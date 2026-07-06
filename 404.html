@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#080B11">
+  <title>Page not found — Hypersage AI Labs</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #080B11; --fg: #EAEEF5; --muted: #98A6BB; --line: rgba(255,255,255,0.14); --a: #2DD4BF; --b: #A78BFA; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased;
+      display: flex; align-items: center; justify-content: center; text-align: center; padding: 32px;
+      background-image:
+        radial-gradient(ellipse 60% 45% at 15% -5%, rgba(45,212,191,0.16), transparent 60%),
+        radial-gradient(ellipse 55% 45% at 88% 8%, rgba(167,139,250,0.16), transparent 62%);
+    }
+    .wrap { max-width: 460px; }
+    img.mark { width: 72px; height: auto; margin: 0 auto 26px; display: block; }
+    .code { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--a); margin-bottom: 16px; }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(1.9rem, 6vw, 2.6rem);
+      letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 14px;
+      background: linear-gradient(120deg, var(--a), var(--b)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    p { color: var(--muted); font-size: 1.04rem; line-height: 1.6; margin-bottom: 30px; }
+    a.home { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; font-size: 0.98rem; color: #06110F;
+      background: linear-gradient(120deg, var(--a), #7fe9d6 60%, var(--b)); border-radius: 999px; padding: 13px 24px;
+      box-shadow: 0 10px 30px rgba(45,212,191,0.28); transition: transform .16s ease, box-shadow .16s ease; }
+    a.home:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(45,212,191,0.38); }
+    a:focus-visible { outline: 2px solid var(--a); outline-offset: 3px; border-radius: 999px; }
+    @media (prefers-reduced-motion: reduce) { a.home:hover { transform: none; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <img class="mark" src="logo.png" alt="Hypersage AI Labs">
+    <div class="code">Error 404</div>
+    <h1>This page wandered off.</h1>
+    <p>The page you're looking for doesn't exist or has moved. Let's get you back to the studio.</p>
+    <a class="home" href="/hypersage-site/"><span>Back to Hypersage</span><span aria-hidden="true">→</span></a>
+  </main>
+</body>
+</html>
