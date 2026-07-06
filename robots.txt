@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://hypersage.ai/sitemap.xml
