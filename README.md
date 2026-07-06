@@ -4,9 +4,10 @@ Single-file static marketing site for **Hypersage AI Labs**, the parent studio f
 
 ## Structure
 - `index.html` — the entire site (inline CSS + a tiny scroll-reveal script, no build step).
+- `logo.png` / `favicon.png` / `apple-touch-icon.png` — the Hypersage mark (a teal→violet infinity, generated via the house gpt-image-1 pipeline). Source kept in `brand/`.
 - `icons/` — real 256px app icons for all 7 products (used in the hero strip + product grid).
 - `shots/` — real app screenshots (480px, web-light) shown in the "A look at the work" showcase.
-- `og-image.png` — 1200×630 social-share card.
+- `og-image.png` — 1200×630 social-share card (uses the logo).
 - `robots.txt`, `sitemap.xml`, `.nojekyll` — deploy support.
 
 ## Deploy (GitHub Pages, same pattern as the app sites)
@@ -22,6 +23,7 @@ git init && git add -A && git commit -m "Hypersage AI Labs site"
 - **Domain / canonical:** `https://hypersage.ai` used in canonical + OG tags. Update if the real domain differs.
 
 ## Done
+- Real generated logo (teal→violet ∞) across nav, footer, favicon, apple-touch, and og-image.
 - Real app icons for all 7 products (hero strip + product grid).
 - "A look at the work" showcase — real screenshots of 6 apps in device frames (horizontal scroll gallery).
 - Live "Visit site" links: Saffra, StoryVault AI, Quietoak, CryptoSage AI, The One (Nightshelf & Mythwright show an "In TestFlight" caption until their sites exist).
