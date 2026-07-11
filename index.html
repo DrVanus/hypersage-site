@@ -301,42 +301,6 @@
     .product .status-note::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.8; }
     .product .platform { font-size: 0.8rem; color: var(--faint); margin-left: auto; }
 
-    /* ===== SHOWCASE (real screenshots in device frames) ===== */
-    .showcase { position: relative; }
-    .showcase-track {
-      display: flex; gap: 28px; align-items: flex-start; overflow-x: auto; scroll-snap-type: x mandatory;
-      padding: 6px 24px 30px; margin: 0 -24px; -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent;
-    }
-    .showcase-track::-webkit-scrollbar { height: 8px; }
-    .showcase-track::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 999px; }
-    .showcase-track::-webkit-scrollbar-track { background: transparent; }
-    .shot { flex: 0 0 auto; width: 232px; scroll-snap-align: center; text-align: center; }
-    .shot .device {
-      border-radius: 30px; padding: 9px; background: #12161f;
-      border: 1px solid var(--line-strong);
-      box-shadow: 0 26px 60px rgba(0,0,0,0.55);
-      transition: transform .25s ease, box-shadow .25s ease;
-      position: relative;
-    }
-    /* Notch pill */
-    .shot .device::before {
-      content: ''; position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-      width: 74px; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.18); z-index: 2;
-    }
-    .shot:hover .device { transform: translateY(-6px); box-shadow: 0 34px 70px rgba(0,0,0,0.6); }
-    .shot .device img {
-      width: 100%; display: block; border-radius: 22px;
-      background: #0b0e14;
-    }
-    .shot .cap { margin-top: 16px; }
-    .shot .cap b { display: block; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1rem; color: var(--fg); }
-    .shot .cap span { font-size: 0.82rem; color: var(--muted); }
-    /* Right-edge fade to hint the row scrolls. */
-    .showcase .edge-fade { position: absolute; top: 0; right: 0; width: 60px; height: 100%; pointer-events: none;
-      background: linear-gradient(90deg, transparent, var(--bg)); z-index: 2; }
-    @media (max-width: 640px) { .showcase .edge-fade { display: none; } .shot { width: 200px; } }
-
     /* ===== SYSTEMS (technical band) ===== */
     .systems { background: linear-gradient(180deg, var(--bg-2), var(--bg)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .systems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
@@ -445,7 +409,6 @@
       </a>
       <div class="links">
         <a href="#products">Products</a>
-        <a href="#work">Work</a>
         <a href="#approach">Approach</a>
         <a href="#systems">Systems</a>
         <a href="#about">About</a>
@@ -455,7 +418,6 @@
         <summary aria-label="Open navigation menu">☰</summary>
         <div class="mobile-links">
           <a href="#products">Products</a>
-          <a href="#work">Work</a>
           <a href="#approach">Approach</a>
           <a href="#systems">Systems</a>
           <a href="#about">About</a>
@@ -584,7 +546,7 @@
             <li>Voice narration and generated illustration</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" href="https://storyvault.app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
             <span class="platform">iOS</span>
           </div>
         </article>
@@ -734,30 +696,6 @@
     </div>
   </section>
 
-  <!-- ===== SHOWCASE ===== -->
-  <section class="block showcase" id="work">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">A look at the work</span>
-        <h2>Screens from the current builds.</h2>
-        <p>Custom illustration, voice, and motion, made by hand for each app — no generic defaults, no placeholder polish.</p>
-      </div>
-    </div>
-    <div class="container">
-      <div class="showcase-track">
-        <div class="shot"><div class="device"><img src="shots/saffra.jpg" alt="Saffra — the AI chef home screen" width="232" height="503" loading="lazy"></div><div class="cap"><b>Saffra</b><span>Your AI chef, at a glance</span></div></div>
-        <div class="shot"><div class="device"><img src="shots/storyvault.jpg" alt="StoryVault AI — starting an AI adventure" width="232" height="503" loading="lazy"></div><div class="cap"><b>StoryVault AI</b><span>Begin an adventure</span></div></div>
-        <div class="shot"><div class="device"><img src="shots/nightshelf.jpg" alt="Nightshelf — the nighttime library" width="232" height="503" loading="lazy"></div><div class="cap"><b>Nightshelf</b><span>A shelf for the night</span></div></div>
-        <div class="shot"><div class="device"><img src="shots/quietoak.jpg" alt="Quietoak — your chosen companion in a calm space" width="232" height="503" loading="lazy"></div><div class="cap"><b>Quietoak</b><span>A companion, in your corner</span></div></div>
-        <div class="shot"><div class="device"><img src="shots/cryptosage.jpg" alt="CryptoSage AI — the portfolio dashboard" width="232" height="503" loading="lazy"></div><div class="cap"><b>CryptoSage AI</b><span>Portfolio intelligence</span></div></div>
-        <div class="shot"><div class="device"><img src="shots/mythwright.jpg" alt="Mythwright — the card collection" width="232" height="503" loading="lazy"></div><div class="cap"><b>Mythwright</b><span>Cards worth collecting</span></div></div>
-        <div class="shot"><div class="device"><img src="shots/theone.jpg" alt="The One — choosing your next connection in Discover" width="232" height="503" loading="lazy"></div><div class="cap"><b>The One</b><span>Choose, don't swipe</span></div></div>
-        <div class="shot"><div class="device"><img src="shots/hexhunter.jpg" alt="Hexhunter — the gothic hero-select and hunt screen" width="232" height="503" loading="lazy"></div><div class="cap"><b>Hexhunter</b><span>Survive the horde</span></div></div>
-      </div>
-    </div>
-    <div class="edge-fade" aria-hidden="true"></div>
-  </section>
-
   <!-- ===== SYSTEMS ===== -->
   <section class="block systems" id="systems">
     <div class="container">
@@ -836,7 +774,7 @@
         <div class="f-col">
           <h3>Products</h3>
           <a href="https://drvanus.github.io/saffra-app/" target="_blank" rel="noopener">Saffra</a>
-          <a href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">StoryVault AI</a>
+          <a href="https://storyvault.app/" target="_blank" rel="noopener">StoryVault AI</a>
           <a href="#products">Nightshelf</a>
           <a href="https://drvanus.github.io/quietoak-site/" target="_blank" rel="noopener">Quietoak</a>
           <a href="https://cryptosageai.io/" target="_blank" rel="noopener">CryptoSage AI</a>
