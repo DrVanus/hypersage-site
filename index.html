@@ -302,6 +302,13 @@
     /* Non-interactive availability caption — deliberately not styled like a link. */
     .product .status-note { display: inline-flex; align-items: center; gap: 7px; font-size: 0.85rem; font-weight: 500; color: var(--muted); }
     .product .status-note::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.8; }
+    /* Spotlight badge for newest / featured app — uses brand gradient instead of per-accent */
+    .badge-spotlight {
+      background: linear-gradient(120deg, rgba(45,212,191,0.18), rgba(167,139,250,0.12)) !important;
+      border-color: rgba(45,212,191,0.5) !important;
+      color: var(--brand-a) !important;
+      font-weight: 700 !important;
+    }
 
     /* ===== SYSTEMS (technical band) ===== */
     .systems { background: linear-gradient(180deg, var(--bg-2), var(--bg)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -455,15 +462,15 @@
   <div class="strip">
     <div class="container">
       <span class="label">The portfolio</span>
-      <a class="word" href="#products"><img src="icons/saffra.png" alt="" width="26" height="26" loading="lazy">Saffra</a>
-      <a class="word" href="#products"><img src="icons/storyvault.png" alt="" width="26" height="26" loading="lazy">StoryVault&nbsp;AI</a>
-      <a class="word" href="#products"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
+      <a class="word" href="#products"><img src="icons/wingmate.png" alt="" width="26" height="26" loading="lazy">Wingmate</a>
       <a class="word" href="#products"><img src="icons/quietoak.png" alt="" width="26" height="26" loading="lazy">Quietoak</a>
       <a class="word" href="#products"><img src="icons/cryptosage.png" alt="" width="26" height="26" loading="lazy">CryptoSage&nbsp;AI</a>
-      <a class="word" href="#products"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
-      <a class="word" href="#products"><img src="icons/theone.png" alt="" width="26" height="26" loading="lazy">The&nbsp;One</a>
-      <a class="word" href="#products"><img src="icons/wingmate.png" alt="" width="26" height="26" loading="lazy">Wingmate</a>
+      <a class="word" href="#products"><img src="icons/saffra.png" alt="" width="26" height="26" loading="lazy">Saffra</a>
+      <a class="word" href="#products"><img src="icons/storyvault.png" alt="" width="26" height="26" loading="lazy">StoryVault&nbsp;AI</a>
       <a class="word" href="#products"><img src="icons/hexhunter.png" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
+      <a class="word" href="#products"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
+      <a class="word" href="#products"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
+      <a class="word" href="#products"><img src="icons/theone.png" alt="" width="26" height="26" loading="lazy">The&nbsp;One</a>
     </div>
   </div>
 
@@ -511,66 +518,24 @@
 
       <div class="products-grid">
 
-        <!-- SAFFRA -->
-        <article class="product" style="--accent: var(--c-saffra);">
+        <!-- WINGMATE -->
+        <article class="product" style="--accent: var(--c-wingmate);">
           <div class="top">
-            <img class="app-icon" src="icons/saffra.png" alt="Saffra app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/wingmate.png" alt="Wingmate app icon" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Saffra</h3>
-              <div class="cat">AI Personal Chef</div>
+              <h3>Wingmate</h3>
+              <div class="cat">AI Dating Coach</div>
             </div>
-            <span class="status">In beta</span>
+            <span class="status badge-spotlight">✦ New</span>
           </div>
-          <p class="desc">A personal AI chef that gives you premium recipes you can actually trust — every one vetted by a trained chef-panel, then adapted to your pantry, allergies, and the time you've got.</p>
+          <p class="desc">AI dating coaches that actually get it. Screenshot analysis, platform-aware coaching for Tinder, Hinge, and Bumble, and personalized openers from four coaches with distinct perspectives.</p>
           <ul>
-            <li>Recipes adapted to your kitchen, not generic results</li>
-            <li>Allergy- and diet-aware, with real substitutions</li>
-            <li>Hands-free, voice-narrated cooking mode</li>
+            <li>Four coaches — bold, empathetic, funny, strategic</li>
+            <li>Screenshot analysis and platform-aware advice</li>
+            <li>Shared memory across every conversation</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/saffra-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
-          </div>
-        </article>
-
-        <!-- NIGHTSHELF -->
-        <article class="product" style="--accent: var(--c-night);">
-          <div class="top">
-            <img class="app-icon" src="icons/nightshelf.png" alt="Nightshelf app icon" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Nightshelf</h3>
-              <div class="cat">Sleep Stories</div>
-            </div>
-            <span class="status">In beta</span>
-          </div>
-          <p class="desc">A quiet shelf of sleep stories for the end of the day — a library of soothing books plus a fresh, AI-written "Tonight's Story," wrapped in gentle ambient soundscapes.</p>
-          <ul>
-            <li>A curated library of calming, chaptered books</li>
-            <li>A new AI-written bedtime story every night</li>
-            <li>Layered ambient soundscapes to drift off to</li>
-          </ul>
-          <div class="foot">
-            <a class="link" href="https://drvanus.github.io/nightshelf-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
-          </div>
-        </article>
-
-        <!-- STORYVAULT -->
-        <article class="product" style="--accent: var(--c-story);">
-          <div class="top">
-            <img class="app-icon" src="icons/storyvault.png" alt="StoryVault AI app icon" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>StoryVault AI</h3>
-              <div class="cat">Interactive Fiction</div>
-            </div>
-            <span class="status">Coming soon</span>
-          </div>
-          <p class="desc">Branching tales, written with you. Step into a classic or a world only you and the AI know — every choice rewrites the next page, with voice narration and original art.</p>
-          <ul>
-            <li>Dozens of classics included, plus open AI Adventure mode</li>
-            <li>Parallel storylines — play a story from any character's side</li>
-            <li>Voice narration and generated illustration</li>
-          </ul>
-          <div class="foot">
-            <a class="link" href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" href="https://drvanus.github.io/wingmate-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -595,24 +560,66 @@
           </div>
         </article>
 
-        <!-- MYTHWRIGHT -->
-        <article class="product" style="--accent: var(--c-myth);">
+        <!-- CRYPTOSAGE -->
+        <article class="product" style="--accent: var(--c-crypto);">
           <div class="top">
-            <img class="app-icon" src="icons/mythwright.png" alt="Mythwright app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/cryptosage.png" alt="CryptoSage AI app icon" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Mythwright</h3>
-              <div class="cat">Strategy Card Game</div>
+              <h3>CryptoSage AI</h3>
+              <div class="cat">Portfolio Intelligence</div>
+            </div>
+            <span class="status">Coming soon</span>
+          </div>
+          <p class="desc">An AI built around your portfolio. It knows what you hold, where you're exposed, and what to do about it — with live market data, sentiment, and an assistant that actually reads your positions.</p>
+          <ul>
+            <li>Portfolio-aware AI chat and price intelligence</li>
+            <li>Live prices, sentiment, and market heat maps</li>
+            <li>Real-time signals from our autonomous research stack</li>
+          </ul>
+          <div class="foot">
+            <a class="link" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
+        <!-- SAFFRA -->
+        <article class="product" style="--accent: var(--c-saffra);">
+          <div class="top">
+            <img class="app-icon" src="icons/saffra.png" alt="Saffra app icon" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Saffra</h3>
+              <div class="cat">AI Personal Chef</div>
             </div>
             <span class="status">In beta</span>
           </div>
-          <p class="desc">A fast, tactical card battler — hundreds of cards, shifting locations, and quick ranked matches where a single reveal turns the board.</p>
+          <p class="desc">A personal AI chef that gives you premium recipes you can actually trust — every one vetted by a trained chef-panel, then adapted to your pantry, allergies, and the time you've got.</p>
           <ul>
-            <li>Hundreds of collectible cards and locations</li>
-            <li>Ranked, conquest, missions, and a rotating shop</li>
-            <li>Live multiplayer on a purpose-built backend</li>
+            <li>Recipes adapted to your kitchen, not generic results</li>
+            <li>Allergy- and diet-aware, with real substitutions</li>
+            <li>Hands-free, voice-narrated cooking mode</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" href="https://drvanus.github.io/saffra-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
+        <!-- STORYVAULT -->
+        <article class="product" style="--accent: var(--c-story);">
+          <div class="top">
+            <img class="app-icon" src="icons/storyvault.png" alt="StoryVault AI app icon" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>StoryVault AI</h3>
+              <div class="cat">Interactive Fiction</div>
+            </div>
+            <span class="status">Coming soon</span>
+          </div>
+          <p class="desc">Branching tales, written with you. Step into a classic or a world only you and the AI know — every choice rewrites the next page, with voice narration and original art.</p>
+          <ul>
+            <li>Dozens of classics included, plus open AI Adventure mode</li>
+            <li>Parallel storylines — play a story from any character's side</li>
+            <li>Voice narration and generated illustration</li>
+          </ul>
+          <div class="foot">
+            <a class="link" href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -637,6 +644,48 @@
           </div>
         </article>
 
+        <!-- MYTHWRIGHT -->
+        <article class="product" style="--accent: var(--c-myth);">
+          <div class="top">
+            <img class="app-icon" src="icons/mythwright.png" alt="Mythwright app icon" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Mythwright</h3>
+              <div class="cat">Strategy Card Game</div>
+            </div>
+            <span class="status">In beta</span>
+          </div>
+          <p class="desc">A fast, tactical card battler — hundreds of cards, shifting locations, and quick ranked matches where a single reveal turns the board.</p>
+          <ul>
+            <li>Hundreds of collectible cards and locations</li>
+            <li>Ranked, conquest, missions, and a rotating shop</li>
+            <li>Live multiplayer on a purpose-built backend</li>
+          </ul>
+          <div class="foot">
+            <a class="link" href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
+        <!-- NIGHTSHELF -->
+        <article class="product" style="--accent: var(--c-night);">
+          <div class="top">
+            <img class="app-icon" src="icons/nightshelf.png" alt="Nightshelf app icon" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Nightshelf</h3>
+              <div class="cat">Sleep Stories</div>
+            </div>
+            <span class="status">In beta</span>
+          </div>
+          <p class="desc">A quiet shelf of sleep stories for the end of the day — a library of soothing books plus a fresh, AI-written "Tonight's Story," wrapped in gentle ambient soundscapes.</p>
+          <ul>
+            <li>A curated library of calming, chaptered books</li>
+            <li>A new AI-written bedtime story every night</li>
+            <li>Layered ambient soundscapes to drift off to</li>
+          </ul>
+          <div class="foot">
+            <a class="link" href="https://drvanus.github.io/nightshelf-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
         <!-- THE ONE -->
         <article class="product" style="--accent: var(--c-one);">
           <div class="top">
@@ -655,48 +704,6 @@
           </ul>
           <div class="foot">
             <a class="link" href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
-          </div>
-        </article>
-
-        <!-- WINGMATE -->
-        <article class="product" style="--accent: var(--c-wingmate);">
-          <div class="top">
-            <img class="app-icon" src="icons/wingmate.png" alt="Wingmate app icon" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Wingmate</h3>
-              <div class="cat">AI Dating Coach</div>
-            </div>
-            <span class="status">In development</span>
-          </div>
-          <p class="desc">AI dating coaches that actually get it. Screenshot analysis, platform-aware coaching for Tinder, Hinge, and Bumble, and personalized openers from four coaches with distinct perspectives.</p>
-          <ul>
-            <li>Four coaches — bold, empathetic, funny, strategic</li>
-            <li>Screenshot analysis and platform-aware advice</li>
-            <li>Shared memory across every conversation</li>
-          </ul>
-          <div class="foot">
-            <a class="link" href="https://drvanus.github.io/wingmate-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
-          </div>
-        </article>
-
-        <!-- CRYPTOSAGE -->
-        <article class="product" style="--accent: var(--c-crypto);">
-          <div class="top">
-            <img class="app-icon" src="icons/cryptosage.png" alt="CryptoSage AI app icon" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>CryptoSage AI</h3>
-              <div class="cat">Portfolio Intelligence</div>
-            </div>
-            <span class="status">Coming soon</span>
-          </div>
-          <p class="desc">An AI built around your portfolio. It knows what you hold, where you're exposed, and what to do about it — with live market data, sentiment, and an assistant that actually reads your positions.</p>
-          <ul>
-            <li>Portfolio-aware AI chat and price intelligence</li>
-            <li>Live prices, sentiment, and market heat maps</li>
-            <li>Real-time signals from our autonomous research stack</li>
-          </ul>
-          <div class="foot">
-            <a class="link" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -790,15 +797,15 @@
       <div class="f-links">
         <div class="f-col">
           <h3>Products</h3>
-          <a href="https://drvanus.github.io/saffra-app/" target="_blank" rel="noopener">Saffra</a>
-          <a href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">StoryVault AI</a>
-          <a href="https://drvanus.github.io/nightshelf-site/" target="_blank" rel="noopener">Nightshelf</a>
+          <a href="https://drvanus.github.io/wingmate-site/" target="_blank" rel="noopener">Wingmate</a>
           <a href="https://drvanus.github.io/quietoak-site/" target="_blank" rel="noopener">Quietoak</a>
           <a href="https://cryptosageai.io/" target="_blank" rel="noopener">CryptoSage AI</a>
-          <a href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Mythwright</a>
-          <a href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">The One</a>
-          <a href="https://drvanus.github.io/wingmate-site/" target="_blank" rel="noopener">Wingmate</a>
+          <a href="https://drvanus.github.io/saffra-app/" target="_blank" rel="noopener">Saffra</a>
+          <a href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">StoryVault AI</a>
           <a href="https://drvanus.github.io/hexhunter-site/" target="_blank" rel="noopener">Hexhunter</a>
+          <a href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Mythwright</a>
+          <a href="https://drvanus.github.io/nightshelf-site/" target="_blank" rel="noopener">Nightshelf</a>
+          <a href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">The One</a>
         </div>
         <div class="f-col">
           <h3>Studio</h3>
