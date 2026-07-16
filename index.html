@@ -177,7 +177,7 @@
 
     .mobile-menu { display: none; position: relative; }
     .mobile-menu > summary {
-      list-style: none; cursor: pointer; padding: 7px 11px; line-height: 1;
+      list-style: none; cursor: pointer; padding: 7px 11px; line-height: 1.3;
       border: 1px solid var(--line-strong); border-radius: 10px; color: var(--fg); font-size: 1.1rem;
       min-width: 44px; min-height: 44px;
       display: inline-flex; align-items: center; justify-content: center;
@@ -200,7 +200,7 @@
     section.hero { padding: 92px 0 60px; position: relative; }
     .hero-inner { max-width: 860px; }
     .hero .eyebrow { display: inline-block; margin-bottom: 22px; padding: 7px 15px; border: 1px solid var(--line-strong); border-radius: 999px; background: rgba(45,212,191,0.06); }
-    .hero h1 { font-size: clamp(2.5rem, 6vw, 4.4rem); font-weight: 700; line-height: 1.12; margin-bottom: 22px; }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4.4rem); font-weight: 700; line-height: 1.2; padding-bottom: 0.1em; margin-bottom: 22px; }
     .hero .lede { font-size: clamp(1.05rem, 2.2vw, 1.28rem); color: var(--muted); max-width: 660px; margin-bottom: 34px; }
     .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
 
@@ -229,7 +229,7 @@
     .section-head { max-width: 680px; margin-bottom: 52px; }
     .section-head.center { margin-left: auto; margin-right: auto; text-align: center; }
     .section-head .eyebrow { display: block; margin-bottom: 16px; }
-    .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; line-height: 1.18; margin-bottom: 16px; }
+    .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; line-height: 1.22; margin-bottom: 16px; }
     .section-head p { color: var(--muted); font-size: 1.08rem; }
 
     /* ===== APPROACH ===== */
@@ -325,7 +325,7 @@
     .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
     @media (max-width: 720px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
     .metric { text-align: center; padding: 26px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,0.015); }
-    .metric .n { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.15; }
+    .metric .n { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.25; }
     .metric .l { color: var(--muted); font-size: 0.9rem; margin-top: 10px; }
 
     /* ===== ABOUT ===== */
@@ -350,7 +350,7 @@
         radial-gradient(ellipse 60% 100% at 50% 100%, rgba(167,139,250,0.10), transparent 70%);
       border-top: 1px solid var(--line);
     }
-    .cta h2 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; margin-bottom: 16px; line-height: 1.16; }
+    .cta h2 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; margin-bottom: 16px; line-height: 1.22; }
     .cta p { color: var(--muted); font-size: 1.1rem; max-width: 560px; margin: 0 auto 30px; }
 
     /* ===== FOOTER ===== */
@@ -463,7 +463,6 @@
     <div class="container">
       <span class="label">The portfolio</span>
       <a class="word" href="#products"><img src="icons/wingmate.png" alt="" width="26" height="26" loading="lazy">Wingmate</a>
-      <a class="word" href="#products"><img src="icons/theone.png" alt="" width="26" height="26" loading="lazy">The&nbsp;One</a>
       <a class="word" href="#products"><img src="icons/quietoak.png" alt="" width="26" height="26" loading="lazy">Quietoak</a>
       <a class="word" href="#products"><img src="icons/cryptosage.png" alt="" width="26" height="26" loading="lazy">CryptoSage&nbsp;AI</a>
       <a class="word" href="#products"><img src="icons/saffra.png" alt="" width="26" height="26" loading="lazy">Saffra</a>
@@ -471,6 +470,7 @@
       <a class="word" href="#products"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
       <a class="word" href="#products"><img src="icons/hexhunter.png" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
       <a class="word" href="#products"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
+      <a class="word" href="#products"><img src="icons/theone.png" alt="" width="26" height="26" loading="lazy">The&nbsp;One</a>
     </div>
   </div>
 
@@ -532,31 +532,10 @@
           <ul>
             <li>Four coaches — bold, empathetic, funny, strategic</li>
             <li>Tinder, Hinge, and Bumble — each coached differently</li>
-            <li>Shared memory across every conversation</li>
+            <li>Send screenshots — get exact words to say next</li>
           </ul>
           <div class="foot">
             <a class="link" href="https://drvanus.github.io/wingmate-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
-          </div>
-        </article>
-
-        <!-- THE ONE -->
-        <article class="product" style="--accent: var(--c-one);">
-          <div class="top">
-            <img class="app-icon" src="icons/theone.png" alt="The One app icon" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>The One</h3>
-              <div class="cat">Intentional Dating</div>
-            </div>
-            <span class="status">In development</span>
-          </div>
-          <p class="desc">Stop swiping. Start choosing. A dating app that deliberately limits your conversations so you focus on who matters — AI matching, one person at a time.</p>
-          <ul>
-            <li>Quality over quantity — one focused match at a time</li>
-            <li>Conversation limits that force real focus</li>
-            <li>AI-assisted compatibility, not vanity metrics</li>
-          </ul>
-          <div class="foot">
-            <a class="link" href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -704,6 +683,27 @@
           </ul>
           <div class="foot">
             <a class="link" href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
+        <!-- THE ONE -->
+        <article class="product" style="--accent: var(--c-one);">
+          <div class="top">
+            <img class="app-icon" src="icons/theone.png" alt="The One app icon" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>The One</h3>
+              <div class="cat">Intentional Dating</div>
+            </div>
+            <span class="status">In development</span>
+          </div>
+          <p class="desc">Stop swiping. Start choosing. A dating app that deliberately limits your conversations so you focus on who matters — AI matching, one person at a time.</p>
+          <ul>
+            <li>Quality over quantity — one focused match at a time</li>
+            <li>Conversation limits that force real focus</li>
+            <li>AI-assisted compatibility, not vanity metrics</li>
+          </ul>
+          <div class="foot">
+            <a class="link" href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
