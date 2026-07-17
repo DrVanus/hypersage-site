@@ -139,7 +139,9 @@
       background: linear-gradient(120deg, var(--brand-a), var(--brand-b));
       -webkit-background-clip: text; background-clip: text; color: transparent;
       -webkit-box-decoration-break: clone; box-decoration-break: clone;
-      padding-bottom: 0.12em;
+      /* Safari clips gradient-text glyphs to the padding box — 0.2em keeps
+         g/y/p descenders inside it even at the hero's tight line-height. */
+      padding-bottom: 0.2em;
     }
 
     /* ===== BUTTONS ===== */
