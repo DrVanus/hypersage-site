@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/alder/</loc>
+    <lastmod>2026-07-31</lastmod>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/alder/privacy.html</loc>
+    <lastmod>2026-07-31</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/alder/terms.html</loc>
+    <lastmod>2026-07-31</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/alder/support.html</loc>
+    <lastmod>2026-07-31</lastmod>
+    <priority>0.6</priority>
+  </url>
+</urlset>

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Rowan's marketing site is an intentional warm, light design that mirrors the
+       app's light scheme. Declare it so a dark-mode OS doesn't auto-invert it. -->
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#FBF4EF">
+  <title>Rowan — the health companion that knows your story.</title>
+  <meta name="description" content="An AI companion for living with a chronic condition. Talk about your day in plain words; Rowan turns it into a record you can actually use — and a brief you hand your doctor. Not a diagnosis engine.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://drvanus.github.io/hypersage-site/rowan/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Rowan — the health companion that knows your story.">
+  <meta property="og:description" content="Talk about your day in plain words. Rowan turns it into a record you can use — and a brief you hand your doctor.">
+  <meta property="og:url" content="https://drvanus.github.io/hypersage-site/rowan/">
+  <meta property="og:site_name" content="Rowan">
+  <meta property="og:image" content="https://drvanus.github.io/hypersage-site/rowan/og-image.png?v=20260731a">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Rowan — the health companion that knows your story">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Rowan — the health companion that knows your story.">
+  <meta name="twitter:description" content="Talk about your day in plain words. Rowan turns it into a record you can use — and a brief you hand your doctor.">
+  <meta name="twitter:image" content="https://drvanus.github.io/hypersage-site/rowan/og-image.png?v=20260731a">
+  <meta name="twitter:image:alt" content="Rowan — the health companion that knows your story">
+
+  <link rel="icon" type="image/png" href="rowan-icon.png?v=20260731a">
+  <link rel="apple-touch-icon" href="rowan-icon.png?v=20260731a">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* Palette re-keyed directly from rowan-app/tokens.json (light scheme). */
+    :root {
+      --bg: #FBF4EF;
+      --surface: #FFFFFF;
+      --card-soft: #EEE9FB;    /* tintSoft */
+      --fg: #3B2D4F;           /* text */
+      --muted-fg: #6E5E7C;     /* textDim */
+      /* Was #8B7C98, which measured 3.21:1 against the warm hero wash and
+         3.86:1 on a white card — under AA for body-size text everywhere it is
+         used (.hero-note carries the medical disclaimer, and .soon carries the
+         "Not built yet" badges). #726180 clears 4.5:1 on every background this
+         page paints behind it: 5.16 on --bg, 4.66 on the hero wash, 4.78 on the
+         hero/lilac overlap, 5.62 on white, 4.73 on --card-soft. */
+      --tertiary-fg: #726180;
+      --primary: #6F5BC5;      /* tint */
+      --primary-dark: #5B49A8; /* tintInk — AA on light fills */
+      --accent: #F2775E;       /* accent — DECORATIVE ONLY (borders, glows) */
+      /* The accent as INK. #F2775E is 2.77:1 against white and against white
+         text, so it fails AA as a label colour and even the 3:1 non-text
+         threshold. Anything that has to be *read* in the accent family uses
+         this instead: 5.14:1 on white, 4.72:1 on --bg. */
+      --accent-ink: #BE4530;
+      --good: #2E9E77;
+      --good-ink: #1B6B4E;
+      --emergency: #B23A28;
+      --border: rgba(59,45,79,0.10);
+      --border-strong: rgba(59,45,79,0.18);
+      --primary-glow: rgba(111,91,197,0.14);
+      --accent-glow: rgba(242,119,94,0.16);
+      --radius: 0.875rem;
+      --radius-lg: 1.375rem;
+    }
+
+    html { scroll-behavior: smooth; color-scheme: only light; background: var(--bg); }
+
+    body {
+      /* Matches the app's type stack: serif display over a system body face. */
+      font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1, h2, h3, .display { font-family: ui-serif, 'New York', Charter, Georgia, 'Times New Roman', serif; }
+
+    /* The app's hero gradient, softened into a page-wide atmosphere. */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 85% 55% at 15% 0%, rgba(251,227,214,0.85), transparent 62%),
+        radial-gradient(ellipse 70% 50% at 88% 10%, rgba(241,234,247,0.9), transparent 68%),
+        radial-gradient(ellipse 70% 45% at 50% 100%, rgba(111,91,197,0.05), transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    a { color: var(--primary-dark); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--primary); }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ===== NAV ===== */
+    nav.site {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(251,244,239,0.84);
+      backdrop-filter: saturate(160%) blur(16px);
+      -webkit-backdrop-filter: saturate(160%) blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav.site .container { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; }
+    nav.site .brand {
+      display: flex; align-items: center; gap: 12px;
+      font-family: ui-serif, 'New York', Charter, Georgia, serif;
+      font-weight: 700; color: var(--fg); font-size: 1.2rem; letter-spacing: -0.01em;
+    }
+    nav.site .brand img { width: 36px; height: 36px; border-radius: 10px; }
+    nav.site .links { display: flex; gap: 20px; font-size: 0.95rem; flex-wrap: nowrap; white-space: nowrap; }
+    nav.site .links a { color: var(--muted-fg); font-weight: 600; }
+    nav.site .links a:hover { color: var(--primary); }
+
+    .mobile-menu { display: none; position: relative; }
+    .mobile-menu > summary {
+      list-style: none; cursor: pointer; padding: 6px 10px;
+      border: 1px solid var(--border); border-radius: 10px;
+      color: var(--primary-dark); font-weight: 800; font-size: 1.1rem; line-height: 1.3;
+      min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .mobile-menu > summary::-webkit-details-marker { display: none; }
+    .mobile-menu[open] > summary { background: var(--card-soft); }
+    .mobile-links {
+      position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
+      display: flex; flex-direction: column; gap: 2px; min-width: 200px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 8px; box-shadow: 0 16px 40px rgba(59,45,79,0.14);
+    }
+    .mobile-links a { color: var(--fg); font-weight: 600; padding: 10px 12px; border-radius: 8px; }
+    .mobile-links a:hover { background: var(--card-soft); color: var(--primary-dark); }
+    @media (max-width: 860px) { nav.site .links { display: none; } .mobile-menu { display: block; } }
+
+    /* ===== HERO ===== */
+    section.hero { padding: 72px 0 60px; position: relative; }
+    .hero-layout { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; }
+    @media (max-width: 900px) { .hero-layout { grid-template-columns: 1fr; gap: 36px; text-align: center; } }
+    .eyebrow {
+      display: inline-block; font-size: 0.76rem; font-weight: 800;
+      letter-spacing: 0.16em; color: var(--primary-dark); text-transform: uppercase;
+      margin-bottom: 18px; padding: 6px 14px;
+      background: var(--card-soft); border: 1px solid var(--border); border-radius: 999px;
+    }
+    .hero-text h1 {
+      font-weight: 700; font-size: clamp(2.3rem, 5.4vw, 3.7rem);
+      line-height: 1.14; letter-spacing: -0.025em; padding-bottom: 0.08em; margin-bottom: 18px;
+    }
+    .hero-text h1 .soft { color: var(--primary); }
+    .hero-text .lede { font-size: 1.15rem; color: var(--muted-fg); max-width: 545px; margin-bottom: 28px; }
+    @media (max-width: 900px) { .hero-text .lede { margin-left: auto; margin-right: auto; } }
+    .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+    @media (max-width: 900px) { .hero-buttons { justify-content: center; } }
+
+    /* The label is white, so EVERY stop of this gradient has to clear 4.5:1
+       against white — not just the ends. The old ramp failed twice over: the
+       #8E7CD8 midpoint measured 3.49:1 and the --accent end 2.77:1. Deepening
+       the midpoint to #7362C2 and the warm end to --accent-ink puts the worst
+       point anywhere along the sweep at 4.94:1. */
+    .btn-warm {
+      display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px;
+      background: linear-gradient(135deg, var(--primary), #7362C2 55%, var(--accent-ink));
+      color: #fff; font-weight: 700; font-size: 1rem; border-radius: var(--radius);
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 8px 26px rgba(111,91,197,0.30);
+    }
+    .btn-warm:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(111,91,197,0.40); color: #fff; }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px;
+      color: var(--primary-dark); background: rgba(255,255,255,0.7);
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+      font-weight: 700; font-size: 1rem; transition: background .2s, border-color .2s;
+    }
+    .btn-outline:hover { background: #fff; border-color: var(--primary); color: var(--primary); }
+
+    .hero-note { margin-top: 20px; font-size: 0.88rem; color: var(--tertiary-fg); }
+    @media (max-width: 900px) { .hero-note { margin-left: auto; margin-right: auto; max-width: 460px; } }
+
+    .hero-image { position: relative; }
+    .hero-image img { width: 100%; max-width: 400px; display: block; margin: 0 auto; object-fit: contain; }
+    .hero-image::after {
+      content: ''; position: absolute; inset: -30px;
+      background: radial-gradient(ellipse at center, var(--primary-glow), transparent 65%);
+      pointer-events: none; z-index: -1;
+    }
+    @media (max-width: 900px) { .hero-image::after { inset: 0; } }
+
+    /* ===== SECTION ===== */
+    section { position: relative; }
+    .section-block { padding: 72px 0; }
+    .section-block.tight { padding: 52px 0; }
+    .section-eyebrow { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--primary-dark); margin-bottom: 14px; }
+    .section-block h2 { font-weight: 700; font-size: clamp(1.9rem, 4vw, 2.7rem); line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .section-block h2 em { font-style: normal; color: var(--primary); }
+    .section-block .lede { color: var(--muted-fg); font-size: 1.08rem; max-width: 645px; margin-bottom: 44px; }
+
+    /* ===== HOW ===== */
+    .how-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 56px; align-items: center; }
+    @media (max-width: 900px) { .how-grid { grid-template-columns: 1fr; gap: 36px; } }
+    .how-image { width: 100%; max-width: 340px; display: block; margin: 0 auto; object-fit: contain; }
+    .how-steps { list-style: none; counter-reset: step; }
+    .how-steps li { counter-increment: step; padding: 16px 0 16px 64px; position: relative; border-bottom: 1px solid var(--border); }
+    .how-steps li:last-child { border-bottom: none; }
+    .how-steps li::before {
+      content: counter(step); position: absolute; left: 0; top: 16px;
+      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.15rem; color: var(--primary-dark);
+      background: var(--card-soft); border: 1px solid var(--border-strong); border-radius: 50%;
+      font-family: ui-serif, Georgia, serif;
+    }
+    .how-steps h3 { font-weight: 700; font-size: 1.14rem; margin-bottom: 4px; }
+    .how-steps p { color: var(--muted-fg); font-size: 0.97rem; }
+
+    /* ===== FEATURES ===== */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 20px; }
+    .feature-card {
+      padding: 26px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+    }
+    .feature-card:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: 0 16px 40px rgba(59,45,79,0.09); }
+    .feature-card .icon-box {
+      width: 48px; height: 48px; border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--card-soft); border: 1px solid var(--border);
+      margin-bottom: 16px; color: var(--primary-dark);
+    }
+    .feature-card .icon-box svg { width: 24px; height: 24px; }
+    .feature-card h3 { font-weight: 700; font-size: 1.2rem; line-height: 1.2; margin-bottom: 8px; }
+    .feature-card p { color: var(--muted-fg); font-size: 0.97rem; }
+    .feature-card .soon {
+      display: inline-block; margin-top: 12px; font-size: 0.72rem; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--tertiary-fg);
+      border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px;
+    }
+
+    /* ===== SCREENS ===== */
+    .screens-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: start; max-width: 820px; margin: 0 auto; }
+    @media (max-width: 760px) { .screens-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+    .screen-card { text-align: center; }
+    .screen-frame {
+      border-radius: 22px; overflow: hidden; border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(59,45,79,0.11); background: #fff;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .screen-card:hover .screen-frame { transform: translateY(-6px); box-shadow: 0 24px 56px rgba(59,45,79,0.17); }
+    .screen-card img { width: 100%; display: block; }
+    .screen-label { margin-top: 12px; font-size: 0.84rem; color: var(--muted-fg); line-height: 1.4; }
+    .screen-label strong { display: block; color: var(--primary-dark); font-weight: 700; margin-bottom: 2px; font-size: 0.9rem; }
+
+    /* ===== LIGHT / DARK PREVIEW TOGGLE ===== */
+    #screens { transition: background .45s ease; }
+    .theme-toggle { display: inline-flex; position: relative; padding: 4px; margin: 2px auto 42px; background: var(--card-soft); border: 1px solid var(--border); border-radius: 999px; -webkit-tap-highlight-color: transparent; }
+    /* min-height 44px: the button measured ~41px, under the 44×44 minimum
+       target. The .thumb is pinned to the track's insets, so it grows with it. */
+    .theme-toggle button { flex: 1 0 auto; min-width: 108px; min-height: 44px; appearance: none; -webkit-appearance: none; border: 0; background: transparent; cursor: pointer; font: inherit; font-weight: 700; font-size: 0.86rem; color: var(--muted-fg); padding: 9px 18px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; position: relative; z-index: 1; transition: color .25s ease; }
+    .theme-toggle button svg { width: 16px; height: 16px; flex: none; }
+    .theme-toggle button[aria-pressed="true"] { color: #fff; }
+    .theme-toggle button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+    .theme-toggle .thumb { position: absolute; left: 4px; top: 4px; bottom: 4px; width: calc(50% - 4px); border-radius: 999px; background: var(--primary); box-shadow: 0 6px 16px rgba(111,91,197,0.35); z-index: 0; transition: transform .3s cubic-bezier(.34,1.06,.42,1); }
+    .theme-toggle.is-dark .thumb { transform: translateX(100%); }
+    .shot-img { transition: opacity .25s ease; }
+    #screens.theme-dark { background: #191327 !important; }
+    #screens.theme-dark .section-eyebrow { color: #A78BFA; }
+    #screens.theme-dark h2 { color: #F4EFFC; }
+    #screens.theme-dark h2 em { color: #EFA48B; }
+    #screens.theme-dark .lede { color: #B4A8C8; }
+    #screens.theme-dark .screen-label { color: #A093B4; }
+    #screens.theme-dark .screen-label strong { color: #CFC3E2; }
+    #screens.theme-dark .screen-frame { border-color: rgba(255,255,255,0.10); box-shadow: 0 18px 50px rgba(0,0,0,0.5); }
+    #screens.theme-dark .theme-toggle { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14); }
+    #screens.theme-dark .theme-toggle button { color: #B4A8C8; }
+    #screens.theme-dark .theme-toggle button[aria-pressed="true"] { color: #fff; }
+    #screens.theme-dark .theme-toggle .thumb { background: #7A63D6; box-shadow: 0 6px 16px rgba(0,0,0,0.45); }
+    @media (prefers-reduced-motion: reduce) { .theme-toggle .thumb, #screens, .shot-img { transition: none; } }
+
+    /* ===== SPOTLIGHT ===== */
+    .spotlight-grid { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: 52px; align-items: center; }
+    @media (max-width: 900px) { .spotlight-grid { grid-template-columns: 1fr; gap: 30px; } }
+    .spotlight-phone .screen-frame { max-width: 290px; margin: 0 auto; border-radius: 26px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(59,45,79,0.14); }
+    .spotlight-phone img { width: 100%; display: block; }
+    .spotlight-points { list-style: none; margin-top: 22px; }
+    .spotlight-points li { position: relative; padding: 9px 0 9px 26px; color: var(--muted-fg); font-size: 0.98rem; }
+    .spotlight-points li::before { content: ''; position: absolute; left: 0; top: calc(9px + 0.62em); transform: translateY(-50%); width: 7px; height: 7px; border-radius: 50%; background: var(--primary); }
+    .spotlight-points strong { color: var(--fg); }
+    .spotlight-grid.flip { grid-template-columns: 1.18fr 0.82fr; }
+    @media (max-width: 900px) { .spotlight-grid.flip { grid-template-columns: 1fr; } .spotlight-grid.flip .spotlight-phone { order: -1; } }
+
+    /* ===== QUOTE / TRANSLATION STRIP ===== */
+    .translate {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 26px; align-items: center;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 30px 32px; max-width: 900px; margin: 0 auto;
+    }
+    @media (max-width: 780px) { .translate { grid-template-columns: 1fr; gap: 16px; text-align: center; } }
+    .translate .said { font-family: ui-serif, Georgia, serif; font-size: 1.15rem; line-height: 1.5; color: var(--fg); }
+    .translate .arrow { color: var(--primary); font-size: 1.6rem; font-weight: 700; }
+    @media (max-width: 780px) { .translate .arrow { transform: rotate(90deg); } }
+    .translate .logged { font-size: 0.92rem; color: var(--muted-fg); }
+    .translate .chip {
+      display: inline-block; margin: 3px 5px 3px 0; padding: 5px 12px;
+      background: var(--card-soft); border: 1px solid var(--border-strong);
+      border-radius: 999px; font-size: 0.86rem; font-weight: 700; color: var(--primary-dark);
+    }
+
+    /* ===== SAFETY BAND ===== */
+    .safety-band {
+      display: flex; gap: 18px; align-items: flex-start;
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 4px solid var(--emergency);
+      border-radius: var(--radius-lg); padding: 26px 28px;
+    }
+    @media (max-width: 640px) { .safety-band { flex-direction: column; text-align: center; align-items: center; } }
+    .safety-band .glyph { flex: 0 0 auto; color: var(--emergency); }
+    .safety-band .glyph svg { width: 40px; height: 40px; }
+    .safety-band h3 { font-weight: 700; font-size: 1.2rem; margin-bottom: 6px; }
+    .safety-band p { color: var(--muted-fg); font-size: 0.98rem; }
+    .safety-band strong { color: var(--emergency); }
+
+    /* ===== BOUNDARY (what it is / isn't) ===== */
+    .boundary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 860px; margin: 0 auto; }
+    @media (max-width: 700px) { .boundary { grid-template-columns: 1fr; } }
+    .boundary-col { padding: 28px 26px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .boundary-col.is { border-top: 3px solid var(--good); }
+    .boundary-col.isnt { border-top: 3px solid var(--accent); }
+    .boundary-col h3 { font-weight: 700; font-size: 1.2rem; margin-bottom: 14px; }
+    .boundary-col ul { list-style: none; }
+    .boundary-col li { position: relative; padding: 8px 0 8px 28px; font-size: 0.96rem; color: var(--muted-fg); }
+    .boundary-col li::before {
+      position: absolute; left: 0; top: 8px; font-weight: 700; font-size: 1rem;
+    }
+    .boundary-col.is li::before { content: '✓'; color: var(--good-ink); }
+    /* The ✕ is the only thing distinguishing these rows at a glance, so it is
+       read, not decoration. --accent on the white column is 2.77:1 — under both
+       4.5:1 and the 3:1 graphical minimum. --accent-ink is 5.14:1. */
+    .boundary-col.isnt li::before { content: '✕'; color: var(--accent-ink); }
+
+    /* ===== FAQ ===== */
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    details.faq { padding: 18px 0; border-bottom: 1px solid var(--border); }
+    /* min-height 44px: the summary is the whole disclosure control and was only
+       about 27px tall — under the 44×44 minimum target. */
+    details.faq summary {
+      font-weight: 700; font-size: 1.05rem; cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center; padding-right: 8px; color: var(--fg);
+      min-height: 44px;
+    }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after { content: '+'; color: var(--primary-dark); font-weight: 400; font-size: 1.4rem; transition: transform .2s; }
+    details.faq[open] summary::after { transform: rotate(45deg); }
+    details.faq p { margin-top: 12px; color: var(--muted-fg); font-size: 0.98rem; line-height: 1.7; }
+
+    /* ===== CTA ===== */
+    .cta-strip {
+      text-align: center; padding: 76px 24px;
+      background: radial-gradient(ellipse at center, var(--primary-glow), transparent 70%), var(--card-soft);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-top: 72px;
+    }
+    .cta-strip h2 { font-family: ui-serif, 'New York', Charter, Georgia, serif; font-weight: 700; font-size: clamp(1.9rem, 4vw, 2.6rem); margin-bottom: 14px; letter-spacing: -0.02em; }
+    .cta-strip p { color: var(--muted-fg); font-size: 1.08rem; margin-bottom: 26px; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+    /* ===== DISCLAIMER ===== */
+    .disclaimer { padding: 36px 0 8px; }
+    .disclaimer p { max-width: 840px; margin: 0 auto; text-align: center; color: var(--muted-fg); font-size: 0.86rem; line-height: 1.6; }
+
+    /* ===== FOOTER ===== */
+    footer.site { padding: 40px 24px 60px; text-align: center; color: var(--muted-fg); font-size: 0.9rem; }
+    footer.site .links { margin-bottom: 12px; }
+    footer.site .links a { color: var(--muted-fg); margin: 0 14px; font-weight: 600; }
+    footer.site .links a:hover { color: var(--primary); }
+    footer.site .copyright { margin-top: 10px; }
+
+    /* ===== A11Y ===== */
+    /* Skip link: off-screen until focused, then a real, visible target above
+       the sticky nav so a keyboard user can jump the whole nav block. */
+    .skip-link {
+      position: absolute; left: 12px; top: -100px; z-index: 100;
+      display: inline-flex; align-items: center; min-height: 44px;
+      padding: 10px 18px; border-radius: var(--radius);
+      background: var(--surface); color: var(--primary-dark);
+      border: 1px solid var(--border-strong); font-weight: 700;
+      box-shadow: 0 10px 30px rgba(59,45,79,0.16);
+      transition: top .15s ease;
+    }
+    .skip-link:focus { top: 12px; }
+    a:focus-visible, summary:focus-visible, .btn-warm:focus-visible, .btn-outline:focus-visible {
+      outline: 3px solid var(--primary-dark); outline-offset: 3px; border-radius: 6px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      .btn-warm:hover, .feature-card:hover, .screen-card:hover .screen-frame { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ===== NAV ===== -->
+  <nav class="site">
+    <div class="container">
+      <div class="brand">
+        <img src="rowan-icon.png?v=20260731a" alt="">
+        Rowan
+      </div>
+      <div class="links">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#screens">Screens</a>
+        <a href="#boundary">What it isn't</a>
+        <a href="#faq">FAQ</a>
+        <a href="support.html">Support</a>
+      </div>
+      <details class="mobile-menu">
+        <summary aria-label="Open menu">☰</summary>
+        <div class="mobile-links">
+          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#screens">Screens</a>
+          <a href="#boundary">What it isn't</a>
+          <a href="#faq">FAQ</a>
+          <a href="support.html">Support</a>
+        </div>
+      </details>
+    </div>
+  </nav>
+
+  <main id="main">
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-layout">
+        <div class="hero-text">
+          <span class="eyebrow">In development · iOS</span>
+          <h1>The health companion that <span class="soft">knows your story.</span></h1>
+          <p class="lede">Living with a chronic condition means retelling your history at every appointment. Rowan listens to how your day actually went, keeps the record for you, and hands you a brief when it's time to see your doctor.</p>
+          <div class="hero-buttons">
+            <a href="mailto:hi@hypersage.ai?subject=Notify%20me%20when%20Rowan%20launches" class="btn-warm">
+              <span>Get early access</span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <a href="#how" class="btn-outline">See how it works</a>
+          </div>
+          <p class="hero-note">Rowan is an AI companion — not a doctor, nurse, or licensed clinician, and not a medical device. It doesn't diagnose or treat.</p>
+        </div>
+        <div class="hero-image">
+          <img src="art/rowan_welcome.png?v=20260731a" alt="Rowan, a warm dawn-sprite companion with a soft violet-and-apricot flame">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW ===== -->
+  <section class="section-block" id="how">
+    <div class="container">
+      <div class="how-grid">
+        <div>
+          <div class="section-eyebrow">How it works</div>
+          <h2>You talk. Rowan keeps <em>the record.</em></h2>
+          <p class="lede">No forms to fill in, no scales to rate, no fields to remember. Say how the day went in ordinary words and Rowan turns it into a structured entry you can look back on — and hand over.</p>
+          <!-- role="list" on every list-style:none list here: Safari/VoiceOver
+               drops list semantics when the marker is removed. -->
+          <ol class="how-steps" role="list">
+            <li>
+              <h3>Tell Rowan what you live with</h3>
+              <p>Add the conditions you already have a diagnosis for, plus your medications and allergies. You can mark something as suspected rather than diagnosed, and change it whenever.</p>
+            </li>
+            <li>
+              <h3>Talk about your day in plain words</h3>
+              <p>"Knee was rough after the long drive, maybe a 7." Rowan logs it as a typed entry — symptom, severity, and the factor you named — instead of letting it scroll away in a chat.</p>
+            </li>
+            <li>
+              <h3>Walk into your appointment prepared</h3>
+              <p>Rowan assembles a visit brief: what your last thirty days of entries add up to, your medication list as you entered it, and the questions worth asking. Your care team treats you — Rowan just makes sure nothing gets forgotten.</p>
+            </li>
+          </ol>
+        </div>
+        <div>
+          <img class="how-image" src="art/rowan_steady.png?v=20260731a" alt="Rowan resting steadily">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TRANSLATION STRIP ===== -->
+  <section class="section-block tight">
+    <div class="container">
+      <div class="translate">
+        <div class="said">“My knee was killing me after that long drive — maybe a 7 out of 10.”</div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="logged">
+          <span class="chip">Knee pain · 7/10</span>
+          <span class="chip">Factor: long drive</span>
+          <span class="chip">Jul 31</span>
+          <div style="margin-top:8px;">Logged as structured data — so it can show up in a trend, and in the brief you hand your doctor.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="section-block" id="features" style="background: rgba(255,255,255,0.5);">
+    <div class="container">
+      <div class="section-eyebrow" style="text-align:center;">Features</div>
+      <h2 style="text-align:center;">Built for the long <em>middle</em> of an illness.</h2>
+      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Not the dramatic diagnosis moment — the years afterward, where the details blur and the appointments are fifteen minutes long.</p>
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3>Conversational logging</h3>
+          <p>Describe a day the way you'd describe it to a friend. Rowan turns it into a typed symptom entry with severity and context — no forms, no sliders.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></div>
+          <!-- `buildBrief` (rowan-app/trends.js) covers a rolling 30-day
+               window — `since: "the last N days"` — not "since your last
+               visit"; there is no visit-to-visit comparison in the shipped
+               brief. Med notes are a listing, never an assessment. -->
+          <h3>The visit brief</h3>
+          <p>The page you hand your doctor: what your last thirty days of entries add up to, your medication list, and the questions worth asking — assembled from what you actually logged.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-7 5 5"/><path d="M3 21h18"/></svg></div>
+          <h3>Trends you can raise</h3>
+          <p>Streaks, sparklines, and patterns Rowan noticed across weeks. Always framed the honest way: a pattern, not a diagnosis — worth raising at your next appointment.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <h3>Medication reminders</h3>
+          <p>Reminders you set, on your schedule, with a tap to mark a dose taken. Rowan tracks what you told it — it never tells you to start, stop, or change a dose.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 8.8-8 10-4.6-1.2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <h3>A safety layer that isn't optional</h3>
+          <p>An independent check runs on every message. If something reads as an emergency, Rowan stops and points you at real care — and those turns are never metered or limited.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h9"/><circle cx="18.5" cy="17" r="2.5"/></svg></div>
+          <!-- The export button serialises the on-device store only (entries,
+               memory, brief additions, transcripts) — `exportServerData()`
+               exists in rowan-app/api.js but is never imported or called, so
+               "a real export … that reaches the server" was not true of the
+               export. The DELETE genuinely does reach the server, so the
+               sentence now attaches that promise only to the half that keeps it. -->
+          <h3>You can see what it knows</h3>
+          <p>A plain list of everything Rowan remembers about you, with a remove on every item and a clear-everything underneath — plus an export of what's on your phone, and a delete that reaches the server too.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+          <h3>Apple Health &amp; medication import</h3>
+          <p>Reading your Health data and your iPhone medication list is designed and next in line — nothing is read today.</p>
+          <span class="soon">Not built yet</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></div>
+          <h3>Record upload</h3>
+          <p>Photographing a lab report or after-visit summary so Rowan can file it alongside your notes is planned, not shipped.</p>
+          <span class="soon">Not built yet</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SCREENS ===== -->
+  <section class="section-block" id="screens">
+    <div class="container" style="text-align:center;">
+      <div class="section-eyebrow">The app</div>
+      <h2>Warm, and quiet about it.</h2>
+      <p class="lede" style="margin-left:auto; margin-right:auto;">No white coats, no clinical charts, no red alarm states. Rowan is designed to be opened on a bad day.</p>
+
+      <div class="theme-toggle" role="group" aria-label="Preview appearance">
+        <span class="thumb" aria-hidden="true"></span>
+        <button type="button" data-theme="light" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+          Light
+        </button>
+        <button type="button" data-theme="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          Dark
+        </button>
+      </div>
+
+      <div class="screens-grid">
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="shots/home.png?v=20260731a" data-light="shots/home.png?v=20260731a" data-dark="shots/home-dark.png?v=20260731a" alt="Rowan's Today screen — a greeting, the next appointment, and today's medications" width="390" height="844" loading="lazy"></div>
+          <div class="screen-label"><strong>Today</strong>What's next, and what's due</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="shots/chat.png?v=20260731a" data-light="shots/chat.png?v=20260731a" data-dark="shots/chat-dark.png?v=20260731a" alt="Rowan's chat screen with an AI companion indicator" width="390" height="844" loading="lazy"></div>
+          <div class="screen-label"><strong>Chat</strong>Where a day becomes a log entry</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="shots/log.png?v=20260731a" data-light="shots/log.png?v=20260731a" data-dark="shots/log-dark.png?v=20260731a" alt="Rowan's quick log — pick a symptom, choose a severity band, and add what might matter" width="390" height="844" loading="lazy"></div>
+          <div class="screen-label"><strong>Quick log</strong>Thirty seconds, if you'd rather tap</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="shots/trends.png?v=20260731a" data-light="shots/trends.png?v=20260731a" data-dark="shots/trends-dark.png?v=20260731a" alt="Rowan's trends screen with sparklines and a noticed pattern" width="390" height="844" loading="lazy"></div>
+          <div class="screen-label"><strong>Trends</strong>A pattern, not a diagnosis</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="shots/conditions.png?v=20260731a" data-light="shots/conditions.png?v=20260731a" data-dark="shots/conditions-dark.png?v=20260731a" alt="Rowan's conditions screen with diagnosed and suspected chips" width="390" height="844" loading="lazy"></div>
+          <div class="screen-label"><strong>Conditions</strong>Diagnosed, or just suspected</div>
+        </div>
+        <div class="screen-card">
+          <!-- Alt describes co-occurrence, not cause; see PLAN §6. -->
+          <div class="screen-frame"><img class="shot-img" src="shots/recap.png?v=20260731a" data-light="shots/recap.png?v=20260731a" data-dark="shots/recap-dark.png?v=20260731a" alt="Rowan's monthly recap — headache days down from eleven to six, alongside the habit that ran through the month's best week" width="390" height="844" loading="lazy"></div>
+          <div class="screen-label"><strong>Monthly recap</strong>One page of your month</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BRIEF SPOTLIGHT ===== -->
+  <section class="section-block" id="brief" style="background: rgba(255,255,255,0.5);">
+    <div class="container">
+      <div class="spotlight-grid">
+        <div class="spotlight-phone">
+          <!-- Uses the derived brief (buildBrief), not the retired fixture:
+               every line counts entries the user wrote. Rationale in git. -->
+          <div class="screen-frame"><img src="shots/brief.png?v=20260731b" alt="A Rowan visit brief for a neurology appointment — each line counts the user's own entries, such as “Knee pain: logged on 9 of 30 days, average 5.7, worst 7”" width="390" height="844" loading="lazy"></div>
+        </div>
+        <div>
+          <div class="section-eyebrow">The hero artifact</div>
+          <h2>Fifteen minutes is not <em>long enough</em> to remember four months.</h2>
+          <p style="color: var(--muted-fg); font-size: 1.05rem;">The appointment is short, and the burden of recall is entirely on you — on a day when you may not be at your best. The visit brief exists so you don't walk out remembering the thing you meant to say.</p>
+          <ul class="spotlight-points" role="list">
+            <li><strong>What changed</strong> — how often each symptom came up and how rough it was, counted from your own entries, not a questionnaire.</li>
+            <li><strong>Your medication list</strong> — exactly as you entered it, with your own notes. Listed, never assessed.</li>
+            <li><strong>Questions to ask</strong> — phrased so they're easy to say out loud.</li>
+            <li><strong>Yours to share</strong> — export it, or just hold up your phone.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SAFETY BAND ===== -->
+  <section class="section-block tight">
+    <div class="container">
+      <div class="safety-band">
+        <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 8.8-8 10-4.6-1.2-8-5-8-10V6z"/><path d="M12 8v4M12 16h.01"/></svg></div>
+        <div>
+          <h3>In an emergency, don't type — call 911.</h3>
+          <p>Rowan is not an emergency service and never delays care. An independent safety check reads every message before Rowan answers; when something looks urgent, Rowan stops and points you to emergency care instead of continuing the conversation. Those turns are <strong>never metered, limited, or paywalled</strong>. Never delay care because of something in this app.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BOUNDARY ===== -->
+  <section class="section-block" id="boundary">
+    <div class="container">
+      <div class="section-eyebrow" style="text-align:center;">Being straight with you</div>
+      <h2 style="text-align:center;">What Rowan is — and <em>what it isn't.</em></h2>
+      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">A health app that overstates itself is dangerous. So here is the line, drawn plainly, in the same words the app uses.</p>
+      <div class="boundary">
+        <div class="boundary-col is">
+          <h3>Rowan does</h3>
+          <ul role="list">
+            <li>Help you organize, track, and understand your health information</li>
+            <li>Turn everyday sentences into a structured symptom record</li>
+            <li>Show you patterns over time, and help you describe them</li>
+            <li>Prepare better questions for your doctor</li>
+            <li>Remind you about medications you entered, on the schedule you set</li>
+            <li>Point you toward care — and toward emergency help when it matters</li>
+          </ul>
+        </div>
+        <div class="boundary-col isnt">
+          <h3>Rowan does not</h3>
+          <ul role="list">
+            <li>Diagnose you, or guess what your symptoms mean</li>
+            <li>Tell you to start, stop, change, or skip any medication or dose</li>
+            <li>Interpret labs or vitals, or call any result "abnormal"</li>
+            <li>Treat, cure, or prevent anything — and it isn't a medical device</li>
+            <li>Replace your doctor, nurse, pharmacist, or therapist</li>
+            <li>Pretend to be a clinician, or hide that it's an AI</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PRIVACY SPOTLIGHT ===== -->
+  <section class="section-block" id="privacy-spotlight" style="background: rgba(255,255,255,0.5);">
+    <div class="container">
+      <div class="spotlight-grid flip">
+        <div>
+          <div class="section-eyebrow">Privacy</div>
+          <h2>No account. No ads. <em>No trackers.</em></h2>
+          <p style="color: var(--muted-fg); font-size: 1.05rem;">Health data is the most sensitive data there is, and the honest position is to say exactly what happens to it — including the parts that leave your phone.</p>
+          <ul class="spotlight-points" role="list">
+            <li><strong>There is no sign-up.</strong> No name, no email, no password — your install is identified by a random device ID.</li>
+            <li><strong>No ad or analytics SDKs</strong> touch your health content, and we never sell or share it.</li>
+            <li><strong>Your messages do go to an AI provider</strong> to generate replies — Anthropic, or OpenAI when Anthropic is unavailable, which receives the same message and health context. Your log is stored on our server so it survives between sessions. We won't pretend otherwise.</li>
+            <!-- "memories on the server" implied server custody of a health-data
+                 category the server never receives: nothing in rowan-api writes
+                 `companion_memories` (service.py streams the merged facts back
+                 to the device and says so — "deliberately NOT persisted
+                 server-side"). The notes live on the phone; the purge still
+                 names that table, so it is listed as covered, not as stored. -->
+            <li><strong>Delete means delete.</strong> One tap erases what Rowan keeps on your phone, and asks our server to purge your conversations, symptom logs, safety events and usage counters in a single transaction — with a per-table receipt of what actually went.</li>
+          </ul>
+          <p style="margin-top: 22px;"><a href="privacy.html" style="font-weight:700;">Read the full privacy policy →</a></p>
+        </div>
+        <div class="spotlight-phone">
+          <!-- Screenshot replaced 2026-07-31; rationale in the commit message.
+               Re-shot in full the same day: the earlier crop existed only to
+               keep the app's false "none of it leaves your device" line out of
+               frame. That copy is fixed in rowan-app, so the whole card —
+               including ALWAYS IN CONTEXT — is shown, and it now says the same
+               thing as privacy.html. -->
+          <div class="screen-frame"><img src="shots/memory.png?v=20260731d" alt="Rowan’s “What Rowan knows” card — the plain list of notes Rowan keeps about you, an “Edit these notes” button, and “Clear everything Rowan knows” underneath" width="390" height="570" loading="lazy"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="section-block" id="faq">
+    <div class="container">
+      <div class="section-eyebrow" style="text-align:center;">Common questions</div>
+      <h2 style="text-align:center;">FAQ</h2>
+      <div class="faq-list">
+        <details class="faq">
+          <summary>Can Rowan tell me what's wrong with me?</summary>
+          <p>No, and it's built not to. Rowan doesn't diagnose, doesn't offer a differential, and won't guess at what your symptoms mean. It's for people who already have a diagnosis and are living with it — organizing what happens day to day so your care team has better information to work with.</p>
+        </details>
+        <details class="faq">
+          <summary>Is Rowan a medical device?</summary>
+          <p>No. Rowan is a general-wellness app that helps you organize, track, and understand your own health information. It doesn't diagnose, treat, cure, or prevent any condition, and it isn't a substitute for professional care. Always check with a qualified healthcare professional before making medical decisions.</p>
+        </details>
+        <details class="faq">
+          <summary>Will it tell me to change my medication?</summary>
+          <p>Never. Rowan gives no dosage guidance of any kind — it will not tell you to start, stop, change, or skip anything. It tracks the medications you entered and reminds you on the schedule you set. If something seems worth raising, it will say it's worth discussing with your doctor or pharmacist, and help you describe it.</p>
+        </details>
+        <details class="faq">
+          <summary>Am I talking to a real person?</summary>
+          <p>No. Rowan is an AI companion, and it says so — there's a persistent indicator in the chat reading "AI companion · not a clinician," and Rowan re-states what it is when you ask, at the start, and again as time goes on. It has no credentials and doesn't play a doctor.</p>
+        </details>
+        <details class="faq">
+          <summary>Where does my data actually go?</summary>
+          <p>Your messages, and a profile summary of your conditions, medications, and recent symptoms, are sent to our backend and on to an AI provider so Rowan can reply. We use Anthropic (Claude) as the primary provider, with OpenAI as failover. Failover is on by default and automatic: if Anthropic is unavailable, the same message and the same profile payload go to OpenAI instead, so OpenAI can receive your health context on any turn. Under those providers' current API terms your content is not used to train their models. Your conversations and logs are also stored on our own server, keyed only to a random device ID — never your name. The notes Rowan keeps about you are stored only on your phone — but your phone sends them along with each message, so they reach the AI provider too. Full details, including how long each thing is kept, are in the <a href="privacy.html">privacy policy</a>.</p>
+        </details>
+        <details class="faq">
+          <summary>Is Rowan HIPAA-compliant?</summary>
+          <p>No — and any app that tells you it is should be treated with suspicion. HIPAA applies to healthcare providers, health plans, and their business associates. Rowan is a consumer wellness app, not a covered entity, so HIPAA simply doesn't apply to it. What we can tell you is what we actually do: no account, no ads, no analytics on your health content, encryption in transit, defined retention windows, and a delete that really deletes.</p>
+        </details>
+        <details class="faq">
+          <summary>Does it read my Apple Health data?</summary>
+          <p>Not today. Reading Apple Health and your iPhone medication list is designed and next in line, but nothing is read right now — everything Rowan knows is something you told it.</p>
+        </details>
+        <details class="faq">
+          <summary>What does it cost?</summary>
+          <p>Rowan isn't for sale yet. There's no subscription you can buy today, and we'd rather leave this blank than quote a price we haven't shipped. When pricing is real, it'll be on this page, and safety and emergency features will never be behind it.</p>
+        </details>
+        <details class="faq">
+          <summary>When can I use it?</summary>
+          <p>Rowan is in development, with a private, invite-gated preview running now. It's iPhone-first and US-first; Android isn't committed. Email us and we'll let you know when there's something to try.</p>
+        </details>
+        <details class="faq">
+          <summary>Who is Rowan for?</summary>
+          <p>Adults 18 and over who are managing one or more diagnosed chronic conditions — migraine, thyroid disease, POTS, IBD and the like — and are tired of rebuilding their own history before every appointment.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="cta-strip">
+    <h2>Stop starting from scratch at every appointment.</h2>
+    <p>Rowan is in development for iPhone. Leave your email and we'll tell you when there's something to try.</p>
+    <a href="mailto:hi@hypersage.ai?subject=Notify%20me%20when%20Rowan%20launches" class="btn-warm">
+      <span>Get early access</span>
+      <span aria-hidden="true">→</span>
+    </a>
+  </section>
+
+  <!-- ===== DISCLAIMER ===== -->
+  <section class="disclaimer">
+    <div class="container">
+      <p>Rowan is an AI companion for organizing your own health information. It is not a doctor, nurse, or licensed clinician, not a medical device, and not a substitute for professional care — it does not diagnose or treat. Always check with a qualified healthcare professional before making medical decisions. In an emergency, don't type — call 911 or your local emergency number. 18+.</p>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site">
+    <div class="links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="mailto:hi@hypersage.ai">Contact</a>
+    </div>
+    <div class="copyright"><a href="https://drvanus.github.io/hypersage-site/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">A HyperSage Studio App</a></div>
+    <div class="copyright">© 2026 Rowan. Your story, kept straight.</div>
+  </footer>
+
+  <script>
+    (function () {
+      var section = document.getElementById('screens');
+      if (!section) return;
+      var toggle = section.querySelector('.theme-toggle');
+      var imgs = section.querySelectorAll('.shot-img');
+      if (!toggle) return;
+      imgs.forEach(function (img) {
+        var d = img.getAttribute('data-dark');
+        if (d) { var pre = new Image(); pre.src = d; }
+      });
+      function setTheme(mode) {
+        var dark = mode === 'dark';
+        section.classList.toggle('theme-dark', dark);
+        toggle.classList.toggle('is-dark', dark);
+        toggle.querySelectorAll('button').forEach(function (b) {
+          b.setAttribute('aria-pressed', b.getAttribute('data-theme') === mode ? 'true' : 'false');
+        });
+        imgs.forEach(function (img) {
+          var next = img.getAttribute(dark ? 'data-dark' : 'data-light');
+          if (next && img.getAttribute('src') !== next) img.setAttribute('src', next);
+        });
+      }
+      toggle.addEventListener('click', function (e) {
+        var btn = e.target.closest('button');
+        if (btn) setTheme(btn.getAttribute('data-theme'));
+      });
+    })();
+  </script>
+
+</body>
+</html>

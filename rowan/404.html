@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#FBF4EF">
+  <title>Not found — Rowan</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="rowan-icon.png?v=20260731a">
+  <link rel="apple-touch-icon" href="rowan-icon.png?v=20260731a">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #FBF4EF; color: #3B2D4F;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 24px; -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 440px; }
+    .skip-link {
+      position: absolute; left: 12px; top: -100px; z-index: 100;
+      background: #6F5BC5; color: #fff; font-weight: 700;
+      padding: 12px 18px; border-radius: 10px; text-decoration: none; transition: top .15s;
+    }
+    .skip-link:focus { top: 12px; }
+    main:focus { outline: none; }
+    @media (prefers-reduced-motion: reduce) { .skip-link { transition: none; } }
+    img.mark { width: 96px; height: 96px; border-radius: 22px; margin-bottom: 24px; }
+    h1 { font-family: ui-serif, 'New York', Charter, Georgia, serif; font-size: 1.9rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
+    p { color: #6E5E7C; margin-bottom: 26px; line-height: 1.6; }
+    a.home {
+      display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px;
+      background: linear-gradient(135deg, #6F5BC5, #F2775E); color: #fff;
+      font-weight: 700; border-radius: 0.875rem; text-decoration: none;
+      box-shadow: 0 8px 26px rgba(111,91,197,0.28);
+    }
+    a.home:focus-visible { outline: 3px solid #5B49A8; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <main id="main" class="wrap">
+    <img class="mark" src="rowan-icon.png?v=20260731a" alt="Rowan">
+    <p style="font-family: ui-serif, Georgia, serif; font-size:3.2rem; font-weight:700; color:#6F5BC5; line-height:1; margin-bottom:10px;">404</p>
+    <h1>That page isn't here.</h1>
+    <p>The link may be old, or the page may have moved. Let's get you back to something that exists.</p>
+    <a class="home" href="index.html">Back to Rowan <span aria-hidden="true">→</span></a>
+  </main>
+</body>
+</html>

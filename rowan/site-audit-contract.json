@@ -1,0 +1,29 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://drvanus.github.io/hypersage-site/rowan/",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "rowan-api: v1 is accountless \u2014 identity is a client-minted pseudonymous UUID sent as the X-Device-Id header (Keychain on native, localStorage in the web build).",
+        "rowan-api schema: the account_id column exists but is NULL on every v1 row; it is reserved for a future Apple-sync release.",
+        "rowan-app/index-onboarding.html ships no sign-up, sign-in, or password surface."
+      ]
+    },
+    "no_tracking": {
+      "approved": true,
+      "evidence": [
+        "rowan-api/app/observability.py: no ad or analytics SDKs; no PostHog. Sentry initialises only when SENTRY_DSN is set, with send_default_pii=False and a scrubber dropping request bodies and auth headers.",
+        "docs/PLAN.md \u00a76 telemetry decision: crash reporting only, with health-content-free breadcrumbs.",
+        "Safety events are content-free: SHA-256 hashed device id, tier, route, and a bounded reason code \u2014 never message text, symptom, or condition."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "docs/PLAN.md \u00a76: 'No ad/analytics SDKs touching health data; never sell/share it.'",
+        "No advertising SDK is present in rowan-app or rowan-api."
+      ]
+    }
+  }
+}

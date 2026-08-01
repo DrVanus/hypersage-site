@@ -1,0 +1,27 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://drvanus.github.io/hypersage-site/waddleton/",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "PenguinArcade: players get an anonymous Supabase guest identity created automatically \u2014 no username, email, or password is ever collected.",
+        "supabase/migrations/20260723_waddleton_foundation.sql: waddleton_profiles stores a display name and a profile state JSON only; there is no credential column."
+      ]
+    },
+    "no_tracking": {
+      "approved": true,
+      "evidence": [
+        "PenguinArcade client: a grep for gtag, GTM, PostHog, Plausible, Mixpanel, Sentry, Amplitude, and Firebase returns no third-party analytics or telemetry SDK.",
+        "The only stored per-network-address data is a guest-signup rate-limit list of timestamps in the Cloudflare Durable Object (worker/src/index.mjs allowGuestSignup), which ages out and is disclosed on the privacy page."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "js/economy.js: adAvailable() and watchAd() both return false unconditionally \u2014 no rewarded-ad path is reachable.",
+        "No advertising SDK is present in the client, and js/storefront.js returns 'store-unavailable' so no purchase can be made either."
+      ]
+    }
+  }
+}

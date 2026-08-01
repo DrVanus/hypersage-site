@@ -1,0 +1,136 @@
+/* Shared stylesheet for /privacy, /terms, /support — keeps the brand consistent
+   without duplicating the landing-page CSS. Palette re-keyed from
+   rowan-app/tokens.json (light scheme); adapted from the Quietoak legal.css. */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FBF4EF;
+  --surface: #FFFFFF;
+  --card: #EEE9FB;         /* tintSoft */
+  --fg: #3B2D4F;           /* text */
+  --muted-fg: #6E5E7C;     /* textDim */
+  --primary: #6F5BC5;      /* tint */
+  --primary-dark: #5B49A8; /* tintInk — AA on light */
+  --accent: #F2775E;
+  --emergency: #B23A28;
+  --border: rgba(59,45,79,0.10);
+}
+
+html { scroll-behavior: smooth; color-scheme: only light; }
+
+body {
+  font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: var(--primary-dark); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--primary); }
+a:focus-visible { outline: 3px solid var(--primary-dark); outline-offset: 3px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+.legal-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,244,239,0.86);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.legal-nav .container { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; }
+.legal-nav .brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: ui-serif, 'New York', Charter, Georgia, serif;
+  font-weight: 700; color: var(--fg); font-size: 1.08rem; letter-spacing: -0.01em;
+}
+.legal-nav .brand img { width: 30px; height: 30px; border-radius: 8px; }
+.legal-nav .links { display: flex; gap: 22px; font-size: 0.95rem; }
+.legal-nav .links a { color: var(--muted-fg); font-weight: 600; }
+.legal-nav .links a:hover { color: var(--primary); }
+/* The current page was signalled by colour alone. It now also carries
+   aria-current="page" in the markup and a weight + underline cue here, so it
+   survives a monochrome render, a colour-vision difference, and a screen
+   reader. */
+.legal-nav .links a.active {
+  color: var(--primary-dark);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
+}
+
+/* Skip link: off-screen until focused, then a real 44px target above the
+   sticky nav. */
+.skip-link {
+  position: absolute; left: 12px; top: -100px; z-index: 100;
+  display: inline-flex; align-items: center; min-height: 44px;
+  padding: 10px 18px; border-radius: 12px;
+  background: var(--surface); color: var(--primary-dark);
+  border: 1px solid rgba(59,45,79,0.18); font-weight: 700;
+  box-shadow: 0 10px 30px rgba(59,45,79,0.16);
+  transition: top .15s ease;
+}
+.skip-link:focus { top: 12px; }
+@media (prefers-reduced-motion: reduce) { .skip-link { transition: none; } }
+
+@media (max-width: 560px) {
+  .legal-nav .container { gap: 12px; }
+  .legal-nav .brand { font-size: 0.95rem; gap: 8px; }
+  .legal-nav .brand img { width: 26px; height: 26px; }
+  .legal-nav .links { gap: 14px; font-size: 0.85rem; }
+}
+
+main.legal { max-width: 760px; margin: 0 auto; padding: 56px 24px 96px; }
+main.legal h1 {
+  font-family: ui-serif, 'New York', Charter, Georgia, serif;
+  font-weight: 700; font-size: 2.4rem; line-height: 1.15;
+  letter-spacing: -0.02em; margin-bottom: 12px; color: var(--fg);
+}
+main.legal .updated { color: var(--muted-fg); font-size: 0.95rem; margin-bottom: 36px; }
+main.legal h2 {
+  font-family: ui-serif, 'New York', Charter, Georgia, serif;
+  font-size: 1.28rem; font-weight: 700;
+  margin-top: 36px; margin-bottom: 12px; color: var(--primary); letter-spacing: -0.01em;
+}
+main.legal h3 { font-size: 1.05rem; font-weight: 700; margin-top: 22px; margin-bottom: 8px; color: var(--fg); }
+main.legal p, main.legal li { color: var(--fg); margin-bottom: 14px; }
+main.legal ul { padding-left: 22px; margin-bottom: 14px; }
+main.legal li { margin-bottom: 6px; }
+main.legal strong { color: var(--primary-dark); font-weight: 700; }
+main.legal code { background: var(--card); padding: 2px 6px; border-radius: 6px; font-size: 0.9em; color: var(--primary-dark); }
+
+/* Emergency callout reused across legal pages. */
+.crisis-note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--emergency);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 24px 0;
+}
+.crisis-note strong { color: var(--emergency); }
+
+/* Pre-launch status callout. */
+.status-note {
+  background: var(--card);
+  border: 1px solid rgba(111,91,197,0.25);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 0 0 28px;
+  font-size: 0.95rem;
+}
+.status-note strong { color: var(--primary-dark); }
+
+footer.legal-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 60px; padding: 28px 24px 36px;
+  text-align: center; color: var(--muted-fg); font-size: 0.9rem;
+}
+footer.legal-footer a { color: var(--muted-fg); margin: 0 12px; font-weight: 600; }
+footer.legal-footer a:hover { color: var(--primary); }

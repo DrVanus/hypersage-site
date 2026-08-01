@@ -1,0 +1,20 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://drvanus.github.io/hypersage-site/alder/",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "recovery-companion-PLAN.md: v1 is accountless, identified by a Keychain-held random device id; there is no name, email, or password anywhere in the product.",
+        "alder-app/persist.js: the client is the store of record \u2014 the prototype persists everything locally and ships no sign-in surface."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "recovery-companion-PLAN.md \u00a72: 'No ads or third-party marketing/analytics SDKs, ever; never sell/share data.'",
+        "alder-app: a grep of the prototype finds no advertising or analytics SDK; the only outbound URL is findtreatment.gov in resources.js."
+      ]
+    }
+  }
+}

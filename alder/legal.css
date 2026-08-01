@@ -1,0 +1,142 @@
+/* Shared stylesheet for /privacy, /terms, /support — keeps the brand consistent
+   without duplicating the landing-page CSS. Palette re-keyed from
+   alder-app/tokens.json ("Hearth", dark scheme). */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #171310;
+  --surface: #211B16;
+  --card: #2A2219;
+  --fg: #F5EDE3;
+  --muted-fg: #A99C8C;
+  --tint: #E0A458;
+  --tint-soft: #3A2E1F;
+  --accent: #8FB996;
+  --danger: #E0725C;
+  --border: #352B22;
+  --border-strong: #4A3D30;
+}
+
+html { scroll-behavior: smooth; color-scheme: only dark; background: var(--bg); }
+
+body {
+  font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: var(--tint); text-decoration: none; transition: color 0.2s; }
+a:hover { color: #EFC08A; }
+a:focus-visible { outline: 3px solid var(--tint); outline-offset: 3px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+/* Skip link — first thing in the tab order, invisible until focused. */
+.skip-link {
+  position: absolute; left: 12px; top: -100px; z-index: 100;
+  background: var(--tint); color: #231505; font-weight: 700;
+  padding: 12px 18px; border-radius: 12px;
+  transition: top 0.15s;
+}
+.skip-link:focus { top: 12px; color: #231505; }
+@media (prefers-reduced-motion: reduce) { .skip-link { transition: none; } }
+
+.legal-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(23,19,16,0.86);
+  backdrop-filter: saturate(150%) blur(14px);
+  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.legal-nav .container { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; }
+.legal-nav .brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: ui-serif, Georgia, serif;
+  font-weight: 700; color: var(--fg); font-size: 1.08rem;
+}
+.legal-nav .brand img { width: 30px; height: 30px; border-radius: 8px; }
+.legal-nav .links { display: flex; gap: 22px; font-size: 0.95rem; }
+.legal-nav .links a { color: var(--muted-fg); font-weight: 600; }
+.legal-nav .links a:hover { color: var(--fg); }
+/* Active page: colour alone can't carry this, so it also gets a rule under it. */
+.legal-nav .links a.active {
+  color: var(--tint);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+@media (max-width: 560px) {
+  .legal-nav .container { gap: 12px; }
+  .legal-nav .brand { font-size: 0.95rem; gap: 8px; }
+  .legal-nav .brand img { width: 26px; height: 26px; }
+  .legal-nav .links { gap: 14px; font-size: 0.85rem; }
+}
+
+main.legal { max-width: 760px; margin: 0 auto; padding: 56px 24px 96px; }
+main.legal h1 {
+  font-family: ui-serif, Georgia, serif;
+  font-weight: 700; font-size: 2.4rem; line-height: 1.15;
+  letter-spacing: -0.02em; margin-bottom: 12px; color: var(--fg);
+}
+main.legal .updated { color: var(--muted-fg); font-size: 0.95rem; margin-bottom: 36px; }
+main.legal h2 {
+  font-family: ui-serif, Georgia, serif;
+  font-size: 1.28rem; font-weight: 700;
+  margin-top: 36px; margin-bottom: 12px; color: var(--tint);
+}
+main.legal h3 { font-size: 1.05rem; font-weight: 700; margin-top: 22px; margin-bottom: 8px; color: var(--fg); }
+main.legal p, main.legal li { color: var(--muted-fg); margin-bottom: 14px; }
+main.legal ul { padding-left: 22px; margin-bottom: 14px; }
+main.legal li { margin-bottom: 6px; }
+main.legal strong { color: var(--fg); font-weight: 700; }
+main.legal code { background: var(--card); padding: 2px 6px; border-radius: 6px; font-size: 0.9em; color: var(--tint); }
+
+/* Crisis callout reused across legal pages. */
+.crisis-note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--danger);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 24px 0;
+}
+.crisis-note strong { color: var(--danger); }
+/* Every number in a crisis note is a tel: link, so it has to look tappable on a
+   phone. Cream text stays legible on --surface; the amber rule under it is the
+   affordance, and it does not rely on colour alone. */
+.crisis-note a, .res-list a {
+  color: var(--fg);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--tint);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.crisis-note a:hover, .crisis-note a:focus-visible,
+.res-list a:hover, .res-list a:focus-visible { color: var(--tint); }
+
+/* Pre-launch status callout. */
+.status-note {
+  background: var(--tint-soft);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 0 0 28px;
+  font-size: 0.95rem;
+}
+.status-note strong { color: var(--tint); }
+
+footer.legal-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 60px; padding: 28px 24px 36px;
+  text-align: center; color: var(--muted-fg); font-size: 0.9rem;
+}
+footer.legal-footer a { color: var(--muted-fg); margin: 0 12px; font-weight: 600; }
+footer.legal-footer a:hover { color: var(--tint); }
