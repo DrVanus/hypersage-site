@@ -42,27 +42,27 @@
 
   <main class="legal" id="main">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 2026-07-31</p>
+    <p class="updated">Last updated: 2026-08-01</p>
 
     <p>Rowan holds health information, which is about the most sensitive data a phone can carry. So this policy is written to be checkable rather than reassuring: every statement below describes what the app and its backend actually do right now. Where something leaves your device, we say so plainly instead of burying it.</p>
 
     <h2>Who we are</h2>
-    <p>Rowan is an iOS app from HyperSage AI Labs, built by an independent developer. There is <strong>no account and no login</strong> — your install is identified by a random identifier generated on your device, not by your name or email. Contact: <a href="mailto:hi@hypersage.ai">hi@hypersage.ai</a>.</p>
+    <p>Rowan is an iOS app from HyperSage AI Labs, built by an independent developer. There is <strong>no account and no login</strong> — your install is identified by a random identifier generated on your device, not by your name or email. Contact: <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a>.</p>
 
     <h2>The short version</h2>
     <ul>
       <li>No account, no name, no email, no password.</li>
       <li><strong>No advertising SDKs and no third-party analytics</strong> touching your health content. We do not sell or share your data.</li>
       <li>Your messages <strong>do</strong> leave your device — they go to our backend and on to an AI provider so Rowan can reply. Today that is <strong>Anthropic</strong>, or <strong>OpenAI</strong> when Anthropic is unavailable.</li>
-      <li>Your conversations and symptom logs are <strong>stored on our server</strong>, keyed to that random device identifier. <strong>The notes Rowan keeps about you stay on your phone</strong> — our server never files them.</li>
+      <li>Your conversations and symptom logs are <strong>stored on our server</strong>, keyed to that random device identifier. <strong>The notes Rowan keeps about you are never filed on our server</strong> — your phone is the record of truth for them. They are still <strong>sent with every message</strong> so Rowan can remember you, and so reach the AI provider like the rest of your context; see "What we store on our own server" below.</li>
       <li>Everything has a retention limit, and one tap in the app deletes it.</li>
     </ul>
 
     <h2>What is sent off your device — and why</h2>
 
     <h3>1. Your messages to Rowan</h3>
-    <p>When you talk to Rowan, your message is sent to our backend and forwarded to an AI provider to generate a reply. Along with it we send a <strong>profile payload</strong> — your registered conditions, medications, allergies, recent symptom entries, preferred name, and <strong>the notes under "What Rowan knows"</strong> — so the reply fits your situation rather than being generic. We also send your device's locale so emergency resources can be resolved to your region.</p>
-    <p>We use <strong>Anthropic (Claude)</strong> as the primary provider and <strong>OpenAI</strong> as a failover. Failover is <strong>enabled by default</strong>, it is automatic, and you are not asked again when it happens: if Anthropic fails to open the stream, the <strong>same message and the same profile payload</strong> — conditions, medications, allergies, recent symptoms — go to OpenAI instead. Be clear-eyed about what that means: <strong>OpenAI can receive your health context on any turn</strong>, not just in some notional edge case. Under these providers' current API terms, <strong>your content is not used to train their models</strong>, and the provider retains it for up to 30 days for abuse monitoring before deleting it. We do not control their policies, so please also read their privacy links below.</p>
+    <p>When you talk to Rowan, your message is sent to our backend and forwarded to an AI provider to generate a reply. Along with it we send a <strong>profile payload</strong> — your registered conditions, medications, recent symptom entries, preferred name, and <strong>the notes under "What Rowan knows"</strong> — so the reply fits your situation rather than being generic. We also send your device's locale so emergency resources can be resolved to your region.</p>
+    <p>We use <strong>Anthropic (Claude)</strong> as the primary provider and <strong>OpenAI</strong> as a failover. Failover is <strong>enabled by default</strong>, it is automatic, and you are not asked again when it happens: if Anthropic fails to open the stream, the <strong>same message and the same profile payload</strong> — conditions, medications, recent symptoms — go to OpenAI instead. Be clear-eyed about what that means: <strong>OpenAI can receive your health context on any turn</strong>, not just in some notional edge case. Under these providers' current API terms, <strong>your content is not used to train their models</strong>, and the provider retains it for up to 30 days for abuse monitoring before deleting it. We do not control their policies, so please also read their privacy links below.</p>
     <p>The consent screen you see during onboarding now names <strong>both</strong>: Anthropic, because that is where your messages go on a normal turn, and OpenAI as the failover that can receive them on any turn. You are told who receives your health context in the step where you agree to it, not only here.</p>
 
     <h3>2. What we store on our own server</h3>
@@ -122,17 +122,17 @@
       <li><strong>Export:</strong> the app's Export button writes a JSON file of what is <strong>on your phone</strong> — your entries, your conversations, and the notes Rowan keeps about you. It does not pull the rows from our server; for those, email us and we will export everything held under your device identifier.</li>
       <li><strong>Delete:</strong> "Delete all my data" erases your on-device record and asks our backend to purge your conversations, messages, symptom logs, safety events, and usage counters in a single transaction — plus the reserved memory table, which is empty — returning a per-table receipt. One honest exception: a rate-limiting row keyed to your network address, which contains no health content and expires on its own, is not covered by that purge. Deleting the app removes everything held on the device.</li>
       <li><strong>EU/UK (GDPR) &amp; California (CCPA/CPRA):</strong> you may request access to, or deletion of, the data tied to your device identifier, and you can withdraw consent at any time. <strong>We do not sell or share your personal information, and we will not discriminate against you for exercising these rights.</strong> The categories we hold on our server are limited to: your random device identifier, your messages and conversations, your symptom logs, content-free safety events, and your own daily usage counters. Rowan's notes about you are stored on your device rather than by us, though your phone transmits them to us and on to the AI provider with each message (see "Your messages to Rowan" above). Our legal bases (GDPR) are your consent for the AI processing and our legitimate interest in operating and securing the service.</li>
-      <li>Email <a href="mailto:hi@hypersage.ai">hi@hypersage.ai</a> with any request.</li>
+      <li>Email <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a> with any request.</li>
     </ul>
 
     <h2>Children</h2>
-    <p>Rowan is intended for adults <strong>18 and older</strong> and is not directed at children. We do not knowingly collect data from children. If you believe a minor has used the app, contact <a href="mailto:hi@hypersage.ai">hi@hypersage.ai</a>.</p>
+    <p>Rowan is intended for adults <strong>18 and older</strong> and is not directed at children. We do not knowingly collect data from children. If you believe a minor has used the app, contact <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a>.</p>
 
     <h2>Changes</h2>
     <p>If we change this policy we will update the date above and post the new version here. Material changes will be noted in the App Store update notes.</p>
 
     <h2>Contact</h2>
-    <p>Questions about privacy: <a href="mailto:hi@hypersage.ai">hi@hypersage.ai</a></p>
+    <p>Questions about privacy: <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a></p>
 
     <div class="crisis-note">
       <strong>In an emergency, don't type — call 911.</strong> Rowan is not an emergency service and is not monitored by a human. If you are having a medical emergency, call 911 or your local emergency number. If you are thinking about harming yourself, call or text <strong>988</strong> (US Suicide &amp; Crisis Lifeline). Never delay care because of something in this app.
