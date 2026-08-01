@@ -183,7 +183,7 @@
     }
 
     .hero-image { position: relative; }
-    .hero-image img { width: 100%; max-width: 380px; display: block; margin: 0 auto; object-fit: contain; }
+    .hero-image img { width: 100%; height: auto; max-width: 380px; display: block; margin: 0 auto; object-fit: contain; }
     .hero-image::after {
       content: ''; position: absolute; inset: -24px;
       background: radial-gradient(ellipse at center, rgba(224,164,88,0.18), transparent 66%);
@@ -253,7 +253,7 @@
       transition: transform .3s, box-shadow .3s;
     }
     .screen-card:hover .screen-frame { transform: translateY(-6px); box-shadow: 0 28px 60px rgba(0,0,0,0.6); }
-    .screen-card img { width: 100%; display: block; }
+    .screen-card img { width: 100%; height: auto; display: block; }
     /* shots/sos.png is cropped shorter than its siblings (the contact list was
        removed), so pin it to the tile height and show it from the top rather
        than letting one card sit short in the row. */
@@ -266,7 +266,7 @@
     .spotlight-grid { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: 50px; align-items: center; }
     @media (max-width: 900px) { .spotlight-grid { grid-template-columns: 1fr; gap: 30px; } }
     .spotlight-phone .screen-frame { max-width: 285px; margin: 0 auto; border-radius: 26px; }
-    .spotlight-phone img { width: 100%; display: block; }
+    .spotlight-phone img { width: 100%; height: auto; display: block; }
     .spotlight-points { list-style: none; margin-top: 22px; }
     .spotlight-points li { position: relative; padding: 9px 0 9px 26px; color: var(--muted-fg); font-size: 0.98rem; }
     .spotlight-points li::before { content: ''; position: absolute; left: 0; top: calc(9px + 0.62em); transform: translateY(-50%); width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }

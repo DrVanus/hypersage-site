@@ -1,6 +1,6 @@
 {
   "schema": "static-site-audit-contract/v1",
-  "canonical_url": "https://drvanus.github.io/hypersage-site/waddleton/",
+  "canonical_url": "https://drvanus.github.io/waddleton-site/",
   "approved_absolute_claims": {
     "no_account": {
       "approved": true,

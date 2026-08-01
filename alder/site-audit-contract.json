@@ -1,6 +1,6 @@
 {
   "schema": "static-site-audit-contract/v1",
-  "canonical_url": "https://drvanus.github.io/hypersage-site/alder/",
+  "canonical_url": "https://drvanus.github.io/alder-site/",
   "approved_absolute_claims": {
     "no_account": {
       "approved": true,

@@ -1,6 +1,6 @@
 {
   "schema": "static-site-audit-contract/v1",
-  "canonical_url": "https://drvanus.github.io/hypersage-site/rowan/",
+  "canonical_url": "https://drvanus.github.io/rowan-site/",
   "approved_absolute_claims": {
     "no_account": {
       "approved": true,
