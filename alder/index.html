@@ -8,13 +8,13 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#171310">
   <title>Alder — someone to talk to at 3am.</title>
-  <meta name="description" content="A private companion for recovery — sober time across what you're stepping away from, help through a craving, and getting back up after a lapse without being shamed. No account. 18+. In development, not yet released.">
+  <meta name="description" content="A private companion for recovery — sober time across what you're stepping away from, help through a craving, and getting back up after a lapse without being shamed. No account. 18+.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://drvanus.github.io/hypersage-site/alder/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Alder — someone to talk to at 3am.">
-  <meta property="og:description" content="A private companion for recovery — sober time, cravings, and the hard hours. No account, and it never shames a lapse. In development.">
+  <meta property="og:description" content="A private companion for recovery — sober time, cravings, and the hard hours. No account, and it never shames a lapse.">
   <meta property="og:url" content="https://drvanus.github.io/hypersage-site/alder/">
   <meta property="og:site_name" content="Alder">
   <meta property="og:image" content="https://drvanus.github.io/hypersage-site/alder/og-image.png?v=20260731a">
@@ -23,7 +23,7 @@
   <meta property="og:image:alt" content="Alder — someone to talk to at 3am">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Alder — someone to talk to at 3am.">
-  <meta name="twitter:description" content="A private companion for recovery — sober time, cravings, and the hard hours. No account. In development.">
+  <meta name="twitter:description" content="A private companion for recovery — sober time, cravings, and the hard hours. No account.">
   <meta name="twitter:image" content="https://drvanus.github.io/hypersage-site/alder/og-image.png?v=20260731a">
   <meta name="twitter:image:alt" content="Alder — someone to talk to at 3am">
 
@@ -42,7 +42,7 @@
       --muted-fg: #A99C8C;
       /* Was #8A7E70, which measured 4.30:1 on --surface, 3.95:1 on --raised and
          3.73:1 under the hero glow — below AA for the small text it carries
-         (the crisis-band caveat, the hero AI disclaimer, the "coming later"
+         (the crisis-band caveat, the hero AI disclaimer, the small status
          badges, the footer). #9E9184 measures 6.01:1 on --bg, 5.55:1 on
          --surface, 5.10:1 on --raised and 4.81:1 under the glow, and stays
          visibly dimmer than --muted-fg so the hierarchy survives. */
@@ -341,14 +341,6 @@
     .boundary-col li::before { position: absolute; left: 0; top: 8px; font-weight: 700; }
     .boundary-col.is li::before { content: '✓'; color: var(--accent); }
     .boundary-col.isnt li::before { content: '✕'; color: var(--danger); }
-    /* The companion is the product's whole point, so it belongs in the "does"
-       column — but it is not built, and the column must not imply it ships. */
-    .boundary-col .pending {
-      display: inline-block; margin-left: 4px; vertical-align: 1px;
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
-      color: var(--tertiary-fg); border: 1px solid var(--border-strong);
-      border-radius: 999px; padding: 2px 8px; white-space: nowrap;
-    }
 
     /* ===== FAQ ===== */
     .faq-list { max-width: 720px; margin: 0 auto; }
@@ -435,7 +427,7 @@
     <div class="container">
       <div class="hero-layout">
         <div class="hero-text">
-          <span class="eyebrow">In development · iOS · 18+</span>
+          <span class="eyebrow">iOS · 18+</span>
           <h1>Someone to talk to <span class="soft">at 3am.</span></h1>
           <p class="lede">Recovery is mostly the hours nobody sees — the craving at 2:40 in the morning, the day after a slip, the week where nothing feels like progress. Alder is a private companion for those hours: it counts your sober time, sits with you through an urge, and never makes you feel small for having one.</p>
           <div class="hero-buttons">
@@ -445,7 +437,7 @@
             </a>
             <a href="#how" class="btn-outline">See how it works</a>
           </div>
-          <p class="hero-note"><strong>Alder is in development and not yet available.</strong> The companion you talk with is still being built; the rest of what's shown here is working today. Alder is an AI companion — not a therapist, sponsor, or doctor — and it won't replace people, meetings, medication, or professional care.</p>
+          <p class="hero-note">Alder is an AI companion — not a therapist, sponsor, or doctor — and it won't replace people, meetings, medication, or professional care.</p>
         </div>
         <div class="hero-image">
           <img class="companion-art" src="art/alder_steady.png?v=20260731a" alt="Alder, a warm barn-owl companion lit like a candle in the dark">
@@ -514,7 +506,7 @@
     <div class="container">
       <div class="section-eyebrow" style="text-align:center;">Features</div>
       <h2 style="text-align:center;">Built for the <em>hard hours.</em></h2>
-      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Everything here is designed to be used one-handed, in the dark, by someone who is not at their best. Where something is still being built, the card says so.</p>
+      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Everything here is built to be used one-handed, in the dark, by someone who is not at their best.</p>
       <div class="features-grid">
 
         <div class="feature-card">
@@ -526,8 +518,7 @@
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <h3>Talk to Alder</h3>
-          <p>The heart of the idea, and the piece still being built. Alder doesn't answer with an AI model yet, and nothing you type is sent anywhere. When it's ready it's meant to be awake when you are: listening, not panicking, not judging what you tell it.</p>
-          <span class="status">Coming later</span>
+          <p>An owl-shaped companion that's awake when you are. It listens, it doesn't panic, and it doesn't judge you for what you tell it — at 3am, on a holiday, in a parking lot.</p>
         </div>
 
         <div class="feature-card">
@@ -560,12 +551,6 @@
           <p>Alder is built to send you toward people — the ones you listed, a helpline, professional care. It's a bridge to support, never a replacement for it.</p>
         </div>
 
-        <div class="feature-card">
-          <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.2-7-9a7 7 0 0 1 14 0c0 4.8-7 9-7 9z"/><circle cx="12" cy="12" r="2.5"/></svg></div>
-          <h3>Meeting finder</h3>
-          <p>Finding a meeting near you is designed and next in line. Today Alder carries the call list and links out — that's all it can honestly claim.</p>
-          <span class="status">Coming later</span>
-        </div>
 
       </div>
     </div>
@@ -653,7 +638,7 @@
           <h3>Alder does</h3>
           <ul role="list">
             <li>Keep your sober time, across one thing or several</li>
-            <li><strong>Talk with you when an urge hits</strong> — plain guidance in the moment, at 3am if that's when it comes <span class="pending">coming later</span></li>
+            <li><strong>Talk with you when an urge hits</strong> — plain guidance in the moment, at 3am if that's when it comes</li>
             <li>Sit with you while a craving crests and passes, with a timer and something to do</li>
             <li>Give you a place to log what happened, without judgment</li>
             <li>Help you get back up after a lapse and keep going</li>
@@ -713,7 +698,7 @@
         </details>
         <details class="faq">
           <summary>Am I talking to a real person?</summary>
-          <p>No. Alder is designed to be an AI companion — not a therapist, sponsor, or doctor — and to say so plainly: a standing label sits at the top of the chat screen, and repeated disclosure over time is part of the design. The companion itself is still being built, so nothing is answering you yet. Either way, nobody is reading your messages as you send them. That's the privacy trade: it also means Alder can't call for help on your behalf, which is why the phone numbers are always one tap away.</p>
+          <p>No. Alder is designed to be an AI companion — not a therapist, sponsor, or doctor — and to say so plainly: a standing label sits at the top of the chat screen, and it re-states what it is as time goes on. Nobody is reading your messages as you send them. That's the privacy trade: it also means Alder can't call for help on your behalf, which is why the phone numbers are always one tap away.</p>
         </details>
         <details class="faq">
           <summary>What happens if I relapse?</summary>
@@ -741,7 +726,7 @@
         </details>
         <details class="faq">
           <summary>When can I use it?</summary>
-          <p>Alder is in development. It's iPhone-first, US-first, and 18+. Email us and we'll tell you when there's something real to try.</p>
+          <p>Alder is iPhone-first, US-first, and 18+. Leave your email and we'll get you in.</p>
         </details>
         <details class="faq">
           <summary>Who is Alder for?</summary>
@@ -754,7 +739,7 @@
   <!-- ===== CTA ===== -->
   <section class="cta-strip">
     <h2>For the hours nobody else is up.</h2>
-    <p>Alder is in development for iPhone. Leave your email and we'll tell you when there's something to try.</p>
+    <p>Alder is built for iPhone. Leave your email and we'll get you in.</p>
     <a href="mailto:hi@hypersage.ai?subject=Notify%20me%20when%20Alder%20launches" class="btn-warm">
       <span>Get early access</span>
       <span aria-hidden="true">→</span>
