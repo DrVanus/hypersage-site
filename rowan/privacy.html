@@ -45,7 +45,7 @@
     <p class="updated">Last updated: 2026-07-31</p>
 
     <div class="status-note">
-      <strong>Rowan has not launched.</strong> This policy describes the private, invite-gated preview as it works today. It will be reviewed by counsel and updated before Rowan is offered publicly, and the date above will change when it is.
+      <strong>Rowan has not launched.</strong> This policy describes the private preview as it works today. It will be reviewed by counsel and updated before Rowan is offered publicly, and the date above will change when it is.
     </div>
 
     <p>Rowan holds health information, which is about the most sensitive data a phone can carry. So this policy is written to be checkable rather than reassuring: every statement below describes what the app and its backend actually do right now. Where something leaves your device, we say so plainly instead of burying it.</p>
@@ -67,7 +67,7 @@
     <h3>1. Your messages to Rowan</h3>
     <p>When you talk to Rowan, your message is sent to our backend and forwarded to an AI provider to generate a reply. Along with it we send a <strong>profile payload</strong> — your registered conditions, medications, allergies, recent symptom entries, preferred name, and <strong>the notes under "What Rowan knows"</strong> — so the reply fits your situation rather than being generic. We also send your device's locale so emergency resources can be resolved to your region.</p>
     <p>We use <strong>Anthropic (Claude)</strong> as the primary provider and <strong>OpenAI</strong> as a failover. Failover is <strong>enabled by default</strong>, it is automatic, and you are not asked again when it happens: if Anthropic fails to open the stream, the <strong>same message and the same profile payload</strong> — conditions, medications, allergies, recent symptoms — go to OpenAI instead. Be clear-eyed about what that means: <strong>OpenAI can receive your health context on any turn</strong>, not just in some notional edge case. Under these providers' current API terms, <strong>your content is not used to train their models</strong>, and the provider retains it for up to 30 days for abuse monitoring before deleting it. We do not control their policies, so please also read their privacy links below.</p>
-    <p>The consent screen you see during onboarding names <strong>Anthropic</strong>, because that is where your messages go on a normal turn. It does not currently name OpenAI, so the failover is disclosed here and in the FAQ instead; naming both in the consent step is a pre-launch fix.</p>
+    <p>The consent screen you see during onboarding names <strong>Anthropic</strong>, because that is where your messages go on a normal turn. It does not currently name OpenAI, so the failover is disclosed here and in the FAQ instead; naming both in the consent step is a change we will make before launch.</p>
 
     <h3>2. What we store on our own server</h3>
     <p>To make Rowan useful across sessions — so your log persists, trends can be computed, and a visit brief can be assembled — your <strong>conversations, messages, and symptom logs</strong> are stored in our own database, tied only to your random device identifier. We hold <strong>no name, email, or login</strong> that could connect that identifier to you.</p>
@@ -109,7 +109,7 @@
     </ul>
 
     <h2>Consumer health data</h2>
-    <p>Some U.S. states — Washington's My Health My Data Act, Nevada's SB 370, and Connecticut's health-data amendments among them — treat consumer health data as its own category with its own consent requirements. Rowan is built to that standard: collection begins only after you affirmatively consent during onboarding, having been told in that step that your messages and health context are sent to Anthropic to generate replies. That step does not yet name OpenAI, which can receive the same content when Anthropic is unavailable — the section above says so plainly, and naming both in the consent step is a pre-launch fix. <strong>We do not sell your consumer health data, and we do not share it for anyone else's purposes.</strong> You can view what Rowan remembers, remove any single note or clear the whole list, export what's on your phone, and delete everything — on the device and on our server — from inside the app.</p>
+    <p>Some U.S. states — Washington's My Health My Data Act, Nevada's SB 370, and Connecticut's health-data amendments among them — treat consumer health data as its own category with its own consent requirements. Rowan is built to that standard: collection begins only after you affirmatively consent during onboarding, having been told in that step that your messages and health context are sent to Anthropic to generate replies. That step does not yet name OpenAI, which can receive the same content when Anthropic is unavailable — the section above says so plainly, and naming both in the consent step is a change we will make before launch. <strong>We do not sell your consumer health data, and we do not share it for anyone else's purposes.</strong> You can view what Rowan remembers, remove any single note or clear the whole list, export what's on your phone, and delete everything — on the device and on our server — from inside the app.</p>
 
     <h2>Third parties</h2>
     <ul>

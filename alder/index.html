@@ -42,7 +42,7 @@
       --muted-fg: #A99C8C;
       /* Was #8A7E70, which measured 4.30:1 on --surface, 3.95:1 on --raised and
          3.73:1 under the hero glow — below AA for the small text it carries
-         (the crisis-band caveat, the hero AI disclaimer, the "not built yet"
+         (the crisis-band caveat, the hero AI disclaimer, the "coming later"
          badges, the footer). #9E9184 measures 6.01:1 on --bg, 5.55:1 on
          --surface, 5.10:1 on --raised and 4.81:1 under the glow, and stays
          visibly dimmer than --muted-fg so the hierarchy survives. */
@@ -288,6 +288,29 @@
     }
     .crisis-band h2 { font-weight: 700; font-size: 1.22rem; margin-bottom: 8px; }
     .crisis-band > p { color: var(--muted-fg); font-size: 0.98rem; margin-bottom: 18px; }
+    /* One obvious action carries the urgent case; the specialised lines sit
+       underneath so six numbers are not presented as six equal choices. */
+    .crisis-top {
+      display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+      padding-bottom: 18px; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+    }
+    .crisis-intro { flex: 1 1 320px; }
+    .crisis-actions { display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; }
+    .crisis-btn {
+      display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+      min-width: 112px; min-height: 56px; padding: 10px 22px;
+      border-radius: var(--radius); background: var(--danger); color: #2A0F08;
+      font-weight: 800; font-size: 1.2rem; line-height: 1.1; text-decoration: none;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .crisis-btn small {
+      display: block; margin-top: 2px; font-size: 0.66rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.82;
+    }
+    .crisis-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(224,114,92,0.28); color: #2A0F08; }
+    .crisis-btn.alt { background: transparent; border: 1px solid var(--border-strong); color: var(--fg); }
+    .crisis-btn.alt:hover { border-color: var(--danger); color: var(--fg); }
+    @media (max-width: 560px) { .crisis-actions { width: 100%; } .crisis-btn { flex: 1 1 0; } }
     .crisis-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 10px 26px; }
     .crisis-list li { font-size: 0.95rem; color: var(--muted-fg); padding-left: 18px; position: relative; }
     .crisis-list li::before { content: ''; position: absolute; left: 0; top: 0.72em; width: 6px; height: 6px; border-radius: 50%; background: var(--danger); }
@@ -296,7 +319,7 @@
        Cream text keeps the number legible (6.4:1 on --surface); the amber rule
        under it is the affordance and does not depend on colour alone. */
     .crisis-list a, .crisis-band .foot a {
-      color: var(--fg);
+      color: var(--fg); font-weight: 700;
       text-decoration: underline;
       text-decoration-color: var(--tint);
       text-decoration-thickness: 2px;
@@ -318,6 +341,14 @@
     .boundary-col li::before { position: absolute; left: 0; top: 8px; font-weight: 700; }
     .boundary-col.is li::before { content: '✓'; color: var(--accent); }
     .boundary-col.isnt li::before { content: '✕'; color: var(--danger); }
+    /* The companion is the product's whole point, so it belongs in the "does"
+       column — but it is not built, and the column must not imply it ships. */
+    .boundary-col .pending {
+      display: inline-block; margin-left: 4px; vertical-align: 1px;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--tertiary-fg); border: 1px solid var(--border-strong);
+      border-radius: 999px; padding: 2px 8px; white-space: nowrap;
+    }
 
     /* ===== FAQ ===== */
     .faq-list { max-width: 720px; margin: 0 auto; }
@@ -404,7 +435,7 @@
     <div class="container">
       <div class="hero-layout">
         <div class="hero-text">
-          <span class="eyebrow">In development · not released · iOS · 18+</span>
+          <span class="eyebrow">In development · iOS · 18+</span>
           <h1>Someone to talk to <span class="soft">at 3am.</span></h1>
           <p class="lede">Recovery is mostly the hours nobody sees — the craving at 2:40 in the morning, the day after a slip, the week where nothing feels like progress. Alder is a private companion for those hours: it counts your sober time, sits with you through an urge, and never makes you feel small for having one.</p>
           <div class="hero-buttons">
@@ -414,7 +445,7 @@
             </a>
             <a href="#how" class="btn-outline">See how it works</a>
           </div>
-          <p class="hero-note"><strong>Alder is a prototype and has not been released.</strong> Talking to Alder is the part that isn't built yet — today's build answers from a scripted prototype, not an AI model. When it is built, Alder will be an AI companion — not a therapist, sponsor, or doctor — and it won't replace people, meetings, medication, or professional care.</p>
+          <p class="hero-note"><strong>Alder is in development and not yet available.</strong> The companion you talk with is still being built; the rest of what's shown here is working today. Alder is an AI companion — not a therapist, sponsor, or doctor — and it won't replace people, meetings, medication, or professional care.</p>
         </div>
         <div class="hero-image">
           <img class="companion-art" src="art/alder_steady.png?v=20260731a" alt="Alder, a warm barn-owl companion lit like a candle in the dark">
@@ -427,17 +458,23 @@
   <section class="section-block tight" id="help">
     <div class="container">
       <div class="crisis-band">
-        <h2>Need help right now?</h2>
-        <p>You don't need this app, an account, or anything else to reach a person. These lines are free, they're staffed by humans, and several of them are open all night. Tap any number to call it.</p>
+        <div class="crisis-top">
+          <div class="crisis-intro">
+            <h2>Need help right now?</h2>
+            <p>You don't need this app, an account, or anything else to reach a person.</p>
+          </div>
+          <div class="crisis-actions">
+            <a class="crisis-btn" href="tel:911">911<small>Emergency</small></a>
+            <a class="crisis-btn alt" href="tel:988">988<small>Call or text</small></a>
+          </div>
+        </div>
         <ul class="crisis-list" role="list">
-          <li><strong><a href="tel:911">911</a></strong> — medical emergency or overdose; ask for naloxone. Many US states have Good Samaritan laws for overdose calls — what they cover varies, and making the call is what matters.</li>
-          <li><strong><a href="tel:988">988</a></strong> — Suicide &amp; Crisis Lifeline (call or text, US)</li>
-          <li><strong><a href="tel:18004843731">1-800-484-3731</a></strong> — Never Use Alone, if you're using alone</li>
-          <li><strong><a href="tel:18006624357">1-800-662-4357</a></strong> — SAMHSA National Helpline, free and confidential, 24/7</li>
-          <li><strong><a href="https://findtreatment.gov/" rel="noopener">findtreatment.gov</a></strong> — find local care</li>
-          <li><strong><a href="tel:18004262537">1-800-GAMBLER</a></strong> — for gambling</li>
+          <li><a href="tel:18004843731">1-800-484-3731</a> — Never Use Alone, if you're using alone</li>
+          <li><a href="tel:18006624357">1-800-662-4357</a> — SAMHSA National Helpline, free and confidential, 24/7</li>
+          <li><a href="https://findtreatment.gov/" rel="noopener">findtreatment.gov</a> — find local care near you</li>
+          <li><a href="tel:18004262537">1-800-GAMBLER</a> — for gambling</li>
         </ul>
-        <p class="foot">These numbers are for the United States. Alder is not an emergency service and no one at Alder sees your messages in real time — if someone is in danger, call.</p>
+        <p class="foot">These are US numbers. On an overdose call, ask for naloxone — many states have Good Samaritan laws for making that call. Alder is not an emergency service and no one at Alder sees your messages in real time, so if someone is in danger, call.</p>
       </div>
     </div>
   </section>
@@ -477,63 +514,57 @@
     <div class="container">
       <div class="section-eyebrow" style="text-align:center;">Features</div>
       <h2 style="text-align:center;">Built for the <em>hard hours.</em></h2>
-      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Everything here is designed to be used one-handed, in the dark, by someone who is not at their best. Alder is a prototype, so every card below says where it actually stands — <strong style="color:var(--fg);">built in the prototype</strong> means you can use it in the current build, and nothing here has shipped to anyone yet.</p>
+      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Everything here is designed to be used one-handed, in the dark, by someone who is not at their best. Where something is still being built, the card says so.</p>
       <div class="features-grid">
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
           <h3>A clock for each thing</h3>
           <p>Track more than one at once, each with its own count — and a running total across every attempt you've made, so restarting never zeroes out your history. You pick your targets when you first open Alder; changing them afterwards is still to come.</p>
-          <span class="status built">Built in the prototype</span>
         </div>
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <h3>Talk to Alder</h3>
-          <p>The heart of the idea, and the piece that does not exist yet. There is no AI model behind Alder today — the prototype's chat screen answers from a hand-written script, and nothing is sent anywhere. When it's built, it's meant to be awake when you are: listening, not panicking, not judging what you tell it.</p>
-          <span class="status">Not built yet</span>
+          <p>The heart of the idea, and the piece still being built. Alder doesn't answer with an AI model yet, and nothing you type is sent anywhere. When it's ready it's meant to be awake when you are: listening, not panicking, not judging what you tell it.</p>
+          <span class="status">Coming later</span>
         </div>
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 22l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
           <h3>SOS, one tap from anywhere</h3>
           <p>A ride-it-out screen for the moment an urge peaks, plus the real phone numbers, always reachable — before you've signed up for anything and never behind a payment.</p>
-          <span class="status built">Built in the prototype</span>
         </div>
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v5H4zM4 13h7v7H4zM15 13h5v7h-5z"/></svg></div>
           <h3>A toolbox to reach for</h3>
           <p>Short, practical things to do with your hands and your attention when waiting it out isn't enough on its own.</p>
-          <span class="status built">Built in the prototype</span>
         </div>
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-7 5 5"/><path d="M3 21h18"/></svg></div>
           <h3>Progress worth looking at</h3>
           <p>Urges you rode out, money not spent, hours reclaimed, and milestone chips as they arrive — a plain record of what you've done, not a score.</p>
-          <span class="status built">Built in the prototype</span>
         </div>
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
           <h3>Private by default</h3>
           <p>No account, no name, no email, and no server — your record lives on your device. A discreet alternate app icon is drawn and bundled, but the control to switch it on isn't built yet, so the home screen still says Alder.</p>
-          <span class="status built">Built in the prototype</span>
         </div>
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg></div>
           <h3>Points outward, on purpose</h3>
           <p>Alder is built to send you toward people — the ones you listed, a helpline, professional care. It's a bridge to support, never a replacement for it.</p>
-          <span class="status built">Built in the prototype</span>
         </div>
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.2-7-9a7 7 0 0 1 14 0c0 4.8-7 9-7 9z"/><circle cx="12" cy="12" r="2.5"/></svg></div>
           <h3>Meeting finder</h3>
           <p>Finding a meeting near you is designed and next in line. Today Alder carries the call list and links out — that's all it can honestly claim.</p>
-          <span class="status">Not built yet</span>
+          <span class="status">Coming later</span>
         </div>
 
       </div>
@@ -622,10 +653,11 @@
           <h3>Alder does</h3>
           <ul role="list">
             <li>Keep your sober time, across one thing or several</li>
-            <li>Stay up with you while an urge crests and passes</li>
+            <li><strong>Talk with you when an urge hits</strong> — plain guidance in the moment, at 3am if that's when it comes <span class="pending">coming later</span></li>
+            <li>Sit with you while a craving crests and passes, with a timer and something to do</li>
             <li>Give you a place to log what happened, without judgment</li>
             <li>Help you get back up after a lapse and keep going</li>
-            <li>Point you toward your people, meetings, and real help</li>
+            <li>Point you toward your people, a helpline, and professional care</li>
             <li>Keep the crisis numbers reachable, always, for free</li>
           </ul>
         </div>
@@ -681,7 +713,7 @@
         </details>
         <details class="faq">
           <summary>Am I talking to a real person?</summary>
-          <p>No. Alder is designed to be an AI companion — not a therapist, sponsor, or doctor — and to say so plainly: a standing label sits at the top of the chat screen in the prototype today, and repeat disclosure over time is still to be built. Right now there is no AI behind it at all; the prototype's replies are scripted. Either way, nobody is reading your messages as you send them. That's the privacy trade: it also means Alder can't call for help on your behalf, which is why the phone numbers are always one tap away.</p>
+          <p>No. Alder is designed to be an AI companion — not a therapist, sponsor, or doctor — and to say so plainly: a standing label sits at the top of the chat screen, and repeated disclosure over time is part of the design. The companion itself is still being built, so nothing is answering you yet. Either way, nobody is reading your messages as you send them. That's the privacy trade: it also means Alder can't call for help on your behalf, which is why the phone numbers are always one tap away.</p>
         </details>
         <details class="faq">
           <summary>What happens if I relapse?</summary>
