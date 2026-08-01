@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Studio-level pages. Product sites have their own child sitemaps, all tied
+     together by the <sitemapindex> in sitemap.xml.
+     <priority> and <changefreq> are deliberately absent: Google ignores both.
+     Origin is the GitHub Pages project URL the site is actually served from;
+     see the switch-over checklist in index.html <head>. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/</loc>
+    <lastmod>2026-08-01</lastmod>
+  </url>
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/privacy.html</loc>
+    <lastmod>2026-07-31</lastmod>
+  </url>
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/terms.html</loc>
+    <lastmod>2026-07-31</lastmod>
+  </url>
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/support.html</loc>
+    <lastmod>2026-07-31</lastmod>
+  </url>
+</urlset>

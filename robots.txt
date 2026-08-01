@@ -1,5 +1,16 @@
 # Served from the GitHub Pages project URL. hypersage.ai is the intended brand
 # domain but is not registered yet — see index.html <head> for the switch-over list.
+#
+# HEADS UP: this file is itself inert today. A crawler only ever reads robots.txt
+# from an ORIGIN ROOT, and this site is served from a project path, so the file in
+# force for this host would be https://drvanus.github.io/robots.txt (currently 404).
+# It starts working the moment a custom domain is attached to this repo. Do NOT
+# re-create per-subfolder robots.txt files (rowan/, alder/, waddleton/ used to have
+# them) — nested robots.txt is ignored by every crawler, at every level, always.
+#
+# Discovery today therefore comes from two places, not from here:
+#   1. the <sitemapindex> below, submitted manually in Search Console
+#   2. ordinary <a href> links between the studio page and the product subfolders
 User-agent: *
 Allow: /
 

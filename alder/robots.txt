@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://drvanus.github.io/hypersage-site/alder/sitemap.xml
