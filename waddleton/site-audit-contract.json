@@ -20,7 +20,8 @@
       "approved": true,
       "evidence": [
         "js/economy.js: adAvailable() and watchAd() both return false unconditionally \u2014 no rewarded-ad path is reachable.",
-        "No advertising SDK is present in the client, and js/storefront.js returns 'store-unavailable' so no purchase can be made either."
+        "No advertising SDK is present in the client. The 'no ads' claim is about ADVERTISING only and is still exactly true.",
+        "PURCHASES ARE NOW REAL, and the copy on this site was corrected to match: the WaddletonStore native bridge (StoreKit 2 on iOS, Play Billing on Android) sells Goldfish consumables and the auto-renewing Waddleton Club subscription in the mobile app. js/storefront.js still reports 'store-unavailable' in the BROWSER build, which is why the web version remains purchase-free. Everything sold is cosmetic; no purchase affects a score or a leaderboard."
       ]
     }
   }
