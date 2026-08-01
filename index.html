@@ -6,27 +6,34 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#080B11">
   <title>Hypersage AI Labs — an independent AI product studio</title>
-  <meta name="description" content="An independent studio building a deliberately eclectic family of iOS apps — across dating, mental health, crypto, cooking, fiction, sleep, and games, with more on the way.">
+  <meta name="description" content="An independent AI studio: eleven iOS apps and a free browser game — dating, mental health, chronic illness, recovery, crypto, cooking, fiction, sleep, and play.">
   <meta name="robots" content="index, follow">
-  <!-- Self-URLs use the brand domain hypersage.ai (same convention as the other app sites).
-       To go fully live there: register hypersage.ai, add a CNAME file containing the domain,
-       point its DNS at GitHub Pages, and set up the hi@hypersage.ai mailbox. Until then the
-       site is served from the GitHub Pages project URL (drvanus.github.io / hypersage-site). -->
-  <link rel="canonical" href="https://hypersage.ai/">
+  <!-- CANONICAL DOMAIN NOTE (2026-07-31)
+       hypersage.ai is the INTENDED brand domain but it is not registered — a DNS lookup
+       returns NXDOMAIN (no A, no NS, no MX). The site is actually served from the GitHub
+       Pages project URL below, so every self-URL on the site points there instead.
+       When hypersage.ai is registered, change in this order:
+         1. canonical / og:url / og:image / twitter:image and the JSON-LD url, logo, image
+            on index.html, privacy.html, terms.html and support.html
+         2. sitemap.xml <loc> entries and the Sitemap: line in robots.txt
+         3. canonical_url in site-audit-contract.json
+         4. add a CNAME file containing "hypersage.ai" and point its DNS at GitHub Pages
+         5. stand up the hi@hypersage.ai mailbox (the mailto: links already assume it) -->
+  <link rel="canonical" href="https://drvanus.github.io/hypersage-site/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Hypersage AI Labs — an independent AI product studio">
-  <meta property="og:description" content="Nine consumer apps across dating, mental health, crypto, cooking, fiction, sleep, and games — each honest about what it is.">
-  <meta property="og:url" content="https://hypersage.ai/">
+  <meta property="og:description" content="Twelve consumer products across dating, mental health, chronic illness, recovery, crypto, cooking, fiction, sleep, and games — each honest about what it is.">
+  <meta property="og:url" content="https://drvanus.github.io/hypersage-site/">
   <meta property="og:site_name" content="Hypersage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png">
+  <meta property="og:image" content="https://drvanus.github.io/hypersage-site/og-image.png?v=20260731b">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Hypersage AI Labs — an AI product studio">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Hypersage AI Labs — an independent AI product studio">
-  <meta name="twitter:description" content="An independent studio building a deliberately eclectic family of nine iOS apps.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png">
+  <meta name="twitter:description" content="An independent studio building a deliberately eclectic family of eleven iOS apps and a free browser game.">
+  <meta name="twitter:image" content="https://drvanus.github.io/hypersage-site/og-image.png?v=20260731b">
   <meta name="twitter:image:alt" content="Hypersage AI Labs — an AI product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -37,10 +44,10 @@
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Hypersage AI Labs",
-    "url": "https://hypersage.ai/",
-    "logo": "https://hypersage.ai/apple-touch-icon.png",
-    "image": "https://hypersage.ai/og-image.png",
-    "description": "An independent studio building an eclectic family of nine iOS apps — across dating, mental health, crypto, cooking, fiction, sleep, and games.",
+    "url": "https://drvanus.github.io/hypersage-site/",
+    "logo": "https://drvanus.github.io/hypersage-site/apple-touch-icon.png",
+    "image": "https://drvanus.github.io/hypersage-site/og-image.png?v=20260731b",
+    "description": "An independent studio building an eclectic family of twelve consumer products — eleven iOS apps and one free browser game — across dating, mental health, chronic illness, recovery, crypto, cooking, fiction, sleep, and play.",
     "email": "hi@hypersage.ai",
     "makesOffer": [
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Saffra", "applicationCategory": "Food & Drink", "operatingSystem": "iOS" } },
@@ -51,7 +58,10 @@
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Mythwright", "applicationCategory": "Game", "operatingSystem": "iOS" } },
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Wingmate", "applicationCategory": "Lifestyle", "operatingSystem": "iOS" } },
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Hexhunter", "applicationCategory": "Game", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "The One", "applicationCategory": "Lifestyle", "operatingSystem": "iOS" } }
+      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "The One", "applicationCategory": "Lifestyle", "operatingSystem": "iOS" } },
+      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Rowan", "applicationCategory": "Medical", "operatingSystem": "iOS" } },
+      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Alder", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS" } },
+      { "@type": "Offer", "itemOffered": { "@type": "VideoGame", "name": "Waddleton", "applicationCategory": "Game", "operatingSystem": "Web" } }
     ]
   }
   </script>
@@ -89,6 +99,16 @@
       --c-one:       #F472A6;
       --c-wingmate:  #E8A838;
       --c-hex:       #8B5CF6;
+      --c-rowan:     #6F5BC5;
+      --c-alder:     #E0A458;
+      --c-waddle:    #59C8FF;
+
+      /* Text-safe tones for the two accents that fail WCAG AA as small text on --panel
+         (#0F141D): --c-hex measures 4.36:1 and --c-rowan 3.50:1. These lighter tones of
+         the same hue measure 6.88:1 and 6.15:1 on --panel, and 6.09:1 / 5.53:1 on the
+         12%-accent status-badge fill. The card's top-border accent is left unchanged. */
+      --c-hex-text:   #A98CFB;
+      --c-rowan-text: #9A87E8;
 
       --radius: 16px;
       --radius-sm: 12px;
@@ -255,6 +275,10 @@
     @media (max-width: 780px) { .products-grid { grid-template-columns: 1fr; } }
     .product {
       --accent: var(--brand-a);
+      /* Text tone for the link + status badge. Defaults to the card accent; cards whose
+         accent is too dark to read as text on --panel override it with a lighter tone of
+         the same hue, so the top-border accent (and the brand identity) is untouched. */
+      --accent-text: var(--accent);
       position: relative; padding: 28px; border: 1px solid var(--line); border-radius: var(--radius);
       background: var(--panel); overflow: clip;
       transition: transform .2s, border-color .2s, box-shadow .2s;
@@ -287,7 +311,7 @@
       flex: 0 0 auto; align-self: flex-start; margin-left: auto;
       font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
       padding: 4px 10px; border-radius: 999px;
-      color: var(--accent);
+      color: var(--accent-text);
       background: rgba(255,255,255,0.06);
       background: color-mix(in srgb, var(--accent) 12%, transparent);
       border: 1px solid var(--line-strong);
@@ -299,12 +323,15 @@
     .product ul li { position: relative; padding: 5px 0 5px 20px; font-size: 0.9rem; color: var(--muted); }
     .product ul li::before { content: ''; position: absolute; left: 2px; top: 0.95em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
     .product .foot { margin-top: auto; display: flex; align-items: center; gap: 16px; padding-top: 4px; }
-    .product .link { display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent); transition: gap .2s; }
+    .product .link { display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent-text); transition: gap .2s; }
     .product .link:hover { gap: 11px; }
     /* Non-interactive availability caption — deliberately not styled like a link. */
     .product .status-note { display: inline-flex; align-items: center; gap: 7px; font-size: 0.85rem; font-weight: 500; color: var(--muted); }
     .product .status-note::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.8; }
-    /* Spotlight badge for newest / featured app — uses brand gradient instead of per-accent */
+    /* Spotlight badge for newest / featured app — uses brand gradient instead of per-accent.
+       Currently unused: "✦ New" read as "newly shipped" next to Coming soon / In development /
+       In beta / Live now, and none of the products it was on had actually launched. Kept for
+       the first product that genuinely ships. */
     .badge-spotlight {
       background: linear-gradient(120deg, rgba(45,212,191,0.18), rgba(167,139,250,0.12)) !important;
       border-color: rgba(45,212,191,0.5) !important;
@@ -371,6 +398,18 @@
     a:focus-visible, summary:focus-visible, .btn:focus-visible {
       outline: 2px solid var(--brand-a); outline-offset: 3px; border-radius: 8px;
     }
+    /* Keyboard users land here first; the sticky nav is 62px tall, so park it below. */
+    .skip-link {
+      position: absolute; left: 12px; top: -100px; z-index: 100;
+      padding: 11px 18px; border-radius: 10px;
+      background: var(--panel); color: var(--fg); font-weight: 600; font-size: 0.94rem;
+      border: 1px solid var(--brand-a);
+      transition: top .15s ease;
+    }
+    .skip-link:focus { top: 12px; }
+    /* Focusing the <main> target from the skip link / brand link must not draw a box
+       around the whole page. */
+    main:focus { outline: none; }
 
     /* ===== SCROLL REVEAL (progressive enhancement) =====
        Only active when JS adds .js-reveal (which it only does when motion is OK +
@@ -411,11 +450,13 @@
 </head>
 <body>
 
+  <a class="skip-link" href="#top">Skip to content</a>
+
   <!-- ===== NAV ===== -->
   <nav class="site">
     <div class="container">
       <a class="brand" href="#top" aria-label="Hypersage AI Labs home">
-        <img class="mark" src="logo.png" alt="" width="32" height="34">
+        <img class="mark" src="logo.png" alt="" width="34" height="38">
         <span>Hypersage<span class="co-sub"> AI Labs</span></span>
       </a>
       <div class="links">
@@ -423,6 +464,7 @@
         <a href="#approach">Approach</a>
         <a href="#systems">Systems</a>
         <a href="#about">About</a>
+        <a href="support.html">Support</a>
         <a href="#contact" class="btn btn-ghost">Get in touch</a>
       </div>
       <details class="mobile-menu">
@@ -432,13 +474,16 @@
           <a href="#approach">Approach</a>
           <a href="#systems">Systems</a>
           <a href="#about">About</a>
+          <a href="support.html">Support</a>
           <a href="#contact">Get in touch</a>
         </div>
       </details>
     </div>
   </nav>
 
-  <span id="top"></span>
+  <!-- #top is the main landmark itself (not an empty span), so the skip link and the
+       brand "home" link move keyboard focus with the scroll. -->
+  <main id="top" tabindex="-1">
 
   <!-- ===== HERO ===== -->
   <section class="hero">
@@ -446,15 +491,15 @@
       <div class="hero-inner">
         <span class="eyebrow">Applied AI · Product Studio</span>
         <h1>Software with <span class="grad-text">a point of view</span>.</h1>
-        <p class="lede">Hypersage is an independent studio building AI-powered consumer apps across dating, mental health, crypto, cooking, fiction, sleep, and games — with more on the way.</p>
+        <p class="lede">Hypersage is an independent studio building AI-powered consumer apps across dating, mental health, chronic illness, recovery, crypto, cooking, fiction, sleep, and games — with more on the way.</p>
         <div class="hero-cta">
           <a href="#products" class="btn btn-primary"><span>See the products</span><span aria-hidden="true">→</span></a>
           <a href="#contact" class="btn btn-ghost">Get in touch</a>
         </div>
         <div class="hero-stats">
-          <span class="stat-chip"><span class="dot"></span><b>9</b>&nbsp;apps</span>
+          <span class="stat-chip"><span class="dot"></span><b>12</b>&nbsp;products</span>
           <span class="stat-chip"><b>Multi-agent</b>&nbsp;backbone</span>
-          <span class="stat-chip"><b>iOS-native</b></span>
+          <span class="stat-chip"><b>iOS-native</b>&nbsp;+ one browser game</span>
         </div>
       </div>
     </div>
@@ -473,6 +518,9 @@
       <a class="word" href="#products"><img src="icons/hexhunter.png" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
       <a class="word" href="#products"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
       <a class="word" href="#products"><img src="icons/theone.png" alt="" width="26" height="26" loading="lazy">The&nbsp;One</a>
+      <a class="word" href="#products"><img src="icons/rowan.png" alt="" width="26" height="26" loading="lazy">Rowan</a>
+      <a class="word" href="#products"><img src="icons/alder.png" alt="" width="26" height="26" loading="lazy">Alder</a>
+      <a class="word" href="#products"><img src="icons/waddleton.png" alt="" width="26" height="26" loading="lazy">Waddleton</a>
     </div>
   </div>
 
@@ -515,7 +563,7 @@
       <div class="section-head">
         <span class="eyebrow">The portfolio</span>
         <h2>What we build.</h2>
-        <p>Nine apps across categories we care about — each with its own brand, voice, and standards.</p>
+        <p>Twelve products across categories we care about — each with its own brand, voice, and standards.</p>
       </div>
 
       <div class="products-grid">
@@ -528,10 +576,10 @@
               <h3>Wingmate</h3>
               <div class="cat">AI Dating Coach</div>
             </div>
-            <span class="status badge-spotlight">✦ New</span>
+            <span class="status">Coming soon</span>
           </div>
           <p class="desc">AI dating coaches that actually get it. Screenshot analysis, platform-aware coaching for Tinder, Hinge, Bumble, and texting, and personalized openers from four coaches with distinct perspectives.</p>
-          <ul>
+          <ul role="list">
             <li>Four coaches — bold, empathetic, funny, strategic</li>
             <li>Tinder, Hinge, Bumble, and Texting — each coached differently</li>
             <li>Send screenshots — get exact words to say next</li>
@@ -552,7 +600,7 @@
             <span class="status">Coming soon</span>
           </div>
           <p class="desc">A calmer way to practice DBT skills. Choose a warm companion you name and get to know, who guides your daily practice — and is right there in the hard moments too.</p>
-          <ul>
+          <ul role="list">
             <li>Real DBT skills across all four modules</li>
             <li>A one-minute diary card and gentle progress</li>
             <li>A crisis kit that's always free and works offline</li>
@@ -573,7 +621,7 @@
             <span class="status">Coming soon</span>
           </div>
           <p class="desc">An AI built around your portfolio. It knows what you hold, where you're exposed, and what to do about it — with live market data, sentiment, and an assistant that actually reads your positions.</p>
-          <ul>
+          <ul role="list">
             <li>Portfolio-aware AI chat and price intelligence</li>
             <li>Live prices, sentiment, and market heat maps</li>
             <li>Real-time signals from our autonomous research stack</li>
@@ -594,7 +642,7 @@
             <span class="status">In beta</span>
           </div>
           <p class="desc">A personal AI chef that gives you premium recipes you can actually trust — every one vetted by a trained chef-panel, then adapted to your pantry, allergies, and the time you've got.</p>
-          <ul>
+          <ul role="list">
             <li>Recipes adapted to your kitchen, not generic results</li>
             <li>Allergy- and diet-aware, with real substitutions</li>
             <li>Hands-free, voice-narrated cooking mode</li>
@@ -615,7 +663,7 @@
             <span class="status">Coming soon</span>
           </div>
           <p class="desc">Branching tales, written with you. Step into a classic or a world only you and the AI know — every choice rewrites the next page, with voice narration and original art.</p>
-          <ul>
+          <ul role="list">
             <li>Dozens of classics included, plus open AI Adventure mode</li>
             <li>Parallel storylines — play a story from any character's side</li>
             <li>Voice narration and generated illustration</li>
@@ -636,7 +684,7 @@
             <span class="status">In beta</span>
           </div>
           <p class="desc">A quiet shelf of sleep stories for the end of the day — a library of soothing books plus a fresh, AI-written "Tonight's Story," wrapped in gentle ambient soundscapes.</p>
-          <ul>
+          <ul role="list">
             <li>A curated library of calming, chaptered books</li>
             <li>A new AI-written bedtime story every night</li>
             <li>Layered ambient soundscapes to drift off to</li>
@@ -647,7 +695,7 @@
         </article>
 
         <!-- HEXHUNTER -->
-        <article class="product" style="--accent: var(--c-hex);">
+        <article class="product" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
           <div class="top">
             <img class="app-icon" src="icons/hexhunter.png" alt="Hexhunter app icon" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -657,7 +705,7 @@
             <span class="status">In development</span>
           </div>
           <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor where you pick a hero, draft illustrated upgrades, and fight to survive 15 minutes of escalating chaos.</p>
-          <ul>
+          <ul role="list">
             <li>8 heroes, each with a distinct playstyle</li>
             <li>18 weapons with secret evolutions to discover</li>
             <li>3 biomes of escalating, hand-drawn dread</li>
@@ -678,7 +726,7 @@
             <span class="status">In beta</span>
           </div>
           <p class="desc">A fast, tactical card battler — hundreds of cards, shifting locations, and quick ranked matches where a single reveal turns the board.</p>
-          <ul>
+          <ul role="list">
             <li>Hundreds of collectible cards and locations</li>
             <li>Ranked, conquest, missions, and a rotating shop</li>
             <li>Live multiplayer on a purpose-built backend</li>
@@ -699,13 +747,77 @@
             <span class="status">In development</span>
           </div>
           <p class="desc">Stop swiping. Start choosing. A dating app that deliberately limits your conversations so you focus on who matters — AI matching, one person at a time.</p>
-          <ul>
+          <ul role="list">
             <li>Quality over quantity — one focused match at a time</li>
             <li>Conversation limits that force real focus</li>
             <li>AI-assisted compatibility, not vanity metrics</li>
           </ul>
           <div class="foot">
             <a class="link" href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
+        <!-- ROWAN -->
+        <article class="product" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
+          <div class="top">
+            <img class="app-icon" src="icons/rowan.png" alt="Rowan app icon" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Rowan</h3>
+              <div class="cat">Chronic-Condition Companion</div>
+            </div>
+            <span class="status">In development</span>
+          </div>
+          <p class="desc">The health companion that knows your story. Talk about your day in plain words and Rowan turns it into a structured record — then hands you a brief for your next appointment. It doesn't diagnose or treat; your care team does that.</p>
+          <ul role="list">
+            <li>Conversation in, structured symptom log out</li>
+            <li>A visit brief: what changed, and what to ask</li>
+            <li>No account, no ads, no trackers on your health data</li>
+          </ul>
+          <div class="foot">
+            <a class="link" href="https://drvanus.github.io/rowan-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
+        <!-- ALDER -->
+        <article class="product" style="--accent: var(--c-alder);">
+          <div class="top">
+            <img class="app-icon" src="icons/alder.png" alt="Alder app icon" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Alder</h3>
+              <div class="cat">Recovery Companion</div>
+            </div>
+            <span class="status">In development</span>
+          </div>
+          <p class="desc">Someone to talk to at 3am. A private companion for recovery that counts your sober time, sits with you through a craving, and never shames a lapse — an AI companion, not a therapist or a doctor.</p>
+          <ul role="list">
+            <li>A separate clock for each thing you're stepping away from</li>
+            <li>A relapse debrief instead of a reset to zero</li>
+            <li>No account, a recovery record kept on your device, and a discreet app icon</li>
+          </ul>
+          <div class="foot">
+            <a class="link" href="https://drvanus.github.io/alder-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
+        <!-- WADDLETON -->
+        <article class="product" style="--accent: var(--c-waddle);">
+          <div class="top">
+            <img class="app-icon" src="icons/waddleton.png" alt="Waddleton app icon" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Waddleton</h3>
+              <div class="cat">Social World · Arcade</div>
+            </div>
+            <span class="status">Live now</span>
+          </div>
+          <p class="desc">A snowy island to waddle around. Make a penguin, meet other players on a hand-painted arctic island, and duck through a door into any of fourteen arcade games. Free in the browser — no download, no ads, nothing to buy.</p>
+          <ul role="list">
+            <li>14 arcade games and 7 island areas, one of them hidden</li>
+            <li>Live multiplayer — chat, snowballs, friends, and parties</li>
+            <li>Free, with no ads and no in-app purchases</li>
+          </ul>
+          <div class="foot">
+            <a class="link" href="https://drvanus.github.io/waddleton-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -727,8 +839,8 @@
     <div class="container">
       <div class="section-head">
         <span class="eyebrow">The infrastructure</span>
-        <h2>One platform beneath nine brands.</h2>
-        <p>A multi-agent platform, an image and voice pipeline, a market research stack, and a growth engine — the shared layer that lets the studio run nine brands in parallel.</p>
+        <h2>One platform beneath twelve brands.</h2>
+        <p>A multi-agent platform, an image and voice pipeline, a market research stack, and a growth engine — the shared layer that lets the studio run twelve brands in parallel.</p>
       </div>
       <div class="systems-grid">
         <div class="system-card">
@@ -766,7 +878,7 @@
           <p>Each product is its own brand, with its own voice and visual identity. What unites them is a single design rule: the AI is transparent about what it is.</p>
           <p>We're building toward launch, making the work public as we go. If any of this resonates, <a href="#contact" style="color: var(--brand-a); font-weight:600;">say hello</a>.</p>
         </div>
-        <ul class="principles">
+        <ul class="principles" role="list">
           <li><strong>Craft over defaults</strong> Custom illustration, voice, and motion in every app. If it looks generic, it isn't done.</li>
           <li><strong>Honest by design</strong> No fake experts, no dark patterns, no gating what matters. The AI is clear about what it is and what it can't do.</li>
           <li><strong>Ship, then sharpen</strong> Real use teaches faster than any mockup. We launch, listen, and improve continuously.</li>
@@ -786,15 +898,17 @@
     </div>
   </section>
 
+  </main>
+
   <!-- ===== FOOTER ===== -->
   <footer class="site">
     <div class="container">
       <div class="f-brand">
         <div class="brand">
-          <img class="mark" src="logo.png" alt="" width="32" height="34">
+          <img class="mark" src="logo.png" alt="" width="34" height="38">
           <span>Hypersage<span class="co-sub"> AI Labs</span></span>
         </div>
-        <p>An independent studio building an eclectic family of iOS apps. Human-directed, AI-powered, honest by design.</p>
+        <p>An independent studio building an eclectic family of iOS apps and one free browser game. Human-directed, AI-powered, honest by design.</p>
       </div>
       <div class="f-links">
         <div class="f-col">
@@ -808,6 +922,9 @@
           <a href="https://drvanus.github.io/hexhunter-site/" target="_blank" rel="noopener">Hexhunter</a>
           <a href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Mythwright</a>
           <a href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">The One</a>
+          <a href="https://drvanus.github.io/rowan-site/" target="_blank" rel="noopener">Rowan</a>
+          <a href="https://drvanus.github.io/alder-site/" target="_blank" rel="noopener">Alder</a>
+          <a href="https://drvanus.github.io/waddleton-site/" target="_blank" rel="noopener">Waddleton</a>
         </div>
         <div class="f-col">
           <h3>Studio</h3>
@@ -815,6 +932,12 @@
           <a href="#systems">Systems</a>
           <a href="#about">About</a>
           <a href="#contact">Contact</a>
+        </div>
+        <div class="f-col">
+          <h3>Legal</h3>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+          <a href="support.html">Support</a>
         </div>
       </div>
     </div>

@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Origin is the GitHub Pages project URL the site is actually served from.
+     hypersage.ai is the intended brand domain but is not registered (DNS returns
+     NXDOMAIN); see the switch-over checklist in index.html <head>. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://hypersage.ai/</loc>
-    <lastmod>2026-07-06</lastmod>
+    <loc>https://drvanus.github.io/hypersage-site/</loc>
+    <lastmod>2026-07-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/privacy.html</loc>
+    <lastmod>2026-07-31</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/terms.html</loc>
+    <lastmod>2026-07-31</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://drvanus.github.io/hypersage-site/support.html</loc>
+    <lastmod>2026-07-31</lastmod>
+    <priority>0.6</priority>
   </url>
 </urlset>

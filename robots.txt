@@ -1,3 +1,6 @@
+# Served from the GitHub Pages project URL. hypersage.ai is the intended brand
+# domain but is not registered yet — see index.html <head> for the switch-over list.
 User-agent: *
 Allow: /
-Sitemap: https://hypersage.ai/sitemap.xml
+
+Sitemap: https://drvanus.github.io/hypersage-site/sitemap.xml

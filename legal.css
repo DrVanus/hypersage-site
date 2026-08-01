@@ -1,0 +1,121 @@
+/* Shared stylesheet for /privacy, /terms, /support — keeps the studio brand
+   consistent without duplicating the landing-page CSS. Tokens re-keyed from the
+   :root block in index.html. */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #080B11;
+  --bg-2: #0C1119;
+  --panel: #0F141D;
+  --fg: #EAEEF5;
+  --muted: #98A6BB;
+  --faint: #8894A8;
+  --line: rgba(255,255,255,0.08);
+  --line-strong: rgba(255,255,255,0.14);
+  --brand-a: #2DD4BF;
+  --brand-b: #A78BFA;
+}
+
+html { scroll-behavior: smooth; color-scheme: only dark; background: var(--bg); }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: var(--brand-a); text-decoration: none; transition: color 0.2s; }
+a:hover { color: #7fe9d6; }
+a:focus-visible { outline: 3px solid var(--brand-a); outline-offset: 3px; border-radius: 4px; }
+
+/* Skip link — off-screen until focused, then parked clear of the sticky nav. */
+.skip-link {
+  position: absolute; left: 12px; top: -100px; z-index: 100;
+  padding: 11px 18px; border-radius: 10px;
+  background: var(--panel); color: var(--fg); font-weight: 600; font-size: 0.94rem;
+  border: 1px solid var(--brand-a);
+  transition: top 0.15s ease;
+}
+.skip-link:focus { top: 12px; }
+/* The skip target is the <main> element itself; don't ring the whole page. */
+main:focus { outline: none; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+.legal-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(8,11,17,0.82);
+  backdrop-filter: saturate(150%) blur(14px);
+  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.legal-nav .container { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; }
+.legal-nav .brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 700; color: var(--fg); font-size: 1.05rem; letter-spacing: -0.01em;
+}
+.legal-nav .brand img { width: 30px; height: 34px; object-fit: contain; }
+.legal-nav .brand .co-sub { color: var(--faint); font-weight: 500; }
+.legal-nav .links { display: flex; gap: 22px; font-size: 0.95rem; }
+.legal-nav .links a { color: var(--muted); font-weight: 500; }
+.legal-nav .links a:hover { color: var(--fg); }
+.legal-nav .links a.active { color: var(--brand-a); }
+
+@media (max-width: 560px) {
+  .legal-nav .container { gap: 12px; }
+  .legal-nav .brand { font-size: 0.92rem; gap: 8px; }
+  .legal-nav .brand .co-sub { display: none; }
+  .legal-nav .links { gap: 14px; font-size: 0.85rem; }
+}
+
+main.legal { max-width: 760px; margin: 0 auto; padding: 56px 24px 96px; }
+main.legal h1 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 700; font-size: 2.4rem; line-height: 1.15;
+  letter-spacing: -0.02em; margin-bottom: 12px; color: var(--fg);
+}
+main.legal .updated { color: var(--muted); font-size: 0.95rem; margin-bottom: 36px; }
+main.legal h2 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-size: 1.28rem; font-weight: 600;
+  margin-top: 36px; margin-bottom: 12px; color: var(--brand-a); letter-spacing: -0.01em;
+}
+main.legal h3 { font-size: 1.05rem; font-weight: 600; margin-top: 22px; margin-bottom: 8px; color: var(--fg); }
+main.legal p, main.legal li { color: var(--muted); margin-bottom: 14px; }
+main.legal ul { padding-left: 22px; margin-bottom: 14px; }
+main.legal li { margin-bottom: 6px; }
+main.legal strong { color: var(--fg); font-weight: 600; }
+main.legal code { background: var(--panel); padding: 2px 6px; border-radius: 6px; font-size: 0.9em; color: var(--brand-a); }
+
+.note {
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--brand-b);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 24px 0;
+}
+.note strong { color: var(--brand-b); }
+
+.product-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-bottom: 20px; padding-left: 0 !important; list-style: none; }
+.product-links li { margin-bottom: 0; }
+.product-links a {
+  display: block; padding: 12px 14px; border: 1px solid var(--line);
+  border-radius: 10px; background: rgba(255,255,255,0.02); color: var(--fg); font-weight: 500;
+}
+.product-links a:hover { border-color: var(--brand-a); background: rgba(255,255,255,0.05); }
+
+footer.legal-footer {
+  border-top: 1px solid var(--line);
+  margin-top: 60px; padding: 28px 24px 36px;
+  text-align: center; color: var(--muted); font-size: 0.9rem;
+}
+footer.legal-footer a { color: var(--muted); margin: 0 12px; font-weight: 500; }
+footer.legal-footer a:hover { color: var(--brand-a); }

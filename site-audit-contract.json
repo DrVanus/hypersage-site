@@ -1,0 +1,35 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://drvanus.github.io/hypersage-site/",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "Rowan card: rowan-api v1 is accountless \u2014 identity is a client-minted UUID sent as X-Device-Id; see rowan-site/site-audit-contract.json.",
+        "Quietoak and Alder are likewise accountless; see quietoak-site/privacy.html and alder-site/site-audit-contract.json."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "Rowan: docs/PLAN.md \u00a76 forbids ad and analytics SDKs touching health data; none are present.",
+        "Waddleton: js/economy.js adAvailable() and watchAd() return false unconditionally, and no ad SDK ships in the client.",
+        "Per-product evidence is recorded in each site's own site-audit-contract.json."
+      ]
+    },
+    "offline": {
+      "approved": true,
+      "evidence": [
+        "Quietoak card claim 'crisis kit ... always free and works offline' matches the shipped Quietoak product copy at quietoak-site/index.html and its privacy page."
+      ]
+    },
+    "no_tracking": {
+      "approved": true,
+      "evidence": [
+        "hypersage-site is static HTML: a grep of every page for gtag, googletagmanager, google-analytics, PostHog, Plausible, Mixpanel, Amplitude, Segment, Hotjar, Clarity, Meta pixel, Matomo, Fathom, and Sentry returns no match.",
+        "No document.cookie, localStorage, or sessionStorage use anywhere in the site.",
+        "The only third-party hosts the pages contact are fonts.googleapis.com and fonts.gstatic.com (Google Fonts) plus GitHub Pages hosting \u2014 both are disclosed by name in privacy.html."
+      ]
+    }
+  }
+}
