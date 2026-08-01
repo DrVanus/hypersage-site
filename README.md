@@ -32,7 +32,7 @@ When `hypersage.ai` is registered, the switch-over checklist lives in an HTML co
 beside the canonical link in `index.html` `<head>`. In short: update the four HTML pages,
 `sitemap.xml`, `robots.txt` and the audit contract, add a `CNAME` file containing
 `hypersage.ai`, point DNS at GitHub Pages — and stand up the mailbox, because
-**`hi@hypersage.ai` cannot receive mail today** (no MX record on an unregistered domain)
+**`hypersageailabs@gmail.com` cannot receive mail today** (no MX record on an unregistered domain)
 even though it is the contact address on every page. That is the highest-priority
 follow-up on this site.
 
