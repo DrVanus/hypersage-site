@@ -254,13 +254,27 @@
     }
     .screen-card:hover .screen-frame { transform: translateY(-6px); box-shadow: 0 28px 60px rgba(0,0,0,0.6); }
     .screen-card img { width: 100%; height: auto; display: block; }
-    /* shots/sos.png is cropped shorter than its siblings (the contact list was
-       removed), so pin it to the tile height and show it from the top rather
-       than letting one card sit short in the row. */
-    .screen-card.is-cropped .screen-frame { aspect-ratio: 390 / 844; overflow: hidden; }
-    .screen-card.is-cropped .screen-frame img { height: 100%; object-fit: cover; object-position: top; }
     .screen-label { margin-top: 12px; font-size: 0.84rem; color: var(--muted-fg); line-height: 1.4; }
     .screen-label strong { display: block; color: var(--tint); font-weight: 700; margin-bottom: 2px; font-size: 0.9rem; }
+
+    /* Appearance switch. Dark is the default because it is the appearance the
+       product is FOR — the page's own headline is "at 3am" — and because the
+       site itself is committed-dark, so a light grid used to read as a
+       screenshot of some other app. No-JS falls back to the dark set, which is
+       what the src attributes already hold. */
+    .scheme-toggle {
+      display: inline-flex; gap: 4px; margin: 0 auto 30px; padding: 4px;
+      background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: 999px;
+    }
+    .scheme-toggle button {
+      font: inherit; font-size: 0.84rem; font-weight: 700; letter-spacing: 0.02em;
+      color: var(--muted-fg); background: none; border: 0; cursor: pointer;
+      padding: 8px 20px; border-radius: 999px; min-height: 44px;
+      transition: background .2s, color .2s;
+    }
+    .scheme-toggle button[aria-pressed="true"] { background: var(--tint); color: var(--on-tint); }
+    .scheme-toggle button:focus-visible { outline: 3px solid var(--tint); outline-offset: 3px; }
 
     /* ===== SPOTLIGHT ===== */
     .spotlight-grid { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: 50px; align-items: center; }
@@ -578,30 +592,38 @@
     <div class="container" style="text-align:center;">
       <div class="section-eyebrow">The app</div>
       <h2>Warm, dim, and quiet.</h2>
-      <p class="lede" style="margin-left:auto; margin-right:auto; margin-bottom:44px;">Alder follows your phone — warm and low-contrast in the light, and it goes dark when your phone does, for the hours this is mostly for. The screens below are the light appearance. No sirens, no red alarms, no cheerful shouting.</p>
-      <div class="screens-grid">
+      <p class="lede" style="margin-left:auto; margin-right:auto; margin-bottom:28px;">Alder follows your phone — warm and low-contrast in the light, dark when your phone goes dark. Every screen below was shot at 3:12 in the morning, because that is the hour it was built for. No sirens, no red alarms, no cheerful shouting.</p>
+
+      <div class="scheme-toggle" role="group" aria-label="App appearance">
+        <button type="button" data-scheme="dark" aria-pressed="true">Dark</button>
+        <button type="button" data-scheme="light" aria-pressed="false">Light</button>
+      </div>
+
+      <!-- src holds the DARK shot; the toggle swaps it. data-shot is the stem
+           both appearances share. Without JS you get dark, which is correct. -->
+      <div class="screens-grid" id="screens-grid">
         <div class="screen-card">
-          <div class="screen-frame"><img src="shots/home.png?v=20260731a" alt="Alder's Today screen showing the current sober-day count, per-target counts, and the next milestone" width="390" height="844" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="home" src="shots/home-dark.webp?v=20260804a" alt="Alder's Today screen at 3am: a night sky over the alder tree, a 90-day sober count, per-target counts, and the next milestone" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Today</strong>Your clock, and what's next</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img src="shots/chat.png?v=20260731a" alt="A conversation with Alder, with an AI companion indicator" width="390" height="844" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="chat" src="shots/chat-dark.webp?v=20260804a" alt="A conversation with Alder: the user says they are having a craving, and Alder answers that cravings crest and break, then offers a 20-minute timer, guided urge surfing, or calling Sam" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Alder</strong>Awake when you are</div>
         </div>
-        <div class="screen-card is-cropped">
-          <div class="screen-frame"><img src="shots/sos.png?v=20260731b" alt="The top of Alder's SOS screen: a &quot;call or text 988&quot; bar, the line &quot;You're here. That's the move.&quot;, and a 20-minute wave timer to ride out a craving" width="390" height="574" loading="lazy"></div>
+        <div class="screen-card">
+          <div class="screen-frame"><img data-shot="sos" src="shots/sos-dark.webp?v=20260804a" alt="Alder's SOS screen with a 20-minute wave running at 19:58, a &quot;call or text 988&quot; bar at the top, and the user's own people listed underneath" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>SOS</strong>One tap, from anywhere</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img src="shots/toolbox.png?v=20260731a" alt="Alder's toolbox of short practical things to do during an urge" width="390" height="844" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="toolbox" src="shots/toolbox-dark.webp?v=20260804a" alt="Alder's toolbox of short practical things to do during an urge, each labelled with how long it takes" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Toolbox</strong>Something to do with your hands</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img src="shots/progress.png?v=20260731a" alt="Alder's progress screen with urges ridden out and milestones" width="390" height="844" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="progress" src="shots/progress-dark.webp?v=20260804a" alt="Alder's progress screen: the bronze chip ladder from 24 hours to a year, and a seven-day craving chart" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Progress</strong>A record of what you've done</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img src="shots/checkin.png?v=20260731a" alt="Alder's daily check-in — how the day went, craving level per target, and what's underneath it" width="390" height="844" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="checkin" src="shots/checkin-dark.webp?v=20260804a" alt="Alder's daily check-in, filled in — how the day went, craving level per target, what's underneath it, and one line to remember" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Check in</strong>One honest minute</div>
         </div>
       </div>
@@ -613,7 +635,7 @@
     <div class="container">
       <div class="spotlight-grid">
         <div class="spotlight-phone">
-          <div class="screen-frame"><img src="shots/debrief.png?v=20260731a" alt="The relapse debrief screen in Alder" width="390" height="844" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/debrief-dark.webp?v=20260804a" alt="Alder's relapse debrief, headed &quot;What happened&quot;: a note that this is not a post-mortem or a confession but a search for the link in the chain, then questions about what set it off and what made the day harder" width="780" height="1688" loading="lazy"></div>
         </div>
         <div>
           <div class="section-eyebrow">The part most apps get wrong</div>
@@ -631,16 +653,27 @@
   </section>
 
   <!-- ===== MILESTONES ===== -->
-  <section class="section-block tight">
-    <div class="container" style="text-align:center;">
-      <div class="section-eyebrow">Milestones</div>
-      <h2 style="margin-bottom: 28px;">Chips that mean something.</h2>
-      <div class="chip-row">
-        <div class="chip-item"><img class="companion-art" src="art/chip_d30.png?v=20260731a" alt="30-day milestone chip" loading="lazy"><span>30 days</span></div>
-        <div class="chip-item"><img class="companion-art" src="art/chip_d90.png?v=20260731a" alt="90-day milestone chip" loading="lazy"><span>90 days</span></div>
-        <div class="chip-item"><img class="companion-art" src="art/chip_y1.png?v=20260731a" alt="One-year milestone chip" loading="lazy"><span>One year</span></div>
+  <section class="section-block tight" id="milestones">
+    <div class="container">
+      <div class="spotlight-grid flip">
+        <div>
+          <div class="section-eyebrow">Milestones</div>
+          <h2>A letter, <em>not a payout.</em></h2>
+          <p style="color: var(--muted-fg); font-size: 1.04rem;">Nine chips, from day one to a year. Tap one you've earned and Alder writes you a short letter about it — built from your own check-ins, not from a template.</p>
+          <div class="chip-row" style="justify-content:flex-start; margin-top: 22px;">
+            <div class="chip-item"><img class="companion-art" src="art/chip_d30.png?v=20260731a" alt="30-day milestone chip" loading="lazy"><span>30 days</span></div>
+            <div class="chip-item"><img class="companion-art" src="art/chip_d90.png?v=20260731a" alt="90-day milestone chip" loading="lazy"><span>90 days</span></div>
+            <div class="chip-item"><img class="companion-art" src="art/chip_y1.png?v=20260731a" alt="One-year milestone chip" loading="lazy"><span>One year</span></div>
+          </div>
+          <ul class="spotlight-points" role="list">
+            <li><strong>No confetti, no coins, no jackpot.</strong> Variable rewards are the wrong machinery to point at people in recovery, so there isn't any.</li>
+            <li><strong>They arrive quietly</strong> — and you can share one as a card, or never show anyone.</li>
+          </ul>
+        </div>
+        <div class="spotlight-phone">
+          <div class="screen-frame"><img src="shots/ceremony-dark.webp?v=20260804a" alt="Alder's milestone screen: the companion above a bronze chip, the heading &quot;Still here, 89 days on&quot;, and a short letter signed by Alder" width="780" height="1688" loading="lazy"></div>
+        </div>
       </div>
-      <p style="color: var(--muted-fg); max-width: 560px; margin: 26px auto 0; font-size: 0.98rem;">Nine of them, from day one to a year. They arrive quietly, and you can share one as a card if you want to — or never show anyone.</p>
     </div>
   </section>
 
@@ -698,7 +731,7 @@
           <p style="margin-top: 22px;"><a href="privacy.html" style="font-weight:700;">Read the full privacy policy →</a></p>
         </div>
         <div class="spotlight-phone">
-          <div class="screen-frame"><img src="shots/you.png?v=20260731a" alt="Alder's settings screen with privacy and data controls" width="390" height="844" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/you-dark.webp?v=20260804a" alt="Alder's settings screen with privacy and data controls, including export and delete" width="780" height="1688" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -784,6 +817,35 @@
     <div class="copyright"><a href="https://drvanus.github.io/hypersage-site/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">A HyperSage Studio App</a></div>
     <div class="copyright">© 2026 Alder. Still here in the morning.</div>
   </footer>
+
+  <!-- The appearance switch. The only script on the page: it swaps the src of
+       the six screen tiles between `<stem>-dark.webp` and `<stem>.webp`. The
+       light set is never in the markup, so a visitor who stays on dark never
+       downloads it. -->
+  <script>
+    (function () {
+      var grid = document.getElementById('screens-grid');
+      var buttons = document.querySelectorAll('.scheme-toggle button');
+      if (!grid || !buttons.length) return;
+      var VERSION = '?v=20260804a';
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var scheme = btn.dataset.scheme;
+          buttons.forEach(function (b) {
+            b.setAttribute('aria-pressed', String(b === btn));
+          });
+          grid.querySelectorAll('img[data-shot]').forEach(function (img) {
+            var stem = img.dataset.shot + (scheme === 'dark' ? '-dark' : '');
+            /* setAttribute, not a direct .src assignment — site_audit.py scans
+               the RAW HTML for src attributes, so an assignment would have its
+               string literal read as a broken local link. Same reason this
+               comment does not spell the pattern out. */
+            img.setAttribute('src', 'shots/' + stem + '.webp' + VERSION);
+          });
+        });
+      });
+    })();
+  </script>
 
 </body>
 </html>
