@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#080B11">
   <title>Hypersage AI Labs — an independent AI product studio</title>
-  <meta name="description" content="An independent AI studio: eleven iOS apps and a free browser game — dating, mental health, chronic illness, recovery, crypto, cooking, fiction, sleep, and play.">
+  <meta name="description" content="An independent AI studio: twelve iOS apps and a free browser game — dating, mental health, chronic illness, recovery, crypto, cooking, AI characters, fiction, sleep, and play.">
   <meta name="robots" content="index, follow">
   <!-- CANONICAL DOMAIN NOTE (2026-07-31)
        hypersage.ai is the INTENDED brand domain but it is not registered — a DNS lookup
@@ -23,7 +23,7 @@
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Hypersage AI Labs — an independent AI product studio">
-  <meta property="og:description" content="Twelve consumer products across dating, mental health, chronic illness, recovery, crypto, cooking, fiction, sleep, and games — each honest about what it is.">
+  <meta property="og:description" content="Thirteen consumer products across dating, mental health, chronic illness, recovery, crypto, cooking, AI characters, fiction, sleep, and games — each honest about what it is.">
   <meta property="og:url" content="https://drvanus.github.io/hypersage-site/">
   <meta property="og:site_name" content="Hypersage AI Labs">
   <meta property="og:image" content="https://drvanus.github.io/hypersage-site/og-image.png?v=20260731b">
@@ -32,7 +32,7 @@
   <meta property="og:image:alt" content="Hypersage AI Labs — an AI product studio">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Hypersage AI Labs — an independent AI product studio">
-  <meta name="twitter:description" content="An independent studio building a deliberately eclectic family of eleven iOS apps and a free browser game.">
+  <meta name="twitter:description" content="An independent studio building twelve iOS apps and one free browser game — human-directed, and honest about what the AI is.">
   <meta name="twitter:image" content="https://drvanus.github.io/hypersage-site/og-image.png?v=20260731b">
   <meta name="twitter:image:alt" content="Hypersage AI Labs — an AI product studio">
 
@@ -47,7 +47,7 @@
     "url": "https://drvanus.github.io/hypersage-site/",
     "logo": "https://drvanus.github.io/hypersage-site/apple-touch-icon.png",
     "image": "https://drvanus.github.io/hypersage-site/og-image.png?v=20260731b",
-    "description": "An independent studio building an eclectic family of twelve consumer products — eleven iOS apps and one free browser game — across dating, mental health, chronic illness, recovery, crypto, cooking, fiction, sleep, and play.",
+    "description": "An independent studio building thirteen consumer products — twelve iOS apps and one free browser game — across dating, mental health, chronic illness, recovery, crypto, cooking, AI characters, fiction, sleep, and play.",
     "email": "hypersageailabs@gmail.com",
     "makesOffer": [
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Saffra", "applicationCategory": "Food & Drink", "operatingSystem": "iOS" } },
@@ -61,7 +61,9 @@
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "The One", "applicationCategory": "Lifestyle", "operatingSystem": "iOS" } },
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Rowan", "applicationCategory": "Medical", "operatingSystem": "iOS" } },
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Alder", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "VideoGame", "name": "Waddleton", "applicationCategory": "Game", "operatingSystem": "Web" } }
+      { "@type": "Offer", "itemOffered": { "@type": "VideoGame", "name": "Waddleton", "applicationCategory": "Game", "operatingSystem": "Web" } },
+      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication",
+        "name": "Mythkin", "applicationCategory": "EntertainmentApplication", "operatingSystem": "iOS" } }
     ]
   }
   </script>
@@ -342,7 +344,13 @@
 
     /* ===== SYSTEMS (technical band) ===== */
     .systems { background: linear-gradient(180deg, var(--bg-2), var(--bg)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+               overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
     .systems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .section-foot { margin-top: 22px; text-align: center; color: var(--muted); font-size: 0.95rem;
+                    max-width: 760px; margin-left: auto; margin-right: auto; }
+    .system-card code { font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+                        font-size: 0.92em; color: var(--fg); }
     @media (max-width: 820px) { .systems-grid { grid-template-columns: 1fr; } }
     .system-card { padding: 30px 28px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,0.015); }
     .system-card .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-a); margin-bottom: 14px; }
@@ -426,8 +434,11 @@
     }
     .js-reveal .is-in { opacity: 1 !important; transform: none !important; }
     .js-reveal .products-grid > *:nth-child(2n) { transition-delay: .07s; }
-    .js-reveal .systems-grid > *:nth-child(2), .js-reveal .approach-grid > *:nth-child(2) { transition-delay: .06s; }
-    .js-reveal .systems-grid > *:nth-child(3), .js-reveal .approach-grid > *:nth-child(3) { transition-delay: .12s; }
+    /* 3n+2 / 3n+3, not 2 / 3 — .systems-grid is repeat(3, 1fr) and the model-stack
+       section runs to six cards, so a fixed nth-child staggers only the first row
+       and the second row pops in together. */
+    .js-reveal .systems-grid > *:nth-child(3n+2), .js-reveal .approach-grid > *:nth-child(2) { transition-delay: .06s; }
+    .js-reveal .systems-grid > *:nth-child(3n+3), .js-reveal .approach-grid > *:nth-child(3) { transition-delay: .12s; }
     .js-reveal .approach-grid > *:nth-child(4) { transition-delay: .18s; }
 
     @media (prefers-reduced-motion: reduce) {
@@ -462,6 +473,7 @@
       </a>
       <div class="links">
         <a href="#products">Products</a>
+        <a href="#models">Stack</a>
         <a href="#approach">Approach</a>
         <a href="#systems">Systems</a>
         <a href="#about">About</a>
@@ -472,6 +484,7 @@
         <summary aria-label="Open navigation menu">☰</summary>
         <div class="mobile-links">
           <a href="#products">Products</a>
+          <a href="#models">Stack</a>
           <a href="#approach">Approach</a>
           <a href="#systems">Systems</a>
           <a href="#about">About</a>
@@ -498,7 +511,7 @@
           <a href="#contact" class="btn btn-ghost">Get in touch</a>
         </div>
         <div class="hero-stats">
-          <span class="stat-chip"><span class="dot"></span><b>12</b>&nbsp;products</span>
+          <span class="stat-chip"><span class="dot"></span><b>13</b>&nbsp;products</span>
           <span class="stat-chip"><b>Multi-agent</b>&nbsp;backbone</span>
           <span class="stat-chip"><b>iOS-native</b>&nbsp;+ one browser game</span>
         </div>
@@ -522,6 +535,7 @@
       <a class="word" href="#products"><img src="icons/rowan.png" alt="" width="26" height="26" loading="lazy">Rowan</a>
       <a class="word" href="#products"><img src="icons/alder.png" alt="" width="26" height="26" loading="lazy">Alder</a>
       <a class="word" href="#products"><img src="icons/waddleton.png" alt="" width="26" height="26" loading="lazy">Waddleton</a>
+      <a class="word" href="#products"><img src="icons/mythkin.png" alt="" width="26" height="26" loading="lazy">Mythkin</a>
     </div>
   </div>
 
@@ -542,7 +556,7 @@
         <div class="approach-card">
           <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.4"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M10 11l-4-3.5M14 11l4-3.5M10 13l-4 3.5M14 13l4 3.5"/></svg></div>
           <h3>AI-augmented development</h3>
-          <p>We direct fleets of specialized agents that research, generate, test, and iterate — but every product decision is made by a person.</p>
+          <p>We run a shared harness of task-specific tooling — for art, for verification, for release — so the same standard applies across every product. Every product decision is made by a person.</p>
         </div>
         <div class="approach-card">
           <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 3.5 3.5L21 5"/><path d="M15 5h6v6"/></svg></div>
@@ -564,7 +578,7 @@
       <div class="section-head">
         <span class="eyebrow">The portfolio</span>
         <h2>What we build.</h2>
-        <p>Twelve products across categories we care about — each with its own brand, voice, and standards.</p>
+        <p>Thirteen products across categories we care about — each with its own brand, voice, and standards.</p>
       </div>
 
       <div class="products-grid">
@@ -572,12 +586,12 @@
         <!-- WINGMATE -->
         <article class="product" style="--accent: var(--c-wingmate);">
           <div class="top">
-            <img class="app-icon" src="icons/wingmate.png" alt="Wingmate app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/wingmate.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Wingmate</h3>
               <div class="cat">AI Dating Coach</div>
             </div>
-            <span class="status">Coming soon</span>
+            <span class="status"><span class="sr-only">Status: </span>Coming soon</span>
           </div>
           <p class="desc">AI dating coaches that actually get it. Screenshot analysis, platform-aware coaching for Tinder, Hinge, Bumble, and texting, and personalized openers from four coaches with distinct perspectives.</p>
           <ul role="list">
@@ -586,19 +600,19 @@
             <li>Send screenshots — get exact words to say next</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/wingmate-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Wingmate site" href="https://drvanus.github.io/wingmate-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <!-- QUIETOAK -->
         <article class="product" style="--accent: var(--c-quietoak);">
           <div class="top">
-            <img class="app-icon" src="icons/quietoak.png" alt="Quietoak app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/quietoak.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Quietoak</h3>
               <div class="cat">Mental Health · DBT</div>
             </div>
-            <span class="status">Coming soon</span>
+            <span class="status"><span class="sr-only">Status: </span>Coming soon</span>
           </div>
           <p class="desc">A calmer way to practice DBT skills. Choose a warm companion you name and get to know, who guides your daily practice — and is right there in the hard moments too.</p>
           <ul role="list">
@@ -607,19 +621,19 @@
             <li>A crisis kit that's always free and works offline</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/quietoak-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Quietoak site" href="https://drvanus.github.io/quietoak-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <!-- CRYPTOSAGE -->
         <article class="product" style="--accent: var(--c-crypto);">
           <div class="top">
-            <img class="app-icon" src="icons/cryptosage.png" alt="CryptoSage AI app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/cryptosage.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>CryptoSage AI</h3>
               <div class="cat">Portfolio Intelligence</div>
             </div>
-            <span class="status">Coming soon</span>
+            <span class="status"><span class="sr-only">Status: </span>Coming soon</span>
           </div>
           <p class="desc">An AI built around your portfolio. It knows what you hold, where you're exposed, and what to do about it — with live market data, sentiment, and an assistant that actually reads your positions.</p>
           <ul role="list">
@@ -628,19 +642,19 @@
             <li>Real-time signals from our autonomous research stack</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the CryptoSage AI site" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <!-- SAFFRA -->
         <article class="product" style="--accent: var(--c-saffra);">
           <div class="top">
-            <img class="app-icon" src="icons/saffra.png" alt="Saffra app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/saffra.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Saffra</h3>
               <div class="cat">AI Personal Chef</div>
             </div>
-            <span class="status">In beta</span>
+            <span class="status"><span class="sr-only">Status: </span>In beta</span>
           </div>
           <p class="desc">A personal AI chef that gives you premium recipes you can actually trust — every one vetted by a trained chef-panel, then adapted to your pantry, allergies, and the time you've got.</p>
           <ul role="list">
@@ -649,19 +663,19 @@
             <li>Hands-free, voice-narrated cooking mode</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/saffra-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Saffra site" href="https://drvanus.github.io/saffra-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <!-- STORYVAULT -->
         <article class="product" style="--accent: var(--c-story);">
           <div class="top">
-            <img class="app-icon" src="icons/storyvault.png" alt="StoryVault AI app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/storyvault.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>StoryVault AI</h3>
               <div class="cat">Interactive Fiction</div>
             </div>
-            <span class="status">Coming soon</span>
+            <span class="status"><span class="sr-only">Status: </span>Coming soon</span>
           </div>
           <p class="desc">Branching tales, written with you. Step into a classic or a world only you and the AI know — every choice rewrites the next page, with voice narration and original art.</p>
           <ul role="list">
@@ -670,19 +684,19 @@
             <li>Voice narration and generated illustration</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the StoryVault AI site" href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <!-- NIGHTSHELF -->
         <article class="product" style="--accent: var(--c-night);">
           <div class="top">
-            <img class="app-icon" src="icons/nightshelf.png" alt="Nightshelf app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/nightshelf.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Nightshelf</h3>
               <div class="cat">Sleep Stories</div>
             </div>
-            <span class="status">In beta</span>
+            <span class="status"><span class="sr-only">Status: </span>In beta</span>
           </div>
           <p class="desc">A quiet shelf of sleep stories for the end of the day — a library of soothing books plus a fresh, AI-written "Tonight's Story," wrapped in gentle ambient soundscapes.</p>
           <ul role="list">
@@ -691,19 +705,19 @@
             <li>Layered ambient soundscapes to drift off to</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/nightshelf-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Nightshelf site" href="https://drvanus.github.io/nightshelf-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <!-- HEXHUNTER -->
         <article class="product" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
           <div class="top">
-            <img class="app-icon" src="icons/hexhunter.png" alt="Hexhunter app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/hexhunter.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Hexhunter</h3>
               <div class="cat">Gothic Horde-Survivor</div>
             </div>
-            <span class="status">In development</span>
+            <span class="status"><span class="sr-only">Status: </span>In development</span>
           </div>
           <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor where you pick a hero, draft illustrated upgrades, and fight to survive 15 minutes of escalating chaos.</p>
           <ul role="list">
@@ -712,19 +726,19 @@
             <li>3 biomes of escalating, hand-drawn dread</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/hexhunter-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Hexhunter site" href="https://drvanus.github.io/hexhunter-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <!-- MYTHWRIGHT -->
         <article class="product" style="--accent: var(--c-myth);">
           <div class="top">
-            <img class="app-icon" src="icons/mythwright.png" alt="Mythwright app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/mythwright.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Mythwright</h3>
               <div class="cat">Strategy Card Game</div>
             </div>
-            <span class="status">In beta</span>
+            <span class="status"><span class="sr-only">Status: </span>In beta</span>
           </div>
           <p class="desc">A fast, tactical card battler — hundreds of cards, shifting locations, and quick ranked matches where a single reveal turns the board.</p>
           <ul role="list">
@@ -733,19 +747,19 @@
             <li>Live multiplayer on a purpose-built backend</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Mythwright site" href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <!-- THE ONE -->
         <article class="product" style="--accent: var(--c-one);">
           <div class="top">
-            <img class="app-icon" src="icons/theone.png" alt="The One app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/theone.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>The One</h3>
               <div class="cat">Intentional Dating</div>
             </div>
-            <span class="status">In development</span>
+            <span class="status"><span class="sr-only">Status: </span>In development</span>
           </div>
           <p class="desc">Stop swiping. Start choosing. A dating app that deliberately limits your conversations so you focus on who matters — AI matching, one person at a time.</p>
           <ul role="list">
@@ -754,19 +768,19 @@
             <li>AI-assisted compatibility, not vanity metrics</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the The One site" href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <!-- ROWAN -->
         <article class="product" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
           <div class="top">
-            <img class="app-icon" src="icons/rowan.png" alt="Rowan app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/rowan.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Rowan</h3>
               <div class="cat">Chronic-Condition Companion</div>
             </div>
-            <span class="status">In development</span>
+            <span class="status"><span class="sr-only">Status: </span>In development</span>
           </div>
           <p class="desc">The health companion that knows your story. Talk about your day in plain words and Rowan turns it into a structured record — then hands you a brief for your next appointment. It doesn't diagnose or treat; your care team does that.</p>
           <ul role="list">
@@ -775,19 +789,19 @@
             <li>No account, no ads, no trackers on your health data</li>
           </ul>
           <div class="foot">
-            <a class="link" href="rowan/index.html" >Visit site <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Visit the Rowan site" href="rowan/index.html" >Visit site <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
         <!-- ALDER -->
         <article class="product" style="--accent: var(--c-alder);">
           <div class="top">
-            <img class="app-icon" src="icons/alder.png" alt="Alder app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/alder.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Alder</h3>
               <div class="cat">Recovery Companion</div>
             </div>
-            <span class="status">In development</span>
+            <span class="status"><span class="sr-only">Status: </span>In development</span>
           </div>
           <p class="desc">Someone to talk to at 3am. A private companion for recovery that counts your sober time, sits with you through a craving, and never shames a lapse — an AI companion, not a therapist or a doctor.</p>
           <ul role="list">
@@ -796,19 +810,19 @@
             <li>No account, a recovery record kept on your device, and a discreet app icon</li>
           </ul>
           <div class="foot">
-            <a class="link" href="alder/index.html" >Visit site <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Visit the Alder site" href="alder/index.html" >Visit site <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
         <!-- WADDLETON -->
         <article class="product" style="--accent: var(--c-waddle);">
           <div class="top">
-            <img class="app-icon" src="icons/waddleton.png" alt="Waddleton app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/waddleton.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Waddleton</h3>
               <div class="cat">Social World · Arcade</div>
             </div>
-            <span class="status">Live now</span>
+            <span class="status"><span class="sr-only">Status: </span>Live now</span>
           </div>
           <p class="desc">A snowy island to waddle around. Make a penguin, meet other players on a hand-painted arctic island, and duck through a door into any of fourteen arcade games. Free in the browser — no download, no ads, nothing to buy.</p>
           <ul role="list">
@@ -817,27 +831,27 @@
             <li>Free, with no ads and no in-app purchases</li>
           </ul>
           <div class="foot">
-                        <a class="link" href="waddleton/index.html">Visit site <span aria-hidden="true">→</span></a>
-            <a class="link" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
+                        <a class="link" aria-label="Visit the Waddleton site" href="waddleton/index.html">Visit site <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Play Waddleton, free in your browser" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
           </div>
         </article>
         <article class="product" style="--accent: var(--c-mythkin);">
           <div class="top">
-            <img class="app-icon" src="icons/mythkin.png" alt="Mythkin app icon" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/mythkin.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Mythkin</h3>
               <div class="cat">AI Characters &amp; Legends</div>
             </div>
-            <span class="status">In development</span>
+            <span class="status"><span class="sr-only">Status: </span>In development</span>
           </div>
-          <p class="desc">Write your own AI characters — temperament, history, opening line — and talk to them. They remember what matters, and you can see and delete every memory they hold. Twelve legends of history and myth come written properly, not scraped.</p>
+          <p class="desc">Write your own AI characters — temperament, history, opening line — and talk to them. They remember what matters, and you can see and delete every memory they hold. 12 legends of history and myth come written properly, not scraped.</p>
           <ul role="list">
             <li>Characters that remember, with the list shown to you</li>
             <li>Share a character; borrowers' conversations stay private</li>
             <li>18+, and no sexual content as a tier or an unlock</li>
           </ul>
           <div class="foot">
-            <a class="link" href="https://drvanus.github.io/mythkin-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">&#8599;</span></a>
+            <a class="link" aria-label="Visit the Mythkin site" href="https://drvanus.github.io/mythkin-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">&#8599;</span></a>
           </div>
         </article>
 
@@ -854,19 +868,154 @@
     </div>
   </section>
 
+  <!-- ===== MODEL STACK =====
+       Every vendor named here is one the SHIPPING code actually calls, checked
+       against source on 2026-08-05. Three things are deliberately absent and
+       must stay absent until someone verifies them: StoryVault's narrative
+       vendor (a deploy-time secret, and three public statements already
+       disagree), Mythwright's text model (its README and its own client
+       comments contradict each other), and any AI claim about The One. -->
+  <section class="block" id="models">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">The model stack</span>
+        <h2>Built on Claude and GPT — and specific about which does what.</h2>
+        <p>We don't train models. We buy the best ones and spend our effort on everything around them: what the model is told, what it is trusted with, and what happens when it is wrong. Two of our products contain no language model at all.</p>
+      </div>
+      <div class="systems-grid">
+
+        <div class="system-card">
+          <div class="tag">Anthropic</div>
+          <h3>Claude writes the companions</h3>
+          <p>Every word Rowan, Alder, Quietoak, Mythkin and Wingmate say to you is written by Claude. Free tiers run Claude Haiku; subscribers move to Claude Sonnet — the same companion, thinking harder.</p>
+          <div class="meta"><span>claude-sonnet-5</span><span>claude-haiku-4-5</span><span>5 products</span></div>
+        </div>
+
+        <div class="system-card">
+          <div class="tag">Safety</div>
+          <h3>A second model reads every message first</h3>
+          <p>In Rowan, Alder and Quietoak, screening is a separate call from the one writing the reply: a deterministic word-and-pattern scan that needs no network, plus a cheaper Claude model for the cases the scan can't settle. The companion cannot overrule its verdict, and the region your phone reports decides which crisis lines you're shown.</p>
+          <div class="meta"><span>Independent classifier</span><span>Zero-network first pass</span><span>Region-aware</span></div>
+        </div>
+
+        <div class="system-card">
+          <div class="tag">Disclosure</div>
+          <h3>The build fails if we misdescribe it</h3>
+          <p>Alder talks to exactly one AI vendor, and a committed check refuses to pass if that stops being true — if the copy names a provider the deployment isn't configured for, or names one and not the other, the build breaks. A promise nobody can quietly drift away from.</p>
+          <div class="meta"><span>claims_audit</span><span>Vendor disclosure</span><span>A committed gate</span></div>
+        </div>
+
+        <div class="system-card">
+          <div class="tag">OpenAI</div>
+          <h3>OpenAI paints every picture</h3>
+          <p>All the AI art across the portfolio is made with OpenAI's image models — <code>gpt-image-1</code> and <code>gpt-image-2</code> — and they are the only image models a user of ours ever reaches. Plenty of what you see isn't AI at all: Alder's growth chips and Rowan's medication glyphs are drawn in code.</p>
+          <div class="meta"><span>gpt-image-2</span><span>gpt-image-1</span><span>Hero / bulk tiers</span></div>
+        </div>
+
+        <div class="system-card">
+          <div class="tag">Voice</div>
+          <h3>OpenAI speaks, where an app speaks</h3>
+          <p>Quietoak's six companions, Saffra, StoryVault and Nightshelf's premium narration are voiced by OpenAI. Not everything is: Rowan reads replies aloud in your phone's own voice, so the words aren't sent anywhere to be spoken, and Wingmate's dictation never leaves the device. Alder and Mythkin don't speak at all.</p>
+          <div class="meta"><span>gpt-4o-mini-tts</span><span>whisper-1</span><span>On-device where it can be</span></div>
+        </div>
+
+        <div class="system-card">
+          <div class="tag">And where GPT reasons</div>
+          <h3>Two products lead with OpenAI</h3>
+          <p>Saffra's chef runs on GPT-4o — it reads your pantry, invents the recipe and photographs it in the same turn. CryptoSage's assistant runs on GPT-4.1, and its price forecasts are generated on our servers by DeepSeek's models, not on your phone.</p>
+          <div class="meta"><span>gpt-4o</span><span>gpt-4.1-mini</span><span>DeepSeek, server-side</span></div>
+        </div>
+
+      </div>
+      <p class="section-foot">And two products call no model at all. Hexhunter runs entirely on the device — its only network use is Apple's own StoreKit and Game Center. Waddleton never sends anything to an AI: it's a children's game, so its penguin chat is a hand-written phrase library behind a word filter, deterministic on purpose.</p>
+    </div>
+  </section>
+
+  <!-- ===== COMPANIONS ===== -->
+  <section class="block" id="companions">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">In-app companions</span>
+        <h2>The difference isn't the model. It's what the model was handed.</h2>
+        <p>A chatbot bolted onto an app knows nothing about the app. Ours are given the record the app has been keeping — and in Rowan, Alder and Quietoak there is no account, so that record lives on your phone and rides up with the message.</p>
+      </div>
+      <div class="systems-grid">
+
+        <div class="system-card">
+          <div class="tag">Context</div>
+          <h3>It has read the last seven days</h3>
+          <p>Three apps, one shape. Alder arrives knowing your last seven check-ins — the craving you rated, whether you used, whether you were hungry, angry, lonely or tired. Quietoak has your seven diary cards with the emotions you rated on them. Rowan has your last seven symptom entries at the severity you set, next to your conditions, medications and allergies.</p>
+          <div class="meta"><span>7 days</span><span>Your own ratings</span><span>Sent with the message</span></div>
+        </div>
+
+        <div class="system-card">
+          <div class="tag">Tools</div>
+          <h3>It can act in the app, not just advise</h3>
+          <p>Tell Rowan your knee is at a 6 and it logs the entry, marks the medication, and starts the brief you'll hand your doctor. Tell Alder how the day went and it writes the check-in. The companion does the thing rather than telling you where the button is.</p>
+          <div class="meta"><span>Writes entries</span><span>Builds the visit brief</span><span>You confirm</span></div>
+        </div>
+
+        <div class="system-card">
+          <div class="tag">Boundaries</div>
+          <h3>And what it is deliberately not given</h3>
+          <p>Rowan gets your medication names and schedules and pointedly not the doses. Wingmate's coach sees the one connection you have open and nothing from any other. CryptoSage sends holdings only while you leave that switch on. Mythkin shows you every fact it has kept, sorted, and lets you pin, edit or delete any of them.</p>
+          <div class="meta"><span>No doses</span><span>Scoped per conversation</span><span>Readable and deletable</span></div>
+        </div>
+
+      </div>
+      <p class="section-foot">Saffra takes it furthest: it knows what's in your pantry, what expires in the next three days, the last ten things you cooked and the stars you gave them — and which step of which recipe you're standing on right now.</p>
+    </div>
+  </section>
+
+  <!-- ===== ART PIPELINE ===== -->
+  <section class="block" id="art-pipeline">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">The art pipeline</span>
+        <h2>Nothing here is stock art.</h2>
+        <p>Nine of our products generate their art through one shared in-house core, from 127 job specifications describing 645 distinct named assets. It is why a recovery app, a bedtime reader and a penguin island don't look like the same template with the hue rotated.</p>
+      </div>
+      <div class="systems-grid">
+
+        <div class="system-card">
+          <div class="tag">The core</div>
+          <h3>One core, and it counts the money</h3>
+          <p>One key contract, one retry policy, one 18-row price table — and a batch with no spend ceiling refuses to run rather than running uncapped. Retries are priced as money, because a render that times out after the image was made still bills. The key is attached to nothing but OpenAI, over TLS.</p>
+          <div class="meta"><span>9 products</span><span>Hard spend cap</span><span>37 offline tests</span></div>
+        </div>
+
+        <div class="system-card">
+          <div class="tag">The craft</div>
+          <h3>Judged at the size it is actually drawn</h3>
+          <p>Art is reviewed on a contact sheet at true draw size on a dark field, because a sprite is judged against its neighbours and not at 100% zoom of the master — and a 1300px master is refused for a 120px draw. A repair composites only the masked region back and proves nothing else moved. A person picks the set.</p>
+          <div class="meta"><span>True draw size</span><span>Masked repair</span><span>Human picks</span></div>
+        </div>
+
+        <div class="system-card">
+          <div class="tag">In your hands</div>
+          <h3>In four apps, you drive it</h3>
+          <p>StoryVault paints the scene you just read into your adventure, turn after turn. Nightshelf commissions a cover for the bedtime story it wrote you. Saffra photographs a recipe it invented, without you writing an image prompt. Mythwright's Forge turns a typed description into a playable card with its own art.</p>
+          <div class="meta"><span>StoryVault</span><span>Nightshelf</span><span>Saffra</span><span>Mythwright</span></div>
+        </div>
+
+      </div>
+      <p class="section-foot">Everywhere else the art was made once and ships inside the app — of the 815 images in Waddleton's iOS bundle, 485 carry the name of an authored job.</p>
+    </div>
+  </section>
+
   <!-- ===== SYSTEMS ===== -->
   <section class="block systems" id="systems">
     <div class="container">
       <div class="section-head">
         <span class="eyebrow">The infrastructure</span>
-        <h2>One platform beneath twelve brands.</h2>
-        <p>A multi-agent platform, an image and voice pipeline, a market research stack, and a growth engine — the shared layer that lets the studio run twelve brands in parallel.</p>
+        <h2>One platform beneath thirteen brands.</h2>
+        <p>A multi-agent platform, a shared art pipeline, a market research stack, and a growth engine — the shared layer that lets one studio run all of them in parallel.</p>
       </div>
       <div class="systems-grid">
         <div class="system-card">
           <div class="tag">Platform</div>
           <h3>Multi-agent backbone</h3>
-          <p>An in-house orchestration platform where specialized agents research, generate assets, and run pipelines under human direction — the operating system underneath everything we ship.</p>
+          <p>An in-house harness of documented, task-specific tooling — art generation, verification gates, release automation — that every product is built through, so a fix made once applies everywhere.</p>
           <div class="meta"><span>Orchestration</span><span>Asset pipelines</span><span>Always-on</span></div>
         </div>
         <div class="system-card">
@@ -945,10 +1094,14 @@
           <a href="rowan/index.html">Rowan</a>
           <a href="alder/index.html">Alder</a>
           <a href="waddleton/index.html">Waddleton</a>
+            <a href="https://drvanus.github.io/mythkin-site/" target="_blank" rel="noopener">Mythkin</a>
         </div>
         <div class="f-col">
           <h3>Studio</h3>
           <a href="#approach">Approach</a>
+          <a href="#models">The model stack</a>
+          <a href="#companions">Companions</a>
+          <a href="#art-pipeline">Art pipeline</a>
           <a href="#systems">Systems</a>
           <a href="#about">About</a>
           <a href="#contact">Contact</a>
