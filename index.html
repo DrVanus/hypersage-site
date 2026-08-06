@@ -296,8 +296,11 @@
     }
     .approach-row h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 10px; line-height: 1.28; }
     .approach-row p { color: var(--muted); font-size: 1rem; max-width: 64ch; }
-    /* One phrase per row lifted to full contrast so the eye lands on the claim. */
-    .approach-row .pull { color: var(--fg); font-weight: 500; }
+    /* One phrase per row lifted to full contrast so the eye lands on the claim.
+       .system-card is listed here too: the AI cards use the same device, and the
+       rule was originally scoped to .approach-row alone, so the spans in that
+       section rendered as ordinary muted body text. */
+    .approach-row .pull, .system-card .pull { color: var(--fg); font-weight: 500; }
     @media (max-width: 820px) {
       .approach-row { grid-template-columns: 1fr; gap: 10px; }
       .approach-row .k { padding-top: 0; }
@@ -587,6 +590,23 @@
           <div>
             <h3>Every app answers to the same bar</h3>
             <p>On the surface these apps have nothing to do with each other, and that is deliberate — each is built for the one thing it does. What they share is the bar underneath: the same rules about what the AI may claim, and the same refusal to dress a guess up as an answer — set that bar once and it holds across every one of them, and <span class="pull">a lesson learned in one is fixed in all of them</span>.</p>
+          </div>
+        </div>
+        <!-- "No front door" lives HERE and not in #ai, which is headed "three
+             jobs" and whose cards are three verbs the AI performs. Working
+             without an account is not a job the AI does, and filing it there
+             would reintroduce the taxonomy break that section's comment records
+             fixing. Audited 2026-08-06: 11 of the 12 in-house app repos open and
+             work with no account; Saffra is the sole exception
+             (MasterChefApp.swift:118-125 gates the root on sign-in). The count
+             is deliberately not a numeral — the portfolio is thirteen products
+             and the audit covered twelve repos, so "eleven of thirteen" would
+             be a claim the evidence does not cover. -->
+        <div class="approach-row">
+          <div class="k">No front door</div>
+          <div>
+            <h3>You do not have to tell us who you are</h3>
+            <p>Almost every app here opens and works with no account, and in several there is no account to skip past because none was ever built. Where an app has a backend, <span class="pull">you are a random id minted on your phone at first launch</span> — not a name, not an email. Signing in buys sync across devices, publishing or multiplayer, and nothing else.</p>
           </div>
         </div>
         <div class="approach-row">
@@ -908,38 +928,65 @@
        counts and contact sheets are how we work, not what anyone buys.
 
        The cards are three PARALLEL jobs — it writes, it draws, it speaks —
-       because the previous version filed them as Context / Safety / Art, which
-       is internal taxonomy: two cards were about the companion and the third
-       was about illustration, so a third of the section did not follow from its
-       own heading. Keep the three verbs parallel, and name one example each;
-       an earlier draft recited five product names in every card. -->
+       because an earlier version filed them as Context / Safety / Art, which is
+       internal taxonomy: two cards were about the companion and the third was
+       about illustration, so a third of the section did not follow from its own
+       heading. Keep the three verbs parallel.
+
+       SECOND RULE, added after the owner read the app-naming draft: DESCRIBE THE
+       SYSTEM, NOT A TWO-APP EXAMPLE LIST. Naming two products per card reads as
+       "only these two do it" and undersells a capability that is much wider. No
+       product names appear in these cards by design — do not reintroduce them.
+
+       EVERY SENTENCE HERE IS SCOPED TO A VERIFIED COUNT, and the hedges are
+       load-bearing rather than throat-clearing. Audited 2026-08-06 across all
+       twelve app repos:
+         - "where an app can tell what you are looking at"  live in-app state
+           reaches the prompt in 5 of the 7 chat apps; two pass record + history
+           only, so an unconditional claim is false.
+         - "in most of the apps that keep one"  6 apps keep a durable fact list;
+           4 hold it on-device with no server copy (Rowan, Alder, Quietoak,
+           Wingmate). Mythkin's is server-held by design and CryptoSage syncs to
+           Firestore once you sign in (AuthenticationManager.swift:923), so
+           "all but one" was WRONG and was corrected before publishing.
+         - "read" is never claimed of memory  Alder stores facts and has no
+           screen that shows them. The card says you can CLEAR it, never that
+           you can read it.
+         - "where a wrong answer matters"  the full safety layer is 3 of 12.
+         - "where art is made as a set"  the batch driver covers 3 of 12, and
+           the five apps with no contact ship the largest art volumes.
+         - "where an app speaks" / "in all but one of them"  6 of 12 speak;
+           5 of the 6 have a device-voice floor, Wingmate has none.
+         - authored delivery instructions are real in 3 apps, hence "where
+           delivery is the point" rather than "every voice is tuned".
+       .meta credits are the Apple 5.1.2(i) AI disclosure. Do not remove them. -->
   <section class="block" id="ai">
     <div class="container">
       <div class="section-head">
         <span class="eyebrow">Inside the apps</span>
-        <h2>Three jobs, and we're specific about each.</h2>
-        <p>Most apps bolt on a chat box and call it AI. Ours use it for three things — writing, drawing, speaking — and each one is built to know something about you that a chat box never could.</p>
+        <h2>Three jobs, and a system behind each one.</h2>
+        <p>The AI in these apps does three things: it writes, it draws, it speaks. Each one runs on machinery we built once and reuse — what the AI is allowed to know about you, what gets checked before it answers, and how the result reaches the screen. Not every app does all three. Where one does, this is what sits underneath it.</p>
       </div>
       <div class="systems-grid">
 
         <div class="system-card">
           <div class="tag">It writes</div>
-          <h3>Your companion has read your record</h3>
-          <p>Alder opens already knowing your last seven check-ins — the craving you rated, whether you used, how the day went. Tell Rowan your knee is at a 6 and it writes the entry and starts the brief for your doctor. Where a wrong answer matters, a safety layer we built checks the message first, independently of the model writing the reply.</p>
+          <h3>The message you type is the smallest part of it</h3>
+          <p>Every turn, the companion is handed a structured record of you and not just the line you typed: what you have told it about yourself, and what you have been doing in the app since you last spoke. Where an app can tell what you are looking at, that goes in too — the recipe you have open, the exact step you are standing on. What it keeps between sessions is a short list of specific facts, and in most of the apps that keep one, <span class="pull">that list lives on your phone rather than on our servers</span>. Where a wrong answer matters, a separate check reads your message before the model does — and before it counts against any free-message limit.</p>
           <div class="meta"><span>Anthropic&rsquo;s Claude</span></div>
         </div>
 
         <div class="system-card">
           <div class="tag">It draws</div>
-          <h3>Every picture is made for the app it&rsquo;s in</h3>
-          <p>None of it is stock, and none of it is one generator with the colours changed. It comes through an illustration pipeline we built ourselves, which is why a recovery app, a bedtime reader and a penguin island don&rsquo;t look like siblings. In four apps you drive it yourself: StoryVault paints the scene you just read, turn after turn.</p>
+          <h3>Every picture is drawn for the app it is in</h3>
+          <p>None of it is stock, and none of it is one look with the colours swapped. Where art is made as a set — a world, a character&rsquo;s expressions, a screen&rsquo;s headers — every piece in that set is written from the same paragraph of art direction, word for word, so <span class="pull">the set reads as one hand instead of a dozen near-misses</span>. It is also why a recovery app, a bedtime reader and a penguin island do not look like siblings. And a picture that comes back clipped by its own frame, or with a white box behind it where a clean edge should be, does not ship. It is thrown out and drawn again.</p>
           <div class="meta"><span>OpenAI</span></div>
         </div>
 
         <div class="system-card">
           <div class="tag">It speaks</div>
-          <h3>Read aloud, in a voice that suits it</h3>
-          <p>Nightshelf reads a bedtime story in a voice you&rsquo;d want reading to a child. Quietoak gives each of its six companions a different one, so the one you chose sounds like itself. Where a phone&rsquo;s own voice does the job, we use that instead.</p>
+          <h3>Which voice, and how it reads</h3>
+          <p>Where an app speaks, there are two engines behind one button: a cloud voice, and the phone&rsquo;s own. In all but one of them, if the cloud voice cannot deliver — no signal, service down — <span class="pull">the phone finishes the words rather than leaving you in silence</span>. And where delivery is the point, how it should read is written out in plain English and sent along with the text, together with the speed and the pitch: read slowly and softly, with long pauses, as if to someone half asleep. Markdown and emoji are stripped first, so you never hear &ldquo;asterisk asterisk&rdquo;.</p>
           <div class="meta"><span>OpenAI</span><span>On-device where it fits</span></div>
         </div>
 
