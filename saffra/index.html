@@ -184,26 +184,6 @@
       from { opacity: 0; transform: translateY(32px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes pulse-glow {
-      0%, 100% { opacity: 0.3; transform: translate(-50%,-50%) scale(1); }
-      50% { opacity: 0.55; transform: translate(-50%,-50%) scale(1.05); }
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% center; }
-      100% { background-position: 200% center; }
-    }
-    @keyframes fade-in {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes breathe {
-      0%, 100% { transform: scale(1); opacity: 0.85; }
-      50% { transform: scale(1.06); opacity: 1; }
-    }
     /* The hide-then-reveal rule is gated on `.js`, which the inline script in
        <head> stamps on <html>. Ungated, this rule hid 56 elements — measured,
        62% of the page's text — from anyone with JavaScript off or blocked, and
@@ -225,11 +205,9 @@
     /* Shimmer on gradient text */
     .shimmer-text {
       background: linear-gradient(90deg, #F5C088 0%, #E08230 40%, #F5C088 60%, #E08230 100%);
-      background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: shimmer 4s linear infinite;
     }
 
     /* Platform badge */
@@ -332,18 +310,16 @@
       .hero-layout { gap: 40px; }
     }
     .hero::before {
-      content: ''; position: absolute; top: calc(30% - var(--parallax, 0px)); left: 50%;
+      content: ''; position: absolute; top: 30%; left: 50%;
       width: 800px; height: 600px;
       background: radial-gradient(ellipse, rgba(224,130,48,0.10), transparent 65%);
       pointer-events: none;
-      animation: pulse-glow 5s ease-in-out infinite;
     }
     .hero::after {
       content: ''; position: absolute; top: 60%; left: 30%;
       width: 400px; height: 400px;
       background: radial-gradient(circle, rgba(91,161,95,0.05), transparent 60%);
       pointer-events: none;
-      animation: pulse-glow 7s ease-in-out 1s infinite;
     }
     .hero h1 {
       font-size: 3.5rem; font-weight: 800; line-height: 1.2; padding-bottom: 0.08em;
@@ -474,11 +450,10 @@
     }
     .phone-placeholder .cooking-voice .voice-dot {
       width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
-      animation: breathe 1.6s ease-in-out infinite;
     }
 
-    /* Hero rotator — stacked screenshots cross-fading on a timer (JS-driven,
-       see #heroRotator below). The first image is position:relative so it
+    /* Hero walkthrough — stacked screenshots cross-fade when the visitor uses
+       the controls below. The first image is position:relative so it
        defines the box height; the rest overlay it absolutely and fade in when
        they receive .is-active. */
     .hero-phone-frame .hero-phone-img {
@@ -487,8 +462,36 @@
     }
     .hero-phone-frame .hero-phone-img:first-child { position: relative; }
     .hero-phone-frame .hero-phone-img.is-active { opacity: 1; }
+    .hero-rotator-controls {
+      display: none; align-items: center; justify-content: center; gap: 5px;
+      margin-top: 14px;
+    }
+    .walkthrough-ready .hero-rotator-controls { display: flex; }
+    .hero-rotator-controls button {
+      appearance: none; -webkit-appearance: none; cursor: pointer;
+      min-width: 44px; min-height: 44px; display: inline-grid; place-items: center;
+      padding: 0; color: var(--muted-fg); background: transparent;
+      border: 1px solid transparent; border-radius: 999px;
+      transition: color .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .hero-rotator-controls button:hover {
+      color: var(--fg); border-color: var(--border); background: rgba(255,255,255,.035);
+    }
+    .hero-rotator-controls button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .hero-rotator-dots { display: flex; align-items: center; justify-content: center; }
+    .hero-rotator-dot::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(224,130,48,.3); transition: width .2s ease, background .2s ease;
+    }
+    .hero-rotator-dot.is-active::before { width: 20px; border-radius: 999px; background: var(--primary); }
+    .hero-rotator-caption {
+      display: none; min-height: 1.5em; margin: 2px auto 0; text-align: center;
+      color: var(--muted-fg); font-size: .72rem; letter-spacing: .01em;
+    }
+    .walkthrough-ready .hero-rotator-caption { display: block; }
     @media (prefers-reduced-motion: reduce) {
-      .hero-phone-frame .hero-phone-img { transition: none; }
+      .hero-phone-frame .hero-phone-img, .hero-rotator-controls button,
+      .hero-rotator-dot::before { transition: none; }
     }
 
     /* Stats */
@@ -929,6 +932,20 @@
       .hero { padding: 110px 0 48px; }
       .container { padding: 0 16px; }
     }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .js .anim { opacity: 1; transform: none; }
+    }
+    @media (forced-colors: active) {
+      .hero::before, .hero::after { display: none; }
+      .shimmer-text, .gradient-text-warm, .italic-anything {
+        color: CanvasText; background: none; -webkit-text-fill-color: CanvasText;
+      }
+      .btn-warm, .btn-outline, .hero-rotator-controls button {
+        color: ButtonText; background: ButtonFace; border: 1px solid ButtonText; box-shadow: none;
+      }
+    }
   </style>
 <!-- app-schema:start (generated by appdev/tools/app_schema.py — edit apps.json, not this) -->
 <!-- WARNING: the `description` below was hand-corrected on 2026-08-06 to remove the
@@ -995,30 +1012,46 @@
       </div>
       <div class="hero-screenshot">
         <div class="hero-phone-wrap">
-          <!-- Hero rotator: cross-fades through the app's signature surfaces,
-               deliberately alternating light and dark mode so both looks show
-               without a single click. Order tells the story — greet, ask,
-               browse, cook, search. -->
-          <div class="hero-phone-frame" id="heroRotator">
+          <!-- A user-controlled tour of the app's signature surfaces. Light and
+               dark captures alternate, but the visitor chooses when to advance. -->
+          <div class="hero-phone-frame" id="heroRotator" aria-roledescription="carousel" aria-label="Saffra app walkthrough">
             <img class="hero-phone-img is-active"
                  src="screenshots-raw/01-chef-tab-light.png"
+                 width="417" height="900" decoding="async"
+                 data-caption="Pantry-aware ways to begin"
                  alt="Saffra Chef tab in light mode — pantry-aware quick-start prompts">
             <img class="hero-phone-img"
                  src="screenshots-raw/07-chat-recipe-dark.png"
+                 width="417" height="900" loading="lazy" decoding="async"
+                 data-caption="Answers grounded in the recipe catalog"
                  alt="Ask Saffra in dark mode — she answers with a recipe pulled from the catalog">
             <img class="hero-phone-img"
                  src="screenshots-raw/05-recipes-light.png"
+                 width="417" height="900" loading="lazy" decoding="async"
+                 data-caption="A trusted recipe catalog, ready to adapt"
                  alt="Recipes in light mode — the flagship catalog with Saffra's daily pick">
             <img class="hero-phone-img"
                  src="screenshots-raw/02-cooking-mode-dark.png"
+                 width="417" height="900" loading="lazy" decoding="async"
+                 data-caption="Hands-free guidance while you cook"
                  alt="Cooking Mode in dark mode — hands-free voice with a suggested step timer">
             <img class="hero-phone-img"
                  src="screenshots-raw/06-search-light.png"
+                 width="417" height="900" loading="lazy" decoding="async"
+                 data-caption="Search by meaning, not just title"
                  alt="Search in light mode — semantic recipe search across the whole catalog">
             <img class="hero-phone-img"
                  src="screenshots-raw/10-recipes-dinner-dark.png"
+                 width="417" height="900" loading="lazy" decoding="async"
+                 data-caption="Suggestions shaped for tonight"
                  alt="Recipes at dinner time in dark mode — Saffra picks for tonight">
           </div>
+          <div class="hero-rotator-controls" role="group" aria-label="Choose a Saffra screen">
+            <button type="button" id="heroRotatorPrev" aria-label="Previous screen">←</button>
+            <div class="hero-rotator-dots" id="heroRotatorDots"></div>
+            <button type="button" id="heroRotatorNext" aria-label="Next screen">→</button>
+          </div>
+          <p class="hero-rotator-caption" id="heroRotatorCaption" aria-live="polite">Pantry-aware ways to begin</p>
         </div>
       </div>
     </div>
@@ -1742,19 +1775,51 @@
   window.addEventListener('resize', revealFallback, { passive: true });
   setTimeout(revealFallback, 800);
 
-  // Hero phone rotator — cross-fade through the signature screens on a timer.
+  // Hero phone walkthrough — intentionally user-controlled. A timed carousel made
+  // the hero move for longer than five seconds and often changed before a visitor
+  // had finished reading the screen or caption.
   (function() {
     var rot = document.getElementById('heroRotator');
+    var dotsWrap = document.getElementById('heroRotatorDots');
+    var prev = document.getElementById('heroRotatorPrev');
+    var next = document.getElementById('heroRotatorNext');
+    var caption = document.getElementById('heroRotatorCaption');
     if (!rot) return;
-    var shots = rot.querySelectorAll('.hero-phone-img');
+    var shots = Array.prototype.slice.call(rot.querySelectorAll('.hero-phone-img'));
     if (shots.length < 2) return;
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var i = 0;
-    setInterval(function() {
-      shots[i].classList.remove('is-active');
-      i = (i + 1) % shots.length;
-      shots[i].classList.add('is-active');
-    }, 3200);
+    var dots = [];
+
+    function show(n) {
+      i = (n + shots.length) % shots.length;
+      shots.forEach(function(shot, index) {
+        var active = index === i;
+        shot.classList.toggle('is-active', active);
+        shot.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+      dots.forEach(function(dot, index) {
+        var active = index === i;
+        dot.classList.toggle('is-active', active);
+        dot.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      if (caption) caption.textContent = shots[i].getAttribute('data-caption') || shots[i].alt;
+    }
+
+    if (dotsWrap) {
+      shots.forEach(function(shot, index) {
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'hero-rotator-dot';
+        dot.setAttribute('aria-label', 'Show screen ' + (index + 1) + ' of ' + shots.length + ': ' + (shot.getAttribute('data-caption') || 'Saffra app'));
+        dot.addEventListener('click', function() { show(index); });
+        dotsWrap.appendChild(dot);
+        dots.push(dot);
+      });
+    }
+    if (prev) prev.addEventListener('click', function() { show(i - 1); });
+    if (next) next.addEventListener('click', function() { show(i + 1); });
+    show(0);
+    rot.parentNode.classList.add('walkthrough-ready');
   })();
 
   // Scroll to top button
@@ -1783,17 +1848,6 @@
     });
     document.getElementById('toggleMonthly').classList.toggle('active', mode === 'monthly');
     document.getElementById('toggleYearly').classList.toggle('active', mode === 'yearly');
-  }
-
-  // Parallax-lite on hero glow
-  var hero = document.querySelector('.hero');
-  if (hero) {
-    window.addEventListener('scroll', function() {
-      var y = window.scrollY;
-      if (y < 800) {
-        hero.style.setProperty('--parallax', (y * 0.15) + 'px');
-      }
-    }, { passive: true });
   }
 
   // Signup — writes to the shared `early_access` Firestore collection,

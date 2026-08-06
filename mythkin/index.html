@@ -22,7 +22,7 @@
 <link rel="icon" type="image/png" href="mythkin-icon.png">
 <link rel="apple-touch-icon" href="mythkin-icon.png">
 <link rel="sitemap" type="application/xml" href="sitemap.xml">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20260806-kinstage">
 </head>
 <body>
 <div class="wrap landing">
@@ -163,5 +163,78 @@ currency, by your app store.</p>
 </footer>
 
 </div>
+<script>
+/* Turn the complete static portrait grid into a manual character stage. The
+   source cards stay in the DOM, so content and controls survive enhancement. */
+(function () {
+  var grid = document.querySelector('.kin-grid');
+  if (!grid) return;
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.kin'));
+  if (!cards.length) return;
+
+  var stage = document.createElement('section');
+  stage.className = 'kin-showcase';
+  stage.setAttribute('aria-label', 'Featured Mythkin character');
+
+  var art = document.createElement('div');
+  art.className = 'kin-feature-art';
+  var featureImage = document.createElement('img');
+  featureImage.width = 256;
+  featureImage.height = 256;
+  art.appendChild(featureImage);
+
+  var copy = document.createElement('div');
+  copy.className = 'kin-feature-copy';
+  var label = document.createElement('small');
+  label.textContent = 'Choose a character';
+  var featureName = document.createElement('h3');
+  featureName.setAttribute('aria-live', 'polite');
+  var featureLine = document.createElement('p');
+  featureLine.className = 'kin-feature-line';
+  var memory = document.createElement('p');
+  memory.className = 'kin-feature-memory';
+  memory.textContent = 'Review, edit, or delete the memories stored for each conversation.';
+  copy.appendChild(label);
+  copy.appendChild(featureName);
+  copy.appendChild(featureLine);
+  copy.appendChild(memory);
+  stage.appendChild(art);
+  stage.appendChild(copy);
+  grid.parentNode.insertBefore(stage, grid);
+
+  var entries = cards.map(function (card, index) {
+    var image = card.querySelector('img');
+    var name = card.querySelector('b');
+    var line = card.querySelector('span');
+    var data = {
+      src: image ? image.getAttribute('src') : '',
+      name: name ? name.textContent : 'Mythkin character',
+      line: line ? line.textContent : '',
+      button: document.createElement('button')
+    };
+    data.button.type = 'button';
+    data.button.className = 'kin-select';
+    data.button.setAttribute('aria-label', 'Preview ' + data.name);
+    while (card.firstChild) data.button.appendChild(card.firstChild);
+    card.appendChild(data.button);
+    data.button.addEventListener('click', function () { select(index); });
+    return data;
+  });
+
+  function select(index) {
+    var selected = entries[index];
+    featureImage.src = selected.src;
+    featureImage.alt = selected.name + ' as depicted in Mythkin';
+    featureName.textContent = selected.name;
+    featureLine.textContent = selected.line;
+    entries.forEach(function (entry, entryIndex) {
+      entry.button.setAttribute('aria-pressed', entryIndex === index ? 'true' : 'false');
+    });
+  }
+
+  document.querySelector('.landing').classList.add('kin-selector-ready');
+  select(0);
+})();
+</script>
 </body>
 </html>
