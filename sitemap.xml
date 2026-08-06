@@ -9,19 +9,19 @@
      see the switch-over checklist in index.html <head>. -->
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>https://drvanus.github.io/hypersage-site/sitemap-main.xml</loc>
+    <loc>https://hypersage.ai/sitemap-main.xml</loc>
     <lastmod>2026-08-01</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://drvanus.github.io/hypersage-site/rowan/sitemap.xml</loc>
+    <loc>https://hypersage.ai/rowan/sitemap.xml</loc>
     <lastmod>2026-07-31</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://drvanus.github.io/hypersage-site/alder/sitemap.xml</loc>
+    <loc>https://hypersage.ai/alder/sitemap.xml</loc>
     <lastmod>2026-07-31</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://drvanus.github.io/hypersage-site/waddleton/sitemap.xml</loc>
+    <loc>https://hypersage.ai/waddleton/sitemap.xml</loc>
     <lastmod>2026-07-31</lastmod>
   </sitemap>
 </sitemapindex>

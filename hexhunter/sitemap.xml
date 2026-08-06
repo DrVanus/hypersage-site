@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://drvanus.github.io/hexhunter-site/</loc>
+    <loc>https://hypersage.ai/hexhunter/</loc>
     <lastmod>2026-07-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://drvanus.github.io/hexhunter-site/privacy-policy.html</loc>
+    <loc>https://hypersage.ai/hexhunter/privacy-policy.html</loc>
     <lastmod>2026-07-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://drvanus.github.io/hexhunter-site/terms.html</loc>
+    <loc>https://hypersage.ai/hexhunter/terms.html</loc>
     <lastmod>2026-07-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://drvanus.github.io/hexhunter-site/support.html</loc>
+    <loc>https://hypersage.ai/hexhunter/support.html</loc>
     <lastmod>2026-08-01</lastmod>
   </url>
 </urlset>

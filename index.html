@@ -8,32 +8,30 @@
   <title>Hypersage AI Labs — an independent AI product studio</title>
   <meta name="description" content="An independent AI studio: twelve iOS apps and a free browser game — dating, mental health, chronic illness, recovery, crypto, cooking, AI characters, fiction, sleep, and play.">
   <meta name="robots" content="index, follow">
-  <!-- CANONICAL DOMAIN NOTE (2026-07-31)
-       hypersage.ai is the INTENDED brand domain but it is not registered — a DNS lookup
-       returns NXDOMAIN (no A, no NS, no MX). The site is actually served from the GitHub
-       Pages project URL below, so every self-URL on the site points there instead.
-       When hypersage.ai is registered, change in this order:
-         1. canonical / og:url / og:image / twitter:image and the JSON-LD url, logo, image
-            on index.html, privacy.html, terms.html and support.html
-         2. sitemap.xml <loc> entries and the Sitemap: line in robots.txt
-         3. canonical_url in site-audit-contract.json
-         4. add a CNAME file containing "hypersage.ai" and point its DNS at GitHub Pages
-         5. stand up the hypersageailabs@gmail.com mailbox (the mailto: links already assume it) -->
-  <link rel="canonical" href="https://drvanus.github.io/hypersage-site/">
+  <!-- CANONICAL DOMAIN (2026-08-06) — hypersage.ai IS registered and live.
+       Cloudflare Registrar; apex A records to GitHub Pages (DNS-only, grey cloud —
+       proxying breaks Pages' certificate issuance); CNAME file in this repo attaches
+       it; Enforce HTTPS on. Every self-URL below points at the domain, and GitHub
+       301s the old drvanus.github.io/hypersage-site/* paths to it, path preserved.
+       support@hypersage.ai is live via Cloudflare Email Routing, so the mailto:
+       links throughout the site now reach a real mailbox rather than assuming one.
+       The eleven app sites are subfolders here (/rowan, /alder, /hexhunter, …), so
+       one domain and one certificate serve the whole portfolio. -->
+  <link rel="canonical" href="https://hypersage.ai/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Hypersage AI Labs — an independent AI product studio">
   <meta property="og:description" content="Thirteen consumer products across dating, mental health, chronic illness, recovery, crypto, cooking, AI characters, fiction, sleep, and games — each honest about what it is.">
-  <meta property="og:url" content="https://drvanus.github.io/hypersage-site/">
+  <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="Hypersage AI Labs">
-  <meta property="og:image" content="https://drvanus.github.io/hypersage-site/og-image.png?v=20260731b">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260731b">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Hypersage AI Labs — an AI product studio">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Hypersage AI Labs — an independent AI product studio">
   <meta name="twitter:description" content="An independent studio building twelve iOS apps and one free browser game — human-directed, and honest about what the AI is.">
-  <meta name="twitter:image" content="https://drvanus.github.io/hypersage-site/og-image.png?v=20260731b">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260731b">
   <meta name="twitter:image:alt" content="Hypersage AI Labs — an AI product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -44,11 +42,11 @@
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Hypersage AI Labs",
-    "url": "https://drvanus.github.io/hypersage-site/",
-    "logo": "https://drvanus.github.io/hypersage-site/apple-touch-icon.png",
-    "image": "https://drvanus.github.io/hypersage-site/og-image.png?v=20260731b",
+    "url": "https://hypersage.ai/",
+    "logo": "https://hypersage.ai/apple-touch-icon.png",
+    "image": "https://hypersage.ai/og-image.png?v=20260731b",
     "description": "An independent studio building thirteen consumer products — twelve iOS apps and one free browser game — across dating, mental health, chronic illness, recovery, crypto, cooking, AI characters, fiction, sleep, and play.",
-    "email": "hypersageailabs@gmail.com",
+    "email": "support@hypersage.ai",
     "makesOffer": [
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Saffra", "applicationCategory": "Food & Drink", "operatingSystem": "iOS" } },
       { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "StoryVault AI", "applicationCategory": "Entertainment", "operatingSystem": "iOS" } },
@@ -637,7 +635,7 @@
             <li>Send screenshots — get exact words to say next</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Wingmate site" href="https://drvanus.github.io/wingmate-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Wingmate site" href="https://hypersage.ai/wingmate/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -658,7 +656,7 @@
             <li>A crisis kit that's always free and works offline</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Quietoak site" href="https://drvanus.github.io/quietoak-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Quietoak site" href="https://hypersage.ai/quietoak/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -700,7 +698,7 @@
             <li>Hands-free, voice-narrated cooking mode</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Saffra site" href="https://drvanus.github.io/saffra-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Saffra site" href="https://hypersage.ai/saffra/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -721,7 +719,7 @@
             <li>Voice narration and generated illustration</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the StoryVault AI site" href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the StoryVault AI site" href="https://hypersage.ai/storyvault/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -742,7 +740,7 @@
             <li>Layered ambient soundscapes to drift off to</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Nightshelf site" href="https://drvanus.github.io/nightshelf-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Nightshelf site" href="https://hypersage.ai/nightshelf/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -763,7 +761,7 @@
             <li>3 biomes of escalating, hand-drawn dread</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Hexhunter site" href="https://drvanus.github.io/hexhunter-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Hexhunter site" href="https://hypersage.ai/hexhunter/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -784,7 +782,7 @@
             <li>Live multiplayer on a purpose-built backend</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Mythwright site" href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the Mythwright site" href="https://hypersage.ai/mythwright/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -888,7 +886,7 @@
             <li>18+, and no sexual content as a tier or an unlock</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Mythkin site" href="https://drvanus.github.io/mythkin-site/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">&#8599;</span></a>
+            <a class="link" aria-label="Visit the Mythkin site" href="https://hypersage.ai/mythkin/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">&#8599;</span></a>
           </div>
         </article>
 
@@ -985,7 +983,7 @@
       <span class="eyebrow">Early access</span>
       <h2 style="margin-top: 18px;">Be first on the next build.</h2>
       <p>More apps are in progress. Get early access to what ships next, or reach out to follow the work up close.</p>
-      <a href="mailto:hypersageailabs@gmail.com?subject=Hello%20Hypersage%20AI%20Labs" class="btn btn-primary"><span>hypersageailabs@gmail.com</span><span aria-hidden="true">→</span></a>
+      <a href="mailto:support@hypersage.ai?subject=Hello%20Hypersage%20AI%20Labs" class="btn btn-primary"><span>support@hypersage.ai</span><span aria-hidden="true">→</span></a>
     </div>
   </section>
 
@@ -1004,19 +1002,19 @@
       <div class="f-links">
         <div class="f-col">
           <h3>Products</h3>
-          <a href="https://drvanus.github.io/wingmate-site/" target="_blank" rel="noopener">Wingmate</a>
-          <a href="https://drvanus.github.io/quietoak-site/" target="_blank" rel="noopener">Quietoak</a>
+          <a href="https://hypersage.ai/wingmate/" target="_blank" rel="noopener">Wingmate</a>
+          <a href="https://hypersage.ai/quietoak/" target="_blank" rel="noopener">Quietoak</a>
           <a href="https://cryptosageai.io/" target="_blank" rel="noopener">CryptoSage AI</a>
-          <a href="https://drvanus.github.io/saffra-app/" target="_blank" rel="noopener">Saffra</a>
-          <a href="https://drvanus.github.io/storyvault-app/" target="_blank" rel="noopener">StoryVault AI</a>
-          <a href="https://drvanus.github.io/nightshelf-site/" target="_blank" rel="noopener">Nightshelf</a>
-          <a href="https://drvanus.github.io/hexhunter-site/" target="_blank" rel="noopener">Hexhunter</a>
-          <a href="https://drvanus.github.io/mythwright-site/" target="_blank" rel="noopener">Mythwright</a>
+          <a href="https://hypersage.ai/saffra/" target="_blank" rel="noopener">Saffra</a>
+          <a href="https://hypersage.ai/storyvault/" target="_blank" rel="noopener">StoryVault AI</a>
+          <a href="https://hypersage.ai/nightshelf/" target="_blank" rel="noopener">Nightshelf</a>
+          <a href="https://hypersage.ai/hexhunter/" target="_blank" rel="noopener">Hexhunter</a>
+          <a href="https://hypersage.ai/mythwright/" target="_blank" rel="noopener">Mythwright</a>
           <a href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">The One</a>
           <a href="rowan/index.html">Rowan</a>
           <a href="alder/index.html">Alder</a>
           <a href="waddleton/index.html">Waddleton</a>
-            <a href="https://drvanus.github.io/mythkin-site/" target="_blank" rel="noopener">Mythkin</a>
+            <a href="https://hypersage.ai/mythkin/" target="_blank" rel="noopener">Mythkin</a>
         </div>
         <div class="f-col">
           <h3>Studio</h3>

@@ -1,17 +1,17 @@
-# Served from the GitHub Pages project URL. hypersage.ai is the intended brand
-# domain but is not registered yet — see index.html <head> for the switch-over list.
+# hypersage.ai is live (2026-08-06) and this repo is attached to it, so this file
+# is now at the ORIGIN ROOT and is actually in force. It was inert before: a crawler
+# only ever reads robots.txt from an origin root, and the site was served from a
+# project path, so the file that governed this host was drvanus.github.io/robots.txt.
 #
-# HEADS UP: this file is itself inert today. A crawler only ever reads robots.txt
-# from an ORIGIN ROOT, and this site is served from a project path, so the file in
-# force for this host would be https://drvanus.github.io/robots.txt (currently 404).
-# It starts working the moment a custom domain is attached to this repo. Do NOT
-# re-create per-subfolder robots.txt files (rowan/, alder/, waddleton/ used to have
-# them) — nested robots.txt is ignored by every crawler, at every level, always.
-#
-# Discovery today therefore comes from two places, not from here:
-#   1. the <sitemapindex> below, submitted manually in Search Console
-#   2. ordinary <a href> links between the studio page and the product subfolders
+# THIS IS THE ONLY robots.txt THAT DOES ANYTHING. Eight subfolders still carry one
+# each (nightshelf/, storyvault/, mythwright/, wingmate/, saffra/, quietoak/,
+# hexhunter/, mythkin/) — they arrived with the sites when they were folded in from
+# their own repos, where each WAS an origin root. Nested robots.txt is ignored by
+# every crawler, at every level, always, so they are inert rather than harmful; their
+# stale Sitemap: lines are read by nobody. Delete them when convenient, and do not add
+# more. The eleven product sites are subfolders of this one origin, so this file
+# covers all of them.
 User-agent: *
 Allow: /
 
-Sitemap: https://drvanus.github.io/hypersage-site/sitemap.xml
+Sitemap: https://hypersage.ai/sitemap.xml

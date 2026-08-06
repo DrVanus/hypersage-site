@@ -6,19 +6,19 @@
      see the switch-over checklist in index.html <head>. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://drvanus.github.io/hypersage-site/</loc>
+    <loc>https://hypersage.ai/</loc>
     <lastmod>2026-08-01</lastmod>
   </url>
   <url>
-    <loc>https://drvanus.github.io/hypersage-site/privacy.html</loc>
+    <loc>https://hypersage.ai/privacy.html</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://drvanus.github.io/hypersage-site/terms.html</loc>
+    <loc>https://hypersage.ai/terms.html</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://drvanus.github.io/hypersage-site/support.html</loc>
+    <loc>https://hypersage.ai/support.html</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
 </urlset>
