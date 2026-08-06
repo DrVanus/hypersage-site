@@ -237,6 +237,7 @@
     .hero h1 { font-size: clamp(2.5rem, 6vw, 4.4rem); font-weight: 700; line-height: 1.2; padding-bottom: 0.1em; margin-bottom: 22px; }
     .hero h1 .hero-line { display: block; }
     .hero .lede { font-size: clamp(1.05rem, 2.2vw, 1.28rem); color: var(--muted); max-width: 660px; margin-bottom: 34px; }
+    .hero .lede strong { color: var(--fg); font-weight: 600; }
     .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
 
     /* The Context Engine is explanatory art: a compact map of the system described
@@ -716,7 +717,7 @@
         <span class="eyebrow">Independent Product Studio</span>
         <h1><span class="hero-line">Software with</span> <span class="grad-text hero-line">a point of view.</span></h1>
         <div class="hero-copy">
-          <p class="lede">Hypersage builds distinctive consumer apps and games across relationships, health, recovery, food, stories, markets, sleep, and play. When AI is part of the experience, the context you choose to share — history, activity, and, where supported, the task in front of you — shapes responses alongside product-specific knowledge, tools, rules, and safeguards.</p>
+          <p class="lede">Hypersage builds distinctive consumer apps and games across relationships, health, recovery, food, stories, markets, sleep, and play. Where AI belongs, <strong>our intelligence layer</strong> combines the context you choose to share with product-specific knowledge, tools, and safeguards.</p>
           <div class="hero-cta">
             <a href="#products" class="btn btn-primary"><span>Explore the products</span><span aria-hidden="true">→</span></a>
             <a href="#ai" class="btn btn-ghost">How the AI works</a>
@@ -724,7 +725,7 @@
         </div>
 
         <figure class="context-engine" aria-hidden="true">
-          <div class="engine-head"><span>How a response is formed</span><span>Context engine</span></div>
+          <div class="engine-head"><span>How a response is formed</span><span>Intelligence layer</span></div>
           <svg class="engine-wires" viewBox="0 0 470 290" preserveAspectRatio="none" focusable="false">
             <defs>
               <linearGradient id="engineGradient" x1="0" y1="0" x2="1" y2="0">
@@ -792,15 +793,15 @@
     </div>
   </div>
 
-  <!-- ===== SHARED INTELLIGENCE =====
+  <!-- ===== INTELLIGENCE LAYER =====
        Claims in this section are scoped to the companion products. All seven
        assemble structured context on every turn; five also pass live task state;
        durable memory and safety mechanisms vary by product and are named accordingly. -->
   <section class="block systems" id="ai">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow">Shared intelligence</span>
-        <h2>The model is only one layer.</h2>
+        <span class="eyebrow">Our intelligence layer</span>
+        <h2>The model is only one part.</h2>
         <p>Our companion products do not begin each turn with an empty chat box. They assemble the right context, carry continuity on purpose, apply rules the domain can defend, and return the result through an interface built for the task.</p>
       </div>
 
