@@ -8,3 +8,5 @@
 *.p12
 *.p8
 *.keystore
+.claude/
+**/.claude/
