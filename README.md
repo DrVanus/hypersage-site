@@ -1,67 +1,100 @@
 # Hypersage AI Labs — studio site
 
-Static, no-build marketing site for **Hypersage AI Labs**, the parent studio for a
-twelve-product portfolio: Wingmate, Quietoak, CryptoSage AI, Saffra, StoryVault AI,
-Nightshelf, Hexhunter, Mythwright, The One, Rowan, Alder and Waddleton.
+> **This file is served publicly at `https://hypersage.ai/README.md`.** GitHub Pages
+> serves every tracked file in the branch, including this one. Nothing in here may
+> contradict the live site, name a mailbox that does not work, or quote a number the
+> pages do not quote. If you need to write something internal, write it somewhere that
+> is not in this tree.
 
-Eleven of the twelve are iOS apps. **Waddleton is a browser game** — it is on neither
+Static, no-build site for **Hypersage AI Labs**, the parent studio, plus the eleven
+product sites that live under it as subfolders.
+
+Thirteen products: Wingmate, Quietoak, CryptoSage AI, Saffra, StoryVault AI, Nightshelf,
+Hexhunter, Mythwright, The One, Rowan, Alder, Waddleton and Mythkin.
+
+Twelve of the thirteen are iOS apps. **Waddleton is a browser game** — it is on neither
 store and is played free at <https://waddleton.pages.dev/>. Copy that describes the
 portfolio should say "iOS apps and a browser game", not "iOS apps".
 
-**Studio-name spelling: `Hypersage`** — one capital H, lowercase `s`. That is the
-spelling used everywhere on this site (titles, JSON-LD `name`, copyright lines, nav and
-footer wordmarks). The three newest product sites currently sign their footers
-"A HyperSage Studio App/Game" with a capital S; those are separate repos and should be
-matched to `Hypersage` there, not here.
+## Two names, and they are not interchangeable
 
-## Canonical domain — read this first
+- **`Hypersage`** — one capital H, lowercase `s` — is the trading style. It is what the
+  wordmark, `<title>`s, JSON-LD `name`, nav and body copy use.
+- **`HyperSage AI Labs LLC`** — capital S, **no comma before LLC** — is the registered
+  Delaware entity. It belongs in copyright lines, liability clauses, indemnity clauses
+  and the JSON-LD `legalName`, and nowhere else. `index.html`'s footer and
+  `privacy.html`'s footer both carry it correctly; do not "fix" either to match the
+  wordmark.
 
-`hypersage.ai` is the **intended** brand domain and it is **not registered**. A DNS
-lookup returns `NXDOMAIN`: no A record, no NS, no MX. There is no `CNAME` file in this
-repo either. The site is actually served from the GitHub Pages project URL:
+Some product footers still sign "A HyperSage Studio App/Game" as a *style*; those should
+become `© 2026 HyperSage AI Labs LLC`, which is the entity, not a restyled wordmark.
 
-```
-https://drvanus.github.io/hypersage-site/
-```
+## Canonical domain
 
-Every self-referencing URL on the site now points there — `<link rel="canonical">`,
-`og:url`, `og:image`, `twitter:image`, the JSON-LD `url`/`logo`/`image`, `sitemap.xml`,
-`robots.txt`, and `canonical_url` in `site-audit-contract.json`.
+`hypersage.ai` is registered, live, and attached to this repo. `CNAME` in the repo root
+contains `hypersage.ai`; DNS is Cloudflare Registrar with apex A records pointing at
+GitHub Pages, **DNS-only / grey cloud** (proxying breaks Pages' certificate issuance);
+Enforce HTTPS is on. GitHub 301s the old `drvanus.github.io/hypersage-site/*` paths to
+the domain, path preserved.
 
-When `hypersage.ai` is registered, the switch-over checklist lives in an HTML comment
-beside the canonical link in `index.html` `<head>`. In short: update the four HTML pages,
-`sitemap.xml`, `robots.txt` and the audit contract, add a `CNAME` file containing
-`hypersage.ai`, point DNS at GitHub Pages — and stand up the mailbox, because
-**`hypersageailabs@gmail.com` cannot receive mail today** (no MX record on an unregistered domain)
-even though it is the contact address on every page. That is the highest-priority
-follow-up on this site.
+`support@hypersage.ai` is live via Cloudflare Email Routing. It is the contact address on
+every page and the `mailto:` links reach a real mailbox.
 
-## Pages
+Every self-referencing URL — `<link rel="canonical">`, `og:url`, `og:image`,
+`twitter:image`, JSON-LD `url`/`logo`/`image`, `sitemap.xml`, `robots.txt` and
+`canonical_url` in `site-audit-contract.json` — is on `https://hypersage.ai/`.
 
-- `index.html` — the whole landing page: inline CSS, a small scroll-reveal script, no build step.
-- `privacy.html` — website-only privacy policy (this site collects nothing; discloses GitHub Pages and Google Fonts by name).
+## Layout
+
+The eleven app sites are **subfolders of this repo**, not separate origins: `/alder/`,
+`/hexhunter/`, `/mythkin/`, `/mythwright/`, `/nightshelf/`, `/quietoak/`, `/rowan/`,
+`/saffra/`, `/storyvault/`, `/waddleton/`, `/wingmate/`. One domain and one certificate
+serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
+(`drvanus.github.io/theone-app/`) are still on their own origins.
+
+### Studio pages
+
+- `index.html` — the landing page: inline CSS, one small scroll-reveal script, no build
+  step. Section order is `products → ai → approach → about → contact` and it must match
+  the nav in both the desktop links and the mobile `<details>` menu.
+- `privacy.html` — studio-site privacy policy. Scoped to the studio pages by name,
+  because the subfolders are now the same origin and `/saffra/` runs a Firebase-backed
+  email form.
 - `terms.html` — website-only terms.
 - `support.html` — contact, per-product site index, billing/refunds, security reporting.
-- `404.html` — branded not-found page (noindex, links home).
-- `marketing.html` — **internal artifact.** A gallery of App Store screenshots and social ad creatives under `marketing/assets/`. Nothing on the public site links to it; it is `noindex` and deliberately carries no canonical/OG tags. Its `<head>` does now declare `color-scheme` / `theme-color` so its hardcoded dark palette renders correctly.
+- `404.html` — branded not-found page (noindex, links home). The eight nested `404.html`
+  files in product subfolders are never served; only the root one is.
 
 ## Assets
 
-- `logo.png` / `favicon.png` / `apple-touch-icon.png` — the Hypersage mark (teal→violet infinity). Source in `brand/`.
-- `icons/` — 256px app icons for all 12 products (hero strip + product grid). All 12 are referenced by `index.html`.
-- `og-image.png` — 1200×630 social card. Referenced with the `?v=20260731a` cache-buster on all four public pages; bump the suffix whenever the bytes change.
-- `shots/` — **orphaned.** Eight app screenshots (`cryptosage`, `hexhunter`, `mythwright`, `nightshelf`, `quietoak`, `saffra`, `storyvault`, `theone`) left over from a removed "A look at the work" showcase. No page in this repo references `shots/` any more. They are kept, not deleted, in case the showcase returns — but nothing renders them today.
+- `logo.png` / `favicon.png` / `apple-touch-icon.png` — the Hypersage mark (teal→violet
+  infinity). Source in `brand/`.
+- `icons/` — 256px app icons for all 13 products (hero strip + product grid). All 13 are
+  referenced by `index.html`.
+- `og-image.png` — 1200×630 social card, referenced with the `?v=20260806b` cache-buster
+  on all four studio pages. Bump the suffix whenever the bytes change, in all four.
+- `shots/` — **orphaned.** Two leftover screenshots (`quietoak.jpg`, `theone.jpg`) from a
+  removed "A look at the work" showcase. Nothing in this repo references them.
 - `legal.css` — shared stylesheet for the three legal pages.
-- `robots.txt`, `sitemap.xml`, `.nojekyll` — deploy/discovery support.
+- `robots.txt`, `sitemap.xml`, `sitemap-main.xml`, `.nojekyll` — deploy/discovery.
+
+`robots.txt` at the repo root is the **only** one that does anything, because a crawler
+reads robots.txt from an origin root only. Eight subfolders still carry an inert one each;
+delete them when convenient and do not add more.
+
+`sitemap.xml` is a sitemap **index**. Every product subfolder that has a `sitemap.xml`
+needs a child entry there or its pages go undeclared — all eleven are listed today.
 
 ## Status vocabulary
 
 Product cards use one of: `Coming soon`, `In development`, `In beta`, `Live now`. Only
-Waddleton is `Live now`. The gradient `badge-spotlight` style ("✦ New") is currently
-unused — it read as *newly shipped* next to that vocabulary, and none of the products
-carrying it had launched. Keep it for the first product that genuinely ships.
+Waddleton is `Live now`, and it is live in a browser — **nothing is on the App Store
+yet**. The gradient `badge-spotlight` style ("✦ New") is currently unused; keep it for
+the first product that genuinely ships to a store.
 
-Each card's status must match what that product's own site says. Check before changing one.
+Each card's status must match what that product's own site says, and the two launch
+sentences on `index.html` (the `#approach` intro and the `#about` paragraph) must move
+the week the first App Store approval lands.
 
 ## Audit gate
 
@@ -70,11 +103,12 @@ python3 ~/.claude/skills/no-build-marketing-site/site_audit.py . --contract site
 ```
 
 `--contract` takes a **bare filename relative to the site directory**. It must end with
-`0 failure(s)`. The contract file records the evidence behind the site's absolute claims
+`0 failure(s)`. The contract records the evidence behind the site's absolute claims
 (`no_account`, `no_ads`, `offline`, `no_tracking`) — add evidence there before adding any
-new absolute claim to a page.
+new absolute claim to a page, and **re-derive the evidence when the code moves**. A gate
+that certifies a stale fact is worse than no gate.
 
-## Deploy (GitHub Pages, same pattern as the app sites)
+## Deploy (GitHub Pages)
 
 ```bash
 cd ~/Developer/DrVanus/hypersage-site
@@ -82,4 +116,4 @@ git add -A && git commit -m "…" && git push origin main
 ```
 
 Remote is `git@github.com:DrVanus/hypersage-site.git`; Pages serves the default branch at
-the project URL above.
+`https://hypersage.ai/`.

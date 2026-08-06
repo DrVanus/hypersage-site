@@ -34,13 +34,14 @@
       This policy covers both the Saffra iOS app and the email you give us on the early-access list on this website. We will flag material changes here and in-app before they take effect.
     </div>
 
-    <p><strong>Saffra</strong> ("the app", "we", "us") is an AI cooking companion built by Daniel Muskin. This policy explains what data we collect, how we use it, and the choices you have. It's written in plain English — no dark patterns.</p>
+    <p><strong>Saffra</strong> ("the app", "we", "us") is an AI cooking companion built by HyperSage AI Labs LLC. This policy explains what data we collect, how we use it, and the choices you have. It's written in plain English — no dark patterns.</p>
 
     <h2>The short version</h2>
     <ul>
       <li>We collect only what the app needs to work: your identity (via Sign in with Apple), your cooking profile (equipment, allergies, preferences), your pantry, your conversation history with the chef, and recipes you import.</li>
       <li>We use this data <strong>solely to operate the app</strong> — personalize the chef, remember your pantry, adapt recipes for you. We do not sell it, we do not use it to train models, we do not share it with advertisers.</li>
       <li>Voice transcription runs <strong>on your device</strong> by default.</li>
+      <li>Two things do leave your device to be read by an AI provider: a photo of a shelf when you ask Saffra to identify what's on it, and a short audio clip if on-device transcription fails in a noisy kitchen. Both are detailed below; neither is stored.</li>
       <li>You can delete your account and all associated data at any time.</li>
     </ul>
 
@@ -64,8 +65,20 @@
 
     <h3>Pantry</h3>
     <ul>
-      <li><strong>Items you add manually, via barcode scan, or via receipt scan</strong> — including names, quantities, expirations, brand, and allergens.</li>
+      <li><strong>Items you add manually, via barcode scan, via receipt scan, or by photographing a shelf</strong> — including names, quantities, expirations, brand, and allergens.</li>
       <li><strong>Receipt and cookbook photos</strong>: OCR runs on your iPhone via Apple's Vision framework. The <strong>image never leaves your device</strong>. Only the extracted text is sent to us for parsing.</li>
+      <!-- REQUIRED DISCLOSURE — do not delete. The ingredient/shelf photo is the ONE
+           image path that leaves the phone. saffra-ios/MasterChef/Pantry/
+           IngredientCameraScanView.swift:4-5: "upload to /v1/pantry/ingest/photo where
+           the vision model identifies them". saffra-api/app/pantry/photo_vision.py:1-7
+           sends the image to `utility_model()` = `llm_utility_model` (config.py:23,
+           default gpt-4o-mini) through `get_llm()`, which is an AsyncOpenAI client and
+           can only be OpenAI or a local Ollama (infra/llm_client.py:1-46) — so on the
+           deployed service this is OpenAI. app/pantry/routes.py:380-420 writes nothing
+           to the database or object storage; the response is a preview list the user
+           confirms. This clause is what makes the receipt/cookbook "never leaves your
+           device" sentence above safe to keep. -->
+      <li><strong>Ingredient photos (fridge, counter, or shelf)</strong>: this one is different. When you photograph a shelf so Saffra can identify what's on it, <strong>the image is uploaded to our server and passed to OpenAI's vision model</strong>, which returns a list of the foods it thinks it can see. We show you that list to confirm before anything is added to your pantry. We do not store the image — it is held in memory for the request, and neither we nor OpenAI use it to train models. Receipt and cookbook pages are not sent this way; only the shelf photo is.</li>
     </ul>
 
     <h3>Conversations</h3>
@@ -96,7 +109,11 @@
 
     <h3>Usage</h3>
     <ul>
-      <li>Per-user counters of chat messages, voice characters, and Whisper seconds, used to enforce daily limits and for aggregate cost monitoring. Not shared externally.</li>
+      <!-- "lifetime and daily" is load-bearing: the free chat allowance is a LIFETIME
+           counter of 10 with no reset (saffra-api/app/config.py:146
+           `free_chat_lifetime`, app/ratelimit/limiter.py:54 key `rl:chat:lifetime:` with
+           no TTL). Saying only "daily limits" here contradicts the pricing page. -->
+      <li>Per-user counters of chat messages, recipe adaptations, photo scans, voice characters, and Whisper seconds, used to enforce lifetime, monthly and daily limits and for aggregate cost monitoring. Not shared externally.</li>
     </ul>
 
     <h3>We do NOT collect</h3>
@@ -121,7 +138,7 @@
       <li><strong>Anthropic (Claude)</strong> — your chat messages and a summary of your profile and pantry are sent to Anthropic to generate and adapt the chef's replies. Governed by <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a>. Neither we nor Anthropic use your content to train models.</li>
       <li><strong>Voyage AI</strong> — your search queries and recipe text are sent to Voyage for embedding. Governed by <a href="https://www.voyageai.com/privacy" target="_blank" rel="noopener">Voyage's privacy policy</a>.</li>
       <li><strong>ElevenLabs</strong> — text you want spoken is sent to ElevenLabs. Governed by their privacy policy.</li>
-      <li><strong>OpenAI (Whisper, fallback only)</strong> — audio sent <em>only</em> when you explicitly use the noisy-kitchen voice fallback. Governed by <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's privacy policy</a>.</li>
+      <li><strong>OpenAI</strong> — two paths. (1) <strong>Vision</strong>: when you photograph a shelf to add ingredients, that image is sent to OpenAI's vision model to identify the foods in it. (2) <strong>Whisper</strong>: audio sent <em>only</em> when the noisy-kitchen voice fallback is used. Governed by <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's privacy policy</a>. Neither the image nor the audio is retained by us, and neither is used to train models.</li>
       <li><strong>USDA FoodData Central</strong> — ingredient names are sent to look up nutrition information. No personal data.</li>
       <li><strong>Open Food Facts</strong> — barcode lookups send just the barcode number. No personal data.</li>
       <li><strong>Google Firebase</strong> — for the early-access waitlist on this website only. Stores your email address until launch notification is sent.</li>
@@ -135,6 +152,7 @@
       <li><strong>Conversations</strong> — individual messages may be auto-summarized and deleted after ~20 turns; summaries persist until you delete the conversation.</li>
       <li><strong>TTS audio cache</strong> — until you delete your account.</li>
       <li><strong>Voice audio for Whisper fallback</strong> — not stored; discarded after transcription.</li>
+      <li><strong>Ingredient/shelf photos</strong> — not stored; held only for the length of the request that identifies the foods in them, then discarded.</li>
       <li><strong>Community posts, photos, comments, likes, follows, blocks, notifications</strong> — until you delete them individually or delete your account. When you delete your account we hard-delete the photos from object storage and remove the associated rows. Reports you've filed are retained in an anonymized form so we can keep acting on repeat abuse.</li>
       <li><strong>Waitlist email</strong> — until launch notification is sent or you ask for removal, whichever is sooner.</li>
     </ul>

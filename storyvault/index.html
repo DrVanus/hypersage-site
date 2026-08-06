@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StoryVault AI — Branching tales, written with you.</title>
-  <meta name="description" content="Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty-seven classics included. Free to try.">
+  <!-- Bundled-book count is 81, not 87: six US-only-public-domain titles were removed
+       (commit f7075b6, 2026-08-04). Verify with
+       `ls storyvault-ios/StoryVaultAI/StoryVaultAI/Resources/Books/*.txt | wc -l`
+       before changing this number anywhere on the site. terms.html:66 already says 81. -->
+  <meta name="description" content="Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty-one classics included. Free to try.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/storyvault/">
 
@@ -34,7 +38,7 @@
     "name": "StoryVault AI",
     "operatingSystem": "iOS",
     "applicationCategory": "EntertainmentApplication",
-    "description": "Branching interactive fiction built on 87 public-domain classics plus myth, folklore, history, and original worlds. Every choice rewrites the next page.",
+    "description": "Branching interactive fiction built on 81 public-domain classics plus myth, folklore, history, and original worlds. Every choice rewrites the next page.",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   }
   </script>
@@ -1047,7 +1051,7 @@
   "name": "StoryVault AI",
   "applicationCategory": "EntertainmentApplication",
   "operatingSystem": "iOS",
-  "description": "Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty-seven classics included. Free to try.",
+  "description": "Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty-one classics included. Free to try.",
   "url": "https://hypersage.ai/storyvault/",
   "author": {
     "@type": "Organization",
@@ -1095,7 +1099,7 @@
             <a href="#how" class="btn-outline">See how it works</a>
           </div>
           <div class="hero-trust">
-            <span>87 classics bundled</span>
+            <span>81 classics bundled</span>
             <span>No account needed</span>
             <span>Free to try</span>
           </div>
@@ -1125,12 +1129,17 @@
   <!-- ===== STATS STRIP ===== -->
   <div class="container">
     <div class="stats-strip reveal">
+      <!-- 81 = `ls .../Resources/Books/*.txt | wc -l`. 250+ = Scenario.all in a Release
+           build, which computes to 258 today: originals 22 + bookThemed 81 + myths 34
+           + folklore 33 + stageScreen 29 + history 35 + epicPoetry 24 (devOnly is
+           DEBUG-only and empty in Release). The page previously said 190+ here and
+           "195 doors" two sections down; both were stale and disagreed with each other. -->
       <div class="stat">
-        <span class="stat-value grad">87</span>
+        <span class="stat-value grad">81</span>
         <span class="stat-label">Classics included</span>
       </div>
       <div class="stat">
-        <span class="stat-value grad">190+</span>
+        <span class="stat-value grad">250+</span>
         <span class="stat-label">AI scenarios</span>
       </div>
       <div class="stat">
@@ -1155,7 +1164,7 @@
           <ol class="how-steps">
             <li>
               <h4>Pick a tale</h4>
-              <p>Eighty-seven bundled classics — Dracula, Sherlock, Beowulf, the Odyssey — each with a hand-curated AI scenario. Plus myth, folklore, history, stage, and epic-poetry worlds. Or invent your own.</p>
+              <p>Eighty-one bundled classics — Dracula, Sherlock, Beowulf, the Odyssey — each with a hand-curated AI scenario. Plus myth, folklore, history, stage, and epic-poetry worlds. Or invent your own.</p>
             </li>
             <li>
               <h4>Read what the AI writes</h4>
@@ -1202,13 +1211,17 @@
             <div class="turn-choice"><span class="n">3</span> Send Pell to shadow the errant sentry first</div>
           </div>
           <div class="turn-custom">Or type your own — "What if I refused the invitation?"</div>
-          <p class="turn-note">The turn shown on the phone, set in readable type — a live run of the real Prismshard Heist scenario. Each turn opens with a scene the app paints for it; every branch is written fresh, so no two runs are the same.</p>
+          <!-- Per-turn scene art is Pro-only: EntitlementStore.swift:43-44 sets the free
+               tier to imageGenerationsPerMonth/PerDay = 0, and AdventureView.swift:4222
+               sends `wantImage: purchase.isPremiumUser`. Free users get zero scene art,
+               ever — do not drop the "with Pro" qualifier here, at :1288, or in the FAQ. -->
+          <p class="turn-note">The turn shown on the phone, set in readable type — a live run of the real Prismshard Heist scenario. With Pro, each turn opens with a scene the app paints for it; every branch is written fresh, so no two runs are the same.</p>
         </div>
       </div>
 
-      <div class="section-eyebrow center">195 doors, one vault</div>
+      <div class="section-eyebrow center">250+ doors, one vault</div>
       <h2 style="text-align:center;" class="reveal">Pick a world. <em class="grad">Any world.</em></h2>
-      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Six of the worlds waiting inside — horror, fantasy, sci-fi, mystery, high-seas adventure, and the Old West. Each opens under a cover the app paints for it, then branches turn by turn from the premise below. Every classic on the shelf has one too, and the original worlds are built for nothing else.</p>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Six of the worlds waiting inside — horror, fantasy, sci-fi, mystery, high-seas adventure, and the Old West. Each opens under its own painted cover, then branches turn by turn from the premise below. Every classic on the shelf has one too, and the original worlds are built for nothing else.</p>
 
       <div class="adv-worlds-grid reveal-stagger">
         <div class="world-card">
@@ -1260,7 +1273,7 @@
           </div>
         </div>
       </div>
-      <p class="adv-more reveal">Plus <strong>87 classics</strong> with scenarios in the source's own voice, and whole shelves of <strong>myth, folklore, history, stage &amp; screen, and epic poetry</strong> — 190+ scenarios in all.</p>
+      <p class="adv-more reveal">Plus <strong>81 classics</strong> with scenarios in the source's own voice, and whole shelves of <strong>myth, folklore, history, stage &amp; screen, and epic poetry</strong> — 250+ scenarios in all.</p>
     </div>
   </section>
 
@@ -1275,7 +1288,7 @@
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5C10.3 4.2 8 3.6 4.8 3.6a.8.8 0 0 0-.8.8v12.4a.8.8 0 0 0 .8.8c3.2 0 5.5.6 7.2 1.9 1.7-1.3 4-1.9 7.2-1.9a.8.8 0 0 0 .8-.8V4.4a.8.8 0 0 0-.8-.8C16 3.6 13.7 4.2 12 5.5z"/><path d="M12 5.5V19.5"/></svg></div>
           <h3>Live a classic</h3>
-          <p>Eighty-seven public-domain books pre-loaded — Dracula, Pride &amp; Prejudice, Sherlock Holmes, Treasure Island, the Odyssey, and 82 more. Each has its own AI Adventure scenario calibrated to the source's voice.</p>
+          <p>Eighty-one public-domain books pre-loaded — Dracula, Pride &amp; Prejudice, Sherlock Holmes, Treasure Island, the Odyssey, and 76 more. Each has its own AI Adventure scenario calibrated to the source's voice.</p>
         </div>
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.4L12 17l-1.9-5.6L4.5 10l5.6-1.4z"/><path d="M18.5 15.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg></div>
@@ -1285,12 +1298,15 @@
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5l6 6-9 9c-1.3 1.3-3.2 1.6-4.4.4-1.2-1.2-.9-3.1.4-4.4z"/><path d="M11 7l6 6"/><path d="M7 15.5c-1.6.4-2.5 1.6-3 3.5 1.9-.5 3.1-1.4 3.5-3"/></svg></div>
           <h3>Painted, not printed</h3>
-          <p>Every book and adventure gets a painted cover in a Victorian-engraving-meets-illuminated-manuscript style — 87 painted classics, plus a fresh cover conjured for each story you start. In AI Adventure, every turn opens with a new scene the app paints for the moment.</p>
+          <p>Every book and adventure gets a painted cover in a Victorian-engraving-meets-illuminated-manuscript style — 81 painted classics, plus a fresh cover conjured for each story you start. In AI Adventure with Pro, every turn opens with a new scene the app paints for the moment.</p>
         </div>
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4.5" width="4.5" height="15" rx="1"/><rect x="9.5" y="4.5" width="4.5" height="15" rx="1"/><path d="M15.4 5.6l3.8 1 .9 13.4-4.2-1.1z" transform="rotate(-6 17 12)"/></svg></div>
           <h3>A reader, too</h3>
-          <p>Saved books open into a clean, themable reader — adjustable size, serif/sans/mono, light/sepia/dark, chapter narration that reads aloud, and navigation that remembers where you left off.</p>
+          <!-- Reader options are exactly what ReaderTheme.swift ships: :41 ReaderFontFamily
+               is `serif, system` (no monospace) and :28 ReaderThemeName is `system, sepia,
+               dark`, displayed Brand / Sepia / Dark (there is no "light"). -->
+          <p>Saved books open into a clean, themable reader — adjustable size, serif or sans, brand/sepia/dark themes, chapter narration that reads aloud, and navigation that remembers where you left off.</p>
         </div>
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.5V7a3 3 0 0 0 3 3M17 5.5h2.5V7a3 3 0 0 1-3 3"/><path d="M12 13v3M9 20h6M10 20l.5-4h3l.5 4"/></svg></div>
@@ -1300,7 +1316,10 @@
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.5v5.2c0 4.3-2.9 7.6-7 9-4.1-1.4-7-4.7-7-9V5.5z"/><rect x="9.3" y="10.8" width="5.4" height="4.5" rx="1"/><path d="M10.4 10.8V9.6a1.6 1.6 0 0 1 3.2 0v1.2"/></svg></div>
           <h3>Yours alone</h3>
-          <p>Saved adventures and reading progress live on your device — no account, no login, no telemetry tied to your name. The AI never trains on your stories.</p>
+          <!-- Not "no login": AuthStore.swift ships Google Sign-In and Keychain tokens, and
+               publishing / liking / reporting in Tales check `isSignedIn`. Reading and
+               playing genuinely need no account — keep the claim scoped to that. -->
+          <p>Saved adventures and reading progress live on your device. No account needed to read or play — signing in is only for publishing to Tales — and no telemetry tied to your name. The AI never trains on your stories.</p>
         </div>
       </div>
     </div>
@@ -1420,7 +1439,7 @@
   <section class="section-block tight">
     <div class="container">
       <div class="section-eyebrow center">The bundled vault</div>
-      <h2 style="text-align:center;" class="reveal"><em class="grad">Eighty-seven</em> classics, free forever</h2>
+      <h2 style="text-align:center;" class="reveal"><em class="grad">Eighty-one</em> classics, free forever</h2>
       <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">All public-domain. All offline-readable. All yours to keep.</p>
       <div class="library-tape reveal">
         <div class="library-chip"><em>Dracula</em> · Bram Stoker</div>
@@ -1435,7 +1454,8 @@
         <div class="library-chip"><em>The Count of Monte Cristo</em> · A. Dumas</div>
         <div class="library-chip"><em>Wuthering Heights</em> · Emily Brontë</div>
         <div class="library-chip"><em>Carmilla</em> · J. Sheridan Le Fanu</div>
-        <div class="library-chip">+ 75 more</div>
+        <!-- 12 titles are named above, so this is 81 - 12 = 69. Recount if a chip is added. -->
+        <div class="library-chip">+ 69 more</div>
       </div>
     </div>
   </section>
@@ -1460,14 +1480,19 @@
             <li>AI-painted scene art every turn</li>
           </ul>
         </div>
+        <!-- Prices must match what is registered at ASC: Configuration.storekit:74 monthly
+             displayPrice 9.99, :95 annual displayPrice 59.99. The page previously showed
+             $79.99 (corrected in the app by commit 98b0ab4) and claimed both "save 33%"
+             and "two months free", which cannot both be true. At 59.99 vs 9.99x12=119.88
+             the saving is 50%. The app computes this live in
+             SubscriptionView.swift annualSavingsText(), so any drift is visible in-app. -->
         <div class="plan featured">
           <h3>Annual</h3>
-          <div class="price grad">$79.99</div>
-          <div class="period">per year — save 33% vs. monthly</div>
+          <div class="price grad">$59.99</div>
+          <div class="period">per year — save 50% vs. monthly</div>
           <ul>
             <li>Everything in Monthly</li>
             <li>7-day free trial</li>
-            <li>Two months free vs. monthly</li>
             <li>Renews yearly, cancel anytime</li>
             <li>AI-painted scene art every turn</li>
           </ul>
@@ -1493,11 +1518,16 @@
         </details>
         <details class="faq">
           <summary>Does the AI train on my stories?</summary>
-          <p>No. Your input is sent to our backend for the duration of the request, forwarded to OpenAI for generation, and not stored on either end. We don't sell or share your input.</p>
+          <!-- Apple 5.1.2(i) provider disclosure — must match the app's own, in
+               SettingsView.swift:613: narrative is Anthropic's Claude with OpenAI as the
+               failover; scene art and premium voice narration are OpenAI. Do not simplify
+               this back to "OpenAI" — the site was the only surface saying that, and
+               privacy.html had the two providers the wrong way round. -->
+          <p>No. Your input is sent to our backend for the duration of the request, forwarded to Anthropic's Claude to write the next page (with OpenAI as a failover), and to OpenAI for scene art and voice narration. It isn't stored on either end, and we don't sell or share your input.</p>
         </details>
         <details class="faq">
           <summary>Can I read offline?</summary>
-          <p>The 87 bundled books are fully offline-readable. AI Adventure requires a network connection — every turn is generated live by the model.</p>
+          <p>The 81 bundled books are fully offline-readable. AI Adventure requires a network connection — every turn is generated live by the model.</p>
         </details>
         <details class="faq">
           <summary>What happens if I cancel Pro?</summary>
@@ -1508,12 +1538,22 @@
           <p>StoryVault is built around literature — period-correct prose, hand-tuned scenarios, a real reader for the source books. The AI keeps you in the source's voice instead of letting the story drift into generic fantasy.</p>
         </details>
         <details class="faq">
-          <summary>iPad? Mac? Android?</summary>
-          <p>iOS first. iPad works on the same iOS app. Android and Mac are on the roadmap but not committed yet.</p>
+          <!-- iPhone only: TARGETED_DEVICE_FAMILY = 1 at project.pbxproj:449,487,508,530.
+               iPad support was deliberately dropped under Guideline 4.0 (commit 98b0ab4).
+               Do not restore an iPad claim without changing the build setting first. -->
+          <summary>Which devices does it run on?</summary>
+          <p>iPhone first. iPad and Mac are on the roadmap; Android is not committed.</p>
         </details>
         <details class="faq">
           <summary>I'm a teacher / parent / reviewer — how do I evaluate it?</summary>
-          <p>The bundled library is all public-domain material rated 12+. The AI Adventure system prompt explicitly excludes explicit sexual content and child endangerment. Reach out at <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> for review codes.</p>
+          <!-- Rating is 13+, not 12+: SHIP.md:131,147 — the age-rating questionnaire's
+               social-media question must be answered "Yes" because of the community Tales
+               feed, and that forces a 13+ floor.
+               The prompt quote must stay exact. system.md:18-19 says "Do not include
+               explicit sexual content or content that sexualizes minors" — it does NOT
+               exclude child endangerment generally; peril involving children is normal in
+               the source literature, so the old wording overclaimed to reviewers. -->
+          <p>StoryVault AI is rated 13+ on the App Store — the community Tales feed sets that floor. The bundled library is public-domain literature, and the AI Adventure system prompt explicitly excludes explicit sexual content and any content that sexualizes minors. Reach out at <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> for review codes.</p>
         </details>
       </div>
     </div>
@@ -1523,7 +1563,7 @@
   <section class="cta-strip">
     <div class="ornament" aria-hidden="true">✦</div>
     <h2 class="reveal">The page is <em class="grad">open.</em></h2>
-    <p class="reveal">Free to try. Eighty-seven classics already in the vault. The next one is yours to write.</p>
+    <p class="reveal">Free to try. Eighty-one classics already in the vault. The next one is yours to write.</p>
     <a href="#plans" class="btn-warm">
       <span>Get StoryVault AI</span>
       <span aria-hidden="true">→</span>

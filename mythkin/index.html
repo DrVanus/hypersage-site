@@ -90,8 +90,14 @@ and the app says so on every screen where you talk to them.</p>
     <h3>Make someone</h3>
     <p>A cottage witch who always has tea on. A starship AI with a dry streak. A
     hype-man best friend. You choose their warmth, humour, energy and candour, write
-    their backstory and their opening line, and their portrait is painted once — so
-    they stay the same character every time you see them.</p>
+    their backstory and their opening line, and give them a colour and a mark that
+    stays theirs — so they look the same character every time you see them.</p>
+    <!-- TRUE AS OF 2026-08-06: only the twelve seeded legends get painted portraits
+         (mythkin-app/app.js PORTRAIT_IDS is a hardcoded Set of those twelve ids;
+         everything else renders the hue-orb placeholder). A painted portrait for a
+         user-made character does not exist yet — mythkin-api/app/chat/routes.py:427
+         says so in as many words. Do not restore "their portrait is painted once"
+         here until a create-flow portrait actually ships. -->
   </div>
 
   <div class="card">
@@ -130,8 +136,17 @@ and the app says so on every screen where you talk to them.</p>
 
 <h2>Pricing</h2>
 <p>Free to use, with a message limit and one character of your own. <strong>Mythkin
-Plus</strong> removes the limit, keeps memory uncapped, and adds voice and more
-characters. Prices are shown in the app, in your own currency, by your app store.</p>
+Plus</strong> removes the limit, keeps memory uncapped, and raises the number of
+characters you can make and borrow. Prices are shown in the app, in your own
+currency, by your app store.</p>
+<!-- TRUE AS OF 2026-08-06: Mythkin has NO voice feature — no speech synthesis, no
+     TTS route, nothing in mythkin-app/*.js. ("voice" in mock-data.js is a writing-
+     style label, not audio.) mythkin-app/plus.js:24 lists voice as an aspiration
+     only. Plus buys: the free window lifted (config.py free_window_messages/
+     free_window_hours), memory uncapped (memory/service.py capacity), created
+     characters 1 -> 5 (config.py free_/plus_max_created_characters) and borrowed
+     3 -> unlimited (marketplace/routes.py:452). Do not re-add voice here until it
+     ships in the client. -->
 
 <footer class="site">
   <span>Mythkin — an app by HyperSage AI Labs</span>

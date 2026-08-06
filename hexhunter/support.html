@@ -120,7 +120,7 @@
     <p>Feature requests are welcome too. We can't promise anything ships, but they are read.</p>
 
     <h2>Where your data goes</h2>
-    <p>Nowhere we control. Hexhunter has <strong>no account, no login, and no server of ours</strong> — the app makes no network calls of its own, and there are no analytics or advertising SDKs in it. Everything you do in the game stays in the app's storage on your iPhone.</p>
+    <p>Nowhere we control. Hexhunter has <strong>no account of ours, no tracking, and no server of ours</strong><!-- Not "no login": Sources/Core/GameCenterManager.swift:14 arms the Game Center auth handler at launch and :29 is an explicit sign-in button in Settings. The next sentence names it. --> — the app makes no network calls of its own, and there are no analytics or advertising SDKs in it. Everything you do in the game stays in the app's storage on your iPhone.</p>
     <p>The two exceptions both belong to Apple, not to us: <strong>Game Center</strong> handles leaderboard scores if you choose to sign in, and <strong>StoreKit</strong> handles purchases and restores. Both are governed by <a href="https://www.apple.com/legal/privacy/" rel="noopener">Apple's Privacy Policy</a>. We never receive your Apple ID or payment details.</p>
     <p>The full details are in the <a href="privacy-policy.html">Privacy Policy</a>, and the rules for using the app are in the <a href="terms.html">Terms of Use</a>.</p>
 

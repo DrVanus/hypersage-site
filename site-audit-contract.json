@@ -5,31 +5,33 @@
     "no_account": {
       "approved": true,
       "evidence": [
-        "Rowan card: rowan-api v1 is accountless \u2014 identity is a client-minted UUID sent as X-Device-Id; see rowan-site/site-audit-contract.json.",
-        "Quietoak and Alder are likewise accountless; see quietoak-site/privacy.html and alder-site/site-audit-contract.json."
+        "Rowan: rowan-api v1 is accountless — identity is a client-minted UUID sent as X-Device-Id (rowan-app/api.js).",
+        "Quietoak and Alder are likewise accountless (anchor-ios/Anchor/Auth/AnchorSignInView.swift:179 states it in-app; alder-app/api.js identifies by X-Device-Id).",
+        "SCOPE, corrected 2026-08-06: 11 of 12 app repos work with no account. SAFFRA IS THE EXCEPTION — saffra-ios/MasterChef/App/MasterChefApp.swift:118-125 gates the root on Sign in with Apple. Any absolute 'no account' phrasing on the front page must carry that exception; index.html now names it."
       ]
     },
     "no_ads": {
       "approved": true,
       "evidence": [
-        "Rowan: docs/PLAN.md \u00a76 forbids ad and analytics SDKs touching health data; none are present.",
-        "Waddleton: js/economy.js adAvailable() and watchAd() return false unconditionally, and no ad SDK ships in the client.",
+        "Rowan: docs/PLAN.md §6 forbids ad and analytics SDKs touching health data; none are present.",
+        "Waddleton: PenguinArcade/js/economy.js adAvailable() and watchAd() return false unconditionally, and no ad SDK ships in the client.",
         "Per-product evidence is recorded in each site's own site-audit-contract.json."
       ]
     },
     "offline": {
       "approved": true,
       "evidence": [
-        "Quietoak card claim 'crisis kit ... always free and works offline' matches the shipped Quietoak product copy at quietoak-site/index.html and its privacy page."
+        "Quietoak's crisis kit is mirrored on-device and its guided-audio corpus is fixed and client-mirrored (anchor-ios/Anchor/Voice/GuidedAudioCorpus.swift), so it plays with no network; storyvault-api/app/dbt/voice.py:31-34 states premium gating must never block crisis content."
       ]
     },
     "no_tracking": {
       "approved": true,
       "evidence": [
-        "hypersage-site is static HTML: a grep of every page for gtag, googletagmanager, google-analytics, PostHog, Plausible, Mixpanel, Amplitude, Segment, Hotjar, Clarity, Meta pixel, Matomo, Fathom, and Sentry returns no match.",
-        "No document.cookie, localStorage, or sessionStorage use anywhere in the site.",
-        "The only third-party hosts the pages contact are fonts.googleapis.com and fonts.gstatic.com (Google Fonts) plus GitHub Pages hosting \u2014 both are disclosed by name in privacy.html."
+        "No analytics or ad SDK ships: a grep of every page for gtag, googletagmanager, google-analytics, PostHog, Plausible, Mixpanel, Amplitude, Segment, Hotjar, Clarity, Meta pixel, Matomo, Fathom and Sentry returns no match.",
+        "No page's OWN code calls document.cookie, localStorage or sessionStorage — verified by grep across all HTML in this repo 2026-08-06. NOTE: the Firebase SDK on the Saffra page uses browser local storage at runtime, so this claim is about our code, not about the browser state a visitor ends up with. privacy.html:77 discloses it.",
+        "Third-party hosts contacted: fonts.googleapis.com and fonts.gstatic.com (Google Fonts) on every page, GitHub Pages for hosting, AND www.gstatic.com plus Google Firestore on /saffra/ only, which loads the Firebase SDK for its early-access form (saffra/index.html:1682-1693). The earlier 'the only third-party hosts are Google Fonts plus GitHub Pages' was true before the eleven product sites were folded in and is now false — do not restore it."
       ]
     }
-  }
+  },
+  "contract_notes": "Corrected 2026-08-06. This file certifies absolute claims made on the FRONT PAGE. It previously cited rowan-site/, quietoak-site/ and alder-site/ paths, which no longer exist — those sites are now subfolders of this repo. Re-verify against the app repos under /Users/dee/Developer/DrVanus/, not against sibling site repos."
 }

@@ -37,31 +37,47 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
+  <!-- STRUCTURED DATA — DO NOT REINTRODUCE `makesOffer` (removed 2026-08-06).
+       schema.org/Offer is an offer to transfer an item for consideration. Twelve of the
+       thirteen products are not on any store, none is obtainable, and none carries a
+       price — so thirteen Offer entries described a shop that does not exist, on the
+       same page that says "Nothing is on the App Store yet". Worse, one entry was
+       "The One", which on disk (theone-app/) is a landing page and no app at all.
+       The shape below is a @graph: one Organization, plus a node per product with
+       `publisher` pointing back at it. That states authorship, which is true, and
+       claims no purchase. Waddleton is the only node that carries an `offers` block,
+       because it is the only thing anyone can actually get today (free, in a browser).
+       Add an `offers` block to a product node ONLY when that product is live on a
+       store and the price matches App Store Connect. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Hypersage AI Labs",
-    "url": "https://hypersage.ai/",
-    "logo": "https://hypersage.ai/apple-touch-icon.png",
-    "image": "https://hypersage.ai/og-image.png?v=20260806b",
-    "description": "An independent studio building consumer software across dating, mental health, chronic illness, recovery, crypto, cooking, AI characters, fiction, sleep, and play.",
-    "email": "support@hypersage.ai",
-    "makesOffer": [
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Saffra", "applicationCategory": "Food & Drink", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "StoryVault AI", "applicationCategory": "Entertainment", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Nightshelf", "applicationCategory": "Lifestyle", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Quietoak", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "CryptoSage AI", "applicationCategory": "Finance", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Mythwright", "applicationCategory": "Game", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Wingmate", "applicationCategory": "Lifestyle", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Hexhunter", "applicationCategory": "Game", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "The One", "applicationCategory": "Lifestyle", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Rowan", "applicationCategory": "Medical", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication", "name": "Alder", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS" } },
-      { "@type": "Offer", "itemOffered": { "@type": "VideoGame", "name": "Waddleton", "applicationCategory": "Game", "operatingSystem": "Web" } },
-      { "@type": "Offer", "itemOffered": { "@type": "MobileApplication",
-        "name": "Mythkin", "applicationCategory": "EntertainmentApplication", "operatingSystem": "iOS" } }
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://hypersage.ai/#org",
+        "name": "Hypersage AI Labs",
+        "legalName": "HyperSage AI Labs LLC",
+        "url": "https://hypersage.ai/",
+        "logo": "https://hypersage.ai/apple-touch-icon.png",
+        "image": "https://hypersage.ai/og-image.png?v=20260806b",
+        "description": "An independent studio building consumer software across dating, mental health, chronic illness, recovery, crypto, cooking, AI characters, fiction, sleep, and play.",
+        "email": "support@hypersage.ai"
+      },
+      { "@type": "VideoGame", "name": "Waddleton", "applicationCategory": "Game", "operatingSystem": "Web",
+        "url": "https://waddleton.pages.dev/", "publisher": { "@id": "https://hypersage.ai/#org" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://waddleton.pages.dev/" } },
+      { "@type": "MobileApplication", "name": "Saffra", "applicationCategory": "Food & Drink", "operatingSystem": "iOS", "url": "https://hypersage.ai/saffra/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "StoryVault AI", "applicationCategory": "Entertainment", "operatingSystem": "iOS", "url": "https://hypersage.ai/storyvault/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "Nightshelf", "applicationCategory": "Lifestyle", "operatingSystem": "iOS", "url": "https://hypersage.ai/nightshelf/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "Quietoak", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS", "url": "https://hypersage.ai/quietoak/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "CryptoSage AI", "applicationCategory": "Finance", "operatingSystem": "iOS", "url": "https://cryptosageai.io/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "Mythwright", "applicationCategory": "Game", "operatingSystem": "iOS", "url": "https://hypersage.ai/mythwright/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "Wingmate", "applicationCategory": "Lifestyle", "operatingSystem": "iOS", "url": "https://hypersage.ai/wingmate/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "Hexhunter", "applicationCategory": "Game", "operatingSystem": "iOS", "url": "https://hypersage.ai/hexhunter/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "Rowan", "applicationCategory": "Medical", "operatingSystem": "iOS", "url": "https://hypersage.ai/rowan/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "Alder", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS", "url": "https://hypersage.ai/alder/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "Mythkin", "applicationCategory": "EntertainmentApplication", "operatingSystem": "iOS", "url": "https://hypersage.ai/mythkin/", "publisher": { "@id": "https://hypersage.ai/#org" } }
     ]
   }
   </script>
@@ -571,55 +587,6 @@
     </div>
   </div>
 
-  <!-- ===== APPROACH ===== -->
-  <section class="block" id="approach">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">What we do</span>
-        <h2>Every app is its own thing.</h2>
-        <p>Each one has its own brand, voice and standards, set by the people who use what they ship. None are live yet — we are building toward launch and making the work public as we go.</p>
-      </div>
-      <div class="approach-lead">
-        <span class="k">The premise</span>
-        <h3>The work is everything around it.</h3>
-        <p>Every app in this space calls the same handful of models, and ours are no exception. <span class="pull">What takes the time is everything around them</span> — what an app is allowed to know about you, what gets checked before it answers, and the illustration, motion and voice it arrives in. That part is made for one app at a time.</p>
-      </div>
-      <div class="approach-ledger">
-        <div class="approach-row">
-          <div class="k">One standard</div>
-          <div>
-            <h3>Every app answers to the same bar</h3>
-            <p>On the surface these apps have nothing to do with each other, and that is deliberate — each is built for the one thing it does. What they share is the bar underneath: the same rules about what the AI may claim, and the same refusal to dress a guess up as an answer — set that bar once and it holds across every one of them, and <span class="pull">a lesson learned in one is fixed in all of them</span>.</p>
-          </div>
-        </div>
-        <!-- "No front door" lives HERE and not in #ai, which is headed "three
-             jobs" and whose cards are three verbs the AI performs. Working
-             without an account is not a job the AI does, and filing it there
-             would reintroduce the taxonomy break that section's comment records
-             fixing. Audited 2026-08-06: 11 of the 12 in-house app repos open and
-             work with no account; Saffra is the sole exception
-             (MasterChefApp.swift:118-125 gates the root on sign-in). The count
-             is deliberately not a numeral — the portfolio is thirteen products
-             and the audit covered twelve repos, so "eleven of thirteen" would
-             be a claim the evidence does not cover. -->
-        <div class="approach-row">
-          <div class="k">No front door</div>
-          <div>
-            <h3>You do not have to tell us who you are</h3>
-            <p>Almost every app here opens and works with no account, and in several there is no account to skip past because none was ever built. Where an app has a backend, <span class="pull">you are a random id minted on your phone at first launch</span> — not a name, not an email. Signing in buys sync across devices, publishing or multiplayer, and nothing else.</p>
-          </div>
-        </div>
-        <div class="approach-row">
-          <div class="k">Accountability</div>
-          <div>
-            <h3>The person who answers your email wrote the app</h3>
-            <p>There is no support tier and nothing to escalate through. <span class="pull">Report something and it reaches the person who can change it</span> — not a queue, not a quarter. It is the easy claim to test: write to us before you trust us with anything.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ===== PRODUCTS ===== -->
   <section class="block" id="products">
     <div class="container">
@@ -683,11 +650,23 @@
             </div>
             <span class="status"><span class="sr-only">Status: </span>Coming soon</span>
           </div>
-          <p class="desc">An AI built around your portfolio. It knows what you hold, where you're exposed, and what to do about it — with live market data, sentiment, and an assistant that actually reads your positions.</p>
+          <!-- FINANCE CATEGORY — two traps here, both previously live on this card.
+               (1) "what to do about it" is the sentence App Review and a regulator read
+                   as personalised investment advice. The studio gives none. Keep the
+                   explicit "It does not tell you what to buy."
+               (2) Portfolio access is CONSENT-GATED, not unconditional:
+                   cryptosage-ios/CryptoSage/AIContextBuilder.swift:56 and :2214 read
+                   AppDefaultsKeys.aiSharePortfolioContext, which the user can switch off.
+                   So "actually reads your positions" needed the "once you let it".
+               (3) The old bullet said "not predictions" — the app ships AI price
+                   predictions and feeds them back into the assistant
+                   (AIContextBuilder.swift:1102-1105, service.cachedPredictions). Do not
+                   restore a "no predictions" claim. -->
+          <p class="desc">An AI that can read your own portfolio, once you let it. Live prices, sentiment and market structure, with a chat that works from your actual positions rather than generic market talk. It does not tell you what to buy.</p>
           <ul role="list">
             <li>Portfolio-aware AI chat and price intelligence</li>
             <li>Live prices, sentiment, and market heat maps</li>
-            <li>Signals drawn from live market data, not predictions</li>
+            <li>Live market data and sentiment — described, not sold as certainty</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the CryptoSage AI site" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
@@ -704,7 +683,16 @@
             </div>
             <span class="status"><span class="sr-only">Status: </span>In beta</span>
           </div>
-          <p class="desc">A personal AI chef that gives you premium recipes you can actually trust — every one vetted by a trained chef-panel, then adapted to your pantry, allergies, and the time you've got.</p>
+          <!-- "vetted by a trained chef-panel" was the previous wording and it is not
+               true: the panel is three AI chef personas — Classic, Modern, Foodie —
+               each drafting independently from the same consensus data
+               (saffra-ios/MasterChef/Recipe/RecipeDetailView.swift:3287). No human chef
+               vets anything. The drafts are then MERGED and weighted, not gated on
+               agreement (same file, Step 5 "Merge & Validate"; the panel_agreement_score
+               column is displayed but never compared against a threshold anywhere in
+               saffra-api/app/). This page's own "Honest by design — no fake experts"
+               principle is a few cells below. Do not reinstate the human-chef reading. -->
+          <p class="desc">A personal AI chef that gives you premium recipes that hold up in a real kitchen. No recipe comes from a single pass — three AI chef personas draft it independently, the drafts are merged and checked for food safety and allergens, then it is adapted to your pantry, allergies, and the time you've got.</p>
           <ul role="list">
             <li>Recipes adapted to your kitchen, not generic results</li>
             <li>Allergy- and diet-aware, with real substitutions</li>
@@ -771,7 +759,10 @@
           <ul role="list">
             <li>8 heroes, each with a distinct playstyle</li>
             <li>18 weapons with secret evolutions to discover</li>
-            <li>3 biomes of escalating, hand-drawn dread</li>
+            <!-- NOT "hand-drawn": Hexhunter's plates are generated (gpt-image-1 via
+                 Hexhunter/scripts/gen_hero_art.py). hexhunter/index.html carries the
+                 same trap — the word was removed there in 7 places incl. alt text. -->
+            <li>3 biomes of escalating, gothic-woodcut dread</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Hexhunter site" href="https://hypersage.ai/hexhunter/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
@@ -855,7 +846,7 @@
           <ul role="list">
             <li>A separate clock for each thing you're stepping away from</li>
             <li>A relapse debrief instead of a reset to zero</li>
-            <li>No account, a recovery record kept on your device, and a discreet app icon</li>
+            <li>No account, and a recovery record kept on your phone rather than in a database of ours</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Alder site" href="alder/index.html" >Visit site <span aria-hidden="true">→</span></a>
@@ -872,11 +863,24 @@
             </div>
             <span class="status"><span class="sr-only">Status: </span>Live now</span>
           </div>
-          <p class="desc">A snowy island to waddle around. Make a penguin, meet other players on a hand-painted arctic island, and duck through a door into any of fourteen arcade games. Free in the browser — no download, no ads, nothing to buy.</p>
+          <!-- SCOPE EVERY "nothing to buy" CLAIM TO THE WEB. Waddleton's catalogue is
+               real and on disk: PenguinArcade/js/store-catalog.js:19-22 registers four
+               consumable goldfish packs at $0.99 / $2.99 / $5.99 / $9.99, and :31
+               com.hypersage.waddleton.club.monthly at $4.99/mo. Both native store
+               plugins exist (WaddletonStorePlugin.swift, WaddletonStorePlugin.java).
+               What makes "nothing to buy" true TODAY is only that js/storefront.js:19
+               available() returns false without a release-build Capacitor bridge, so the
+               browser build cannot transact. An unqualified "no in-app purchases" was the
+               previous wording and becomes false the day either mobile build ships. -->
+          <!-- FIFTEEN, not fourteen: PenguinArcade/js registers 15 addGame() calls
+               (counted 2026-08-06). waddleton/index.html was corrected to 15 in the
+               same pass, and this card contradicted it. "Painted", not "hand-painted"
+               — the island art is generated through artcore. -->
+          <p class="desc">A snowy island to waddle around. Make a penguin, meet other players on a painted arctic island, and duck through a door into any of fifteen arcade games. Free in the browser — no download, no ads, and nothing to buy on the web.</p>
           <ul role="list">
-            <li>14 arcade games and 7 island areas, one of them hidden</li>
+            <li>15 arcade games and 7 island areas, one of them hidden</li>
             <li>Live multiplayer — chat, snowballs, friends, and parties</li>
-            <li>Free, with no ads and no in-app purchases</li>
+            <li>Free in the browser — no ads, and nothing to buy on the web</li>
           </ul>
           <div class="foot">
                         <a class="link" aria-label="Visit the Waddleton site" href="waddleton/index.html">Visit site <span aria-hidden="true">→</span></a>
@@ -973,7 +977,14 @@
           <div class="tag">It writes</div>
           <h3>The message you type is the smallest part of it</h3>
           <p>Every turn, the companion is handed a structured record of you and not just the line you typed: what you have told it about yourself, and what you have been doing in the app since you last spoke. Where an app can tell what you are looking at, that goes in too — the recipe you have open, the exact step you are standing on. What it keeps between sessions is a short list of specific facts, and in most of the apps that keep one, <span class="pull">that list lives on your phone rather than on our servers</span>. Where a wrong answer matters, a separate check reads your message before the model does — and before it counts against any free-message limit.</p>
-          <div class="meta"><span>Anthropic&rsquo;s Claude</span></div>
+          <!-- BOTH providers, and the second one is not optional. This credit previously
+               named Anthropic alone, which under-discloses two shipping products:
+               cryptosage-ios/CryptoSage/AIService.swift:232-234 hardcodes
+               https://api.openai.com/v1/chat/completions with gpt-4.1-mini / gpt-4.1 and
+               has no provider switch; saffra-api/app/config.py:20-23 is
+               llm_provider="openai" / llm_chef_model="gpt-4o", and app/chat/service.py:22
+               imports AsyncOpenAI as its only client. Do not trim this back to one name. -->
+          <div class="meta"><span>Anthropic&rsquo;s Claude</span><span>OpenAI</span></div>
         </div>
 
         <div class="system-card">
@@ -994,6 +1005,85 @@
     </div>
   </section>
 
+  <!-- ===== APPROACH =====
+       SECTION ORDER IS LOAD-BEARING: it must match the nav, which reads
+       Products → The AI → Approach → About (nav at the top of <body>, and the same
+       order again in the mobile <details> menu). Approach used to sit FIRST, above
+       #products, so clicking the third nav item threw the reader back above a section
+       they had already scrolled past, and the "The portfolio" wordmark strip — which
+       links to #products — landed them in 323 words of philosophy instead. If you move
+       a section here, move its nav entry in both menus in the same edit. -->
+  <section class="block" id="approach">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">What we do</span>
+        <h2>Every app is its own thing.</h2>
+        <!-- LAUNCH STATUS — a trap, because it changes the week an app is approved.
+             Verified 2026-08-06: one product is playable now (Waddleton, free at
+             waddleton.pages.dev, and the card below is badged "Live now"); NOTHING is
+             on the App Store yet. "None are live yet" was the previous wording and was
+             already false against the page's own Waddleton card, its "Play free" link
+             and its "nothing to buy" line. When the first iOS app is approved, this
+             sentence and the matching one in #about must both move. -->
+        <p>Each one has its own brand, voice and standards, set by the people who use what they ship. One is playable now — Waddleton, free in your browser. Nothing is on the App Store yet; the rest are building toward launch, and we are making the work public as we go.</p>
+      </div>
+      <div class="approach-lead">
+        <span class="k">The premise</span>
+        <h3>The work is everything around it.</h3>
+        <p>Every app in this space calls the same handful of models, and ours are no exception. <span class="pull">What takes the time is everything around them</span> — what an app is allowed to know about you, what gets checked before it answers, and the illustration and motion it arrives in. That part is made for one app at a time.</p>
+      </div>
+      <div class="approach-ledger">
+        <!-- This row states a PRACTICE, not a fleet-wide property, and the difference is
+             load-bearing. The previous wording ("set that bar once and it holds across
+             every one of them", "a lesson learned in one is fixed in all of them") is a
+             guarantee the audit breaks: the full safety layer ships in 3 of 12 apps
+             (audit/safety.md), and Wingmate is a live LLM chat product with no safety
+             module at all — no scanner, no classifier, no output guard. So a lesson
+             learned in Rowan demonstrably has NOT been fixed in all of them. Do not
+             restore an "every"/"all of them" formulation here until the audit supports
+             one; "what we work out in one app, we carry into the next" is what is true. -->
+        <div class="approach-row">
+          <div class="k">One standard</div>
+          <div>
+            <h3>The same bar, carried from one app to the next</h3>
+            <p>On the surface these apps have nothing to do with each other, and that is deliberate — each is built for the one thing it does. What they share is not a look, it is a bar: the same rules about what the AI may claim, and the same refusal to dress a guess up as an answer. <span class="pull">What we work out in one app, we carry into the next</span>.</p>
+          </div>
+        </div>
+        <!-- "No front door" lives HERE and not in #ai, which is headed "three
+             jobs" and whose cards are three verbs the AI performs. Working
+             without an account is not a job the AI does, and filing it there
+             would reintroduce the taxonomy break that section's comment records
+             fixing. Audited 2026-08-06: 11 of the 12 in-house app repos open and
+             work with no account; Saffra is the sole exception
+             (MasterChefApp.swift:118-125 gates the root on sign-in). The count
+             is deliberately not a numeral — the portfolio is thirteen products
+             and the audit covered twelve repos, so "eleven of thirteen" would
+             be a claim the evidence does not cover. -->
+        <div class="approach-row">
+          <div class="k">No front door</div>
+          <div>
+            <h3>You do not have to tell us who you are</h3>
+            <p>Almost every app here opens and works with no account, and in several there is no account to skip past because none was ever built. Where an app has a backend, <span class="pull">you are a random id minted on your phone at first launch</span> — not a name, not an email. Signing in buys sync across devices, publishing or multiplayer — not the app itself, with one exception: Saffra asks for Sign in with Apple before it opens.</p>
+            <!-- The Saffra exception is named, not softened. MasterChefApp.swift:118-125
+                 has exactly two branches: signed-in users get MainTabView/OnboardingFlow,
+                 everyone else gets SignInWithAppleView. The demo bypass in
+                 SignInWithAppleView.swift:24-34 is DEBUG-or-Info.plist opt-in and hidden
+                 in the shipping build, so there is no third path. "and nothing else" was
+                 the previous ending and it was false eleven cells below its own page. -->
+
+          </div>
+        </div>
+        <div class="approach-row">
+          <div class="k">Accountability</div>
+          <div>
+            <h3>The person who answers your email wrote the app</h3>
+            <p>There is no support tier and nothing to escalate through. <span class="pull">Report something and it reaches the person who can change it</span> — not a queue, not a quarter. It is the easy claim to test: write to us before you trust us with anything.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== ABOUT ===== -->
   <section class="block" id="about">
     <div class="container">
@@ -1005,12 +1095,23 @@
         <div>
           <p>Hypersage is an independent studio building an eclectic family of consumer apps. People set the direction, make the hard calls, and hold the standard — and nothing ships half-finished.</p>
           <p>Each product is its own brand, with its own voice and visual identity. What unites them is a single design rule: the AI is transparent about what it is.</p>
-          <p>We're building toward launch, making the work public as we go. If any of this resonates, <a href="#contact" style="color: var(--brand-a); font-weight:600;">say hello</a>.</p>
+          <p>We're building toward the App Store, making the work public as we go. If any of this resonates, <a href="#contact" style="color: var(--brand-a); font-weight:600;">say hello</a>.</p>
         </div>
         <ul class="principles" role="list">
-          <li><strong>Craft over defaults</strong> Custom illustration, voice, and motion in every app.</li>
+          <!-- The voice third of this line was dropped, deliberately. "Custom
+               illustration, voice, and motion in EVERY app" was the previous wording:
+               speech-out ships in 6 of 12 (audit/voice.md). Alder has no speech file at
+               all; Mythkin, CryptoSage, Hexhunter, Mythwright and Waddleton ship zero
+               client speech code. The "It speaks" card above hedges this correctly with
+               "where an app speaks" — this line undid that in eight words. The
+               illustration and motion halves survive and are kept. -->
+          <li><strong>Craft over defaults</strong> No stock art and no off-the-shelf theme — the illustration and motion in every app are drawn for that app.</li>
           <li><strong>Honest by design</strong> No fake experts, no dark patterns, no gating what matters. The AI is clear about what it is and what it can't do.</li>
-          <li><strong>Ship, then sharpen</strong> Real use teaches faster than any mockup. We launch, listen, and improve continuously.</li>
+          <!-- An intention, not a report. "We launch, listen, and improve continuously"
+               described an ongoing practice this studio has not started — nothing is on
+               a store yet — and it contradicted "nothing ships half-finished" in the
+               paragraph beside it. -->
+          <li><strong>Ship, then sharpen</strong> Real use teaches faster than any mockup — which is why the first build goes out narrow rather than late.</li>
           <li><strong>Small on purpose</strong> A short path from a decision to a shipped build, and no one between the person who cares about a detail and the person who fixes it.</li>
         </ul>
       </div>
@@ -1073,6 +1174,12 @@
     </div>
     <div class="container">
       <div class="f-bottom">
+        <!-- TWO NAMES, BOTH CORRECT, AND THEY ARE NOT INTERCHANGEABLE. `Hypersage` (one
+             capital H) is the trading style used in the wordmark, titles and body copy.
+             `HyperSage AI Labs LLC` — capital S, no comma before LLC — is the registered
+             Delaware entity, and it is what belongs in a copyright line, a liability
+             clause and the JSON-LD `legalName`. Do NOT "fix" this line to match the
+             wordmark; it is the one place on the page that must carry the legal name. -->
         <span>© 2026 HyperSage AI Labs LLC. All rights reserved.</span>
         <span>Human direction, AI leverage.</span>
       </div>

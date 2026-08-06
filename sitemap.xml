@@ -1,27 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Sitemap INDEX. The previous version listed only the four studio-level pages
-     and omitted every rowan/, alder/ and waddleton/ URL, so nothing declared them
-     to a crawler. Add a child <sitemap> entry here whenever a product subfolder is
-     added, or its pages go undeclared.
+<!-- Sitemap INDEX for the whole hypersage.ai origin.
+     EVERY product subfolder that has a sitemap.xml on disk must have a child entry
+     here, or its pages go undeclared. This file previously listed 3 of the 11 product
+     folders (rowan, alder, waddleton) while hexhunter, mythkin, mythwright, nightshelf,
+     quietoak, saffra, storyvault and wingmate all shipped a valid sitemap.xml that
+     nothing pointed at. All 11 are listed below; add the twelfth when it arrives.
+     CryptoSage AI and The One are NOT here on purpose — they are served from other
+     origins (cryptosageai.io, drvanus.github.io/theone-app), and a sitemap index may
+     only reference sitemaps on its own host.
      A sitemap only covers descendants of its own directory unless it is submitted
      through Search Console — so submit THIS url there.
-     Origin is the GitHub Pages project URL the site is actually served from;
-     see the switch-over checklist in index.html <head>. -->
+     <lastmod> is the date the child sitemap FILE changed, not its page content. -->
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>https://hypersage.ai/sitemap-main.xml</loc>
-    <lastmod>2026-08-01</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://hypersage.ai/rowan/sitemap.xml</loc>
-    <lastmod>2026-07-31</lastmod>
+    <lastmod>2026-08-06</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://hypersage.ai/alder/sitemap.xml</loc>
-    <lastmod>2026-07-31</lastmod>
+    <lastmod>2026-08-06</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/hexhunter/sitemap.xml</loc>
+    <lastmod>2026-08-06</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/mythkin/sitemap.xml</loc>
+    <lastmod>2026-08-06</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/mythwright/sitemap.xml</loc>
+    <lastmod>2026-08-06</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/nightshelf/sitemap.xml</loc>
+    <lastmod>2026-08-06</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/quietoak/sitemap.xml</loc>
+    <lastmod>2026-08-06</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/rowan/sitemap.xml</loc>
+    <lastmod>2026-08-06</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/saffra/sitemap.xml</loc>
+    <lastmod>2026-08-06</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/storyvault/sitemap.xml</loc>
+    <lastmod>2026-08-06</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://hypersage.ai/waddleton/sitemap.xml</loc>
-    <lastmod>2026-07-31</lastmod>
+    <lastmod>2026-08-06</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/wingmate/sitemap.xml</loc>
+    <lastmod>2026-08-06</lastmod>
   </sitemap>
 </sitemapindex>

@@ -66,7 +66,12 @@
     <p>The export needs <strong>Reminders</strong> access in iPhone Settings → Saffra. You can also share the list as plain text, or send it to Instacart if that app is installed.</p>
 
     <h3>I got a "too many requests" or limit message</h3>
-    <p>Saffra applies daily and monthly limits on the free tier, and rate limits on everyone, so one person can't exhaust the service for everybody. The app tells you which limit you hit and offers the upgrade that removes it. Waiting also clears the time-based ones.</p>
+    <!-- "lifetime" first, deliberately: chef chat and recipe adaptation on the free
+         tier are ONE-TIME allowances (saffra-api/app/config.py:146,152
+         `free_chat_lifetime = 10`, `free_adapt_lifetime = 1`; the Redis key
+         `rl:chat:lifetime:{user}` carries no TTL). Saying only "daily and monthly"
+         tells a free user to wait for a reset that never comes. -->
+    <p>Saffra applies lifetime, daily and monthly limits on the free tier, and rate limits on everyone, so one person can't exhaust the service for everybody. The app tells you which limit you hit and offers the upgrade that removes it. Waiting clears the time-based ones; the free chef-chat and recipe-adaptation allowances are one-time, so those only reset by upgrading.</p>
 
     <h3>My pantry and chats disappeared when I made an account</h3>
     <p>If you were trying Saffra <strong>without signing in</strong>, you were in the preview — the sample pantry and the chats in it are local to that preview and do not carry over to a new account. Anything you create after you sign in is saved to your account.</p>
@@ -130,12 +135,17 @@
       <li><strong>Anthropic (Claude)</strong> — your chat messages, plus a summary of your profile and pantry, are sent to Anthropic to generate and adapt the chef's replies.</li>
       <li><strong>Voyage AI</strong> — your search queries and recipe text are sent to Voyage to create the embeddings that power recipe search.</li>
       <li><strong>ElevenLabs</strong> — the text you want spoken aloud, for the premium voice. You can turn premium voice off in Settings and use on-device iOS voices only, in which case nothing goes to ElevenLabs.</li>
+      <!-- The shelf-photo line is a required disclosure, not a nicety: it is the one
+           image path that leaves the device (saffra-api/app/pantry/photo_vision.py,
+           reached from IngredientCameraScanView.swift). Deleting it puts this page
+           back in conflict with the App Store privacy label. -->
       <li><strong>OpenAI (Whisper)</strong> — audio, and only as a fallback when on-device transcription can't cope with a noisy kitchen. The audio is not retained.</li>
+      <li><strong>OpenAI (vision)</strong> — the photo you take of a fridge or pantry shelf when you ask Saffra to identify what's on it. It is read to produce the list of items you then confirm, and it is not retained. Receipt and cookbook photos do not go this way.</li>
       <li><strong>Apple and Google</strong> — sign-in only.</li>
       <li><strong>USDA FoodData Central</strong> (ingredient names, for nutrition) and <strong>Open Food Facts</strong> (just the barcode number). No personal data either way.</li>
       <li><strong>Fly.io, Cloudflare R2, Upstash Redis</strong> — hosting infrastructure.</li>
     </ul>
-    <p>Two things stay on your iPhone: <strong>voice transcription</strong> runs on-device via Apple's Speech framework, and <strong>receipt OCR</strong> runs on-device via Apple's Vision framework — the image never leaves your phone, only the extracted text is sent for parsing.</p>
+    <p>Two things stay on your iPhone: <strong>voice transcription</strong> runs on-device via Apple's Speech framework (the Whisper fallback above is the exception), and <strong>receipt and cookbook OCR</strong> runs on-device via Apple's Vision framework — those images never leave your phone, only the extracted text is sent for parsing.</p>
     <p>We do not sell your data, we do not use it to train models, and we do not share it with advertisers. None of the providers above are authorized to use your data for their own purposes.</p>
 
     <h2>Things Saffra doesn't do</h2>

@@ -668,7 +668,16 @@
         <div class="feature-card">
           <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
           <h3>Voice Coaching</h3>
-          <p>Talk it out instead of typing — dictate your situation hands-free and hear any reply read aloud, with each coach speaking in their own voice.</p>
+          <!-- VOICE TRAP: neither "hands-free" nor "any reply" was true.
+               Wingmate/Views/Chat/CoachChatView.swift:1289-1307 is a tap-to-start /
+               tap-to-stop mic button that appends the transcript to the draft — you still tap
+               Send; there is no turn loop. Read-aloud is a metered server fetch
+               (SpeechManager.swift:176-179 renders "You've used today's read-aloud allowance"),
+               and a repo-wide grep for AVSpeechSynthesizer in Wingmate/ returns nothing, so a
+               failed fetch plays silence — there is no on-device voice to fall back to. Do not
+               call the voices "tuned" or "tone-steered" either: wingmate-api/src/routes/tts.js
+               sends tts-1 with no speed and no instructions, only a per-coach voice name. -->
+          <p>Talk it out instead of typing — dictate your message with one tap, and tap a reply to hear it read back, each coach in their own voice. Read-aloud needs a connection and has a daily allowance.</p>
         </div>
 
         <div class="feature-card">

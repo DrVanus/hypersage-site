@@ -567,13 +567,26 @@
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-7 5 5"/><path d="M3 21h18"/></svg></div>
           <h3>Progress worth looking at</h3>
-          <p>Urges you rode out, money not spent, hours reclaimed, and milestone chips as they arrive — a plain record of what you've done, not a score.</p>
+          <!-- Do NOT re-add "money not spent" or "hours reclaimed" here. Both tiles are
+               computed in alder-app/app.js:333-334 from estCostPerDay / estMinutesPerDay,
+               and NO surface in the app collects either figure — onboarding builds a profile
+               without them (see the comment at app.js:329-332), so every real user reads
+               $0 and 0 h forever. Restore the two nouns only once onboarding asks. -->
+          <p>Urges you rode out and milestone chips as they arrive — a plain record of what you've done, not a score.</p>
         </div>
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
           <h3>Private by default</h3>
-          <p>No account, no name, no email, and no server — your record lives on your device. A discreet alternate app icon is drawn and bundled, but the control to switch it on isn't built yet, so the home screen still says Alder.</p>
+          <!-- "no server" was here and was FALSE: alder-app/api.js:126 ships
+               BACKEND_LIVE = true, app.js:874-921 sends the profile slice on every turn,
+               and alder-api persists companion_conversations / messages / memories /
+               safety_logs. privacy.html has always said so correctly. An inaccurate
+               health-data statement IS the FTC Health Breach Notification Rule violation
+               (GoodRx, Premom) — never restore an absolute here without reading
+               alder-app/app-claims-contract.json first. Provider is Anthropic ONLY:
+               this deployment holds no OpenAI key (index-onboarding.html:275-282). -->
+          <p>No account, no name, no email — your recovery record is stored on your phone, not in a database of ours. To write a reply, Alder sends your message and a slice of that record to Anthropic; the <a href="privacy.html">privacy policy</a> lists exactly which fields. A discreet alternate app icon is drawn and bundled, but the control to switch it on isn't built yet, so the home screen still says Alder.</p>
         </div>
 
         <div class="feature-card">
@@ -659,7 +672,7 @@
         <div>
           <div class="section-eyebrow">Milestones</div>
           <h2>A letter, <em>not a payout.</em></h2>
-          <p style="color: var(--muted-fg); font-size: 1.04rem;">Nine chips, from day one to a year. Tap one you've earned and Alder writes you a short letter about it — built from your own check-ins, not from a template.</p>
+          <p style="color: var(--muted-fg); font-size: 1.04rem;">Nine chips, from day one to a year. Tap one you've earned and Alder writes you a short note about it.</p>
           <div class="chip-row" style="justify-content:flex-start; margin-top: 22px;">
             <div class="chip-item"><img class="companion-art" src="art/chip_d30.png?v=20260731a" alt="30-day milestone chip" loading="lazy"><span>30 days</span></div>
             <div class="chip-item"><img class="companion-art" src="art/chip_d90.png?v=20260731a" alt="90-day milestone chip" loading="lazy"><span>90 days</span></div>
@@ -724,7 +737,12 @@
           <ul class="spotlight-points" role="list">
             <li><strong>No account, no name, no email.</strong> There is nothing to sign up for and nothing to sign in to.</li>
             <li><strong>A discreet app icon is planned</strong> so what's on your home screen is your business — the artwork is drawn and bundled, but the switch to turn it on isn't built yet.</li>
-            <li><strong>Your record stays on your device</strong> — the clocks, the check-ins, the debriefs.</li>
+            <!-- Storage vs transmission are two different claims. Storage is true; the
+                 last seven check-ins ride out with EVERY message (alder-app/app.js:911-916,
+                 `recent_checkins`). Do not shorten this bullet back to a storage-only
+                 sentence — privacy.html states the transmission plainly and the two pages
+                 must not disagree. -->
+            <li><strong>Your record is kept on your device</strong> — the clocks, the check-ins, the debriefs — and a slice of it, your last seven check-ins among them, goes out with each message you send Alder.</li>
             <li><strong>No ads and no third-party analytics.</strong> Not now, not later. We don't sell or share anything.</li>
             <li><strong>Delete it all, whenever</strong> — and export it first if you want to keep it.</li>
           </ul>
@@ -769,11 +787,22 @@
         </details>
         <details class="faq">
           <summary>Is my data private?</summary>
-          <p>There's no account, no name, and no email, and your recovery record is kept on your device. There are no ads and no third-party analytics, and we don't sell or share anything. When conversations with Alder go live, your messages will be sent to a named AI provider to generate replies — you'll be told exactly who, and asked to agree, before a single message is sent. Full detail is in the <a href="privacy.html">privacy policy</a>. What we won't do is claim a kind of legal confidentiality this app doesn't have.</p>
+          <!-- PRESENT TENSE, deliberately. Conversations are live (api.js:126
+               BACKEND_LIVE = true). This answer used to say "when conversations go live…
+               a named AI provider", which was both stale and vaguer than privacy.html.
+               Provider is Anthropic and ONLY Anthropic — no OpenAI key in this deployment,
+               and COMPANION_LLM_FAILOVER_ENABLED is false; naming a second provider here
+               would be over-disclosure, which is inaccuracy in the other direction. -->
+          <p>There's no account, no name, and no email, and your recovery record is kept on your phone — we run no database of it. There are no ads and no third-party analytics, and we don't sell or share anything. Your messages are sent to <strong>Anthropic</strong> to generate replies, along with a slice of that record. You are told exactly who and exactly which fields, and asked to agree, before a single message is sent — the consent check sits in the transport rather than the screen, so nothing can slip past it. Full detail is in the <a href="privacy.html">privacy policy</a>. What we won't do is claim a kind of legal confidentiality this app doesn't have.</p>
         </details>
         <details class="faq">
           <summary>What does it cost?</summary>
-          <p>Nothing is for sale yet, so there's no price to quote. Whatever happens later, the SOS screen and the crisis numbers will never be metered, limited, or put behind a payment.</p>
+          <!-- Prices must match terms.html:78 and support.html:122 (US$9.99/mo,
+               US$59.99/yr) and the products in alder-app/ios/App/App/AlderPlus.swift:31-32
+               (com.hypersage.alder.plus.monthly / .annual). This answer previously said
+               "nothing is for sale yet" while our own Terms quoted the price — do not
+               change a figure on one page alone. -->
+          <p>Alder is free to use. There is an optional subscription, <strong>Alder Plus</strong> — US$9.99 per month or US$59.99 per year, billed by Apple. The SOS screen and the crisis numbers are never metered, limited, or put behind a payment.</p>
         </details>
         <details class="faq">
           <summary>When can I use it?</summary>

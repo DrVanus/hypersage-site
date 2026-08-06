@@ -652,11 +652,15 @@
         <div class="showcase-copy">
           <div class="section-eyebrow">The Hunters</div>
           <h2>Eight ways to <em>face the dark.</em></h2>
-          <p class="lede">Pick your hunter in the loadout, then earn the rest with essence. Every hero rewrites the run — a passive, a stat identity, and a starting weapon that sets the whole build in motion. Start with Vess; unlock the other seven.</p>
+          <!-- Hexhunter ships two one-time IAPs (Hexhunter/Products.storekit —
+               com.vanus.hexhunter.unlockall and com.vanus.hexhunter.starterpack). The page
+               must not read as if essence is the only route. Prices are deliberately absent
+               here: the .storekit file is a local test config, not the ASC-registered price. -->
+          <p class="lede">Pick your hunter in the loadout, then earn the rest with essence — or take the optional one-time Unlock All purchase and skip the grind. Every hero rewrites the run — a passive, a stat identity, and a starting weapon that sets the whole build in motion. Start with Vess; unlock the other seven.</p>
           <ul class="showcase-points">
             <li><b>8 distinct hunters</b> — from the balanced Huntress to the kill-hungry Revenant.</li>
             <li><b>Each shifts the whole build</b> with its own passive and starting weapon.</li>
-            <li><b>Unlock with essence</b> earned from every run into the dark.</li>
+            <li><b>Unlock with essence</b> earned from every run into the dark — or with the optional Unlock All purchase.</li>
           </ul>
         </div>
         <div class="showcase-media">
@@ -877,26 +881,30 @@
   <section class="section-block" id="art">
     <div class="container">
       <div class="section-eyebrow">Inside the Hunt</div>
-      <h2>Hand-illustrated <span class="gold">woodcut dark.</span></h2>
-      <p class="lede">Every hero, boss, and horror is drawn by hand in the game's gothic woodcut style. A look at the art you'll be fighting through.</p>
+      <!-- AI-DISCLOSURE TRAP: do NOT restore "hand-illustrated" / "drawn by hand" here or in
+           the alt text below. The 54 plates in Hexhunter/Sources/Bundled/HexArt/ are generated
+           through artcore on gpt-image-1 (Hexhunter/scripts/gen_hero_art.py:11-24 — MODEL =
+           "gpt-image-1"). Describe the STYLE, never the hand. -->
+      <h2>One gothic <span class="gold">woodcut line.</span></h2>
+      <p class="lede">Every hero, boss, and horror is illustrated in the same gothic woodcut style — one art direction, held plate by plate across the whole bestiary. A look at the art you'll be fighting through.</p>
       <div class="gallery-grid">
         <figure class="art-card">
-          <img src="assets/gallery-hero-vess.png?v=20260711a" alt="Vess, the Huntress — hand-illustrated gothic hero art" loading="lazy">
+          <img src="assets/gallery-hero-vess.png?v=20260711a" alt="Vess, the Huntress — gothic woodcut hero art" loading="lazy">
           <div class="art-shade" aria-hidden="true"></div>
           <figcaption class="art-cap"><div class="art-kind">Hero</div><div class="art-name">Vess, the Huntress</div></figcaption>
         </figure>
         <figure class="art-card">
-          <img src="assets/gallery-hero-ravenna.png?v=20260711a" alt="Ravenna, the Witch — hand-illustrated gothic hero art" loading="lazy">
+          <img src="assets/gallery-hero-ravenna.png?v=20260711a" alt="Ravenna, the Witch — gothic woodcut hero art" loading="lazy">
           <div class="art-shade" aria-hidden="true"></div>
           <figcaption class="art-cap"><div class="art-kind">Hero</div><div class="art-name">Ravenna, the Witch</div></figcaption>
         </figure>
         <figure class="art-card">
-          <img src="assets/gallery-boss.png?v=20260711a" alt="The Plague Abbot — hand-illustrated gothic boss art" loading="lazy">
+          <img src="assets/gallery-boss.png?v=20260711a" alt="The Plague Abbot — gothic woodcut boss art" loading="lazy">
           <div class="art-shade" aria-hidden="true"></div>
           <figcaption class="art-cap"><div class="art-kind">Boss</div><div class="art-name">The Plague Abbot</div></figcaption>
         </figure>
         <figure class="art-card">
-          <img src="assets/gallery-enemy.png?v=20260711a" alt="The Bone Golem — hand-illustrated gothic enemy art" loading="lazy">
+          <img src="assets/gallery-enemy.png?v=20260711a" alt="The Bone Golem — gothic woodcut enemy art" loading="lazy">
           <div class="art-shade" aria-hidden="true"></div>
           <figcaption class="art-cap"><div class="art-kind">Enemy</div><div class="art-name">The Bone Golem</div></figcaption>
         </figure>
@@ -912,7 +920,7 @@
         <div>
           <div class="section-eyebrow">The studio</div>
           <h3>From HyperSage</h3>
-          <p>Hexhunter is built by <a href="https://hypersage.ai/" style="color:var(--primary-bright)">HyperSage</a> — an independent studio crafting opinionated, carefully-made apps and games. Every hero, enemy, biome, and draft card is hand-illustrated, no backend, no login, no tracking. Just the hunt. <a href="https://hypersage.ai/">See the studio <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+          <p>Hexhunter is built by <a href="https://hypersage.ai/" style="color:var(--primary-bright)">HyperSage</a> — an independent studio crafting opinionated, carefully-made apps and games. Every hero, enemy, biome, and draft card is drawn in one gothic woodcut style — no backend, no account, no tracking, and Game Center leaderboards are optional. Just the hunt. <a href="https://hypersage.ai/">See the studio <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
         </div>
       </div>
     </div>
@@ -937,7 +945,10 @@
       <a href="support.html">Support</a>
       <a href="mailto:support@hypersage.ai">Contact</a>
     </div>
-    <div class="copyright">© 2026 HyperSage. Rated 9+ for fantasy violence. All hunts are optional; the dark is not.</div>
+    <!-- No App Store age rating exists yet — Hexhunter is unreleased. The studio's own
+         questionnaire in Hexhunter/store/listing.md:80 expects 12+, driven by fantasy
+         violence. Do not print a number here until Apple has actually assigned one. -->
+    <div class="copyright">© 2026 HyperSage. Fantasy violence. All hunts are optional; the dark is not.</div>
   </footer>
 
   <!-- Hero carousel: crossfade + auto-rotate through gameplay screenshots.

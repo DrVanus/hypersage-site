@@ -758,7 +758,10 @@
           <ul class="spotlight-points">
             <li><strong>However sure you are.</strong> For each one, mark whether you're just <em>wondering</em>, <em>pretty sure</em>, or it's been <em>diagnosed</em> — all welcome, none required.</li>
             <li><strong>Never a label.</strong> Quietoak doesn't diagnose or treat. Your companion uses this as context, never to assess you, and always points clinical questions back to your clinician.</li>
-            <li><strong>Yours to control.</strong> Optional, stored on your device, and editable anytime — change or clear it whenever you like.</li>
+            <!-- The conditions profile is kept on device but rides along with every message
+                 (Anchor/Companion/CompanionChatScreen.swift:383-385 sends conditions_diagnosed
+                 / _strongly_suspected / _self_suspected); privacy.html:59 says so. -->
+            <li><strong>Yours to control.</strong> Optional and editable anytime — change or clear it whenever you like. It's kept on your device and sent along with your messages so the reply can fit you.</li>
           </ul>
         </div>
       </div>
@@ -821,7 +824,14 @@
         <div class="feature-card">
           <div class="icon-box"><img src="icons/feat-privacy.png?v=20260804e" alt=""></div>
           <h3>Private &amp; accountless</h3>
-          <p>No sign-up, no account to create. Your diary and practice stay on your device by default. No ads, no third-party trackers on your diary or chat.</p>
+          <!-- PRIVACY TRAP: "stay on your device by default" was false. Every companion turn
+               sends a 7-day diary recap — including the 0-5 suicidal-ideation and self-harm
+               ratings and 120 characters of each day's note — to the backend and on to the AI
+               provider (anchor-ios/Anchor/Diary/DiaryStore.swift:340-357, sent unconditionally
+               at Anchor/Companion/CompanionChatScreen.swift:387). This exact mismatch was a
+               named submission blocker in anchor-ios/store/PRESUBMIT-REVIEW-2026-08-04.md.
+               quietoak/privacy.html:54 is the authority; keep this page consistent with it. -->
+          <p>No sign-up, no account to create. Your diary and practice live on your device — we keep no diary on our servers. No ads, no third-party trackers on your diary or chat.</p>
         </div>
       </div>
     </div>
@@ -1031,7 +1041,7 @@
         </details>
         <details class="faq">
           <summary>Is my data private?</summary>
-          <p>Your diary and practice are stored on your device by default. There's no account and no login. We don't run ads or third-party trackers against your diary or chat. To generate replies, your messages are sent to our backend and an AI provider, and your conversations are saved there — tied only to a random device ID, never your name — so your chats carry over between sessions. You can delete them anytime, and the full data flow is in our <a href="privacy.html">privacy policy</a>.</p>
+          <p>Your diary and practice are stored on your device, and we keep no diary on our servers. There's no account and no login. We don't run ads or third-party trackers against your diary or chat. To generate replies, your messages are sent to our backend and an AI provider — together with a short recap of your last 7 logged diary days, including your urge ratings and the first 120 characters of each day's note, so the reply fits your week. Your conversations are saved there — tied only to a random device ID, never your name — so your chats carry over between sessions. You can delete them anytime, and the full data flow is in our <a href="privacy.html">privacy policy</a>.</p>
         </details>
         <details class="faq">
           <summary>What's free, and what's Plus?</summary>

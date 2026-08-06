@@ -112,7 +112,12 @@
     </div>
 
     <h2>Billing and subscriptions</h2>
-    <p><strong>There is nothing to buy today</strong> — Rowan has no paid plan. If a subscription is added later, Apple will handle billing: refunds would go through <a href="https://reportaproblem.apple.com/" rel="noopener">reportaproblem.apple.com</a>, and you would manage or cancel it in iOS Settings → Apple ID → Subscriptions. If something looks wrong on our side, email us and we'll sort it out.</p>
+    <!-- TRAP: this said "there is nothing to buy today". The shipping build has a
+         Rowan Plus paywall and two StoreKit products
+         (rowan-app/ios/App/App/RowanPlus.swift:31-32). Free cap of 10 a day is
+         verified at rowan-api/app/config.py:126. No price here on purpose — the
+         app reads displayPrice from StoreKit. -->
+    <p>Rowan is free to use, with conversation capped at 10 messages a day. <strong>Rowan Plus</strong> is an optional subscription that lifts that cap and answers with a more capable model. Apple handles billing: refunds go through <a href="https://reportaproblem.apple.com/" rel="noopener">reportaproblem.apple.com</a>, and you manage or cancel it in iOS Settings → Apple ID → Subscriptions. Safety and emergency features are never behind a payment. If something looks wrong on our side, email us and we'll sort it out.</p>
 
     <h2>For clinicians, reviewers &amp; press</h2>
     <p>If you're a clinician, a reviewer, or a journalist evaluating Rowan, reach out at <a href="mailto:support@hypersage.ai?subject=Rowan%20review%20request">support@hypersage.ai</a>. Rowan is a general-wellness record-keeping companion — not a diagnosis engine, not a treatment adviser, and not a medical device — with prominent disclaimers, a persistent "AI companion · not a clinician" indicator, an independent safety layer that is never metered, and a documented list of things the product refuses to do.</p>

@@ -6,13 +6,13 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0b1026">
   <title>Waddleton — a snowy island to waddle around.</title>
-  <meta name="description" content="Make a penguin, explore a painted arctic island, meet other players, and play 14 arcade games. Free, in your browser, no download and no account to create.">
+  <meta name="description" content="Make a penguin, explore a painted arctic island, meet other players, and play 15 arcade games. Free, in your browser, no download and no account to create.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/waddleton/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Waddleton — a snowy island to waddle around.">
-  <meta property="og:description" content="Make a penguin, meet other players, and dive into 14 arcade games. Free, in your browser.">
+  <meta property="og:description" content="Make a penguin, meet other players, and dive into 15 arcade games. Free, in your browser.">
   <meta property="og:url" content="https://hypersage.ai/waddleton/">
   <meta property="og:site_name" content="Waddleton">
   <meta property="og:image" content="https://hypersage.ai/waddleton/og-image.png?v=20260806b">
@@ -21,7 +21,7 @@
   <meta property="og:image:alt" content="Waddleton — a snowy island to waddle around">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Waddleton — a snowy island to waddle around.">
-  <meta name="twitter:description" content="Make a penguin, meet other players, and dive into 14 arcade games. Free, in your browser.">
+  <meta name="twitter:description" content="Make a penguin, meet other players, and dive into 15 arcade games. Free, in your browser.">
   <meta name="twitter:image" content="https://hypersage.ai/waddleton/og-image.png?v=20260806b">
   <meta name="twitter:image:alt" content="Waddleton — a snowy island to waddle around">
 
@@ -353,7 +353,11 @@
     <div class="container">
       <span class="eyebrow">Free · Plays in your browser</span>
       <h1>A snowy island to <span class="grad">waddle around.</span></h1>
-      <p class="lede">Make a penguin, wander a hand-painted arctic island, throw snowballs at strangers who become friends, and duck into a door when you feel like an arcade game. No download, no sign-up, no cost.</p>
+      <!-- AI-DISCLOSURE TRAP: the rooms, furniture, buildings and island tiles under
+           PenguinArcade/art/ are generated through the artcore batch driver (26 install
+           manifests, 153 installed assets). "Painted" describes the style honestly;
+           "hand-painted" is a claim about how they were made, and it is not true. -->
+      <p class="lede">Make a penguin, wander a painted arctic island, throw snowballs at strangers who become friends, and duck into a door when you feel like an arcade game. No download, no sign-up, no cost.</p>
       <div class="hero-buttons">
         <a href="https://waddleton.pages.dev/" class="btn-play" target="_blank" rel="noopener">
           <span>Play Waddleton free</span>
@@ -368,7 +372,11 @@
       </div>
 
       <div class="stats">
-        <div class="stat"><div class="n">14</div><div class="l">arcade games</div></div>
+        <!-- COUNT TRAP: 15 games, not 14 — PenguinArcade/js/ui.js:1684-1704 is the registry
+             the map directory is built from; BONKBERG (js/ui.js:1698) was the one missed. Two
+             of the 15 are Floe Arcade cabinets (AURORA ALLEY, ARCTIC HOCKEY, :1703-1704); the
+             other 13 are signed landmarks. Re-count from that registry before changing. -->
+        <div class="stat"><div class="n">15</div><div class="l">arcade games</div></div>
         <div class="stat"><div class="n">7</div><div class="l">island areas</div></div>
         <div class="stat"><div class="n">154</div><div class="l">things to wear &amp; place</div></div>
         <div class="stat"><div class="n">$0</div><div class="l">free to play, no ads</div></div>
@@ -444,8 +452,8 @@
       <div class="split">
         <div>
           <div class="section-eyebrow">The arcade</div>
-          <h2>Fourteen games. <em>Most have a door.</em></h2>
-          <p style="color: var(--muted-fg); font-size: 1.04rem;">Ten of them live behind a sign out on the island — you walk up to the dock, the trailhead, the fort, and go in. The rest are cabinets you stand at inside the Floe Arcade. (If you'd rather not walk, the map carries a directory that will take you straight to any of the fourteen.) Snowflakes you earn playing them buy hats you'll wear back outside.</p>
+          <h2>Fifteen games. <em>Most have a door.</em></h2>
+          <p style="color: var(--muted-fg); font-size: 1.04rem;">Thirteen of them live behind a sign out on the island — you walk up to the dock, the trailhead, the fort, the shore ice, and go in. The other two are cabinets you stand at inside the Floe Arcade. (If you'd rather not walk, the map carries a directory that will take you straight to any of the fifteen.) Snowflakes you earn playing them buy hats you'll wear back outside.</p>
           <ul class="split-points" role="list">
             <li><strong>Every game keeps your personal best</strong> on the device you played it on.</li>
             <li><strong>Play together</strong> — start a party and launch a game as a group.</li>
@@ -464,13 +472,19 @@
         <li class="game"><div class="g-name">Snowball Fight</div><div class="g-kind">Aim and duck</div></li>
         <li class="game"><div class="g-name">Ice Fishing</div><div class="g-kind">Patience, mostly</div></li>
         <li class="game"><div class="g-name">Jet Pack Adventure</div><div class="g-kind">Fly and collect</div></li>
-        <li class="game"><div class="g-name">Thin Ice</div><div class="g-kind">Puzzle, carefully</div></li>
+        <!-- NAME TRAP: every g-name below must match what the player is shown in
+             PenguinArcade/js/ui.js:1684-1704. "Thin Ice" is the internal key; the game is
+             called MELTDOWN. Likewise CAVERN RESCUE (never "Puffle Rescue" — "Puffle" is
+             Disney's Club Penguin mark and appears nowhere in the shipped game) and
+             ARCTIC HOCKEY (not "Arctic Hockey Shootout"). -->
+        <li class="game"><div class="g-name">Meltdown</div><div class="g-kind">Puzzle, carefully</div></li>
         <li class="game"><div class="g-name">Aurora Alley</div><div class="g-kind">Under the lights</div></li>
-        <li class="game"><div class="g-name">Arctic Hockey Shootout</div><div class="g-kind">Take the shot</div></li>
+        <li class="game"><div class="g-name">Arctic Hockey</div><div class="g-kind">Take the shot</div></li>
         <li class="game"><div class="g-name">Waddle Waves</div><div class="g-kind">Surf the swell</div></li>
-        <li class="game"><div class="g-name">Puffle Rescue</div><div class="g-kind">Go get them</div></li>
+        <li class="game"><div class="g-name">Cavern Rescue</div><div class="g-kind">Go get them</div></li>
         <li class="game"><div class="g-name">Avalanche Escape</div><div class="g-kind">Don't look back</div></li>
         <li class="game"><div class="g-name">Avalanche Dash</div><div class="g-kind">Three lanes, one chaser</div></li>
+        <li class="game"><div class="g-name">Bonkberg</div><div class="g-kind">Last penguin on the berg</div></li>
         <li class="game"><div class="g-name">Lazy Floe</div><div class="g-kind">You cannot lose</div></li>
       </ul>
     </div>
@@ -482,13 +496,25 @@
       <div class="center">
         <div class="section-eyebrow">Together</div>
         <h2>Other penguins are <em>actually other people.</em></h2>
-        <p class="lede">Waddleton is a live world. The penguins wandering past you are players, and the island is better when it's busy.</p>
+        <!-- COPPA / Play-Families TRAP. PenguinArcade/js/agegate.js holds a full bracketed
+             policy table, but only three rows have a live consumer today: free-text-chat
+             (js/ui.js:3057 removes the input for a child), read-free-text (js/hub.js:1132
+             drops inbound typed frames), and the parental gate on money and links-out
+             (js/gate.js, wired at js/ui.js:2018-2239 and by gate.js's own anchor
+             interceptor). The rows for multiplayer, friend-code, friend-request-stranger,
+             third-party-auth, custom-display-name and public-leaderboard-name have NO
+             caller — js/safename.js is loaded but pickerFor() is never invoked. So this
+             page may only describe the chat tier, the age screen and the parental gate.
+             Do NOT write that under-13s get a bot island, generated names, gated friending
+             or no sign-in until something actually asks those rows. The 2025 COPPA
+             amendments weigh the operator's own marketing as evidence. -->
+        <p class="lede">Waddleton is a live world. The penguins wandering past you are players, and the island is better when it's busy — though how you talk to them depends on your age, which the island asks about before you arrive.</p>
       </div>
       <div class="features-grid">
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <h3>Chat and emotes</h3>
-          <p>Speech bubbles over your head, a wheel of emotes, and a quick-chat list of ready-made phrases if you'd rather tap than type.</p>
+          <p>Speech bubbles over your head, a wheel of emotes, and a quick-chat list of ready-made phrases if you'd rather tap than type. Players under 13 get the phrase list only — they can't type, and typed messages from other players never reach their screen.</p>
         </div>
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 5.5a3.2 3.2 0 0 1 0 6M18 20a6.4 6.4 0 0 0-2.2-4.8"/></svg></div>
@@ -552,11 +578,21 @@
       <div class="honest">
         <div class="honest-card">
           <h3>No ads. Nothing you have to buy.</h3>
-          <p>There are no advertisements in Waddleton, and nothing you need to buy to play any of it. Nearly all of the shop — 135 of the 154 items — is bought with Snowflakes you earned by playing. The other 19 are cosmetics priced in Goldfish, a premium currency, or reserved for Waddleton Club members. Both are optional purchases in the mobile app, both are purely decorative, and neither one makes a penguin faster, stronger, or higher on a leaderboard.</p>
+          <p>There are no advertisements in Waddleton, and nothing you need to buy to play any of it. Nearly all of the shop — 135 of the 154 items — is bought with Snowflakes you earned by playing. The other 19 are cosmetics priced in Goldfish, a premium currency, or reserved for Waddleton Club members. Both will be optional purchases when the mobile app ships; neither is buyable in the browser today. Both are purely decorative, and neither one makes a penguin faster, stronger, or higher on a leaderboard.<!-- Do not write "in the mobile app" in the present tense: the FAQ on this same page says there is no App Store or Play build yet, and PenguinArcade/js/storefront.js:19 available() returns false without a release-build Capacitor bridge, so nothing on the web can transact. --></p>
         </div>
         <div class="honest-card">
           <h3>No sign-up needed, and no tracking.</h3>
           <p>You can play the whole game without creating anything — a guest penguin appears the moment you arrive. Signing in is optional and exists only so your penguin can follow you to another device. There are no third-party analytics and no ad networks in the game at all.</p>
+        </div>
+        <div class="honest-card">
+          <!-- Only claims with a live consumer belong in this card. Verified:
+               js/agegate.js runs before Hub.start() (js/ui.js:3116-3122); js/ui.js:3057
+               REMOVES the chat input for the child bracket rather than disabling it;
+               js/hub.js:1132 drops inbound free text for that bracket; js/gate.js's keypad
+               challenges every store route (js/ui.js:2018-2239) and every outbound anchor.
+               js/safechat.js is required by both the browser and the ws server. -->
+          <h3>An age screen runs before the island does.</h3>
+          <p>Waddleton asks the month and year you were born before you set foot on the ice. The month and year are never stored and never sent anywhere; only the age band is kept, and it decides how chat works. Under 13, the typing box isn't disabled — it isn't there: those players talk with a list of ready-made phrases, and typed messages from other players never reach their screen. Anything that costs money or opens a page outside the game sits behind a parental keypad, for every player.</p>
         </div>
         <div class="honest-card">
           <h3>Your penguin lives in this browser.</h3>
@@ -576,11 +612,16 @@
       <div class="faq-list">
         <details class="faq">
           <summary>Is it really free?</summary>
-          <p>Yes. Every room, every mini-game and every feature is free, and there are no ads. Snowflakes are earned by playing and buy 135 of the shop's 154 items. To be exact about the rest: 15 are priced in Goldfish, a premium currency you can optionally buy in the mobile app, and 4 are for Waddleton Club members — an optional monthly subscription. All 19 are cosmetic. Nothing you can buy affects a score, a leaderboard, or how well you play.</p>
+          <p>Yes. Every room, every mini-game and every feature is free, and there are no ads. Snowflakes are earned by playing and buy 135 of the shop's 154 items. To be exact about the rest: 15 are priced in Goldfish, a premium currency that will be purchasable when the mobile app ships, and 4 are for Waddleton Club members — an optional monthly subscription that will come with it. All 19 are cosmetic. Nothing you can buy affects a score, a leaderboard, or how well you play.</p>
         </details>
         <details class="faq">
           <summary>Do I have to make an account?</summary>
-          <p>No. Open the page and you're a penguin. A guest identity is created for you automatically so other players can see you moving around the island, but there's no email, no password, and nothing to sign up for.</p>
+          <!-- Precision matters here. PenguinArcade/js/agegate.js:291-303: the month and year
+               never leave the function — not to storage, not to the profile, not to a server.
+               The resulting BRACKET does ride along on the next profile save into the
+               waddleton_profiles row, and that is deliberate. Do not simplify this to "nothing
+               leaves your device". -->
+          <p>No. One screen asks the month and year you were born, and then you're a penguin. The month and year themselves are never stored and never sent anywhere — only which age band you're in is kept with your penguin, because that is what decides chat and who can reach you. A guest identity is created for you automatically so other players can see you moving around the island, but there's no email, no password, and nothing to sign up for.</p>
         </details>
         <details class="faq">
           <summary>Will my penguin follow me to another device?</summary>
@@ -592,7 +633,7 @@
         </details>
         <details class="faq">
           <summary>Is the chat safe?</summary>
-          <p>There's a quick-chat list of safe ready-made phrases if you'd rather not type at all, and you can mute or block any player and report anyone who's being a problem. To be straight with you: reports are recorded but there is no full-time moderation team reading them, so please use mute and block — they work immediately.</p>
+          <p>Anything typed goes through one filter that the browser and the server both run, so a patched client doesn't get around it: profanity is masked, anything shaped like a phone number, an email, a link or an address is blocked outright, and leetspeak is normalised first so the obvious dodges collapse to the same word. Players under 13 don't type at all — they use a list of ready-made phrases, and they never see anyone else's typed text. Everyone can mute or block any player, and report anyone who's being a problem. To be straight with you: reports are recorded but there is no full-time moderation team reading them, so please use mute and block — they work immediately.</p>
         </details>
         <details class="faq">
           <summary>Are the leaderboards legit?</summary>

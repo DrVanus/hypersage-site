@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- HOST TRAP: these <loc> values must be on hypersage.ai, the host this sitemap is actually
+     served from. They previously read https://quietoak.app/… — a domain that is NXDOMAIN and
+     unregistered (still an open to-do in quietoak/README.md:31). A sitemap whose URLs are on a
+     different host than the sitemap itself is rejected outright, and index.html's canonical, OG
+     and JSON-LD have always pointed at hypersage.ai/quietoak/. Do not repoint these until the
+     domain is actually bought AND the site is actually served from it. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://quietoak.app/</loc>
-    <lastmod>2026-07-04</lastmod>
+    <loc>https://hypersage.ai/quietoak/</loc>
+    <lastmod>2026-08-06</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://quietoak.app/privacy.html</loc>
-    <lastmod>2026-07-04</lastmod>
+    <loc>https://hypersage.ai/quietoak/privacy.html</loc>
+    <lastmod>2026-08-06</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://quietoak.app/terms.html</loc>
-    <lastmod>2026-07-04</lastmod>
+    <loc>https://hypersage.ai/quietoak/terms.html</loc>
+    <lastmod>2026-08-06</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://quietoak.app/support.html</loc>
-    <lastmod>2026-07-04</lastmod>
+    <loc>https://hypersage.ai/quietoak/support.html</loc>
+    <lastmod>2026-08-06</lastmod>
     <priority>0.6</priority>
   </url>
 </urlset>

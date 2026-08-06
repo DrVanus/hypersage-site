@@ -1,4 +1,8 @@
+# Nested robots.txt is inert on this origin — only https://hypersage.ai/robots.txt is fetched
+# by crawlers. This file is kept only so the URL is not a 404. Its Sitemap line is publicly
+# fetchable, so it must not advertise a host we no longer use: it previously pointed at the
+# retired GitHub Pages repo drvanus.github.io/wingmate-site/.
 User-agent: *
 Allow: /
 
-Sitemap: https://drvanus.github.io/wingmate-site/sitemap.xml
+Sitemap: https://hypersage.ai/wingmate/sitemap.xml

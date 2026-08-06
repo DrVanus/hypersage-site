@@ -711,7 +711,13 @@
           <ul class="spotlight-points" role="list">
             <li><strong>There is no sign-up.</strong> No name, no email, no password — your install is identified by a random device ID.</li>
             <li><strong>No ad or analytics SDKs</strong> touch your health content, and we never sell or share it.</li>
-            <li><strong>Your messages do go to an AI provider</strong> to generate replies — Anthropic, or OpenAI when Anthropic is unavailable, which receives the same message and health context. Your log is stored on our server so it survives between sessions. We won't pretend otherwise.</li>
+            <!-- TRAP: OpenAI has TWO routes to your content, not one. Route 1 is
+                 the reply failover. Route 2 is the independent safety check's own
+                 failover, which sends the recent transcript to a model of its own
+                 (rowan-api/app/companion/classifier.py:62 CLASSIFIER_MODEL_OPENAI,
+                 :331 _assess_openai). privacy.html:113 already says "two separate
+                 routes" — this page must not understate it. -->
+            <li><strong>Your messages do go to an AI provider</strong> to generate replies — Anthropic, or OpenAI when Anthropic is unavailable, which receives the same message and health context. The independent safety check fails over the same way, sending the recent transcript to OpenAI on its own. Your log is stored on our server so it survives between sessions. We won't pretend otherwise.</li>
             <!-- "memories on the server" implied server custody of a health-data
                  category the server never receives: nothing in rowan-api writes
                  `companion_memories` (service.py streams the merged facts back
@@ -755,11 +761,19 @@
         </details>
         <details class="faq">
           <summary>Am I talking to a real person?</summary>
-          <p>No. Rowan is an AI companion, and it says so — there's a persistent indicator in the chat reading "AI companion · not a clinician," and Rowan re-states what it is when you ask, at the start, and again as time goes on. It has no credentials and doesn't play a doctor.</p>
+          <!-- TRAP: this used to add "and again as time goes on". Rowan's prompt
+               asks for that (rowan-api/app/companion/prompts/rowan_system.md:51-53,
+               "after 7+ days away") but NOTHING computes it — a grep of
+               rowan-api/app for session_minutes / days_since_last / redisclos
+               returns nothing, so the model cannot know how long you were away.
+               Alder DOES have the clock (alder-api/app/companion/cache_blocks.py:527,542
+               _redisclosure_directive). Restore the elapsed-time claim only if
+               that directive is ported to rowan-api. -->
+          <p>No. Rowan is an AI companion, and it says so — there's a persistent indicator in the chat reading "AI companion · not a clinician," Rowan says what it is at the start of a conversation, and it answers plainly every time you ask. It has no credentials and doesn't play a doctor.</p>
         </details>
         <details class="faq">
           <summary>Where does my data actually go?</summary>
-          <p>Your messages, and a profile summary of your conditions, medications, allergies, and recent symptoms, are sent to our backend and on to an AI provider so Rowan can reply. We use Anthropic (Claude) as the primary provider, with OpenAI as failover. Failover is on by default and automatic: if Anthropic is unavailable, the same message and the same profile payload go to OpenAI instead, so OpenAI can receive your health context on any turn. Under both providers' commercial API terms as they stand today, your content is not used to train their models. Those are their terms rather than ours, and we will update this page if they change. Your conversations and logs are also stored on our own server, keyed only to a random device ID — never your name. The notes Rowan keeps about you are stored only on your phone — but your phone sends them along with each message, so they reach the AI provider too. Full details, including how long each thing is kept, are in the <a href="privacy.html">privacy policy</a>.</p>
+          <p>Your messages, and a profile summary of your conditions, medications, allergies, and recent symptoms, are sent to our backend and on to an AI provider so Rowan can reply. We use Anthropic (Claude) as the primary provider, with OpenAI as failover. Failover is on by default and automatic: if Anthropic is unavailable, the same message and the same profile payload go to OpenAI instead, so OpenAI can receive your health context on any turn. OpenAI can be reached by a second route as well — the independent safety check runs on its own separate model, and it has its own failover, which sends the recent transcript to OpenAI. Under both providers' commercial API terms as they stand today, your content is not used to train their models. Those are their terms rather than ours, and we will update this page if they change. Your conversations and logs are also stored on our own server, keyed only to a random device ID — never your name. The notes Rowan keeps about you are stored only on your phone — but your phone sends them along with each message, so they reach the AI provider too. Full details, including how long each thing is kept, are in the <a href="privacy.html">privacy policy</a>.</p>
         </details>
         <details class="faq">
           <summary>Is Rowan HIPAA-compliant?</summary>
@@ -771,7 +785,19 @@
         </details>
         <details class="faq">
           <summary>What does it cost?</summary>
-          <p>Tracking your conditions and medications, logging how a day went, your trends, the visit brief, and reminders are all part of Rowan. <strong>There is nothing to buy today</strong> — Rowan has no paid plan yet, and conversation is capped at 10 messages a day. We would rather leave this blank than quote a price we have not shipped. Safety and emergency features will never be behind a payment.</p>
+          <!-- TRAP: this page previously said "there is nothing to buy today".
+               That is FALSE — the shipping build carries a Rowan Plus card and a
+               "See Rowan Plus" button (rowan-app/index.html:729-737), a Settings
+               subscription row (:917), and two StoreKit products
+               (rowan-app/ios/App/App/RowanPlus.swift:31-32,
+               com.hypersage.rowan.plus.monthly / .annual). The 10-a-day free cap
+               IS correct: rowan-api/app/config.py:126
+               `companion_chat_daily_cap: int = 10  # per device/day, FREE tier;
+               Plus = unlimited`, and Plus also raises the model tier (:189).
+               Do NOT quote a price here: the app deliberately reads displayPrice
+               from StoreKit rather than hardcoding one, so any number written on
+               this page is wrong in every storefront but at most one. -->
+          <p>Tracking your conditions and medications, logging how a day went, your trends, the visit brief, and reminders are all part of Rowan at no cost. Conversation on the free plan is capped at 10 messages a day. There is one optional subscription, <strong>Rowan Plus</strong>, which lifts that cap and answers with a more capable model — the price and renewal terms are shown in the App Store before you buy, and billing is handled by Apple. Safety and emergency features are never behind a payment.</p>
         </details>
         <details class="faq">
           <summary>When can I use it?</summary>
