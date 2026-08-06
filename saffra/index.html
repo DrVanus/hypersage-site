@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saffra — Premium Recipes You Can Trust. Adapted to Your Kitchen.</title>
+  <meta name="description" content="Saffra is your personal AI chef. Premium recipes you can trust — every one vetted by a trained chef-panel, then adapted to your pantry, allergies, and the time you've got. Hands-free voice cooking. iOS, in beta.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://drvanus.github.io/saffra-app/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Saffra — Premium Recipes You Can Trust">
+  <meta property="og:description" content="The AI cooking app that doesn't make up recipes. Every recipe vetted by a trained chef-panel. Adapted to your kitchen. Hands-free.">
+  <meta property="og:url" content="https://drvanus.github.io/saffra-app/">
+  <meta property="og:site_name" content="Saffra">
+  <meta property="og:image" content="https://drvanus.github.io/saffra-app/saffra-hat.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Saffra — Premium Recipes You Can Trust">
+  <meta name="twitter:description" content="The AI cooking app that doesn't make up recipes. Every recipe vetted by a trained chef-panel. Adapted to your kitchen.">
+  <meta name="twitter:image" content="https://drvanus.github.io/saffra-app/saffra-hat.png">
+
+  <link rel="icon" type="image/png" href="saffra-hat.png">
+  <link rel="apple-touch-icon" href="saffra-hat.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0E0C0A;
+      --fg: #F5EFE5;
+      --card: #1A1612;
+      --card-fg: #F5EFE5;
+      --primary: #E08230;
+      --primary-fg: #ffffff;
+      --primary-dark: #B8651C;
+      --primary-light: #F5C088;
+      --secondary: #5BA15F;
+      --secondary-dark: #3B7A3F;
+      --muted: #1A1612;
+      --muted-fg: #9A8E80;
+      --accent: #2A1A0E;
+      --accent-fg: #F5EFE5;
+      --warm-cream: #F5C088;
+      --border: rgba(224,130,48,0.14);
+      --primary-glow: rgba(224,130,48,0.10);
+      --radius: 0.625rem;
+    }
+
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    .container { max-width: 1152px; margin: 0 auto; padding: 0 24px; }
+
+    /* padding-bottom on all background-clip:text spans keeps descenders
+       (g, y, p) inside the paint box — without it they clip at the baseline. */
+    .gradient-text-warm {
+      display: inline-block;
+      background: linear-gradient(135deg, #F5C088 0%, #E08230 50%, #B8651C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      padding-bottom: 0.16em; margin-bottom: -0.16em;
+    }
+    .gradient-text-green {
+      display: inline-block;
+      background: linear-gradient(135deg, #8FCB93 0%, #5BA15F 50%, #3B7A3F 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      padding-bottom: 0.16em; margin-bottom: -0.16em;
+    }
+    .italic-anything {
+      display: inline-block;
+      font-family: 'Playfair Display', 'Inter', serif;
+      font-style: italic;
+      font-weight: 600;
+      background: linear-gradient(135deg, #F5C088 0%, #E08230 50%, #B8651C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      padding-bottom: 0.16em; margin-bottom: -0.16em;
+      /* Italic Playfair overhangs its right edge — keep the final letter +
+         period from clipping against the inline-block boundary. */
+      padding-right: 0.08em;
+    }
+
+    .btn-warm {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #E08230, #B8651C);
+      color: #ffffff;
+      font-weight: 700; font-size: 0.9rem; font-family: inherit;
+      border-radius: 12px; border: none; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(224,130,48,0.25);
+      transition: all 0.2s ease;
+      letter-spacing: 0.01em;
+    }
+    .btn-warm:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(224,130,48,0.4); background: linear-gradient(135deg, #F09848, #C97520); }
+    .btn-warm svg { width: 16px; height: 16px; }
+
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px;
+      background: rgba(224,130,48,0.05);
+      color: #F5C088;
+      font-weight: 600; font-size: 0.9rem; font-family: inherit;
+      border-radius: 12px; border: 1px solid var(--border); cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-outline:hover { background: rgba(224,130,48,0.1); border-color: rgba(224,130,48,0.3); }
+
+    .section-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--primary); margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 2.5rem; font-weight: 800; line-height: 1.2; padding-bottom: 0.08em;
+      letter-spacing: -0.03em;
+    }
+
+    .section-desc {
+      font-size: 1.05rem; color: var(--muted-fg);
+      max-width: 600px; margin-top: 14px; line-height: 1.65;
+    }
+
+    section { padding: 96px 0; }
+
+    .section-divider {
+      height: 1px; max-width: 768px; margin: 0 auto;
+      background: linear-gradient(90deg, transparent, rgba(224,130,48,0.2), transparent);
+      position: relative;
+    }
+    .section-divider::after {
+      content: ''; position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+      width: 200px; height: 16px;
+      background: radial-gradient(ellipse, rgba(224,130,48,0.08), transparent);
+    }
+
+    /* Icons */
+    .icon-box {
+      width: 42px; height: 42px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(224,130,48,0.08);
+      border: 1px solid var(--border);
+      border-radius: 10px; flex-shrink: 0;
+    }
+    .icon-box svg { width: 20px; height: 20px; color: var(--primary); stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .icon-box.green { background: rgba(91,161,95,0.10); border-color: rgba(91,161,95,0.18); }
+    .icon-box.green svg { color: var(--secondary); }
+
+    /* Animations */
+    @keyframes fade-in-up {
+      from { opacity: 0; transform: translateY(32px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.3; transform: translate(-50%,-50%) scale(1); }
+      50% { opacity: 0.55; transform: translate(-50%,-50%) scale(1.05); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.06); opacity: 1; }
+    }
+    .anim { opacity: 0; transform: translateY(32px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+    .anim.visible { opacity: 1; transform: translateY(0); }
+    .anim-d1 { transition-delay: 0.1s; }
+    .anim-d2 { transition-delay: 0.2s; }
+    .anim-d3 { transition-delay: 0.3s; }
+    .anim-d4 { transition-delay: 0.4s; }
+    .anim-d5 { transition-delay: 0.5s; }
+    .anim-d6 { transition-delay: 0.6s; }
+    .anim-d7 { transition-delay: 0.7s; }
+
+    /* Shimmer on gradient text */
+    .shimmer-text {
+      background: linear-gradient(90deg, #F5C088 0%, #E08230 40%, #F5C088 60%, #E08230 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+
+    /* Platform badge */
+    .platform-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 16px; border-radius: 20px;
+      background: rgba(224,130,48,0.05);
+      border: 1px solid var(--border);
+      font-size: 0.78rem; font-weight: 500; color: var(--muted-fg);
+      margin-bottom: 20px;
+      animation: fade-in-up 0.8s ease both;
+    }
+    .platform-badge span { color: #F5C088; }
+
+    /* Scroll to top */
+    .scroll-top {
+      position: fixed; bottom: 24px; right: 24px; z-index: 50;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(224,130,48,0.15); border: 1px solid var(--border);
+      border-radius: 10px; cursor: pointer;
+      opacity: 0; transform: translateY(10px);
+      transition: all 0.3s ease; pointer-events: none;
+    }
+    .scroll-top.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .scroll-top:hover { background: rgba(224,130,48,0.25); }
+    .scroll-top svg { width: 18px; height: 18px; color: var(--primary); stroke: currentColor; fill: none; stroke-width: 2.5; }
+
+    /* Pricing toggle */
+    .pricing-toggle {
+      display: inline-flex; gap: 4px; justify-content: center; margin-top: 20px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 4px;
+    }
+    .pricing-toggle-wrap { text-align: center; margin-top: 20px; }
+    .toggle-btn {
+      padding: 8px 20px; border-radius: 8px; border: none;
+      background: transparent; color: var(--muted-fg);
+      font-size: 0.85rem; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .toggle-btn.active { background: linear-gradient(135deg, #E08230, #B8651C); color: #fff; }
+    .toggle-save { font-size: 0.7rem; color: #F5C088; font-weight: 600; opacity: 0.85; }
+
+    /* Navbar */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(14,12,10,0.7);
+      backdrop-filter: saturate(180%) blur(16px);
+      -webkit-backdrop-filter: saturate(180%) blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .navbar .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; }
+    .nav-logo .logo-mark {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, rgba(245,192,136,0.15), rgba(184,101,28,0.05));
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(224,130,48,0.20);
+      overflow: hidden;
+    }
+    .nav-logo .logo-mark img { width: 28px; height: 28px; object-fit: contain; }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a { font-size: 0.85rem; color: var(--muted-fg); transition: color 0.2s; font-weight: 500; }
+    .nav-links a:hover { color: var(--fg); }
+    .nav-links a.nav-cta {
+      padding: 8px 18px; background: linear-gradient(135deg, #E08230, #B8651C);
+      color: #ffffff; font-weight: 700; font-size: 0.8rem;
+      border-radius: 8px; transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(224,130,48,0.3);
+    }
+    .nav-links a.nav-cta:hover { box-shadow: 0 4px 16px rgba(224,130,48,0.4); background: linear-gradient(135deg, #F09848, #C97520); }
+    .nav-toggle { display: none; background: none; border: none; color: var(--fg); cursor: pointer; padding: 4px; }
+    .nav-toggle svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    /* Hero */
+    .hero {
+      padding: 140px 0 80px; text-align: center; position: relative; overflow: hidden;
+    }
+    .hero-layout {
+      display: flex; flex-direction: column; align-items: center;
+    }
+    @media (min-width: 1100px) {
+      .hero-layout {
+        flex-direction: row; align-items: center; gap: 56px; text-align: left;
+      }
+      .hero-text { flex: 1; min-width: 0; }
+      .hero-screenshot { margin-top: 0 !important; flex-shrink: 0; }
+      .hero h1 { margin: 0; }
+      .hero .subtitle { margin: 20px 0 0; }
+      .hero-buttons { justify-content: flex-start; }
+      .hero .platform-badge { display: inline-flex; }
+      .hero-phone-frame { max-width: none; }
+    }
+    @media (min-width: 1100px) and (max-width: 1250px) {
+      .hero h1 { font-size: 2.8rem; }
+      .hero-phone-frame .phone-placeholder { max-height: 460px; }
+      .hero-layout { gap: 40px; }
+    }
+    .hero::before {
+      content: ''; position: absolute; top: calc(30% - var(--parallax, 0px)); left: 50%;
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse, rgba(224,130,48,0.10), transparent 65%);
+      pointer-events: none;
+      animation: pulse-glow 5s ease-in-out infinite;
+    }
+    .hero::after {
+      content: ''; position: absolute; top: 60%; left: 30%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(91,161,95,0.05), transparent 60%);
+      pointer-events: none;
+      animation: pulse-glow 7s ease-in-out 1s infinite;
+    }
+    .hero h1 {
+      font-size: 3.5rem; font-weight: 800; line-height: 1.2; padding-bottom: 0.08em;
+      letter-spacing: -0.03em; max-width: 800px; margin: 0 auto;
+      animation: fade-in-up 0.8s ease both;
+      position: relative;
+    }
+    .hero .subtitle {
+      font-size: 1.1rem; color: var(--muted-fg); max-width: 580px;
+      margin: 20px auto 0; line-height: 1.7;
+      animation: fade-in-up 0.8s ease 0.15s both;
+      position: relative;
+    }
+    .hero-buttons {
+      display: flex; gap: 14px; justify-content: center; margin-top: 32px; flex-wrap: wrap;
+      animation: fade-in-up 0.8s ease 0.3s both;
+      position: relative;
+    }
+    .hero-screenshot {
+      margin-top: 56px; display: flex; justify-content: center;
+      animation: fade-in-up 0.8s ease 0.45s both;
+      position: relative;
+    }
+    .hero-phone-wrap {
+      position: relative; display: inline-block;
+    }
+    .hero-phone-wrap::before {
+      content: ''; position: absolute; inset: -32px;
+      border-radius: 3rem;
+      background: radial-gradient(ellipse, rgba(224,130,48,0.16), transparent 70%);
+      filter: blur(30px);
+      pointer-events: none;
+    }
+    /* Layout-only wrapper now — the visual phone bezel + screen lives in the
+       PNG itself, so this no longer paints a frame. Kept the class because
+       the crossfade + glow CSS still references it. */
+    .hero-phone-frame {
+      position: relative;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+    /* Real device PNGs (540×1100, bezel + Dynamic Island baked in).
+       Match the gallery .shot treatment exactly so every screenshot renders
+       the same way: no extra border-radius (the bezel is already in the PNG,
+       so a CSS radius would shave its corners) and object-fit: contain. */
+    .hero-phone-img {
+      display: block;
+      width: 280px;
+      height: auto;
+      object-fit: contain;
+    }
+    /* Phone screens */
+    .phone-placeholder {
+      width: 264px; max-height: 520px; min-height: 480px;
+      border-radius: 2rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      padding: 24px 20px;
+      font-family: 'Inter', sans-serif;
+    }
+    .phone-placeholder.screen-chef {
+      background: linear-gradient(180deg, #1A1612 0%, #0E0C0A 100%);
+    }
+    .phone-placeholder.screen-cooking {
+      background: linear-gradient(180deg, #1A1612 0%, #0E0C0A 100%);
+    }
+    .phone-placeholder .phone-header {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--primary); margin-bottom: 16px;
+      text-align: center; align-self: stretch;
+    }
+    .phone-placeholder .phone-greeting {
+      width: 100%;
+      font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 4px;
+      text-align: left;
+    }
+    .phone-placeholder .phone-greet-sub {
+      width: 100%;
+      font-size: 0.72rem; color: var(--muted-fg); margin-bottom: 14px;
+      text-align: left;
+    }
+    .phone-placeholder .phone-pills { display: flex; gap: 6px; flex-wrap: wrap; align-self: stretch; margin-bottom: 16px; }
+    .phone-placeholder .phone-pill {
+      padding: 4px 10px; border-radius: 12px;
+      background: rgba(224,130,48,0.10); border: 1px solid var(--border);
+      font-size: 0.62rem; color: #F5C088; font-weight: 600;
+    }
+    .phone-placeholder .phone-pill.green {
+      background: rgba(91,161,95,0.12); border-color: rgba(91,161,95,0.22); color: #8FCB93;
+    }
+    .phone-placeholder .phone-quick {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    }
+    .phone-placeholder .phone-quick-icon {
+      width: 24px; height: 24px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #E08230, #B8651C);
+      color: #fff; font-size: 0.72rem;
+    }
+    .phone-placeholder .phone-quick-icon.green { background: linear-gradient(135deg, #5BA15F, #3B7A3F); }
+    .phone-placeholder .phone-quick-text { font-size: 0.72rem; font-weight: 600; color: #fff; flex: 1; line-height: 1.3; }
+
+    .phone-placeholder .cooking-step-num {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, #F5C088, #E08230);
+      color: #fff; font-weight: 800; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px; box-shadow: 0 4px 16px rgba(224,130,48,0.35);
+    }
+    .phone-placeholder .cooking-step-text {
+      font-size: 0.82rem; color: #fff; line-height: 1.5; text-align: center;
+      max-width: 220px; margin-bottom: 18px;
+    }
+    .phone-placeholder .cooking-timer {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; border-radius: 10px;
+      background: rgba(224,130,48,0.10); border: 1px solid var(--border);
+      font-size: 0.72rem; color: #F5C088; font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .phone-placeholder .cooking-voice {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 14px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.65rem; color: var(--muted-fg); font-weight: 500;
+      margin-top: auto;
+    }
+    .phone-placeholder .cooking-voice .voice-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
+      animation: breathe 1.6s ease-in-out infinite;
+    }
+
+    /* Hero rotator — stacked screenshots cross-fading on a timer (JS-driven,
+       see #heroRotator below). The first image is position:relative so it
+       defines the box height; the rest overlay it absolutely and fade in when
+       they receive .is-active. */
+    .hero-phone-frame .hero-phone-img {
+      position: absolute; top: 0; left: 0; width: 100%; height: auto;
+      opacity: 0; transition: opacity 0.9s ease-in-out;
+    }
+    .hero-phone-frame .hero-phone-img:first-child { position: relative; }
+    .hero-phone-frame .hero-phone-img.is-active { opacity: 1; }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-phone-frame .hero-phone-img { transition: none; }
+    }
+
+    /* Stats */
+    .stats {
+      padding: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, rgba(224,130,48,0.03), transparent, rgba(91,161,95,0.03));
+    }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .stat-item {
+      padding: 40px 16px; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-number { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+    .stat-label {
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--muted-fg); margin-top: 6px;
+    }
+
+    /* Concept Section */
+    .concept-section {
+      position: relative;
+      background-image: radial-gradient(rgba(224,130,48,0.06) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .concept-section::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(224,130,48,0.06), transparent 55%);
+      pointer-events: none;
+    }
+    .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; margin-top: 48px; }
+    .concept-features { display: flex; flex-direction: column; gap: 28px; }
+    .concept-feature { display: flex; gap: 16px; align-items: flex-start; }
+    .concept-feature h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 5px; }
+    .concept-feature p { font-size: 0.85rem; color: var(--muted-fg); line-height: 1.55; }
+
+    .chat-preview {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px; position: relative;
+      box-shadow: 0 16px 60px rgba(0,0,0,0.4), 0 0 40px rgba(224,130,48,0.06);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .chat-label {
+      font-size: 0.65rem; color: var(--muted-fg); text-transform: uppercase;
+      letter-spacing: 0.12em; margin-bottom: 16px; font-weight: 600;
+      opacity: 0.7;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .chat-label::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+    }
+    .chat-bubble {
+      padding: 12px 16px; border-radius: 12px; font-size: 0.85rem;
+      line-height: 1.55; margin-bottom: 10px; max-width: 88%;
+    }
+    .chat-user {
+      background: rgba(224,130,48,0.12); border: 1px solid var(--border);
+      margin-left: auto; color: #F5C088;
+    }
+    .chat-chef {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    }
+    .chat-tool {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; margin: 6px 0;
+      border-radius: 8px;
+      background: rgba(91,161,95,0.10); border: 1px solid rgba(91,161,95,0.20);
+      font-size: 0.7rem; color: #8FCB93; font-weight: 600;
+    }
+    .chat-tool::before {
+      content: ''; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--secondary);
+    }
+
+    /* Intelligence section — the "why she's actually a chef" credibility layer */
+    .intelligence-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 48px;
+    }
+    .intelligence-card {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 16px; padding: 26px 24px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .intelligence-card:hover {
+      border-color: rgba(224,130,48,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(224,130,48,0.06), 0 0 60px rgba(224,130,48,0.04);
+    }
+    .intelligence-card .icon-box { margin-bottom: 16px; width: 48px; height: 48px; }
+    .intelligence-card .icon-box svg { width: 22px; height: 22px; }
+    .intelligence-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; line-height: 1.3; letter-spacing: -0.01em; }
+    .intelligence-card p { font-size: 0.88rem; color: var(--muted-fg); line-height: 1.65; }
+    .intelligence-card p strong { color: var(--primary-light); font-weight: 600; }
+    .intel-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+      margin-top: 32px;
+    }
+    .intel-stat {
+      background: rgba(224,130,48,0.04); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px; text-align: center;
+    }
+    .intel-stat-num { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+    .intel-stat-label {
+      font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--muted-fg); margin-top: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .intelligence-grid { grid-template-columns: 1fr; }
+      .intel-stats { grid-template-columns: 1fr; }
+    }
+
+    /* Features */
+    .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 40px; }
+    .feature-card {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .feature-card::before {
+      content: ''; position: absolute; inset: -1px; border-radius: 17px;
+      background: linear-gradient(135deg, rgba(224,130,48,0.25), transparent 50%, rgba(224,130,48,0.15));
+      opacity: 0; transition: opacity 0.3s; z-index: -1;
+    }
+    .feature-card:hover { border-color: rgba(224,130,48,0.3); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(224,130,48,0.08), 0 0 60px rgba(224,130,48,0.04); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card .icon-box { margin-bottom: 14px; }
+    .feature-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+    .feature-card p { font-size: 0.82rem; color: var(--muted-fg); line-height: 1.55; }
+
+    /* Steps */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
+    .step { text-align: center; }
+    .step-num {
+      width: 44px; height: 44px; margin: 0 auto 16px;
+      background: linear-gradient(135deg, #E08230, #B8651C);
+      color: #ffffff; font-weight: 800; font-size: 1rem;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(224,130,48,0.30);
+    }
+    .step h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .step p { font-size: 0.85rem; color: var(--muted-fg); max-width: 240px; margin: 0 auto; line-height: 1.55; }
+
+    /* Pricing */
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px;
+      align-items: stretch;
+    }
+    .price-card {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px 24px; position: relative;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+      /* Flex column so the bullet list can grow to fill remaining vertical
+         space and the CTA button pins to the bottom. Without this, cards
+         with fewer bullets (Lifetime) sit their button mid-card while the
+         taller Pro card's button anchors lower — visually misaligned. */
+      display: flex; flex-direction: column;
+    }
+    .price-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+    .price-card.featured {
+      border-color: var(--primary);
+      box-shadow: 0 0 50px rgba(224,130,48,0.10), 0 0 100px rgba(224,130,48,0.04);
+      background: linear-gradient(180deg, rgba(224,130,48,0.06), rgba(255,255,255,0.02) 40%);
+      transform: scale(1.02);
+    }
+    .price-card.featured:hover { transform: scale(1.02) translateY(-4px); box-shadow: 0 0 60px rgba(224,130,48,0.15), 0 12px 40px rgba(0,0,0,0.3); }
+    .price-badge {
+      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+      padding: 4px 14px; background: linear-gradient(135deg, #E08230, #B8651C);
+      color: #ffffff; font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em; border-radius: 20px;
+    }
+    .price-card h3 { font-size: 1.15rem; font-weight: 700; }
+    .price-card .price-sub { font-size: 0.8rem; color: var(--muted-fg); margin-top: 4px; }
+    .price-amount { font-size: 2.5rem; font-weight: 800; margin: 20px 0 2px; letter-spacing: -0.02em; }
+    .price-period { font-size: 0.8rem; color: var(--muted-fg); }
+    .price-features {
+      list-style: none; margin-top: 24px; display: flex; flex-direction: column; gap: 10px;
+      flex: 1;  /* Pushes the CTA button to the bottom across all 3 cards. */
+    }
+    .price-features li {
+      font-size: 0.82rem; color: var(--muted-fg);
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .price-features li::before { content: '\2713'; color: var(--primary); font-weight: 700; flex-shrink: 0; }
+    .price-features li.off { color: rgba(154,142,128,0.4); text-decoration: line-through; }
+    .price-features li.off::before { content: '\2715'; color: rgba(154,142,128,0.3); }
+    .price-card .btn-warm, .price-card .btn-outline { width: 100%; justify-content: center; margin-top: 24px; }
+
+    /* FAQ */
+    .faq-list { max-width: 680px; margin: 40px auto 0; }
+    .faq-item { border-bottom: 1px solid var(--border); transition: background 0.2s; }
+    .faq-item:hover { background: rgba(224,130,48,0.02); }
+    .faq-q {
+      width: 100%; background: none; border: none; color: var(--fg);
+      font-size: 0.95rem; font-weight: 600; text-align: left;
+      padding: 20px 0; cursor: pointer; display: flex;
+      justify-content: space-between; align-items: center; font-family: inherit;
+    }
+    .faq-q .faq-icon { flex-shrink: 0; margin-left: 16px; color: var(--primary); font-size: 1.2rem; transition: transform 0.2s; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.45s ease; }
+    /* Bumped from 400px — some answers now run longer (the AI / accuracy /
+       allergens entries) and were getting clipped at the bottom. 800px is
+       enough headroom for any current answer; the transition still feels
+       crisp because most answers stop well short of the cap. */
+    .faq-item.open .faq-a { max-height: 800px; }
+    .faq-a p { padding: 0 0 20px; font-size: 0.88rem; color: var(--muted-fg); line-height: 1.65; }
+
+    /* CTA */
+    .cta-section { text-align: center; position: relative; overflow: hidden; }
+    .cta-section::after {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(224,130,48,0.10), transparent 60%);
+      pointer-events: none;
+    }
+    .cta-section::before {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); width: 500px; height: 300px;
+      background: radial-gradient(ellipse, rgba(91,161,95,0.06), transparent 70%);
+      pointer-events: none;
+    }
+    .signup-form { display: flex; gap: 10px; justify-content: center; margin-top: 28px; flex-wrap: wrap; position: relative; z-index: 1; }
+    .signup-form input {
+      padding: 12px 18px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--fg); font-size: 0.9rem; font-family: inherit;
+      width: 300px; outline: none; transition: border-color 0.2s;
+    }
+    .signup-form input:focus { border-color: var(--primary); }
+    .signup-form input::placeholder { color: rgba(154,142,128,0.5); }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border); padding: 48px 0; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+    .footer-brand p { font-size: 0.82rem; color: var(--muted-fg); margin-top: 12px; max-width: 280px; line-height: 1.55; }
+    .footer-col h4 { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(154,142,128,0.7); margin-bottom: 14px; }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 8px; }
+    .footer-col a { font-size: 0.82rem; color: var(--muted-fg); transition: color 0.2s; }
+    .footer-col a:hover { color: #F5C088; }
+    .footer-bottom {
+      margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.72rem; color: rgba(154,142,128,0.5);
+    }
+
+    /* Feature-detail sections — one section per major feature, CryptoSage
+       style: copy on one side, real device screenshots on the other,
+       alternating direction section to section (.fd-flip). */
+    .fd-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
+      align-items: center; margin-top: 48px;
+    }
+    .fd-copy .section-label { margin-bottom: 10px; }
+    .fd-copy h2 { font-size: 2.1rem; font-weight: 800; line-height: 1.22; letter-spacing: -0.025em; padding-bottom: 0.1em; }
+    .fd-copy > p { font-size: 0.98rem; color: var(--muted-fg); line-height: 1.7; margin-top: 14px; }
+    .fd-points { list-style: none; margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .fd-points li { display: flex; gap: 14px; align-items: flex-start; }
+    .fd-points .icon-box { width: 38px; height: 38px; border-radius: 9px; }
+    .fd-points .icon-box svg { width: 18px; height: 18px; }
+    .fd-points h4 { font-size: 0.92rem; font-weight: 700; margin-bottom: 3px; }
+    .fd-points p { font-size: 0.84rem; color: var(--muted-fg); line-height: 1.55; }
+    .fd-shots {
+      display: flex; gap: 22px; justify-content: center; align-items: flex-end;
+      position: relative;
+    }
+    .fd-shots::before {
+      content: ''; position: absolute; inset: -24px;
+      border-radius: 3rem;
+      background: radial-gradient(ellipse, rgba(224,130,48,0.14), transparent 68%);
+      filter: blur(26px); pointer-events: none;
+    }
+    .fd-shot { position: relative; text-align: center; }
+
+    /* Device frame. The screenshots are now clean 968x2088 captures (iPhone
+       1:2.157) with no baked-in bezel, so the phone is drawn here instead of
+       being painted into the PNG — no amber halo, correct proportions, and one
+       consistent look across every shot. Radius tracks Apple's ~9% of width. */
+    .fd-shot img, .hero-phone-img, .time-card img {
+      border-radius: 9%/4.2%;
+      background: #000;
+      box-shadow:
+        0 0 0 2px rgba(255,255,255,0.07),
+        0 0 0 7px rgba(20,14,10,0.95),
+        0 22px 48px rgba(0,0,0,0.55);
+    }
+    .fd-shot img {
+      width: 250px; height: auto; object-fit: contain;
+      transition: transform 0.4s ease;
+    }
+    .fd-shot:hover img { transform: translateY(-4px); }
+    .fd-shot .fd-shot-caption {
+      margin-top: 12px; font-size: 0.75rem; font-weight: 600;
+      color: var(--muted-fg); letter-spacing: 0.02em;
+    }
+    /* Two-shot layouts: stagger the pair so it reads as a moment in time,
+       not a static grid. */
+    .fd-shots.pair .fd-shot:first-child { margin-bottom: 40px; }
+    .fd-grid.fd-flip .fd-copy { order: 2; }
+    .fd-grid.fd-flip .fd-shots { order: 1; }
+
+    /* Time-of-day strip — four phones, one per meal slot. */
+    .time-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px 20px;
+      margin-top: 52px;
+    }
+    .time-card { text-align: center; }
+    .time-card .time-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 5px 14px; border-radius: 16px; margin-bottom: 16px;
+      background: rgba(224,130,48,0.07); border: 1px solid var(--border);
+      font-size: 0.74rem; font-weight: 700; color: #F5C088;
+      letter-spacing: 0.04em;
+    }
+    .time-card .time-tag svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .time-card .shot-wrap { position: relative; margin-bottom: 16px; }
+    .time-card .shot-wrap::before {
+      content: ''; position: absolute; inset: -14px;
+      border-radius: 2.5rem;
+      background: radial-gradient(ellipse, rgba(224,130,48,0.16), transparent 65%);
+      filter: blur(18px); pointer-events: none;
+    }
+    .time-card img {
+      position: relative; width: 100%; height: auto; object-fit: contain;
+      transition: transform 0.4s ease;
+    }
+    .time-card:hover img { transform: translateY(-4px); }
+    .time-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 5px; letter-spacing: -0.01em; }
+    .time-card p { font-size: 0.8rem; color: var(--muted-fg); line-height: 1.5; max-width: 230px; margin: 0 auto; }
+
+    /* Cooking-mode flow strip — how a cook actually plays out. */
+    .cook-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 56px; }
+    .cook-flow-step {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px 18px;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .cook-flow-step .cf-num {
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em;
+      color: var(--primary); text-transform: uppercase; margin-bottom: 10px;
+    }
+    .cook-flow-step h4 { font-size: 0.92rem; font-weight: 700; margin-bottom: 6px; }
+    .cook-flow-step p { font-size: 0.8rem; color: var(--muted-fg); line-height: 1.55; }
+
+    /* "What she can see" context chips in the AI section. */
+    .context-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .context-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 15px; border-radius: 20px;
+      background: rgba(224,130,48,0.06); border: 1px solid var(--border);
+      font-size: 0.78rem; font-weight: 600; color: #F5C088;
+    }
+    .context-chip svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .context-chip.green { background: rgba(91,161,95,0.08); border-color: rgba(91,161,95,0.2); color: #8FCB93; }
+
+    @media (max-width: 1099px) {
+      .time-strip { grid-template-columns: repeat(2, 1fr); max-width: 560px; margin-left: auto; margin-right: auto; }
+      .cook-flow { grid-template-columns: repeat(2, 1fr); }
+      .fd-grid { gap: 44px; }
+      .fd-shot img { width: 220px; }
+    }
+    @media (max-width: 900px) {
+      .fd-grid { grid-template-columns: 1fr; gap: 40px; }
+      .fd-grid.fd-flip .fd-copy { order: 1; }
+      .fd-grid.fd-flip .fd-shots { order: 2; }
+      .fd-shots.pair .fd-shot:first-child { margin-bottom: 0; }
+      .fd-copy h2 { font-size: 1.8rem; }
+    }
+    @media (max-width: 600px) {
+      .time-strip { grid-template-columns: 1fr; max-width: 300px; }
+      .cook-flow { grid-template-columns: 1fr; }
+      .fd-shots { flex-wrap: wrap; gap: 28px; }
+      .fd-shot img { width: min(250px, 78vw); }
+    }
+
+    /* Responsive */
+    @media (max-width: 1099px) {
+      .section-title { font-size: 2.15rem; }
+      .features-grid { grid-template-columns: repeat(3, 1fr); }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .concept-grid { gap: 40px; }
+      section { padding: 72px 0; }
+      .nav-links { gap: 20px; }
+      .nav-links a { font-size: 0.8rem; }
+    }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex; flex-direction: column; position: absolute;
+        top: 64px; left: 0; right: 0;
+        background: rgba(14,12,10,0.95); backdrop-filter: blur(16px);
+        padding: 20px 24px; gap: 16px; border-bottom: 1px solid var(--border);
+      }
+      .nav-toggle { display: block; }
+      .hero h1 { font-size: 2.5rem; }
+      .hero .subtitle { font-size: 1rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-item:nth-child(2) { border-right: none; }
+      .concept-grid { grid-template-columns: 1fr; gap: 32px; }
+      .chat-preview { order: -1; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps { grid-template-columns: 1fr; gap: 24px; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+      .section-title { font-size: 1.85rem; }
+      section { padding: 64px 0; }
+    }
+
+    @media (max-width: 767px) {
+      .hero h1 { font-size: 2.1rem; }
+      .hero { padding: 120px 0 60px; }
+      .pricing-grid { max-width: 380px; }
+      .stat-number { font-size: 1.55rem; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .hero-buttons { flex-direction: column; align-items: center; }
+      .signup-form { flex-direction: column; align-items: center; }
+      .signup-form input { width: 100%; }
+      .hero h1 { font-size: 1.85rem; }
+      .hero { padding: 110px 0 48px; }
+      .container { padding: 0 16px; }
+    }
+  </style>
+<!-- app-schema:start (generated by appdev/tools/app_schema.py — edit apps.json, not this) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Saffra",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "iOS",
+  "description": "Saffra is your personal AI chef. Premium recipes you can trust \u2014 every one vetted by a trained chef-panel, then adapted to your pantry, allergies, and the time you've got. Hands-free voice cooking. iOS, in beta.",
+  "url": "https://drvanus.github.io/saffra-app/",
+  "author": {
+    "@type": "Organization",
+    "name": "Hypersage AI Labs"
+  }
+}
+</script>
+<!-- app-schema:end -->
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="container">
+    <a href="#" class="nav-logo">
+      <div class="logo-mark"><img src="saffra-hat.png" alt="Saffra"></div>
+      <span>Saffra</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="#screenshots">Inside</a>
+      <a href="#time-aware">Time-Aware</a>
+      <a href="#intelligence">The AI</a>
+      <a href="#cooking-mode">Cooking Mode</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="#signup" class="nav-cta">Get Early Access</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-layout">
+      <div class="hero-text">
+        <div class="platform-badge">Coming Soon <span>to</span> iOS</div>
+        <h1>Make<br><span class="italic-anything">anything.</span></h1>
+        <p class="subtitle">Premium recipes you can trust — every one vetted by a trained chef-panel, then rewritten for your pantry, your allergies, and the time you've got. Plus voice-first cooking when your hands are full of dough.</p>
+        <div class="hero-buttons">
+          <a href="#signup" class="btn-warm">Get Early Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <a href="#how-it-works" class="btn-outline">See How It Works</a>
+        </div>
+      </div>
+      <div class="hero-screenshot">
+        <div class="hero-phone-wrap">
+          <!-- Hero rotator: cross-fades through the app's signature surfaces,
+               deliberately alternating light and dark mode so both looks show
+               without a single click. Order tells the story — greet, ask,
+               browse, cook, search. -->
+          <div class="hero-phone-frame" id="heroRotator">
+            <img class="hero-phone-img is-active"
+                 src="screenshots-raw/01-chef-tab-light.png"
+                 alt="Saffra Chef tab in light mode — pantry-aware quick-start prompts">
+            <img class="hero-phone-img"
+                 src="screenshots-raw/07-chat-recipe-dark.png"
+                 alt="Ask Saffra in dark mode — she answers with a recipe pulled from the catalog">
+            <img class="hero-phone-img"
+                 src="screenshots-raw/05-recipes-light.png"
+                 alt="Recipes in light mode — a panel-vetted catalog with Saffra's daily pick">
+            <img class="hero-phone-img"
+                 src="screenshots-raw/02-cooking-mode-dark.png"
+                 alt="Cooking Mode in dark mode — hands-free voice with a suggested step timer">
+            <img class="hero-phone-img"
+                 src="screenshots-raw/06-search-light.png"
+                 alt="Search in light mode — semantic recipe search across the whole catalog">
+            <img class="hero-phone-img"
+                 src="screenshots-raw/10-recipes-dinner-dark.png"
+                 alt="Recipes at dinner time in dark mode — Saffra picks for tonight">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-number gradient-text-warm">230,000+</div><div class="stat-label">Recipes, Semantically Searchable</div></div>
+      <div class="stat-item"><div class="stat-number gradient-text-warm">3</div><div class="stat-label">Chef-Trained Perspectives Must Agree</div></div>
+      <div class="stat-item"><div class="stat-number gradient-text-warm">25+</div><div class="stat-label">Cuisines, Regional Depth</div></div>
+      <div class="stat-item"><div class="stat-number gradient-text-warm">100%</div><div class="stat-label">Hands-Free Voice</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- Concept Section -->
+<section class="concept-section" id="concept">
+  <div class="container">
+    <div class="anim">
+      <span class="section-label">How She's Different</span>
+      <h2 class="section-title">Your chef.<br><span class="gradient-text-warm">Your kitchen.</span></h2>
+      <p class="section-desc">Every other recipe source has a single point of failure. Cookbook recipes carry one author's bias. AI-generated recipes carry one model's hallucinations. Saffra's catalog is panel-vetted — three chef-trained perspectives have to agree before a recipe ships, and then she rewrites it for you.</p>
+    </div>
+    <div class="concept-grid">
+      <div class="concept-features anim">
+        <div class="concept-feature">
+          <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div><h4>Pantry-first</h4><p>She checks what you have before suggesting anything. If the cilantro's going yellow, that's tonight's dinner.</p></div>
+        </div>
+        <div class="concept-feature">
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 1v22M19 12a7 7 0 0 1-14 0M9 8a3 3 0 0 1 6 0v4a3 3 0 0 1-6 0V8z"/></svg></div>
+          <div><h4>Voice-first Cooking Mode</h4><p>Messy hands? Say "hey saffra, next step" and she narrates. Set timers by voice — they live in the Dynamic Island.</p></div>
+        </div>
+        <div class="concept-feature">
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M16 4l4 4M3 12a9 9 0 0 1 9-9"/></svg></div>
+          <div><h4>Adapted for you</h4><p>Every recipe is rewritten for your pantry, equipment, allergies, and skill level. Beginners get sensory cues. Pros get the chef move.</p></div>
+        </div>
+        <div class="concept-feature">
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div><h4>Allergens never slip</h4><p>Declared allergies are non-negotiable. She'll swap loud and clear, or pass on a recipe entirely — never quietly proceed.</p></div>
+        </div>
+      </div>
+      <div class="chat-preview anim">
+        <div class="chat-label">A real chat with Saffra</div>
+        <div class="chat-bubble chat-user">What can I make tonight? I have maybe 30 minutes.</div>
+        <div class="chat-tool">Checking your pantry · 9 items</div>
+        <div class="chat-bubble chat-chef">Quick one: let's do a skillet chicken thigh in a cilantro-tomato pan sauce over rice. Thirty minutes flat, one pan.</div>
+        <div class="chat-bubble chat-chef" style="margin-bottom:0">The cilantro's going yellow — perfect time to use it. Want me to walk you through it hands-free?</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Time-aware home — the Recipes tab re-organizes around the meal you're
+     actually about to cook. Light shots for morning/midday, dark for
+     evening/night: the strip itself reads like a day passing. -->
+<section id="time-aware">
+  <div class="container">
+    <div style="text-align:center" class="anim">
+      <span class="section-label">Time-Aware Home</span>
+      <h2 class="section-title">She knows what<br><span class="gradient-text-warm">time it is.</span></h2>
+      <p class="section-desc" style="margin:14px auto 0">Open Saffra at 7 AM and the Recipes tab is a breakfast app. Open it at midnight and it's a late-night one. The quick rail, the order of every section, and Saffra's headline pick all re-rank around the meal you're actually about to cook — no tapping, no filters, no settings.</p>
+    </div>
+    <div class="time-strip">
+      <div class="time-card anim anim-d1">
+        <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>7:00 AM</div>
+        <div class="shot-wrap">
+          <img src="screenshots-raw/08-recipes-breakfast-light.png" loading="lazy"
+               alt="Recipes tab in the morning — Saffra's breakfast pick and a Quick breakfast rail">
+        </div>
+        <h4>Morning</h4>
+        <p>"Quick breakfast" leads. Pancakes and shakshuka up front — heavy dinner mains stay out of the morning rail.</p>
+      </div>
+      <div class="time-card anim anim-d2">
+        <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>12:30 PM</div>
+        <div class="shot-wrap">
+          <img src="screenshots-raw/09-recipes-lunch-light.png" loading="lazy"
+               alt="Recipes tab at midday — Saffra's lunch pick with bowls and salads ranked first">
+        </div>
+        <h4>Midday</h4>
+        <p>"Quick lunch" takes over — bowls, salads, and fast mains, led by Saffra's lunch pick.</p>
+      </div>
+      <div class="time-card anim anim-d3">
+        <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/></svg>6:30 PM</div>
+        <div class="shot-wrap">
+          <img src="screenshots-raw/10-recipes-dinner-dark.png" loading="lazy"
+               alt="Recipes tab in the evening — Saffra picks for tonight with a Quick tonight rail">
+        </div>
+        <h4>Evening</h4>
+        <p>"Saffra picks for tonight." The dinner canon — pasta, chicken, soups — ranks to the top for the main event.</p>
+      </div>
+      <div class="time-card anim anim-d4">
+        <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>11:50 PM</div>
+        <div class="shot-wrap">
+          <img src="screenshots-raw/11-recipes-latenight-dark.png" loading="lazy"
+               alt="Recipes tab late at night — a late-night pick and a rail of 25-minute dishes">
+        </div>
+        <h4>Late night</h4>
+        <p>"Late-night quick" — nothing over 25 minutes, nothing that needs a supermarket run. Fried rice territory.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Built like a chef — the AI / intelligence layer -->
+<section id="intelligence">
+  <div class="container">
+    <div style="text-align:center" class="anim">
+      <span class="section-label">The Intelligence Layer</span>
+      <h2 class="section-title">Built like a chef,<br><span class="gradient-text-warm">not a chatbot.</span></h2>
+      <p class="section-desc" style="margin:14px auto 0">Generic "AI cooking" tools paste a recipe into a chatbot and call it a day. Every layer of Saffra is built for cooking specifically — with knowledge, memory, and rules a general-purpose AI doesn't have.</p>
+    </div>
+
+    <!-- The context layer: what Saffra can actually see when you ask her
+         something. One real chat, annotated. -->
+    <div class="fd-grid">
+      <div class="fd-copy anim">
+        <span class="section-label">Full App Context</span>
+        <h2>She reads everything going on <span class="gradient-text-warm">in the app.</span></h2>
+        <p>When you ask "what can I make tonight?", Saffra isn't answering cold. Before she says a word, she can check your pantry, your cook history, the clock, and your profile — the same way a chef glances at the walk-in before calling the special. Watch the tool chips in a real chat: that's her actually looking, not pretending to.</p>
+        <div class="context-chips">
+          <span class="context-chip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M8 6V4M16 6V4"/></svg>What's in your pantry</span>
+          <span class="context-chip green"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Time of day</span>
+          <span class="context-chip"><svg viewBox="0 0 24 24"><path d="M12 20.35l-1.45-1.32C5.4 14.36 2 11.28 2 7.5 2 4.42 4.42 2 7.5 2c1.74 0 3.41.81 4.5 2.09C13.09 2.81 14.76 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.78-3.4 6.86-8.55 11.54L12 20.35z"/></svg>Dishes you've loved</span>
+          <span class="context-chip green"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Allergies &amp; diet</span>
+          <span class="context-chip"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>Your skill level</span>
+          <span class="context-chip green"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></svg>The time you've got</span>
+          <span class="context-chip"><svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Recipes you've saved</span>
+        </div>
+      </div>
+      <div class="fd-shots anim">
+        <div class="fd-shot">
+          <img src="screenshots-raw/07-chat-recipe-dark.png" loading="lazy"
+               alt="Ask Saffra — visible tool chips show her checking the pantry and searching recipes before answering with a recipe card">
+          <div class="fd-shot-caption">Tool chips = her actually checking, live</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="intelligence-grid" style="margin-top:56px">
+      <div class="intelligence-card anim anim-d1">
+        <div class="icon-box"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg></div>
+        <h3>A real chef persona — not a generic LLM</h3>
+        <p>Powered by <strong>advanced AI</strong> — shaped into a real chef. Saffra has a name, a voice, signature moves, and hard safety rules. Her tone calibrates to your skill: beginners get sensory cues ("when oil shimmers, when it smells nutty"), pros get terse technique-first ("hit it with a nappé"). One model, infinite cooks.</p>
+      </div>
+      <div class="intelligence-card anim anim-d2">
+        <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <h3>A panel-vetted catalog — not AI slop</h3>
+        <p>Every flagship recipe Saffra knows passed a <strong>trained chef-panel</strong> before it shipped. Three chef-trained perspectives review each dish — research, debate, common-mistake review — and only the version they all agree on reaches you. Saffra's catalog: <strong>2,100+ panel-vetted flagship recipes</strong> across 25+ cuisines, plus a <strong>230,000-recipe semantic search index</strong> for breadth (vector embeddings). You get the version that survived disagreement, not a hallucinated one. Then she adapts it to your pantry, your skill, your equipment.</p>
+      </div>
+      <div class="intelligence-card anim anim-d3">
+        <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3>Memory that compounds</h3>
+        <p>Rolling conversation summaries. Cook history with star ratings. Live pantry awareness. Recent-suggestion tracking so she doesn't pitch the same dish twice. The <strong>longer you cook with her, the sharper she gets</strong> — leaning into what you loved, steering around what flopped, varying within genres you've succeeded at, never repeating last Tuesday's dinner unless you ask.</p>
+      </div>
+      <div class="intelligence-card anim anim-d4">
+        <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <h3>Nine specialized tools, used silently</h3>
+        <p>Saffra doesn't just talk — she <em>works</em>. She has nine purpose-built tools: <strong>pantry search, recipe lookup, recipe adaptation, ingredient substitution, technique explainer, voice timers, unit conversion, recipe saving, profile updates</strong>. She picks the right tools for each turn and chains them — "what's for dinner?" might fire pantry-search → recipe-lookup → adapt-for-user, all silently before answering.</p>
+      </div>
+      <div class="intelligence-card anim anim-d1">
+        <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Allergen safety as a hard rule</h3>
+        <p>Declared allergies are <strong>non-negotiable</strong> — hard refusal rules, not soft suggestions. She'll either swap loud and clear or pass on the recipe entirely. Cross-contamination flags for serious allergies (peanut, tree nut, shellfish, sesame, gluten-for-celiac). USDA-safe internal temperatures cited in every recipe that needs one.</p>
+      </div>
+      <div class="intelligence-card anim anim-d2">
+        <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></div>
+        <h3>A voice built for a real kitchen</h3>
+        <p>Streaming <strong>neural TTS</strong> — Saffra's signature voice — served from a content-addressed cache so the same line never re-renders twice. Speech recognition runs <strong>on-device via Apple's Speech framework</strong> — your voice never leaves the phone unless on-device accuracy fails. The wake phrase "hey saffra" is only armed inside Cooking Mode, never app-wide. Voice timers land in Live Activities, including the Dynamic Island.</p>
+      </div>
+    </div>
+
+    <div class="intel-stats anim anim-d3">
+      <div class="intel-stat">
+        <div class="intel-stat-num gradient-text-warm">Advanced AI</div>
+        <div class="intel-stat-label">Purpose-Built Chef</div>
+      </div>
+      <div class="intel-stat">
+        <div class="intel-stat-num gradient-text-warm">9 tools</div>
+        <div class="intel-stat-label">Chef-Specific, Chained</div>
+      </div>
+      <div class="intel-stat">
+        <div class="intel-stat-num gradient-text-warm">230,000+</div>
+        <div class="intel-stat-label">Recipes, Semantically Searchable</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Cooking Mode — the signature surface, explained step by step. -->
+<section id="cooking-mode">
+  <div class="container">
+    <div style="text-align:center" class="anim">
+      <span class="section-label">Cooking Mode</span>
+      <h2 class="section-title">One step at a time.<br><span class="gradient-text-warm">Hands never touch the screen.</span></h2>
+      <p class="section-desc" style="margin:14px auto 0">Tap "Let's cook" on any recipe and the whole phone becomes a chef at your shoulder. One step per screen, big enough to read from across the counter, with a photo of the dish, the exact ingredients this step needs, and a timer she's already sized for you.</p>
+    </div>
+
+    <div class="fd-grid">
+      <div class="fd-copy anim">
+        <ul class="fd-points">
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 1v22M19 12a7 7 0 0 1-14 0M9 8a3 3 0 0 1 6 0v4a3 3 0 0 1-6 0V8z"/></svg></div>
+            <div><h4>She reads every step aloud</h4><p>Saffra narrates in her signature voice, then listens. "Hey saffra, next step" — "replay that" — "how long on the timer?" Your hands stay in the food.</p></div>
+          </li>
+          <li>
+            <div class="icon-box green"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M8 6V4M16 6V4"/></svg></div>
+            <div><h4>Just the ingredients this step needs</h4><p>Each step card pulls out exactly what you're reaching for — "spaghetti, salt" — so you're never re-scanning the full list mid-sizzle.</p></div>
+          </li>
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></svg></div>
+            <div><h4>Timers she's already sized</h4><p>"15 min — saffra suggests this timer." One tap (or one sentence) and it's running in the Dynamic Island, even if you leave the app.</p></div>
+          </li>
+          <li>
+            <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <div><h4>Ask anything, mid-step</h4><p>"Why reserve the pasta water?" The ask-saffra bar answers inline without leaving the step — and a "coming up" preview keeps you one move ahead.</p></div>
+          </li>
+        </ul>
+      </div>
+      <div class="fd-shots pair anim">
+        <div class="fd-shot">
+          <img src="screenshots-raw/02-cooking-mode-light.png" loading="lazy"
+               alt="Cooking Mode step 1 — Saffra reads the step aloud with ingredient chips and a suggested 15-minute timer">
+          <div class="fd-shot-caption">Step 1 — she's reading it aloud</div>
+        </div>
+        <div class="fd-shot">
+          <img src="screenshots-raw/14-cooking-step2-dark.png" loading="lazy"
+               alt="Cooking Mode mid-recipe — the dish photo on the step card with progress bar and hands-free controls">
+          <div class="fd-shot-caption">Mid-recipe, dark mode</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cook-flow">
+      <div class="cook-flow-step anim anim-d1"><div class="cf-num">Step 1</div><h4>Tap "Let's cook"</h4><p>Any recipe, one tap. The screen clears to a single step with a progress bar — no scrolling a wall of instructions with wet hands.</p></div>
+      <div class="cook-flow-step anim anim-d2"><div class="cf-num">Step 2</div><h4>She reads, you cook</h4><p>Saffra narrates the step and waits. The wake phrase "hey saffra" is armed only here — never anywhere else in the app.</p></div>
+      <div class="cook-flow-step anim anim-d3"><div class="cf-num">Step 3</div><h4>Timers run themselves</h4><p>Say "set the timer" and it lands in Live Activities — Lock Screen and Dynamic Island. Multiple timers, all labeled.</p></div>
+      <div class="cook-flow-step anim anim-d4"><div class="cf-num">Step 4</div><h4>Finish with a photo</h4><p>The last step ends with "I'm done — tap to snap a photo." Your cook lands in your history, and she remembers how it went.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Ask Saffra — the chat surface. -->
+<section id="ask-saffra">
+  <div class="container">
+    <div class="fd-grid fd-flip">
+      <div class="fd-copy anim">
+        <span class="section-label">Ask Saffra</span>
+        <h2>A chef on the other end —<br><span class="gradient-text-warm">not a search box.</span></h2>
+        <p>The Saffra tab opens with a time-of-day greeting, your pantry at a glance, and quick-starts built from what's actually in your kitchen. Ask anything — she answers like a chef, and when a recipe is the answer, she hands you a real card from the vetted catalog: one tap to open it, one more to cook it.</p>
+        <ul class="fd-points">
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <div><h4>Real recipes, not improvised ones</h4><p>"What can I make tonight?" gets a recipe card pulled from the panel-vetted catalog — never a hallucinated list of steps.</p></div>
+          </li>
+          <li>
+            <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M16 4l4 4M3 12a9 9 0 0 1 9-9"/></svg></div>
+            <div><h4>You can watch her work</h4><p>Tool chips show each check as it happens — pantry scan, catalog search — so an answer is never a black box.</p></div>
+          </li>
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div><h4>Quick-starts that fit the moment</h4><p>Morning greeting, evening greeting, late-night greeting — with one-tap prompts shaped by the hour and your on-hand ingredients.</p></div>
+          </li>
+        </ul>
+      </div>
+      <div class="fd-shots pair anim">
+        <div class="fd-shot">
+          <img src="screenshots-raw/01-chef-tab-light.png" loading="lazy"
+               alt="The Saffra tab — time-of-day greeting, pantry pills, and quick-start prompts">
+          <div class="fd-shot-caption">The greeting knows your kitchen</div>
+        </div>
+        <div class="fd-shot">
+          <img src="screenshots-raw/07-chat-recipe-light.png" loading="lazy"
+               alt="Ask Saffra answering with a tappable recipe card after checking the pantry">
+          <div class="fd-shot-caption">She answers with a real recipe</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Pantry — scan / snap / barcode. -->
+<section id="pantry">
+  <div class="container">
+    <div class="fd-grid">
+      <div class="fd-copy anim">
+        <span class="section-label">Your Kitchen</span>
+        <h2>A pantry that fills itself —<br><span class="gradient-text-warm">and empties smart.</span></h2>
+        <p>Saffra can only cook from your kitchen if she knows what's in it — so getting food into the app takes seconds, not typing. And once it's in, freshness is tracked: things about to turn get flagged and pitched for tonight's dinner instead of the trash.</p>
+        <ul class="fd-points">
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+            <div><h4>Snap your fridge</h4><p>Photograph a shelf and she identifies what's on it. Items land categorized, no typing.</p></div>
+          </li>
+          <li>
+            <div class="icon-box green"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h6"/></svg></div>
+            <div><h4>Scan a receipt</h4><p>On-device OCR reads the lines, AI parses them into clean items — your photo never leaves the phone.</p></div>
+          </li>
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M3 5v14M8 5v14M12 5v14M17 5v14M21 5v14"/></svg></div>
+            <div><h4>Or beep the barcode</h4><p>Lookup runs against Open Food Facts — items arrive pre-tagged with category, expiration, and allergen flags.</p></div>
+          </li>
+          <li>
+            <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div><h4>Expiring? It's dinner.</h4><p>Items going stale get flagged in the pantry and surfaced in chat — "the cilantro's going yellow, let's use it tonight."</p></div>
+          </li>
+        </ul>
+      </div>
+      <div class="fd-shots anim">
+        <div class="fd-shot">
+          <img src="screenshots-raw/03-pantry-light.png" loading="lazy"
+               alt="The pantry — item counts by category with expiring and stale flags, plus photo, receipt, and barcode capture">
+          <div class="fd-shot-caption">Grocery, fridge &amp; freshness at a glance</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Search — semantic, filterable. -->
+<section id="search">
+  <div class="container">
+    <div class="fd-grid fd-flip">
+      <div class="fd-copy anim">
+        <span class="section-label">Search</span>
+        <h2>Type a craving,<br><span class="gradient-text-warm">get dinner.</span></h2>
+        <p>Search runs on vector embeddings across 230,000+ recipes — so "cozy noodle soup" and "something bright with lemon" work as well as exact titles. Every result comes back as a photo card with time and cuisine up front, and refinements for time, diet, and cuisine are one tap away.</p>
+        <ul class="fd-points">
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
+            <div><h4>Meaning, not keywords</h4><p>Semantic search understands the dish you're describing — no more guessing the magic word a recipe site indexed.</p></div>
+          </li>
+          <li>
+            <div class="icon-box green"><svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
+            <div><h4>Filters that matter</h4><p>Under 30 minutes. Vegetarian. Thai. Stack refinements and the results re-rank instantly.</p></div>
+          </li>
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M2 17l10 5 10-5M2 12l10 5 10-5M12 2L2 7l10 5 10-5-10-5z"/></svg></div>
+            <div><h4>Vetted first</h4><p>Panel-vetted flagship recipes rank above the wider index, so the top results are the ones that survived three chefs' review.</p></div>
+          </li>
+        </ul>
+      </div>
+      <div class="fd-shots anim">
+        <div class="fd-shot">
+          <img src="screenshots-raw/05-recipes-dark.png" loading="lazy"
+               alt="Recipe results as photo cards, each showing cuisine and cook time up front">
+          <div class="fd-shot-caption">Every result is a photo card</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Recipe detail — what a vetted recipe looks like up close. -->
+<section id="recipe-detail">
+  <div class="container">
+    <div class="fd-grid">
+      <div class="fd-copy anim">
+        <span class="section-label">The Recipe Page</span>
+        <h2>Everything you need to know<br><span class="gradient-text-warm">before you commit.</span></h2>
+        <p>A recipe page should answer one question fast: can I cook this, tonight, with what I have? Timing, difficulty, and servings sit at the top; ingredients are checked against your pantry; and the whole thing ends in one button — "Let's cook."</p>
+        <ul class="fd-points">
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div><h4>The vitals, at a glance</h4><p>Prep, cook, and total time, difficulty, and servings you can scale — the recipe recalculates quantities for you.</p></div>
+          </li>
+          <li>
+            <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/><path d="M9 12l2 2 4-4"/></svg></div>
+            <div><h4>Ingredients vs. your pantry</h4><p>What you have is marked; what you're missing can go straight to a shopping list. No mid-recipe surprises.</p></div>
+          </li>
+          <li>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+            <div><h4>Nutrition, honestly stated</h4><p>Calories and macros per serving, plus allergen callouts that persist through every adaptation Saffra makes.</p></div>
+          </li>
+          <li>
+            <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M16 4l4 4M3 12a9 9 0 0 1 9-9"/></svg></div>
+            <div><h4>Adapt it to you</h4><p>One tap rewrites the recipe for your allergies, equipment, and skill — swaps named loud and clear, never silent.</p></div>
+          </li>
+        </ul>
+      </div>
+      <div class="fd-shots pair anim">
+        <div class="fd-shot">
+          <img src="screenshots-raw/04-recipe-detail-light.png" loading="lazy"
+               alt="Recipe detail — hero photo with timing, difficulty, servings, and the Let's cook button">
+          <div class="fd-shot-caption">The top: vitals + "Let's cook"</div>
+        </div>
+        <div class="fd-shot">
+          <img src="screenshots-raw/13-recipe-ingredients-dark.png" loading="lazy"
+               alt="Recipe detail scrolled — the ingredient list checked against your pantry">
+          <div class="fd-shot-caption">Below the fold: ingredients &amp; more</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Features -->
+<section id="features">
+  <div class="container">
+    <div style="text-align:center" class="anim">
+      <span class="section-label">Features</span>
+      <h2 class="section-title">Everything you need to<br><span class="gradient-text-warm">cook anything.</span></h2>
+      <p class="section-desc" style="margin:14px auto 0">Each feature exists for one reason: get you from "what should I cook" to dinner on the plate.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card anim anim-d1">
+        <div class="icon-box green"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M8 6V4M16 6V4"/></svg></div>
+        <h3>Pantry-first matching</h3>
+        <p>She suggests recipes that use what you already have. Items going off get used first. Less waste, fewer trips.</p>
+      </div>
+      <div class="feature-card anim anim-d2">
+        <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 1v22M19 12a7 7 0 0 1-14 0M9 8a3 3 0 0 1 6 0v4a3 3 0 0 1-6 0V8z"/></svg></div>
+        <h3>Hands-free Cooking Mode</h3>
+        <p>"Hey saffra, next step." She listens the whole time you're cooking. Voice timers land in the Dynamic Island.</p>
+      </div>
+      <div class="feature-card anim anim-d3">
+        <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M2 17l10 5 10-5M2 12l10 5 10-5M12 2L2 7l10 5 10-5-10-5z"/></svg></div>
+        <h3>Adapted recipes</h3>
+        <p>Every recipe rewritten for your pantry, equipment, allergies, and skill — beginners get sensory cues, pros get the chef move.</p>
+      </div>
+      <div class="feature-card anim anim-d4">
+        <div class="icon-box"><svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></div>
+        <h3>Save any recipe</h3>
+        <p>Paste a URL, snap a cookbook page — Saffra imports it and adapts it for you. Build a personal library that learns your taste.</p>
+      </div>
+      <div class="feature-card anim anim-d1">
+        <div class="icon-box green"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h6"/></svg></div>
+        <h3>Receipt &amp; barcode scanning</h3>
+        <p>Scan groceries straight into your pantry — items land with categories, expiration dates, and allergen flags pre-filled.</p>
+      </div>
+      <div class="feature-card anim anim-d2">
+        <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Allergen-aware, always</h3>
+        <p>Declared allergies are non-negotiable. She swaps loud and clear, or passes on the recipe — never quietly proceeds.</p>
+      </div>
+      <div class="feature-card anim anim-d3">
+        <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></div>
+        <h3>Skill calibration</h3>
+        <p>Tell her your level once. Beginners get every technique explained with sensory cues. Pros get terse, technique-first direction.</p>
+      </div>
+      <div class="feature-card anim anim-d4">
+        <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></svg></div>
+        <h3>Voice timers, Live Activities</h3>
+        <p>"Set rice for eighteen minutes." It's running. Multiple timers track on Lock Screen and Dynamic Island so you don't miss a beat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- How It Works -->
+<section id="how-it-works">
+  <div class="container">
+    <div style="text-align:center" class="anim">
+      <span class="section-label">Get Started</span>
+      <h2 class="section-title">Cook with Saffra in <span class="gradient-text-warm">4 steps.</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step anim"><div class="step-num">1</div><h3>Tell her your kitchen</h3><p>One-minute conversational onboarding. Diet, allergies, equipment, skill, the cuisines you love.</p></div>
+      <div class="step anim"><div class="step-num">2</div><h3>Ask what to cook</h3><p>She pulls from a panel-vetted catalog, checks your pantry and your time, and names the dish — confidently, adapted to you.</p></div>
+      <div class="step anim"><div class="step-num">3</div><h3>Cook hands-free</h3><p>Voice-first Cooking Mode reads you each step. Set timers by voice. Ask "why does this matter?" any time.</p></div>
+      <div class="step anim"><div class="step-num">4</div><h3>Save what you loved</h3><p>Rate the result. She remembers. Future suggestions lean into what worked, and quietly skip what didn't.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Pricing -->
+<section id="pricing">
+  <div class="container">
+    <div style="text-align:center" class="anim">
+      <span class="section-label">Pricing</span>
+      <h2 class="section-title">Simple <span class="gradient-text-warm">pricing.</span></h2>
+      <p class="section-desc" style="margin:14px auto 0">Start free. Upgrade when you're ready to cook with her every day.</p>
+      <div class="pricing-toggle-wrap">
+        <div class="pricing-toggle">
+          <button class="toggle-btn" id="toggleMonthly" onclick="setPricing('monthly')">Monthly</button>
+          <button class="toggle-btn active" id="toggleYearly" onclick="setPricing('yearly')">Yearly <span class="toggle-save">Save 50%</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card anim">
+        <h3>Free</h3><p class="price-sub">Try the chef</p>
+        <div class="price-amount gradient-text-warm">$0</div><div class="price-period">forever</div>
+        <ul class="price-features">
+          <li>10 chef messages a day</li>
+          <li>Browse the recipe library</li>
+          <li>1 recipe adaptation</li>
+          <li>Pantry tracking</li>
+          <li>Safety disclaimers &amp; allergen flags</li>
+          <li class="off">Unlimited chat</li>
+          <li class="off">Voice cooking</li>
+          <li class="off">Receipt &amp; barcode scanning</li>
+        </ul>
+        <a href="#signup" class="btn-outline">Start Free</a>
+      </div>
+      <div class="price-card featured anim">
+        <div class="price-badge">7-Day Free Trial</div>
+        <h3>Pro</h3><p class="price-sub">For everyday cooks</p>
+        <div class="price-amount gradient-text-warm">$4.99</div><div class="price-period">/mo (billed yearly)</div>
+        <ul class="price-features">
+          <li>Ask Chef anything — no message limit</li>
+          <li>Cook hands-free with Saffra's signature voice</li>
+          <li>Every recipe rewritten for you</li>
+          <li>Save any URL or cookbook page</li>
+          <li>Receipt &amp; barcode scanning</li>
+          <li>Voice timers in Dynamic Island</li>
+          <li>Personal recipe library</li>
+          <li>7-day free trial · cancel anytime</li>
+        </ul>
+        <a href="#signup" class="btn-warm">Get Pro</a>
+      </div>
+      <div class="price-card anim">
+        <h3>Lifetime</h3><p class="price-sub">Pay once. Yours forever.</p>
+        <div class="price-amount gradient-text-warm">$149.99</div><div class="price-period">one-time</div>
+        <ul class="price-features">
+          <li>Everything in Pro</li>
+          <li>Forever — no renewal</li>
+          <li>All future Pro features included</li>
+          <li>Early access to new cuisines and panel-vetted recipes</li>
+          <li>Early access to new chef-mode features</li>
+        </ul>
+        <a href="#signup" class="btn-outline">Buy Lifetime</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div style="text-align:center" class="anim">
+      <span class="section-label">FAQ</span>
+      <h2 class="section-title">Common <span class="gradient-text-warm">questions.</span></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item"><button class="faq-q">How is Saffra different from a recipe site or ChatGPT?<span class="faq-icon">+</span></button><div class="faq-a"><p>Three big differences. <strong>One:</strong> ChatGPT improvises every recipe — it can hallucinate temperatures, miss steps, or confidently invent techniques that don't work. Saffra's flagship recipes are <strong>panel-vetted</strong> — a trained chef-panel of three chef-trained perspectives reviews each dish, debates the technique, and only ships the version they all agree on. <strong>Two:</strong> recipe sites don't know what's in your fridge or what you can't eat. Saffra calls a pantry tool before every suggestion, treats declared allergies as hard refusal rules (not soft hints), and rewrites every recipe for what you actually have. <strong>Three:</strong> she has an explicit chef persona — safety rules, tone calibration by skill level, signature behaviors — and a hands-free voice mode for when your hands are full of dough.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">What's actually powering Saffra?<span class="faq-icon">+</span></button><div class="faq-a"><p>The brain is a <strong>state-of-the-art multimodal AI model</strong>, with a faster utility model for simple tasks (parsing receipts, folding old conversations into summaries). Recipe search runs on <strong>vector embeddings</strong> over our curated library. Voice synthesis is a <strong>neural TTS voice</strong> — Saffra's signature — content-addressed cached so the same line never renders twice. Speech recognition runs on-device via Apple's Speech framework. Image OCR for receipts and cookbook pages also runs on-device, via Apple's Vision framework — your photos never leave your phone. The recipe catalog itself is panel-vetted by a multi-perspective chef pipeline before anything reaches the app.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">How accurate is the cooking advice?<span class="faq-icon">+</span></button><div class="faq-a"><p>Two things keep her grounded. <strong>One</strong>: when you ask for a specific dish or "what should I cook?", she calls a tool that searches our curated recipe library — hand-curated flagship recipes plus 230,000 CC0-licensed recipes — instead of improvising one from memory. So you get a real recipe, adapted for you, not a hallucination. <strong>Two</strong>: for techniques and substitutions she calls dedicated tools (technique explainer, substitution lookup) rather than guessing. She also won't claim to have personally tasted something — she'll say "by the numbers, this should read bright and savory" instead of "I love this." If she's not sure, she says so.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">What does "she helps you make anything" actually mean?<span class="faq-icon">+</span></button><div class="faq-a"><p>Anything. Any cuisine — Thai, Mexican regional (Oaxacan vs. Yucatecan vs. Norteño), Korean, Vietnamese, French classical to bistro, Sicilian vs. Emilia-Romagna vs. Roman Italian, Chinese regional (Sichuan, Cantonese, Hunan), West African, Levantine, Peruvian. Cuisines outside our named list get the same regional-and-technique-first reasoning, never a generic "Asian" answer. Any dietary world — vegan, keto, halal, kosher, FODMAP, Whole30, celiac (with cross-contamination awareness). Any skill — from someone who's never cooked chicken (sensory cues, every technique explained) to a sous-vide-plating home cook (terse, technique-first). Any kitchen — induction-only, no oven, cast iron only, full restaurant brigade. She calibrates to you.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">Will she remember what I've cooked?<span class="faq-icon">+</span></button><div class="faq-a"><p>Yes. Conversations are persisted, your pantry is tracked, and recipes you rate 4-5 stars influence future suggestions. After about 24 turns the older messages fold into a compact summary so context stays sharp without bloating. She knows what you've cooked recently (and won't repeat last Tuesday's dinner unless you ask), what you've loved, and what fell flat. She'll weight suggestions toward your wins, vary within genres you've succeeded at, and treat anything she's already pitched in this thread as off the table.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">How does she know what's in my pantry?<span class="faq-icon">+</span></button><div class="faq-a"><p>You tell her — but quickly. Snap a grocery receipt and on-device OCR extracts the lines, then a lightweight AI model parses them into clean line items (your photo never leaves the phone). Or scan a barcode — the lookup runs against Open Food Facts and items land in your pantry pre-tagged with category, expiration, and allergen flags. Or just type things in. As you cook, she tracks what's used and what's running low. Items going off ("the cilantro's gone yellow") get surfaced for tonight's dinner instead of going in the trash.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">Do I have to use voice?<span class="faq-icon">+</span></button><div class="faq-a"><p>Never. Text-mode chat is the default and works exactly the same. Voice mode is for when your hands are deep in dough or holding a knife. Toggle it per-session in Settings, or open Cooking Mode for full hands-free narration with the wake phrase "hey saffra" — note that the wake phrase is <em>only</em> armed inside Cooking Mode, never app-wide, so the mic isn't listening when you're not cooking. Voice timers fire silently and land in Live Activities (Lock Screen + Dynamic Island). Free tier is text-only; Pro unlocks voice cooking.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">What about allergies and food safety?<span class="faq-icon">+</span></button><div class="faq-a"><p>Allergens are <strong>non-negotiable</strong>. Once you declare one in your profile, she will either substitute the offending ingredient (loud and clear, named in the response) or refuse the recipe entirely and offer a genuinely good alternative — never quietly proceed. For serious allergies (peanut, tree nut, shellfish, sesame, gluten-for-celiac) she also flags cross-contamination risks in shared oils, fryers, cutting boards. Adapted recipes carry a persistent allergen disclaimer banner in-app. USDA-safe internal temperatures appear in every recipe that needs them — chicken at 165°F, ground beef 160°F, salmon 125-130°F. That said: Saffra is an AI. She's very capable but always verify allergens and cooking temperatures yourself, and she's not a substitute for medical or dietary advice.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">Is the free tier actually usable?<span class="faq-icon">+</span></button><div class="faq-a"><p>Yes. Free gives you 10 chef messages a day, full recipe-library browse, 1 recipe adaptation to feel the magic, pantry tracking, and every safety guardrail. Pro adds the things you'd reach for daily — unlimited chat, voice cooking with Saffra's signature voice, every recipe rewritten for your kitchen, receipt &amp; barcode scanning, recipe import from URLs and cookbook photos, and a personal library that learns your taste over time.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">How are Saffra's recipes different from AI-generated ones?<span class="faq-icon">+</span></button><div class="faq-a"><p>Most "AI cooking" apps generate recipes on the fly — one model, one pass, no review. The result is the AI-slop you've seen in the news: charcoal Christmas cakes, hollandaise hallucinations, recipes that assume you have ingredients you don't. Saffra works differently. Her flagship catalog is <strong>panel-vetted</strong>: every recipe goes through a trained chef-panel of three chef-trained perspectives. They research the dish from many sources, debate the technique, identify common mistakes, and only ship the version they all agree on. What you cook is the recipe that survived three independent perspectives — which is why it's more likely to actually work the first time, taste authentic, and not be missing critical detail. Then Saffra adapts that vetted recipe to your kitchen.</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">When is Saffra launching?<span class="faq-icon">+</span></button><div class="faq-a"><p>We're heading into TestFlight beta now. Sign up for early access above and you'll be among the first cooks invited in. iOS first; other platforms come after we've nailed the iPhone experience. We're going for "actually delightful," not "ship it now and patch later."</p></div></div>
+
+      <div class="faq-item"><button class="faq-q">What about my data?<span class="faq-icon">+</span></button><div class="faq-a"><p>Sign in with Apple. We never sell data. We never use your conversations to train models. We never track you across apps or websites. Voice transcription runs on-device by default — only the text reaches our server, never the audio. Receipt and cookbook photos run through Apple's Vision framework on your phone — only the extracted text leaves the device. You can delete your account and every byte of your data from Profile / Me at any time. Full policy at <a href="privacy.html" style="color:#F5C088;text-decoration:underline">/privacy</a>.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- CTA -->
+<section class="cta-section" id="signup">
+  <div class="container">
+    <h2 class="section-title anim">Ready for recipes you can <span class="gradient-text-warm">actually trust?</span></h2>
+    <p class="section-desc anim" style="margin:16px auto 0;text-align:center">Premium recipes, panel-vetted. Adapted to your kitchen. Cooked with you, hands-free. Get notified the moment we open TestFlight. iOS first.</p>
+    <form class="signup-form anim" onsubmit="handleSignup(event)">
+      <input type="email" id="signupEmail" placeholder="Enter your email" required>
+      <button type="submit" class="btn-warm">Get Early Access <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </form>
+    <p class="anim" style="margin-top:12px;font-size:0.75rem;color:rgba(154,142,128,0.55);position:relative;z-index:1">iOS. No spam. We'll notify you the moment beta opens.</p>
+  </div>
+</section>
+
+<!-- Scroll to Top -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">
+  <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+</button>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">
+          <div class="logo-mark" style="width:30px;height:30px;border-radius:8px;"><img src="saffra-hat.png" alt="Saffra" style="width:22px;height:22px"></div>
+          <span>Saffra</span>
+        </a>
+        <p>Your personal AI chef. Premium recipes you can trust — vetted by a trained chef-panel, adapted to your kitchen.</p>
+      </div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a href="#screenshots">Inside the App</a></li><li><a href="#time-aware">Time-Aware Home</a></li><li><a href="#intelligence">The AI</a></li><li><a href="#cooking-mode">Cooking Mode</a></li><li><a href="#pantry">Pantry</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+      <div class="footer-col"><h4>Legal</h4><ul><li><a href="privacy.html">Privacy</a></li><li><a href="terms.html">Terms</a>
+                                                                                               <a href="support.html">Support</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <p><a href="https://drvanus.github.io/hypersage-site/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">A HyperSage Studio App</a></p>
+      <p>&copy; 2026 Saffra. All rights reserved.</p>
+      <p>Saffra is an AI. Always verify allergens and cooking temperatures yourself.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Firebase compat SDKs (used only for the early-access waitlist write).
+     Reuses the existing TheOne Firebase project; signups land in the same
+     `early_access` collection but are tagged source: 'saffra-website' so
+     they can be filtered separately. -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyBKkYiae50y-uZN7gGm97Bu-5iXNv9P5fE",
+    authDomain: "theone-dating-app.firebaseapp.com",
+    projectId: "theone-dating-app",
+    storageBucket: "theone-dating-app.firebasestorage.app",
+    messagingSenderId: "777335450044",
+    appId: "1:777335450044:ios:d8f1673935c1b0251de3b9"
+  });
+  var db = firebase.firestore();
+
+  // Mobile nav
+  document.getElementById('navToggle').addEventListener('click', function() {
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-links a').forEach(function(a) {
+    a.addEventListener('click', function() { document.getElementById('navLinks').classList.remove('open'); });
+  });
+
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var item = this.parentElement;
+      var open = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
+      if (!open) item.classList.add('open');
+    });
+  });
+
+  // Scroll animations
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.anim').forEach(function(el) { observer.observe(el); });
+
+  // Reveal fallback: if IntersectionObserver never fires (some embedded
+  // webviews / readers), no .anim content would EVER paint. A cheap rect
+  // check on scroll/resize reveals anything already in the viewport.
+  function revealFallback() {
+    document.querySelectorAll('.anim:not(.visible)').forEach(function(el) {
+      var r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('visible');
+    });
+  }
+  window.addEventListener('scroll', revealFallback, { passive: true });
+  window.addEventListener('resize', revealFallback, { passive: true });
+  setTimeout(revealFallback, 800);
+
+  // Hero phone rotator — cross-fade through the signature screens on a timer.
+  (function() {
+    var rot = document.getElementById('heroRotator');
+    if (!rot) return;
+    var shots = rot.querySelectorAll('.hero-phone-img');
+    if (shots.length < 2) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var i = 0;
+    setInterval(function() {
+      shots[i].classList.remove('is-active');
+      i = (i + 1) % shots.length;
+      shots[i].classList.add('is-active');
+    }, 3200);
+  })();
+
+  // Scroll to top button
+  var scrollBtn = document.getElementById('scrollTop');
+  if (scrollBtn) {
+    window.addEventListener('scroll', function() {
+      scrollBtn.classList.toggle('show', window.scrollY > 400);
+    }, { passive: true });
+  }
+
+  // Pricing toggle. Yearly is the default — best-value framing for the
+  // featured Pro card. Lifetime price is fixed regardless of toggle.
+  var monthlyPrices = ['$0', '$9.99', '$149.99'];
+  var yearlyPrices = ['$0', '$4.99', '$149.99'];
+  var monthlyPeriods = ['forever', '/month', 'one-time'];
+  var yearlyPeriods = ['forever', '/mo (billed yearly)', 'one-time'];
+  function setPricing(mode) {
+    var cards = document.querySelectorAll('.price-card');
+    var prices = mode === 'yearly' ? yearlyPrices : monthlyPrices;
+    var periods = mode === 'yearly' ? yearlyPeriods : monthlyPeriods;
+    cards.forEach(function(card, i) {
+      var amt = card.querySelector('.price-amount');
+      var per = card.querySelector('.price-period');
+      if (amt) amt.textContent = prices[i];
+      if (per) per.textContent = periods[i];
+    });
+    document.getElementById('toggleMonthly').classList.toggle('active', mode === 'monthly');
+    document.getElementById('toggleYearly').classList.toggle('active', mode === 'yearly');
+  }
+
+  // Parallax-lite on hero glow
+  var hero = document.querySelector('.hero');
+  if (hero) {
+    window.addEventListener('scroll', function() {
+      var y = window.scrollY;
+      if (y < 800) {
+        hero.style.setProperty('--parallax', (y * 0.15) + 'px');
+      }
+    }, { passive: true });
+  }
+
+  // Signup — writes to the shared `early_access` Firestore collection,
+  // tagged with source 'saffra-website' so signups can be separated from
+  // TheOne's waitlist. Falls back to a friendly error if the write fails
+  // (offline, blocked extension, Firestore unreachable).
+  function handleSignup(e) {
+    e.preventDefault();
+    var email = document.getElementById('signupEmail').value.trim();
+    var btn = e.target.querySelector('button');
+    if (!email) return;
+
+    btn.textContent = 'Saving...';
+    btn.style.opacity = '0.7';
+
+    db.collection('early_access').add({
+      email: email,
+      source: 'saffra-website',
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    }).then(function() {
+      btn.textContent = "You're on the list!";
+      btn.style.background = 'rgba(224,130,48,0.15)';
+      btn.style.color = '#F5C088';
+      btn.style.boxShadow = 'none';
+      btn.style.opacity = '1';
+      document.getElementById('signupEmail').value = '';
+    }).catch(function(err) {
+      console.error('Signup error:', err);
+      btn.textContent = 'Error — try again';
+      btn.style.background = '';
+      btn.style.opacity = '1';
+    });
+
+    setTimeout(function() {
+      btn.innerHTML = 'Get Early Access <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.boxShadow = '';
+    }, 4000);
+  }
+</script>
+
+</body>
+</html>

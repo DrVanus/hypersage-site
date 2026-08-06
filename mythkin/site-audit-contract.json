@@ -1,0 +1,15 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://drvanus.github.io/mythkin-site/",
+  "approved_absolute_claims": {
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "mythkin-app/package.json declares exactly four runtime dependencies, all first-party Capacitor plugins: @capacitor/keyboard, @capacitor/preferences, @capacitor/share, @capacitor/status-bar. There is no advertising or analytics SDK among them.",
+        "A grep across every .js/.json/.swift/.plist in mythkin-app (excluding node_modules) for admob, google-mobile-ads, facebook, applovin, unity-ads, ironsource, appsflyer, adjust, amplitude, mixpanel, firebase, segment, posthog and sentry returns no SDK match. The only 'segment' hits are the English word in DESIGN.md and a CSS rule in app.css.",
+        "There is no iOS Podfile and no SPM package reference in mythkin-app/ios, so no advertising framework is linked into the native shell.",
+        "The app requests no advertising identifier: no AppTrackingTransparency usage, and no NSUserTrackingUsageDescription in the iOS Info.plist."
+      ]
+    }
+  }
+}

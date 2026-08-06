@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0E0B06">
+  <title>Mythwright — Collect. Build. Battle.</title>
+  <meta name="description" content="The heroes and monsters of classic literature duel across three lanes. Dracula trades blows with Athena. 244 cards, six factions, an AI Card Forge, and a full campaign.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://drvanus.github.io/mythwright-site/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Mythwright — Collect. Build. Battle.">
+  <meta property="og:description" content="The heroes and monsters of classic literature duel across three lanes. 244 cards, six factions, an AI Card Forge, and a full campaign.">
+  <meta property="og:url" content="https://drvanus.github.io/mythwright-site/">
+  <meta property="og:site_name" content="Mythwright">
+  <meta property="og:image" content="https://drvanus.github.io/mythwright-site/app-icon.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mythwright — Collect. Build. Battle.">
+  <meta name="twitter:description" content="The heroes and monsters of classic literature duel across three lanes.">
+  <meta name="twitter:image" content="https://drvanus.github.io/mythwright-site/app-icon.png">
+
+  <link rel="icon" type="image/png" href="app-icon.png">
+  <link rel="apple-touch-icon" href="app-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0E0B06;              /* deep parchment-black */
+      --bg-2: #16110A;
+      --surface: #1C1509;
+      --card: #1A1409;
+      --card-soft: #221A0C;
+      --fg: #F3E9D2;             /* aged parchment */
+      --muted-fg: #C4B189;
+      --tertiary-fg: #8A7A56;
+      --gold: #E0B34C;           /* primary amber-gold */
+      --gold-bright: #F6CE6A;
+      --gold-deep: #B08526;
+      --ember: #D9793B;          /* warm ember accent */
+      --arcane: #7C6BC4;         /* faction contrast */
+      --border: rgba(224,179,76,0.16);
+      --border-strong: rgba(224,179,76,0.30);
+      --gold-glow: rgba(224,179,76,0.14);
+      --radius: 0.9rem;
+      --radius-lg: 1.35rem;
+      --shadow: 0 20px 60px rgba(0,0,0,0.55);
+    }
+
+    html { scroll-behavior: smooth; background: var(--bg); color-scheme: dark; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Atmospheric arcane glow */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 18% -5%, rgba(224,179,76,0.13), transparent 60%),
+        radial-gradient(ellipse 65% 50% at 88% 8%, rgba(217,121,59,0.10), transparent 65%),
+        radial-gradient(ellipse 80% 60% at 50% 108%, rgba(124,107,196,0.08), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    h1, h2, h3, .display { font-family: 'Cinzel', Georgia, serif; letter-spacing: 0.01em; }
+
+    a { color: var(--gold-bright); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--gold); }
+
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ===== NAV ===== */
+    nav.site {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(14,11,6,0.78);
+      backdrop-filter: saturate(160%) blur(16px);
+      -webkit-backdrop-filter: saturate(160%) blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav.site .container {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 13px; padding-bottom: 13px;
+    }
+    nav.site .brand {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'Cinzel', serif; font-weight: 700; color: var(--fg);
+      font-size: 1.2rem; letter-spacing: 0.02em;
+    }
+    nav.site .brand img { width: 34px; height: 34px; border-radius: 8px; box-shadow: 0 0 0 1px var(--border-strong); }
+    nav.site .links { display: flex; gap: 26px; align-items: center; }
+    nav.site .links a { color: var(--muted-fg); font-weight: 600; font-size: .95rem; font-family: 'Inter', sans-serif; }
+    nav.site .links a:hover { color: var(--gold-bright); }
+    @media (max-width: 680px) { nav.site .links a:not(.btn) { display: none; } }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(180deg, var(--gold-bright), var(--gold-deep));
+      color: #221803; font-weight: 700; font-family: 'Inter', sans-serif;
+      padding: 11px 22px; border-radius: 999px; font-size: .95rem;
+      box-shadow: 0 6px 20px rgba(224,179,76,0.28); border: 1px solid rgba(255,255,255,0.12);
+      transition: transform .15s, box-shadow .2s;
+    }
+    .btn:hover { color: #221803; transform: translateY(-1px); box-shadow: 0 10px 30px rgba(224,179,76,0.4); }
+    .btn.ghost {
+      background: transparent; color: var(--gold-bright);
+      border: 1px solid var(--border-strong); box-shadow: none;
+    }
+    .btn.ghost:hover { background: var(--gold-glow); }
+
+    /* ===== HERO ===== */
+    header.hero { padding: 84px 0 72px; text-align: center; }
+    .hero .kicker {
+      display: inline-block; font-family: 'Inter', sans-serif; font-weight: 700;
+      font-size: .78rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--gold); padding: 6px 16px; border: 1px solid var(--border-strong);
+      border-radius: 999px; margin-bottom: 26px; background: var(--gold-glow);
+    }
+    .hero img.crest {
+      width: 128px; height: 128px; border-radius: 29px; margin: 0 auto 30px;
+      display: block; box-shadow: 0 16px 38px rgba(0,0,0,0.5);
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 1.18; font-weight: 800; padding-bottom: 0.12em;
+      background: linear-gradient(180deg, #FBF3DD 0%, var(--gold-bright) 70%, var(--gold-deep) 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 22px;
+    }
+    .hero p.sub {
+      font-size: clamp(1.05rem, 2.4vw, 1.35rem); color: var(--muted-fg);
+      max-width: 640px; margin: 0 auto 36px;
+    }
+    .hero .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero .stat-strip {
+      display: flex; gap: 44px; justify-content: center; flex-wrap: wrap;
+      margin-top: 58px; padding-top: 30px; border-top: 1px solid var(--border);
+      max-width: 640px; margin-left: auto; margin-right: auto;
+    }
+    .stat-strip .stat .num { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700; color: var(--gold-bright); }
+    .stat-strip .stat .lbl { font-size: .82rem; color: var(--tertiary-fg); letter-spacing: 0.06em; text-transform: uppercase; }
+
+    /* Device showcase — rotating carousel */
+    .showcase { padding: 6px 0 34px; }
+    .showcase .container { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+    .carousel {
+      position: relative; width: 300px; max-width: 82vw; padding: 12px;
+      aspect-ratio: 300 / 624;
+      background: linear-gradient(160deg, #2c2213, #14100a);
+      border-radius: 46px; border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow), 0 0 70px var(--gold-glow);
+    }
+    /* subtle screen bezel highlight */
+    .carousel::after {
+      content: ''; position: absolute; inset: 12px; border-radius: 34px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+      pointer-events: none; z-index: 3;
+    }
+    .carousel .slide {
+      position: absolute; inset: 12px; border-radius: 34px; overflow: hidden;
+      opacity: 0; transform: scale(1.015);
+      transition: opacity .9s ease, transform 4.2s ease;
+    }
+    .carousel .slide.active { opacity: 1; transform: scale(1); z-index: 1; }
+    .carousel .slide img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 34px; }
+    .carousel-dots { display: flex; gap: 10px; justify-content: center; }
+    .carousel-dots button {
+      width: 8px; height: 8px; border-radius: 50%; border: none; padding: 0;
+      background: var(--border-strong); cursor: pointer; transition: transform .25s, background .25s, box-shadow .25s;
+    }
+    .carousel-dots button:hover { background: var(--gold-deep); }
+    .carousel-dots button.active { background: var(--gold-bright); transform: scale(1.35); box-shadow: 0 0 12px var(--gold-glow); }
+
+    /* Screenshot gallery — responsive grid that fits the page */
+    .gallery-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px 26px;
+      max-width: 940px; margin: 0 auto;
+    }
+    @media (max-width: 820px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 30px 22px; max-width: 560px; } }
+    @media (max-width: 460px) { .gallery-grid { grid-template-columns: 1fr; max-width: 300px; } }
+    .shot { text-align: center; }
+    .shot .frame {
+      padding: 8px; border-radius: 30px;
+      background: linear-gradient(160deg, #2c2213, #14100a);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow), 0 0 42px var(--gold-glow);
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+    .shot:hover .frame { transform: translateY(-4px); border-color: var(--gold-deep); box-shadow: var(--shadow), 0 0 60px var(--gold-glow); }
+    .shot .frame img { display: block; width: 100%; border-radius: 24px; }
+    .shot .cap { margin-top: 15px; font-size: .92rem; color: var(--muted-fg); font-weight: 600; }
+
+    /* ===== SECTION ===== */
+    section { padding: 72px 0; position: relative; }
+    .section-head { text-align: center; max-width: 640px; margin: 0 auto 52px; }
+    .section-head h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; margin-bottom: 14px; color: var(--fg); }
+    .section-head p { color: var(--muted-fg); font-size: 1.08rem; }
+
+    /* Feature grid */
+    .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    @media (max-width: 760px) { .features { grid-template-columns: 1fr; } }
+    .feature {
+      background: linear-gradient(180deg, var(--card), var(--bg-2));
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 30px 28px; transition: transform .2s, border-color .2s, box-shadow .2s;
+    }
+    .feature:hover { transform: translateY(-3px); border-color: var(--border-strong); box-shadow: var(--shadow); }
+    .feature .ic {
+      width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center;
+      background: linear-gradient(150deg, rgba(246,206,106,0.24), rgba(176,133,38,0.08));
+      border: 1px solid rgba(224,179,76,0.42); margin-bottom: 18px;
+      color: var(--gold-bright);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 8px 20px rgba(224,179,76,0.10);
+    }
+    .feature .ic svg { width: 26px; height: 26px; display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+    .feature h3 { font-size: 1.28rem; font-weight: 700; margin-bottom: 9px; color: var(--fg); font-family: 'Cinzel', serif; }
+    .feature p { color: var(--muted-fg); font-size: 1rem; }
+
+    /* Factions */
+    .factions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 760px) { .factions { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 460px) { .factions { grid-template-columns: 1fr; } }
+    .faction {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px; text-align: center;
+      transition: transform .2s, border-color .2s;
+    }
+    .faction:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+    .faction .glyph { display: inline-grid; place-items: center; margin-bottom: 10px; color: var(--gold-bright); }
+    .faction .glyph svg { width: 30px; height: 30px; display: block; }
+    .faction h4 { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.1rem; color: var(--gold-bright); margin-bottom: 5px; }
+    .faction p { font-size: .9rem; color: var(--tertiary-fg); }
+
+    /* Lanes explainer */
+    .lanes {
+      display: flex; gap: 12px; margin-top: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 22px;
+    }
+    @media (max-width: 640px) { .lanes { flex-direction: column; } }
+    .lane {
+      flex: 1; text-align: center; padding: 22px 14px; border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--card-soft), transparent);
+      border: 1px dashed var(--border-strong);
+    }
+    .lane .n { font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--gold); }
+    .lane h4 { margin: 8px 0 4px; font-family: 'Inter', sans-serif; font-size: 1rem; }
+    .lane p { font-size: .88rem; color: var(--muted-fg); }
+
+    /* CTA band */
+    .cta-band {
+      text-align: center; background:
+        radial-gradient(ellipse 60% 120% at 50% 0%, var(--gold-glow), transparent 70%),
+        linear-gradient(180deg, var(--bg-2), var(--bg));
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 60px 30px; margin: 20px 0;
+    }
+    .cta-band h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 14px; }
+    .cta-band p { color: var(--muted-fg); max-width: 480px; margin: 0 auto 28px; font-size: 1.08rem; }
+
+    /* Footer */
+    footer.site { border-top: 1px solid var(--border); padding: 44px 0; margin-top: 40px; }
+    footer.site .container { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+    footer.site .brand { display: flex; align-items: center; gap: 10px; font-family: 'Cinzel', serif; color: var(--muted-fg); font-weight: 700; }
+    footer.site .brand img { width: 28px; height: 28px; border-radius: 7px; }
+    footer.site .flinks { display: flex; gap: 22px; }
+    footer.site .flinks a { color: var(--tertiary-fg); font-size: .92rem; }
+    footer.site .flinks a:hover { color: var(--gold-bright); }
+    footer.site .copy { color: var(--tertiary-fg); font-size: .85rem; width: 100%; text-align: center; margin-top: 8px; }
+  </style>
+<!-- app-schema:start (generated by appdev/tools/app_schema.py — edit apps.json, not this) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mythwright",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "iOS",
+  "description": "The heroes and monsters of classic literature duel across three lanes. Dracula trades blows with Athena. 244 cards, six factions, an AI Card Forge, and a full campaign.",
+  "url": "https://drvanus.github.io/mythwright-site/",
+  "author": {
+    "@type": "Organization",
+    "name": "Hypersage AI Labs"
+  }
+}
+</script>
+<!-- app-schema:end -->
+</head>
+<body>
+  <nav class="site">
+    <div class="container">
+      <div class="brand"><img src="app-icon.png" alt="Mythwright icon"> Mythwright</div>
+      <div class="links">
+        <a href="#screens">Screens</a>
+        <a href="#features">Features</a>
+        <a href="#factions">Factions</a>
+        <a href="#lanes">How it plays</a>
+        <a href="#get" class="btn ghost">Coming to iOS</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <span class="kicker">Collectible Card Game · iOS</span>
+      <img src="app-icon.png" alt="Mythwright" class="crest">
+      <h1>Collect. Build. Battle.</h1>
+      <p class="sub">The heroes and monsters of classic literature, at war across three lanes. Dracula trades blows with Athena, Alice sits beside Beowulf in your deck — and every match is six turns of nerve and timing.</p>
+      <div class="cta-row">
+        <a href="#get" class="btn">Get Mythwright</a>
+        <a href="#features" class="btn ghost">See what's inside</a>
+      </div>
+      <div class="stat-strip">
+        <div class="stat"><div class="num">244</div><div class="lbl">Cards</div></div>
+        <div class="stat"><div class="num">6</div><div class="lbl">Factions</div></div>
+        <div class="stat"><div class="num">33</div><div class="lbl">Locations</div></div>
+        <div class="stat"><div class="num">3</div><div class="lbl">Lanes</div></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="showcase" aria-label="Mythwright on iPhone">
+    <div class="container">
+      <div class="carousel" id="heroCarousel" aria-label="Mythwright screenshots, auto-rotating">
+        <div class="slide active"><img src="screenshot.jpg" alt="The Mythwright home screen on iPhone — Ranked PvP, Practice, Campaign, and Conquest game modes with today's featured card."></div>
+        <div class="slide"><img src="shots/collection.jpg" alt="The Mythwright collection screen — illustrated cards of Dracula, Van Helsing, and other literary legends."></div>
+        <div class="slide"><img src="shots/lanes.jpg" alt="A Mythwright match in progress with character cards fought across three lanes."></div>
+        <div class="slide"><img src="shots/forge.jpg" alt="The Mythwright AI Forge — describe a character and it paints the art, balances the stats, and writes the ability."></div>
+      </div>
+      <div class="carousel-dots" id="heroDots" role="tablist" aria-label="Choose screenshot">
+        <button class="active" type="button" aria-label="Home screen"></button>
+        <button type="button" aria-label="Collection"></button>
+        <button type="button" aria-label="Match in progress"></button>
+        <button type="button" aria-label="AI Forge"></button>
+      </div>
+    </div>
+  </section>
+
+  <section id="screens" aria-label="Mythwright screenshots">
+    <div class="container">
+      <div class="section-head">
+        <h2>See it in action</h2>
+        <p>Collect the cards, forge your own, and duel across three lanes.</p>
+      </div>
+      <div class="gallery-grid">
+        <figure class="shot"><div class="frame"><img src="shots/collection.jpg" alt="The Mythwright collection screen — 244 cards, each an illustrated character from classic literature." loading="lazy"></div><figcaption class="cap">Collect all 244 legends</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="shots/lanes.jpg" alt="A Mythwright match mid-game — character cards committed across three contested lanes." loading="lazy"></div><figcaption class="cap">Duel across three lanes</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="shots/deck.jpg" alt="The Mythwright deck builder — assembling a twelve-card deck from the collection." loading="lazy"></div><figcaption class="cap">Build your deck</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="shots/forge.jpg" alt="The Mythwright AI Forge in use — a described character ready to be forged into a card." loading="lazy"></div><figcaption class="cap">Forge your own with AI</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="shots/card.jpg" alt="A Mythwright card detail — a Legendary card with its On Reveal ability and flavor quote." loading="lazy"></div><figcaption class="cap">Every card is a legend</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="screenshot.jpg" alt="The Mythwright home screen — Ranked, Practice, Campaign, and Conquest game modes." loading="lazy"></div><figcaption class="cap">Four ways to play</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="container">
+      <div class="section-head">
+        <h2>Built for collectors and tacticians</h2>
+        <p>Fast duels, deep deckbuilding, and a cast drawn from the greatest stories ever told.</p>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.6l7.6 2.6v5.2c0 4.7-3.2 8.1-7.6 9.6-4.4-1.5-7.6-4.9-7.6-9.6V5.2z"/><path d="M12 3v17.6"/><path d="M4.6 8.7h14.8"/><circle cx="12" cy="8.7" r="1.4" fill="currentColor" stroke="none"/><circle cx="8" cy="13" r=".85" fill="currentColor" stroke="none"/><circle cx="16" cy="13" r=".85" fill="currentColor" stroke="none"/></svg></div>
+          <h3>Six Factions</h3>
+          <p>Gothic drains, Mythic overpowers, Wonderland tricks, Detective outsmarts, Sea destroys, Folklore multiplies. Pick a banner and master its rhythm.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9.2" y="4.6" width="9.4" height="13.6" rx="1.7" transform="rotate(15 13.9 11.4)"/><rect x="4" y="4.6" width="9.4" height="13.6" rx="1.7" transform="rotate(-15 8.7 11.4)"/><rect x="7.3" y="4.9" width="9.4" height="13.6" rx="1.7"/><circle cx="12" cy="9" r="1.3" fill="currentColor" stroke="none"/><path d="M10.4 13.4h3.2"/></svg></div>
+          <h3>A Cast of 244</h3>
+          <p>Every card is a legend from classic literature — Dracula, Sherlock, Athena, Alice, Ahab, Beowulf. Each ability is drawn from its source: Hyde transforms at end of turn, Cheshire vanishes to another lane.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.6 2.6l.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7z" fill="currentColor" stroke="none"/><path d="M2.6 10.7c2.1-.95 3.4-1.35 5.5-1.35H15c0 2-1.5 3.15-3.8 3.25l.55 1.85H7.55l.55-1.85C6 12.45 3.7 11.95 2.6 10.7z" fill="currentColor" stroke="none"/><path d="M8.5 15.1h4l-.4 1.6h1.5v1.85H7.4V16.7h1.5z" fill="currentColor" stroke="none"/></svg></div>
+          <h3>AI Card Forge</h3>
+          <p>Describe a character in one line — "a one-eyed lighthouse keeper who commands ravens" — and the Forge paints the art, balances the stats, and writes the ability. Yours to keep and play.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.3 3.7 6.1v13.6L9 17.9l6 1.9 5.3-1.8V4.2L15 6.1z"/><path d="M9 4.3v13.6M15 6.1v13.7"/><path d="M5.7 9.1c1.3 1.8 2.7 2.3 4 1.4" stroke-dasharray="0.1 2.3"/><path d="M16.3 8.6c1.2 0 2.1.9 2.1 2.1 0 1.4-2.1 3.3-2.1 3.3s-2.1-1.9-2.1-3.3c0-1.2.9-2.1 2.1-2.1z"/><circle cx="16.3" cy="10.8" r=".7" fill="currentColor" stroke="none"/></svg></div>
+          <h3>Campaign, Ranked &amp; Practice</h3>
+          <p>Fight literary boss decks for legendary unlocks, climb the seasonal cube ladder from Bronze to Infinite, or test new decks against the AI. Daily missions keep the collection growing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lanes" style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
+        <h2>Win the war across three lanes</h2>
+        <p>Six turns. Both sides stage face-down, then reveal at once. Best two of three lanes takes the match.</p>
+      </div>
+      <div class="lanes">
+        <div class="lane"><div class="n">I</div><h4>Stage</h4><p>Commit cards face-down to any lane. Locations twist the rules — Castle Dracula buffs Gothic, the Styx destroys its lane on turn six.</p></div>
+        <div class="lane"><div class="n">II</div><h4>Reveal</h4><p>Both sides flip at once. On-reveal abilities cascade, powers stack, and lane scores swing.</p></div>
+        <div class="lane"><div class="n">III</div><h4>Wager</h4><p>Every match starts at one cube. Confident? Wager to double the stakes. Outmatched? Yield and cut your losses.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="factions">
+    <div class="container">
+      <div class="section-head">
+        <h2>Choose your banner</h2>
+        <p>Six factions drawn from the classics, each with its own identity and win condition.</p>
+      </div>
+      <div class="factions">
+        <div class="faction"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.7 14.3A8.6 8.6 0 1 1 9.6 3a7 7 0 0 0 11.1 11.3z"/><path d="M16.6 3.5l.55 1.7 1.7.55-1.7.55-.55 1.7-.55-1.7-1.7-.55 1.7-.55z" fill="currentColor" stroke="none"/></svg></div><h4>Gothic</h4><p>Drain effects &amp; dark synergies. Dracula, Van Helsing, the Creature.</p></div>
+        <div class="faction"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.6 2.5 5.9 13.2h4.3l-1.7 8.3L18.1 10.1h-4.8z" fill="currentColor" stroke="none"/></svg></div><h4>Mythic</h4><p>Raw power of gods and heroes. Zeus, Athena, Achilles.</p></div>
+        <div class="faction"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l1.7 5.1 5.1 1.7-5.1 1.7-1.7 5.1-1.7-5.1L5.2 10l5.1-1.7z" fill="currentColor" stroke="none"/><path d="M18.6 15.2l.8 2.4 2.4.8-2.4.8-.8 2.4-.8-2.4-2.4-.8 2.4-.8z" fill="currentColor" stroke="none"/><circle cx="6.2" cy="18" r="1" fill="currentColor" stroke="none"/></svg></div><h4>Wonderland</h4><p>Trick cards &amp; lane shenanigans. Cheshire, the Jabberwock, the Queen of Hearts.</p></div>
+        <div class="faction"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.2" cy="10.2" r="6"/><path d="M14.6 14.6 20.4 20.4"/></svg></div><h4>Detective</h4><p>Information advantage. Sherlock, Moriarty, Irene Adler.</p></div>
+        <div class="faction"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.8c1.5 0 1.5 1.4 3 1.4s1.5-1.4 3-1.4 1.5 1.4 3 1.4 1.5-1.4 3-1.4 1.5 1.4 3 1.4 1.5-1.4 3-1.4"/><path d="M3 13.4c1.5 0 1.5 1.4 3 1.4s1.5-1.4 3-1.4 1.5 1.4 3 1.4 1.5-1.4 3-1.4 1.5 1.4 3 1.4 1.5-1.4 3-1.4"/></svg></div><h4>Sea</h4><p>Deep control &amp; area destruction. Ahab, Moby Dick, the Kraken.</p></div>
+        <div class="faction"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18.8 4.2c-7.2 0-12.6 3.4-12.6 9.4 0 1.4.3 2.6.9 3.7C9.8 13 13.4 10.4 17 9.2c-3.4 1.9-6.5 4.6-8.6 8.2.9.6 2 .9 3.2.9 6 0 8.4-5.4 7.2-14.1z"/></svg></div><h4>Folklore</h4><p>Synergy buffs &amp; trickster shifts. Beowulf, Anansi, Baba Yaga.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="get">
+    <div class="container">
+      <div class="cta-band">
+        <h2>Forge your legend</h2>
+        <p>Mythwright is coming to iPhone and iPad. Collect all 244 legends, build the deck, and take your seat at the table.</p>
+        <div class="cta-row" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+          <a href="#" class="btn">Coming to the App Store</a>
+          <a href="privacy.html" class="btn ghost">Privacy</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <div class="container">
+      <div class="brand"><img src="app-icon.png" alt="Mythwright icon"> Mythwright</div>
+      <div class="flinks">
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="support.html">Support</a>
+        <a href="#features">Features</a>
+        <a href="https://drvanus.github.io/hypersage-site/" target="_blank" rel="noopener">A HyperSage Studio App</a>
+      </div>
+      <div class="copy">© 2026 Mythwright. Every character is drawn from public-domain literature — the legends belong to everyone.</div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.getElementById('heroCarousel');
+      var dotBar = document.getElementById('heroDots');
+      if (!root || !dotBar) return;
+      var slides = Array.prototype.slice.call(root.querySelectorAll('.slide'));
+      var dots = Array.prototype.slice.call(dotBar.querySelectorAll('button'));
+      if (slides.length < 2) return;
+      var i = 0, timer = null;
+      var INTERVAL = 3400;
+
+      function show(n) {
+        n = (n + slides.length) % slides.length;
+        slides[i].classList.remove('active');
+        dots[i].classList.remove('active');
+        i = n;
+        slides[i].classList.add('active');
+        dots[i].classList.add('active');
+      }
+      function next() { show(i + 1); }
+      function start() { stop(); timer = setInterval(next, INTERVAL); }
+      function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+      dots.forEach(function (d, idx) {
+        d.addEventListener('click', function () { show(idx); start(); });
+      });
+      // Pause on hover so a viewer can dwell on a screen.
+      root.addEventListener('mouseenter', stop);
+      root.addEventListener('mouseleave', start);
+      // Pause when the tab isn't visible.
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) { stop(); } else { start(); }
+      });
+
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce) start();
+    })();
+  </script>
+</body>
+</html>

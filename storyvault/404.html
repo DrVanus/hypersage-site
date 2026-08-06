@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page not found — StoryVault AI</title>
+  <link rel="icon" type="image/png" href="storyvault-mark.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0D0620;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(107,63,160,0.22), transparent 60%),
+        #0D0620;
+      color: #F5F1E8;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    img { width: 88px; height: 88px; border-radius: 16px; margin-bottom: 28px; box-shadow: 0 0 40px rgba(217,181,127,0.18); }
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic; font-weight: 600;
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.3;
+      /* descender-safe gradient text */
+      background: linear-gradient(115deg, #F3E3BD 0%, #E4C48F 38%, #D9B57F 62%, #C09A62 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: inline-block;
+      padding-bottom: 0.16em;
+      margin-bottom: calc(12px - 0.16em);
+    }
+    p { color: #B8AEC6; font-size: 1.1rem; margin-bottom: 28px; max-width: 480px; }
+    a {
+      display: inline-block;
+      padding: 12px 22px;
+      background: linear-gradient(135deg, #D9B57F, #6B3FA0);
+      color: #fff;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: transform .15s, box-shadow .15s;
+    }
+    a:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(107,63,160,0.4); }
+  </style>
+</head>
+<body>
+  <img src="storyvault-mark.png" alt="StoryVault AI">
+  <h1>The page is not in this vault.</h1>
+  <p>You've wandered off the map. The trail back is well-lit.</p>
+  <a href="index.html">Return home</a>
+</body>
+</html>

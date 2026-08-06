@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Off the menu — Saffra</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="saffra-hat.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0E0C0A;
+      --fg: #F5EFE5;
+      --primary: #E08230;
+      --primary-light: #F5C088;
+      --primary-dark: #B8651C;
+      --muted-fg: #9A8E80;
+      --border: rgba(224,130,48,0.14);
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 32px 24px;
+      -webkit-font-smoothing: antialiased;
+      position: relative; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse, rgba(224,130,48,0.10), transparent 65%);
+      pointer-events: none;
+    }
+    .wrap {
+      position: relative; text-align: center; max-width: 520px;
+    }
+    .logo-mark {
+      width: 72px; height: 72px; margin: 0 auto 28px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, rgba(245,192,136,0.15), rgba(184,101,28,0.05));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 0 24px rgba(224,130,48,0.20);
+    }
+    .logo-mark img { width: 56px; height: 56px; object-fit: contain; }
+    .code {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--primary); margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 3rem; font-weight: 800; line-height: 1.18; letter-spacing: -0.03em;
+      margin-bottom: 14px;
+    }
+    .italic {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-weight: 600;
+      background: linear-gradient(135deg, #F5C088 0%, #E08230 50%, #B8651C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      padding-bottom: 0.12em;
+      margin-bottom: -0.12em;
+    }
+    p { font-size: 1rem; color: var(--muted-fg); line-height: 1.65; margin-bottom: 28px; }
+    .btn-warm {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #E08230, #B8651C);
+      color: #ffffff;
+      font-weight: 700; font-size: 0.9rem;
+      border-radius: 12px; text-decoration: none;
+      box-shadow: 0 4px 20px rgba(224,130,48,0.25);
+      transition: all 0.2s ease;
+    }
+    .btn-warm:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(224,130,48,0.4); }
+    .btn-warm svg { width: 16px; height: 16px; }
+    @media (max-width: 480px) {
+      h1 { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo-mark"><img src="saffra-hat.png" alt="Saffra"></div>
+    <div class="code">404 · Off the menu</div>
+    <h1>This page isn't on <span class="italic">tonight's menu.</span></h1>
+    <p>The link you followed doesn't exist (or doesn't yet). Head back to the kitchen and we'll find you something to cook.</p>
+    <a href="./" class="btn-warm">Back to the kitchen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+
+# --- secrets (auto-added) ---
+.env
+.env.*
+*.env
+*.key
+*.pem
+*.p12
+*.p8
+*.keystore

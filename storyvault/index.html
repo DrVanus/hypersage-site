@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StoryVault AI — Branching tales, written with you.</title>
+  <meta name="description" content="Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty-seven classics included. Free to try.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://drvanus.github.io/storyvault-app/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="StoryVault AI — Branching tales, written with you.">
+  <meta property="og:description" content="Step into a classic. Or a world only the AI has dreamed. Every choice rewrites the next page.">
+  <meta property="og:url" content="https://drvanus.github.io/storyvault-app/">
+  <meta property="og:site_name" content="StoryVault AI">
+  <meta property="og:image" content="https://drvanus.github.io/storyvault-app/storyvault-mark.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="StoryVault AI — Branching tales, written with you.">
+  <meta name="twitter:description" content="Step into a classic. Or invent your own world. Every choice rewrites the next page.">
+  <meta name="twitter:image" content="https://drvanus.github.io/storyvault-app/storyvault-mark.png">
+
+  <link rel="icon" type="image/png" href="storyvault-mark.png">
+  <link rel="apple-touch-icon" href="storyvault-mark.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="screenshots/home.jpg">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "StoryVault AI",
+    "operatingSystem": "iOS",
+    "applicationCategory": "EntertainmentApplication",
+    "description": "Branching interactive fiction built on 87 public-domain classics plus myth, folklore, history, and original worlds. Every choice rewrites the next page.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0D0620;
+      --bg-deeper: #060312;
+      --fg: #F5F1E8;
+      --card: #171030;
+      --card-2: #1E1440;
+      --primary: #6B3FA0;
+      --primary-dark: #2D1450;
+      --primary-light: #9D6FD9;
+      --accent: #D9B57F;
+      --accent-light: #EBD3A4;
+      --accent-dark: #B8905A;
+      --muted-fg: #B8AEC6;
+      --tertiary-fg: #7C7290;
+      --border: rgba(217,181,127,0.16);
+      --border-strong: rgba(217,181,127,0.34);
+      --primary-glow: rgba(157,111,217,0.18);
+      --accent-glow: rgba(217,181,127,0.14);
+      --radius: 0.75rem;
+      --radius-lg: 1.125rem;
+      --gold-grad: linear-gradient(115deg, #F3E3BD 0%, #E4C48F 38%, #D9B57F 62%, #C09A62 100%);
+      --warm-grad: linear-gradient(135deg, var(--accent), var(--primary));
+      --ease: cubic-bezier(.22,.61,.36,1);
+    }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Cosmic backdrop — deep purple nebulas + a sparse hand-placed starfield.
+       Pure CSS, one fixed layer, no images. */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(1.5px 1.5px at 8% 12%,  rgba(245,241,232,.55) 50%, transparent 51%),
+        radial-gradient(1px 1px     at 22% 34%, rgba(235,211,164,.45) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 37% 8%,  rgba(245,241,232,.35) 50%, transparent 51%),
+        radial-gradient(1px 1px     at 54% 22%, rgba(245,241,232,.5)  50%, transparent 51%),
+        radial-gradient(2px 2px     at 68% 6%,  rgba(235,211,164,.4)  50%, transparent 51%),
+        radial-gradient(1px 1px     at 79% 30%, rgba(245,241,232,.45) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 91% 14%, rgba(245,241,232,.4)  50%, transparent 51%),
+        radial-gradient(1px 1px     at 14% 64%, rgba(245,241,232,.3)  50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 45% 78%, rgba(235,211,164,.3)  50%, transparent 51%),
+        radial-gradient(1px 1px     at 72% 60%, rgba(245,241,232,.35) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 88% 82%, rgba(245,241,232,.3)  50%, transparent 51%),
+        radial-gradient(1px 1px     at 30% 92%, rgba(235,211,164,.35) 50%, transparent 51%),
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(107,63,160,0.26), transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 30%, rgba(157,111,217,0.13), transparent 70%),
+        radial-gradient(ellipse 70% 40% at 50% 100%, rgba(217,181,127,0.07), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    ::selection { background: rgba(157,111,217,.4); color: var(--fg); }
+
+    a { color: var(--accent); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--accent-light); }
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ===== Descender-safe display text =====
+       Every gradient-clipped or tight-leading display span gets breathing
+       room below the baseline: padding-bottom extends the paint box so
+       g/y/p/j descenders are never sheared, margin-bottom cancels the
+       layout shift. Applied via .grad and .safe-desc. */
+    .grad {
+      background: var(--gold-grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: inline-block;
+      padding-bottom: 0.16em;
+      margin-bottom: -0.16em;
+    }
+    .safe-desc {
+      display: inline-block;
+      padding-bottom: 0.12em;
+      margin-bottom: -0.12em;
+    }
+
+    h1, h2, h3, h4 { text-wrap: balance; }
+
+    /* ===== Ornament divider ===== */
+    .ornament {
+      display: flex; align-items: center; justify-content: center;
+      gap: 16px;
+      color: var(--accent);
+      font-size: 0.85rem;
+      margin: 0 auto;
+      max-width: 420px;
+    }
+    .ornament::before, .ornament::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-strong));
+    }
+    .ornament::after {
+      background: linear-gradient(90deg, var(--border-strong), transparent);
+    }
+
+    /* ===== Scroll reveal (JS adds .js to <html>; no-JS stays visible) ===== */
+    .js .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity .8s var(--ease), transform .8s var(--ease);
+    }
+    .js .reveal.in { opacity: 1; transform: none; }
+    .js .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity .7s var(--ease), transform .7s var(--ease);
+    }
+    .js .reveal-stagger.in > * { opacity: 1; transform: none; }
+    .js .reveal-stagger.in > :nth-child(2) { transition-delay: .09s; }
+    .js .reveal-stagger.in > :nth-child(3) { transition-delay: .18s; }
+    .js .reveal-stagger.in > :nth-child(4) { transition-delay: .27s; }
+    .js .reveal-stagger.in > :nth-child(5) { transition-delay: .36s; }
+    .js .reveal-stagger.in > :nth-child(6) { transition-delay: .45s; }
+    @media (prefers-reduced-motion: reduce) {
+      .js .reveal, .js .reveal-stagger > * {
+        opacity: 1 !important; transform: none !important; transition: none !important;
+      }
+    }
+
+    /* ===== NAV ===== */
+    nav.site {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(13,6,32,0.72);
+      backdrop-filter: saturate(180%) blur(18px);
+      -webkit-backdrop-filter: saturate(180%) blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav.site .container {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px;
+      padding-top: 14px; padding-bottom: 14px;
+    }
+    nav.site .brand {
+      display: flex; align-items: center; gap: 12px;
+      font-weight: 800; color: var(--fg); font-size: 1.08rem;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    nav.site .brand img {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+    nav.site .links {
+      display: flex; gap: 26px;
+      font-size: 0.93rem;
+    }
+    nav.site .links a { color: var(--muted-fg); font-weight: 500; }
+    nav.site .links a:hover { color: var(--accent); }
+    .btn-nav {
+      display: inline-flex; align-items: center;
+      padding: 9px 18px;
+      font-size: 0.9rem; font-weight: 700;
+      color: var(--accent-light);
+      background: rgba(217,181,127,0.08);
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      transition: background .2s, border-color .2s, transform .15s;
+      white-space: nowrap;
+    }
+    .btn-nav:hover {
+      background: rgba(217,181,127,0.16);
+      border-color: var(--accent);
+      color: var(--accent-light);
+      transform: translateY(-1px);
+    }
+    @media (max-width: 860px) {
+      nav.site .links { display: none; }
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-warm {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 15px 28px;
+      background: var(--warm-grad);
+      color: #fff; font-weight: 700; font-size: 1rem;
+      border-radius: var(--radius);
+      transition: transform .18s var(--ease), box-shadow .18s var(--ease);
+      box-shadow:
+        0 8px 32px rgba(107,63,160,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.22);
+      overflow: hidden;
+    }
+    .btn-warm::after {          /* shine sweep */
+      content: '';
+      position: absolute; top: 0; bottom: 0; left: -80%;
+      width: 50%;
+      background: linear-gradient(105deg, transparent, rgba(255,255,255,0.28), transparent);
+      transform: skewX(-20deg);
+      transition: left .55s var(--ease);
+    }
+    .btn-warm:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 14px 44px rgba(107,63,160,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.22);
+      color: #fff;
+    }
+    .btn-warm:hover::after { left: 130%; }
+    @media (prefers-reduced-motion: reduce) { .btn-warm::after { display: none; } }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 15px 24px;
+      color: var(--accent);
+      background: rgba(217,181,127,0.05);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      font-weight: 600; font-size: 1rem;
+      transition: background .2s, border-color .2s, transform .15s;
+    }
+    .btn-outline:hover {
+      background: rgba(217,181,127,0.12);
+      border-color: var(--accent);
+      color: var(--accent-light);
+      transform: translateY(-2px);
+    }
+
+    /* ===== HERO ===== */
+    section.hero {
+      padding: 88px 0 96px;
+      position: relative;
+    }
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 64px;
+      align-items: center;
+    }
+    @media (max-width: 880px) {
+      .hero-layout { grid-template-columns: 1fr; gap: 48px; text-align: center; }
+      section.hero { padding: 56px 0 72px; }
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 22px;
+      padding: 7px 14px;
+      background: var(--accent-glow);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+    .hero-eyebrow::before { content: '✦'; font-size: 0.7rem; }
+    .hero-text h1 {
+      font-family: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(2.6rem, 6vw, 4.4rem);
+      line-height: 1.16;
+      letter-spacing: -0.02em;
+      margin-bottom: 22px;
+    }
+    .hero-text h1 .italic-anything {
+      font-style: italic; font-weight: 600;
+    }
+    .hero-text .lede {
+      font-size: 1.16rem;
+      color: var(--muted-fg);
+      max-width: 540px;
+      margin-bottom: 34px;
+      line-height: 1.75;
+    }
+    @media (max-width: 880px) { .hero-text .lede { margin-left: auto; margin-right: auto; } }
+
+    .hero-buttons {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    @media (max-width: 880px) { .hero-buttons { justify-content: center; } }
+
+    .hero-trust {
+      display: flex; flex-wrap: wrap; gap: 10px 22px;
+      font-size: 0.85rem;
+      color: var(--tertiary-fg);
+      letter-spacing: 0.02em;
+    }
+    @media (max-width: 880px) { .hero-trust { justify-content: center; } }
+    .hero-trust span { display: inline-flex; align-items: center; gap: 8px; }
+    .hero-trust span::before {
+      content: '✦';
+      color: var(--accent-dark);
+      font-size: 0.62rem;
+    }
+
+    .hero-image { position: relative; display: flex; justify-content: center; }
+    .hero-image::after {
+      content: '';
+      position: absolute;
+      inset: -70px;
+      background: radial-gradient(ellipse at center, var(--primary-glow), transparent 62%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    /* floating sparks around the hero device */
+    .hero-spark {
+      position: absolute;
+      color: var(--accent);
+      opacity: .6;
+      pointer-events: none;
+      animation: spark-float 7s ease-in-out infinite;
+      text-shadow: 0 0 14px rgba(217,181,127,.6);
+    }
+    .hero-spark.s1 { top: 6%;  left: 4%;  font-size: 1rem;    animation-delay: 0s; }
+    .hero-spark.s2 { top: 22%; right: 2%; font-size: 0.7rem;  animation-delay: 1.6s; }
+    .hero-spark.s3 { bottom: 14%; left: 8%; font-size: 0.8rem; animation-delay: 3.2s; }
+    .hero-spark.s4 { bottom: 4%; right: 10%; font-size: 0.6rem; animation-delay: 4.8s; }
+    @keyframes spark-float {
+      0%, 100% { transform: translateY(0);    opacity: .35; }
+      50%      { transform: translateY(-12px); opacity: .8; }
+    }
+    @media (prefers-reduced-motion: reduce) { .hero-spark { animation: none; } }
+
+    /* ===== iPHONE DEVICE FRAME =====
+       Dark titanium bezel wrapping a real capture. Screenshots carry
+       their own status bar + Dynamic Island, so the frame is a rounded
+       bezel + screen clip — no faux notch needed. */
+    .device {
+      position: relative;
+      width: 100%;
+      max-width: 288px;
+      margin: 0 auto;
+      padding: 9px;
+      border-radius: 44px;
+      background: linear-gradient(155deg, #453a68 0%, #191033 45%, #0b0620 100%);
+      box-shadow:
+        0 30px 70px rgba(6,3,18,0.72),
+        0 0 0 1px rgba(217,181,127,0.16),
+        inset 0 1px 1px rgba(255,255,255,0.08),
+        inset 0 0 0 1px rgba(0,0,0,0.5);
+    }
+    .device img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 36px;
+      background: var(--bg-deeper);
+    }
+    /* Side buttons — titanium rails */
+    .device::before,
+    .device::after {
+      content: '';
+      position: absolute;
+      width: 3px;
+      border-radius: 3px;
+      background: linear-gradient(180deg, #55487a, #241844);
+    }
+    .device::before { left: -3px; top: 116px; height: 56px; }
+    .device::after  { right: -3px; top: 132px; height: 64px; }
+    .device.device-hero { max-width: 344px; }
+    @media (max-width: 880px) { .device.device-hero { max-width: 300px; } }
+
+    /* Floor shadow under a device */
+    .device-stage { position: relative; }
+    .device-stage::after {
+      content: '';
+      position: absolute;
+      left: 50%; bottom: -26px;
+      width: 68%; height: 30px;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse at center, rgba(6,3,18,0.65), transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Hero screenshot carousel — 6 captures (light + dark), 4s each,
+       24s loop. Visible window per slide is 1/6 of the cycle with a
+       ~0.6s crossfade at each edge. */
+    .hero-carousel { position: relative; width: 100%; }
+    .hero-carousel img {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      animation: sv-carousel 24s infinite;
+    }
+    .hero-carousel img:nth-child(1) { position: relative; animation-delay: 0s; }
+    .hero-carousel img:nth-child(2) { animation-delay: 4s; }
+    .hero-carousel img:nth-child(3) { animation-delay: 8s; }
+    .hero-carousel img:nth-child(4) { animation-delay: 12s; }
+    .hero-carousel img:nth-child(5) { animation-delay: 16s; }
+    .hero-carousel img:nth-child(6) { animation-delay: 20s; }
+    @keyframes sv-carousel {
+      0%     { opacity: 0; }
+      2.5%   { opacity: 1; }
+      16.67% { opacity: 1; }
+      19.2%  { opacity: 0; }
+      100%   { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-carousel img { animation: none; opacity: 1; }
+      .hero-carousel img:nth-child(n+2) { display: none; }
+    }
+
+    /* ===== STATS STRIP ===== */
+    .stats-strip {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 0;
+      padding: 34px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin: 24px 0 48px;
+      background:
+        linear-gradient(180deg, rgba(30,20,64,0.55), rgba(23,16,48,0.55));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .stat {
+      text-align: center;
+      min-width: 150px;
+      flex: 1 1 150px;
+      padding: 6px 18px;
+      position: relative;
+    }
+    .stat + .stat::before {
+      content: '';
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      height: 44px; width: 1px;
+      background: linear-gradient(180deg, transparent, var(--border-strong), transparent);
+    }
+    @media (max-width: 700px) {
+      .stat { flex: 1 1 42%; padding: 14px 8px; }
+      .stat:nth-child(3)::before { display: none; }
+    }
+    .stat-value {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700; font-size: 2.3rem;
+      line-height: 1.25;
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.78rem; color: var(--muted-fg);
+      text-transform: uppercase; letter-spacing: 0.14em;
+      margin-top: 4px;
+    }
+
+    /* ===== SECTION ===== */
+    section { position: relative; }
+    .section-block { padding: 96px 0; }
+    .section-block.tight { padding: 72px 0; }
+    @media (max-width: 700px) {
+      .section-block { padding: 64px 0; }
+      .section-block.tight { padding: 52px 0; }
+    }
+    .section-eyebrow {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.76rem; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 16px;
+    }
+    .section-eyebrow::before {
+      content: '';
+      width: 28px; height: 1px;
+      background: var(--accent-dark);
+    }
+    .section-eyebrow.center {
+      justify-content: center;
+      text-align: center;
+    }
+    .section-eyebrow.center::after {
+      content: '';
+      width: 28px; height: 1px;
+      background: var(--accent-dark);
+    }
+    .section-block h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700; font-size: clamp(2rem, 4vw, 3.1rem);
+      line-height: 1.22; letter-spacing: -0.02em;
+      margin-bottom: 18px;
+    }
+    .section-block h2 em {
+      font-style: italic; font-weight: 600;
+    }
+    .section-block .lede {
+      color: var(--muted-fg); font-size: 1.08rem;
+      max-width: 660px; margin-bottom: 52px;
+      line-height: 1.75;
+    }
+
+    /* ===== FEATURES ===== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
+    }
+    .feature-card {
+      position: relative;
+      padding: 30px 28px;
+      background: linear-gradient(180deg, var(--card-2), var(--card));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      transition: transform .25s var(--ease), border-color .25s, box-shadow .25s;
+      overflow: hidden;
+    }
+    .feature-card::before {          /* top hairline glint */
+      content: '';
+      position: absolute; top: 0; left: 12%; right: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(217,181,127,.35), transparent);
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--border-strong);
+      box-shadow: 0 20px 52px rgba(6,3,18,0.6), 0 0 0 1px rgba(217,181,127,0.06);
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card .icon-box {
+      width: 50px; height: 50px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(150deg, rgba(157,111,217,0.22), rgba(107,63,160,0.10));
+      border: 1px solid rgba(157,111,217,0.32);
+      margin-bottom: 18px;
+      color: var(--primary-light);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .feature-card .icon-box svg { width: 25px; height: 25px; display: block; }
+    .feature-card h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 600;
+      font-size: 1.32rem; line-height: 1.28;
+      margin-bottom: 9px;
+      padding-bottom: 0.08em;   /* descender room for g/y in serif titles */
+    }
+    .feature-card p {
+      color: var(--muted-fg);
+      font-size: 0.96rem;
+      line-height: 1.7;
+    }
+
+    /* ===== HOW IT WORKS ===== */
+    .how-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 64px; align-items: center;
+    }
+    @media (max-width: 880px) { .how-grid { grid-template-columns: 1fr; gap: 44px; } }
+    .how-image {
+      border-radius: var(--radius-lg);
+      width: 100%; max-width: 460px;
+      display: block; margin: 0 auto;
+      box-shadow:
+        0 20px 60px rgba(107,63,160,0.35),
+        0 0 0 1px var(--border);
+    }
+    .how-steps { list-style: none; counter-reset: step; }
+    .how-steps li {
+      counter-increment: step;
+      padding: 20px 0 20px 68px;
+      position: relative;
+    }
+    .how-steps li + li {
+      border-top: 1px solid var(--border);
+    }
+    .how-steps li::before {
+      content: counter(step);
+      position: absolute; left: 0; top: 22px;
+      width: 46px; height: 46px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700; font-size: 1.25rem;
+      color: var(--accent);
+      background:
+        linear-gradient(180deg, rgba(217,181,127,0.14), rgba(217,181,127,0.04));
+      border: 1px solid var(--border-strong);
+      border-radius: 50%;
+      box-shadow: 0 0 18px rgba(217,181,127,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .how-steps h4 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 600; font-size: 1.18rem;
+      line-height: 1.3;
+      margin-bottom: 5px;
+      padding-bottom: 0.08em;
+    }
+    .how-steps p { color: var(--muted-fg); font-size: 0.96rem; line-height: 1.7; }
+
+    /* ===== SCREENS STRIP ===== */
+    .screens-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 30px;
+      align-items: start;
+    }
+    @media (max-width: 880px) {
+      .screens-grid { grid-template-columns: repeat(2, 1fr); gap: 40px 20px; }
+    }
+    .screen-card { text-align: center; }
+    .screen-card .device {
+      transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+    }
+    .screen-card:hover .device {
+      transform: translateY(-9px);
+      box-shadow:
+        0 36px 84px rgba(107,63,160,0.42),
+        0 0 0 1px rgba(217,181,127,0.24),
+        inset 0 1px 1px rgba(255,255,255,0.08),
+        inset 0 0 0 1px rgba(0,0,0,0.5);
+    }
+    .screen-card .screen-label {
+      margin-top: 18px;
+      font-size: 0.86rem;
+      color: var(--muted-fg);
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+    }
+    .screen-card .screen-label strong {
+      display: block;
+      font-family: 'Playfair Display', Georgia, serif;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 1.02rem;
+      margin-bottom: 3px;
+      padding-bottom: 0.08em;
+    }
+
+    /* ===== LIBRARY CHIPS ===== */
+    .library-tape {
+      display: flex; gap: 13px; flex-wrap: wrap;
+      justify-content: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .library-chip {
+      padding: 10px 18px;
+      background: linear-gradient(180deg, rgba(30,20,64,0.6), rgba(23,16,48,0.6));
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.92rem;
+      color: var(--muted-fg);
+      transition: border-color .2s, color .2s, transform .2s, box-shadow .2s;
+    }
+    .library-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6,3,18,0.5);
+    }
+    .library-chip em {
+      font-style: italic;
+      color: var(--accent-light);
+    }
+
+    /* ===== PRO PLANS ===== */
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    @media (max-width: 800px) { .plans { grid-template-columns: 1fr; max-width: 460px; } }
+
+    .plan {
+      padding: 36px 32px;
+      background: linear-gradient(180deg, var(--card-2), var(--card));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      position: relative;
+      transition: transform .25s var(--ease), box-shadow .25s;
+    }
+    .plan:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 52px rgba(6,3,18,0.55);
+    }
+    .plan.featured {
+      border: 1px solid transparent;
+      background:
+        linear-gradient(180deg, #241948, var(--card-2)) padding-box,
+        linear-gradient(160deg, rgba(235,211,164,.75), rgba(217,181,127,.25) 40%, rgba(107,63,160,.5)) border-box;
+      box-shadow: 0 18px 56px rgba(107,63,160,0.28);
+    }
+    .plan.featured::before {
+      content: 'Best Value';
+      position: absolute;
+      top: -13px; right: 22px;
+      padding: 5px 14px;
+      background: var(--gold-grad);
+      color: var(--primary-dark);
+      font-size: 0.72rem; font-weight: 800;
+      letter-spacing: 0.1em;
+      border-radius: 999px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 16px rgba(217,181,127,0.35);
+    }
+    .plan h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 600; font-size: 1.45rem;
+      line-height: 1.3;
+      margin-bottom: 2px;
+      padding-bottom: 0.08em;
+    }
+    .plan .price {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700; font-size: 2.6rem;
+      line-height: 1.3;
+      margin: 10px 0 2px;
+    }
+    .plan .period {
+      color: var(--muted-fg); font-size: 0.94rem;
+      margin-bottom: 26px;
+    }
+    .plan ul { list-style: none; }
+    .plan li {
+      padding: 9px 0 9px 28px;
+      font-size: 0.96rem;
+      position: relative;
+      color: var(--fg);
+    }
+    .plan li::before {
+      content: '✦';
+      position: absolute; left: 2px; top: 9px;
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-shadow: 0 0 8px rgba(217,181,127,0.5);
+    }
+    .plan li.muted { color: var(--muted-fg); }
+    .plan li.muted::before { color: var(--tertiary-fg); text-shadow: none; }
+
+    /* ===== AI ADVENTURE SHOWCASE ===== */
+    .adv-hero-grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 56px;
+      align-items: center;
+      margin-bottom: 72px;
+    }
+    @media (max-width: 880px) { .adv-hero-grid { grid-template-columns: 1fr; gap: 44px; } }
+
+    /* The "turn" panel — a stylized rendition of an adventure turn using
+       the app's real opening prose and choice-chip idiom. */
+    .turn-panel {
+      background: linear-gradient(180deg, var(--card-2), var(--card));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 30px 30px 26px;
+      box-shadow: 0 24px 64px rgba(6,3,18,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+    }
+    .turn-panel .turn-kicker {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .turn-panel .turn-kicker::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border-strong), transparent);
+    }
+    .turn-panel .prose {
+      font-family: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: var(--fg);
+      margin-bottom: 22px;
+    }
+    .turn-panel .prose em { color: var(--accent-light); }
+    .turn-choices { display: flex; flex-direction: column; gap: 10px; }
+    .turn-choice {
+      display: flex; align-items: center; gap: 12px;
+      text-align: left;
+      padding: 13px 16px;
+      background: rgba(217,181,127,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--fg);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      transition: border-color .2s, background .2s, transform .15s;
+    }
+    .turn-choice:hover {
+      border-color: var(--accent);
+      background: rgba(217,181,127,0.11);
+      color: var(--fg);
+      transform: translateX(4px);
+    }
+    .turn-choice .n {
+      flex: 0 0 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700; font-size: 0.85rem;
+      color: var(--accent);
+      border: 1px solid var(--border-strong);
+      border-radius: 50%;
+      background: var(--accent-glow);
+    }
+    .turn-custom {
+      margin-top: 12px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      border: 1px dashed var(--border-strong);
+      border-radius: 12px;
+      color: var(--tertiary-fg);
+      font-size: 0.92rem;
+      font-style: italic;
+    }
+    .turn-custom::before { content: '✎'; color: var(--accent); font-style: normal; }
+    .turn-note {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: var(--tertiary-fg);
+    }
+
+    /* Genre scenario cards — real painted covers + catalog copy. */
+    .adv-worlds-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+    @media (max-width: 900px) { .adv-worlds-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .adv-worlds-grid { grid-template-columns: 1fr; } }
+    .world-card {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--card);
+      transition: transform .3s var(--ease), box-shadow .3s, border-color .3s;
+    }
+    .world-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--border-strong);
+      box-shadow: 0 26px 64px rgba(6,3,18,0.65);
+    }
+    .world-card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      transition: transform .5s var(--ease);
+    }
+    .world-card:hover img { transform: scale(1.04); }
+    .world-card .world-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 30%, rgba(6,3,18,0.55) 62%, rgba(6,3,18,0.93));
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 20px;
+    }
+    .world-card .world-genre {
+      align-self: flex-start;
+      font-size: 0.66rem; font-weight: 800;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--primary-dark);
+      background: var(--gold-grad);
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .world-card h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      line-height: 1.25;
+      color: #fff;
+      margin-bottom: 5px;
+      padding-bottom: 0.08em;
+    }
+    .world-card .world-tagline {
+      font-size: 0.88rem;
+      color: rgba(245,241,232,0.82);
+      line-height: 1.5;
+    }
+    .adv-more {
+      text-align: center;
+      margin-top: 30px;
+      color: var(--muted-fg);
+      font-size: 0.95rem;
+    }
+    .adv-more strong { color: var(--accent); font-weight: 600; }
+
+    /* ===== FAQ ===== */
+    .faq-list { max-width: 740px; margin: 0 auto; }
+    details.faq {
+      padding: 4px 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(30,20,64,0.35), rgba(23,16,48,0.35));
+      margin-bottom: 12px;
+      transition: border-color .2s;
+    }
+    details.faq:hover { border-color: var(--border-strong); }
+    details.faq[open] { border-color: var(--border-strong); }
+    details.faq summary {
+      font-weight: 600; font-size: 1.02rem;
+      cursor: pointer;
+      list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 16px;
+      padding: 15px 0;
+      color: var(--fg);
+    }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after {
+      content: '+';
+      flex: 0 0 auto;
+      color: var(--accent);
+      font-weight: 400; font-size: 1.45rem;
+      line-height: 1;
+      transition: transform .25s var(--ease);
+    }
+    details.faq[open] summary::after { transform: rotate(45deg); }
+    details.faq p {
+      padding-bottom: 18px;
+      color: var(--muted-fg);
+      font-size: 0.97rem; line-height: 1.75;
+    }
+
+    /* ===== CTA STRIP ===== */
+    .cta-strip {
+      text-align: center;
+      padding: 96px 24px 104px;
+      background:
+        radial-gradient(ellipse 60% 80% at center, var(--primary-glow), transparent 70%),
+        linear-gradient(180deg, var(--card), var(--bg-deeper));
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-strip .ornament { margin-bottom: 30px; }
+    .cta-strip h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700; font-size: clamp(2.1rem, 4.5vw, 3.2rem);
+      line-height: 1.22;
+      margin-bottom: 16px;
+    }
+    .cta-strip h2 em { font-style: italic; font-weight: 600; }
+    .cta-strip p {
+      color: var(--muted-fg);
+      font-size: 1.1rem; margin-bottom: 34px;
+      max-width: 540px; margin-left: auto; margin-right: auto;
+      line-height: 1.75;
+    }
+
+    /* ===== FOOTER ===== */
+    footer.site {
+      padding: 52px 24px 56px;
+      color: var(--tertiary-fg);
+      font-size: 0.9rem;
+      background: var(--bg-deeper);
+      border-top: 1px solid var(--border);
+    }
+    footer.site .footer-inner {
+      max-width: 1120px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      position: relative; z-index: 1;
+    }
+    footer.site .brand {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--fg); font-weight: 700;
+    }
+    footer.site .brand img { width: 30px; height: 30px; border-radius: 7px; }
+    footer.site .brand small {
+      display: block;
+      color: var(--tertiary-fg); font-weight: 400; font-size: 0.8rem;
+    }
+    footer.site .links { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+    footer.site .links a { color: var(--muted-fg); }
+    footer.site .links a:hover { color: var(--accent); }
+    footer.site .copyright {
+      width: 100%;
+      margin-top: 26px; padding-top: 22px;
+      border-top: 1px solid rgba(217,181,127,0.08);
+      text-align: center;
+    }
+    @media (max-width: 640px) {
+      footer.site .footer-inner { flex-direction: column; text-align: center; }
+      footer.site .brand { flex-direction: column; }
+    }
+  </style>
+<!-- app-schema:start (generated by appdev/tools/app_schema.py — edit apps.json, not this) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "StoryVault AI",
+  "applicationCategory": "EntertainmentApplication",
+  "operatingSystem": "iOS",
+  "description": "Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty-seven classics included. Free to try.",
+  "url": "https://drvanus.github.io/storyvault-app/",
+  "author": {
+    "@type": "Organization",
+    "name": "Hypersage AI Labs"
+  }
+}
+</script>
+<!-- app-schema:end -->
+</head>
+<body>
+
+  <!-- ===== NAV ===== -->
+  <nav class="site">
+    <div class="container">
+      <a class="brand" href="#top" aria-label="StoryVault AI home">
+        <img src="storyvault-mark.png" alt="">
+        StoryVault&nbsp;AI
+      </a>
+      <div class="links">
+        <a href="#how">How it works</a>
+        <a href="#adventure">AI Adventure</a>
+        <a href="#features">Features</a>
+        <a href="#screens">Screens</a>
+        <a href="#plans">Pro</a>
+        <a href="#faq">FAQ</a>
+        <a href="support.html">Support</a>
+      </div>
+      <a href="#plans" class="btn-nav">Get the app</a>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="top">
+    <div class="container">
+      <div class="hero-layout">
+        <div class="hero-text">
+          <span class="hero-eyebrow">Coming to iOS</span>
+          <h1>Branching tales,<br><span class="italic-anything grad">written with you.</span></h1>
+          <p class="lede">Step into Beowulf, Dracula, or a world only the AI has dreamed. Pick from offered choices — or type whatever you want. Every choice rewrites the next page.</p>
+          <div class="hero-buttons">
+            <a href="#plans" class="btn-warm">
+              <span>Get StoryVault AI</span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <a href="#how" class="btn-outline">See how it works</a>
+          </div>
+          <div class="hero-trust">
+            <span>87 classics bundled</span>
+            <span>No account needed</span>
+            <span>Free to try</span>
+          </div>
+        </div>
+        <div class="hero-image">
+          <span class="hero-spark s1" aria-hidden="true">✦</span>
+          <span class="hero-spark s2" aria-hidden="true">✦</span>
+          <span class="hero-spark s3" aria-hidden="true">✦</span>
+          <span class="hero-spark s4" aria-hidden="true">✦</span>
+          <div class="device-stage">
+            <div class="device device-hero">
+              <div class="hero-carousel">
+                <img src="screenshots/home.jpg" width="720" height="1564" alt="StoryVault AI home in light mode — Continue Reading Frankenstein, Write a Story and AI Adventure buttons, and Most Popular classics">
+                <img src="screenshots/adventure-turn.jpg" width="720" height="1564" alt="A live AI Adventure turn — The Prismshard Heist in dark mode, a painted scene above the story text and a 'Type your own move' box" loading="lazy">
+                <img src="screenshots/library.jpg" width="720" height="1564" alt="Your Vault library in light mode — the Veilkeep Manor adventure beside Alice, Dracula, and Frankenstein" loading="lazy">
+                <img src="screenshots/reader-dark.jpg" width="720" height="1564" alt="The reader in dark mode — Alice in Wonderland in a clean night-reading view" loading="lazy">
+                <img src="screenshots/write-story.jpg" width="720" height="1564" alt="Write Your Own Story composer in light mode — quick-start flavors and Conjure a Story" loading="lazy">
+                <img src="screenshots/home-dark.jpg" width="720" height="1564" alt="StoryVault AI home in dark mode — the same literary home by night" loading="lazy">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STATS STRIP ===== -->
+  <div class="container">
+    <div class="stats-strip reveal">
+      <div class="stat">
+        <span class="stat-value grad">87</span>
+        <span class="stat-label">Classics included</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value grad">190+</span>
+        <span class="stat-label">AI scenarios</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value grad">∞</span>
+        <span class="stat-label">Unique runs</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value grad">Free</span>
+        <span class="stat-label">To start reading</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="section-block" id="how">
+    <div class="container">
+      <div class="how-grid">
+        <div class="reveal">
+          <div class="section-eyebrow">How it works</div>
+          <h2>A page. A choice.<br><em class="grad">A new page.</em></h2>
+          <p class="lede">Not an audiobook. Not a chatbot. A tale that bends to every move you make, written in the voice of the world you stepped into.</p>
+          <ol class="how-steps">
+            <li>
+              <h4>Pick a tale</h4>
+              <p>Eighty-seven bundled classics — Dracula, Sherlock, Beowulf, the Odyssey — each with a hand-curated AI scenario. Plus myth, folklore, history, stage, and epic-poetry worlds. Or invent your own.</p>
+            </li>
+            <li>
+              <h4>Read what the AI writes</h4>
+              <p>Streaming prose arrives a sentence at a time, in the voice of the world you stepped into — beneath a painted cover conjured for your story.</p>
+            </li>
+            <li>
+              <h4>Choose what happens next</h4>
+              <p>Pick from three offered branches, or type whatever you want. The story adapts.</p>
+            </li>
+          </ol>
+        </div>
+        <div class="reveal">
+          <div class="device-stage">
+            <div class="device" style="max-width: 320px;">
+              <img src="screenshots/book-detail-dark.jpg" width="720" height="1564" alt="Alice in Wonderland book detail in dark mode — painted cover, Fantasy tag, chapters, and first-pages preview" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== AI ADVENTURE SHOWCASE ===== -->
+  <section class="section-block" id="adventure" style="background: linear-gradient(180deg, rgba(23,16,48,0.0), rgba(23,16,48,0.5) 18%, rgba(23,16,48,0.5) 82%, rgba(23,16,48,0.0));">
+    <div class="container">
+      <div class="section-eyebrow center">The headline act</div>
+      <h2 style="text-align:center;" class="reveal">AI Adventure. <em class="grad">Your move.</em></h2>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Every turn, the AI writes the next page in the voice of the world you're in — then hands you the pen. Pick a branch or type anything at all, and it remembers: your choices carry forward turn after turn, so a single run can unfold for hours and never repeat itself. Here's one turn.</p>
+
+      <div class="adv-hero-grid">
+        <div class="reveal">
+          <div class="device-stage">
+            <div class="device">
+              <img src="screenshots/adventure-turn.jpg" width="720" height="1564" alt="A live AI Adventure turn — The Prismshard Heist, Chapter 1: a scene painting for the turn, the story written in a vivid heist-noir voice, and a 'Type your own move' box" loading="lazy">
+            </div>
+          </div>
+        </div>
+        <div class="turn-panel reveal">
+          <div class="turn-kicker">The Prismshard Heist · Chapter 1 · Approach</div>
+          <p class="prose">Three bells past midnight, and Halen breathes the kind of quiet that belongs only to cats and thieves. The mist sits low on the canal, smelling of brine and old rope, and <em>the cold of the tiles seeps through your boots like a slow debt.</em></p>
+          <div class="turn-choices">
+            <div class="turn-choice"><span class="n">1</span> Cross by the bridge and go in at ground level</div>
+            <div class="turn-choice"><span class="n">2</span> Signal Mora to test the wards with a prayer before moving</div>
+            <div class="turn-choice"><span class="n">3</span> Send Pell to shadow the errant sentry first</div>
+          </div>
+          <div class="turn-custom">Or type your own — "What if I refused the invitation?"</div>
+          <p class="turn-note">The turn shown on the phone, set in readable type — a live run of the real Prismshard Heist scenario. Each turn opens with a scene the app paints for it; every branch is written fresh, so no two runs are the same.</p>
+        </div>
+      </div>
+
+      <div class="section-eyebrow center">195 doors, one vault</div>
+      <h2 style="text-align:center;" class="reveal">Pick a world. <em class="grad">Any world.</em></h2>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Six of the worlds waiting inside — horror, fantasy, sci-fi, mystery, high-seas adventure, and the Old West. Each opens under a cover the app paints for it, then branches turn by turn from the premise below. Every classic on the shelf has one too, and the original worlds are built for nothing else.</p>
+
+      <div class="adv-worlds-grid reveal-stagger">
+        <div class="world-card">
+          <img src="art/scenario-veilkeep.jpg" width="480" height="600" alt="Veilkeep Manor — a brooding gothic manor at dusk, painted cover" loading="lazy">
+          <div class="world-overlay">
+            <span class="world-genre">Horror</span>
+            <h3>Veilkeep Manor</h3>
+            <p class="world-tagline">Inherit a house that doesn't want you</p>
+          </div>
+        </div>
+        <div class="world-card">
+          <img src="art/scenario-prismshard.jpg" width="480" height="600" alt="The Prismshard Heist — a jeweled relic in a warded temple, painted cover" loading="lazy">
+          <div class="world-overlay">
+            <span class="world-genre">Fantasy</span>
+            <h3>The Prismshard Heist</h3>
+            <p class="world-tagline">One night to steal a god's eye</p>
+          </div>
+        </div>
+        <div class="world-card">
+          <img src="art/scenario-ironbridge.jpg" width="480" height="600" alt="Ironbridge Drift — a derelict cargo ship adrift between stars, painted cover" loading="lazy">
+          <div class="world-overlay">
+            <span class="world-genre">Sci-fi</span>
+            <h3>Ironbridge Drift</h3>
+            <p class="world-tagline">A derelict cargo ship between stars</p>
+          </div>
+        </div>
+        <div class="world-card">
+          <img src="art/scenario-blackbird.jpg" width="480" height="600" alt="The Blackbird Job — a noir Los Angeles night, painted cover" loading="lazy">
+          <div class="world-overlay">
+            <span class="world-genre">Mystery</span>
+            <h3>The Blackbird Job</h3>
+            <p class="world-tagline">A widow in a black hat, a missing brother, and an LA night that won't end</p>
+          </div>
+        </div>
+        <div class="world-card">
+          <img src="art/scenario-salted-king.jpg" width="480" height="600" alt="The Salted King — a pirate sloop meeting a galleon at moonrise, painted cover" loading="lazy">
+          <div class="world-overlay">
+            <span class="world-genre">Adventure</span>
+            <h3>The Salted King</h3>
+            <p class="world-tagline">A pirate sloop, a Spanish galleon at moonrise, and a captain who knows your face</p>
+          </div>
+        </div>
+        <div class="world-card">
+          <img src="art/scenario-coltspur.jpg" width="480" height="600" alt="Dust at Coltspur — a frontier mining town at dusk, painted cover" loading="lazy">
+          <div class="world-overlay">
+            <span class="world-genre">Western</span>
+            <h3>Dust at Coltspur</h3>
+            <p class="world-tagline">A mining town that buried its last marshal quietly</p>
+          </div>
+        </div>
+      </div>
+      <p class="adv-more reveal">Plus <strong>87 classics</strong> with scenarios in the source's own voice, and whole shelves of <strong>myth, folklore, history, stage &amp; screen, and epic poetry</strong> — 190+ scenarios in all.</p>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="section-block" id="features">
+    <div class="container">
+      <div class="section-eyebrow">What's inside</div>
+      <h2 class="reveal">Every classic. <em class="grad">Every choice.</em></h2>
+      <p class="lede reveal">A literary engine, a quiet reader, a trophy gallery — built like a chef's knife, not a Swiss army.</p>
+
+      <div class="features-grid reveal-stagger">
+        <div class="feature-card">
+          <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5C10.3 4.2 8 3.6 4.8 3.6a.8.8 0 0 0-.8.8v12.4a.8.8 0 0 0 .8.8c3.2 0 5.5.6 7.2 1.9 1.7-1.3 4-1.9 7.2-1.9a.8.8 0 0 0 .8-.8V4.4a.8.8 0 0 0-.8-.8C16 3.6 13.7 4.2 12 5.5z"/><path d="M12 5.5V19.5"/></svg></div>
+          <h3>Live a classic</h3>
+          <p>Eighty-seven public-domain books pre-loaded — Dracula, Pride &amp; Prejudice, Sherlock Holmes, Treasure Island, the Odyssey, and 82 more. Each has its own AI Adventure scenario calibrated to the source's voice.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.4L12 17l-1.9-5.6L4.5 10l5.6-1.4z"/><path d="M18.5 15.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg></div>
+          <h3>Or a world only you know</h3>
+          <p>Sketch a premise — title, genre, characters, a plot seed. The AI weaves a branching tale around it, keeping continuity across every turn.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5l6 6-9 9c-1.3 1.3-3.2 1.6-4.4.4-1.2-1.2-.9-3.1.4-4.4z"/><path d="M11 7l6 6"/><path d="M7 15.5c-1.6.4-2.5 1.6-3 3.5 1.9-.5 3.1-1.4 3.5-3"/></svg></div>
+          <h3>Painted, not printed</h3>
+          <p>Every book and adventure gets a painted cover in a Victorian-engraving-meets-illuminated-manuscript style — 87 painted classics, plus a fresh cover conjured for each story you start. In AI Adventure, every turn opens with a new scene the app paints for the moment.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4.5" width="4.5" height="15" rx="1"/><rect x="9.5" y="4.5" width="4.5" height="15" rx="1"/><path d="M15.4 5.6l3.8 1 .9 13.4-4.2-1.1z" transform="rotate(-6 17 12)"/></svg></div>
+          <h3>A reader, too</h3>
+          <p>Saved books open into a clean, themable reader — adjustable size, serif/sans/mono, light/sepia/dark, chapter narration that reads aloud, and navigation that remembers where you left off.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.5V7a3 3 0 0 0 3 3M17 5.5h2.5V7a3 3 0 0 1-3 3"/><path d="M12 13v3M9 20h6M10 20l.5-4h3l.5 4"/></svg></div>
+          <h3>Earn the trophies</h3>
+          <p>Achievements for completing books, finishing scenarios, writing your own moves, and reading across genres. Stats track your library, finished reads, and turns played.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.5v5.2c0 4.3-2.9 7.6-7 9-4.1-1.4-7-4.7-7-9V5.5z"/><rect x="9.3" y="10.8" width="5.4" height="4.5" rx="1"/><path d="M10.4 10.8V9.6a1.6 1.6 0 0 1 3.2 0v1.2"/></svg></div>
+          <h3>Yours alone</h3>
+          <p>Saved adventures and reading progress live on your device — no account, no login, no telemetry tied to your name. The AI never trains on your stories.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SCREENS ===== -->
+  <section class="section-block" id="screens">
+    <div class="container">
+      <div class="section-eyebrow center">A look inside</div>
+      <h2 style="text-align:center;" class="reveal">Crafted, top to <em class="grad">bottom.</em></h2>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">A literary luxury aesthetic, hand-built one screen at a time.</p>
+      <div class="screens-grid reveal-stagger">
+        <div class="screen-card">
+          <div class="device-stage">
+            <div class="device">
+              <img src="screenshots/home.jpg" width="720" height="1564" alt="StoryVault AI home — Continue Reading Frankenstein, AI Adventure and Write a Story buttons, Most Popular shelf" loading="lazy">
+            </div>
+          </div>
+          <div class="screen-label">
+            <strong>Your literary home</strong>
+            Pick up where you left off
+          </div>
+        </div>
+        <div class="screen-card">
+          <div class="device-stage">
+            <div class="device">
+              <img src="screenshots/adventure-dark.jpg" width="720" height="1564" alt="AI Adventure picker in dark mode — Tonight's Tale: The Prismshard Heist under a full moon, Write Your Own Tale, and Browse by mood" loading="lazy">
+            </div>
+          </div>
+          <div class="screen-label">
+            <strong>AI Adventure</strong>
+            Worlds that branch every turn
+          </div>
+        </div>
+        <div class="screen-card">
+          <div class="device-stage">
+            <div class="device">
+              <img src="screenshots/reader.jpg" width="720" height="1564" alt="The reader — Alice in Wonderland open to Chapter 1 in a clean, minimal reading view with chapter narration" loading="lazy">
+            </div>
+          </div>
+          <div class="screen-label">
+            <strong>Reader</strong>
+            Serif themes + chapter narration
+          </div>
+        </div>
+        <div class="screen-card">
+          <div class="device-stage">
+            <div class="device">
+              <img src="screenshots/library.jpg" width="720" height="1564" alt="Your Vault — the Veilkeep Manor adventure beside Alice in Wonderland, Dracula, and Frankenstein, with genre pills and reading progress" loading="lazy">
+            </div>
+          </div>
+          <div class="screen-label">
+            <strong>Your vault</strong>
+            Genre pills + reading progress
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DEEPER SCREENS ===== -->
+  <section class="section-block tight" id="daynight" style="background: linear-gradient(180deg, rgba(23,16,48,0.0), rgba(23,16,48,0.5) 18%, rgba(23,16,48,0.5) 82%, rgba(23,16,48,0.0));">
+    <div class="container">
+      <div class="section-eyebrow center">Day &amp; night</div>
+      <h2 style="text-align:center;" class="reveal">Read it. Write it. <em class="grad">Share it.</em></h2>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Every screen ships in light and dark — warm parchment by day, deep violet night mode after hours. Painted covers with first-page previews, a story composer built to write like a novelist, achievements on your profile, and community Tales.</p>
+      <div class="screens-grid reveal-stagger">
+        <div class="screen-card">
+          <div class="device-stage">
+            <div class="device">
+              <img src="screenshots/book-detail.jpg" width="720" height="1564" alt="Alice in Wonderland book detail — painted cover, Fantasy tag, 12 chapters, editorial blurb, and a first-pages preview" loading="lazy">
+            </div>
+          </div>
+          <div class="screen-label">
+            <strong>Book detail</strong>
+            Painted cover, blurb, first pages
+          </div>
+        </div>
+        <div class="screen-card">
+          <div class="device-stage">
+            <div class="device">
+              <img src="screenshots/write-story.jpg" width="720" height="1564" alt="Write Your Own Story — quick-start flavors like Heist Caper and Haunted Mystery, plus a Conjure a Story button that drafts a complete brief" loading="lazy">
+            </div>
+          </div>
+          <div class="screen-label">
+            <strong>Write a story</strong>
+            A novelist's composer, not a chatbot
+          </div>
+        </div>
+        <div class="screen-card">
+          <div class="device-stage">
+            <div class="device">
+              <img src="screenshots/profile-dark.jpg" width="720" height="1564" alt="Profile in dark mode — books, adventures, and unlocks at a glance, recent achievements, and appearance themes" loading="lazy">
+            </div>
+          </div>
+          <div class="screen-label">
+            <strong>Your profile</strong>
+            Achievements, stats, themes — by night
+          </div>
+        </div>
+        <div class="screen-card">
+          <div class="device-stage">
+            <div class="device">
+              <img src="screenshots/tales-dark.jpg" width="720" height="1564" alt="Tales in dark mode — community Discover feed with featured StoryVault Originals like The Anchored Charts" loading="lazy">
+            </div>
+          </div>
+          <div class="screen-label">
+            <strong>Tales</strong>
+            Community stories, after dark
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LIBRARY ===== -->
+  <section class="section-block tight">
+    <div class="container">
+      <div class="section-eyebrow center">The bundled vault</div>
+      <h2 style="text-align:center;" class="reveal"><em class="grad">Eighty-seven</em> classics, free forever</h2>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">All public-domain. All offline-readable. All yours to keep.</p>
+      <div class="library-tape reveal">
+        <div class="library-chip"><em>Dracula</em> · Bram Stoker</div>
+        <div class="library-chip"><em>Frankenstein</em> · Mary Shelley</div>
+        <div class="library-chip"><em>Pride and Prejudice</em> · Jane Austen</div>
+        <div class="library-chip"><em>Sherlock Holmes</em> · A. Conan Doyle</div>
+        <div class="library-chip"><em>Treasure Island</em> · R. L. Stevenson</div>
+        <div class="library-chip"><em>The Odyssey</em> · Homer</div>
+        <div class="library-chip"><em>Alice in Wonderland</em> · Lewis Carroll</div>
+        <div class="library-chip"><em>Jane Eyre</em> · Charlotte Brontë</div>
+        <div class="library-chip"><em>The Time Machine</em> · H. G. Wells</div>
+        <div class="library-chip"><em>The Count of Monte Cristo</em> · A. Dumas</div>
+        <div class="library-chip"><em>Wuthering Heights</em> · Emily Brontë</div>
+        <div class="library-chip"><em>Carmilla</em> · J. Sheridan Le Fanu</div>
+        <div class="library-chip">+ 75 more</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PRO PLANS ===== -->
+  <section class="section-block" id="plans" style="background: linear-gradient(180deg, rgba(23,16,48,0.0), rgba(23,16,48,0.5) 18%, rgba(23,16,48,0.5) 82%, rgba(23,16,48,0.0));">
+    <div class="container">
+      <div class="section-eyebrow center">StoryVault Pro</div>
+      <h2 style="text-align:center;" class="reveal">Free to try. <em class="grad">Pro for the unlimited library.</em></h2>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Three free AI Adventure turns every month. Pro removes every cap.</p>
+
+      <div class="plans reveal-stagger">
+        <div class="plan">
+          <h3>Monthly</h3>
+          <div class="price grad">$9.99</div>
+          <div class="period">per month, cancel anytime</div>
+          <ul>
+            <li>Unlimited AI Adventure turns</li>
+            <li>Unlimited custom premises</li>
+            <li>Unlimited saved adventures</li>
+            <li>AI voice narration</li>
+            <li>AI-painted scene art every turn</li>
+          </ul>
+        </div>
+        <div class="plan featured">
+          <h3>Annual</h3>
+          <div class="price grad">$79.99</div>
+          <div class="period">per year — save 33% vs. monthly</div>
+          <ul>
+            <li>Everything in Monthly</li>
+            <li>7-day free trial</li>
+            <li>Two months free vs. monthly</li>
+            <li>Renews yearly, cancel anytime</li>
+            <li>AI-painted scene art every turn</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="section-block" id="faq">
+    <div class="container">
+      <div class="section-eyebrow center">Common questions</div>
+      <h2 style="text-align:center;" class="reveal">FAQ</h2>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Everything reviewers, readers, and parents ask us.</p>
+      <div class="faq-list reveal">
+        <details class="faq">
+          <summary>Is the AI just rewriting the original book?</summary>
+          <p>No — the AI uses the book's world and voice as the setting, but every adventure is its own continuity. You're not reading Dracula. You're at Castle Dracula, making choices Jonathan Harker never had.</p>
+        </details>
+        <details class="faq">
+          <summary>What if the AI says something off?</summary>
+          <p>It happens. Tap "Try again" on any turn to regenerate, or type a different choice to steer the story. The system prompt is tuned to keep prose in-period and on-tone, but AI is AI.</p>
+        </details>
+        <details class="faq">
+          <summary>Does the AI train on my stories?</summary>
+          <p>No. Your input is sent to our backend for the duration of the request, forwarded to OpenAI for generation, and not stored on either end. We don't sell or share your input.</p>
+        </details>
+        <details class="faq">
+          <summary>Can I read offline?</summary>
+          <p>The 87 bundled books are fully offline-readable. AI Adventure requires a network connection — every turn is generated live by the model.</p>
+        </details>
+        <details class="faq">
+          <summary>What happens if I cancel Pro?</summary>
+          <p>You keep access through the end of the current period, then drop back to the free tier (3 AI Adventure turns / month). Your saved adventures and library stay — they're on your device.</p>
+        </details>
+        <details class="faq">
+          <summary>How is this different from AI Dungeon?</summary>
+          <p>StoryVault is built around literature — period-correct prose, hand-tuned scenarios, a real reader for the source books. The AI keeps you in the source's voice instead of letting the story drift into generic fantasy.</p>
+        </details>
+        <details class="faq">
+          <summary>iPad? Mac? Android?</summary>
+          <p>iOS first. iPad works on the same iOS app. Android and Mac are on the roadmap but not committed yet.</p>
+        </details>
+        <details class="faq">
+          <summary>I'm a teacher / parent / reviewer — how do I evaluate it?</summary>
+          <p>The bundled library is all public-domain material rated 12+. The AI Adventure system prompt explicitly excludes explicit sexual content and child endangerment. Reach out at <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a> for review codes.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA STRIP ===== -->
+  <section class="cta-strip">
+    <div class="ornament" aria-hidden="true">✦</div>
+    <h2 class="reveal">The page is <em class="grad">open.</em></h2>
+    <p class="reveal">Free to try. Eighty-seven classics already in the vault. The next one is yours to write.</p>
+    <a href="#plans" class="btn-warm">
+      <span>Get StoryVault AI</span>
+      <span aria-hidden="true">→</span>
+    </a>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site">
+    <div class="footer-inner">
+      <div class="brand">
+        <img src="storyvault-mark.png" alt="">
+        <span>StoryVault AI
+          <small>Branching tales, written with you.</small>
+        </span>
+      </div>
+      <div class="links">
+        <a href="#how">How it works</a>
+        <a href="#plans">Pro</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="support.html">Support</a>
+        <a href="mailto:hypersageailabs@gmail.com">Contact</a>
+        <a href="https://drvanus.github.io/hypersage-site/" target="_blank" rel="noopener">A HyperSage Studio App</a>
+      </div>
+      <div class="copyright">© 2026 StoryVault AI. All tales told are your own.</div>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll-reveal: progressive enhancement only — without JS everything
+    // stays visible (the hiding styles are scoped under html.js).
+    document.documentElement.classList.add('js');
+    const io = 'IntersectionObserver' in window
+      ? new IntersectionObserver((entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          }
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' })
+      : null;
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
+      if (io) io.observe(el); else el.classList.add('in');
+    });
+  </script>
+
+</body>
+</html>

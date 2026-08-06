@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Saffra</title>
+  <meta name="description" content="How Saffra handles your data. Plain English, no dark patterns.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://drvanus.github.io/saffra-app/privacy.html">
+  <link rel="icon" type="image/png" href="saffra-hat.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="legal.css">
+</head>
+<body>
+
+<nav class="legal-nav">
+  <div class="container">
+    <a href="./" class="nav-logo">
+      <div class="logo-mark"><img src="saffra-hat.png" alt="Saffra"></div>
+      <span>Saffra</span>
+    </a>
+    <a href="./" class="nav-back">← Back to home</a>
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p class="last-updated">Last updated: July 19, 2026</p>
+
+    <div class="draft-note">
+      This policy covers both the Saffra iOS app and the email you give us on the early-access list on this website. We will flag material changes here and in-app before they take effect.
+    </div>
+
+    <p><strong>Saffra</strong> ("the app", "we", "us") is an AI cooking companion built by Daniel Muskin. This policy explains what data we collect, how we use it, and the choices you have. It's written in plain English — no dark patterns.</p>
+
+    <h2>The short version</h2>
+    <ul>
+      <li>We collect only what the app needs to work: your identity (via Sign in with Apple), your cooking profile (equipment, allergies, preferences), your pantry, your conversation history with the chef, and recipes you import.</li>
+      <li>We use this data <strong>solely to operate the app</strong> — personalize the chef, remember your pantry, adapt recipes for you. We do not sell it, we do not use it to train models, we do not share it with advertisers.</li>
+      <li>Voice transcription runs <strong>on your device</strong> by default.</li>
+      <li>You can delete your account and all associated data at any time.</li>
+    </ul>
+
+    <h2>What we collect</h2>
+
+    <h3>Early-access waitlist (this website)</h3>
+    <ul>
+      <li><strong>Email address</strong> — only the email you type into the signup form on this site, plus a timestamp and the source label <code>saffra-website</code>. We use it for one thing: to send you a single message when TestFlight opens. We never sell it, we never share it with advertisers, and we never send marketing email beyond the launch notification. You can ask for removal at any time by emailing <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a>.</li>
+    </ul>
+
+    <h3>Account (in the app, post-launch)</h3>
+    <ul>
+      <li><strong>Apple or Google user ID</strong> (opaque identifier from Sign in with Apple or Sign in with Google) — to log you in.</li>
+      <li><strong>Email address</strong> — only if Apple or Google passes it to us, and only to contact you about your account. We never send marketing email.</li>
+    </ul>
+
+    <h3>Profile</h3>
+    <ul>
+      <li><strong>Kitchen equipment, dietary restrictions, allergies, likes, dislikes, skill level, cuisine preferences, household size, budget, time constraints, cooking style notes, preferred voice, unit system</strong> — collected during onboarding so the chef can tailor its suggestions. You can edit or clear any of these in Profile / Me.</li>
+    </ul>
+
+    <h3>Pantry</h3>
+    <ul>
+      <li><strong>Items you add manually, via barcode scan, or via receipt scan</strong> — including names, quantities, expirations, brand, and allergens.</li>
+      <li><strong>Receipt and cookbook photos</strong>: OCR runs on your iPhone via Apple's Vision framework. The <strong>image never leaves your device</strong>. Only the extracted text is sent to us for parsing.</li>
+    </ul>
+
+    <h3>Conversations</h3>
+    <ul>
+      <li><strong>Messages you send to the chef</strong> and <strong>the chef's replies</strong>, so the chef has memory across sessions. Older conversations are periodically summarized and the raw messages are deleted.</li>
+    </ul>
+
+    <h3>Recipes</h3>
+    <ul>
+      <li>Recipes you import via URL or cookbook photo, and adapted versions created for you.</li>
+    </ul>
+
+    <h3>Community content (opt-in)</h3>
+    <ul>
+      <li><strong>Public handle &amp; display name</strong> — only if you opt into the Community and pick a handle.</li>
+      <li><strong>Cook posts</strong> you explicitly share to the community, including the photo you uploaded, the caption you wrote, and which recipe the photo is for. Anyone using the app can see posts whose moderation state is <code>live</code>; your private cook photos (the default) stay on your device and are never uploaded.</li>
+      <li><strong>Likes, comments, follows, blocks, reports</strong> you create on community content.</li>
+      <li><strong>Moderation metadata</strong> — for every community post we keep a short record of our automated vision classifier's "food / not food" and "safe / unsafe" decisions, plus the removal reason if a post is taken down. This is used to enforce the rules, not to build a profile of you.</li>
+      <li><strong>Notifications</strong> — an in-app inbox of likes, comments, and follows you have received. Not sent to you via push in the current version.</li>
+    </ul>
+
+    <h3>Voice</h3>
+    <ul>
+      <li>When you use voice mode, transcription runs <strong>on-device via Apple Speech.framework</strong> — audio is not sent to us.</li>
+      <li>As a fallback (only when on-device accuracy is too low for a noisy kitchen), audio may be sent briefly to our server and forwarded to OpenAI's Whisper for transcription. We do not retain the audio; it is processed and discarded.</li>
+      <li>Text-to-speech uses ElevenLabs. Audio is generated on our server and streamed to your device. Audio for publicly available curated recipes is cached (content-addressed) so we don't re-generate the same clip for every user.</li>
+    </ul>
+
+    <h3>Usage</h3>
+    <ul>
+      <li>Per-user counters of chat messages, voice characters, and Whisper seconds, used to enforce daily limits and for aggregate cost monitoring. Not shared externally.</li>
+    </ul>
+
+    <h3>We do NOT collect</h3>
+    <ul>
+      <li>Location, contacts, calendar, browsing history, financial data, health data outside your self-declared dietary/allergy profile.</li>
+      <li>Any analytics that track you across apps or websites.</li>
+    </ul>
+
+    <h2>How we use it</h2>
+    <ul>
+      <li><strong>Operate the app</strong> — personalize recommendations, remember your pantry, stream chef responses.</li>
+      <li><strong>Safety</strong> — enforce rate limits and guard against abuse.</li>
+      <li><strong>Community safety</strong> — run an automated vision check ("is this food?" / "is this safe?") on every community photo <em>before</em> it's visible to others, and review user reports so we can remove rule-breaking content quickly.</li>
+      <li><strong>Product improvement</strong> — only via aggregate metrics (e.g., "how often does the chef call <code>lookup_recipe</code>?"), never with identifiable data.</li>
+    </ul>
+
+    <h2>Third-party services</h2>
+    <p>We share data with these service providers only to the extent needed to run the app:</p>
+    <ul>
+      <li><strong>Apple</strong> — Sign in with Apple.</li>
+      <li><strong>Google</strong> — Sign in with Google, only if you use it. Governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
+      <li><strong>Anthropic (Claude)</strong> — your chat messages and a summary of your profile and pantry are sent to Anthropic to generate and adapt the chef's replies. Governed by <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a>. Neither we nor Anthropic use your content to train models.</li>
+      <li><strong>Voyage AI</strong> — your search queries and recipe text are sent to Voyage for embedding. Governed by <a href="https://www.voyageai.com/privacy" target="_blank" rel="noopener">Voyage's privacy policy</a>.</li>
+      <li><strong>ElevenLabs</strong> — text you want spoken is sent to ElevenLabs. Governed by their privacy policy.</li>
+      <li><strong>OpenAI (Whisper, fallback only)</strong> — audio sent <em>only</em> when you explicitly use the noisy-kitchen voice fallback. Governed by <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's privacy policy</a>.</li>
+      <li><strong>USDA FoodData Central</strong> — ingredient names are sent to look up nutrition information. No personal data.</li>
+      <li><strong>Open Food Facts</strong> — barcode lookups send just the barcode number. No personal data.</li>
+      <li><strong>Google Firebase</strong> — for the early-access waitlist on this website only. Stores your email address until launch notification is sent.</li>
+      <li><strong>Fly.io, Cloudflare R2, Upstash Redis</strong> — hosting infrastructure.</li>
+    </ul>
+    <p>None of these providers are authorized to use your data for their own purposes.</p>
+
+    <h2>How long we keep it</h2>
+    <ul>
+      <li><strong>Account + profile + pantry</strong> — until you delete your account.</li>
+      <li><strong>Conversations</strong> — individual messages may be auto-summarized and deleted after ~20 turns; summaries persist until you delete the conversation.</li>
+      <li><strong>TTS audio cache</strong> — until you delete your account.</li>
+      <li><strong>Voice audio for Whisper fallback</strong> — not stored; discarded after transcription.</li>
+      <li><strong>Community posts, photos, comments, likes, follows, blocks, notifications</strong> — until you delete them individually or delete your account. When you delete your account we hard-delete the photos from object storage and remove the associated rows. Reports you've filed are retained in an anonymized form so we can keep acting on repeat abuse.</li>
+      <li><strong>Waitlist email</strong> — until launch notification is sent or you ask for removal, whichever is sooner.</li>
+    </ul>
+
+    <h2>Your choices</h2>
+    <ul>
+      <li><strong>Edit or delete any profile field</strong> in Profile / Me.</li>
+      <li><strong>Delete a pantry item, recipe, or conversation</strong> any time.</li>
+      <li><strong>Sign out</strong> via Profile / Me.</li>
+      <li><strong>Delete your account</strong> → from Profile / Me, or by emailing <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a>. In-app deletion runs the cascade immediately (photos, posts, comments, likes, follows, blocks, notifications); email requests are processed within 30 days.</li>
+      <li><strong>Block another community member</strong> any time from their public profile.</li>
+      <li><strong>Report a post or comment</strong> — every report is reviewed, and we always respond to abusive content within 24 hours.</li>
+      <li><strong>Turn off premium voice</strong> in Settings to use on-device iOS voices only — no ElevenLabs request leaves your device.</li>
+    </ul>
+
+    <h2>Kids</h2>
+    <p>The app is not directed at children under 13. We don't knowingly collect data from children.</p>
+
+    <h2>International transfers</h2>
+    <p>Our servers are in the United States. If you're in another country, your data is transferred to the US for processing. We rely on standard contractual clauses where required.</p>
+
+    <h2>Changes</h2>
+    <p>If we update this policy, we'll note the new date above and flag material changes in-app.</p>
+
+    <h2>Contact</h2>
+    <ul>
+      <li>Email: <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a></li>
+      <li>For early-access list questions: <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>&copy; 2026 Saffra. <a href="./">Home</a> · <a href="terms.html">Terms</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://drvanus.github.io/mythkin-site/sitemap.xml

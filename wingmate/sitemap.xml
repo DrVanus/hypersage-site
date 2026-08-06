@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Origin is the GitHub Pages project URL the site is actually served from.
+     wingmate.app is NOT ours — it serves a competitor's app of the same name —
+     so it must never appear here. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://drvanus.github.io/wingmate-site/</loc><lastmod>2026-08-01</lastmod></url>
+  <url><loc>https://drvanus.github.io/wingmate-site/privacy.html</loc><lastmod>2026-08-01</lastmod></url>
+  <url><loc>https://drvanus.github.io/wingmate-site/terms.html</loc><lastmod>2026-08-01</lastmod></url>
+  <url><loc>https://drvanus.github.io/wingmate-site/support.html</loc><lastmod>2026-08-01</lastmod></url>
+</urlset>

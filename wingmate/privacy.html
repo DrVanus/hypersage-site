@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Privacy Policy — Wingmate</title>
+  <link rel="icon" type="image/png" href="app-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #1A1D23; --surface: #22262E; --fg: #ECE7F0; --muted: #9CA3B4;
+      --faint: #6B7280; --line: rgba(255,255,255,0.08); --amber: #E8A838;
+    }
+    html { scroll-behavior: smooth; color-scheme: dark; background: var(--bg); }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg); color: var(--fg); line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+    h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+    a { color: var(--amber); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    nav.site {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(26,29,35,0.85); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line); padding: 14px 24px;
+    }
+    nav.site .inner { max-width: 760px; margin: 0 auto; display: flex; align-items: center; gap: 11px; }
+    nav.site img { width: 32px; height: 32px; border-radius: 8px; }
+    nav.site span { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--fg); }
+
+    .hero { padding: 64px 0 40px; border-bottom: 1px solid var(--line); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    .hero p { color: var(--muted); font-size: 0.95rem; }
+
+    .content { padding: 40px 0 80px; }
+    .content h2 { font-size: 1.3rem; font-weight: 600; margin: 36px 0 12px; }
+    .content h2:first-child { margin-top: 0; }
+    .content p, .content li { color: var(--muted); font-size: 0.95rem; margin-bottom: 12px; }
+    .content ul { padding-left: 20px; }
+    .content li { margin-bottom: 8px; }
+
+    footer { border-top: 1px solid var(--line); padding: 32px 24px; text-align: center; }
+    footer p { color: var(--faint); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <nav class="site">
+    <div class="inner">
+      <a href="index.html"><img src="app-icon.png" alt="" width="32" height="32"></a>
+      <a href="index.html" style="color: var(--fg); text-decoration: none;"><span>Wingmate</span></a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="container">
+      <h1>Privacy Policy</h1>
+      <p>Last updated: July 19, 2026</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="container">
+
+      <h2>Overview</h2>
+      <p>Wingmate ("we", "our", "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use the Wingmate mobile application.</p>
+
+      <h2>Information We Collect</h2>
+      <p><strong>Chat messages.</strong> When you chat with a coach, your message is sent to our server, which relays it to our AI provider (see Third-Party Processing) to generate a reply. We do not store your messages or conversations on our servers — each request is processed only to produce the response. Your conversation history is kept on your device.</p>
+      <p><strong>Screenshots.</strong> If you share conversation screenshots with your coach, they are sent to our server and relayed to our AI provider (see Third-Party Processing) to generate a response. They are not stored on our servers.</p>
+      <p><strong>Other people in your screenshots.</strong> A conversation screenshot may include messages, names, or photos of the person you're talking to. When you choose to share one, that content is processed by our AI provider solely to generate your coaching response and is not stored on our servers or used to train models. Please only share screenshots you're comfortable processing this way, and avoid sharing content about anyone who would object.</p>
+      <p><strong>Device identifier.</strong> We generate and store a random, anonymous device identifier to track your free-tier usage and subscription status. This identifier is not linked to your personal identity.</p>
+      <p><strong>Connection data.</strong> Information you enter about people you're talking to (such as names, notes, and platforms) is stored locally on your device. When you ask a coach for advice about a specific person, the details you've entered about them are included in that request to our AI provider so the advice is relevant. We do not store this connection data on our servers.</p>
+
+      <h2>Information We Do Not Collect</h2>
+      <ul>
+        <li>We do not collect your real name, email address, or phone number</li>
+        <li>We do not access your contacts, photos, or files beyond screenshots you explicitly share</li>
+        <li>We do not use tracking pixels, advertising identifiers, or third-party analytics</li>
+        <li>We do not sell or rent your data, and we do not share it with advertisers or data brokers</li>
+      </ul>
+
+      <h2>How We Use Your Information</h2>
+      <ul>
+        <li>To provide AI coaching responses to your messages</li>
+        <li>To analyze screenshots you share for coaching purposes</li>
+        <li>To manage your subscription and free-tier usage limits</li>
+        <li>To maintain conversation continuity within coaching sessions</li>
+      </ul>
+
+      <h2>Third-Party Processing</h2>
+      <p>To generate coaching responses, we send the content of your requests — your messages, any screenshots you share, and the details you've entered about the person you're discussing — to trusted AI providers acting as our processors:</p>
+      <ul>
+        <li><strong>Anthropic</strong> (Claude) generates the coaches' written responses and analyzes shared screenshots.</li>
+        <li><strong>OpenAI</strong> generates spoken audio when you use the read-aloud (text-to-speech) feature.</li>
+      </ul>
+      <p>These providers process your content only to return a response and do not use it to train their models under our configuration. We do not share your data with any other third parties for their own purposes.</p>
+
+      <h2>Data Storage and Security</h2>
+      <p>Your connection profiles, saved openers, and app preferences are stored locally on your device using encrypted file protection. Chat messages sent to our servers are processed over encrypted HTTPS connections.</p>
+
+      <h2>Data Retention</h2>
+      <p>Your conversation transcripts, connections, and saved openers are stored only on your device, and you can delete all conversations at any time from Settings. We do not retain your messages or conversations on our servers; each request is processed only to generate a reply and is not saved.</p>
+
+      <h2>Children's Privacy</h2>
+      <p>Wingmate is not intended for users under the age of 17. We do not knowingly collect information from children.</p>
+
+      <h2>Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.</p>
+
+      <h2>Contact Us</h2>
+      <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a>.</p>
+
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Hypersage AI Labs. All rights reserved.</p>
+  </footer>
+</body>
+</html>

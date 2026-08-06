@@ -1,0 +1,110 @@
+/* Shared stylesheet for /privacy and /terms — keeps the brand consistent
+   without duplicating the full landing-page CSS on every legal page.
+   Modeled on saffra-app/legal.css; palette swapped for StoryVault's
+   royal-purple + antique-gold luxury dark theme. */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0D0620;
+  --fg: #F5F1E8;
+  --card: #171030;
+  --primary: #6B3FA0;
+  --primary-light: #9D6FD9;
+  --primary-dark: #2D1450;
+  --accent: #D9B57F;
+  --accent-light: #EBD3A4;
+  --muted-fg: #B8AEC6;
+  --border: rgba(217,181,127,0.18);
+  --gold-grad: linear-gradient(115deg, #F3E3BD 0%, #E4C48F 38%, #D9B57F 62%, #C09A62 100%);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(107,63,160,0.2), transparent 60%),
+    var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--accent-light); }
+
+.container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+.legal-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(15,7,33,0.88);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.legal-nav .container {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 14px; padding-bottom: 14px;
+}
+.legal-nav .brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700; color: var(--fg); font-size: 1.05rem;
+}
+.legal-nav .brand img { width: 28px; height: 28px; border-radius: 6px; }
+.legal-nav .links { display: flex; gap: 22px; font-size: 0.95rem; }
+.legal-nav .links a { color: var(--muted-fg); }
+.legal-nav .links a:hover { color: var(--accent); }
+.legal-nav .links a.active { color: var(--accent); }
+
+main.legal {
+  max-width: 760px; margin: 0 auto;
+  padding: 56px 24px 96px;
+}
+main.legal h1 {
+  font-family: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
+  font-style: italic; font-weight: 600;
+  font-size: 2.6rem; line-height: 1.3;
+  margin-bottom: 12px;
+  /* Gradient-clipped display text: extend the paint box below the
+     baseline so italic descenders (y, p, g) are never sheared. */
+  background: var(--gold-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  padding-bottom: 0.16em;
+  margin-bottom: calc(12px - 0.16em);
+}
+main.legal .updated {
+  color: var(--muted-fg); font-size: 0.95rem;
+  margin-bottom: 36px;
+}
+main.legal h2 {
+  font-size: 1.25rem; font-weight: 700;
+  margin-top: 36px; margin-bottom: 12px;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+}
+main.legal h3 {
+  font-size: 1.05rem; font-weight: 600;
+  margin-top: 22px; margin-bottom: 8px;
+  color: var(--fg);
+}
+main.legal p, main.legal li {
+  color: var(--fg);
+  margin-bottom: 14px;
+}
+main.legal ul { padding-left: 22px; margin-bottom: 14px; }
+main.legal li { margin-bottom: 6px; }
+main.legal strong { color: var(--accent); font-weight: 600; }
+
+footer.legal-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+  padding: 28px 24px 36px;
+  text-align: center;
+  color: var(--muted-fg); font-size: 0.9rem;
+}
+footer.legal-footer a { color: var(--muted-fg); margin: 0 12px; }
+footer.legal-footer a:hover { color: var(--accent); }

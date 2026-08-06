@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0C0F1A">
+  <title>Privacy Policy — Nightshelf</title>
+  <meta name="description" content="Privacy Policy for the Nightshelf reading app.">
+  <link rel="icon" type="image/png" href="app-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg:#0B0E19; --fg:#F3EFE6; --muted:#B7B2C4; --tertiary:#837E93;
+      --accent:#E8B15C; --accent-bright:#F6C877; --accent-deep:#C68B36;
+      --border:rgba(243,239,230,0.08); --border-strong:rgba(243,239,230,0.16);
+      --gold-border:rgba(232,177,92,0.38);
+    }
+    html { background: var(--bg); color-scheme: dark; scroll-behavior: smooth; }
+    body {
+      font-family:'Inter',-apple-system,system-ui,sans-serif; background:var(--bg); color:var(--fg);
+      line-height:1.75; -webkit-font-smoothing:antialiased; position:relative;
+    }
+    body::before {
+      content:''; position:absolute; inset:0 0 auto 0; height:60vh; pointer-events:none;
+      background:
+        radial-gradient(ellipse 62% 50% at 14% -8%, rgba(232,177,92,0.12), transparent 62%),
+        radial-gradient(ellipse 55% 45% at 90% -4%, rgba(154,140,214,0.10), transparent 64%);
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 90px; position:relative; }
+    .top { display:flex; align-items:center; gap:12px; margin-bottom: 52px; }
+    .top img { width:36px; height:36px; border-radius:10px; box-shadow:0 0 0 1px var(--border-strong), 0 4px 14px rgba(0,0,0,0.5); }
+    .top a { font-family:'Fraunces',serif; font-weight:600; color:var(--fg); text-decoration:none; font-size:1.3rem; line-height:1.3; }
+    h1 {
+      font-family:'Fraunces',serif; font-weight:600; font-size:clamp(2.1rem,5vw,2.7rem); line-height:1.2;
+      background-image:linear-gradient(178deg,#FBF6EA 4%,var(--accent-bright) 70%,var(--accent-deep) 108%);
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+      padding-bottom:0.22em; margin-bottom:-0.10em;  /* descender-safe gradient text */
+    }
+    .updated { color:var(--tertiary); font-size:.9rem; margin-bottom:38px; }
+    h2 {
+      font-family:'Fraunces',serif; font-weight:600; font-size:1.32rem; line-height:1.4;
+      margin:40px 0 12px; color:var(--fg); padding-top:18px; position:relative;
+    }
+    h2::before {
+      content:''; position:absolute; top:0; left:0; width:44px; height:1px;
+      background:linear-gradient(90deg, var(--accent), transparent);
+    }
+    p, li { color:var(--muted); margin-bottom:14px; font-size:.99rem; }
+    li { margin-bottom:12px; }
+    ul { padding-left: 22px; }
+    strong { color:var(--fg); font-weight:600; }
+    /* Server hostnames are read as literals, not prose — a reviewer should be
+       able to tell where the words actually go at a glance. */
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em;
+      color: var(--fg); background: rgba(243,239,230,0.06);
+      border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px;
+    }
+    a { color: var(--accent-bright); text-decoration:none; }
+    a:hover { color: var(--accent); }
+    ::selection { background: rgba(232,177,92,0.28); color: var(--fg); }
+    .back {
+      display:inline-flex; align-items:center; gap:8px; margin-top:44px; padding:11px 22px;
+      color:var(--accent-bright); text-decoration:none; font-weight:600; font-size:.95rem; line-height:1.5;
+      border:1px solid var(--gold-border); border-radius:999px; background:rgba(232,177,92,0.05);
+      transition:background .2s ease;
+    }
+    .back:hover { background:rgba(232,177,92,0.13); color:var(--accent-bright); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><img src="app-icon.png" alt="Nightshelf"><a href="index.html">Nightshelf</a></div>
+    <h1>Privacy Policy</h1>
+    <div class="updated">Last updated: August 2, 2026</div>
+
+    <p>Nightshelf ("the app", "we", "us") is a bedtime-story app for iOS. It is built to know as little about you as possible. There is <strong>no account, no sign-in, no analytics SDK, no third-party tracker, and no advertising</strong>. This policy explains the little that's left.</p>
+
+    <h2>What stays on your device</h2>
+    <ul>
+      <li><strong>Your shelf and progress</strong> — which stories you've opened, your place in each one, and your bedtime settings (voice, speed, sleep timer, ambient sound). These live on your device and, via Apple's private iCloud key-value storage, sync between your own devices. Nightshelf keeps no copy of them on any server.</li>
+      <li><strong>On-device narration</strong> — the built-in iOS voice synthesizes every word locally. Nothing leaves your phone, and it never needs a connection.</li>
+    </ul>
+
+    <h2>What leaves your device, and why</h2>
+    <p>Two features send <em>your words</em> off your phone. Both ask permission the first time you use them, and neither runs if you say no — not then, and not later. A third, smaller thing goes out without asking, and it gets its own bullet below rather than a footnote.</p>
+    <ul>
+      <li><strong>Cloud narrators</strong> — if you pick one of the six cloud narrators (Nova, Alloy, Fable, Onyx, Echo, Shimmer), the paragraph being read is sent away to be turned into audio, and so is the paragraph after it, fetched early so the reading doesn't pause. <strong>This is just as true of a book from the built-in shelf as it is of a story you asked for</strong> — whatever is on the page is what gets sent.</li>
+      <li><strong>Tonight's Story</strong> — writing a custom bedtime story sends the setting, tone and length you chose, plus the optional detail you typed. If a cover picture is painted for it, the story's title is sent to be drawn. Please don't include personal details you wouldn't want sent.</li>
+      <li><strong>Auditioning a narrator — the one thing we don't ask about.</strong> Tapping ▶ beside a narrator's name sends a single fixed sample sentence, the same one for every listener, written into the app itself. It travels the same road as everything else and carries the anonymous device ID described below. We don't put it behind the permission because it cannot carry anything of yours — not the page you were reading, not a word you typed, not even which book you were in. It happens only when you tap ▶, and it is the only thing that can leave your phone after you have said no.</li>
+    </ul>
+
+    <h2>Where it goes: three stops, not two</h2>
+    <p>Everything travels the same road.</p>
+    <ul>
+      <li><strong>Nightshelf's own server</strong> first — <code>storyvault-api.fly.dev</code>, which we run and which is hosted for us by <strong>Fly.io</strong> in the United States. Your words reach us and our host before they reach anyone else.</li>
+      <li><strong>OpenAI</strong> — turns text into audio for the cloud narrators, and paints story covers.</li>
+      <li><strong>Anthropic</strong> — its Claude model writes a Tonight's Story.</li>
+    </ul>
+    <p>What OpenAI and Anthropic do with text once it reaches them is governed by their own terms, not ours. Nightshelf holds no zero-retention agreement with either company, so we will not promise on their behalf that your words are discarded. What we can tell you is what <em>we</em> do, below.</p>
+
+    <h2>What our server keeps</h2>
+    <ul>
+      <li><strong>A device ID, deliberately.</strong> Nightshelf never asks for a name or an email, so there is none to send. Each phone does generate a random ID for itself on first launch and sends it with every request. It exists so the nightly limits can be counted per device rather than per network — otherwise everyone behind one router would share a single allowance. Counting requires keeping it: our server stores a scrambled (SHA-256) copy of that ID alongside the date, which feature was used, and a running number. No book title, no story, and none of your words are in that row. Rows more than 35 days old are deleted when the clean-up runs — but nothing runs it on a timer. It piggybacks on other traffic reaching the same server, so a row can sit there longer than 35 days, and we would rather say that than imply a schedule we haven't built.</li>
+      <li><strong>Audio, for a while.</strong> Narration we have already produced is kept in a shared cache, filed under a fingerprint of the paragraph rather than under any device — so the second listener to reach the first page of a book gets it without it being made again. The cache holds audio, is tied to no one, and is wiped whenever the server is updated.</li>
+      <li><strong>Ordinary logs.</strong> Narration records which narrator read and how many characters were spoken. A Tonight's Story records the picks you made from the lists — setting, tone, weather, time of night and length — plus whether you typed a detail at all, never the detail itself, and how many chapters came back. When the model returns something we cannot use, the failure line records the <em>shape</em> of what came back — which kinds of block, which fields were present — and none of its text. <strong>They do not record the words:</strong> not a page of a book, not what you typed, not a line of the story written for you, and not its title.</li>
+      <li><strong>Your IP address, scrambled.</strong> Reaching our server shows it your IP, the way visiting a website does. We never store it as written: it is hashed the same way before being used to keep guests inside the free allowance. If a cloud narrator is selected, the app also pings the server once at launch to check it is awake; that ping carries no text.</li>
+    </ul>
+
+    <h2>Purchases</h2>
+    <p>Nightshelf Pro is bought through Apple. Apple handles the transaction and shares only the receipt with the app, so it knows you're a subscriber. You can manage the subscription anytime in Settings → Apple ID → Subscriptions.</p>
+
+    <h2>Premium system voices</h2>
+    <p>If you download Apple's Enhanced or Premium voices from iOS Settings → Accessibility → Spoken Content → Voices, that download and those voices are handled by iOS, not by Nightshelf.</p>
+
+    <h2>Data sharing</h2>
+    <p>We do not sell data and we do not share anything with advertisers. Nothing described above is used to build a profile of you or to advertise to you.</p>
+
+    <h2>Children's privacy</h2>
+    <p>Nightshelf is made for adults who read themselves to sleep, and it is rated 13+. It is not directed to children and is not part of Apple's Kids Category. The shelf is adult literary fiction — alongside the fairy tales there is a Mystery &amp; Gothic shelf holding <em>Dracula</em>, <em>Jekyll &amp; Hyde</em>, Poe and Lovecraft — so parents should treat it the way they would a bookshelf, not a children's app.</p>
+    <p>Nightshelf collects no personal information from anyone, of any age. There is no account, no sign-in and no analytics, so there is nothing to collect from a child in the first place. We do not knowingly collect personal information from children under 13; if you believe a child has sent us something through the story form, email us and we will delete it.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this policy? Email <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a>.</p>
+
+    <a class="back" href="index.html">← Back to Nightshelf</a>
+  </div>
+</body>
+</html>

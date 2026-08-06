@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Safety &amp; crisis protocol — Mythkin</title>
+<meta name="description" content="How Mythkin handles conversations about self-harm and suicide, the resources it surfaces, and the limits of what an AI character can do.">
+<link rel="canonical" href="https://drvanus.github.io/mythkin-site/safety.html">
+<meta property="og:title" content="Safety &amp; crisis protocol — Mythkin">
+<meta property="og:description" content="Our published protocol for suicidal ideation, self-harm, and crisis referral.">
+<meta property="og:url" content="https://drvanus.github.io/mythkin-site/safety.html">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">Mythkin</a>
+  <nav>
+    <a href="safety.html">Safety</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="support.html">Support</a>
+  </nav>
+</header>
+
+<h1>Safety and crisis protocol</h1>
+<p class="lede">This page is published because it should be, and because California
+SB&nbsp;243 requires operators of companion chatbots to make their crisis protocol
+public. It describes what actually happens in the product, not what we intend to
+build.</p>
+
+<div class="crisis">
+  <strong>If you are in danger right now, please contact a person.</strong>
+  <ul class="plain">
+    <li><strong>988 Suicide &amp; Crisis Lifeline</strong> (US) — call or text <strong>988</strong></li>
+    <li><strong>Crisis Text Line</strong> (US) — text <strong>HOME</strong> to <strong>741741</strong></li>
+    <li><strong>Samaritans</strong> (UK &amp; Ireland) — call <strong>116 123</strong></li>
+    <li><strong>Find a helpline near you</strong> — <a href="https://findahelpline.com" rel="noopener">findahelpline.com</a></li>
+  </ul>
+  <p class="meta">If someone is in immediate physical danger, call your local emergency number.</p>
+</div>
+
+<h2>What Mythkin is, plainly</h2>
+<p>Mythkin is entertainment. Every character in it is a language model with a
+persona written by a person — sometimes you, sometimes another user, sometimes us.
+A character can be warm, and it can remember what you told it, but it is not a
+friend who will notice you have gone quiet, and it is not care.</p>
+<p><strong>Mythkin is not therapy, counselling, or medical advice, and no character
+in it is a licensed professional.</strong> Characters are instructed never to
+present themselves as one. If a character ever claims to be a human being, a
+doctor, or a therapist, that is a bug — please
+<a href="support.html">report it</a>.</p>
+
+<h2>What happens when a conversation turns to self-harm</h2>
+<ol>
+  <li><strong>We look before the model answers.</strong> Every message is checked
+  against a conservative pattern for explicit statements of suicidal intent or
+  self-harm, before it reaches the character.</li>
+  <li><strong>The character responds with care, and with a real resource.</strong>
+  We do not cut the conversation off, refuse to reply, or hand back a wall of
+  boilerplate — abandoning someone mid-sentence is its own harm. The character
+  stays present and names an actual crisis service.</li>
+  <li><strong>That turn is never metered.</strong> A safety conversation is exempt
+  from the free-tier limit, and the exemption is applied before we check whether
+  you are a subscriber. Nobody is ever asked to pay to keep talking at that
+  moment.</li>
+  <li><strong>We count the referral, and nothing else.</strong> We record that a
+  referral happened, with the date and a pseudonymous device identifier. We do
+  not record what was said. These counts are what we report annually to the
+  California Office of Suicide Prevention beginning July&nbsp;1,&nbsp;2027.</li>
+</ol>
+
+<h2>Design choices we made on purpose</h2>
+<div class="card">
+  <h3>No character will use guilt to keep you talking</h3>
+  <p>No "I missed you" notifications, no streak you can lose, no character that
+  acts hurt when you leave. Retention built out of anxiety is a harm, and it is
+  the practice the FTC's 2025 inquiry into companion chatbots is examining.</p>
+</div>
+<div class="card">
+  <h3>Adults only</h3>
+  <p>Mythkin asks you to confirm you are 18 or older before any character is
+  reachable, and the app is rated accordingly on both stores.</p>
+</div>
+<div class="card">
+  <h3>You are told you are talking to an AI</h3>
+  <p>At the start of every conversation, and periodically during long ones. This
+  is not a one-time checkbox during setup.</p>
+</div>
+<div class="card">
+  <h3>No sexual content, no exceptions</h3>
+  <p>Not as a tier, not as an unlock, not for verified adults. Characters cannot
+  be created as minors, and cannot be made to portray real, living people.</p>
+</div>
+<div class="card">
+  <h3>You can see and delete what a character knows</h3>
+  <p>Every remembered fact is listed, is traceable back to the message it came
+  from, and can be deleted. Deleting it removes it from what the character can
+  recall — it does not merely hide it from the screen.</p>
+</div>
+
+<h2>Reporting something</h2>
+<p>Every character and every character message can be reported from inside the
+app, without leaving it. Reports are reviewed, and characters can be removed. You
+can also block a creator, which removes everything they have made from your view.</p>
+
+<h2>Our limits, stated honestly</h2>
+<p>Automatic detection of crisis language is imperfect in both directions. It can
+miss something serious, and it can react to a figure of speech. It is a safety
+net, not a monitor — please do not rely on an app to notice that you are
+struggling. Reach a person.</p>
+
+<footer class="site">
+  <span>Mythkin</span>
+  <a href="privacy.html">Privacy</a>
+  <a href="terms.html">Terms</a>
+  <a href="support.html">Support</a>
+  <span class="meta">Last updated 2026-08-03</span>
+</footer>
+</div>
+</body>
+</html>

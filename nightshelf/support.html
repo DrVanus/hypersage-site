@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0C0F1A">
+  <title>Support — Nightshelf</title>
+  <meta name="description" content="Help with Nightshelf — 86 classics read aloud until you fall asleep. Email hypersageailabs@gmail.com for anything not answered here.">
+  <link rel="icon" type="image/png" href="app-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg:#0B0E19; --fg:#F3EFE6; --muted:#B7B2C4; --tertiary:#837E93;
+      --accent:#E8B15C; --accent-bright:#F6C877; --accent-deep:#C68B36;
+      --border:rgba(243,239,230,0.08); --border-strong:rgba(243,239,230,0.16);
+      --gold-border:rgba(232,177,92,0.38);
+    }
+    html { background: var(--bg); color-scheme: dark; scroll-behavior: smooth; }
+    body {
+      font-family:'Inter',-apple-system,system-ui,sans-serif; background:var(--bg); color:var(--fg);
+      line-height:1.75; -webkit-font-smoothing:antialiased; position:relative;
+    }
+    body::before {
+      content:''; position:absolute; inset:0 0 auto 0; height:60vh; pointer-events:none;
+      background:
+        radial-gradient(ellipse 62% 50% at 14% -8%, rgba(232,177,92,0.12), transparent 62%),
+        radial-gradient(ellipse 55% 45% at 90% -4%, rgba(154,140,214,0.10), transparent 64%);
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 90px; position:relative; }
+    .top { display:flex; align-items:center; gap:12px; margin-bottom: 52px; }
+    .top img { width:36px; height:36px; border-radius:10px; box-shadow:0 0 0 1px var(--border-strong), 0 4px 14px rgba(0,0,0,0.5); }
+    .top a { font-family:'Fraunces',serif; font-weight:600; color:var(--fg); text-decoration:none; font-size:1.3rem; line-height:1.3; }
+    h1 {
+      font-family:'Fraunces',serif; font-weight:600; font-size:clamp(2.1rem,5vw,2.7rem); line-height:1.2;
+      background-image:linear-gradient(178deg,#FBF6EA 4%,var(--accent-bright) 70%,var(--accent-deep) 108%);
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+      padding-bottom:0.22em; margin-bottom:-0.10em;  /* descender-safe gradient text */
+    }
+    .updated { color:var(--tertiary); font-size:.9rem; margin-bottom:38px; }
+    h2 {
+      font-family:'Fraunces',serif; font-weight:600; font-size:1.32rem; line-height:1.4;
+      margin:40px 0 12px; color:var(--fg); padding-top:18px; position:relative;
+    }
+    h2::before {
+      content:''; position:absolute; top:0; left:0; width:44px; height:1px;
+      background:linear-gradient(90deg, var(--accent), transparent);
+    }
+    p, li { color:var(--muted); margin-bottom:14px; font-size:.99rem; }
+    li { margin-bottom:12px; }
+    ul { padding-left: 22px; }
+    strong { color:var(--fg); font-weight:600; }
+    a { color: var(--accent-bright); text-decoration:none; }
+    a:hover { color: var(--accent); }
+    ::selection { background: rgba(232,177,92,0.28); color: var(--fg); }
+    .back {
+      display:inline-flex; align-items:center; gap:8px; margin-top:44px; padding:11px 22px;
+      color:var(--accent-bright); text-decoration:none; font-weight:600; font-size:.95rem; line-height:1.5;
+      border:1px solid var(--gold-border); border-radius:999px; background:rgba(232,177,92,0.05);
+      transition:background .2s ease;
+    }
+    .back:hover { background:rgba(232,177,92,0.13); color:var(--accent-bright); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><img src="app-icon.png" alt="Nightshelf"><a href="index.html">Nightshelf</a></div>
+    <h1>Support</h1>
+    <p class="updated">One developer reads every email. You'll get a real reply, usually within a day or two — <a href="mailto:hypersageailabs@gmail.com">hypersageailabs@gmail.com</a>.</p>
+
+    <h2>Do I need a connection?</h2>
+    <p>Not for the library. All 86 books ship inside the app, and the on-device narrator reads them with no network at all — a plane, a basement, or airplane mode are all fine. Only the six cloud narrators and writing a new Tonight's Story need a connection.</p>
+
+    <h2>Which books are free?</h2>
+    <p>Thirteen of the eighty-six — among them <em>The Wind in the Willows</em>, <em>Alice's Adventures in Wonderland</em>, <em>A Christmas Carol</em>, <em>Treasure Island</em>, <em>Peter Pan</em>, Grimm and Aesop. They stay free for as long as you keep the app, with no account and no ads. Nightshelf Pro opens the other seventy-three, plus the six cloud narrators, Tonight's Story, and sleep timers past an hour.</p>
+    <p>All eighty-six are <em>installed</em> either way — that is why the shelf works offline — but a locked book shows a padlock until you subscribe.</p>
+
+    <h2>The narrator sounds flat</h2>
+    <p>That is the on-device voice. Two ways to improve it: pick one of the six cloud narrators (Nova, Alloy, Fable, Onyx, Echo or Shimmer), or download a Premium system voice in iOS Settings → Accessibility → Spoken Content → Voices, which the on-device narrator will then use.</p>
+
+    <h2>It kept reading after I fell asleep</h2>
+    <p>Set the sleep timer before you start. Narration fades out rather than stopping abruptly, so it does not jolt you awake. Your place in the book is saved either way, so you can pick up wherever you drifted off.</p>
+
+    <h2>My progress did not follow to my other device</h2>
+    <p>Progress syncs through your own private iCloud storage, so both devices need to be signed into the same Apple ID with iCloud Drive on. There is no Nightshelf account and no copy on any server of ours — with iCloud off, progress simply stays on the one device.</p>
+
+    <h2>Tonight's Story will not generate</h2>
+    <p>It needs a connection and takes a few seconds to write. If it keeps failing, check your connection and try a shorter prompt. If the app says the nightly limit is reached, that is the daily cap — a few fresh stories a night, then it resets. Every book already on your shelf still reads aloud in the meantime.</p>
+
+    <h2>Restoring Nightshelf Pro</h2>
+    <p>Open the Pro screen and tap <strong>Restore Purchases</strong>. If your Apple ID has an active subscription it re-links in seconds — there is no account to log into.</p>
+
+    <h2>Refunds and billing</h2>
+    <p>All purchases are handled by Apple. Request a refund at <a href="https://reportaproblem.apple.com/" rel="noopener">reportaproblem.apple.com</a>, and manage or cancel in iOS Settings → Apple ID → Subscriptions.</p>
+
+    <h2>Reporting a bug</h2>
+    <p>Email <a href="mailto:hypersageailabs@gmail.com?subject=Nightshelf%20bug%20report">hypersageailabs@gmail.com</a> with what you saw and what you were doing. Your device model and iOS version help a lot.</p>
+
+    <h2>Where your data goes</h2>
+    <p>The full flow is in the <a href="privacy.html">privacy policy</a>, and it is worth reading — this summary is deliberately not the whole story. Short version: no account, no sign-in, no analytics, no third-party tracker, no advertising. Reading progress and settings live on your device and in your own private iCloud storage.</p>
+    <p>The on-device narrator speaks every word on the phone, so nothing leaves it. Two features do reach the network — choosing one of the six cloud narrators, and asking for a Tonight's Story — and the app asks permission the first time you use either. Say no and no page of a book, and nothing you have typed, is sent. When they do run, the text travels through <strong>three</strong> stops, not two: <strong>Nightshelf's own server</strong> first (hosted for us by Fly.io in the United States), then <strong>OpenAI</strong> to be turned into audio or to paint a cover, or <strong>Anthropic</strong> to write the story.</p>
+    <p>One thing sits outside that permission, and the <a href="privacy.html">privacy policy</a> spells it out: tapping ▶ to audition a narrator sends one fixed sample sentence — the same one for everyone, built into the app — plus the anonymous device ID. It can't carry anything of yours, which is why it isn't gated, and it only happens when you tap ▶.</p>
+    <p>That applies to a book from the built-in shelf exactly as much as to a story you asked for — with a cloud narrator selected, whatever is on the page is what gets sent. Our server keeps a scrambled copy of a random per-device ID so nightly limits can be counted per device, and it keeps narration it has already made in a shared cache, filed under a fingerprint of the paragraph rather than under any device. Neither is tied to you: Nightshelf has no name, email or account to attach them to, because it never asks for one.</p>
+
+    <h2>Reviewers and press</h2>
+    <p>Reach out at <a href="mailto:hypersageailabs@gmail.com?subject=Nightshelf%20review%20request">hypersageailabs@gmail.com</a>. Nightshelf is a bedtime reader built around 86 complete works in the public domain — Dracula, Sherlock Holmes, Grimm, Poe and others — narrated aloud, with a sleep timer and ambient sound. Our thanks to the volunteer transcribers who typed these texts back into readable form.</p>
+
+    <a class="back" href="index.html">← Back to Nightshelf</a>
+  </div>
+</body>
+</html>

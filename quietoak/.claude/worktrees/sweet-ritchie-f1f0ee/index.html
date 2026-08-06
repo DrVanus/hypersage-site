@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Quietoak's marketing site is an intentional light, calm-daytime design.
+       Declare it so a dark-mode OS/browser renders it as designed instead of
+       auto-inverting it (which turned the calm background near-black and made
+       the phone mockups' edges + form controls look broken). -->
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F3F6F5">
+  <title>Quietoak — A calmer way to practice DBT skills.</title>
+  <meta name="description" content="An iOS app for practicing DBT skills with a warm companion you choose — real DBT skills, a one-minute diary card, and a crisis kit that's always free.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://quietoak.app/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Quietoak — A calmer way to practice DBT skills.">
+  <meta property="og:description" content="Practice DBT skills with a warm companion you choose — and who's there in the hard moments too. Crisis support is always free.">
+  <meta property="og:url" content="https://quietoak.app/">
+  <meta property="og:site_name" content="Quietoak">
+  <meta property="og:image" content="https://quietoak.app/og-image.png?v=20260726a">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Quietoak — a calmer way to practice DBT skills">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Quietoak — A calmer way to practice DBT skills.">
+  <meta name="twitter:description" content="Practice DBT skills with a warm companion you choose. The crisis kit is always free.">
+  <meta name="twitter:image" content="https://quietoak.app/og-image.png?v=20260726a">
+  <meta name="twitter:image:alt" content="Quietoak — a calmer way to practice DBT skills">
+
+  <link rel="icon" type="image/png" href="quietoak-icon.png?v=20260624r">
+  <link rel="apple-touch-icon" href="quietoak-icon.png?v=20260624r">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #F3F6F5;          /* mist */
+      --surface: #FFFFFF;
+      --card: #FFFFFF;
+      --card-soft: #EAF1F0;   /* cardSoft */
+      --fg: #21353B;          /* seaDeep ink */
+      --muted-fg: #4A5E64;    /* muted ink (AA on light) */
+      --tertiary-fg: #7C8A8E;
+      --primary: #3E7D8A;     /* sea */
+      --primary-dark: #336974;/* seaPressed */
+      --sage: #9DBFA8;
+      --sage-deep: #6F9C82;
+      --sand: #E9B384;        /* warm accent */
+      --apricot: #F1C9A5;
+      --crisis: #E07A5F;      /* coralCalm — crisis affordance only */
+      --crisis-text: #C2553B;
+      --border: rgba(33,53,59,0.10);
+      --border-strong: rgba(33,53,59,0.18);
+      --primary-glow: rgba(62,125,138,0.12);
+      --sage-glow: rgba(157,191,168,0.20);
+      /* Per-companion accent discs — the exact in-app accent colours (light mode)
+         at 0.18 opacity, mirroring the in-app avatar disc so each companion reads
+         in its own colour on the site as in the app. */
+      --c-willow: rgba(135,164,141,0.18); /* sage  */
+      --c-sage:   rgba(63,130,135,0.18);  /* tide  */
+      --c-river:  rgba(150,177,196,0.18); /* sky   */
+      --c-sol:    rgba(217,141,107,0.18); /* clay  */
+      --c-stone:  rgba(140,155,142,0.18); /* stone */
+      --c-fern:   rgba(169,182,140,0.18); /* fern  */
+      --radius: 0.875rem;
+      --radius-lg: 1.25rem;
+    }
+
+    html { scroll-behavior: smooth; color-scheme: only light; background: var(--bg); }
+
+    body {
+      font-family: 'Nunito', ui-rounded, 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Calm daytime atmosphere — soft, low-contrast wash of mist -> cardSoft ->
+       faint sage. Pure CSS; should barely register, never raise the eye. */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(157,191,168,0.22), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 85% 15%, rgba(241,201,165,0.18), transparent 70%),
+        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(62,125,138,0.05), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a { color: var(--primary-dark); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--primary); }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ===== NAV ===== */
+    nav.site {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(243,246,245,0.82);
+      backdrop-filter: saturate(160%) blur(16px);
+      -webkit-backdrop-filter: saturate(160%) blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav.site .container {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 14px; padding-bottom: 14px;
+    }
+    nav.site .brand {
+      display: flex; align-items: center; gap: 12px;
+      font-weight: 800; color: var(--fg); font-size: 1.15rem;
+      letter-spacing: -0.01em;
+    }
+    nav.site .brand img { width: 36px; height: 36px; border-radius: 9px; }
+    nav.site .links { display: flex; gap: 20px; font-size: 0.95rem; flex-wrap: nowrap; white-space: nowrap; }
+    nav.site .links a { color: var(--muted-fg); font-weight: 600; }
+    nav.site .links a:hover { color: var(--primary); }
+
+    /* Mobile menu (no JS): a <details> hamburger that never collides with the brand. */
+    .mobile-menu { display: none; position: relative; }
+    .mobile-menu > summary {
+      list-style: none; cursor: pointer; padding: 6px 10px;
+      border: 1px solid var(--border); border-radius: 10px;
+      color: var(--primary-dark); font-weight: 800; font-size: 1.1rem; line-height: 1.3;
+    }
+    .mobile-menu > summary::-webkit-details-marker { display: none; }
+    .mobile-menu[open] > summary { background: var(--card-soft); }
+    .mobile-links {
+      position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
+      display: flex; flex-direction: column; gap: 2px; min-width: 190px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 8px; box-shadow: 0 16px 40px rgba(33,53,59,0.12);
+    }
+    .mobile-links a { color: var(--fg); font-weight: 600; padding: 10px 12px; border-radius: 8px; }
+    .mobile-links a:hover { background: var(--card-soft); color: var(--primary-dark); }
+    @media (max-width: 800px) {
+      nav.site .links { display: none; }
+      .mobile-menu { display: block; }
+    }
+
+    /* ===== HERO ===== */
+    section.hero { padding: 72px 0 64px; position: relative; }
+    .hero-layout {
+      display: grid; grid-template-columns: 1.05fr 0.95fr;
+      gap: 56px; align-items: center;
+    }
+    @media (max-width: 880px) {
+      .hero-layout { grid-template-columns: 1fr; gap: 36px; text-align: center; }
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.76rem; font-weight: 800;
+      letter-spacing: 0.16em; color: var(--primary-dark);
+      text-transform: uppercase;
+      margin-bottom: 18px; padding: 6px 14px;
+      background: var(--sage-glow);
+      border: 1px solid var(--border); border-radius: 999px;
+    }
+    .hero-text h1 {
+      font-weight: 800;
+      font-size: clamp(2.3rem, 5.4vw, 3.8rem);
+      line-height: 1.18; letter-spacing: -0.025em; padding-bottom: 0.08em;
+      margin-bottom: 18px;
+    }
+    .hero-text h1 .soft { color: var(--primary); }
+    .hero-text .lede {
+      font-size: 1.15rem; color: var(--muted-fg);
+      max-width: 540px; margin-bottom: 30px;
+    }
+    @media (max-width: 880px) { .hero-text .lede { margin-left: auto; margin-right: auto; } }
+    .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+    @media (max-width: 880px) { .hero-buttons { justify-content: center; } }
+
+    .btn-warm {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 26px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff; font-weight: 800; font-size: 1rem;
+      border-radius: var(--radius);
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 8px 26px rgba(62,125,138,0.28);
+    }
+    .btn-warm:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(62,125,138,0.38); color: #fff; }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 22px; color: var(--primary-dark);
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+      font-weight: 700; font-size: 1rem;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-outline:hover { background: #fff; border-color: var(--primary); color: var(--primary); }
+
+    .hero-image { position: relative; }
+    .hero-image img {
+      width: 100%; max-width: 460px; display: block; margin: 0 auto; object-fit: contain;
+    }
+    .hero-image::after {
+      content: ''; position: absolute; inset: -30px;
+      background: radial-gradient(ellipse at center, var(--sage-glow), transparent 65%);
+      pointer-events: none; z-index: -1;
+    }
+    /* On phones the -30px glow bleed pushed the page ~6px past the viewport
+       (horizontal scroll). Pull it in so the page can't drift sideways. */
+    @media (max-width: 880px) { .hero-image::after { inset: 0; } }
+
+    /* ===== SECTION ===== */
+    section { position: relative; }
+    .section-block { padding: 72px 0; }
+    .section-block.tight { padding: 52px 0; }
+    .section-eyebrow { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--primary-dark); margin-bottom: 14px; }
+    .section-block h2 {
+      font-weight: 800; font-size: clamp(1.9rem, 4vw, 2.7rem);
+      line-height: 1.22; letter-spacing: -0.02em; margin-bottom: 16px;
+    }
+    .section-block h2 em { font-style: normal; color: var(--primary); }
+    .section-block .lede { color: var(--muted-fg); font-size: 1.08rem; max-width: 640px; margin-bottom: 44px; }
+
+    /* ===== HOW ===== */
+    .how-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 56px; align-items: center; }
+    @media (max-width: 880px) { .how-grid { grid-template-columns: 1fr; gap: 36px; } }
+    .how-image { width: 100%; max-width: 420px; display: block; margin: 0 auto; object-fit: contain; }
+    .how-steps { list-style: none; counter-reset: step; }
+    .how-steps li {
+      counter-increment: step; padding: 16px 0 16px 64px;
+      position: relative; border-bottom: 1px solid var(--border);
+    }
+    .how-steps li:last-child { border-bottom: none; }
+    .how-steps li::before {
+      content: counter(step); position: absolute; left: 0; top: 16px;
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.15rem; color: var(--primary-dark);
+      background: var(--sage-glow); border: 1px solid var(--border-strong); border-radius: 50%;
+    }
+    .how-steps h3 { font-weight: 800; font-size: 1.12rem; margin-bottom: 4px; }
+    .how-steps p { color: var(--muted-fg); font-size: 0.97rem; }
+
+    /* ===== FEATURES ===== */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 20px; }
+    .feature-card {
+      padding: 26px; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+    }
+    .feature-card:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: 0 16px 40px rgba(33,53,59,0.08); }
+    .feature-card .icon-box {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--card-soft); border: 1px solid var(--border);
+      margin-bottom: 16px; font-size: 1.4rem;
+    }
+    .feature-card .icon-box img { width: 32px; height: 32px; object-fit: contain; display: block; }
+    .feature-card h3 { font-weight: 800; font-size: 1.22rem; line-height: 1.2; margin-bottom: 8px; }
+    .feature-card p { color: var(--muted-fg); font-size: 0.97rem; }
+
+    /* ===== SCREENS ===== */
+    .screens-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: start; max-width: 820px; margin: 0 auto; }
+    @media (max-width: 760px) { .screens-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+    .screen-card { text-align: center; }
+    .screen-frame {
+      border-radius: 22px; overflow: hidden; border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(33,53,59,0.10);
+      background: #fff; transition: transform .3s, box-shadow .3s;
+    }
+    .screen-card:hover .screen-frame { transform: translateY(-6px); box-shadow: 0 24px 56px rgba(33,53,59,0.16); }
+    .screen-card img { width: 100%; display: block; }
+    .screen-label { margin-top: 12px; font-size: 0.84rem; color: var(--muted-fg); line-height: 1.4; }
+    .screen-label strong { display: block; color: var(--primary-dark); font-weight: 700; margin-bottom: 2px; font-size: 0.9rem; }
+
+    /* ===== LIGHT / DARK PREVIEW TOGGLE (screens showcase) ===== */
+    #screens { transition: background .45s ease; }
+    .theme-toggle { display: inline-flex; position: relative; padding: 4px; margin: 2px auto 42px; background: var(--card-soft); border: 1px solid var(--border); border-radius: 999px; -webkit-tap-highlight-color: transparent; }
+    .theme-toggle button { flex: 1 0 auto; min-width: 108px; appearance: none; -webkit-appearance: none; border: 0; background: transparent; cursor: pointer; font: inherit; font-weight: 700; font-size: 0.86rem; color: var(--muted-fg); padding: 9px 18px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; position: relative; z-index: 1; transition: color .25s ease; }
+    .theme-toggle button svg { width: 16px; height: 16px; flex: none; }
+    .theme-toggle button[aria-pressed="true"] { color: #fff; }
+    .theme-toggle button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+    .theme-toggle .thumb { position: absolute; left: 4px; top: 4px; bottom: 4px; width: calc(50% - 4px); border-radius: 999px; background: var(--primary); box-shadow: 0 6px 16px rgba(62,125,138,0.35); z-index: 0; transition: transform .3s cubic-bezier(.34,1.06,.42,1); }
+    .theme-toggle.is-dark .thumb { transform: translateX(100%); }
+    .shot-img { transition: opacity .25s ease; }
+    /* When Dark is chosen the whole showcase dims, selling the theme */
+    #screens.theme-dark { background: #182930 !important; }
+    #screens.theme-dark .section-eyebrow { color: #9DBFA8; }
+    #screens.theme-dark h2 { color: #F3F6F5; }
+    #screens.theme-dark h2 em { color: #7FC4D6; }
+    #screens.theme-dark .lede { color: #BCC8CA; }
+    #screens.theme-dark .screen-label { color: #9AA8AA; }
+    #screens.theme-dark .screen-label strong { color: #C3D6D8; }
+    #screens.theme-dark .screen-frame { border-color: rgba(255,255,255,0.10); box-shadow: 0 18px 50px rgba(0,0,0,0.45); }
+    #screens.theme-dark .theme-toggle { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14); }
+    #screens.theme-dark .theme-toggle button { color: #AEBEC0; }
+    #screens.theme-dark .theme-toggle button[aria-pressed="true"] { color: #fff; }
+    #screens.theme-dark .theme-toggle .thumb { background: #2C7A8C; box-shadow: 0 6px 16px rgba(0,0,0,0.45); }
+    @media (prefers-reduced-motion: reduce) { .theme-toggle .thumb, #screens, .shot-img { transition: none; } }
+
+    /* ===== SPOTLIGHT ===== */
+    .spotlight-grid { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: 52px; align-items: center; }
+    @media (max-width: 880px) { .spotlight-grid { grid-template-columns: 1fr; gap: 30px; } }
+    .spotlight-phone .screen-frame { max-width: 290px; margin: 0 auto; border-radius: 26px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(33,53,59,0.12); }
+    .spotlight-phone img { width: 100%; display: block; }
+    .spotlight-points { list-style: none; margin-top: 22px; }
+    .spotlight-points li { position: relative; padding: 9px 0 9px 26px; color: var(--muted-fg); font-size: 0.98rem; }
+    .spotlight-points li::before { content: ''; position: absolute; left: 0; top: calc(9px + 0.62em); transform: translateY(-50%); width: 7px; height: 7px; border-radius: 50%; background: var(--sage-deep); }
+    .spotlight-points strong { color: var(--fg); }
+    /* Phone-on-the-right variant (alternate the rhythm down the page). */
+    .spotlight-grid.flip { grid-template-columns: 1.18fr 0.82fr; }
+    @media (max-width: 880px) { .spotlight-grid.flip { grid-template-columns: 1fr; } .spotlight-grid.flip .spotlight-phone { order: -1; } }
+    /* Two phones side by side inside a spotlight (memory + switch companion). */
+    .spotlight-duo { display: flex; gap: 16px; justify-content: center; align-items: center; }
+    .spotlight-duo .screen-frame {
+      flex: 1 1 0; max-width: 205px; margin: 0; border-radius: 26px; overflow: hidden;
+      border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(33,53,59,0.13); background: #fff;
+    }
+    .spotlight-duo .screen-frame:first-child { transform: translateY(12px) rotate(-1.5deg); }
+    .spotlight-duo .screen-frame:last-child { transform: translateY(-12px) rotate(1.5deg); }
+    .spotlight-duo img { width: 100%; display: block; }
+    @media (max-width: 520px) {
+      .spotlight-duo .screen-frame { max-width: 150px; }
+      .spotlight-duo .screen-frame:first-child,
+      .spotlight-duo .screen-frame:last-child { transform: none; }
+    }
+
+    /* ===== RESPONDS (two companion modes) ===== */
+    .responds-pair { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; max-width: 600px; margin: 0 auto; }
+    @media (max-width: 520px) { .responds-pair { grid-template-columns: 1fr; gap: 24px; max-width: 280px; } }
+    .responds-card { text-align: center; }
+    .responds-card .screen-frame { border-radius: 24px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 18px 44px rgba(33,53,59,0.10); background: #fff; }
+    .responds-card img { width: 100%; display: block; }
+    .responds-card .screen-label { margin-top: 14px; font-size: 0.88rem; color: var(--muted-fg); }
+    .responds-card .screen-label strong { display: block; color: var(--primary-dark); font-weight: 700; margin-bottom: 2px; font-size: 0.95rem; }
+
+    /* ===== COMPANIONS ===== */
+    .companions-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+    }
+    @media (max-width: 760px) { .companions-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 460px) { .companions-grid { grid-template-columns: 1fr; } }
+    .companion-card {
+      text-align: center; padding: 22px 18px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .companion-card:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(33,53,59,0.08); }
+    /* Companion sits on a soft accent disc — same treatment as the in-app avatar. */
+    .companion-card img { width: 104px; height: 104px; object-fit: contain; margin: 0 auto 10px; display: block; border-radius: 50%; padding: 7px; }
+    .companion-card.willow img { background: var(--c-willow); }
+    .companion-card.sage   img { background: var(--c-sage); }
+    .companion-card.river  img { background: var(--c-river); }
+    .companion-card.sol    img { background: var(--c-sol); }
+    .companion-card.stone  img { background: var(--c-stone); }
+    .companion-card.fern   img { background: var(--c-fern); }
+    .companion-card .name { font-weight: 800; font-size: 1.1rem; }
+    .companion-card .role { color: var(--primary-dark); font-size: 0.82rem; font-weight: 700; margin: 2px 0 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .companion-card p { color: var(--muted-fg); font-size: 0.92rem; }
+
+    /* ===== CRISIS BAND ===== */
+    .crisis-band {
+      display: flex; gap: 18px; align-items: center;
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 4px solid var(--crisis);
+      border-radius: var(--radius-lg); padding: 26px 28px;
+    }
+    @media (max-width: 640px) { .crisis-band { flex-direction: column; text-align: center; } }
+    .crisis-band .glyph { font-size: 2rem; flex: 0 0 auto; }
+    .crisis-band .glyph img { width: 48px; height: 48px; object-fit: contain; display: block; }
+    .crisis-band h3 { font-weight: 800; font-size: 1.2rem; margin-bottom: 6px; }
+    .crisis-band p { color: var(--muted-fg); font-size: 0.98rem; }
+    .crisis-band strong { color: var(--crisis-text); }
+
+    /* ===== PLANS ===== */
+    .plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 760px; margin: 0 auto; align-items: stretch; }
+    @media (max-width: 700px) { .plans { grid-template-columns: 1fr; } }
+    .plan { padding: 32px 28px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); position: relative; display: flex; flex-direction: column; }
+    .plan.featured { border-color: var(--primary); background: linear-gradient(180deg, rgba(157,191,168,0.10), var(--card)); }
+    .plan.featured::before {
+      content: 'Best value'; position: absolute; top: -12px; right: 20px;
+      padding: 4px 12px; background: var(--primary); color: #fff;
+      font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em;
+      border-radius: 999px; text-transform: uppercase;
+    }
+    .plan h3 { font-weight: 800; font-size: 1.35rem; margin-bottom: 4px; }
+    .plan .price { font-weight: 800; font-size: 2.2rem; color: var(--primary); margin: 12px 0 2px; }
+    .plan .period { color: var(--muted-fg); font-size: 0.92rem; margin-bottom: 22px; }
+    .plan ul { list-style: none; margin-bottom: 6px; }
+    .plan li { padding: 8px 0 8px 26px; font-size: 0.95rem; position: relative; color: var(--fg); }
+    .plan li::before { content: ''; position: absolute; left: 0; top: calc(8px + 0.62em); transform: translateY(-50%); width: 7px; height: 7px; border-radius: 50%; background: var(--sage-deep); }
+    .plan li.muted { color: var(--muted-fg); }
+    .plan li.muted::before { background: var(--tertiary-fg); }
+    .plan .plan-note { margin-top: 16px; font-size: 0.92rem; font-weight: 700; color: var(--sage-deep); }
+    .plan .plan-fine { margin-top: auto; padding-top: 16px; font-size: 0.78rem; line-height: 1.5; color: var(--muted-fg); }
+    .plan .plan-fine a { color: var(--primary-dark); text-decoration: underline; }
+
+    /* ===== FAQ ===== */
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    details.faq { padding: 18px 0; border-bottom: 1px solid var(--border); }
+    details.faq summary {
+      font-weight: 700; font-size: 1.05rem; cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+      padding-right: 8px; color: var(--fg);
+    }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after { content: '+'; color: var(--primary-dark); font-weight: 400; font-size: 1.4rem; transition: transform .2s; }
+    details.faq[open] summary::after { transform: rotate(45deg); }
+    details.faq p { margin-top: 12px; color: var(--muted-fg); font-size: 0.98rem; line-height: 1.7; }
+
+    /* ===== CTA ===== */
+    .cta-strip {
+      text-align: center; padding: 76px 24px;
+      background: radial-gradient(ellipse at center, var(--sage-glow), transparent 70%), var(--card-soft);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      margin-top: 72px;
+    }
+    .cta-strip h2 { font-weight: 800; font-size: clamp(1.9rem, 4vw, 2.6rem); margin-bottom: 14px; letter-spacing: -0.02em; }
+    .cta-strip p { color: var(--muted-fg); font-size: 1.08rem; margin-bottom: 26px; max-width: 540px; margin-left: auto; margin-right: auto; }
+
+    /* ===== DISCLAIMER ===== */
+    .disclaimer { padding: 36px 0 8px; }
+    .disclaimer p {
+      max-width: 820px; margin: 0 auto; text-align: center;
+      color: var(--muted-fg); font-size: 0.86rem; line-height: 1.6;
+    }
+
+    /* ===== FOOTER ===== */
+    footer.site { padding: 40px 24px 60px; text-align: center; color: var(--muted-fg); font-size: 0.9rem; }
+    footer.site .links { margin-bottom: 12px; }
+    footer.site .links a { color: var(--muted-fg); margin: 0 14px; font-weight: 600; }
+    footer.site .links a:hover { color: var(--primary); }
+    footer.site .copyright { margin-top: 10px; }
+
+    /* ===== ACCESSIBILITY ===== */
+    /* Visible keyboard focus on every interactive element (WCAG 2.4.7) — the
+       gradient button + list-style-none summaries hide the default UA ring. */
+    a:focus-visible, summary:focus-visible,
+    .btn-warm:focus-visible, .btn-outline:focus-visible {
+      outline: 3px solid var(--primary-dark);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+    /* Honor Reduce Motion — same respect the app gives this OS setting:
+       no animated scroll, no hover lifts/rotations. */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .btn-warm:hover, .feature-card:hover, .companion-card:hover,
+      .screen-card:hover .screen-frame, .responds-card:hover .screen-frame { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAV ===== -->
+  <nav class="site">
+    <div class="container">
+      <div class="brand">
+        <img src="quietoak-icon.png?v=20260624r" alt="">
+        Quietoak
+      </div>
+      <div class="links">
+        <a href="#how">How it works</a>
+        <a href="#companions">Companions</a>
+        <a href="#features">Features</a>
+        <a href="#screens">Screens</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="support.html">Support</a>
+      </div>
+      <details class="mobile-menu">
+        <summary aria-label="Open menu">☰</summary>
+        <div class="mobile-links">
+          <a href="#how">How it works</a>
+          <a href="#companions">Companions</a>
+          <a href="#features">Features</a>
+          <a href="#screens">Screens</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#faq">FAQ</a>
+          <a href="support.html">Support</a>
+        </div>
+      </details>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-layout">
+        <div class="hero-text">
+          <span class="eyebrow">Coming to iOS</span>
+          <h1>A calmer way to<br><span class="soft">practice DBT&nbsp;skills.</span></h1>
+          <p class="lede">Choose a companion — a gentle nature-spirit you name and get to know — who guides your daily DBT practice. The same companion is right there in the hard moments too. And the crisis kit is always free.</p>
+          <div class="hero-buttons">
+            <a href="mailto:hi@quietoak.app?subject=Notify%20me%20when%20Quietoak%20launches" class="btn-warm">
+              <span>Get early access</span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <a href="#how" class="btn-outline">See how it works</a>
+          </div>
+        </div>
+        <div class="hero-image">
+          <img src="companions/group.png?v=20260726a" alt="The six Quietoak companions sitting together — a fawn, an owl, an otter, and a fox, with a tortoise and a rabbit nestled in front">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW ===== -->
+  <section class="section-block" id="how">
+    <div class="container">
+      <div class="how-grid">
+        <div>
+          <div class="section-eyebrow">How it works</div>
+          <h2>One companion, from daily practice to <em>harder days.</em></h2>
+          <p class="lede">Not a bot buried in a menu. The companion you choose and bond with for everyday practice is the same warm presence you can talk to when things get hard.</p>
+          <ol class="how-steps">
+            <li>
+              <h3>Choose your companion</h3>
+              <p>Pick one of six gentle companions, each with its own temperament. Name it, and make it yours.</p>
+            </li>
+            <li>
+              <h3>Practice DBT skills together</h3>
+              <p>Work through guided exercises like STOP, TIPP, and paced breathing with your companion beside you — and log a one-minute diary card.</p>
+            </li>
+            <li>
+              <h3>They're there on the hard days too</h3>
+              <p>The same companion is one tap away in chat. And the Crisis Survival Kit — 988, 741741, your local lines — is always free and works offline.</p>
+            </li>
+          </ol>
+        </div>
+        <div>
+          <img class="how-image" src="companions/willow-steady.png?v=20260726a" alt="Willow, a gentle sage-green fawn companion">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMPANIONS ===== -->
+  <section class="section-block" id="companions" style="background: rgba(255,255,255,0.45);">
+    <div class="container">
+      <div class="section-eyebrow" style="text-align:center;">The companions</div>
+      <h2 style="text-align:center;">Choose the one who <em>fits you.</em></h2>
+      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Six soft nature-spirits, each a different way of showing up. The same companion guides your practice and stays with you in the hard moments.</p>
+      <!-- Order matches the in-app onboarding catalog: willow, sage, river, sol, stone, fern. -->
+      <div class="companions-grid">
+        <div class="companion-card willow">
+          <img src="companions/willow-steady.png?v=20260726a" alt="Willow, a fawn">
+          <div class="name">Willow</div>
+          <div class="role">Grounding</div>
+          <p>Warm and quiet. Slows the body down — feet on the floor, one slow breath.</p>
+        </div>
+        <div class="companion-card sage">
+          <img src="companions/sage-steady.png?v=20260726a" alt="Sage, an owl">
+          <div class="name">Sage</div>
+          <div class="role">Clear</div>
+          <p>Calm and plainspoken. Helps you name what's happening and see it clearly.</p>
+        </div>
+        <div class="companion-card river">
+          <img src="companions/river-steady.png?v=20260726a" alt="River, an otter">
+          <div class="name">River</div>
+          <div class="role">Flowing</div>
+          <p>Encouraging and easy to talk to. "There's no wrong way to start — just tell me how today's going."</p>
+        </div>
+        <div class="companion-card sol">
+          <img src="companions/sol-steady.png?v=20260726a" alt="Sol, a fox">
+          <div class="name">Sol</div>
+          <div class="role">Hopeful</div>
+          <p>Warm and low-light, not peppy. "Even on the heaviest days, we can find one warm thing to stand on."</p>
+        </div>
+        <div class="companion-card stone">
+          <img src="companions/stone-steady.png?v=20260726a" alt="Stone, a tortoise">
+          <div class="name">Stone</div>
+          <div class="role">Steady</div>
+          <p>Unhurried and immovable. "We've got time. Nothing here has to be fixed right now."</p>
+        </div>
+        <div class="companion-card fern">
+          <img src="companions/fern-steady.png?v=20260726a" alt="Fern, a rabbit">
+          <div class="name">Fern</div>
+          <div class="role">Tender</div>
+          <p>Soft and permission-giving. "You don't have to be okay right now, or fix anything."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PERSONALIZATION SPOTLIGHT ===== -->
+  <section class="section-block" id="personalize">
+    <div class="container">
+      <div class="spotlight-grid">
+        <div class="spotlight-phone">
+          <div class="screen-frame"><img src="screenshots/06-context.jpg?v=20260717a" alt="Quietoak onboarding — sharing what you're navigating, with a Wondering / Pretty sure / Diagnosed level picker" loading="lazy"></div>
+        </div>
+        <div>
+          <div class="section-eyebrow">Knows you better</div>
+          <h2>It learns what you're <em>navigating.</em></h2>
+          <p class="lede">Tell your companion what you're working with — what a professional has diagnosed, or just what you think might fit. It uses that to meet you where you are: the skills it reaches for, the words it chooses, what it knows might be hard.</p>
+          <ul class="spotlight-points">
+            <li><strong>However sure you are.</strong> For each one, mark whether you're just <em>wondering</em>, <em>pretty sure</em>, or it's been <em>diagnosed</em> — all welcome, none required.</li>
+            <li><strong>Never a label.</strong> Quietoak doesn't diagnose or treat. Your companion uses this as context, never to assess you, and always points clinical questions back to your clinician.</li>
+            <li><strong>Yours to control.</strong> Optional, stored on your device, and editable anytime — change or clear it whenever you like.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VOICE SPOTLIGHT ===== -->
+  <section class="section-block" id="voice" style="background: rgba(255,255,255,0.45);">
+    <div class="container">
+      <div class="spotlight-grid flip">
+        <div>
+          <div class="section-eyebrow">Talk it through</div>
+          <h2>Some days, you'd rather just <em>say it out loud.</em></h2>
+          <p class="lede">Tap once and talk — hands-free, like a real conversation. Your companion listens and answers in a warm spoken voice, so on the nights you can't face typing, you don't have to. Switch back to text whenever you want.</p>
+          <ul class="spotlight-points">
+            <li><strong>Hands-free.</strong> Tap to talk, then just speak — no typing, no menus.</li>
+            <li><strong>A voice that matches your companion.</strong> Each one has its own gentle, distinct voice.</li>
+            <li><strong>Always your choice.</strong> "Type instead" is one tap away, and the crisis kit is never more than a tap from here either.</li>
+          </ul>
+        </div>
+        <div class="spotlight-phone">
+          <div class="screen-frame"><img src="screenshots/07-voice.jpg?v=20260726b" alt="Quietoak voice conversation — talking with Willow hands-free, with a tap-to-talk button" loading="lazy"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="section-block" id="features">
+    <div class="container">
+      <div class="section-eyebrow">What's inside</div>
+      <h2>DBT skills, <em>made gentle.</em></h2>
+      <p class="lede">Faithful to the DBT model, built warm by design — the opposite of clinical.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon-box"><img src="icons/feat-companion.png?v=20260624r" alt=""></div>
+          <h3>Choose your companion</h3>
+          <p>Pick the one whose temperament fits you — grounding, steady, clear, encouraging, tender, or hopeful — give it a name, and it becomes a presence you actually know. Your AI guide, for daily practice and the hard days alike.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><img src="icons/feat-skills.png?v=20260624r" alt=""></div>
+          <h3>Real DBT skills</h3>
+          <p>All four modules — Mindfulness, Distress Tolerance, Emotion Regulation, Interpersonal Effectiveness — in small, plainspoken steps, with your companion to walk you through any of them at your own pace.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><img src="icons/feat-diary.png?v=20260624r" alt=""></div>
+          <h3>A one-minute diary card</h3>
+          <p>A real DBT diary card — mood, emotions, urges, and the skills you reached for — in under a minute. Tap it in or just speak it aloud, as light or detailed as you like, and look back gently over time.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><img src="icons/feat-breathing.png?v=20260624r" alt=""></div>
+          <h3>Guided exercises</h3>
+          <p>STOP, TIPP, paced breathing, Self-Soothe, and a one-minute Wise Mind practice — guided step by step, and your companion can talk you through them out loud, in its own voice.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><img src="icons/feat-crisis.png?v=20260624r" alt=""></div>
+          <h3>Crisis kit, always free</h3>
+          <p>988, 741741, and your local lines — never behind a paywall, and it works offline. Some things should never be gated.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box"><img src="icons/feat-privacy.png?v=20260624r" alt=""></div>
+          <h3>Private &amp; accountless</h3>
+          <p>No sign-up, no account to create. Your diary and practice stay on your device by default. No ads, no third-party trackers on your diary or chat.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SCREENS ===== -->
+  <section class="section-block" id="screens" style="background: rgba(255,255,255,0.45);">
+    <div class="container">
+      <div class="section-eyebrow" style="text-align:center;">A look inside</div>
+      <h2 style="text-align:center;">Calm by day, gentle by <em>night.</em></h2>
+      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Warm, plainspoken screens built for hard moments — not a clinical dashboard. Quietoak follows your device's Light or Dark setting; tap below to see every screen either way.</p>
+      <div style="text-align:center;">
+        <div class="theme-toggle" role="group" aria-label="Preview screens in light or dark mode">
+          <span class="thumb" aria-hidden="true"></span>
+          <button type="button" data-theme="light" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            Light
+          </button>
+          <button type="button" data-theme="dark" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            Dark
+          </button>
+        </div>
+      </div>
+      <div class="screens-grid">
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="screenshots/01-today.jpg?v=20260726b" data-light="screenshots/01-today.jpg?v=20260726b" data-dark="screenshots/01-today-dark.jpg?v=20260726b" alt="Quietoak Today tab — a companion greeting and a one-minute check-in" loading="lazy"></div>
+          <div class="screen-label"><strong>Today</strong>Your companion, every day</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="screenshots/02b-cards.jpg?v=20260726d" data-light="screenshots/02b-cards.jpg?v=20260726d" data-dark="screenshots/02b-cards-dark.jpg?v=20260726d" alt="Quietoak companion chat with DBT skill cards brought right into the conversation" loading="lazy"></div>
+          <div class="screen-label"><strong>In-chat skills</strong>Lessons, right in the chat</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="screenshots/03-skills.jpg?v=20260717b" data-light="screenshots/03-skills.jpg?v=20260717b" data-dark="screenshots/03-skills-dark.jpg?v=20260717b" alt="Quietoak Skills tab — the four DBT modules" loading="lazy"></div>
+          <div class="screen-label"><strong>Skills</strong>Real DBT skills, guided</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="screenshots/04-diary.jpg?v=20260717b" data-light="screenshots/04-diary.jpg?v=20260717b" data-dark="screenshots/04-diary-dark.jpg?v=20260717b" alt="Quietoak diary card — mood and emotions in under a minute" loading="lazy"></div>
+          <div class="screen-label"><strong>Diary</strong>A one-minute card</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="screenshots/10-chain.jpg?v=20260717b" data-light="screenshots/10-chain.jpg?v=20260717b" data-dark="screenshots/10-chain-dark.jpg?v=20260717b" alt="Quietoak chain analysis — gently tracing a hard moment link by link to find where a skill fits" loading="lazy"></div>
+          <div class="screen-label"><strong>Chain analysis</strong>Trace a hard moment</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-frame"><img class="shot-img" src="screenshots/05-crisis.jpg?v=20260717b" data-light="screenshots/05-crisis.jpg?v=20260717b" data-dark="screenshots/05-crisis-dark.jpg?v=20260717b" alt="Quietoak Crisis Survival Kit — 988, 741741, and grounding skills" loading="lazy"></div>
+          <div class="screen-label"><strong>Crisis kit</strong>One tap, always free</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW THE COMPANION RESPONDS ===== -->
+  <section class="section-block" id="responds" style="background: rgba(255,255,255,0.45);">
+    <div class="container">
+      <div class="section-eyebrow" style="text-align:center;">How your companion responds</div>
+      <h2 style="text-align:center;">It listens first — and <em>guides when it helps.</em></h2>
+      <p class="lede" style="text-align:center; max-width: 680px; margin-left:auto; margin-right:auto;">Your companion won't push a skill every time. Often it just wants to understand — asking what's going on, validating, and giving you room to vent. When something might genuinely help, it brings a guided exercise right into the chat, never buried in a menu.</p>
+      <div class="responds-pair">
+        <div class="responds-card">
+          <div class="screen-frame"><img src="screenshots/02-companion-listen.jpg?v=20260726b" alt="Quietoak companion listening — validating and asking what made the day hard" loading="lazy"></div>
+          <div class="screen-label"><strong>Sometimes it just listens</strong>Asks, validates, lets you vent</div>
+        </div>
+        <div class="responds-card">
+          <div class="screen-frame"><img src="screenshots/02-companion.jpg?v=20260726b" alt="Quietoak companion bringing a Paced Breathing exercise into the chat" loading="lazy"></div>
+          <div class="screen-label"><strong>And guides when it helps</strong>A skill, right in the chat</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTINUITY + SWITCH SPOTLIGHT ===== -->
+  <section class="section-block" id="continuity">
+    <div class="container">
+      <div class="spotlight-grid">
+        <div class="spotlight-phone">
+          <div class="spotlight-duo">
+            <div class="screen-frame"><img src="screenshots/09-conversations.jpg?v=20260726c" alt="Quietoak conversations drawer — saved talks and what your companion remembers between chats" loading="lazy"></div>
+            <div class="screen-frame"><img src="screenshots/08-switcher.jpg?v=20260726c" alt="Quietoak companion switcher — choosing which companion you need right now, each with a voice sample" loading="lazy"></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-eyebrow">It stays with you</div>
+          <h2>It remembers you — and it's <em>whoever you need.</em></h2>
+          <p class="lede">Your talks are saved, so you never start over. Your companion carries what matters between conversations — and on a day you need something different, you can switch to another companion and pick right back up.</p>
+          <ul class="spotlight-points">
+            <li><strong>Picks up where you left off.</strong> No re-explaining yourself — it remembers the thread you were on and the skills you're working on.</li>
+            <li><strong>Switch anytime.</strong> Six companions, each a little different — change who's with you whenever it fits, and hear a voice sample first.</li>
+            <li><strong>Yours, on your terms.</strong> Start a fresh talk, revisit an old one, or clear it — all in a tap.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROGRESS SPOTLIGHT ===== -->
+  <section class="section-block" id="progress">
+    <div class="container">
+      <div class="spotlight-grid flip">
+        <div>
+          <div class="section-eyebrow">See how far you've come</div>
+          <h2>The wins you'd otherwise <em>miss.</em></h2>
+          <p class="lede">Recovery isn't a straight line — so Quietoak counts the quiet wins. The urges you rode out, the days you showed up, the skills you reached for: gathered up and shown back to you, gently, never as a scoreboard.</p>
+          <ul class="spotlight-points">
+            <li><strong>Every urge you ride out.</strong> Feeling an urge and <em>not</em> acting on it is the skill working — those count here, not just the hard days.</li>
+            <li><strong>A kind streak, never a guilt trip.</strong> See the days you checked in; a missed day is never framed as a broken streak.</li>
+            <li><strong>Patterns over time.</strong> Your mood and skill use show up as calm lines, so you can see what's actually helping.</li>
+          </ul>
+        </div>
+        <div class="spotlight-phone">
+          <div class="screen-frame"><img src="screenshots/11-progress.jpg?v=20260626d" alt="Quietoak progress — a gentle check-in streak, check-ins this month, days you practiced skills, and urges ridden out" loading="lazy"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CRISIS BAND ===== -->
+  <section class="section-block tight">
+    <div class="container">
+      <div class="crisis-band">
+        <div class="glyph" aria-hidden="true"><img src="icons/feat-crisis.png?v=20260624r" alt=""></div>
+        <div>
+          <h3>Help is always one tap away — and always free.</h3>
+          <p>The Crisis Survival Kit is never behind Plus and works offline: <strong>988</strong> (call or text, US), <strong>741741</strong> (text HOME), and your local lines, resolved to your region. Your companion also watches each message for signs you're in danger and surfaces real help right in the chat — even if our AI is down. If you're in immediate danger, call your local emergency number.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PRICING ===== -->
+  <section class="section-block" id="pricing" style="background: rgba(255,255,255,0.45);">
+    <div class="container">
+      <div class="section-eyebrow" style="text-align:center;">Pricing</div>
+      <h2 style="text-align:center;">Generous free. <em>Plus when you want more.</em></h2>
+      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">The skills, the diary card, all six companions, and the crisis kit are free. Plus adds the extras — and crisis support is never paywalled.</p>
+      <div class="plans">
+        <div class="plan">
+          <h3>Free</h3>
+          <div class="price">$0</div>
+          <div class="period">no account, ever</div>
+          <ul>
+            <li>The full DBT skills library, all four modules</li>
+            <li>The one-minute diary card &amp; gentle trends</li>
+            <li>All six companions</li>
+            <li>Saved conversations — your companion remembers you between chats</li>
+            <li>Companion chat with a gentle daily limit (crisis chat is never limited)</li>
+            <li>The Crisis Survival Kit — always free, offline</li>
+          </ul>
+        </div>
+        <div class="plan featured">
+          <h3>Quietoak Plus</h3>
+          <div class="price">$9.99<span style="font-size:1rem; color:var(--muted-fg); font-weight:600;">/mo</span></div>
+          <div class="period">or $59.99/year · cancel anytime</div>
+          <ul>
+            <li>Everything in Free</li>
+            <li>Unlimited time with your companion — no daily limit — and the smartest, warmest version of them</li>
+            <li>Premium companion voice — a warmer, more natural voice (the on-device voice stays free for everyone)</li>
+            <li>A clinician-ready PDF of your diary card to share with your therapist</li>
+          </ul>
+          <p class="plan-note">Crisis support is always free — on every plan.</p>
+          <p class="plan-fine">Auto-renewing subscription billed to your Apple ID. It renews unless cancelled at least 24&nbsp;hours before the period ends; manage or cancel anytime in iOS&nbsp;Settings. <a href="terms.html">See terms</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="section-block" id="faq">
+    <div class="container">
+      <div class="section-eyebrow" style="text-align:center;">Common questions</div>
+      <h2 style="text-align:center;">FAQ</h2>
+      <div class="faq-list">
+        <details class="faq">
+          <summary>Is Quietoak therapy?</summary>
+          <p>No. Quietoak is a self-help tool based on the DBT (Dialectical Behavior Therapy) model. It is not therapy, not a diagnosis, and not a substitute for professional care. It's designed to work alongside therapy, or while you're learning the skills on your own.</p>
+        </details>
+        <details class="faq">
+          <summary>Is the companion a real person?</summary>
+          <p>No — your companion is an AI guide. It says so, it never claims to be a therapist or a person, and it points you toward people and professional help when that's what's needed. It's there to help you practice skills, not to be something you lean on instead of real support.</p>
+        </details>
+        <details class="faq">
+          <summary>Can I talk out loud, or switch companions?</summary>
+          <p>Both. You can have a hands-free voice conversation — tap to talk and your companion answers in a warm spoken voice — or stay in text; it's your choice every time. And you can switch between the six companions whenever you like. Your saved talks and what your companion remembers carry over, so you never start from scratch — and that's free. A premium, more natural voice is part of Quietoak Plus.</p>
+        </details>
+        <details class="faq">
+          <summary>What if I'm in crisis?</summary>
+          <p>The Crisis Survival Kit is one tap from anywhere in the app, always free, never paywalled, and works offline — 988 (call or text, US), 741741 (text HOME), and your local lines. If you're in immediate danger, call your local emergency number. Quietoak is not an emergency service.</p>
+        </details>
+        <details class="faq">
+          <summary>Is my data private?</summary>
+          <p>Your diary and practice are stored on your device by default. There's no account and no login. We don't run ads or third-party trackers against your diary or chat. To generate replies, your messages are sent to our backend and an AI provider, and your conversations are saved there — tied only to a random device ID, never your name — so your chats carry over between sessions. You can delete them anytime, and the full data flow is in our <a href="privacy.html">privacy policy</a>.</p>
+        </details>
+        <details class="faq">
+          <summary>What's free, and what's Plus?</summary>
+          <p>The whole app is free to use: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (with a gentle daily limit). Quietoak Plus ($9.99/month or $59.99/year) lifts that limit — unlimited time with your companion, plus the smartest version of them — and adds a premium companion voice (the on-device voice stays free for everyone) and a clinician-ready PDF of your diary card. Crisis support is never limited and never behind Plus.</p>
+        </details>
+        <details class="faq">
+          <summary>Who is Quietoak for?</summary>
+          <p>Adults (18+) who want to practice DBT skills in a calm, private space — whether you're in therapy and using it as an adjunct, on a waitlist, or learning the skills on your own.</p>
+        </details>
+        <details class="faq">
+          <summary>iPad? Mac? Android?</summary>
+          <p>iPhone first. It runs on iPad in iPhone-compatibility mode for now; a native iPad layout, Android, and Mac aren't committed yet.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="cta-strip">
+    <h2>Steady, even on the hard days.</h2>
+    <p>Quietoak is coming to iOS. Leave your email and we'll let you know when it's ready — and crisis support will always be free.</p>
+    <a href="mailto:hi@quietoak.app?subject=Notify%20me%20when%20Quietoak%20launches" class="btn-warm">
+      <span>Get early access</span>
+      <span aria-hidden="true">→</span>
+    </a>
+  </section>
+
+  <!-- ===== DISCLAIMER ===== -->
+  <section class="disclaimer">
+    <div class="container">
+      <p>Quietoak teaches DBT skills and is not therapy, medical treatment, a diagnosis, or a crisis service. Your companion is an AI guide, not a person or a substitute for professional care. If you're in crisis, call or text 988 (US) or your local emergency number. 18+.</p>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site">
+    <div class="links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="mailto:hi@quietoak.app">Contact</a>
+    </div>
+    <div class="copyright"><a href="https://drvanus.github.io/hypersage-site/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">A HyperSage Studio App</a></div>
+    <div class="copyright">© 2026 Quietoak. Rooted and steady, through the storm.</div>
+  </footer>
+
+  <script>
+    (function () {
+      var section = document.getElementById('screens');
+      if (!section) return;
+      var toggle = section.querySelector('.theme-toggle');
+      var imgs = section.querySelectorAll('.shot-img');
+      if (!toggle) return;
+      // Preload the dark variants so the first toggle is instant.
+      imgs.forEach(function (img) {
+        var d = img.getAttribute('data-dark');
+        if (d) { var pre = new Image(); pre.src = d; }
+      });
+      function setTheme(mode) {
+        var dark = mode === 'dark';
+        section.classList.toggle('theme-dark', dark);
+        toggle.classList.toggle('is-dark', dark);
+        toggle.querySelectorAll('button').forEach(function (b) {
+          b.setAttribute('aria-pressed', b.getAttribute('data-theme') === mode ? 'true' : 'false');
+        });
+        imgs.forEach(function (img) {
+          var next = img.getAttribute(dark ? 'data-dark' : 'data-light');
+          if (next && img.getAttribute('src') !== next) img.setAttribute('src', next);
+        });
+      }
+      toggle.addEventListener('click', function (e) {
+        var btn = e.target.closest('button');
+        if (btn) setTheme(btn.getAttribute('data-theme'));
+      });
+    })();
+  </script>
+
+</body>
+</html>

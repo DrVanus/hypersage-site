@@ -1,0 +1,136 @@
+/* Shared stylesheet for /privacy-policy and /terms — keeps the Hexhunter brand
+   consistent without duplicating the landing-page CSS. Dark gothic palette,
+   re-keyed from the index.html design tokens. */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0C0A14;
+  --surface: #16101F;
+  --card: #1E1830;
+  --fg: #ECE7F5;
+  --muted-fg: #A99EC2;
+  --primary: #8B5CF6;
+  --primary-bright: #A78BFA;
+  --gold: #D4AF37;
+  --gold-bright: #F0D875;
+  --blood: #C1121F;
+  --border: rgba(167,139,250,0.14);
+  --border-strong: rgba(167,139,250,0.28);
+}
+
+html { scroll-behavior: smooth; color-scheme: dark; background: var(--bg); }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.72;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Faint gothic wash, same family as the landing page. */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 90% 50% at 15% -5%, rgba(139,92,246,0.12), transparent 55%),
+    radial-gradient(ellipse 80% 55% at 50% 108%, rgba(109,40,217,0.10), transparent 65%);
+  pointer-events: none; z-index: 0;
+}
+
+a { color: var(--primary-bright); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--gold-bright); }
+a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.container { max-width: 760px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+.legal-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(12,10,20,0.82);
+  backdrop-filter: saturate(150%) blur(14px);
+  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.legal-nav .container {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 13px; padding-bottom: 13px;
+}
+.legal-nav .brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Cinzel', Georgia, serif; font-weight: 700; color: var(--fg);
+  font-size: 1.05rem; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.legal-nav .brand img { width: 32px; height: 32px; border-radius: 9px; box-shadow: 0 0 16px rgba(139,92,246,0.3); }
+.legal-nav .links { display: flex; gap: 22px; font-size: 0.95rem; }
+.legal-nav .links a { color: var(--muted-fg); font-weight: 600; }
+.legal-nav .links a:hover { color: var(--primary-bright); }
+.legal-nav .links a.active { color: var(--gold); }
+
+@media (max-width: 560px) {
+  .legal-nav .container { gap: 12px; }
+  .legal-nav .brand { font-size: 0.92rem; gap: 8px; }
+  .legal-nav .brand img { width: 27px; height: 27px; }
+  .legal-nav .links { gap: 14px; font-size: 0.85rem; }
+}
+
+main.legal {
+  max-width: 760px; margin: 0 auto;
+  padding: 56px 24px 96px;
+  position: relative; z-index: 1;
+}
+main.legal h1 {
+  font-family: 'Cinzel', Georgia, serif; font-weight: 800;
+  font-size: 2.5rem; line-height: 1.15;
+  letter-spacing: 0.01em; margin-bottom: 12px;
+  color: var(--fg);
+}
+main.legal .updated {
+  color: var(--muted-fg); font-size: 0.95rem;
+  margin-bottom: 36px;
+}
+main.legal h2 {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 1.3rem; font-weight: 700;
+  margin-top: 38px; margin-bottom: 12px;
+  color: var(--primary-bright);
+  letter-spacing: 0.01em;
+}
+main.legal h3 {
+  font-size: 1.05rem; font-weight: 700;
+  margin-top: 22px; margin-bottom: 8px;
+  color: var(--fg);
+}
+main.legal p, main.legal li { color: var(--muted-fg); margin-bottom: 14px; }
+main.legal ul { padding-left: 22px; margin-bottom: 14px; }
+main.legal li { margin-bottom: 6px; }
+main.legal strong { color: var(--fg); font-weight: 700; }
+main.legal code {
+  background: var(--card); padding: 2px 6px; border-radius: 6px;
+  font-size: 0.9em; color: var(--gold-bright);
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.callout {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gold);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 24px 0;
+}
+.callout strong { color: var(--gold-bright); }
+
+footer.legal-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+  padding: 28px 24px 40px;
+  text-align: center;
+  color: var(--muted-fg); font-size: 0.9rem;
+  position: relative; z-index: 1;
+}
+footer.legal-footer a { color: var(--muted-fg); margin: 0 12px; font-weight: 600; }
+footer.legal-footer a:hover { color: var(--gold-bright); }

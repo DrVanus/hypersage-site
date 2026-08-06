@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0B0E19">
+  <title>Nightshelf — Bedtime stories, read aloud</title>
+  <meta name="description" content="Nightshelf is a cozy iOS bedtime-story app: 86 complete classics and calm new stories written by AI, read aloud with ambient sound and a sleep timer.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://drvanus.github.io/nightshelf-site/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Nightshelf — Bedtime stories, read aloud">
+  <meta property="og:description" content="86 complete classics and calm new stories written by AI, read aloud with ambient sound underneath.">
+  <meta property="og:url" content="https://drvanus.github.io/nightshelf-site/">
+  <meta property="og:site_name" content="Nightshelf">
+  <meta property="og:image" content="https://drvanus.github.io/nightshelf-site/app-icon.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nightshelf — Bedtime stories, read aloud">
+  <meta name="twitter:description" content="Bedtime classics and AI-written stories, read aloud in a soft, sleepy voice.">
+  <meta name="twitter:image" content="https://drvanus.github.io/nightshelf-site/app-icon.png">
+
+  <link rel="icon" type="image/png" href="app-icon.png">
+  <link rel="apple-touch-icon" href="app-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ================================================================
+       Nightshelf design system
+       ---------------------------------------------------------------
+       Descender safety: every element that uses background-clip: text
+       carries .grad-text (padding-bottom reserves paint area below the
+       baseline, negative margin re-tightens layout). Headings keep
+       line-height ≥ 1.16 and never sit in an overflow-hidden box, so
+       g / y / p / j descenders are never cut.
+       ================================================================ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:            #0B0E19;
+      --bg-raised:     #111527;
+      --surface:       #151A2E;
+      --card:          #171D33;
+      --fg:            #F3EFE6;
+      --muted-fg:      #B7B2C4;
+      --tertiary-fg:   #837E93;
+      --accent:        #E8B15C;
+      --accent-bright: #F6C877;
+      --accent-deep:   #C68B36;
+      --lilac:         #9A8CD6;
+      --rose:          #D98C97;
+      --ink:           #241703;
+
+      --border:        rgba(243,239,230,0.08);
+      --border-strong: rgba(243,239,230,0.16);
+      --gold-border:   rgba(232,177,92,0.38);
+      --accent-glow:   rgba(232,177,92,0.13);
+
+      --radius-sm: 10px;
+      --radius:    16px;
+      --radius-lg: 24px;
+
+      --shadow-lg: 0 24px 70px rgba(0,0,0,0.55);
+      --shadow-md: 0 12px 34px rgba(0,0,0,0.40);
+
+      --font-serif: 'Fraunces', Georgia, serif;
+      --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+      /* fluid type scale */
+      --text-hero: clamp(2.75rem, 6.4vw, 4.6rem);
+      --text-h2:   clamp(1.9rem, 3.8vw, 2.7rem);
+      --text-h3:   1.32rem;
+      --text-sub:  clamp(1.05rem, 2.2vw, 1.28rem);
+    }
+
+    html { scroll-behavior: smooth; background: var(--bg); color-scheme: dark; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.68;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      text-rendering: optimizeLegibility;
+    }
+
+    ::selection { background: rgba(232,177,92,0.28); color: var(--fg); }
+
+    /* ---- Night sky: lamplight glows + two drifting star layers ---- */
+    .sky {
+      position: absolute; inset: 0 0 auto 0; height: 160vh;
+      pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .sky::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 62% 46% at 12% -6%, rgba(232,177,92,0.15), transparent 62%),
+        radial-gradient(ellipse 55% 42% at 92% 2%, rgba(154,140,214,0.13), transparent 64%),
+        radial-gradient(ellipse 90% 60% at 50% 118%, rgba(217,140,151,0.05), transparent 72%);
+    }
+    .sky .stars, .sky .stars2 { content: ''; position: absolute; inset: 0; }
+    .sky .stars {
+      background-image:
+        radial-gradient(1.1px 1.1px at 22px 34px, rgba(243,239,230,0.55), transparent 55%),
+        radial-gradient(0.9px 0.9px at 130px 90px, rgba(243,239,230,0.35), transparent 55%),
+        radial-gradient(1.3px 1.3px at 230px 150px, rgba(246,200,119,0.4), transparent 55%),
+        radial-gradient(0.8px 0.8px at 310px 60px, rgba(243,239,230,0.3), transparent 55%);
+      background-size: 360px 220px;
+      animation: twinkle 7s ease-in-out infinite alternate;
+    }
+    .sky .stars2 {
+      background-image:
+        radial-gradient(1px 1px at 70px 170px, rgba(243,239,230,0.4), transparent 55%),
+        radial-gradient(0.9px 0.9px at 180px 40px, rgba(154,140,214,0.45), transparent 55%),
+        radial-gradient(1.2px 1.2px at 300px 200px, rgba(243,239,230,0.28), transparent 55%);
+      background-size: 420px 260px;
+      animation: twinkle 9s ease-in-out 1.8s infinite alternate;
+    }
+    @keyframes twinkle { from { opacity: .45; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .sky .stars, .sky .stars2 { animation: none; } }
+
+    h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.012em; }
+
+    /* Descender-safe gradient text */
+    .grad-text {
+      background-image: linear-gradient(178deg, #FBF6EA 4%, var(--accent-bright) 70%, var(--accent-deep) 108%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+      padding-bottom: 0.22em;      /* room for g / y / p descenders */
+      margin-bottom: -0.14em;      /* reclaim layout height          */
+    }
+
+    a { color: var(--accent-bright); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--accent); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+    .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ============================== NAV ============================== */
+    nav.site {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(11,14,25,0.72);
+      backdrop-filter: saturate(150%) blur(18px);
+      -webkit-backdrop-filter: saturate(150%) blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav.site::after {
+      content: ''; display: block; height: 1px;
+      background: linear-gradient(90deg, transparent 8%, rgba(232,177,92,0.22) 50%, transparent 92%);
+      margin-top: -1px;
+    }
+    nav.site .container { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-serif); font-weight: 600; color: var(--fg); font-size: 1.3rem; line-height: 1.3; }
+    .brand img { width: 36px; height: 36px; border-radius: 10px; box-shadow: 0 0 0 1px var(--border-strong), 0 4px 14px rgba(0,0,0,0.5); }
+    nav.site .links { display: flex; gap: 30px; align-items: center; }
+    nav.site .links a:not(.btn) {
+      color: var(--muted-fg); font-weight: 500; font-size: .95rem; line-height: 1.5;
+      position: relative; padding: 4px 0;
+    }
+    nav.site .links a:not(.btn)::after {
+      content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px;
+      background: var(--accent); transition: right .25s ease;
+    }
+    nav.site .links a:not(.btn):hover { color: var(--fg); }
+    nav.site .links a:not(.btn):hover::after { right: 0; }
+    @media (max-width: 700px) { nav.site .links a:not(.btn) { display: none; } }
+
+    /* ============================ BUTTONS ============================ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      background: linear-gradient(180deg, var(--accent-bright), var(--accent-deep));
+      color: var(--ink); font-weight: 600; font-size: .97rem; line-height: 1.45;
+      padding: 13px 26px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 8px 24px rgba(232,177,92,0.28);
+      transition: transform .16s ease, box-shadow .22s ease;
+    }
+    .btn:hover { color: var(--ink); transform: translateY(-2px); box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 12px 34px rgba(232,177,92,0.42); }
+    .btn:active { transform: translateY(0); }
+    .btn.ghost {
+      background: rgba(232,177,92,0.05); color: var(--accent-bright);
+      border: 1px solid var(--gold-border); box-shadow: none;
+    }
+    .btn.ghost:hover { background: var(--accent-glow); color: var(--accent-bright); box-shadow: 0 6px 20px rgba(232,177,92,0.12); }
+    .btn.sm { padding: 9px 20px; font-size: .9rem; }
+
+    /* ============================= HERO ============================= */
+    header.hero { padding: 96px 0 56px; text-align: center; position: relative; }
+    .kicker {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-weight: 600; font-size: .76rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      padding: 7px 18px; line-height: 1.6;
+      border: 1px solid var(--gold-border); border-radius: 999px;
+      background: var(--accent-glow); margin-bottom: 34px;
+    }
+    .kicker svg { width: 13px; height: 13px; }
+    .hero img.crest {
+      width: 116px; height: 116px; border-radius: 26px; margin: 0 auto 34px; display: block;
+      box-shadow: 0 0 0 1px var(--border-strong), 0 18px 44px rgba(0,0,0,0.5), 0 0 60px rgba(232,177,92,0.14);
+    }
+    .hero h1 {
+      font-size: var(--text-hero); line-height: 1.16; font-weight: 600;
+      max-width: 14em; margin-left: auto; margin-right: auto;
+    }
+    .hero h1 em { font-style: italic; font-weight: 500; }
+    .hero p.sub {
+      font-size: var(--text-sub); color: var(--muted-fg); line-height: 1.7;
+      max-width: 610px; margin: 20px auto 40px;
+    }
+    .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero .fineprint { margin-top: 16px; font-size: .84rem; color: var(--tertiary-fg); line-height: 1.6; }
+
+    .stat-strip {
+      display: flex; justify-content: center; align-items: stretch;
+      margin: 64px auto 0; padding-top: 34px; max-width: 680px;
+      border-top: 1px solid var(--border);
+    }
+    .stat { flex: 1 1 0; padding: 0 12px; position: relative; }
+    .stat + .stat::before {
+      content: ''; position: absolute; left: 0; top: 12%; bottom: 12%;
+      width: 1px; background: var(--border);
+    }
+    .stat .num {
+      font-family: var(--font-serif); font-size: 2.1rem; font-weight: 600;
+      color: var(--accent-bright); line-height: 1.3;
+    }
+    .stat .lbl { font-size: .8rem; color: var(--tertiary-fg); letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.6; }
+
+    /* ======================= DEVICE SHOWCASE ======================= */
+    .showcase { padding: 26px 0 10px; }
+    .showcase .container { display: flex; justify-content: center; align-items: center; gap: 34px; }
+    .device-wrap { position: relative; }
+    .device-wrap::before {
+      content: ''; position: absolute; inset: -12% -30%;
+      background: radial-gradient(ellipse 55% 48% at 50% 42%, rgba(232,177,92,0.16), transparent 70%);
+      pointer-events: none;
+    }
+    .device {
+      position: relative; width: 310px; max-width: 82vw; padding: 12px;
+      background: linear-gradient(165deg, #262d4b 0%, #10142a 60%, #1a2140 100%);
+      border-radius: 50px; border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-lg), 0 0 80px var(--accent-glow), 0 1px 0 rgba(255,255,255,0.08) inset;
+    }
+    .device img { display: block; width: 100%; height: auto; border-radius: 38px; }
+    .float-chip {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(21,26,46,0.86); border: 1px solid var(--border-strong);
+      border-radius: 14px; padding: 12px 18px;
+      font-size: .88rem; font-weight: 500; color: var(--muted-fg); line-height: 1.5;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .float-chip .dot { width: 26px; height: 26px; border-radius: 8px; flex: none; display: grid; place-items: center; background: var(--accent-glow); border: 1px solid var(--gold-border); color: var(--accent-bright); }
+    .float-chip .dot svg { width: 14px; height: 14px; }
+    .float-chip strong { color: var(--fg); font-weight: 600; }
+    .chip-col { display: flex; flex-direction: column; gap: 18px; }
+    .chip-col.left { align-items: flex-end; }
+    .chip-col.right { align-items: flex-start; }
+    @media (max-width: 900px) { .chip-col { display: none; } }
+
+    /* =========================== SECTIONS =========================== */
+    section { padding: 84px 0; }
+    .section-head { text-align: center; max-width: 640px; margin: 0 auto 56px; }
+    .eyebrow {
+      display: block; font-family: var(--font-sans); font-weight: 600; font-size: .74rem;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--tertiary-fg);
+      margin-bottom: 14px; line-height: 1.6;
+    }
+    .eyebrow::before, .eyebrow::after { content: '·'; color: var(--accent); margin: 0 10px; }
+    .section-head h2 { font-size: var(--text-h2); line-height: 1.22; }
+    .section-head p { color: var(--muted-fg); font-size: 1.08rem; margin-top: 12px; line-height: 1.7; }
+
+    .fleuron { text-align: center; color: var(--accent); opacity: .8; font-size: 1.05rem; letter-spacing: 1.1em; text-indent: 1.1em; line-height: 1; margin: 6px 0 0; user-select: none; }
+
+    /* ====================== SCREENSHOT GALLERY ====================== */
+    .gallery-shell { position: relative; }
+    .gallery-shell::before, .gallery-shell::after {
+      content: ''; position: absolute; top: 0; bottom: 26px; width: 70px; z-index: 2; pointer-events: none;
+    }
+    .gallery-shell::before { left: -26px; background: linear-gradient(90deg, var(--bg), transparent); }
+    .gallery-shell::after  { right: -26px; background: linear-gradient(270deg, var(--bg), transparent); }
+    .gallery-row {
+      display: flex; gap: 26px; overflow-x: auto; padding: 14px 34px 30px;
+      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .gallery-row::-webkit-scrollbar { display: none; }
+    .shot { flex: 0 0 auto; width: 228px; scroll-snap-align: center; text-align: center; }
+    .shot .frame {
+      padding: 9px; border-radius: 36px;
+      background: linear-gradient(165deg, #262d4b, #10142a 62%, #1a2140);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-md), 0 0 46px rgba(232,177,92,0.10), 0 1px 0 rgba(255,255,255,0.07) inset;
+      transition: transform .28s ease, box-shadow .28s ease;
+    }
+    .shot:hover .frame { transform: translateY(-6px); box-shadow: var(--shadow-lg), 0 0 60px rgba(232,177,92,0.16), 0 1px 0 rgba(255,255,255,0.07) inset; }
+    .shot .frame img { display: block; width: 100%; height: auto; border-radius: 27px; }
+    .shot .cap { margin-top: 16px; font-family: var(--font-serif); font-style: italic; font-size: 1.02rem; color: var(--muted-fg); line-height: 1.5; }
+    @media (max-width: 640px) { .shot { width: 196px; } }
+
+    /* =========================== FEATURES =========================== */
+    .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+    @media (max-width: 780px) { .features { grid-template-columns: 1fr; } }
+    .feature {
+      position: relative;
+      background: linear-gradient(180deg, var(--card), var(--bg-raised));
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 32px 30px 30px; overflow: hidden;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .25s ease;
+    }
+    .feature::before {
+      content: ''; position: absolute; top: 0; left: 14%; right: 14%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232,177,92,0.35), transparent);
+      opacity: 0; transition: opacity .25s ease;
+    }
+    .feature:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+    .feature:hover::before { opacity: 1; }
+    .feature .ic {
+      width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
+      background: linear-gradient(150deg, rgba(246,200,119,0.20), rgba(198,139,54,0.06));
+      border: 1px solid var(--gold-border); margin-bottom: 20px; color: var(--accent-bright);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 8px 20px rgba(232,177,92,0.08);
+    }
+    .feature .ic svg { width: 25px; height: 25px; display: block; }
+    .feature h3 { font-size: var(--text-h3); line-height: 1.35; margin-bottom: 8px; }
+    .feature p { color: var(--muted-fg); font-size: .98rem; line-height: 1.7; }
+
+    /* ============================ RITUAL ============================ */
+    .ritual { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; position: relative; }
+    @media (max-width: 720px) { .ritual { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; } }
+    .step {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 30px 24px 26px; text-align: center; position: relative;
+      transition: border-color .22s ease, transform .22s ease;
+    }
+    .step:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+    .step .n {
+      font-family: var(--font-serif); font-size: 1.35rem; font-weight: 600; color: var(--accent);
+      display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
+      border: 1px solid var(--gold-border); margin-bottom: 16px; line-height: 1;
+      background: var(--accent-glow);
+    }
+    .step h4 { font-size: 1.14rem; line-height: 1.4; margin-bottom: 6px; }
+    .step p { font-size: .95rem; color: var(--muted-fg); line-height: 1.65; }
+
+    /* =========================== CTA BAND =========================== */
+    .cta-band {
+      position: relative; text-align: center; overflow: hidden;
+      background:
+        radial-gradient(ellipse 64% 130% at 50% -8%, rgba(232,177,92,0.16), transparent 68%),
+        linear-gradient(180deg, var(--bg-raised), var(--bg));
+      border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
+      padding: 68px 32px 62px; margin: 10px 0;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset;
+    }
+    .cta-band .moon {
+      width: 44px; height: 44px; margin: 0 auto 22px; color: var(--accent-bright);
+      filter: drop-shadow(0 0 18px rgba(246,200,119,0.45));
+    }
+    .cta-band h2 { font-size: var(--text-h2); line-height: 1.22; }
+    .cta-band p { color: var(--muted-fg); max-width: 480px; margin: 12px auto 32px; font-size: 1.08rem; line-height: 1.7; }
+
+    /* ============================ FOOTER ============================ */
+    footer.site { border-top: 1px solid var(--border); padding: 48px 0 42px; margin-top: 48px; }
+    footer.site .container { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+    footer.site .brand { font-size: 1.1rem; color: var(--muted-fg); }
+    footer.site .brand img { width: 30px; height: 30px; border-radius: 8px; }
+    footer.site .flinks { display: flex; gap: 26px; }
+    footer.site .flinks a { color: var(--tertiary-fg); font-size: .92rem; line-height: 1.6; }
+    footer.site .flinks a:hover { color: var(--accent-bright); }
+    footer.site .copy { color: var(--tertiary-fg); font-size: .85rem; line-height: 1.6; }
+
+    /* ======================= SCROLL REVEAL ========================== */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+  </style>
+<!-- app-schema:start (generated by appdev/tools/app_schema.py — edit apps.json, not this) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Nightshelf",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "iOS",
+  "description": "Nightshelf is a cozy iOS bedtime-story app: 86 complete classics and calm new stories written by AI, read aloud with ambient sound and a sleep timer.",
+  "url": "https://drvanus.github.io/nightshelf-site/",
+  "author": {
+    "@type": "Organization",
+    "name": "Hypersage AI Labs"
+  }
+}
+</script>
+<!-- app-schema:end -->
+</head>
+<body>
+  <div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars2"></div></div>
+
+  <nav class="site">
+    <div class="container">
+      <a class="brand" href="#top"><img src="app-icon.png" alt="" aria-hidden="true"> Nightshelf</a>
+      <div class="links">
+        <a href="#screens">Screens</a>
+        <a href="#features">Features</a>
+        <a href="#ritual">How it works</a>
+        <a href="#get" class="btn ghost sm">Coming to iOS</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="container">
+      <span class="kicker">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        Bedtime stories · iOS
+      </span>
+      <img src="app-icon.png" alt="The Nightshelf app icon — books stacked beneath a crescent moon" class="crest">
+      <h1 class="grad-text">Stories to <em>drift off</em> to</h1>
+      <p class="sub">A shelf of bedtime stories — eighty-six timeless classics, and calm new ones written for you by AI, read aloud in a soft, sleepy voice with ambient sound underneath.</p>
+      <div class="cta-row">
+        <a href="#get" class="btn">Get Nightshelf</a>
+        <a href="#screens" class="btn ghost">Take a look</a>
+      </div>
+      <p class="fineprint">No account. No ads. Just goodnights.</p>
+      <div class="stat-strip">
+        <!-- Numbers here are read out of the app, not remembered. 86 =
+             `ls Resources/Books/*.txt | wc -l`; 13 = `grep -c 'freeTier: true'
+             SleepCatalog.swift` (73 false); 6 = the OpenAI narrator set. The
+             third stat used to read "∞ stories you conjure" — the server caps
+             Tonight's Story per device per night, so an infinity glyph was
+             selling something that does not exist. A fresh story each night is
+             the true shape.
+             It then read 15 while this very comment said 13, and while :497,
+             terms.html:83 and support.html:78 all said thirteen — the free
+             count is a purchase-relevant disclosure, so the loudest number on
+             the page was the only wrong one. Re-run the two commands above
+             before touching any of the four; a comment that states the source
+             does not keep the markup honest by itself. -->
+        <div class="stat"><div class="num">86</div><div class="lbl">Complete classics</div></div>
+        <div class="stat"><div class="num">6</div><div class="lbl">Warm narrators</div></div>
+        <div class="stat"><div class="num">13</div><div class="lbl">Free, no account</div></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="showcase" aria-label="Nightshelf on iPhone">
+    <div class="container">
+      <div class="chip-col left" aria-hidden="true">
+        <div class="float-chip"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span><span>Fades out in <strong>30 min</strong></span></div>
+        <div class="float-chip"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M7 8v8M17 8v8M3 11v2M21 11v2"/></svg></span><span>Nova is reading, <strong>slowly</strong></span></div>
+      </div>
+      <div class="device-wrap reveal">
+        <div class="device">
+          <img src="screenshot.jpg" alt="The Nightshelf home screen on iPhone — a nighttime library with tonight's story, fairy tales, and myths &amp; legends." width="840" height="1825">
+        </div>
+      </div>
+      <div class="chip-col right" aria-hidden="true">
+        <div class="float-chip"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14a8 8 0 0 1 16 0M8 19c-.5-1.4-.8-3-.8-5M12 20c-.4-1.8-.6-3.8-.6-6M16 19c.5-1.4.8-3 .8-5"/></svg></span><span><strong>Rain</strong> underneath</span></div>
+        <div class="float-chip"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5V6a2 2 0 0 1 2-2h13v14H6.5a2.5 2.5 0 0 0 0 5H19"/></svg></span><span>Your place, <strong>kept</strong></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screens" aria-label="Nightshelf screenshots">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">The app</span>
+        <h2 class="grad-text">A closer look</h2>
+        <p>Read it, hear it, and drift off — Nightshelf, screen by screen.</p>
+      </div>
+      <div class="gallery-shell reveal">
+        <div class="gallery-row">
+          <figure class="shot"><div class="frame"><img src="shots/home.jpg" alt="The Nightshelf home screen — a nighttime library with tonight's story, fairy tales, and myths and legends." loading="lazy" width="840" height="1825"></div><figcaption class="cap">A shelf for the night</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/story.jpg" alt="The Nightshelf bedtime-story composer — pick a setting and tone, then write a calm original story." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Conjure a bedtime story</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/reader.jpg" alt="The Nightshelf reader playing The Wind in the Willows aloud, with a sleep-timer that fades the narration out." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Read along, or listen</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/voice.jpg" alt="The Nightshelf voice picker — six warm narrators like Nova, Fable, and Onyx to read each story." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Six warm narrators</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/ambient.jpg" alt="The Nightshelf ambient-sound picker — rain, fireplace, ocean, and more to layer under any book." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Ambient sound underneath</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/chapters.jpg" alt="The Nightshelf chapter list for The Wind in the Willows — jump to any chapter with one tap." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Skip to any chapter</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/settings.jpg" alt="Nightshelf settings — reading speed, default sleep timer, listening mode, voice, and ambient sound." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Tuned for bedtime</figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" style="padding-top: 40px;">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Features</span>
+        <h2 class="grad-text">Everything for a good night</h2>
+        <p>Simple, warm, and unhurried — the way bedtime should feel.</p>
+      </div>
+      <div class="features">
+        <div class="feature reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="4.4" rx="1.2"/><rect x="3.5" y="9.8" width="17" height="4.4" rx="1.2"/><rect x="3.5" y="15.6" width="17" height="4.4" rx="1.2"/><line x1="6.5" y1="6.2" x2="8.2" y2="6.2"/><line x1="6.5" y1="12" x2="8.2" y2="12"/><line x1="6.5" y1="17.8" x2="8.2" y2="17.8"/></svg></div>
+          <h3>A Shelf for the Night</h3>
+          <p>Eighty-six timeless tales — Austen, Verne, Grimm, and friends — arranged on beautiful nighttime shelves, with your Continue row waiting right on top. Thirteen are free; Nightshelf Pro opens the rest.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg></div>
+          <h3>Conjure a Story</h3>
+          <p>Pick a place, a mood, and a length — and AI writes a calm original bedtime story for tonight, with a cover painted to match. A fresh one each night, and it needs a connection.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7.5" y1="20" x2="7.5" y2="13.5"/><line x1="12" y1="20" x2="12" y2="8.5"/><line x1="16.5" y1="20" x2="16.5" y2="11"/></svg></div>
+          <h3>Read Along, or Listen</h3>
+          <p>The on-device voice reads every book aloud with the network off, or switch to one of six warm AI narrators when you want something richer. Voice, pace, and reading mode — all yours to set.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 3.5l.6 1.9 1.9.6-1.9.6-.6 1.9-.6-1.9-1.9-.6 1.9-.6z"/></svg></div>
+          <h3>Ambient Sound &amp; Sleep Timer</h3>
+          <p>Rain, fireplace, ocean — layered gently under the narration, with a sleep timer that fades everything out as you drift off.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.2" r="1.3"/></svg></div>
+          <h3>Private by Design</h3>
+          <p>No account, no sign-in, no ads, no trackers. Your progress and settings live on your device and sync only through your own private iCloud — Nightshelf keeps no copy on any server. The two features that send your words off the phone, cloud narration and Tonight's Story, ask permission first; say no and they stay off. The <a href="privacy.html">privacy policy</a> names every stop those words make, and the one small thing that isn't behind the permission.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5a4.5 4.5 0 0 1 4.5-4.5 5.5 5.5 0 0 1 10.7 1.6A4 4 0 0 1 18.5 17H8.5A4.5 4.5 0 0 1 4 12.5z"/><path d="M12 11v5"/><path d="M9.8 13.8L12 16l2.2-2.2"/></svg></div>
+          <h3>Right Where You Left Off</h3>
+          <p>Your place in every story is held overnight and synced privately through iCloud, so tomorrow's chapter starts exactly where tonight's ended.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ritual" style="padding-top: 20px;">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">The ritual</span>
+        <h2 class="grad-text">A little ritual, every night</h2>
+        <p>Nightshelf is built around the quiet minutes before sleep.</p>
+      </div>
+      <div class="ritual">
+        <div class="step reveal"><div class="n">1</div><h4>Open your shelf</h4><p>Tonight's story waiting where you left it, beside shelves of classics.</p></div>
+        <div class="step reveal"><div class="n">2</div><h4>Press play</h4><p>A warm voice reads aloud while rain or firelight murmurs underneath.</p></div>
+        <div class="step reveal"><div class="n">3</div><h4>Drift off</h4><p>The sleep timer fades the story out and holds your place till tomorrow.</p></div>
+      </div>
+      <p class="fleuron" aria-hidden="true">✦ ✦ ✦</p>
+    </div>
+  </section>
+
+  <section id="get" style="padding-top: 20px;">
+    <div class="container">
+      <div class="cta-band reveal">
+        <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <h2 class="grad-text">Drift off tonight</h2>
+        <p>Nightshelf is coming to iPhone and iPad. A bedtime story, read aloud, every night.</p>
+        <div class="cta-row">
+          <a href="#" class="btn">Coming to the App Store</a>
+          <a href="privacy.html" class="btn ghost">Privacy</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <div class="container">
+      <a class="brand" href="#top"><img src="app-icon.png" alt="" aria-hidden="true"> Nightshelf</a>
+      <div class="flinks">
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="support.html">Support</a>
+        <a href="#features">Features</a>
+        <a href="https://drvanus.github.io/hypersage-site/" target="_blank" rel="noopener">A HyperSage Studio App</a>
+      </div>
+      <div class="copy">© 2026 Nightshelf. Made for quiet evenings and soft goodnights.</div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+      document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    })();
+  </script>
+</body>
+</html>
