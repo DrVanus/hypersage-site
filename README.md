@@ -12,9 +12,10 @@ product sites that live under it as subfolders.
 Thirteen products: Wingmate, Quietoak, CryptoSage AI, Saffra, StoryVault AI, Nightshelf,
 Hexhunter, Mythwright, The One, Rowan, Alder, Waddleton and Mythkin.
 
-Twelve of the thirteen are iOS apps. **Waddleton is a browser game** — it is on neither
-store and is played free at <https://waddleton.pages.dev/>. Copy that describes the
-portfolio should say "iOS apps and a browser game", not "iOS apps".
+Eleven of the thirteen currently have iOS app code. **Waddleton is a browser game**,
+played at <https://waddleton.pages.dev/>; **The One is currently a landing-page concept**.
+Portfolio copy should say "consumer products" unless it is intentionally describing a
+specific platform.
 
 ## Two names, and they are not interchangeable
 
@@ -55,7 +56,7 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
 ### Studio pages
 
 - `index.html` — the landing page: inline CSS, one small scroll-reveal script, no build
-  step. Section order is `products → ai → approach → about → contact` and it must match
+  step. Section order is `ai → products → approach → about → contact` and it must match
   the nav in both the desktop links and the mobile `<details>` menu.
 - `privacy.html` — studio-site privacy policy. Scoped to the studio pages by name,
   because the subfolders are now the same origin and `/saffra/` runs a Firebase-backed
@@ -85,28 +86,26 @@ delete them when convenient and do not add more.
 `sitemap.xml` is a sitemap **index**. Every product subfolder that has a `sitemap.xml`
 needs a child entry there or its pages go undeclared — all eleven are listed today.
 
-## Status vocabulary
+## Availability copy
 
-Product cards use one of: `Coming soon`, `In development`, `In beta`, `Live now`. Only
-Waddleton is `Live now`, and it is live in a browser — **nothing is on the App Store
-yet**. The gradient `badge-spotlight` style ("✦ New") is currently unused; keep it for
-the first product that genuinely ships to a store.
+The studio homepage deliberately does not rank products by launch state. Availability
+belongs on each product page and in the destination of its call to action. A product card
+may link to a live experience when one exists, but studio-level copy should explain the
+portfolio and its shared product architecture rather than compare release status.
 
-Each card's status must match what that product's own site says, and the two launch
-sentences on `index.html` (the `#approach` intro and the `#about` paragraph) must move
-the week the first App Store approval lands.
-
-## Audit gate
+## Audit tooling
 
 ```bash
 python3 ~/.claude/skills/no-build-marketing-site/site_audit.py . --contract site-audit-contract.json
 ```
 
-`--contract` takes a **bare filename relative to the site directory**. It must end with
-`0 failure(s)`. The contract records the evidence behind the site's absolute claims
-(`no_account`, `no_ads`, `offline`, `no_tracking`) — add evidence there before adding any
-new absolute claim to a page, and **re-derive the evidence when the code moves**. A gate
-that certifies a stale fact is worse than no gate.
+The legacy script is useful for a single standalone marketing site, but it is **not a
+release gate for this consolidated multi-site tree**. It currently misreads same-origin
+subfolder links, sitemap-index semantics, nested product contracts, and intentionally
+reused screenshots. Treat its output as leads to inspect, not a pass/fail result, until a
+repo-specific validator replaces it. The contracts still record evidence behind absolute
+claims (`no_account`, `no_ads`, `offline`, `no_tracking`); re-derive that evidence whenever
+the product code moves. A gate that certifies a stale fact is worse than no gate.
 
 ## Deploy (GitHub Pages)
 
