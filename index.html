@@ -257,21 +257,53 @@
     .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; line-height: 1.22; margin-bottom: 16px; }
     .section-head p { color: var(--muted); font-size: 1.08rem; }
 
-    /* ===== APPROACH ===== */
-    .approach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 18px; }
-    .approach-card {
-      padding: 28px 26px; border: 1px solid var(--line); border-radius: var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0));
-      transition: transform .2s, border-color .2s, background .2s;
+    /* ===== APPROACH — ledger rows =====
+       Deliberately not a card grid: four equal boxes forced uneven copy to equal
+       height (leaving ragged empty space) and needed decorative icons to fill the
+       corner. A keyed row lets each claim run to its natural length. */
+    /* The lead claim carries the section's argument; the ledger below is the record
+       of how it is held up. Without it every row weighed the same and nothing landed. */
+    .approach-lead {
+      border-left: 2px solid var(--brand-a); padding-left: 30px;
+      margin-bottom: 54px; max-width: 760px;
     }
-    .approach-card:hover { transform: translateY(-4px); border-color: var(--line-strong); background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0)); }
-    .approach-card .ic {
-      width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-      background: rgba(45,212,191,0.10); border: 1px solid rgba(45,212,191,0.22); margin-bottom: 18px; color: var(--brand-a);
+    .approach-lead .k {
+      display: block; margin-bottom: 16px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--brand-a);
     }
-    .approach-card .ic svg { width: 24px; height: 24px; }
-    .approach-card h3 { font-size: 1.16rem; font-weight: 600; margin-bottom: 9px; line-height: 1.3; }
-    .approach-card p { color: var(--muted); font-size: 0.96rem; }
+    .approach-lead h3 {
+      font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 700; line-height: 1.24; margin-bottom: 16px;
+    }
+    .approach-lead p { color: var(--muted); font-size: 1.05rem; }
+    @media (max-width: 820px) { .approach-lead { padding-left: 20px; margin-bottom: 40px; } }
+
+    .approach-ledger { border-top: 1px solid var(--line-strong); }
+    .approach-row {
+      display: grid; grid-template-columns: 200px 1fr; gap: 0 44px;
+      padding: 28px 0; border-bottom: 1px solid var(--line); position: relative;
+    }
+    /* Hairline wipe on hover — replaces the card's translateY lift. */
+    .approach-row::after {
+      content: ""; position: absolute; left: 0; bottom: -1px; height: 1px; width: 0;
+      background: linear-gradient(90deg, var(--brand-a), transparent);
+      transition: width .45s ease;
+    }
+    .approach-row:hover::after { width: 100%; }
+    .approach-row .k {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--faint); padding-top: 0.5em;
+    }
+    .approach-row h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 10px; line-height: 1.28; }
+    .approach-row p { color: var(--muted); font-size: 1rem; max-width: 64ch; }
+    /* One phrase per row lifted to full contrast so the eye lands on the claim. */
+    .approach-row .pull { color: var(--fg); font-weight: 500; }
+    @media (max-width: 820px) {
+      .approach-row { grid-template-columns: 1fr; gap: 10px; }
+      .approach-row .k { padding-top: 0; }
+    }
 
     /* ===== PRODUCTS ===== */
     .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
@@ -422,7 +454,8 @@
        Only active when JS adds .js-reveal (which it only does when motion is OK +
        IntersectionObserver exists), so no-JS / reduced-motion users see everything. */
     .js-reveal .section-head,
-    .js-reveal .approach-card,
+    .js-reveal .approach-lead,
+    .js-reveal .approach-row,
     .js-reveal .product,
     .js-reveal .system-card,
     .js-reveal .about-grid > *,
@@ -435,14 +468,15 @@
     /* 3n+2 / 3n+3, not 2 / 3 — .systems-grid is repeat(3, 1fr) and the model-stack
        section runs to six cards, so a fixed nth-child staggers only the first row
        and the second row pops in together. */
-    .js-reveal .systems-grid > *:nth-child(3n+2), .js-reveal .approach-grid > *:nth-child(2) { transition-delay: .06s; }
-    .js-reveal .systems-grid > *:nth-child(3n+3), .js-reveal .approach-grid > *:nth-child(3) { transition-delay: .12s; }
-    .js-reveal .approach-grid > *:nth-child(4) { transition-delay: .18s; }
+    .js-reveal .systems-grid > *:nth-child(3n+2), .js-reveal .approach-ledger > *:nth-child(2) { transition-delay: .06s; }
+    .js-reveal .systems-grid > *:nth-child(3n+3), .js-reveal .approach-ledger > *:nth-child(3) { transition-delay: .12s; }
+    .js-reveal .approach-ledger > *:nth-child(4) { transition-delay: .18s; }
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-      .product:hover, .approach-card:hover, .btn:hover { transform: none !important; }
+      .product:hover, .btn:hover { transform: none !important; }
+      .approach-row:hover::after { width: 0 !important; }
     }
   </style>
   <script>
@@ -543,26 +577,32 @@
         <h2>Built by hand, at speed.</h2>
         <p>Thirteen products from one small team, each with its own look, voice and standards — because the people setting them are the people who use what they ship.</p>
       </div>
-      <div class="approach-grid">
-        <div class="approach-card">
-          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 5.6L20 9l-4.4 3.7L17 19l-5-3-5 3 1.4-6.3L4 9l5.6-1.4z"/></svg></div>
-          <h3>The model is the easy part</h3>
-          <p>Anyone can call the same API we do. What actually takes the time is everything around it — the illustration, the voice, the motion, the wording — and all of that is made by hand, per app.</p>
+      <div class="approach-lead">
+        <span class="k">The premise</span>
+        <h3>The model is the easy part.</h3>
+        <p>Anyone can call the same API we do. <span class="pull">What actually takes the time is everything around it</span> — the illustration, the motion, the voice it answers in — and all of that is made by hand, per app.</p>
+      </div>
+      <div class="approach-ledger">
+        <div class="approach-row">
+          <div class="k">Tooling</div>
+          <div>
+            <h3>We built our own</h3>
+            <p>Our illustration pipeline, our testing gates and our release process are all in-house and shared by every product — so a standard set once holds across thirteen apps, and <span class="pull">a lesson learned in one is fixed in all of them</span>.</p>
+          </div>
         </div>
-        <div class="approach-card">
-          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.4"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M10 11l-4-3.5M14 11l4-3.5M10 13l-4 3.5M14 13l4 3.5"/></svg></div>
-          <h3>We built our own tooling</h3>
-          <p>Our illustration pipeline, our testing gates and our release process are all in-house and shared by every product — so a standard set once holds across thirteen apps, and a lesson learned in one is fixed in all of them.</p>
+        <div class="approach-row">
+          <div class="k">Research</div>
+          <div>
+            <h3>We run our own experiments</h3>
+            <p>Alongside the apps we build quantitative systems that read markets and act on them. <span class="pull">CryptoSage is the part of that work you can hold in your hand.</span></p>
+          </div>
         </div>
-        <div class="approach-card">
-          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 3.5 3.5L21 5"/><path d="M15 5h6v6"/></svg></div>
-          <h3>We run our own experiments</h3>
-          <p>Alongside the apps we build quantitative systems that read markets and act on them. CryptoSage is the part of that work you can hold in your hand.</p>
-        </div>
-        <div class="approach-card">
-          <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="M9.5 3 8 9l4 12 4-12-1.5-6"/></svg></div>
-          <h3>Ship, then sharpen</h3>
-          <p>A working build in someone's hands teaches more in a week than a mockup does in a month. We ship early, listen, and keep sharpening.</p>
+        <div class="approach-row">
+          <div class="k">Cadence</div>
+          <div>
+            <h3>Ship, then sharpen</h3>
+            <p><span class="pull">A working build in someone's hands teaches more in a week than a mockup does in a month.</span> We ship early, listen, and keep sharpening.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -1005,7 +1045,7 @@
     (function () {
       if (!document.documentElement.classList.contains('js-reveal')) return;
       var els = document.querySelectorAll(
-        '.section-head, .approach-card, .product, .system-card, .about-grid > *, .cta .container'
+        '.section-head, .approach-lead, .approach-row, .product, .system-card, .about-grid > *, .cta .container'
       );
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
