@@ -3,14 +3,12 @@
 # only ever reads robots.txt from an origin root, and the site was served from a
 # project path, so the file that governed this host was drvanus.github.io/robots.txt.
 #
-# THIS IS THE ONLY robots.txt THAT DOES ANYTHING. Eight subfolders still carry one
-# each (nightshelf/, storyvault/, mythwright/, wingmate/, saffra/, quietoak/,
-# hexhunter/, mythkin/) — they arrived with the sites when they were folded in from
-# their own repos, where each WAS an origin root. Nested robots.txt is ignored by
-# every crawler, at every level, always, so they are inert rather than harmful; their
-# stale Sitemap: lines are read by nobody. Delete them when convenient, and do not add
-# more. The eleven product sites are subfolders of this one origin, so this file
-# covers all of them.
+# THIS IS THE ONLY robots.txt THAT CONTROLS CRAWLING. Eight subfolders retain a
+# robots.txt from the standalone sites that were folded into this origin. Crawlers
+# ignore those nested files, but their Sitemap lines point at the canonical
+# hypersage.ai subfolder URLs so a direct request does not advertise retired hosts.
+# The eleven product sites are subfolders of this one origin, so the rules below
+# cover all of them.
 User-agent: *
 Allow: /
 

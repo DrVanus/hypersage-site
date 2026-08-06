@@ -18,8 +18,8 @@
   <meta property="og:url" content="https://hypersage.ai/hexhunter/">
   <meta property="og:site_name" content="Hexhunter">
   <meta property="og:image" content="https://hypersage.ai/hexhunter/og-image.png?v=20260806b">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image:width" content="640">
+  <meta property="og:image:height" content="336">
   <meta property="og:image:alt" content="Hexhunter — a gothic illustrated horde-survivor">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Hexhunter — Survive the Horde. Draft Your Doom.">
@@ -45,7 +45,9 @@
       --card-soft: #1E1830;
       --fg: #ECE7F5;          /* bone-white ink */
       --muted-fg: #A99EC2;    /* muted lilac ink */
-      --tertiary-fg: #7A7092;
+      /* Raised from #7A7092 so 0.74–0.92rem labels clear AA over the fixed
+         violet atmosphere instead of only against the flat page colour. */
+      --tertiary-fg: #8D82A8;
       --primary: #8B5CF6;     /* arcane violet */
       --primary-bright: #A78BFA;
       --primary-dark: #6D28D9;
@@ -244,18 +246,29 @@
     }
     .hero-art .carousel img.active { opacity: 1; }
     .hero-art .carousel-column { display: flex; flex-direction: column; align-items: center; }
-    .carousel-dots { display: flex; justify-content: center; gap: 9px; margin-top: 20px; }
+    .carousel-dots { display: flex; justify-content: center; gap: 5px; margin-top: 20px; }
     .carousel-dots button {
-      width: 8px; height: 8px; padding: 0; border: 0; cursor: pointer;
-      border-radius: 999px; background: rgba(167,139,250,0.28);
+      width: 24px; height: 24px; padding: 0; border: 0; cursor: pointer;
+      display: grid; place-items: center; background: transparent;
+    }
+    .carousel-dots button::before {
+      content: ''; width: 8px; height: 8px; border-radius: 999px;
+      background: rgba(167,139,250,0.58);
       transition: width .3s ease, background .3s ease, box-shadow .3s ease;
     }
-    .carousel-dots button:hover { background: rgba(167,139,250,0.55); }
-    .carousel-dots button.active {
-      width: 24px; background: var(--primary-bright);
+    .carousel-dots button:hover::before { background: var(--primary-bright); }
+    .carousel-dots button.active::before {
+      width: 20px; background: var(--primary-bright);
       box-shadow: 0 0 12px var(--violet-glow);
     }
     .carousel-dots button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .carousel-pause {
+      min-height: 44px; margin-top: 4px; padding: 8px 14px;
+      border: 1px solid var(--border-strong); border-radius: 999px;
+      background: transparent; color: var(--muted-fg);
+      font: 600 .84rem/1.3 'Inter', sans-serif; cursor: pointer;
+    }
+    .carousel-pause:hover { color: var(--fg); border-color: var(--primary-bright); }
 
     /* ===== SECTION ===== */
     section { position: relative; }
@@ -507,7 +520,7 @@
   "url": "https://hypersage.ai/hexhunter/",
   "author": {
     "@type": "Organization",
-    "name": "Hypersage AI Labs"
+    "name": "HyperSage AI Labs LLC"
   }
 }
 </script>
@@ -579,6 +592,7 @@
               </div>
             </div>
             <div class="carousel-dots" id="heroDots" role="tablist" aria-label="Choose a screenshot"></div>
+            <button class="carousel-pause" id="heroPause" type="button" hidden>Pause rotation</button>
           </div>
         </div>
       </div>
@@ -948,7 +962,7 @@
     <!-- No App Store age rating exists yet — Hexhunter is unreleased. The studio's own
          questionnaire in Hexhunter/store/listing.md:80 expects 12+, driven by fantasy
          violence. Do not print a number here until Apple has actually assigned one. -->
-    <div class="copyright">© 2026 HyperSage. Fantasy violence. All hunts are optional; the dark is not.</div>
+    <div class="copyright">© 2026 HyperSage AI Labs LLC. Fantasy violence. All hunts are optional; the dark is not.</div>
   </footer>
 
   <!-- Hero carousel: crossfade + auto-rotate through gameplay screenshots.
@@ -957,6 +971,7 @@
     (function () {
       var carousel = document.getElementById('heroCarousel');
       var dotsWrap = document.getElementById('heroDots');
+      var pauseBtn = document.getElementById('heroPause');
       if (!carousel || !dotsWrap) return;
 
       var slides = Array.prototype.slice.call(carousel.querySelectorAll('img'));
@@ -964,7 +979,7 @@
 
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var DELAY = 3600;
-      var i = 0, timer = null;
+      var i = 0, timer = null, paused = false;
 
       var dots = slides.map(function (_, idx) {
         var b = document.createElement('button');
@@ -992,7 +1007,7 @@
 
       function restart() {
         stop();
-        if (!reduce) timer = setInterval(next, DELAY);
+        if (!reduce && !paused) timer = setInterval(next, DELAY);
       }
 
       // Initial state
@@ -1000,6 +1015,14 @@
       dots[0].setAttribute('aria-selected', 'true');
 
       if (!reduce) {
+        if (pauseBtn) {
+          pauseBtn.hidden = false;
+          pauseBtn.addEventListener('click', function () {
+            paused = !paused;
+            pauseBtn.textContent = paused ? 'Resume rotation' : 'Pause rotation';
+            if (paused) stop(); else restart();
+          });
+        }
         restart();
         carousel.addEventListener('mouseenter', stop);
         carousel.addEventListener('mouseleave', restart);

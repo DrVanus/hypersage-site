@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://drvanus.github.io/storyvault-app/sitemap.xml
+Sitemap: https://hypersage.ai/storyvault/sitemap.xml

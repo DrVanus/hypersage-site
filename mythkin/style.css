@@ -29,7 +29,8 @@ a{color:var(--tint)}
 a:focus-visible,button:focus-visible{outline:2px solid var(--tint);outline-offset:2px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
   padding:1.25rem 1.35rem;margin:1rem 0}
-.card h3{margin-top:0}
+.card h3,.card h2.card-heading{margin-top:0}
+.card h2.card-heading{font-size:1rem}
 table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.95rem}
 th,td{text-align:left;padding:.55rem .5rem;border-bottom:1px solid var(--border);vertical-align:top}
 th{color:var(--dim);font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em}
@@ -94,6 +95,16 @@ ul.plain li{padding:.35rem 0;border-bottom:1px solid var(--border)}
   border-radius:14px;padding:1.25rem 1.35rem;margin:1rem 0}
 .refusals ul{margin:0;padding-left:1.15rem}
 .refusals li{padding:.28rem 0}
+
+/* Launch status ------------------------------------------------------------- */
+.availability{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:1.25rem 1.35rem;margin:2rem 0 0}
+.availability h2{margin:0 0 .4rem}
+.availability p{margin:.25rem 0 1rem}
+.launch-button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+  padding:.55rem .9rem;border:1px solid currentColor;border-radius:999px;
+  color:var(--tint);font-weight:700;text-decoration:none}
+.launch-button:hover,.launch-button:focus{background:var(--bg);text-decoration:underline}
 
 @media (max-width:760px){
   .hero{grid-template-columns:1fr;gap:1.75rem}

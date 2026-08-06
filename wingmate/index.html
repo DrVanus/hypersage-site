@@ -28,24 +28,6 @@
   <link rel="icon" type="image/png" href="app-icon.png">
   <link rel="apple-touch-icon" href="app-icon.png">
 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "MobileApplication",
-    "name": "Wingmate",
-    "applicationCategory": "Lifestyle",
-    "operatingSystem": "iOS",
-    "description": "Four AI dating coaches with real perspectives. Screenshot analysis, platform-aware coaching, and personalized openers.",
-    "url": "https://hypersage.ai/wingmate/",
-    "image": "https://hypersage.ai/wingmate/app-icon.png",
-    "author": {
-      "@type": "Organization",
-      "name": "Hypersage AI Labs",
-      "url": "https://hypersage.ai/"
-    }
-  }
-  </script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -62,7 +44,7 @@
       --fg: #F0ECF4;
       --fg-strong: #FFFFFF;
       --muted: #9CA3B4;
-      --faint: #5F6778;
+      --faint: #8A93A6;
       --line: rgba(255,255,255,0.07);
       --line-strong: rgba(255,255,255,0.12);
 
@@ -255,14 +237,19 @@
       transition: opacity .4s ease;
     }
     .carousel-caption span { color: var(--amber); }
-    .carousel-dots { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+    .carousel-dots { display: flex; justify-content: center; gap: 0; margin-top: 5px; }
     .carousel-dots button {
-      width: 7px; height: 7px; padding: 0; border: 0; cursor: pointer;
-      border-radius: 999px; background: rgba(232,168,56,0.25);
+      position: relative; width: 32px; height: 32px; padding: 0; border: 0;
+      cursor: pointer; border-radius: 999px; background: transparent;
+    }
+    .carousel-dots button::before {
+      content: ''; position: absolute; left: 50%; top: 50%;
+      width: 8px; height: 8px; border-radius: 999px;
+      transform: translate(-50%, -50%); background: rgba(232,168,56,0.60);
       transition: width .3s ease, background .3s ease, box-shadow .3s ease;
     }
-    .carousel-dots button:hover { background: rgba(232,168,56,0.50); }
-    .carousel-dots button.active {
+    .carousel-dots button:hover::before { background: rgba(232,168,56,0.82); }
+    .carousel-dots button.active::before {
       width: 22px; background: var(--amber);
       box-shadow: 0 0 14px rgba(232,168,56,0.30);
     }
@@ -571,7 +558,7 @@
   "url": "https://hypersage.ai/wingmate/",
   "author": {
     "@type": "Organization",
-    "name": "Hypersage AI Labs"
+    "name": "HyperSage AI Labs LLC"
   }
 }
 </script>
@@ -591,7 +578,7 @@
         <a href="#screens">Screens</a>
         <a href="#coaches">Coaches</a>
         <a href="#how">How it works</a>
-        <a href="#download" class="btn btn-ghost">Get Wingmate</a>
+        <a href="#notify" class="btn btn-ghost">Launch notice</a>
       </div>
       <details class="mobile-menu">
         <summary aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></summary>
@@ -601,7 +588,7 @@
           <a href="#coaches">Coaches</a>
           <a href="#how">How it works</a>
           <a href="#platforms">Platforms</a>
-          <a href="#download">Get Wingmate</a>
+          <a href="#notify">Launch notice</a>
         </div>
       </details>
     </div>
@@ -618,7 +605,7 @@
           <h1>AI dating coaches that <span class="grad-text">actually get it.</span></h1>
           <p class="lede">Four coaches, four perspectives. Drop a screenshot and get exact replies to send — platform-aware advice for Tinder, Hinge, Bumble, Instagram, and plain old texting.</p>
           <div class="hero-cta">
-            <a href="#download" class="btn btn-primary"><span>Get started</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a href="#notify" class="btn btn-primary"><span>Get launch notice</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
             <a href="#screens" class="btn btn-ghost"><span>See it in action</span></a>
           </div>
           <div class="hero-trust">
@@ -1002,9 +989,9 @@
   </section>
 
   <!-- ===== CTA ===== -->
-  <section class="cta" id="download">
+  <section class="cta" id="notify">
     <div class="container">
-      <span class="eyebrow">Get Wingmate</span>
+      <span class="eyebrow">Launch notice</span>
       <h2 style="margin-top: 18px;">Your next conversation<br>starts <span class="grad-text">here.</span></h2>
       <p>Wingmate is coming to iOS. Four coaches, real advice, and conversations that actually go somewhere.</p>
       <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Wingmate%20launches" class="btn btn-primary"><span>Get notified at launch</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -1045,7 +1032,7 @@
     </div>
     <div class="container">
       <div class="f-bottom">
-        <span>&copy; 2026 Hypersage AI Labs. All rights reserved.</span>
+        <span>&copy; 2026 HyperSage AI Labs LLC. All rights reserved.</span>
         <span>Four coaches. Real advice. No guessing.</span>
       </div>
     </div>

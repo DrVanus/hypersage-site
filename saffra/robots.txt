@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://drvanus.github.io/saffra-app/sitemap.xml
+Sitemap: https://hypersage.ai/saffra/sitemap.xml

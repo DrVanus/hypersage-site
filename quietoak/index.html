@@ -46,7 +46,9 @@
       --card-soft: #EAF1F0;   /* cardSoft */
       --fg: #21353B;          /* seaDeep ink */
       --muted-fg: #4A5E64;    /* muted ink (AA on light) */
-      --tertiary-fg: #7C8A8E;
+      /* Raised from #7C8A8E: the old token fell below AA even on white and
+         dropped further over the fixed sage/apricot atmosphere. */
+      --tertiary-fg: #5E6D71;
       --primary: #3E7D8A;     /* sea */
       --primary-dark: #336974;/* seaPressed */
       --sage: #9DBFA8;
@@ -97,7 +99,7 @@
     }
 
     a { color: var(--primary-dark); text-decoration: none; transition: color .2s; }
-    a:hover { color: var(--primary); }
+    a:hover { color: var(--fg); }
 
     .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 
@@ -121,7 +123,7 @@
     nav.site .brand img { width: 36px; height: 36px; border-radius: 9px; }
     nav.site .links { display: flex; gap: 20px; font-size: 0.95rem; flex-wrap: nowrap; white-space: nowrap; }
     nav.site .links a { color: var(--muted-fg); font-weight: 600; }
-    nav.site .links a:hover { color: var(--primary); }
+    nav.site .links a:hover { color: var(--primary-dark); }
 
     /* Mobile menu (no JS): a <details> hamburger that never collides with the brand. */
     .mobile-menu { display: none; position: relative; }
@@ -534,7 +536,7 @@
   "url": "https://hypersage.ai/quietoak/",
   "author": {
     "@type": "Organization",
-    "name": "HyperSage AI Labs"
+    "name": "HyperSage AI Labs LLC"
   }
 }
 </script>
@@ -1085,7 +1087,7 @@
       <a href="mailto:support@hypersage.ai">Contact</a>
     </div>
     <div class="copyright"><a href="https://hypersage.ai/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">A HyperSage AI Labs app</a></div>
-    <div class="copyright">© 2026 Quietoak. Rooted and steady, through the storm.</div>
+    <div class="copyright">© 2026 HyperSage AI Labs LLC. Quietoak — rooted and steady, through the storm.</div>
   </footer>
 
   <script>

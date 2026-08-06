@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://drvanus.github.io/nightshelf-site/sitemap.xml
+Sitemap: https://hypersage.ai/nightshelf/sitemap.xml

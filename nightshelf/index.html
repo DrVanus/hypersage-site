@@ -26,7 +26,9 @@
   <meta property="og:url" content="https://hypersage.ai/nightshelf/">
   <meta property="og:site_name" content="Nightshelf">
   <meta property="og:image" content="https://hypersage.ai/nightshelf/app-icon.png">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Nightshelf — Bedtime stories, read aloud">
   <meta name="twitter:description" content="Bedtime classics and AI-written stories, read aloud in a soft, sleepy voice.">
   <meta name="twitter:image" content="https://hypersage.ai/nightshelf/app-icon.png">
@@ -180,7 +182,25 @@
     }
     nav.site .links a:not(.btn):hover { color: var(--fg); }
     nav.site .links a:not(.btn):hover::after { right: 0; }
-    @media (max-width: 700px) { nav.site .links a:not(.btn) { display: none; } }
+    .mobile-menu { display: none; position: relative; }
+    .mobile-menu > summary {
+      list-style: none; cursor: pointer; padding: 6px 10px;
+      min-width: 44px; min-height: 44px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid var(--gold-border); border-radius: 10px;
+      color: var(--accent-bright); font-weight: 700; font-size: 1.1rem; line-height: 1.3;
+    }
+    .mobile-menu > summary::-webkit-details-marker { display: none; }
+    .mobile-menu[open] > summary { background: var(--accent-glow); }
+    .mobile-links {
+      position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
+      display: flex; flex-direction: column; gap: 2px; min-width: 200px;
+      background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: 14px; padding: 8px; box-shadow: var(--shadow-md);
+    }
+    .mobile-links a { color: var(--fg); font-weight: 600; padding: 10px 12px; border-radius: 8px; }
+    .mobile-links a:hover { background: var(--bg-raised); color: var(--accent-bright); }
+    @media (max-width: 700px) { nav.site .links { display: none; } .mobile-menu { display: block; } }
 
     /* ============================ BUTTONS ============================ */
     .btn {
@@ -194,6 +214,8 @@
     }
     .btn:hover { color: var(--ink); transform: translateY(-2px); box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 12px 34px rgba(232,177,92,0.42); }
     .btn:active { transform: translateY(0); }
+    .btn[aria-disabled="true"] { cursor: default; opacity: .82; box-shadow: none; }
+    .btn[aria-disabled="true"]:hover { transform: none; box-shadow: none; }
     .btn.ghost {
       background: rgba(232,177,92,0.05); color: var(--accent-bright);
       border: 1px solid var(--gold-border); box-shadow: none;
@@ -304,6 +326,13 @@
     }
     .gallery-row::-webkit-scrollbar { display: none; }
     .shot { flex: 0 0 auto; width: 228px; scroll-snap-align: center; text-align: center; }
+    @media (max-width: 700px) {
+      /* Decorative glows may bleed visually, but they must not widen the page.
+         The gallery itself remains horizontally scrollable inside its row. */
+      .device-wrap::before { inset: -12% 0; }
+      .gallery-shell::before { left: 0; }
+      .gallery-shell::after { right: 0; }
+    }
     .shot .frame {
       padding: 9px; border-radius: 36px;
       background: linear-gradient(165deg, #262d4b, #10142a 62%, #1a2140);
@@ -358,7 +387,7 @@
       border: 1px solid var(--gold-border); margin-bottom: 16px; line-height: 1;
       background: var(--accent-glow);
     }
-    .step h4 { font-size: 1.14rem; line-height: 1.4; margin-bottom: 6px; }
+    .step h3 { font-size: 1.14rem; line-height: 1.4; margin-bottom: 6px; }
     .step p { font-size: .95rem; color: var(--muted-fg); line-height: 1.65; }
 
     /* =========================== CTA BAND =========================== */
@@ -383,7 +412,7 @@
     footer.site .container { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
     footer.site .brand { font-size: 1.1rem; color: var(--muted-fg); }
     footer.site .brand img { width: 30px; height: 30px; border-radius: 8px; }
-    footer.site .flinks { display: flex; gap: 26px; }
+    footer.site .flinks { display: flex; gap: 26px; flex-wrap: wrap; justify-content: center; }
     footer.site .flinks a { color: var(--tertiary-fg); font-size: .92rem; line-height: 1.6; }
     footer.site .flinks a:hover { color: var(--accent-bright); }
     footer.site .copy { color: var(--tertiary-fg); font-size: .85rem; line-height: 1.6; }
@@ -405,7 +434,7 @@
   "url": "https://hypersage.ai/nightshelf/",
   "author": {
     "@type": "Organization",
-    "name": "Hypersage AI Labs"
+    "name": "HyperSage AI Labs LLC"
   }
 }
 </script>
@@ -423,6 +452,15 @@
         <a href="#ritual">How it works</a>
         <a href="#get" class="btn ghost sm">Coming to iOS</a>
       </div>
+      <details class="mobile-menu">
+        <summary aria-label="Open navigation">☰</summary>
+        <div class="mobile-links">
+          <a href="#screens">Screens</a>
+          <a href="#features">Features</a>
+          <a href="#ritual">How it works</a>
+          <a href="#get">Coming to iOS</a>
+        </div>
+      </details>
     </div>
   </nav>
 
@@ -550,9 +588,9 @@
         <p>Nightshelf is built around the quiet minutes before sleep.</p>
       </div>
       <div class="ritual">
-        <div class="step reveal"><div class="n">1</div><h4>Open your shelf</h4><p>Tonight's story waiting where you left it, beside shelves of classics.</p></div>
-        <div class="step reveal"><div class="n">2</div><h4>Press play</h4><p>A warm voice reads aloud while rain or firelight murmurs underneath.</p></div>
-        <div class="step reveal"><div class="n">3</div><h4>Drift off</h4><p>The sleep timer fades the story out and holds your place till tomorrow.</p></div>
+        <div class="step reveal"><div class="n">1</div><h3>Open your shelf</h3><p>Tonight's story waiting where you left it, beside shelves of classics.</p></div>
+        <div class="step reveal"><div class="n">2</div><h3>Press play</h3><p>A warm voice reads aloud while rain or firelight murmurs underneath.</p></div>
+        <div class="step reveal"><div class="n">3</div><h3>Drift off</h3><p>The sleep timer fades the story out and holds your place till tomorrow.</p></div>
       </div>
       <p class="fleuron" aria-hidden="true">✦ ✦ ✦</p>
     </div>
@@ -568,7 +606,7 @@
              changing the build setting first. -->
         <p>Nightshelf is coming to iPhone. A bedtime story, read aloud, every night.</p>
         <div class="cta-row">
-          <a href="#" class="btn">Coming to the App Store</a>
+          <span class="btn" aria-disabled="true">Coming to the App Store</span>
           <a href="privacy.html" class="btn ghost">Privacy</a>
         </div>
       </div>
@@ -585,7 +623,7 @@
         <a href="#features">Features</a>
         <a href="https://hypersage.ai/" target="_blank" rel="noopener">A HyperSage Studio App</a>
       </div>
-      <div class="copy">© 2026 Nightshelf. Made for quiet evenings and soft goodnights.</div>
+      <div class="copy">© 2026 HyperSage AI Labs LLC. Nightshelf — made for quiet evenings and soft goodnights.</div>
     </div>
   </footer>
 

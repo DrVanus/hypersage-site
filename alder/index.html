@@ -361,7 +361,8 @@
     details.faq { padding: 18px 0; border-bottom: 1px solid var(--border); }
     details.faq summary {
       font-weight: 700; font-size: 1.05rem; cursor: pointer; list-style: none;
-      display: flex; justify-content: space-between; align-items: center; padding-right: 8px; color: var(--fg);
+      min-height: 44px; display: flex; justify-content: space-between; align-items: center;
+      padding-right: 8px; color: var(--fg);
     }
     details.faq summary::-webkit-details-marker { display: none; }
     details.faq summary::after { content: '+'; color: var(--tint); font-weight: 400; font-size: 1.4rem; transition: transform .2s; }
@@ -412,7 +413,7 @@
   "url": "https://hypersage.ai/alder/",
   "author": {
     "@type": "Organization",
-    "name": "Hypersage AI Labs"
+    "name": "HyperSage AI Labs LLC"
   }
 }
 </script>
@@ -613,10 +614,12 @@
       </div>
 
       <!-- src holds the DARK shot; the toggle swaps it. data-shot is the stem
-           both appearances share. Without JS you get dark, which is correct. -->
+           both appearances share. Alt text describes content common to both
+           appearances so it stays accurate after the source changes. Without
+           JS you get dark, which is correct. -->
       <div class="screens-grid" id="screens-grid">
         <div class="screen-card">
-          <div class="screen-frame"><img data-shot="home" src="shots/home-dark.webp?v=20260804a" alt="Alder's Today screen at 3am: a night sky over the alder tree, a 90-day sober count, per-target counts, and the next milestone" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="home" src="shots/home-dark.webp?v=20260804a" alt="Alder's Today screen with an alder tree, a 90-day sober count, per-target counts, and the next milestone" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Today</strong>Your clock, and what's next</div>
         </div>
         <div class="screen-card">
@@ -844,7 +847,7 @@
       <a href="mailto:support@hypersage.ai">Contact</a>
     </div>
     <div class="copyright"><a href="https://hypersage.ai/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">A HyperSage Studio App</a></div>
-    <div class="copyright">© 2026 Alder. Still here in the morning.</div>
+    <div class="copyright">© 2026 HyperSage AI Labs LLC. Alder — still here in the morning.</div>
   </footer>
 
   <!-- The appearance switch. The only script on the page: it swaps the src of
