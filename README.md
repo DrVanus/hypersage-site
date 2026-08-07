@@ -55,9 +55,9 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
 
 ### Studio pages
 
-- `index.html` — the landing page: inline CSS, one small scroll-reveal script, no build
-  step. Section order is `ai → products → approach → about → contact` and it must match
-  the nav in both the desktop links and the mobile `<details>` menu.
+- `index.html` — the landing page: inline CSS, small enhancement scripts, no build
+  step. Section order is `hero → products → ai → about → contact`; the desktop and
+  mobile navigation must point to those public sections in the same order.
 - `privacy.html` — studio-site privacy policy. Scoped to the studio pages by name,
   because the subfolders are now the same origin and `/saffra/` runs a Firebase-backed
   email form.
@@ -72,7 +72,7 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
   infinity). Source in `brand/`.
 - `icons/` — 256px app icons for all 13 products (hero strip + product grid). All 13 are
   referenced by `index.html`.
-- `og-image.png` — 1200×630 social card, referenced with the `?v=20260806b` cache-buster
+- `og-image.png` — 1200×630 social card, referenced with the `?v=20260806c` cache-buster
   on all four studio pages. Bump the suffix whenever the bytes change, in all four.
 - `shots/` — **orphaned.** Two leftover screenshots (`quietoak.jpg`, `theone.jpg`) from a
   removed "A look at the work" showcase. Nothing in this repo references them.

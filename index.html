@@ -5,41 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#080B11">
-  <title>Hypersage AI Labs — independent product studio</title>
-  <meta name="description" content="Hypersage builds distinctive apps for relationships, health, food, stories, markets, and sleep — alongside original games and context-aware AI.">
+  <title>Hypersage AI Labs — Independent Product Studio</title>
+  <meta name="description" content="Hypersage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta name="robots" content="index, follow">
-  <!-- CANONICAL DOMAIN (2026-08-06) — hypersage.ai IS registered and live.
-       Cloudflare Registrar; apex A records to GitHub Pages (DNS-only, grey cloud —
-       proxying breaks Pages' certificate issuance); CNAME file in this repo attaches
-       it; Enforce HTTPS on. Every self-URL below points at the domain, and GitHub
-       301s the old drvanus.github.io/hypersage-site/* paths to it, path preserved.
-       support@hypersage.ai is live via Cloudflare Email Routing, so the mailto:
-       links throughout the site now reach a real mailbox rather than assuming one.
-       The eleven app sites are subfolders here (/rowan, /alder, /hexhunter, …), so
-       one domain and one certificate serve the whole portfolio. -->
+  <!-- hypersage.ai is the canonical origin for the studio and hosted product sites. -->
   <link rel="canonical" href="https://hypersage.ai/">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Hypersage AI Labs — independent product studio">
-  <meta property="og:description" content="Distinctive apps for relationships, health, food, stories, markets, and sleep — alongside original games and context-aware AI.">
+  <meta property="og:title" content="Hypersage AI Labs — Independent Product Studio">
+  <meta property="og:description" content="Hypersage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="Hypersage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260806b">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260806c">
+  <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Hypersage AI Labs — an independent product studio">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Hypersage AI Labs — independent product studio">
-  <meta name="twitter:description" content="Distinctive apps for relationships, health, food, stories, markets, and sleep — alongside original games and context-aware AI.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260806b">
+  <meta name="twitter:title" content="Hypersage AI Labs — Independent Product Studio">
+  <meta name="twitter:description" content="Hypersage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260806c">
   <meta name="twitter:image:alt" content="Hypersage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
-  <!-- Structured data states authorship without implying that every product is
-       currently purchasable. Add an Offer only when availability and pricing can be
-       verified against the product's live distribution channel. -->
+  <!-- Product schemas state authorship only; availability and pricing vary. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -51,8 +42,8 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260806b",
-        "description": "An independent studio building distinctive consumer products, with context-aware AI where it belongs.",
+        "image": "https://hypersage.ai/og-image.png?v=20260806c",
+        "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai"
       },
       { "@type": "VideoGame", "name": "Waddleton", "applicationCategory": "Game", "operatingSystem": "Web",
@@ -66,7 +57,7 @@
       { "@type": "MobileApplication", "name": "Mythwright", "applicationCategory": "Game", "operatingSystem": "iOS", "url": "https://hypersage.ai/mythwright/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "Wingmate", "applicationCategory": "Lifestyle", "operatingSystem": "iOS", "url": "https://hypersage.ai/wingmate/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "Hexhunter", "applicationCategory": "Game", "operatingSystem": "iOS", "url": "https://hypersage.ai/hexhunter/", "publisher": { "@id": "https://hypersage.ai/#org" } },
-      { "@type": "MobileApplication", "name": "Rowan", "applicationCategory": "Medical", "operatingSystem": "iOS", "url": "https://hypersage.ai/rowan/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "Rowan", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS", "url": "https://hypersage.ai/rowan/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "Alder", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS", "url": "https://hypersage.ai/alder/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "Mythkin", "applicationCategory": "EntertainmentApplication", "operatingSystem": "iOS", "url": "https://hypersage.ai/mythkin/", "publisher": { "@id": "https://hypersage.ai/#org" } }
     ]
@@ -109,7 +100,7 @@
       --c-rowan:     #6F5BC5;
       --c-alder:     #E0A458;
       --c-waddle:    #59C8FF;
-  --c-mythkin:   #E8823C;
+      --c-mythkin:   #E8823C;
 
       /* Text-safe tones for accents that fail WCAG AA as links on --panel.
          The card's top-border accent is left unchanged. */
@@ -406,6 +397,16 @@
       width: 26px; height: 26px; border-radius: 7px; flex: 0 0 auto; object-fit: cover;
       border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
+    @media (max-width: 700px) {
+      .strip { padding: 12px 0; }
+      .strip .container {
+        flex-wrap: nowrap; justify-content: flex-start; gap: 12px 26px;
+        overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .strip .container::-webkit-scrollbar { display: none; }
+      .strip .label, .strip .word { flex: 0 0 auto; }
+    }
 
     /* ===== SECTION SCAFFOLD ===== */
     section.block { padding: 88px 0; position: relative; }
@@ -414,29 +415,12 @@
     .section-head .eyebrow { display: block; margin-bottom: 16px; }
     .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; line-height: 1.22; margin-bottom: 16px; }
     .section-head p { color: var(--muted); font-size: 1.08rem; }
+    @media (max-width: 560px) {
+      section.block { padding: 68px 0; }
+      .section-head { margin-bottom: 36px; }
+    }
 
-    /* ===== APPROACH — ledger rows =====
-       Deliberately not a card grid: four equal boxes forced uneven copy to equal
-       height (leaving ragged empty space) and needed decorative icons to fill the
-       corner. A keyed row lets each claim run to its natural length. */
-    /* The lead claim carries the section's argument; the ledger below is the record
-       of how it is held up. Without it every row weighed the same and nothing landed. */
-    .approach-lead {
-      border-left: 2px solid var(--brand-a); padding-left: 30px;
-      margin-bottom: 54px; max-width: 760px;
-    }
-    .approach-lead .k {
-      display: block; margin-bottom: 16px;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--brand-a);
-    }
-    .approach-lead h3 {
-      font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 700; line-height: 1.24; margin-bottom: 16px;
-    }
-    .approach-lead p { color: var(--muted); font-size: 1.05rem; }
-    @media (max-width: 820px) { .approach-lead { padding-left: 20px; margin-bottom: 40px; } }
-
+    /* ===== STUDIO — operating principles ===== */
     .approach-ledger { border-top: 1px solid var(--line-strong); }
     .approach-row {
       display: grid; grid-template-columns: 200px 1fr; gap: 0 44px;
@@ -456,11 +440,6 @@
     }
     .approach-row h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 10px; line-height: 1.28; }
     .approach-row p { color: var(--muted); font-size: 1rem; max-width: 64ch; }
-    /* One phrase per row lifted to full contrast so the eye lands on the claim.
-       .system-card is listed here too: the AI cards use the same device, and the
-       rule was originally scoped to .approach-row alone, so the spans in that
-       section rendered as ordinary muted body text. */
-    .approach-row .pull, .system-card .pull { color: var(--fg); font-weight: 500; }
     @media (max-width: 820px) {
       .approach-row { grid-template-columns: 1fr; gap: 10px; }
       .approach-row .k { padding-top: 0; }
@@ -468,7 +447,7 @@
 
     /* ===== PRODUCTS ===== */
     .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-    @media (max-width: 780px) { .products-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .products-grid { grid-template-columns: 1fr; } }
     .product {
       --accent: var(--brand-a);
       /* Text tone for links. Cards whose accent is too dark to read on --panel override
@@ -477,7 +456,7 @@
       position: relative; padding: 28px; border: 1px solid var(--line); border-radius: var(--radius);
       background: var(--panel); overflow: clip;
       transition: transform .2s, border-color .2s, box-shadow .2s;
-      display: flex; flex-direction: column;
+      display: flex; flex-direction: column; scroll-margin-top: 88px;
     }
     .product::before {
       content: ''; position: absolute; inset: 0 0 auto 0; height: 3px;
@@ -536,34 +515,12 @@
     }
     .flow-step h3 { font-size: 1rem; font-weight: 600; margin-bottom: 7px; }
     .flow-step p { color: var(--muted); font-size: 0.88rem; line-height: 1.55; }
-    .systems-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-    @media (max-width: 820px) { .systems-grid { grid-template-columns: 1fr; } }
     @media (max-width: 920px) {
       .intelligence-flow { grid-template-columns: repeat(2, 1fr); }
       .flow-step:not(:last-child)::after { display: none; }
     }
     @media (max-width: 560px) { .intelligence-flow { grid-template-columns: 1fr; } }
-    .system-card { padding: 30px 28px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,0.015); }
-    .system-card .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-a); margin-bottom: 14px; }
-    .system-card h3 { font-size: 1.28rem; font-weight: 600; margin-bottom: 12px; line-height: 1.22; }
-    .system-card p { color: var(--muted); font-size: 0.96rem; margin-bottom: 14px; }
-    .system-card .meta { display: flex; flex-wrap: wrap; gap: 7px; }
-    .system-card .meta span { font-size: 0.76rem; color: var(--faint); border: 1px solid var(--line); border-radius: 8px; padding: 4px 9px; }
     .model-note { color: var(--faint); font-size: 0.82rem; margin-top: 18px; }
-
-    /* ===== ABOUT ===== */
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
-    @media (max-width: 820px) { .about-grid { grid-template-columns: 1fr; gap: 30px; } }
-    .about-grid p { color: var(--muted); font-size: 1.04rem; margin-bottom: 16px; }
-    .about-grid p strong { color: var(--fg); font-weight: 600; }
-    .principles { list-style: none; }
-    .principles li { position: relative; padding: 14px 0 14px 32px; border-bottom: 1px solid var(--line); color: var(--muted); }
-    .principles li:last-child { border-bottom: none; }
-    .principles li strong { color: var(--fg); font-weight: 600; display: block; margin-bottom: 2px; font-family: 'Space Grotesk', sans-serif; }
-    .principles li::before {
-      content: ''; position: absolute; left: 0; top: 20px; width: 16px; height: 16px; border-radius: 5px;
-      background: linear-gradient(120deg, var(--brand-a), var(--brand-b));
-    }
 
     /* ===== CTA ===== */
     .cta {
@@ -609,12 +566,9 @@
        Only active when JS adds .js-reveal (which it only does when motion is OK +
        IntersectionObserver exists), so no-JS / reduced-motion users see everything. */
     .js-reveal .section-head,
-    .js-reveal .approach-lead,
     .js-reveal .approach-row,
     .js-reveal .product,
     .js-reveal .flow-step,
-    .js-reveal .system-card,
-    .js-reveal .about-grid > *,
     .js-reveal .cta .container {
       opacity: 0; transform: translateY(20px);
       transition: opacity .6s cubic-bezier(.16,.8,.3,1), transform .6s cubic-bezier(.16,.8,.3,1);
@@ -622,7 +576,6 @@
     .js-reveal .is-in { opacity: 1 !important; transform: none !important; }
     .js-reveal .products-grid > *:nth-child(2n) { transition-delay: .07s; }
     .js-reveal .intelligence-flow > *:nth-child(2),
-    .js-reveal .systems-grid > *:nth-child(2n),
     .js-reveal .approach-ledger > *:nth-child(2) { transition-delay: .06s; }
     .js-reveal .intelligence-flow > *:nth-child(3),
     .js-reveal .approach-ledger > *:nth-child(3) { transition-delay: .12s; }
@@ -653,7 +606,7 @@
       body::before, .context-engine { display: none; }
       .hero-stage { grid-template-columns: 1fr; grid-template-areas: "eyebrow" "title" "copy"; }
       .grad-text { color: CanvasText; background: none; -webkit-text-fill-color: CanvasText; }
-      .btn, .eyebrow, .product, .system-card, .flow-step, .approach-row {
+      .btn, .eyebrow, .product, .flow-step, .approach-row {
         color: CanvasText; background: Canvas; border-color: CanvasText;
       }
       .btn-primary { color: ButtonText; background: ButtonFace; border: 1px solid ButtonText; box-shadow: none; }
@@ -685,9 +638,8 @@
         <span>Hypersage<span class="co-sub"> AI Labs</span></span>
       </a>
       <div class="links">
-        <a href="#ai">How it works</a>
         <a href="#products">Products</a>
-        <a href="#approach">How we build</a>
+        <a href="#ai">Intelligence</a>
         <a href="#about">Studio</a>
         <a href="support.html">Support</a>
         <a href="#contact" class="btn btn-ghost">Get in touch</a>
@@ -695,9 +647,8 @@
       <details class="mobile-menu">
         <summary aria-label="Open navigation menu">☰</summary>
         <div class="mobile-links">
-          <a href="#ai">How it works</a>
           <a href="#products">Products</a>
-          <a href="#approach">How we build</a>
+          <a href="#ai">Intelligence</a>
           <a href="#about">Studio</a>
           <a href="support.html">Support</a>
           <a href="#contact">Get in touch</a>
@@ -717,10 +668,10 @@
         <span class="eyebrow">Independent Product Studio</span>
         <h1><span class="hero-line">Software with</span> <span class="grad-text hero-line">a point of view.</span></h1>
         <div class="hero-copy">
-          <p class="lede">Hypersage builds distinctive consumer apps for relationships, health, recovery, food, stories, markets, and sleep — alongside original games. Where AI belongs, <strong>our intelligence layer</strong> combines the context you choose to share with product-specific knowledge, tools, and safeguards.</p>
+          <p class="lede">Hypersage builds distinctive consumer apps for relationships, health, recovery, food, stories, markets, and sleep — alongside original games. Where AI belongs, we add a <strong>product-specific intelligence layer</strong> that combines information you provide and relevant in-product context with domain knowledge, tools, and safeguards.</p>
           <div class="hero-cta">
             <a href="#products" class="btn btn-primary"><span>Explore the products</span><span aria-hidden="true">→</span></a>
-            <a href="#ai" class="btn btn-ghost">How the AI works</a>
+            <a href="#ai" class="btn btn-ghost">Intelligence layer</a>
           </div>
         </div>
 
@@ -744,7 +695,7 @@
           </svg>
 
           <div class="engine-node node-record">
-            <strong>Your record</strong>
+            <strong>Your context</strong>
             <small>goals · preferences</small>
           </div>
           <div class="engine-node node-recent">
@@ -760,14 +711,14 @@
             <span class="engine-orbit"></span>
             <img src="logo.png" alt="" width="25" height="28">
             <strong>Product system</strong>
-            <small>tools · data · rules<br>boundaries</small>
+            <small>knowledge · tools<br>rules · safeguards</small>
           </div>
 
           <div class="engine-output">
             <span>Result</span>
             <strong>Fit to the task</strong>
           </div>
-          <figcaption class="engine-foot">* Where the product supports live task context.</figcaption>
+          <figcaption class="engine-foot">* In products that support live task context.</figcaption>
         </figure>
       </div>
     </div>
@@ -777,82 +728,21 @@
   <div class="strip">
     <div class="container">
       <span class="label">The portfolio</span>
-      <a class="word" href="#products"><img src="icons/wingmate.png" alt="" width="26" height="26" loading="lazy">Wingmate</a>
-      <a class="word" href="#products"><img src="icons/quietoak.png" alt="" width="26" height="26" loading="lazy">Quietoak</a>
-      <a class="word" href="#products"><img src="icons/cryptosage.png" alt="" width="26" height="26" loading="lazy">CryptoSage&nbsp;AI</a>
-      <a class="word" href="#products"><img src="icons/saffra.png" alt="" width="26" height="26" loading="lazy">Saffra</a>
-      <a class="word" href="#products"><img src="icons/storyvault.png" alt="" width="26" height="26" loading="lazy">StoryVault&nbsp;AI</a>
-      <a class="word" href="#products"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
-      <a class="word" href="#products"><img src="icons/hexhunter.png" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
-      <a class="word" href="#products"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
-      <a class="word" href="#products"><img src="icons/theone.png" alt="" width="26" height="26" loading="lazy">The&nbsp;One</a>
-      <a class="word" href="#products"><img src="icons/rowan.png" alt="" width="26" height="26" loading="lazy">Rowan</a>
-      <a class="word" href="#products"><img src="icons/alder.png" alt="" width="26" height="26" loading="lazy">Alder</a>
-      <a class="word" href="#products"><img src="icons/waddleton.png" alt="" width="26" height="26" loading="lazy">Waddleton</a>
-      <a class="word" href="#products"><img src="icons/mythkin.png" alt="" width="26" height="26" loading="lazy">Mythkin</a>
+      <a class="word" href="#product-wingmate"><img src="icons/wingmate.png" alt="" width="26" height="26" loading="lazy">Wingmate</a>
+      <a class="word" href="#product-quietoak"><img src="icons/quietoak.png" alt="" width="26" height="26" loading="lazy">Quietoak</a>
+      <a class="word" href="#product-cryptosage"><img src="icons/cryptosage.png" alt="" width="26" height="26" loading="lazy">CryptoSage&nbsp;AI</a>
+      <a class="word" href="#product-saffra"><img src="icons/saffra.png" alt="" width="26" height="26" loading="lazy">Saffra</a>
+      <a class="word" href="#product-storyvault"><img src="icons/storyvault.png" alt="" width="26" height="26" loading="lazy">StoryVault&nbsp;AI</a>
+      <a class="word" href="#product-nightshelf"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
+      <a class="word" href="#product-hexhunter"><img src="icons/hexhunter.png" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
+      <a class="word" href="#product-mythwright"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
+      <a class="word" href="#product-the-one"><img src="icons/theone.png" alt="" width="26" height="26" loading="lazy">The&nbsp;One</a>
+      <a class="word" href="#product-rowan"><img src="icons/rowan.png" alt="" width="26" height="26" loading="lazy">Rowan</a>
+      <a class="word" href="#product-alder"><img src="icons/alder.png" alt="" width="26" height="26" loading="lazy">Alder</a>
+      <a class="word" href="#product-waddleton"><img src="icons/waddleton.png" alt="" width="26" height="26" loading="lazy">Waddleton</a>
+      <a class="word" href="#product-mythkin"><img src="icons/mythkin.png" alt="" width="26" height="26" loading="lazy">Mythkin</a>
     </div>
   </div>
-
-  <!-- ===== INTELLIGENCE LAYER =====
-       Claims in this section are scoped to the companion products. All seven
-       assemble structured context on every turn; five also pass live task state;
-       durable memory and safety mechanisms vary by product and are named accordingly. -->
-  <section class="block systems" id="ai">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">Our intelligence layer</span>
-        <h2>The model is only one part.</h2>
-        <p>Our companion products do not begin each turn with an empty chat box. They assemble the right context, carry continuity on purpose, apply rules the domain can defend, and return the result through an interface built for the task.</p>
-      </div>
-
-      <ol class="intelligence-flow" aria-label="Context layers a companion can use">
-        <li class="flow-step">
-          <h3>Your record</h3>
-          <p>Goals, preferences, conditions, boundaries, and anything else you choose to share.</p>
-        </li>
-        <li class="flow-step">
-          <h3>Recent activity</h3>
-          <p>Diary entries, symptoms, check-ins, cooking history, conversations, and other product events.</p>
-        </li>
-        <li class="flow-step">
-          <h3>The current task</h3>
-          <p>Where the product supports it: the open recipe, selected person, story chapter, or live market state.</p>
-        </li>
-        <li class="flow-step">
-          <h3>A product-specific result</h3>
-          <p>Context is combined with the relevant domain data, tools, rules, and interface.</p>
-        </li>
-      </ol>
-
-      <div class="systems-grid">
-        <div class="system-card">
-          <div class="tag">Context</div>
-          <h3>The app sends the situation, not just the sentence</h3>
-          <p>Every companion rebuilds a structured context package before it answers: what the person has told it, what they have logged, and what the conversation already established. That can mean symptoms and medications, diary entries and check-ins, pantry and allergies, a selected person and saved screenshots, or consented holdings and live market data. <span class="pull">The new message is one input among many.</span></p>
-        </div>
-
-        <div class="system-card">
-          <div class="tag">Continuity</div>
-          <h3>Memory with a boundary</h3>
-          <p>Continuity is represented explicitly: bounded facts, editable profiles, recent activity, and thread history. The product decides what should last, what should be replaced, and what can be cleared instead of asking a model to improvise memory from an endless transcript. <span class="pull">Storage, sync, and controls are designed per product.</span></p>
-        </div>
-
-        <div class="system-card">
-          <div class="tag">Domain logic</div>
-          <h3>Domain knowledge is designed into the product</h3>
-          <p>A general model can draft. The product supplies task-specific structure: schemas, reference data, tools, boundaries, and response formats. A chef works from pantry, allergies, recipes, and the current step; a portfolio assistant works from consented holdings, watchlists, and live markets. In the health, recovery, and DBT companions, separate safety checks can surface urgent resources before generation and before message limits. <span class="pull">It is not one generic chatbot with a new name and colour.</span></p>
-        </div>
-
-        <div class="system-card">
-          <div class="tag">App-native delivery</div>
-          <h3>The answer keeps the shape of the work</h3>
-          <p>An answer can become a structured symptom entry, an appointment brief, an adapted recipe, a character memory, a narrated scene, or the next action in a workflow. Streamed replies preserve the reader's place rather than pulling them away from earlier text, with stop controls and voice support where the product provides them. <span class="pull">Chat is an interface; the product is everything that happens around it.</span></p>
-        </div>
-      </div>
-
-      <p class="model-note">The portfolio uses Anthropic and OpenAI models; the exact provider and data path vary by product and feature.</p>
-    </div>
-  </section>
 
   <!-- ===== PRODUCTS ===== -->
   <section class="block" id="products">
@@ -860,13 +750,13 @@
       <div class="section-head">
         <span class="eyebrow">The portfolio</span>
         <h2>Focused products for different parts of life.</h2>
-        <p>Shared foundations do not mean a shared skin. Each product has its own audience, boundaries, visual language, and interaction model.</p>
+        <p>Each product is designed around a clear audience and job, with its own identity and way of working. What we learn carries across the portfolio; the products themselves remain distinct.</p>
       </div>
 
       <div class="products-grid">
 
         <!-- WINGMATE -->
-        <article class="product" style="--accent: var(--c-wingmate);">
+        <article class="product" id="product-wingmate" style="--accent: var(--c-wingmate);">
           <div class="top">
             <img class="app-icon" src="icons/wingmate.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -874,11 +764,10 @@
               <div class="cat">AI Dating Coach</div>
             </div>
           </div>
-          <p class="desc">Dating coaching built around the platform, the conversation, and the person you are talking to. Save context by connection, share profile screenshots, and work with four coaching styles on what to say next.</p>
+          <p class="desc">An AI dating coach that organizes context by connection, analyzes profile screenshots, and adapts guidance to the platform and conversation. Four coaching perspectives offer different tones and strategies.</p>
           <ul role="list">
             <li>Connection-specific context and screenshot analysis</li>
-            <li>Platform-aware guidance for Tinder, Hinge, Bumble, and texting</li>
-            <li>Four perspectives with distinct tone and strategy</li>
+            <li>Guidance for Tinder, Hinge, Bumble, and texting</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Wingmate site" href="wingmate/">Visit site <span aria-hidden="true">→</span></a>
@@ -886,19 +775,18 @@
         </article>
 
         <!-- QUIETOAK -->
-        <article class="product" style="--accent: var(--c-quietoak);">
+        <article class="product" id="product-quietoak" style="--accent: var(--c-quietoak);">
           <div class="top">
             <img class="app-icon" src="icons/quietoak.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Quietoak</h3>
-              <div class="cat">Mental Health · DBT</div>
+              <div class="cat">DBT Skills Companion</div>
             </div>
           </div>
-          <p class="desc">A DBT companion that connects daily diary entries, skills practice, goals, and recent conversations to make support more relevant in the moment.</p>
+          <p class="desc">A companion for practicing DBT skills that can use diary entries, goals, skills practice, and recent conversations to keep guidance relevant. It is not therapy or crisis care.</p>
           <ul role="list">
-            <li>Real DBT skills across all four modules</li>
-            <li>A one-minute diary card and gentle progress</li>
-            <li>A crisis kit that's always free and works offline</li>
+            <li>Skills organized across all four DBT modules</li>
+            <li>One-minute diary cards, progress tracking, and an offline crisis kit</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Quietoak site" href="quietoak/">Visit site <span aria-hidden="true">→</span></a>
@@ -906,7 +794,7 @@
         </article>
 
         <!-- CRYPTOSAGE -->
-        <article class="product" style="--accent: var(--c-crypto);">
+        <article class="product" id="product-cryptosage" style="--accent: var(--c-crypto);">
           <div class="top">
             <img class="app-icon" src="icons/cryptosage.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -914,23 +802,11 @@
               <div class="cat">Portfolio Intelligence</div>
             </div>
           </div>
-          <!-- FINANCE CATEGORY — two traps here, both previously live on this card.
-               (1) "what to do about it" is the sentence App Review and a regulator read
-                   as personalised investment advice. The studio gives none. Keep the
-                   explicit "It does not tell you what to buy."
-               (2) Portfolio access is CONSENT-GATED, not unconditional:
-                   cryptosage-ios/CryptoSage/AIContextBuilder.swift:56 and :2214 read
-                   AppDefaultsKeys.aiSharePortfolioContext, which the user can switch off.
-                   So "actually reads your positions" needed the "once you let it".
-               (3) The old bullet said "not predictions" — the app ships AI price
-                   predictions and feeds them back into the assistant
-                   (AIContextBuilder.swift:1102-1105, service.cachedPredictions). Do not
-                   restore a "no predictions" claim. -->
-          <p class="desc">Portfolio intelligence that combines consented holdings, live prices, watchlists, market structure, and sentiment in one context-aware workspace. It describes the data; it does not tell you what to buy.</p>
+          <!-- Portfolio context is consent-controlled; output is not investment advice. -->
+          <p class="desc">A market-research workspace that combines consented portfolio context, live prices, watchlists, market structure, sentiment, and model-generated estimates. For informational use only; not investment advice.</p>
           <ul role="list">
-            <li>Portfolio-aware AI chat and price intelligence</li>
-            <li>Live prices, sentiment, and market heat maps</li>
-            <li>Live market data and sentiment — described, not sold as certainty</li>
+            <li>Portfolio-aware chat when portfolio sharing is enabled</li>
+            <li>Live prices, watchlists, sentiment, and market maps</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the CryptoSage AI site" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
@@ -938,7 +814,7 @@
         </article>
 
         <!-- SAFFRA -->
-        <article class="product" style="--accent: var(--c-saffra);">
+        <article class="product" id="product-saffra" style="--accent: var(--c-saffra);">
           <div class="top">
             <img class="app-icon" src="icons/saffra.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -946,20 +822,11 @@
               <div class="cat">AI Personal Chef</div>
             </div>
           </div>
-          <!-- "vetted by a trained chef-panel" was the previous wording and it is not
-               true: the panel is three AI chef personas — Classic, Modern, Foodie —
-               each drafting independently from the same consensus data
-               (saffra-ios/MasterChef/Recipe/RecipeDetailView.swift:3287). No human chef
-               vets anything. The drafts are then MERGED and weighted, not gated on
-               agreement (same file, Step 5 "Merge & Validate"; the panel_agreement_score
-               column is displayed but never compared against a threshold anywhere in
-               saffra-api/app/). This page's own "Honest by design — no fake experts"
-               principle is a few cells below. Do not reinstate the human-chef reading. -->
-          <p class="desc">An AI chef that works from your pantry, allergies, preferences, equipment, time, cooking history, and the open recipe step. Recipes are built through a structured consensus process and checked for food safety and allergens.</p>
+          <!-- Recipe generation and checks are automated; no human-chef review is claimed. -->
+          <p class="desc">An AI cooking companion that adapts prepared recipes to pantry, allergies, preferences, equipment, time, cooking history, and the current step. The catalog uses a multi-draft process with automated food-safety and allergen-completeness checks.</p>
           <ul role="list">
-            <li>Recipes adapted to your kitchen, not generic results</li>
-            <li>Allergy- and diet-aware, with real substitutions</li>
-            <li>Hands-free, voice-narrated cooking mode</li>
+            <li>Recipes adapted to your kitchen and constraints</li>
+            <li>Diet- and allergen-aware substitutions with hands-free cooking mode</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Saffra site" href="saffra/">Visit site <span aria-hidden="true">→</span></a>
@@ -967,7 +834,7 @@
         </article>
 
         <!-- STORYVAULT -->
-        <article class="product" style="--accent: var(--c-story);">
+        <article class="product" id="product-storyvault" style="--accent: var(--c-story);">
           <div class="top">
             <img class="app-icon" src="icons/storyvault.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -975,11 +842,10 @@
               <div class="cat">Interactive Fiction</div>
             </div>
           </div>
-          <p class="desc">Interactive fiction where the story state and every prior choice shape the next page. Step into a classic or build a world of your own, with optional narration and Pro scene art.</p>
+          <p class="desc">Interactive fiction in which story state and prior choices shape each new page. Explore included classics or build an original world, with optional narration and generated scene art.</p>
           <ul role="list">
-            <li>Dozens of classics included, plus open AI Adventure mode</li>
-            <li>Parallel storylines — play a story from any character's side</li>
-            <li>Pro narration and generated scene illustration</li>
+            <li>Dozens of included classics plus open-ended AI adventures</li>
+            <li>Curated character perspectives in supported classics</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the StoryVault AI site" href="storyvault/">Visit site <span aria-hidden="true">→</span></a>
@@ -987,7 +853,7 @@
         </article>
 
         <!-- NIGHTSHELF -->
-        <article class="product" style="--accent: var(--c-night);">
+        <article class="product" id="product-nightshelf" style="--accent: var(--c-night);">
           <div class="top">
             <img class="app-icon" src="icons/nightshelf.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -995,11 +861,10 @@
               <div class="cat">Sleep Stories</div>
             </div>
           </div>
-          <p class="desc">A complete wind-down experience built around calming books, paced reading, narration, and layered ambient sound. Nightshelf Pro adds custom AI bedtime stories and six AI narrators.</p>
+          <p class="desc">A wind-down experience combining calming books, paced reading, narration, and layered ambient sound. Nightshelf Pro adds custom AI bedtime stories and six AI narrators.</p>
           <ul role="list">
             <li>A curated library of calming, chaptered books</li>
-            <li>Custom AI bedtime stories with Nightshelf Pro</li>
-            <li>Six AI narrators with Pro, plus ambient soundscapes</li>
+            <li>Custom stories, six narrators, and ambient soundscapes with Pro</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Nightshelf site" href="nightshelf/">Visit site <span aria-hidden="true">→</span></a>
@@ -1007,7 +872,7 @@
         </article>
 
         <!-- HEXHUNTER -->
-        <article class="product" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
+        <article class="product" id="product-hexhunter" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
           <div class="top">
             <img class="app-icon" src="icons/hexhunter.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -1015,14 +880,11 @@
               <div class="cat">Gothic Horde-Survivor</div>
             </div>
           </div>
-          <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor where you pick a hero, draft illustrated upgrades, and fight to survive 15 minutes of escalating chaos.</p>
+          <p class="desc">Survive the horde. Draft your doom. A 15-minute gothic horde-survivor built around distinct heroes, illustrated upgrades, and escalating chaos.</p>
           <ul role="list">
-            <li>8 heroes, each with a distinct playstyle</li>
-            <li>18 weapons with secret evolutions to discover</li>
-            <!-- NOT "hand-drawn": Hexhunter's plates are generated (gpt-image-1 via
-                 Hexhunter/scripts/gen_hero_art.py). hexhunter/index.html carries the
-                 same trap — the word was removed there in 7 places incl. alt text. -->
-            <li>3 biomes of escalating, gothic-woodcut dread</li>
+            <li>8 heroes with distinct playstyles</li>
+            <li>18 weapons, secret evolutions, and 3 escalating biomes</li>
+            <!-- Art is generated; do not describe it as hand-drawn or hand-illustrated. -->
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Hexhunter site" href="hexhunter/">Visit site <span aria-hidden="true">→</span></a>
@@ -1030,7 +892,7 @@
         </article>
 
         <!-- MYTHWRIGHT -->
-        <article class="product" style="--accent: var(--c-myth);">
+        <article class="product" id="product-mythwright" style="--accent: var(--c-myth);">
           <div class="top">
             <img class="app-icon" src="icons/mythwright.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -1038,11 +900,10 @@
               <div class="cat">Strategy Card Game</div>
             </div>
           </div>
-          <p class="desc">A fast, tactical card battler — hundreds of cards, shifting locations, and quick ranked matches where a single reveal turns the board.</p>
+          <p class="desc">A fast tactical card battler with hundreds of cards, shifting locations, and quick ranked matches where a single reveal can turn the board.</p>
           <ul role="list">
-            <li>Hundreds of collectible cards and locations</li>
             <li>Ranked, conquest, missions, and a rotating shop</li>
-            <li>Live multiplayer on a purpose-built backend</li>
+            <li>Asynchronous multiplayer backed by a dedicated service</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Mythwright site" href="mythwright/">Visit site <span aria-hidden="true">→</span></a>
@@ -1050,7 +911,7 @@
         </article>
 
         <!-- THE ONE -->
-        <article class="product" style="--accent: var(--c-one);">
+        <article class="product" id="product-the-one" style="--accent: var(--c-one);">
           <div class="top">
             <img class="app-icon" src="icons/theone.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -1058,11 +919,10 @@
               <div class="cat">Intentional Dating · Concept</div>
             </div>
           </div>
-          <p class="desc">A product concept for intentional dating: fewer simultaneous conversations, more attention to the person in front of you, and matching designed around compatibility rather than volume.</p>
+          <p class="desc">A concept exploring intentional dating: one focused match at a time, compatibility over volume, and conversation design that favors depth.</p>
           <ul role="list">
-            <li>Quality over quantity — one focused match at a time</li>
-            <li>Conversation limits that force real focus</li>
-            <li>Compatibility over vanity metrics</li>
+            <li>Designed around one active match</li>
+            <li>Constraints intended to encourage focused conversation</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit The One's site" href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
@@ -1070,7 +930,7 @@
         </article>
 
         <!-- ROWAN -->
-        <article class="product" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
+        <article class="product" id="product-rowan" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
           <div class="top">
             <img class="app-icon" src="icons/rowan.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -1078,11 +938,10 @@
               <div class="cat">Chronic-Condition Companion</div>
             </div>
           </div>
-          <p class="desc">A chronic-condition companion that connects conversation, symptoms, medication history, and daily logs, then turns them into structured records and appointment briefs. Diagnosis and treatment stay with the care team.</p>
+          <p class="desc">A chronic-condition companion that connects conversations, symptoms, medication history, and daily logs, then turns them into structured records and appointment briefs. Diagnosis and treatment remain with the care team.</p>
           <ul role="list">
-            <li>Conversation in, structured symptom log out</li>
-            <li>A visit brief: what changed, and what to ask</li>
-            <li>No account, no ads, no trackers on your health data</li>
+            <li>Conversations converted into symptom logs and visit briefs</li>
+            <li>No account, ads, or third-party health-data tracking</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Rowan site" href="rowan/">Visit site <span aria-hidden="true">→</span></a>
@@ -1090,7 +949,7 @@
         </article>
 
         <!-- ALDER -->
-        <article class="product" style="--accent: var(--c-alder);">
+        <article class="product" id="product-alder" style="--accent: var(--c-alder);">
           <div class="top">
             <img class="app-icon" src="icons/alder.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -1098,11 +957,10 @@
               <div class="cat">Recovery Companion</div>
             </div>
           </div>
-          <p class="desc">A recovery companion that connects goals, quit timelines, check-ins, and recent conversations to support cravings, lapses, and progress without resetting the record to zero. It is an AI companion, not a therapist or doctor.</p>
+          <p class="desc">A recovery companion that connects goals, quit timelines, check-ins, and recent conversations to support cravings, lapses, and progress without erasing prior work. It supports recovery routines; it does not replace a therapist or doctor.</p>
           <ul role="list">
-            <li>A separate clock for each thing you're stepping away from</li>
-            <li>A relapse debrief instead of a reset to zero</li>
-            <li>Crisis-language triage runs before the AI and before message limits</li>
+            <li>Separate progress clocks and lapse debriefs for each goal</li>
+            <li>Crisis-language checks can surface urgent resources before generation and message limits</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Alder site" href="alder/">Visit site <span aria-hidden="true">→</span></a>
@@ -1110,7 +968,7 @@
         </article>
 
         <!-- WADDLETON -->
-        <article class="product" style="--accent: var(--c-waddle);">
+        <article class="product" id="product-waddleton" style="--accent: var(--c-waddle);">
           <div class="top">
             <img class="app-icon" src="icons/waddleton.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -1118,31 +976,18 @@
               <div class="cat">Social World · Arcade</div>
             </div>
           </div>
-          <!-- SCOPE EVERY "nothing to buy" CLAIM TO THE WEB. Waddleton's catalogue is
-               real and on disk: PenguinArcade/js/store-catalog.js:19-22 registers four
-               consumable goldfish packs at $0.99 / $2.99 / $5.99 / $9.99, and :31
-               com.hypersage.waddleton.club.monthly at $4.99/mo. Both native store
-               plugins exist (WaddletonStorePlugin.swift, WaddletonStorePlugin.java).
-               What makes "nothing to buy" true TODAY is only that js/storefront.js:19
-               available() returns false without a release-build Capacitor bridge, so the
-               browser build cannot transact. An unqualified "no in-app purchases" was the
-               previous wording and becomes false the day either mobile build ships. -->
-          <!-- FIFTEEN, not fourteen: PenguinArcade/js registers 15 addGame() calls
-               (counted 2026-08-06). waddleton/index.html was corrected to 15 in the
-               same pass, and this card contradicted it. "Painted", not "hand-painted"
-               — the island art is generated through artcore. -->
-          <p class="desc">A snowy island to waddle around. Make a penguin, meet other players on a painted arctic island, and duck through a door into any of fifteen arcade games. Free in the browser — no download, no ads, and nothing to buy on the web.</p>
+          <!-- Free/no-purchase claims are scoped to the web build; game count is 15. -->
+          <p class="desc">A snowy social world in the browser: make a penguin, explore seven island areas, meet other players, and enter fifteen arcade games.</p>
           <ul role="list">
-            <li>15 arcade games and 7 island areas, one of them hidden</li>
-            <li>Live multiplayer — chat, snowballs, friends, and parties</li>
-            <li>Free in the browser — no ads, and nothing to buy on the web</li>
+            <li>Multiplayer with chat, friends, parties, and snowballs</li>
+            <li>Free on the web, with no advertising or web purchases</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Waddleton site" href="waddleton/">Visit site <span aria-hidden="true">→</span></a>
             <a class="link" aria-label="Play Waddleton, free in your browser" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
           </div>
         </article>
-        <article class="product" style="--accent: var(--c-mythkin);">
+        <article class="product" id="product-mythkin" style="--accent: var(--c-mythkin);">
           <div class="top">
             <img class="app-icon" src="icons/mythkin.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
@@ -1150,95 +995,92 @@
               <div class="cat">AI Characters &amp; Legends</div>
             </div>
           </div>
-          <p class="desc">Create characters with a defined temperament, history, boundaries, and opening line, then build conversations around their story context and memories. Twelve legends of history and myth are included.</p>
+          <p class="desc">Create original characters with defined temperaments, histories, boundaries, and opening lines, then build conversations shaped by story context and memories. Twelve figures from history and myth are included.</p>
           <ul role="list">
-            <li>Characters that remember, with the list shown to you</li>
-            <li>Share a character; borrowers' conversations stay private</li>
-            <li>18+, and no sexual content as a tier or an unlock</li>
+            <li>Visible, reviewable character memories</li>
+            <li>Share characters without sharing private conversations</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Mythkin site" href="mythkin/">Visit site <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
-        <!-- STUDIO CONTACT CARD -->
-        <article class="product" style="--accent: var(--brand-b); justify-content: center; text-align: center;">
+        <!-- PORTFOLIO CONTACT -->
+        <aside class="product" aria-label="Portfolio contact" style="--accent: var(--brand-b); justify-content: center; text-align: center;">
           <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding: 10px 0;">
-            <h3 style="font-size:1.3rem;">Work with the studio.</h3>
-            <p class="desc" style="margin-bottom: 6px;">For product partnerships, early access, or a problem that deserves a focused AI product, start a conversation.</p>
-            <a class="btn btn-ghost" href="#contact">Start a conversation</a>
+            <h3 style="font-size:1.3rem;">Interested in the portfolio?</h3>
+            <p class="desc" style="margin-bottom: 6px;">We welcome conversations with investors, product partners, press, and early users.</p>
+            <a class="btn btn-ghost" href="#contact">Contact the studio</a>
           </div>
-        </article>
+        </aside>
 
       </div>
     </div>
   </section>
 
-  <!-- ===== PRODUCT DISCIPLINE ===== -->
-  <section class="block" id="approach">
+  <!-- ===== INTELLIGENCE LAYER =====
+       Implementations, memory, controls, and safety paths vary by product. -->
+  <section class="block systems" id="ai">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow">Product discipline</span>
-        <h2>Shared foundations. Product-specific judgment.</h2>
-        <p>Reuse matters when it carries good mechanisms forward without flattening the product. The context, rules, interface, and operating boundaries are reconsidered for every job.</p>
+        <span class="eyebrow">Our intelligence layer</span>
+        <h2>General models, shaped for specific work.</h2>
+        <p>In products with context-aware AI, the model is only one part. Depending on the product, the experience can combine information you provide, recent activity, product-specific knowledge, live data, tools, rules, and safeguards. The implementation varies by product; the goal is consistent: responses shaped for the situation and task.</p>
       </div>
-      <div class="approach-lead">
-        <span class="k">The premise</span>
-        <h3>Useful AI comes from the system around the model.</h3>
-        <p>Models are capable generalists. Products constrain them to specific work by deciding what context enters, what tools are available, which claims are out of bounds, and what happens when the system reaches a boundary. <span class="pull">The model matters; the product design around it matters more.</span></p>
+
+      <ol class="intelligence-flow" aria-label="How a context-aware response is formed">
+        <li class="flow-step">
+          <h3>Your context</h3>
+          <p>Goals, preferences, conditions, and boundaries you provide within the product.</p>
+        </li>
+        <li class="flow-step">
+          <h3>Recent activity</h3>
+          <p>Relevant diary entries, symptoms, check-ins, conversations, and in-product activity.</p>
+        </li>
+        <li class="flow-step">
+          <h3>Product intelligence</h3>
+          <p>Current task, domain knowledge, live data, tools, rules, and safeguards.</p>
+        </li>
+        <li class="flow-step">
+          <h3>A useful result</h3>
+          <p>An answer, brief, recipe, story beat, or next action shaped for the task.</p>
+        </li>
+      </ol>
+
+      <p class="model-note">AI-enabled products use models from Anthropic and OpenAI; provider, data path, memory, and safety controls vary by product and feature.</p>
+    </div>
+  </section>
+
+  <!-- ===== STUDIO ===== -->
+  <section class="block" id="about">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">The studio</span>
+        <h2>We build, operate, and support the portfolio.</h2>
+        <p>Hypersage is an independent consumer-product studio working across health, relationships, food, finance, stories, and games. We design the products, run the systems behind them, and stay directly accountable for what ships.</p>
       </div>
       <div class="approach-ledger">
         <div class="approach-row">
-          <div class="k">Fit the work</div>
+          <div class="k">Product first</div>
           <div>
-            <h3>Start with the task, not the model</h3>
-            <p>We define what the product must know, what it must check, and how the result should behave before deciding which model call belongs in the loop. <span class="pull">A useful workflow is the specification; chat is only one possible interface.</span></p>
+            <h3>Start with the job</h3>
+            <p>We define what a product needs to know, check, and help someone do before choosing the model, tools, or interface.</p>
           </div>
         </div>
         <div class="approach-row">
-          <div class="k">Show the boundary</div>
+          <div class="k">Shared learning</div>
           <div>
-            <h3>Say what the system knows — and what it does not</h3>
-            <p>Provider, data path, memory, limits, and the role of the AI belong in the product experience and its product page. High-stakes claims are scoped to the products that can support them. <span class="pull">Those boundaries belong in the product design and disclosure from the beginning.</span></p>
-          </div>
-        </div>
-        <div class="approach-row">
-          <div class="k">Reuse carefully</div>
-          <div>
-            <h3>Carry mechanisms forward, not assumptions</h3>
-            <p>Context assembly, memory stores, streaming behaviour, voice fallback, and safety patterns move between products when they fit. Each adoption is re-checked against the new domain. <span class="pull">Shared architecture should compound learning without creating copy-and-paste products.</span></p>
+            <h3>Carry the strongest systems forward</h3>
+            <p>Context patterns, memory systems, streaming, voice, safety work, and operating lessons move between products when they fit. Each product adapts them to its own domain.</p>
           </div>
         </div>
         <div class="approach-row">
           <div class="k">Direct ownership</div>
           <div>
-            <h3>The people building it read the feedback</h3>
-            <p>Product questions and reported problems reach the studio directly, keeping the path from a user observation to a changed interface, model behaviour, or policy short. <span class="pull">That short path makes feedback easier to trace into product decisions.</span></p>
+            <h3>Feedback reaches us directly</h3>
+            <p>Questions and reported problems come directly to us, keeping the path from a user observation to a product decision short.</p>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== ABOUT ===== -->
-  <section class="block" id="about">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">The studio</span>
-        <h2>Small enough to stay close to the details.</h2>
-      </div>
-      <div class="about-grid">
-        <div>
-          <p>Hypersage is an independent consumer-product studio working across health, relationships, cooking, finance, stories, and games. Each category forces a different answer to the same question: what would make intelligence genuinely useful here?</p>
-          <p>We use AI where it improves the product and ordinary software where it does not. The goal is not to put a chatbot everywhere. It is to make each product understand its job.</p>
-          <p>A cooking companion, a story reader, and a game should not share a voice or visual system. They should share disciplined decisions underneath. If that approach resonates, <a href="#contact" style="color: var(--brand-a); font-weight:600;">talk to the studio</a>.</p>
-        </div>
-        <ul class="principles" role="list">
-          <li><strong>Context before conversation</strong> The product prepares the situation before the model sees the latest message.</li>
-          <li><strong>Domain depth over generic chat</strong> Schemas, data, tools, and task-specific checks are designed for the specific job.</li>
-          <li><strong>Clear boundaries</strong> The system states what it knows, what it sends, and what it cannot decide.</li>
-          <li><strong>Craft throughout</strong> Interface, illustration, motion, and — where it matters — voice are authored for the product.</li>
-        </ul>
       </div>
     </div>
   </section>
@@ -1248,7 +1090,7 @@
     <div class="container">
       <span class="eyebrow">Contact</span>
       <h2 style="margin-top: 18px;">Talk to the studio.</h2>
-      <p>Product questions, partnerships, press, early access, or feedback — write directly to the people building the work.</p>
+      <p>For investors, product partners, press, early access, product questions, or feedback, contact us directly.</p>
       <a href="mailto:support@hypersage.ai?subject=Hello%20Hypersage%20AI%20Labs" class="btn btn-primary"><span>support@hypersage.ai</span><span aria-hidden="true">→</span></a>
     </div>
   </section>
@@ -1263,29 +1105,16 @@
           <img class="mark" src="logo.png" alt="" width="34" height="38">
           <span>Hypersage<span class="co-sub"> AI Labs</span></span>
         </div>
-        <p>An independent studio building focused consumer products and context-aware AI companions.</p>
+        <p>An independent studio building distinctive consumer apps and original games.</p>
       </div>
       <div class="f-links">
         <div class="f-col">
           <h3>Products</h3>
-          <a href="wingmate/">Wingmate</a>
-          <a href="quietoak/">Quietoak</a>
-          <a href="https://cryptosageai.io/" target="_blank" rel="noopener">CryptoSage AI</a>
-          <a href="saffra/">Saffra</a>
-          <a href="storyvault/">StoryVault AI</a>
-          <a href="nightshelf/">Nightshelf</a>
-          <a href="hexhunter/">Hexhunter</a>
-          <a href="mythwright/">Mythwright</a>
-          <a href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">The One</a>
-          <a href="rowan/">Rowan</a>
-          <a href="alder/">Alder</a>
-          <a href="waddleton/">Waddleton</a>
-          <a href="mythkin/">Mythkin</a>
+          <a href="#products">Explore the portfolio</a>
         </div>
         <div class="f-col">
           <h3>Studio</h3>
-          <a href="#ai">How the intelligence works</a>
-          <a href="#approach">How we build</a>
+          <a href="#ai">Intelligence layer</a>
           <a href="#about">Studio</a>
           <a href="#contact">Contact</a>
         </div>
@@ -1299,14 +1128,8 @@
     </div>
     <div class="container">
       <div class="f-bottom">
-        <!-- TWO NAMES, BOTH CORRECT, AND THEY ARE NOT INTERCHANGEABLE. `Hypersage` (one
-             capital H) is the trading style used in the wordmark, titles and body copy.
-             `HyperSage AI Labs LLC` — capital S, no comma before LLC — is the registered
-             Delaware entity, and it is what belongs in a copyright line, a liability
-             clause and the JSON-LD `legalName`. Do NOT "fix" this line to match the
-             wordmark; it is the one place on the page that must carry the legal name. -->
         <span>© 2026 HyperSage AI Labs LLC. All rights reserved.</span>
-        <span>Focused products. Context-aware intelligence.</span>
+        <span>Software with a point of view.</span>
       </div>
     </div>
   </footer>
@@ -1368,7 +1191,7 @@
     (function () {
       if (!document.documentElement.classList.contains('js-reveal') || !('IntersectionObserver' in window)) return;
       var els = document.querySelectorAll(
-        '.section-head, .approach-lead, .approach-row, .product, .flow-step, .system-card, .about-grid > *, .cta .container'
+        '.section-head, .approach-row, .product, .flow-step, .cta .container'
       );
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
