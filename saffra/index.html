@@ -571,6 +571,46 @@
       background: var(--secondary);
     }
 
+    /* Adaptation flow — the concept intro's closing line ("Then she rewrites
+       it for you") drawn as a flow: one vetted recipe, read against your
+       kitchen, out comes your version. Every label restates copy that already
+       appears elsewhere on this page — add no new claims here. */
+    .adapt-flow {
+      margin-top: 56px;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 16px; padding: 26px 28px;
+      box-shadow: 0 16px 60px rgba(0,0,0,0.4), 0 0 40px rgba(224,130,48,0.06);
+    }
+    .adapt-track {
+      display: grid; grid-template-columns: 1fr auto 1.15fr auto 1fr;
+      gap: 18px; align-items: center; margin-top: 6px;
+    }
+    .adapt-stage-label {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted-fg); margin-bottom: 10px;
+    }
+    .adapt-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 14px 16px;
+    }
+    .adapt-card h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; }
+    .adapt-card p { font-size: 0.8rem; color: var(--muted-fg); line-height: 1.55; }
+    .adapt-result { background: rgba(224,130,48,0.05); border-color: rgba(224,130,48,0.3); }
+    .adapt-result h3 { font-size: 1.15rem; }
+    .adapt-chips { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+    .adapt-arrow { width: 34px; height: 24px; color: var(--primary); opacity: 0.8; flex-shrink: 0; }
+    .adapt-arrow path { stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .adapt-arrow .adapt-flow-dash { stroke-dasharray: 4 6; animation: adapt-dash 1.4s linear infinite; }
+    @keyframes adapt-dash { to { stroke-dashoffset: -10; } }
+    @media (prefers-reduced-motion: reduce) {
+      .adapt-arrow .adapt-flow-dash { animation: none; }
+    }
+    @media (max-width: 900px) {
+      .adapt-flow { padding: 22px 20px; }
+      .adapt-track { grid-template-columns: 1fr; gap: 14px; }
+      .adapt-arrow { transform: rotate(90deg); margin: -2px auto; }
+    }
+
     /* Intelligence section — the "why she's actually a chef" credibility layer */
     .intelligence-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 48px;
@@ -1111,6 +1151,38 @@
         <div class="chat-bubble chat-chef" style="margin-bottom:0">The cilantro's going yellow — perfect time to use it. Want me to walk you through it hands-free?</div>
       </div>
     </div>
+    <!-- The adaptation flow — the intro's closing line as a picture. Labels
+         restate on-page copy only (concept intro, context chips, allergen
+         rule, "Adapted for you"); arrows are decorative and aria-hidden. -->
+    <div class="adapt-flow anim anim-d2">
+      <div class="chat-label">Then she rewrites it for you</div>
+      <div class="adapt-track">
+        <div class="adapt-stage">
+          <div class="adapt-stage-label">One vetted recipe</div>
+          <div class="adapt-card">
+            <h3>From the catalog</h3>
+            <p>Cross-referenced across tested, editor-vetted sources, checked for food safety and allergens before it ships.</p>
+          </div>
+        </div>
+        <svg class="adapt-arrow" viewBox="0 0 34 24" aria-hidden="true" focusable="false"><path class="adapt-flow-dash" d="M2 12h22"/><path d="M22 6l6 6-6 6"/></svg>
+        <div class="adapt-stage">
+          <div class="adapt-stage-label">Read against your kitchen</div>
+          <div class="adapt-chips">
+            <span class="context-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M8 6V4M16 6V4"/></svg>What's in your pantry</span>
+            <span class="context-chip green"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Allergies &amp; diet — non-negotiable</span>
+            <span class="context-chip green"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></svg>The time you've got</span>
+          </div>
+        </div>
+        <svg class="adapt-arrow" viewBox="0 0 34 24" aria-hidden="true" focusable="false"><path class="adapt-flow-dash" d="M2 12h22"/><path d="M22 6l6 6-6 6"/></svg>
+        <div class="adapt-stage">
+          <div class="adapt-stage-label">Out comes</div>
+          <div class="adapt-card adapt-result">
+            <h3><span class="italic-anything">Your version.</span></h3>
+            <p>Substitutions named out loud — sensory cues for beginners, the chef move for pros.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1332,7 +1404,7 @@
           </li>
           <li>
             <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M16 4l4 4M3 12a9 9 0 0 1 9-9"/></svg></div>
-            <div><h3>You can see the checks</h3><p>Tool chips show each product step as it happens — including pantry scan and catalog search — so you can see what informed the answer.</p></div>
+            <div><h3>You can see the checks</h3><p>Tool chips show each check as it happens — including pantry scan and catalog search — so you can see what informed the answer.</p></div>
           </li>
           <li>
             <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
