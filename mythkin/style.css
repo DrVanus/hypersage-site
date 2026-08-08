@@ -136,6 +136,46 @@ ul.plain li{padding:.35rem 0;border-bottom:1px solid var(--border)}
 .refusals ul{margin:0;padding-left:1.15rem}
 .refusals li{padding:.28rem 0}
 
+/* Anatomy of a character -----------------------------------------------------
+   A worked example of the fields the copy above names: temperament sliders,
+   backstory, opening line, visible memories, and the colour + mark. Content is
+   plain HTML and visible without JS; the only animation is the trait fill,
+   which rests at its final state so reduced-motion simply shows it filled. */
+.anatomy-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:1.25rem 1.35rem;margin:1.25rem 0 .5rem}
+.anatomy-head{display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;
+  padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid var(--border)}
+.anatomy-orb{flex:none;display:grid;place-items:center;width:52px;height:52px;
+  border-radius:50%;color:var(--gold);border:1px solid var(--border);
+  background:var(--bg);
+  background:color-mix(in srgb,var(--tint) 14%,var(--surface))}
+.anatomy-name{min-width:14rem;flex:1}
+.anatomy-name b{display:block;font-family:var(--serif);font-size:1.15rem;letter-spacing:-.01em}
+.anatomy-name span{display:block;color:var(--dim);font-size:.8rem;margin-top:.15rem}
+.anatomy-ai{flex:none;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dim);border:1px solid var(--border);border-radius:999px;padding:.25rem .6rem}
+.anatomy-rows{margin:0}
+.anatomy-row{display:grid;grid-template-columns:9.5rem 1fr;gap:.35rem 1.25rem;
+  padding:.85rem 0;border-bottom:1px solid var(--border)}
+.anatomy-row:last-child{border-bottom:0;padding-bottom:.15rem}
+.anatomy-row dt{color:var(--gold);font-size:.72rem;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;padding-top:.2rem}
+.anatomy-row dd{margin:0}
+.anatomy-sample{margin:0;font-family:var(--serif);font-size:1.02rem}
+.anatomy-note{display:block;color:var(--dim);font-size:.8rem;margin-top:.35rem}
+.traits{list-style:none;margin:0;padding:0;display:grid;gap:.45rem}
+.traits li{display:grid;grid-template-columns:5.2rem 1fr;align-items:center;gap:.75rem}
+.trait-name{font-size:.82rem}
+.trait-track{height:6px;border-radius:999px;overflow:hidden;
+  background:var(--border);
+  background:color-mix(in srgb,var(--tint) 12%,var(--border))}
+.trait-track i{display:block;height:100%;width:calc(var(--v)*100%);border-radius:inherit;
+  background:var(--tint);transform-origin:left;animation:trait-grow .8s ease}
+@keyframes trait-grow{from{transform:scaleX(0)}}
+.mem-chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.45rem}
+.mem-chips li{font-size:.8rem;background:var(--bg);border:1px solid var(--border);
+  border-radius:999px;padding:.28rem .7rem}
+
 /* Launch status ------------------------------------------------------------- */
 .availability{background:var(--surface);border:1px solid var(--border);border-radius:14px;
   padding:1.25rem 1.35rem;margin:2rem 0 0}
@@ -150,6 +190,7 @@ ul.plain li{padding:.35rem 0;border-bottom:1px solid var(--border)}
   .hero{grid-template-columns:1fr;gap:1.75rem}
   .hero-copy .lede{max-width:none}
   .phone{max-width:260px}
+  .anatomy-row{grid-template-columns:1fr;gap:.3rem}
   .kin-showcase{grid-template-columns:1fr;text-align:center;gap:1.25rem}
   .kin-feature-art{width:min(68vw,230px)}
   .kin-feature-copy .kin-feature-memory{margin-left:auto;margin-right:auto}
@@ -159,4 +200,6 @@ ul.plain li{padding:.35rem 0;border-bottom:1px solid var(--border)}
 @media (forced-colors:active){
   .kin-showcase::before,.kin-feature-art::after{display:none}
   .kin-showcase,.kin-select,.kin-select[aria-pressed="true"]{border:1px solid CanvasText;background:Canvas;color:CanvasText;box-shadow:none}
+  .trait-track{border:1px solid CanvasText}
+  .trait-track i{background:CanvasText}
 }
