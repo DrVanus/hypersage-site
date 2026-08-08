@@ -44,7 +44,8 @@
         "logo": "https://hypersage.ai/apple-touch-icon.png",
         "image": "https://hypersage.ai/og-image.png?v=20260806c",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
-        "email": "support@hypersage.ai"
+        "email": "support@hypersage.ai",
+        "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
       },
       { "@type": "VideoGame", "name": "Waddleton", "applicationCategory": "Game", "operatingSystem": "Web",
         "url": "https://waddleton.pages.dev/", "publisher": { "@id": "https://hypersage.ai/#org" },
@@ -66,7 +67,11 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Loaded async so first paint never waits on a third-party host; the system-ui
+       fallbacks in every font stack cover the gap. -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"></noscript>
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -229,7 +234,14 @@
     .hero h1 .hero-line { display: block; }
     .hero .lede { font-size: clamp(1.05rem, 2.2vw, 1.28rem); color: var(--muted); max-width: 660px; margin-bottom: 34px; }
     .hero .lede strong { color: var(--fg); font-weight: 600; }
-    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-cta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    /* Quiet third affordance: the one product a visitor can touch right now. */
+    .hero-try {
+      display: inline-flex; align-items: center; gap: 7px; min-height: 44px;
+      color: var(--muted); font-weight: 500; font-size: 0.94rem; transition: color .2s;
+    }
+    .hero-try .u { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(45,212,191,.45); }
+    .hero-try:hover { color: var(--fg); }
 
     /* The Context Engine is explanatory art: a compact map of the system described
        by the semantic ordered list in #ai. It is deliberately decorative here so
@@ -268,8 +280,8 @@
     }
     .engine-head span:first-child { color: var(--brand-a); }
     .engine-wires { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; overflow: visible; }
-    .engine-wire { fill: none; stroke: rgba(152,166,187,.28); stroke-width: 1.15; vector-effect: non-scaling-stroke; }
-    .engine-wire.out { stroke: url(#engineGradient); stroke-width: 1.4; }
+    .engine-wire { fill: none; stroke: rgba(152,166,187,.44); stroke-width: 1.3; vector-effect: non-scaling-stroke; }
+    .engine-wire.out { stroke: url(#engineGradient); stroke-width: 1.6; }
     .signal-packet { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
     .engine-node {
       position: absolute; z-index: 2; width: 30.5%; min-width: 108px;
@@ -360,6 +372,37 @@
       0% { opacity: 0; transform: translate(331px,151px) scale(.35); }
       18%, 78% { opacity: 1; } 100% { opacity: 0; transform: translate(356px,145px) scale(.75); }
     }
+
+    /* Idle state — after the intro (or when the intro is skipped while motion is
+       allowed), a quiet pulse of traffic repeats every 9s so the diagram reads as
+       live rather than frozen. Reduced-motion users never receive .motion-idle, and
+       the global reduce override kills it regardless. */
+    .context-engine.motion-idle .engine-orbit { animation: engineOrbitSpin 16s linear infinite; }
+    .context-engine.motion-idle .packet-record { animation: packetRecordLoop 9s cubic-bezier(.4,0,.2,1) 2s infinite; }
+    .context-engine.motion-idle .packet-recent { animation: packetRecentLoop 9s cubic-bezier(.4,0,.2,1) 2.25s infinite; }
+    .context-engine.motion-idle .packet-current { animation: packetCurrentLoop 9s cubic-bezier(.4,0,.2,1) 2.5s infinite; }
+    .context-engine.motion-idle .packet-output { animation: packetOutputLoop 9s cubic-bezier(.4,0,.2,1) 3.4s infinite; }
+    @keyframes engineOrbitSpin { to { transform: rotate(360deg); } }
+    @keyframes packetRecordLoop {
+      0% { opacity: 0; transform: translate(150px,80px) scale(.6); }
+      2.5%, 9.5% { opacity: .85; }
+      12%, 100% { opacity: 0; transform: translate(189px,140px) scale(.25); }
+    }
+    @keyframes packetRecentLoop {
+      0% { opacity: 0; transform: translate(150px,145px) scale(.6); }
+      2.5%, 9.5% { opacity: .85; }
+      12%, 100% { opacity: 0; transform: translate(187px,145px) scale(.25); }
+    }
+    @keyframes packetCurrentLoop {
+      0% { opacity: 0; transform: translate(150px,208px) scale(.6); }
+      2.5%, 9.5% { opacity: .85; }
+      12%, 100% { opacity: 0; transform: translate(189px,153px) scale(.25); }
+    }
+    @keyframes packetOutputLoop {
+      0% { opacity: 0; transform: translate(331px,151px) scale(.35); }
+      2.5%, 9.5% { opacity: .85; }
+      12%, 100% { opacity: 0; transform: translate(356px,145px) scale(.75); }
+    }
     @media (max-width: 980px) {
       .hero-stage {
         grid-template-columns: 1fr; grid-template-areas: "eyebrow" "title" "copy" "engine";
@@ -406,6 +449,24 @@
       }
       .strip .container::-webkit-scrollbar { display: none; }
       .strip .label, .strip .word { flex: 0 0 auto; }
+    }
+
+    /* ===== STAT BAND ===== */
+    .statband { border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.012); }
+    .statband .container {
+      display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px 18px;
+      padding-top: 20px; padding-bottom: 20px;
+    }
+    .stat { display: flex; align-items: baseline; justify-content: center; gap: 10px; }
+    .stat strong {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.55rem; font-weight: 700; line-height: 1;
+      background: linear-gradient(120deg, var(--brand-a), var(--brand-b));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .stat span { color: var(--faint); font-size: 0.8rem; line-height: 1.35; }
+    @media (max-width: 860px) {
+      .statband .container { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .stat { justify-content: flex-start; }
     }
 
     /* ===== SECTION SCAFFOLD ===== */
@@ -481,6 +542,16 @@
     .product .titleblock { flex: 1 1 auto; min-width: 145px; }
     .product .titleblock h3 { font-size: 1.28rem; font-weight: 600; line-height: 1.22; }
     .product .cat { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
+    /* Lifecycle chip — an honest status beats a visitor searching the App Store and
+       finding nothing. Update these when a product goes live. */
+    .product .status {
+      margin-left: auto; align-self: flex-start; flex: 0 0 auto;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; font-weight: 600;
+      /* No text-transform — "iOS" must keep its casing. */
+      letter-spacing: 0.07em; white-space: nowrap;
+      color: var(--faint); padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: 999px;
+    }
+    .product .status.live { color: #06110F; background: var(--brand-a); border-color: transparent; }
     .product > p.desc { color: var(--muted); font-size: 0.98rem; margin-bottom: 16px; }
     .product ul { list-style: none; margin-bottom: 18px; }
     .product ul li { position: relative; padding: 5px 0 5px 20px; font-size: 0.9rem; color: var(--muted); }
@@ -532,6 +603,9 @@
     }
     .cta h2 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; margin-bottom: 16px; line-height: 1.22; }
     .cta p { color: var(--muted); font-size: 1.1rem; max-width: 560px; margin: 0 auto 30px; }
+    .cta-routes { margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 14px; flex-wrap: wrap; color: var(--faint); font-size: 0.9rem; }
+    .cta-routes a { color: var(--muted); padding: 4px 0; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line-strong); transition: color .2s; }
+    .cta-routes a:hover { color: var(--fg); }
 
     /* ===== FOOTER ===== */
     footer.site { border-top: 1px solid var(--line); padding: 54px 24px 46px; }
@@ -546,8 +620,10 @@
     footer .f-bottom { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 24px; color: var(--faint); font-size: 0.82rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 
     /* ===== A11Y ===== */
+    /* No border-radius override here — the outline traces each control's own shape,
+       so pills stay pills when focused. */
     a:focus-visible, summary:focus-visible, .btn:focus-visible {
-      outline: 2px solid var(--brand-a); outline-offset: 3px; border-radius: 8px;
+      outline: 2px solid var(--brand-a); outline-offset: 3px;
     }
     /* Keyboard users land here first; the sticky nav is 62px tall, so park it below. */
     .skip-link {
@@ -581,6 +657,16 @@
     .js-reveal .approach-ledger > *:nth-child(3) { transition-delay: .12s; }
     .js-reveal .intelligence-flow > *:nth-child(4),
     .js-reveal .approach-ledger > *:nth-child(4) { transition-delay: .18s; }
+
+    /* Print never fires IntersectionObserver — force everything visible on paper. */
+    @media print {
+      .js-reveal .section-head, .js-reveal .approach-row, .js-reveal .product,
+      .js-reveal .flow-step, .js-reveal .cta .container {
+        opacity: 1 !important; transform: none !important;
+      }
+      .context-engine .engine-node, .context-engine .engine-core,
+      .context-engine .engine-output, .context-engine .engine-wire { opacity: 1 !important; }
+    }
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -672,6 +758,7 @@
           <div class="hero-cta">
             <a href="#products" class="btn btn-primary"><span>Explore the products</span><span aria-hidden="true">→</span></a>
             <a href="#ai" class="btn btn-ghost">Intelligence layer</a>
+            <a class="hero-try" href="https://waddleton.pages.dev/" target="_blank" rel="noopener" aria-label="Play Waddleton free in your browser"><span class="u">Or play Waddleton free</span> <span aria-hidden="true">↗</span></a>
           </div>
         </div>
 
@@ -744,6 +831,16 @@
     </div>
   </div>
 
+  <!-- Every figure here is verifiable on this page or at the store — recount before changing. -->
+  <div class="statband" aria-label="The studio at a glance">
+    <div class="container">
+      <div class="stat"><strong>13</strong><span>products in the portfolio</span></div>
+      <div class="stat"><strong>6</strong><span>App&nbsp;Store categories</span></div>
+      <div class="stat"><strong>2</strong><span>platforms — iOS &amp; web</span></div>
+      <div class="stat"><strong>100%</strong><span>designed, built &amp; operated in&#8209;house</span></div>
+    </div>
+  </div>
+
   <!-- ===== PRODUCTS ===== -->
   <section class="block" id="products">
     <div class="container">
@@ -763,11 +860,12 @@
               <h3>Wingmate</h3>
               <div class="cat">AI Dating Coach</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
           <p class="desc">An AI dating coach that organizes context by connection, analyzes profile screenshots, and adapts guidance to the platform and conversation. Four coaching perspectives offer different tones and strategies.</p>
           <ul role="list">
             <li>Connection-specific context and screenshot analysis</li>
-            <li>Guidance for Tinder, Hinge, Bumble, and texting</li>
+            <li>Guidance for Tinder, Hinge, Bumble, Instagram, and texting</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Wingmate site" href="wingmate/">Visit site <span aria-hidden="true">→</span></a>
@@ -782,8 +880,9 @@
               <h3>Quietoak</h3>
               <div class="cat">DBT Skills Companion</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
-          <p class="desc">A companion for practicing DBT skills that can use diary entries, goals, skills practice, and recent conversations to keep guidance relevant. It is not therapy or crisis care.</p>
+          <p class="desc">A companion for practicing DBT skills that can use diary entries, skills practice, and recent conversations to keep guidance relevant. It is not therapy or crisis care.</p>
           <ul role="list">
             <li>Skills organized across all four DBT modules</li>
             <li>One-minute diary cards, progress tracking, and an offline crisis kit</li>
@@ -801,6 +900,7 @@
               <h3>CryptoSage AI</h3>
               <div class="cat">Portfolio Intelligence</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
           <!-- Portfolio context is consent-controlled; output is not investment advice. -->
           <p class="desc">A market-research workspace that combines consented portfolio context, live prices, watchlists, market structure, sentiment, and model-generated estimates. For informational use only; not investment advice.</p>
@@ -821,6 +921,7 @@
               <h3>Saffra</h3>
               <div class="cat">AI Personal Chef</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
           <!-- Recipe generation and checks are automated; no human-chef review is claimed. -->
           <p class="desc">An AI cooking companion that adapts prepared recipes to pantry, allergies, preferences, equipment, time, cooking history, and the current step. The catalog uses a multi-draft process with automated food-safety and allergen-completeness checks.</p>
@@ -841,11 +942,12 @@
               <h3>StoryVault AI</h3>
               <div class="cat">Interactive Fiction</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
           <p class="desc">Interactive fiction in which story state and prior choices shape each new page. Explore included classics or build an original world, with optional narration and generated scene art.</p>
           <ul role="list">
             <li>Dozens of included classics plus open-ended AI adventures</li>
-            <li>Curated character perspectives in supported classics</li>
+            <li>A hand-curated scenario for every included classic</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the StoryVault AI site" href="storyvault/">Visit site <span aria-hidden="true">→</span></a>
@@ -860,11 +962,12 @@
               <h3>Nightshelf</h3>
               <div class="cat">Sleep Stories</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
           <p class="desc">A wind-down experience combining calming books, paced reading, narration, and layered ambient sound. Nightshelf Pro adds custom AI bedtime stories and six AI narrators.</p>
           <ul role="list">
             <li>A curated library of calming, chaptered books</li>
-            <li>Custom stories, six narrators, and ambient soundscapes with Pro</li>
+            <li>Layered ambient sound for everyone; custom stories and six narrators with Pro</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Nightshelf site" href="nightshelf/">Visit site <span aria-hidden="true">→</span></a>
@@ -879,8 +982,9 @@
               <h3>Hexhunter</h3>
               <div class="cat">Gothic Horde-Survivor</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
-          <p class="desc">Survive the horde. Draft your doom. A 15-minute gothic horde-survivor built around distinct heroes, illustrated upgrades, and escalating chaos.</p>
+          <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor built around distinct heroes, illustrated upgrades, and escalating chaos.</p>
           <ul role="list">
             <li>8 heroes with distinct playstyles</li>
             <li>18 weapons, secret evolutions, and 3 escalating biomes</li>
@@ -899,11 +1003,12 @@
               <h3>Mythwright</h3>
               <div class="cat">Strategy Card Game</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
           <p class="desc">A fast tactical card battler with hundreds of cards, shifting locations, and quick ranked matches where a single reveal can turn the board.</p>
           <ul role="list">
-            <li>Ranked, conquest, missions, and a rotating shop</li>
-            <li>Asynchronous multiplayer backed by a dedicated service</li>
+            <li>Campaign, ranked, practice, and daily missions</li>
+            <li>A seasonal ladder that climbs from Bronze to Infinite</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Mythwright site" href="mythwright/">Visit site <span aria-hidden="true">→</span></a>
@@ -916,8 +1021,9 @@
             <img class="app-icon" src="icons/theone.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>The One</h3>
-              <div class="cat">Intentional Dating · Concept</div>
+              <div class="cat">Intentional Dating</div>
             </div>
+            <span class="status">Concept</span>
           </div>
           <p class="desc">A concept exploring intentional dating: one focused match at a time, compatibility over volume, and conversation design that favors depth.</p>
           <ul role="list">
@@ -937,6 +1043,7 @@
               <h3>Rowan</h3>
               <div class="cat">Chronic-Condition Companion</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
           <p class="desc">A chronic-condition companion that connects conversations, symptoms, medication history, and daily logs, then turns them into structured records and appointment briefs. Diagnosis and treatment remain with the care team.</p>
           <ul role="list">
@@ -956,11 +1063,12 @@
               <h3>Alder</h3>
               <div class="cat">Recovery Companion</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
           <p class="desc">A recovery companion that connects goals, quit timelines, check-ins, and recent conversations to support cravings, lapses, and progress without erasing prior work. It supports recovery routines; it does not replace a therapist or doctor.</p>
           <ul role="list">
             <li>Separate progress clocks and lapse debriefs for each goal</li>
-            <li>Crisis-language checks can surface urgent resources before generation and message limits</li>
+            <li>The SOS screen and crisis lines are never metered or paywalled</li>
           </ul>
           <div class="foot">
             <a class="link" aria-label="Visit the Alder site" href="alder/">Visit site <span aria-hidden="true">→</span></a>
@@ -975,6 +1083,7 @@
               <h3>Waddleton</h3>
               <div class="cat">Social World · Arcade</div>
             </div>
+            <span class="status live">Live on the web</span>
           </div>
           <!-- Free/no-purchase claims are scoped to the web build; game count is 15. -->
           <p class="desc">A snowy social world in the browser: make a penguin, explore seven island areas, meet other players, and enter fifteen arcade games.</p>
@@ -994,8 +1103,9 @@
               <h3>Mythkin</h3>
               <div class="cat">AI Characters &amp; Legends</div>
             </div>
+            <span class="status">iOS · Coming soon</span>
           </div>
-          <p class="desc">Create original characters with defined temperaments, histories, boundaries, and opening lines, then build conversations shaped by story context and memories. Twelve figures from history and myth are included.</p>
+          <p class="desc">Create original characters with defined temperaments, histories, and opening lines, then build conversations shaped by story context and memories. Twelve figures from history and myth are included.</p>
           <ul role="list">
             <li>Visible, reviewable character memories</li>
             <li>Share characters without sharing private conversations</li>
@@ -1092,6 +1202,12 @@
       <h2 style="margin-top: 18px;">Talk to the studio.</h2>
       <p>For investors, product partners, press, early access, product questions, or feedback, contact us directly.</p>
       <a href="mailto:support@hypersage.ai?subject=Hello%20Hypersage%20AI%20Labs" class="btn btn-primary"><span>support@hypersage.ai</span><span aria-hidden="true">→</span></a>
+      <p class="cta-routes">
+        <a href="mailto:support@hypersage.ai?subject=Investor%20inquiry">Investors</a><span aria-hidden="true">·</span>
+        <a href="mailto:support@hypersage.ai?subject=Press%20inquiry">Press</a><span aria-hidden="true">·</span>
+        <a href="press.html">Press kit</a><span aria-hidden="true">·</span>
+        <a href="support.html">Product support</a>
+      </p>
     </div>
   </section>
 
@@ -1116,6 +1232,7 @@
           <h3>Studio</h3>
           <a href="#ai">Intelligence layer</a>
           <a href="#about">Studio</a>
+          <a href="press.html">Press kit</a>
           <a href="#contact">Contact</a>
         </div>
         <div class="f-col">
@@ -1128,7 +1245,7 @@
     </div>
     <div class="container">
       <div class="f-bottom">
-        <span>© 2026 HyperSage AI Labs LLC. All rights reserved.</span>
+        <span>© 2026 HyperSage AI Labs LLC · Delaware, USA. All rights reserved.</span>
         <span>Software with a point of view.</span>
       </div>
     </div>
@@ -1155,10 +1272,15 @@
         if (observer) observer.disconnect();
         engine.classList.remove('motion-armed', 'motion-start');
         engine.classList.add('motion-complete');
+        /* The idle traffic pulse only runs where the intro was allowed to. */
+        if (canAnimate) engine.classList.add('motion-idle');
       }
 
       function startEngine() {
-        if (finished || document.hidden || !engine.classList.contains('motion-armed')) return;
+        if (finished || !engine.classList.contains('motion-armed')) return;
+        /* Background-tab load: skip straight to the complete static diagram — the
+           armed (all-hidden) state must never be what a resumed tab shows. */
+        if (document.hidden) { finishEngine(); return; }
         engine.classList.add('motion-start');
         if (observer) observer.disconnect();
         timer = window.setTimeout(finishEngine, 3800);
@@ -1211,6 +1333,26 @@
         if (motionQuery.addEventListener) motionQuery.addEventListener('change', revealEverything);
         else if (motionQuery.addListener) motionQuery.addListener(revealEverything);
       }
+    })();
+
+    /* The <details> menu never closes itself — close it after a link is tapped,
+       on Escape, and on any tap outside it. */
+    (function () {
+      var menu = document.querySelector('.mobile-menu');
+      if (!menu) return;
+      menu.querySelectorAll('.mobile-links a').forEach(function (a) {
+        a.addEventListener('click', function () { menu.removeAttribute('open'); });
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && menu.hasAttribute('open')) {
+          menu.removeAttribute('open');
+          var s = menu.querySelector('summary');
+          if (s) s.focus();
+        }
+      });
+      document.addEventListener('click', function (e) {
+        if (menu.hasAttribute('open') && !menu.contains(e.target)) menu.removeAttribute('open');
+      });
     })();
   </script>
 </body>

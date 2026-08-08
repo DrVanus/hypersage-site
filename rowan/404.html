@@ -31,7 +31,9 @@
     p { color: #6E5E7C; margin-bottom: 26px; line-height: 1.6; }
     a.home {
       display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px;
-      background: linear-gradient(135deg, #6F5BC5, #F2775E); color: #fff;
+      /* Matches index.html's .btn-warm — the earlier #F2775E end stop measured 2.77:1
+         against white text and fails AA. */
+      background: linear-gradient(135deg, #6F5BC5, #7362C2 55%, #BE4530); color: #fff;
       font-weight: 700; border-radius: 0.875rem; text-decoration: none;
       box-shadow: 0 8px 26px rgba(111,91,197,0.28);
     }
