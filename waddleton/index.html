@@ -29,6 +29,40 @@
   <link rel="icon" type="image/png" href="waddleton-icon.png?v=20260731a">
   <link rel="apple-touch-icon" href="waddleton-icon.png?v=20260731a">
 
+  <!-- Every value below restates a claim already on this page (free, browser,
+       multiplayer, 15 games); the org @id matches the studio homepage's node. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://hypersage.ai/waddleton/#page",
+        "url": "https://hypersage.ai/waddleton/",
+        "name": "Waddleton — a snowy island to waddle around.",
+        "description": "Make a penguin, explore a painted arctic island, meet other players, and play 15 arcade games. Free, in your browser, no download and no account to create.",
+        "primaryImageOfPage": "https://hypersage.ai/waddleton/og-image.png?v=20260806b",
+        "about": { "@id": "https://hypersage.ai/waddleton/#game" }
+      },
+      {
+        "@type": "VideoGame",
+        "@id": "https://hypersage.ai/waddleton/#game",
+        "name": "Waddleton",
+        "applicationCategory": "Game",
+        "operatingSystem": "Web",
+        "gamePlatform": "Web browser",
+        "playMode": "MultiPlayer",
+        "url": "https://waddleton.pages.dev/",
+        "image": "https://hypersage.ai/waddleton/og-image.png?v=20260806b",
+        "description": "Make a penguin, explore a painted arctic island, meet other players, and play 15 arcade games. Free, in your browser, no download and no account to create.",
+        "publisher": { "@type": "Organization", "@id": "https://hypersage.ai/#org", "name": "Hypersage AI Labs", "url": "https://hypersage.ai/" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://waddleton.pages.dev/" },
+        "potentialAction": { "@type": "PlayAction", "target": "https://waddleton.pages.dev/" }
+      }
+    ]
+  }
+  </script>
+
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -161,6 +195,37 @@
     .hero .lede { font-size: 1.16rem; color: var(--muted-fg); max-width: 640px; margin: 0 auto 32px; }
     .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
     .hero-note { margin-top: 18px; font-size: 0.88rem; color: var(--faint); }
+
+    /* ===== SNOWFALL (decorative) =====
+       Two tiled dot layers behind the hero copy (.container carries z-index:1).
+       Each layer translates by exactly one tile in both axes, so the loop is
+       seamless and compositor-only. Static flakes still show when animation
+       is off — reduced-motion just stops the fall. */
+    .hero .snowfall { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .hero .snowfall::before,
+    .hero .snowfall::after { content: ''; position: absolute; left: 0; }
+    .hero .snowfall::before {
+      top: -260px; width: calc(100% + 260px); height: calc(100% + 260px);
+      background-image:
+        radial-gradient(2.6px 2.6px at 17px 34px, rgba(244,249,255,0.7) 50%, transparent 54%),
+        radial-gradient(2px 2px at 143px 65px, rgba(244,249,255,0.55) 50%, transparent 54%),
+        radial-gradient(2.4px 2.4px at 79px 156px, rgba(244,249,255,0.6) 50%, transparent 54%),
+        radial-gradient(2px 2px at 205px 220px, rgba(244,249,255,0.45) 50%, transparent 54%);
+      background-size: 260px 260px;
+      animation: snow-near 15s linear infinite;
+    }
+    .hero .snowfall::after {
+      top: -200px; width: calc(100% + 200px); height: calc(100% + 200px);
+      background-image:
+        radial-gradient(1.6px 1.6px at 41px 61px, rgba(168,190,222,0.5) 50%, transparent 56%),
+        radial-gradient(1.4px 1.4px at 111px 142px, rgba(168,190,222,0.4) 50%, transparent 56%),
+        radial-gradient(1.6px 1.6px at 165px 23px, rgba(168,190,222,0.45) 50%, transparent 56%),
+        radial-gradient(1.3px 1.3px at 63px 187px, rgba(168,190,222,0.35) 50%, transparent 56%);
+      background-size: 200px 200px;
+      animation: snow-far 26s linear infinite;
+    }
+    @keyframes snow-near { to { transform: translate3d(-260px, 260px, 0); } }
+    @keyframes snow-far  { to { transform: translate3d(-200px, 200px, 0); } }
 
     .hero-shot {
       margin: 48px auto 0; max-width: 980px;
@@ -310,6 +375,9 @@
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
       .btn-play:hover, .place:hover, .game:hover, .feature-card:hover { transform: none !important; }
+      /* animation: none (not just a clamped duration) — an infinite 0.01ms loop
+         would still cycle. The flakes stay put as a static scatter. */
+      .hero .snowfall::before, .hero .snowfall::after { animation: none !important; }
     }
   </style>
 </head>
@@ -350,6 +418,7 @@
 
   <!-- ===== HERO ===== -->
   <section class="hero">
+    <div class="snowfall" aria-hidden="true"></div>
     <div class="container">
       <span class="eyebrow">Free · Plays in your browser</span>
       <h1>A snowy island to <span class="grad">waddle around.</span></h1>
