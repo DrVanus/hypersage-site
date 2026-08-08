@@ -38,10 +38,10 @@
 
     <h2>The short version</h2>
     <ul>
-      <li>We collect only what the app needs to work: your identity (via Sign in with Apple), your cooking profile (equipment, allergies, preferences), your pantry, your conversation history with the chef, and recipes you import.</li>
+      <li>We collect only what the app needs to work: your identity (via Sign in with Apple or Google), your cooking profile (equipment, allergies, preferences), your pantry, your conversation history with the chef, and recipes you import.</li>
       <li>We use this data <strong>solely to operate the app</strong> — personalize the chef, remember your pantry, adapt recipes for you. We do not sell it, we do not use it to train models, we do not share it with advertisers.</li>
       <li>Voice transcription runs <strong>on your device</strong> by default.</li>
-      <li>Two things do leave your device to be read by an AI provider: a photo of a shelf when you ask Saffra to identify what's on it, and a short audio clip if on-device transcription fails in a noisy kitchen. Both are detailed below; neither is stored.</li>
+      <li>Your conversations with the chef do leave your device: each message, along with a summary of your profile and pantry, goes to our server and on to <strong>OpenAI</strong> to generate the reply. Two more things can leave to be read by an AI model — a photo of a shelf when you ask Saffra to identify what's on it, and a short audio clip if on-device transcription fails in a noisy kitchen; those two are read, then discarded. All of it is detailed below.</li>
       <li>You can delete your account and all associated data at any time.</li>
     </ul>
 
@@ -104,7 +104,7 @@
     <ul>
       <li>When you use voice mode, transcription runs <strong>on-device via Apple Speech.framework</strong> — audio is not sent to us.</li>
       <li>As a fallback (only when on-device accuracy is too low for a noisy kitchen), audio may be sent briefly to our server and forwarded to OpenAI's Whisper for transcription. We do not retain the audio; it is processed and discarded.</li>
-      <li>Text-to-speech uses ElevenLabs. Audio is generated on our server and streamed to your device. Audio for publicly available curated recipes is cached (content-addressed) so we don't re-generate the same clip for every user.</li>
+      <li>Text-to-speech uses OpenAI's text-to-speech. Audio is generated on our server and streamed to your device. Audio for publicly available curated recipes is cached (content-addressed) so we don't re-generate the same clip for every user.</li>
     </ul>
 
     <h3>Usage</h3>
@@ -135,10 +135,8 @@
     <ul>
       <li><strong>Apple</strong> — Sign in with Apple.</li>
       <li><strong>Google</strong> — Sign in with Google, only if you use it. Governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
-      <li><strong>Anthropic (Claude)</strong> — your chat messages and a summary of your profile and pantry are sent to Anthropic to generate and adapt the chef's replies. Governed by <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a>. Neither we nor Anthropic use your content to train models.</li>
-      <li><strong>Voyage AI</strong> — your search queries and recipe text are sent to Voyage for embedding. Governed by <a href="https://www.voyageai.com/privacy" target="_blank" rel="noopener">Voyage's privacy policy</a>.</li>
-      <li><strong>ElevenLabs</strong> — text you want spoken is sent to ElevenLabs. Governed by their privacy policy.</li>
-      <li><strong>OpenAI</strong> — two paths. (1) <strong>Vision</strong>: when you photograph a shelf to add ingredients, that image is sent to OpenAI's vision model to identify the foods in it. (2) <strong>Whisper</strong>: audio sent <em>only</em> when the noisy-kitchen voice fallback is used. Governed by <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's privacy policy</a>. Neither the image nor the audio is retained by us, and neither is used to train models.</li>
+      <li><strong>OpenAI</strong> — five paths. (1) <strong>Chef chat</strong>: your messages, along with a summary of your profile and pantry, are sent to OpenAI to generate and adapt the chef's replies. (2) <strong>Vision</strong>: when you photograph a shelf to add ingredients, that image is sent to OpenAI's vision model to identify the foods in it. (3) <strong>Whisper</strong>: audio sent <em>only</em> when the noisy-kitchen voice fallback is used. (4) <strong>Text-to-speech</strong>: text you want spoken aloud. (5) <strong>Search</strong>: your recipe searches and imported recipe text are converted to embeddings to power search over Saffra's own recipe catalog — there is no external web-search provider. Governed by <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's privacy policy</a>. Neither the shelf image nor the audio is retained by us, and none of your content is used to train models.</li>
+      <li><strong>Anthropic (Claude)</strong> — only if you share a cook photo to the Community: the photo you chose to publish is checked by Anthropic's model before it goes live (the "is this food / is this safe" review). Nothing else ever goes to Anthropic — not your chats, profile, or pantry. Governed by <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a>. Neither we nor Anthropic use your content to train models.</li>
       <li><strong>USDA FoodData Central</strong> — ingredient names are sent to look up nutrition information. No personal data.</li>
       <li><strong>Open Food Facts</strong> — barcode lookups send just the barcode number. No personal data.</li>
       <li><strong>Google Firebase</strong> — for the early-access waitlist on this website only. Stores your email address until launch notification is sent.</li>
@@ -165,7 +163,7 @@
       <li><strong>Delete your account</strong> → from Profile / Me, or by emailing <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>. In-app deletion runs the cascade immediately (photos, posts, comments, likes, follows, blocks, notifications); email requests are processed within 30 days.</li>
       <li><strong>Block another community member</strong> any time from their public profile.</li>
       <li><strong>Report a post or comment</strong> — every report is reviewed, and we always respond to abusive content within 24 hours.</li>
-      <li><strong>Turn off premium voice</strong> in Settings to use on-device iOS voices only — no ElevenLabs request leaves your device.</li>
+      <li><strong>Turn off premium voice</strong> in Settings to use on-device iOS voices only — no text leaves your device to be spoken.</li>
     </ul>
 
     <h2>Kids</h2>

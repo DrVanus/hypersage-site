@@ -1578,7 +1578,7 @@
         <h3>Free</h3><p class="price-sub">Try the chef</p>
         <div class="price-amount gradient-text-warm">$0</div><div class="price-period">forever</div>
         <ul class="price-features">
-          <li>A free account is required to open Saffra (Sign in with Apple)</li>
+          <li>A free account is required to open Saffra (Sign in with Apple or Google)</li>
           <!-- TRUE AS OF 2026-08-06: 10 is a LIFETIME cap, not a daily one.
                saffra-api/app/config.py:146 `free_chat_lifetime: int = 10`;
                app/ratelimit/limiter.py:54 keys it `rl:chat:lifetime:{user_id}`
@@ -1599,7 +1599,7 @@
         <a href="#signup" class="btn-outline">Join the waitlist</a>
       </div>
       <div class="price-card featured anim">
-        <div class="price-badge">7-Day Free Trial</div>
+        <div class="price-badge" id="proTrialBadge">7-Day Free Trial</div>
         <h3>Pro</h3><p class="price-sub">For everyday cooks</p>
         <div class="price-amount gradient-text-warm">$4.99</div><div class="price-period">/mo (billed yearly)</div>
         <ul class="price-features">
@@ -1610,7 +1610,7 @@
           <li>Receipt &amp; barcode scanning</li>
           <li>Voice timers in Dynamic Island</li>
           <li>Personal recipe library</li>
-          <li>7-day free trial · cancel anytime</li>
+          <li id="proTrialLine">7-day free trial · cancel anytime</li>
         </ul>
         <a href="#signup" class="btn-warm">Join the waitlist</a>
       </div>
@@ -1662,7 +1662,7 @@
 
       <div class="faq-item"><button class="faq-q">When is Saffra launching?<span class="faq-icon">+</span></button><div class="faq-a"><p>Saffra is preparing for TestFlight beta. Join the waitlist above to be notified when invitations open. The first release is focused on iPhone; no timing has been announced for other platforms.</p></div></div>
 
-      <div class="faq-item"><button class="faq-q">What about my data?<span class="faq-icon">+</span></button><div class="faq-a"><p>Sign in with Apple. We never sell data. We never use your conversations to train models. We never track you across apps or websites. Voice transcription runs on-device by default — normally only the text reaches our server. If on-device accuracy fails in a noisy kitchen, a short clip is sent to OpenAI's Whisper and discarded after transcription. Receipt and cookbook photos run through Apple's Vision framework on your phone — only the extracted text leaves the device. The one image that does leave is the shelf photo you take to stock your pantry: that is sent to our server and read by OpenAI's vision model, and not stored. You can delete your account and every byte of your data from Profile / Me at any time. Full policy at <a href="privacy.html" style="color:#F5C088;text-decoration:underline">/privacy</a>.</p></div></div>
+      <div class="faq-item"><button class="faq-q">What about my data?<span class="faq-icon">+</span></button><div class="faq-a"><p>Sign in with Apple or Google. We never sell data. We never use your conversations to train models. We never track you across apps or websites. Voice transcription runs on-device by default — normally only the text reaches our server. If on-device accuracy fails in a noisy kitchen, a short clip is sent to OpenAI's Whisper and discarded after transcription. Receipt and cookbook photos run through Apple's Vision framework on your phone — only the extracted text leaves the device. The one image that does leave is the shelf photo you take to stock your pantry: that is sent to our server and read by OpenAI's vision model, and not stored. You can delete your account and every byte of your data from Profile / Me at any time. Full policy at <a href="privacy.html" style="color:#F5C088;text-decoration:underline">/privacy</a>.</p></div></div>
     </div>
   </div>
 </section>
@@ -1845,6 +1845,12 @@
       if (amt) amt.textContent = prices[i];
       if (per) per.textContent = periods[i];
     });
+    // The 7-day free trial exists on the ANNUAL plan only (terms 9.1/9.3),
+    // so the badge and feature line must not show while Monthly is selected.
+    var trialBadge = document.getElementById('proTrialBadge');
+    var trialLine = document.getElementById('proTrialLine');
+    if (trialBadge) trialBadge.style.display = mode === 'yearly' ? '' : 'none';
+    if (trialLine) trialLine.textContent = mode === 'yearly' ? '7-day free trial · cancel anytime' : 'Cancel anytime';
     document.getElementById('toggleMonthly').classList.toggle('active', mode === 'monthly');
     document.getElementById('toggleYearly').classList.toggle('active', mode === 'yearly');
   }
