@@ -270,6 +270,67 @@
     }
     .carousel-pause:hover { color: var(--fg); border-color: var(--primary-bright); }
 
+    /* ===== DRAFT FAN (signature visual — the level-up draft, pure CSS/SVG) ===== */
+    .draft-strip { padding: 0 0 56px; text-align: center; }
+    .draft-fan {
+      display: flex; justify-content: center; align-items: flex-end;
+      padding: 30px 0 12px; margin-bottom: 22px;
+    }
+    .draft-card {
+      position: relative;
+      width: clamp(108px, 28vw, 158px); aspect-ratio: 5 / 7;
+      margin: 0 -22px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px;
+      background: linear-gradient(168deg, var(--card-soft), var(--card) 55%, #100B1B);
+      border: 1px solid var(--border-strong); border-radius: 16px;
+      box-shadow: 0 20px 46px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+      transform-origin: 50% 120%;
+      transition: transform .35s ease, box-shadow .35s ease;
+    }
+    /* Inner hairline frame, echoing the game's illustrated draft cards. */
+    .draft-card::before {
+      content: ''; position: absolute; inset: 7px;
+      border: 1px solid var(--border); border-radius: 11px;
+      pointer-events: none;
+    }
+    .draft-card::after {
+      content: '\2726'; position: absolute; top: 13px; left: 0; right: 0;
+      font-size: 0.7rem; line-height: 1; color: var(--gold); opacity: 0.8;
+      text-shadow: 0 0 10px var(--gold-glow);
+    }
+    .draft-card svg { width: 42px; height: 42px; color: var(--primary-bright); filter: drop-shadow(0 0 10px var(--violet-glow)); }
+    .draft-card .card-label {
+      font-family: 'Cinzel', serif; font-size: 0.66rem; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold);
+    }
+    .draft-card.fan-left  { transform: rotate(-9deg) translateY(14px); z-index: 1; }
+    .draft-card.fan-right { transform: rotate(9deg) translateY(14px); z-index: 1; }
+    .draft-card.fan-mid {
+      transform: translateY(-10px); z-index: 2;
+      border-color: rgba(167,139,250,0.45);
+      box-shadow: 0 26px 56px rgba(0,0,0,0.6), 0 0 44px var(--violet-glow), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .draft-card.fan-mid svg { color: var(--gold-bright); filter: drop-shadow(0 0 10px var(--gold-glow)); }
+    /* Progressive enhancement: the fan spreads on hover. The global
+       prefers-reduced-motion block below flattens the transition. */
+    .draft-fan:hover .fan-left  { transform: rotate(-13deg) translate(-10px, 12px); }
+    .draft-fan:hover .fan-mid   { transform: translateY(-18px); }
+    .draft-fan:hover .fan-right { transform: rotate(13deg) translate(10px, 12px); }
+    @media (prefers-reduced-motion: no-preference) {
+      @keyframes draft-star-glow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+      .draft-card.fan-mid::after { animation: draft-star-glow 3.2s ease-in-out infinite; }
+    }
+    .draft-note { color: var(--muted-fg); font-size: 0.98rem; max-width: 560px; margin: 0 auto; }
+    .draft-note b { color: var(--fg); font-weight: 600; }
+    .draft-tally {
+      margin-top: 12px; font-size: 0.82rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold);
+    }
+    @media (max-width: 460px) {
+      .draft-card { margin: 0 -18px; }
+      .draft-card svg { width: 34px; height: 34px; }
+    }
+
     /* ===== SECTION ===== */
     section { position: relative; }
     .section-block { padding: 80px 0; }
@@ -571,7 +632,7 @@
           <p class="lede">A gothic illustrated horde-survivor. Pick a hero, draft upgrades every level, evolve your weapons into ascended forms, and fight to survive the endless dark.</p>
           <div class="hero-buttons">
             <a href="#download" class="btn-primary">
-              <span> Coming to iOS</span>
+              <span>Get notified</span>
             </a>
             <a href="#features" class="btn-ghost">
               <span>See the hunt</span>
@@ -596,6 +657,30 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===== THE DRAFT (signature visual — inline CSS/SVG only, no image assets).
+       Depicts only what the page already states: three cards per level
+       (a weapon, an upgrade, or an item) and the 8 / 18 / 3 counts. -->
+  <section class="draft-strip">
+    <div class="container">
+      <div class="draft-fan" aria-hidden="true">
+        <div class="draft-card fan-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 3v8.5h-4V6z"/><line x1="8" y1="14.5" x2="16" y2="14.5"/><line x1="12" y1="14.5" x2="12" y2="20"/><circle cx="12" cy="21" r="1.1"/></svg>
+          <div class="card-label">Weapon</div>
+        </div>
+        <div class="draft-card fan-mid">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/><path d="M6 20l6-6 6 6"/></svg>
+          <div class="card-label">Upgrade</div>
+        </div>
+        <div class="draft-card fan-right">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="5.5"/><path d="M12 8.5V7"/><circle cx="12" cy="5.2" r="1.6"/></svg>
+          <div class="card-label">Item</div>
+        </div>
+      </div>
+      <p class="draft-note">Every level the hunt deals <b>three cards</b> — a new weapon, an upgrade, or an item. Reroll, banish, and craft your perfect run.</p>
+      <p class="draft-tally">8 hunters · 18 weapons · 3 biomes</p>
     </div>
   </section>
 
@@ -763,7 +848,7 @@
           <p class="lede">Choose your descent from the loadout. Each biome throws a faster, tougher horde and pays out more essence for surviving it — push deep enough in one and the next unlocks, with a boss that hits harder than the last.</p>
           <ul class="showcase-points">
             <li><b>The Ossuary</b> — a bone-choked catacomb where every hunt begins.</li>
-            <li><b>The Frostvault</b> — a bitter, tougher horde that pays 40% more essence.</li>
+            <li><b>The Frostvault</b> — a bitter, tougher horde that pays 39% more essence.</li>
             <li><b>The Ashlands</b> — the deepest, deadliest hunt and the richest haul of all.</li>
           </ul>
         </div>
@@ -790,7 +875,7 @@
           <div class="biome-body">
             <div class="biome-num">Biome II · Survive 60s to unlock</div>
             <h3>The Frostvault</h3>
-            <p>Where the frost-lich broods. Faster, tougher horde and a bitter cold that pays 40% more essence.</p>
+            <p>Where the frost-lich broods. Faster, tougher horde and a bitter cold that pays 39% more essence.</p>
             <span class="boss">Frost Lich</span>
           </div>
         </div>
