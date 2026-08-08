@@ -1,0 +1,33 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://hypersage.ai/quietoak/",
+  "_why": "Written 2026-08-08. Quietoak (app repo: anchor-ios) has a live backend that receives a diary slice on every chat turn, so its privacy story is NOT 'nothing leaves the device'. The three claims below are the ones the site actually makes, and each is scoped to survive that fact. Evidence re-derived from /Users/dee/Developer/DrVanus/anchor-ios.",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "The sign-in surface exists in the repo but is UNREACHABLE in the shipping app: AnchorAuthStore.shared.start() has no call site anywhere in Anchor/, and nothing outside Anchor/Auth/ presents AnchorSignInView or AnchorAccountSection (the constraint is written down at Anchor/Auth/GoogleSignInHelper.swift:7-15). The shipped Release Info.plist carries an EMPTY GIDClientID, so the Google button hides itself.",
+        "Identity is a random per-install id, which is what privacy.html says: 'There is no account and no login — the app identifies your install with a random ...'.",
+        "Independently confirmed in the presubmit listing audit at anchor-ios/store/PRESUBMIT-REVIEW-2026-08-04-raw.json (section E, 'GoogleSignIn linked but inert')."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "Zero ad, analytics, attribution or crash SDKs. anchor-ios Package.resolved pins only GoogleSignIn-iOS, AppAuth-iOS, gtm-session-fetcher and GTMAppAuth; a grep across *.swift/*.plist/*.pbxproj/*.yml for GoogleMobileAds, AdMob, AppLovin, FBSDK, Firebase, Crashlytics, Sentry, Amplitude, Mixpanel, AppsFlyer, Bugsnag, Datadog, OneSignal and Braze returns zero substantive hits (anchor-ios/store/PRESUBMIT-REVIEW-2026-08-04-raw.json section E).",
+        "PrivacyInfo.xcprivacy declares NSPrivacyTracking = false with an empty NSPrivacyTrackingDomains array.",
+        "SCOPE: the site pairs the claim with trackers on a named surface — 'No ads, no third-party trackers on your diary or chat' — which is true and stays true even though the diary slice does go to our own backend."
+      ]
+    },
+    "offline": {
+      "approved": true,
+      "evidence": [
+        "SCOPED TO THE CRISIS SURVIVAL KIT AND THE SKILLS/DIARY SURFACES, which is exactly how all four pages use it ('the Crisis Survival Kit is always free and works offline'; 'The skills, diary card, and crisis kit all work offline').",
+        "Offline by construction: CrisisResourceStore.loadBestAvailable() reads only the app bundle and Application Support, and CrisisResource.actionURL builds tel:/sms: URLs on-device (anchor-ios/Anchor/Crisis/CrisisResources.swift:38-56). Regions US/GB/CA/AU/EU/unknown ship in crisis_resources.json.",
+        "The guided-audio corpus is fixed and client-mirrored (anchor-ios/Anchor/Voice/GuidedAudioCorpus.swift), and storyvault-api/app/dbt/voice.py:31-34 records that premium gating must never block crisis content.",
+        "COMPANION CHAT IS NOT OFFLINE — it is a network round-trip to our backend and carries a 7-day diary slice (Anchor/Diary/DiaryStore.swift:340-357 -> POST /v1/dbt/chat). No page claims chat works offline; keep it that way."
+      ]
+    }
+  },
+  "contract_notes": "OPEN ISSUE, not a claim this gate can see: the presubmit audit (anchor-ios/store/PRESUBMIT-REVIEW-2026-08-04-raw.json section A5) found the older quietoak privacy page said the diary is 'not uploaded to us', which the code contradicts. Re-read privacy.html against DiaryStore.companionDiaryPayload before the next submission."
+}

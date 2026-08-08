@@ -1,0 +1,49 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://hypersage.ai/hexhunter/",
+  "_why": "Written 2026-08-08 when the folded-in product sites were first audited against their OWN contracts instead of the studio's. Hexhunter is the strongest privacy story in the fleet because the app makes no network calls at all; the one thing that CAN leave the device is a Game Center score, and every claim below is worded to leave room for it. Verified against /Users/dee/Developer/DrVanus/Hexhunter.",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "There is no sign-in surface and no backend: a grep of Hexhunter/Sources for ASAuthorization, SignInWithApple, GIDSignIn and signIn( returns nothing.",
+        "SCOPE: Game Center is the ONE identity in the product, and it is Apple's, optional, and never ours. Sources/Core/GameCenterManager.swift submits survival-time and kill scores when the player opts in; privacy-policy.html gives it its own section, says the game is fully playable without it, points at apple.com/legal/privacy, and states the app never receives the Apple ID. index.html says 'Game Center leaderboards are optional' in the same breath as 'no account'. Do not reword any of these to a bare 'no account' that drops the Game Center carve-out."
+      ]
+    },
+    "no_tracking": {
+      "approved": true,
+      "evidence": [
+        "No analytics, attribution or crash SDK is linked: the project builds with zero external packages (Sources/Core/AdManager.swift documents that as a deliberate constraint).",
+        "Hexhunter/Sources/PrivacyInfo.xcprivacy declares NSPrivacyTracking = false, so the app is not permitted to track across apps or websites and requests no advertising identifier."
+      ]
+    },
+    "no_personal_data": {
+      "approved": true,
+      "evidence": [
+        "The only persisted data is game progress in UserDefaults — unlocked heroes and stages, relics, essence, best times, achievements and sound preferences. privacy-policy.html enumerates exactly that list.",
+        "No field anywhere collects a name, email, address or contact detail; there is no form, no account, and no server of ours to send one to."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "Sources/Core/AdManager.swift is a PROTOCOL SEAM with no SDK behind it: 'deliberately NO SDK dependency yet', and 'No rewarded placements ship in v1.0 — the Watch to Revive / Watch for 2x Essence offers were removed until a real ad SDK is integrated'. Interstitials are gated behind adsDisabled and are a no-op.",
+        "SCOPE: the site's claim is version-scoped on purpose — privacy-policy.html says 'Hexhunter version 1.0 does not display third-party advertisements', and the IAP section says purchases may remove 'future ads'. If an ad SDK is ever integrated, this approval and that sentence both expire."
+      ]
+    },
+    "local_only": {
+      "approved": true,
+      "evidence": [
+        "Hexhunter makes NO network calls: a grep of Hexhunter/Sources for URLSession returns nothing. The only https:// strings in Sources are SwiftUI Link destinations (PaywallView.swift:113-114, SettingsView.swift:443,446) that hand a URL to Safari — the app itself never opens a connection.",
+        "SCOPE: privacy-policy.html attaches 'This data never leaves your device' to the UserDefaults progress paragraph specifically, and the Game Center section immediately follows it. Scores submitted to Game Center DO leave the device. Keep the sentence attached to the on-device data it describes; a page-level 'nothing ever leaves your device' would be false."
+      ]
+    },
+    "offline": {
+      "approved": true,
+      "evidence": [
+        "Same zero-URLSession evidence as local_only: there is no network path to lose, so support.html's 'It runs fully offline — you do not need a network connection to play' is exactly true.",
+        "Game Center submission needs a connection, but it is optional and the game is fully playable without it."
+      ]
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://hypersage.ai/storyvault/",
+  "_why": "Written 2026-08-08. StoryVault DOES ship Sign in with Apple and Google, so the site's wording is 'no account NEEDED' rather than 'no account'. That distinction is the whole approval — evidence below records what sign-in actually unlocks so nobody shortens the sentence. Verified against /Users/dee/Developer/DrVanus/storyvault-ios.",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "Reading and playing are accountless. The site says 'No account needed' (index.html trust row) and 'no account needed to read or play' (support.html) — both scoped to reading/playing, not to the whole product.",
+        "SIGN-IN EXISTS and gates only social surfaces: storyvault-ios/.../AuthStore.swift:13 records that 'liking + reporting check isSignedIn', MarketplaceTabView.swift:360,493 guard on auth.isSignedIn, and ProfileView.swift:33 renders the signed-out user as 'Guest'. Nothing in the reading or adventure path checks it.",
+        "Pro is StoreKit-only and works without an account: entitlement is derived from isPremiumUser, not from a session (SITE-CONTRADICTIONS-RESOLVED-2026-08-08.md §2). Build 3 was cut specifically to fix accountless Pro."
+      ]
+    },
+    "no_tracking": {
+      "approved": true,
+      "evidence": [
+        "No analytics, attribution or ad SDK is linked: a grep of storyvault-ios/StoryVaultAI/StoryVaultAI.xcodeproj/project.pbxproj for GoogleMobileAds, AdMob, PostHog, Mixpanel, Amplitude, Crashlytics and FirebaseAnalytics returns nothing.",
+        "Crash handling is first-party and SDK-free: StoryVaultAI/CrashReporter.swift:29 records that adding Sentry or Crashlytics would mean swapping MetricKitSubscriber — i.e. neither is present today.",
+        "CAVEAT for the backend, not this site: if SENTRY_DSN is ever set on storyvault-api, the default LoggingIntegration would ship stack-frame locals (including story text) on ERROR. Re-check this approval if that happens."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "No advertising SDK is linked into the app (same project.pbxproj grep as no_tracking), and there is no ad placement, rewarded flow, or ad-gated content anywhere in the reading or adventure path.",
+        "Monetisation is StoryVault Pro through StoreKit only."
+      ]
+    }
+  }
+}

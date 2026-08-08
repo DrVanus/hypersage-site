@@ -10,6 +10,16 @@
         "alder-app/api.js deviceId(): a caller is identified to the backend by a locally minted random `alder.deviceId` plus an entitlement header — never by a personal identifier. The backend rows are keyed to that random id and nothing else."
       ]
     },
+    "no_tracking": {
+      "approved": true,
+      "evidence": [
+        "The sentence approved here is privacy.html's 'There is no analytics provider, no crash-reporting provider, no advertising network, and no data broker on this list, because there are none in Alder.' It names the CRASH-REPORTING provider too, so it is stricter than the fleet-standard no-analytics claim and needs the deployment check below.",
+        "Client: a grep of alder-app/*.js for PostHog, Sentry, Mixpanel, Amplitude, Firebase, gtag and analytics returns nothing.",
+        "Backend: alder-api/app/observability.py can install Sentry, but install_sentry() returns immediately when settings.sentry_dsn is unset, and NO SENTRY_DSN IS DEPLOYED — `fly secrets list` for alder-api on 2026-08-08 showed only DATABASE_URL, ANTHROPIC_API_KEY, COMPANION_LLM_FAILOVER_ENABLED, DEV_UNLOCK_ACKNOWLEDGED, DEV_UNLOCK_CODE and USAGE_HASH_SALT. The claim is true AS DEPLOYED.",
+        "THIS IS A DEPLOYMENT-CONDITIONAL APPROVAL: `fly secrets set SENTRY_DSN=...` on alder-api would make the 'no crash-reporting provider' half of that sentence false the moment it deployed, with no code change and nothing for this gate to catch. Re-word the page or drop the DSN; do not leave both.",
+        "The no-ad/no-analytics half is additionally pinned by must_not_match invariants in alder-app/app-claims-contract.json, so a tracker fails that build."
+      ]
+    },
     "no_ads": {
       "approved": true,
       "evidence": [
