@@ -16,13 +16,13 @@
        (commit 9ae6323). Verify with
        `ls Nightshelf/Nightshelf/Nightshelf/Resources/Books/*.txt | wc -l`
        before changing this number on any page. terms.html and support.html carry it too. -->
-  <meta name="description" content="Nightshelf is a cozy iOS bedtime-story app: 82 complete classics and calm new stories written by AI, read aloud with ambient sound and a sleep timer.">
+  <meta name="description" content="Nightshelf is a cozy iOS bedtime-story app: 82 complete classics and calm new stories written by AI with Nightshelf Pro, read aloud with ambient sound and a sleep timer.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/nightshelf/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Nightshelf — Bedtime stories, read aloud">
-  <meta property="og:description" content="82 complete classics and calm new stories written by AI, read aloud with ambient sound underneath.">
+  <meta property="og:description" content="82 complete classics and calm new stories written by AI with Nightshelf Pro, read aloud with ambient sound underneath.">
   <meta property="og:url" content="https://hypersage.ai/nightshelf/">
   <meta property="og:site_name" content="Nightshelf">
   <meta property="og:image" content="https://hypersage.ai/nightshelf/app-icon.png">
@@ -30,7 +30,7 @@
   <meta property="og:image:height" content="512">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Nightshelf — Bedtime stories, read aloud">
-  <meta name="twitter:description" content="Bedtime classics and AI-written stories, read aloud in a soft, sleepy voice.">
+  <meta name="twitter:description" content="Bedtime classics, plus AI-written stories with Nightshelf Pro — read aloud in a soft, sleepy voice.">
   <meta name="twitter:image" content="https://hypersage.ai/nightshelf/app-icon.png">
 
   <link rel="icon" type="image/png" href="app-icon.png">
@@ -417,6 +417,37 @@
     footer.site .flinks a:hover { color: var(--accent-bright); }
     footer.site .copy { color: var(--tertiary-fg); font-size: .85rem; line-height: 1.6; }
 
+    /* ========================= WIND-DOWN ============================
+       Layered diagram: the story, the narration, the ambient sound —
+       dimming toward the moon as the sleep timer fades everything out.
+       Depicts only what the copy above already says. Static by default;
+       the drift/breathe animations are progressive enhancement. */
+    .winddown { max-width: 740px; margin: 64px auto 0; }
+    .winddown svg { display: block; width: 100%; height: auto; }
+    .winddown .lab {
+      font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; fill: var(--tertiary-fg);
+    }
+    .winddown .wave { fill: none; stroke-linecap: round; }
+    .winddown .w1 { stroke: var(--accent-bright); stroke-width: 2.4; opacity: .85; animation: wd-drift 26s linear infinite; }
+    .winddown .w2 { stroke: var(--lilac); stroke-width: 2; opacity: .75; animation: wd-drift2 38s linear infinite; }
+    .winddown .glow { animation: wd-breathe 9s ease-in-out infinite alternate; }
+    @keyframes wd-drift  { to { transform: translateX(-80px); } }
+    @keyframes wd-drift2 { to { transform: translateX(-60px); } }
+    @keyframes wd-breathe { from { opacity: .55; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .winddown .w1, .winddown .w2, .winddown .glow { animation: none; }
+    }
+    .wd-axis {
+      display: flex; justify-content: space-between; margin-top: 2px; padding: 0 4px;
+      font-size: .74rem; font-weight: 600; color: var(--tertiary-fg);
+      letter-spacing: .14em; text-transform: uppercase; line-height: 1.6;
+    }
+    .wd-cap {
+      margin-top: 20px; text-align: center; font-family: var(--font-serif);
+      font-style: italic; font-size: 1.02rem; color: var(--muted-fg); line-height: 1.6;
+    }
+
     /* ======================= SCROLL REVEAL ========================== */
     .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
     .reveal.in { opacity: 1; transform: none; }
@@ -430,7 +461,7 @@
   "name": "Nightshelf",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "iOS",
-  "description": "Nightshelf is a cozy iOS bedtime-story app: 82 complete classics and calm new stories written by AI, read aloud with ambient sound and a sleep timer.",
+  "description": "Nightshelf is a cozy iOS bedtime-story app: 82 complete classics and calm new stories written by AI with Nightshelf Pro, read aloud with ambient sound and a sleep timer.",
   "url": "https://hypersage.ai/nightshelf/",
   "author": {
     "@type": "Organization",
@@ -474,7 +505,7 @@
       <h1 class="grad-text">Stories to <em>drift off</em> to</h1>
       <p class="sub">A shelf of bedtime stories — eighty-two timeless classics, and calm new ones written for you by AI with Nightshelf Pro, read aloud in a soft, sleepy voice with ambient sound underneath.</p>
       <div class="cta-row">
-        <a href="#get" class="btn">Get Nightshelf</a>
+        <a href="#get" class="btn">Coming to iOS</a>
         <a href="#screens" class="btn ghost">Take a look</a>
       </div>
       <p class="fineprint">No account. No ads. Just goodnights.</p>
@@ -499,7 +530,7 @@
       </div>
       <div class="device-wrap reveal">
         <div class="device">
-          <img src="screenshot.jpg" alt="The Nightshelf home screen on iPhone — a nighttime library with tonight's story, fairy tales, and myths &amp; legends." width="840" height="1825">
+          <img src="shots/home.jpg" alt="The Nightshelf home screen on iPhone — a nighttime library with tonight's story, fairy tales, and myths &amp; legends." width="840" height="1825">
         </div>
       </div>
       <div class="chip-col right" aria-hidden="true">
@@ -592,6 +623,37 @@
         <div class="step reveal"><div class="n">2</div><h3>Press play</h3><p>A warm voice reads aloud while rain or firelight murmurs underneath.</p></div>
         <div class="step reveal"><div class="n">3</div><h3>Drift off</h3><p>The sleep timer fades the story out and holds your place till tomorrow.</p></div>
       </div>
+      <figure class="winddown reveal">
+        <svg viewBox="0 0 720 230" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="wdDim" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#0B0E19" stop-opacity="0"/>
+              <stop offset=".55" stop-color="#0B0E19" stop-opacity=".55"/>
+              <stop offset="1" stop-color="#0B0E19" stop-opacity="1"/>
+            </linearGradient>
+            <radialGradient id="wdGlow">
+              <stop offset="0" stop-color="#F6C877" stop-opacity=".32"/>
+              <stop offset="1" stop-color="#F6C877" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <text class="lab" x="40" y="34">The story</text>
+          <rect x="40" y="48" width="430" height="4" rx="2" fill="rgba(243,239,230,0.30)"/>
+          <rect x="40" y="60" width="470" height="4" rx="2" fill="rgba(243,239,230,0.22)"/>
+          <rect x="40" y="72" width="390" height="4" rx="2" fill="rgba(243,239,230,0.27)"/>
+          <text class="lab" x="40" y="104">A warm voice</text>
+          <path class="wave w1" d="M-80 126q20 -14 40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0"/>
+          <text class="lab" x="40" y="170">Rain or firelight</text>
+          <path class="wave w2" d="M-60 190q15 -9 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0"/>
+          <rect x="360" y="0" width="360" height="230" fill="url(#wdDim)"/>
+          <circle class="glow" cx="644" cy="112" r="54" fill="url(#wdGlow)"/>
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" transform="translate(615 83) scale(2.4)" fill="#F6C877"/>
+          <circle cx="560" cy="38" r="1.3" fill="rgba(243,239,230,0.5)"/>
+          <circle cx="688" cy="58" r="1.1" fill="rgba(243,239,230,0.38)"/>
+          <circle cx="604" cy="170" r="1.2" fill="rgba(243,239,230,0.32)"/>
+        </svg>
+        <div class="wd-axis" aria-hidden="true"><span>Press play</span><span>Drift off</span></div>
+        <figcaption class="wd-cap">A warm voice reads the story while rain or firelight murmurs underneath — and the sleep timer fades everything out as you drift off.</figcaption>
+      </figure>
       <p class="fleuron" aria-hidden="true">✦ ✦ ✦</p>
     </div>
   </section>
