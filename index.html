@@ -216,21 +216,23 @@
 
     /* ===== HERO ===== */
     section.hero { padding: 82px 0 64px; position: relative; }
+    /* The engine spans every row of the right column, so the title and copy sit
+       beside it and no desktop dead zone opens above the diagram. */
     .hero-stage {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(440px, .9fr);
+      grid-template-columns: minmax(0, 1.15fr) minmax(440px, .85fr);
       grid-template-areas:
-        "eyebrow eyebrow"
-        "title title"
+        "eyebrow engine"
+        "title engine"
         "copy engine";
       align-items: center;
-      column-gap: clamp(28px, 3vw, 52px);
+      column-gap: clamp(28px, 3.5vw, 60px);
     }
-    .hero .eyebrow { grid-area: eyebrow; justify-self: start; }
-    .hero h1 { grid-area: title; max-width: 960px; }
+    .hero .eyebrow { grid-area: eyebrow; justify-self: start; align-self: end; }
+    .hero h1 { grid-area: title; }
     .hero-copy { grid-area: copy; align-self: start; }
     .hero .eyebrow { display: inline-block; margin-bottom: 22px; padding: 7px 15px; border: 1px solid var(--line-strong); border-radius: 999px; background: rgba(45,212,191,0.06); }
-    .hero h1 { font-size: clamp(2.5rem, 6vw, 4.4rem); font-weight: 700; line-height: 1.2; padding-bottom: 0.1em; margin-bottom: 22px; }
+    .hero h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 700; line-height: 1.2; padding-bottom: 0.1em; margin-bottom: 22px; }
     .hero h1 .hero-line { display: block; }
     .hero .lede { font-size: clamp(1.05rem, 2.2vw, 1.28rem); color: var(--muted); max-width: 660px; margin-bottom: 34px; }
     .hero .lede strong { color: var(--fg); font-weight: 600; }
@@ -248,7 +250,7 @@
        screen-reader users encounter the complete explanation only once. */
     .context-engine {
       grid-area: engine; position: relative; isolation: isolate;
-      width: 100%; max-width: 470px; aspect-ratio: 1.62 / 1;
+      width: 100%; max-width: 500px; aspect-ratio: 1.62 / 1;
       justify-self: end; align-self: center; overflow: hidden;
       border: 1px solid var(--line-strong); border-radius: 24px;
       background:
@@ -407,7 +409,7 @@
       .hero-stage {
         grid-template-columns: 1fr; grid-template-areas: "eyebrow" "title" "copy" "engine";
       }
-      .hero h1 { max-width: 880px; }
+      .hero h1 { max-width: 880px; font-size: clamp(2.5rem, 6vw, 4.4rem); }
       .hero-copy { max-width: 720px; }
       .context-engine { justify-self: start; max-width: 560px; margin-top: 42px; }
     }
@@ -473,6 +475,11 @@
     section.block { padding: 88px 0; position: relative; }
     .section-head { max-width: 680px; margin-bottom: 52px; }
     .section-head.center { margin-left: auto; margin-right: auto; text-align: center; }
+    /* Desktop: center the section heads so wide viewports don't read as a full-width
+       band with an empty right half. Phones keep the left-aligned reading flow. */
+    @media (min-width: 861px) {
+      .section-head { max-width: 780px; margin-left: auto; margin-right: auto; text-align: center; }
+    }
     .section-head .eyebrow { display: block; margin-bottom: 16px; }
     .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; line-height: 1.22; margin-bottom: 16px; }
     .section-head p { color: var(--muted); font-size: 1.08rem; }
