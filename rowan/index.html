@@ -187,6 +187,38 @@
     }
     @media (max-width: 900px) { .hero-image::after { inset: 0; } }
 
+    /* ===== HERO FLOW (the lede, drawn: conversation → record → brief) ===== */
+    .hero-flow { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 44px; margin-top: 56px; }
+    .hero-flow li {
+      position: relative; text-align: center; padding: 24px 20px 20px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    }
+    .hero-flow li + li::before {
+      content: '→'; position: absolute; left: -34px; top: 50%; transform: translateY(-50%);
+      color: var(--primary); font-size: 1.5rem; font-weight: 700; line-height: 1;
+    }
+    .flow-glyph {
+      width: 44px; height: 44px; margin: 0 auto 12px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--card-soft); border: 1px solid var(--border); color: var(--primary-dark);
+    }
+    .flow-glyph svg { width: 22px; height: 22px; }
+    .flow-name { display: block; font-family: ui-serif, 'New York', Charter, Georgia, serif; font-weight: 700; font-size: 1.08rem; margin-bottom: 4px; color: var(--fg); }
+    .hero-flow p { color: var(--muted-fg); font-size: 0.9rem; line-height: 1.55; }
+    @media (max-width: 900px) {
+      .hero-flow { grid-template-columns: 1fr; gap: 40px; max-width: 420px; margin-left: auto; margin-right: auto; }
+      .hero-flow li + li::before { left: 50%; top: -33px; transform: translate(-50%, 0) rotate(90deg); }
+    }
+    /* Progressive enhancement only: a gentle nudge on the desktop arrows.
+       Off under prefers-reduced-motion (and the global reduce block clamps it too). */
+    @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+      .hero-flow li + li::before { animation: flow-nudge 2.8s ease-in-out infinite; }
+    }
+    @keyframes flow-nudge {
+      0%, 100% { transform: translateY(-50%) translateX(0); }
+      50% { transform: translateY(-50%) translateX(4px); }
+    }
+
     /* ===== SECTION ===== */
     section { position: relative; }
     .section-block { padding: 72px 0; }
@@ -468,6 +500,27 @@
           <img src="art/rowan_welcome.png?v=20260731a" alt="Rowan, a warm dawn-sprite companion with a soft violet-and-apricot flame">
         </div>
       </div>
+      <!-- The lede, drawn. Every phrase below restates copy that already
+           appears on this page (the lede, the How-it-works steps, and the
+           feature cards) — no new claims. role="list": Safari/VoiceOver drops
+           list semantics when the marker is removed. -->
+      <ol class="hero-flow" role="list" aria-label="How a conversation becomes a structured record, then a visit brief">
+        <li>
+          <div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <strong class="flow-name">A conversation</strong>
+          <p>Say how the day went, in ordinary words.</p>
+        </li>
+        <li>
+          <div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h9"/></svg></div>
+          <strong class="flow-name">A structured record</strong>
+          <p>A typed entry — symptom, severity, and the factor you named.</p>
+        </li>
+        <li>
+          <div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></div>
+          <strong class="flow-name">A visit brief</strong>
+          <p>Your last thirty days, your medication list, and the questions worth asking.</p>
+        </li>
+      </ol>
     </div>
   </section>
 
@@ -692,7 +745,7 @@
             <li>Interpret labs or vitals, or call any result "abnormal"</li>
             <li>Treat, cure, or prevent anything — and it isn't a medical device</li>
             <li>Replace your doctor, nurse, pharmacist, or therapist</li>
-            <li>Provide therapy or counselling, or treat low mood as something to fix</li>
+            <li>Provide therapy or counseling, or treat low mood as something to fix</li>
             <li>Pretend to be a clinician, or hide that it's an AI</li>
           </ul>
         </div>
@@ -735,7 +788,10 @@
                frame. That copy is fixed in rowan-app, so the whole card —
                including ALWAYS IN CONTEXT — is shown, and it now says the same
                thing as privacy.html. -->
-          <div class="screen-frame"><img class="shot-img" src="shots/memory.webp?v=20260805a" data-light="shots/memory.webp?v=20260805a" data-dark="shots/memory-dark.webp?v=20260805a" alt="Rowan’s “What Rowan knows” card — the plain list of notes Rowan keeps about you, an “Edit these notes” button, “Clear everything Rowan knows” underneath, and an “Always in context” note listing everything Rowan sees — the notes, your conditions, medications and allergies, recent entries, your name, your device language and today’s date — and saying the notes are stored on the device, not kept on the server, but sent with each message and so reaching the AI provider" width="716" height="1772" loading="lazy"></div>
+          <!-- No shot-img class or data-dark here: the light/dark toggle is
+               scoped to the #screens section (whose backdrop darkens with it);
+               this shot sits in a section that stays light, so it stays light. -->
+          <div class="screen-frame"><img src="shots/memory.webp?v=20260805a" alt="Rowan’s “What Rowan knows” card — the plain list of notes Rowan keeps about you, an “Edit these notes” button, “Clear everything Rowan knows” underneath, and an “Always in context” note listing everything Rowan sees — the notes, your conditions, medications and allergies, recent entries, your name, your device language and today’s date — and saying the notes are stored on the device, not kept on the server, but sent with each message and so reaching the AI provider" width="716" height="1772" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -797,7 +853,7 @@
                Do NOT quote a price here: the app deliberately reads displayPrice
                from StoreKit rather than hardcoding one, so any number written on
                this page is wrong in every storefront but at most one. -->
-          <p>Tracking your conditions and medications, logging how a day went, your trends, the visit brief, and reminders are all part of Rowan at no cost. Conversation on the free plan is capped at 10 messages a day. There is one optional subscription, <strong>Rowan Plus</strong>, which lifts that cap and answers with a more capable model — the price and renewal terms are shown in the App Store before you buy, and billing is handled by Apple. Safety and emergency features are never behind a payment.</p>
+          <p>At launch: tracking your conditions and medications, logging how a day went, your trends, the visit brief, and reminders are all part of Rowan at no cost. Conversation on the free plan is capped at 10 messages a day. There is one optional subscription, <strong>Rowan Plus</strong>, which lifts that cap and answers with a more capable model — the price and renewal terms are shown in the App Store before you buy, and billing is handled by Apple. Safety and emergency features are never behind a payment.</p>
         </details>
         <details class="faq">
           <summary>When can I use it?</summary>
