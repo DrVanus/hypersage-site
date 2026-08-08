@@ -24,9 +24,7 @@
   <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260806c">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="fonts/fonts.css">
   <link rel="stylesheet" href="legal.css">
 </head>
 <body>
@@ -69,13 +67,16 @@
     <p>If you email us, we obviously have your email and whatever you wrote in it. We keep that correspondence only for as long as it takes to deal with it.</p>
 
     <h2>Who does see something when you visit</h2>
-    <p>Two third parties are involved in simply serving the page, and both necessarily see your IP address:</p>
+    <p>One third party is involved in simply serving the studio pages, and it necessarily sees your IP address:</p>
     <ul>
       <li><strong>GitHub Pages</strong> hosts this site, so GitHub's servers handle your request. <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub privacy statement</a></li>
-      <li><strong>Google Fonts</strong> serves the typefaces this site uses — Space Grotesk, Inter, and (on the home page) JetBrains Mono — so Google receives a request from your browser when a page loads. <a href="https://policies.google.com/privacy" rel="noopener">Google privacy policy</a></li>
     </ul>
-    <p>On the Saffra page there is a third: <strong>Google Firebase</strong>, which loads its own scripts and stores the early-access form's submissions. It is on that page only, and the Firebase SDK uses your browser's local storage while it runs.</p>
-    <p>None of the three is something we ask for data from, and none gets anything from us about you.</p>
+    <!-- The studio pages self-host their typefaces (fonts/fonts.css) as of 2026-08-08.
+         Product subsite pages still load Google Fonts; their own policies disclose it,
+         and the sentence below is scoped to the studio pages for that reason. -->
+    <p>The typefaces on the studio pages are served from this site itself — loading them sends no request to Google or any other font host. (Individual product pages on this domain may still load fonts from Google; each product's own policy covers its pages.)</p>
+    <p>On the Saffra page there is a second: <strong>Google Firebase</strong>, which loads its own scripts and stores the early-access form's submissions. It is on that page only, and the Firebase SDK uses your browser's local storage while it runs.</p>
+    <p>Neither is something we ask for data from, and neither gets anything from us about you.</p>
 
     <h2>Links out</h2>
     <p>This site links to our products' own websites, and those sites may link on to an app store. Once you follow a link, that destination's privacy policy applies rather than this one.</p>
@@ -91,16 +92,15 @@
       <li><a href="https://hypersage.ai/nightshelf/" target="_blank" rel="noopener">Nightshelf ↗</a></li>
       <li><a href="https://hypersage.ai/hexhunter/" target="_blank" rel="noopener">Hexhunter ↗</a></li>
       <li><a href="https://hypersage.ai/mythwright/" target="_blank" rel="noopener">Mythwright ↗</a></li>
-      <li><a href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">The One ↗</a></li>
       <li><a href="rowan/index.html">Rowan ↗</a></li>
       <li><a href="alder/index.html">Alder ↗</a></li>
       <li><a href="waddleton/index.html">Waddleton ↗</a></li>
       <li><a href="https://hypersage.ai/mythkin/" target="_blank" rel="noopener">Mythkin ↗</a></li>
     </ul>
-    <!-- Thirteen products, thirteen entries. Mythkin was missing from this list while
-         the home page, the footer and the JSON-LD all carried it — on the one page
-         whose stated job is "if you are trying to find a specific app's policy, start
-         at its site", an omission is a dead end. Add a row here with every product. -->
+    <!-- Twelve products, twelve entries — every product in the portfolio grid gets a
+         row here. On the one page whose stated job is "if you are trying to find a
+         specific app's policy, start at its site", an omission is a dead end. The One
+         (concept, not launching) was removed from the portfolio 2026-08-08. -->
 
     <h2>Your rights</h2>
     <p>Because this website holds nothing about you, there is nothing here to access, correct, or delete. If you have emailed us and would like that correspondence deleted, or you have a question about a specific product's data, write to <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> and we'll handle it.</p>

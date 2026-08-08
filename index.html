@@ -45,7 +45,8 @@
         "image": "https://hypersage.ai/og-image.png?v=20260806c",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
-        "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
+        "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" },
+        "founder": { "@type": "Person", "name": "Daniel Muskin" }
       },
       { "@type": "VideoGame", "name": "Waddleton", "applicationCategory": "Game", "operatingSystem": "Web",
         "url": "https://waddleton.pages.dev/", "publisher": { "@id": "https://hypersage.ai/#org" },
@@ -65,13 +66,11 @@
   }
   </script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Loaded async so first paint never waits on a third-party host; the system-ui
-       fallbacks in every font stack cover the gap. -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"></noscript>
+  <!-- Fonts are self-hosted (fonts/fonts.css) — no request leaves this origin, which
+       is also what the privacy page now promises. -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/space-grotesk.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter.woff2">
+  <link rel="stylesheet" href="fonts/fonts.css">
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -453,24 +452,6 @@
       .strip .label, .strip .word { flex: 0 0 auto; }
     }
 
-    /* ===== STAT BAND ===== */
-    .statband { border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.012); }
-    .statband .container {
-      display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px 18px;
-      padding-top: 20px; padding-bottom: 20px;
-    }
-    .stat { display: flex; align-items: baseline; justify-content: center; gap: 10px; }
-    .stat strong {
-      font-family: 'Space Grotesk', sans-serif; font-size: 1.55rem; font-weight: 700; line-height: 1;
-      background: linear-gradient(120deg, var(--brand-a), var(--brand-b));
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-    }
-    .stat span { color: var(--faint); font-size: 0.8rem; line-height: 1.35; }
-    @media (max-width: 860px) {
-      .statband .container { grid-template-columns: repeat(2, minmax(0,1fr)); }
-      .stat { justify-content: flex-start; }
-    }
-
     /* ===== SECTION SCAFFOLD ===== */
     section.block { padding: 88px 0; position: relative; }
     .section-head { max-width: 680px; margin-bottom: 52px; }
@@ -830,21 +811,10 @@
       <a class="word" href="#product-nightshelf"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
       <a class="word" href="#product-hexhunter"><img src="icons/hexhunter.png" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
       <a class="word" href="#product-mythwright"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
-      <a class="word" href="#product-the-one"><img src="icons/theone.png" alt="" width="26" height="26" loading="lazy">The&nbsp;One</a>
       <a class="word" href="#product-rowan"><img src="icons/rowan.png" alt="" width="26" height="26" loading="lazy">Rowan</a>
       <a class="word" href="#product-alder"><img src="icons/alder.png" alt="" width="26" height="26" loading="lazy">Alder</a>
       <a class="word" href="#product-waddleton"><img src="icons/waddleton.png" alt="" width="26" height="26" loading="lazy">Waddleton</a>
       <a class="word" href="#product-mythkin"><img src="icons/mythkin.png" alt="" width="26" height="26" loading="lazy">Mythkin</a>
-    </div>
-  </div>
-
-  <!-- Every figure here is verifiable on this page or at the store — recount before changing. -->
-  <div class="statband" aria-label="The studio at a glance">
-    <div class="container">
-      <div class="stat"><strong>13</strong><span>products in the portfolio</span></div>
-      <div class="stat"><strong>6</strong><span>App&nbsp;Store categories</span></div>
-      <div class="stat"><strong>2</strong><span>platforms — iOS &amp; web</span></div>
-      <div class="stat"><strong>100%</strong><span>designed, built &amp; operated in&#8209;house</span></div>
     </div>
   </div>
 
@@ -1022,26 +992,6 @@
           </div>
         </article>
 
-        <!-- THE ONE -->
-        <article class="product" id="product-the-one" style="--accent: var(--c-one);">
-          <div class="top">
-            <img class="app-icon" src="icons/theone.png" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>The One</h3>
-              <div class="cat">Intentional Dating</div>
-            </div>
-            <span class="status">Concept</span>
-          </div>
-          <p class="desc">A concept exploring intentional dating: one focused match at a time, compatibility over volume, and conversation design that favors depth.</p>
-          <ul role="list">
-            <li>Designed around one active match</li>
-            <li>Constraints intended to encourage focused conversation</li>
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Visit The One's site" href="https://drvanus.github.io/theone-app/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
-          </div>
-        </article>
-
         <!-- ROWAN -->
         <article class="product" id="product-rowan" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
           <div class="top">
@@ -1123,7 +1073,7 @@
         </article>
 
         <!-- PORTFOLIO CONTACT -->
-        <aside class="product" aria-label="Portfolio contact" style="--accent: var(--brand-b); justify-content: center; text-align: center;">
+        <aside class="product" aria-label="Portfolio contact" style="--accent: var(--brand-b); justify-content: center; text-align: center; grid-column: 1 / -1;">
           <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding: 10px 0;">
             <h3 style="font-size:1.3rem;">Interested in the portfolio?</h3>
             <p class="desc" style="margin-bottom: 6px;">We welcome conversations with investors, product partners, press, and early users.</p>
@@ -1196,6 +1146,13 @@
           <div>
             <h3>Feedback reaches us directly</h3>
             <p>Questions and reported problems come directly to us, keeping the path from a user observation to a product decision short.</p>
+          </div>
+        </div>
+        <div class="approach-row">
+          <div class="k">Who we are</div>
+          <div>
+            <h3>Founder-run, end to end</h3>
+            <p>Hypersage was founded by Daniel Muskin. The person who designs each product also builds it, operates it, and answers its support mail.</p>
           </div>
         </div>
       </div>
