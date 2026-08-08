@@ -25,8 +25,8 @@
   <meta name="twitter:image" content="https://hypersage.ai/wingmate/og-image.png">
   <meta name="twitter:image:alt" content="Wingmate — AI dating coaches that actually get it">
 
-  <link rel="icon" type="image/png" href="app-icon.png">
-  <link rel="apple-touch-icon" href="app-icon.png">
+  <link rel="icon" type="image/png" sizes="180x180" href="app-icon-180.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="app-icon-180.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -359,6 +359,16 @@
     .connections-showcase { display: grid; grid-template-columns: repeat(3, minmax(0, 262px)); justify-content: center; gap: 40px 34px; }
     @media (max-width: 900px) { .connections-showcase { grid-template-columns: repeat(2, minmax(0, 240px)); } }
     @media (max-width: 480px) { .connections-showcase { grid-template-columns: minmax(0, 280px); } }
+
+    /* ===== CONTEXT STACK (one card per connection) ===== */
+    .context-stack { max-width: 700px; margin: 0 auto 64px; }
+    .context-stack svg { display: block; width: 100%; height: auto; }
+    .context-stack figcaption { text-align: center; color: var(--faint); font-size: 0.84rem; margin-top: 14px; letter-spacing: 0.02em; }
+    .ctx-card { animation: ctxFloat 6.5s ease-in-out infinite alternate; }
+    .ctx-b { animation-delay: -2.2s; }
+    .ctx-c { animation-delay: -4.4s; }
+    @keyframes ctxFloat { from { transform: translateY(0); } to { transform: translateY(-7px); } }
+    @media (prefers-reduced-motion: reduce) { .ctx-card { animation: none; } }
     /* ===== LIGHT / DARK PREVIEW TOGGLE (screens showcase) ===== */
     .theme-toggle { display: inline-flex; position: relative; padding: 4px; margin: 6px auto 10px; background: var(--card); border: 1px solid var(--line-strong); border-radius: 999px; -webkit-tap-highlight-color: transparent; }
     .theme-toggle button { flex: 1 0 auto; min-width: 104px; appearance: none; -webkit-appearance: none; border: 0; background: transparent; cursor: pointer; font: inherit; font-weight: 600; font-size: 0.88rem; color: var(--muted); padding: 9px 18px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; position: relative; z-index: 1; transition: color .25s ease; }
@@ -570,7 +580,7 @@
   <nav class="site">
     <div class="container">
       <a class="brand" href="#top" aria-label="Wingmate home">
-        <img src="app-icon.png" alt="" width="38" height="38">
+        <img src="app-icon-180.png" alt="" width="38" height="38">
         <span>Wingmate</span>
       </a>
       <div class="links">
@@ -628,7 +638,7 @@
                 <img src="assets/screens/screen-settings.jpg?v=4" alt="Settings — switch active coach, adjust coaching tone between Gentle and Direct, and set dating experience level." data-caption="Tune your experience">
               </div>
             </div>
-            <div class="carousel-caption" id="heroCaption" aria-live="polite"><span>Chat with your coach</span></div>
+            <div class="carousel-caption" id="heroCaption" aria-live="polite"><span>Tap-to-copy replies, not a chatbot</span></div>
             <div class="carousel-dots" id="heroDots" role="tablist" aria-label="Choose a screenshot"></div>
           </div>
         </div>
@@ -655,15 +665,6 @@
         <div class="feature-card">
           <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
           <h3>Voice Coaching</h3>
-          <!-- VOICE TRAP: neither "hands-free" nor "any reply" was true.
-               Wingmate/Views/Chat/CoachChatView.swift:1289-1307 is a tap-to-start /
-               tap-to-stop mic button that appends the transcript to the draft — you still tap
-               Send; there is no turn loop. Read-aloud is a metered server fetch
-               (SpeechManager.swift:176-179 renders "You've used today's read-aloud allowance"),
-               and a repo-wide grep for AVSpeechSynthesizer in Wingmate/ returns nothing, so a
-               failed fetch plays silence — there is no on-device voice to fall back to. Do not
-               call the voices "tuned" or "tone-steered" either: wingmate-api/src/routes/tts.js
-               sends tts-1 with no speed and no instructions, only a per-coach voice name. -->
           <p>Talk it out instead of typing — dictate your message with one tap, and tap a reply to hear it read back, each coach in their own voice. Read-aloud needs a connection and has a daily allowance.</p>
         </div>
 
@@ -822,6 +823,68 @@
         <h2>Your dating life, <span class="grad-text">organized.</span></h2>
         <p>Every person you're talking to gets a living profile — platform, stage, her dating-profile screenshots, your private notes, and what your coach has learned. Tap "Get coaching" and the advice already knows the whole story.</p>
       </div>
+
+      <figure class="context-stack">
+        <svg viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <ellipse cx="340" cy="150" rx="300" ry="115" fill="rgba(232,168,56,0.05)"/>
+          <g transform="translate(26,52) rotate(-2.5 99 104)"><g class="ctx-card">
+            <rect width="198" height="208" rx="16" fill="var(--surface)" stroke="var(--line-strong)"/>
+            <rect x="16" y="0" width="110" height="2.5" fill="var(--amber)" opacity="0.5"/>
+            <text x="18" y="32" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="11" letter-spacing="2" fill="var(--amber)">TINDER</text>
+            <rect x="18" y="48" width="88" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="84" y="71" width="96" height="17" rx="8.5" fill="rgba(232,168,56,0.28)"/>
+            <rect x="18" y="94" width="64" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
+            <line x1="18" y1="130" x2="180" y2="130" stroke="var(--line)"/>
+            <text x="18" y="152" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">STAGE</text>
+            <circle cx="78" cy="149" r="3.2" fill="var(--amber)"/>
+            <circle cx="100" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
+            <circle cx="122" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
+            <circle cx="144" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
+            <circle cx="166" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
+            <text x="18" y="182" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">NOTES</text>
+            <rect x="70" y="174" width="110" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
+            <rect x="70" y="183" width="76" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
+          </g></g>
+          <g transform="translate(241,26)"><g class="ctx-card ctx-b">
+            <rect width="198" height="208" rx="16" fill="var(--card)" stroke="var(--line-strong)"/>
+            <rect x="16" y="0" width="110" height="2.5" fill="var(--amber)" opacity="0.7"/>
+            <text x="18" y="32" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="11" letter-spacing="2" fill="var(--amber)">HINGE</text>
+            <rect x="18" y="48" width="104" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="76" y="71" width="104" height="17" rx="8.5" fill="rgba(232,168,56,0.28)"/>
+            <rect x="18" y="94" width="76" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
+            <line x1="18" y1="130" x2="180" y2="130" stroke="var(--line)"/>
+            <text x="18" y="152" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">STAGE</text>
+            <circle cx="78" cy="149" r="3.2" fill="var(--amber)"/>
+            <circle cx="100" cy="149" r="3.2" fill="var(--amber)"/>
+            <circle cx="122" cy="149" r="3.2" fill="var(--amber)"/>
+            <circle cx="144" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
+            <circle cx="166" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
+            <text x="18" y="182" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">NOTES</text>
+            <rect x="70" y="174" width="110" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
+            <rect x="70" y="183" width="88" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
+          </g></g>
+          <g transform="translate(456,52) rotate(2.5 99 104)"><g class="ctx-card ctx-c">
+            <rect width="198" height="208" rx="16" fill="var(--surface)" stroke="var(--line-strong)"/>
+            <rect x="16" y="0" width="110" height="2.5" fill="var(--amber)" opacity="0.5"/>
+            <text x="18" y="32" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="11" letter-spacing="2" fill="var(--amber)">BUMBLE</text>
+            <rect x="18" y="48" width="96" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="18" y="71" width="72" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="84" y="94" width="96" height="17" rx="8.5" fill="rgba(232,168,56,0.28)"/>
+            <line x1="18" y1="130" x2="180" y2="130" stroke="var(--line)"/>
+            <text x="18" y="152" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">STAGE</text>
+            <circle cx="78" cy="149" r="3.2" fill="var(--amber)"/>
+            <circle cx="100" cy="149" r="3.2" fill="var(--amber)"/>
+            <circle cx="122" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
+            <circle cx="144" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
+            <circle cx="166" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
+            <text x="18" y="182" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">NOTES</text>
+            <rect x="70" y="174" width="110" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
+            <rect x="70" y="183" width="64" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
+          </g></g>
+        </svg>
+        <figcaption>Each connection keeps its own thread — platform, stage from matching to exclusive, and private notes.</figcaption>
+      </figure>
+
       <div class="connections-showcase">
 
         <div class="theme-card light">
@@ -1003,7 +1066,7 @@
     <div class="container">
       <div class="f-brand">
         <div class="brand">
-          <img src="app-icon.png" alt="" width="32" height="32">
+          <img src="app-icon-180.png" alt="" width="32" height="32">
           <span>Wingmate</span>
         </div>
         <p>AI dating coaches that actually get it. Built by Hypersage AI Labs.</p>
