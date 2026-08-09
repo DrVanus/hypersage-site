@@ -34,7 +34,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet"></noscript>
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -583,6 +585,80 @@
 }
 </script>
 <!-- app-schema:end -->
+<!-- FAQPage structured data — plain-text mirror of the visible #faq section
+     below. If an FAQ answer changes on the page, change it here too. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Quietoak therapy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Quietoak is a self-help tool based on the DBT (Dialectical Behavior Therapy) model. It is not therapy, not a diagnosis, and not a substitute for professional care. It's designed to work alongside therapy, or while you're learning the skills on your own."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the companion a real person?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — your companion is an AI guide. It says so, it never claims to be a therapist or a person, and it points you toward people and professional help when that's what's needed. It's there to help you practice skills, not to be something you lean on instead of real support."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I talk out loud, or switch companions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Both. You can have a hands-free voice conversation — tap to talk and your companion answers in a warm spoken voice — or stay in text; it's your choice every time. And you can switch between the six companions whenever you like. Your saved talks and what your companion remembers carry over, so you never start from scratch — and that's free. A premium, more natural voice is part of Quietoak Plus."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if I'm in crisis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Crisis Survival Kit is one tap from anywhere in the app, always free, never paywalled, and works offline — 988 (call or text, US), 741741 (text HOME), and your local lines. If you're in immediate danger, call your local emergency number. Quietoak is not an emergency service."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data private?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Your diary and practice are stored on your device, and we keep no diary on our servers. There's no account and no login. We don't run ads or third-party trackers against your diary or chat. To generate replies, your messages are sent to our backend and an AI provider — together with a short recap of your last 7 logged diary days, including your urge ratings and the first 120 characters of each day's note, so the reply fits your week. Your conversations are saved there — tied only to a random device ID, never your name — so your chats carry over between sessions. You can delete them anytime, and the full data flow is in our privacy policy."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's free, and what's Plus?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The whole app is free to use: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (with a gentle daily limit). Quietoak Plus ($9.99/month or $59.99/year) lifts that limit — unlimited time with your companion, plus the smartest version of them — and adds a premium companion voice (the on-device voice stays free for everyone) and a clinician-ready PDF of your diary card. Crisis support is never limited and never behind Plus."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who is Quietoak for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Adults (18+) who want to practice DBT skills in a calm, private space — whether you're in therapy and using it as an adjunct, on a waitlist, or learning the skills on your own."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iPad? Mac? Android?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "iPhone first. It runs on iPad in iPhone-compatibility mode for now; a native iPad layout, Android, and Mac aren't committed yet."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -590,7 +666,7 @@
   <nav class="site">
     <div class="container">
       <div class="brand">
-        <img src="quietoak-icon.png?v=20260804e" alt="">
+        <img src="quietoak-icon.png?v=20260804e" width="256" height="256" alt="">
         Quietoak
       </div>
       <div class="links">
@@ -642,7 +718,7 @@
                need to float on the page — it needs a frame. `compose_hero_painting.py`
                fades the backdrop into this page's own colour, so the amber never
                meets a hard edge and there is no matte to get wrong. -->
-          <img src="companions/group-painting.png?v=20260804e" width="1240" height="761"
+          <img src="companions/group-painting.png?v=20260804e" width="640" height="392" fetchpriority="high"
                alt="A painted portrait of the six Quietoak companions together — a fawn, an owl, an otter, a fox, a tortoise and a rabbit, gathered in warm light">
         </div>
       </div>
@@ -673,7 +749,7 @@
           </ol>
         </div>
         <div>
-          <img class="how-image" src="companions/willow-steady.png?v=20260804e" alt="Willow, a gentle sage-green fawn companion">
+          <img class="how-image" src="companions/willow-steady.png?v=20260804e" alt="Willow, a gentle sage-green fawn companion" loading="lazy">
         </div>
       </div>
     </div>
@@ -688,37 +764,37 @@
       <!-- Order matches the in-app onboarding catalog: willow, sage, river, sol, stone, fern. -->
       <div class="companions-grid">
         <div class="companion-card willow">
-          <img src="companions/willow-card.png?v=20260804e" alt="Willow, a fawn">
+          <img src="companions/willow-card.png?v=20260804e" width="416" height="416" loading="lazy" alt="Willow, a fawn">
           <div class="name">Willow</div>
           <div class="role">Grounding</div>
           <p>Warm and quiet. Starts with your body — feet on the floor, one slow breath — before anything else.</p>
         </div>
         <div class="companion-card sage">
-          <img src="companions/sage-card.png?v=20260804e" alt="Sage, an owl">
+          <img src="companions/sage-card.png?v=20260804e" width="416" height="416" loading="lazy" alt="Sage, an owl">
           <div class="name">Sage</div>
           <div class="role">Clear</div>
           <p>Calm and plainspoken. Explains what's actually happening, so the thing stops being a mystery.</p>
         </div>
         <div class="companion-card river">
-          <img src="companions/river-card.png?v=20260804e" alt="River, an otter">
+          <img src="companions/river-card.png?v=20260804e" width="416" height="416" loading="lazy" alt="River, an otter">
           <div class="name">River</div>
           <div class="role">Flowing</div>
           <p>Curious and easy to talk to. Asks before assuming — more of a conversation than a lesson.</p>
         </div>
         <div class="companion-card sol">
-          <img src="companions/sol-card.png?v=20260804e" alt="Sol, a fox">
+          <img src="companions/sol-card.png?v=20260804e" width="416" height="416" loading="lazy" alt="Sol, a fox">
           <div class="name">Sol</div>
           <div class="role">Hopeful</div>
           <p>Warm and low-light, never peppy. Finds the one true thing you already did, without talking you out of the hard part.</p>
         </div>
         <div class="companion-card stone">
-          <img src="companions/stone-card.png?v=20260804e" alt="Stone, a tortoise">
+          <img src="companions/stone-card.png?v=20260804e" width="416" height="416" loading="lazy" alt="Stone, a tortoise">
           <div class="name">Stone</div>
           <div class="role">Steady</div>
           <p>Unhurried and immovable. Sits with it instead of reaching for a fix, and says the least of any of them.</p>
         </div>
         <div class="companion-card fern">
-          <img src="companions/fern-card.png?v=20260804e" alt="Fern, a rabbit">
+          <img src="companions/fern-card.png?v=20260804e" width="416" height="416" loading="lazy" alt="Fern, a rabbit">
           <div class="name">Fern</div>
           <div class="role">Tender</div>
           <p>Soft and permission-giving. Takes the obligation off you first, before anything else gets discussed.</p>
@@ -767,17 +843,17 @@
       <p class="lede" style="text-align:center; margin: 0 auto 8px;">Tap a companion to see how they'd answer. These are real replies from the app &mdash; nothing here was written for this page.</p>
 
       <div class="cv-tabs" role="tablist" aria-label="Choose a companion">
-          <button class="cv-tab is-on" data-c="willow" type="button" aria-selected="true" role="tab"><img src="companions/willow-card.png?v=20260804e" alt=""><span>Willow</span></button>
-          <button class="cv-tab" data-c="sage" type="button" aria-selected="false" role="tab"><img src="companions/sage-card.png?v=20260804e" alt=""><span>Sage</span></button>
-          <button class="cv-tab" data-c="river" type="button" aria-selected="false" role="tab"><img src="companions/river-card.png?v=20260804e" alt=""><span>River</span></button>
-          <button class="cv-tab" data-c="sol" type="button" aria-selected="false" role="tab"><img src="companions/sol-card.png?v=20260804e" alt=""><span>Sol</span></button>
-          <button class="cv-tab" data-c="stone" type="button" aria-selected="false" role="tab"><img src="companions/stone-card.png?v=20260804e" alt=""><span>Stone</span></button>
-          <button class="cv-tab" data-c="fern" type="button" aria-selected="false" role="tab"><img src="companions/fern-card.png?v=20260804e" alt=""><span>Fern</span></button>
+          <button class="cv-tab is-on" data-c="willow" type="button" aria-selected="true" role="tab"><img src="companions/willow-card.png?v=20260804e" width="416" height="416" loading="lazy" alt=""><span>Willow</span></button>
+          <button class="cv-tab" data-c="sage" type="button" aria-selected="false" role="tab"><img src="companions/sage-card.png?v=20260804e" width="416" height="416" loading="lazy" alt=""><span>Sage</span></button>
+          <button class="cv-tab" data-c="river" type="button" aria-selected="false" role="tab"><img src="companions/river-card.png?v=20260804e" width="416" height="416" loading="lazy" alt=""><span>River</span></button>
+          <button class="cv-tab" data-c="sol" type="button" aria-selected="false" role="tab"><img src="companions/sol-card.png?v=20260804e" width="416" height="416" loading="lazy" alt=""><span>Sol</span></button>
+          <button class="cv-tab" data-c="stone" type="button" aria-selected="false" role="tab"><img src="companions/stone-card.png?v=20260804e" width="416" height="416" loading="lazy" alt=""><span>Stone</span></button>
+          <button class="cv-tab" data-c="fern" type="button" aria-selected="false" role="tab"><img src="companions/fern-card.png?v=20260804e" width="416" height="416" loading="lazy" alt=""><span>Fern</span></button>
       </div>
 
       <div class="cv-phone">
         <div class="cv-head">
-          <img class="cv-head-img" src="companions/willow-card.png?v=20260804e" alt="">
+          <img class="cv-head-img" src="companions/willow-card.png?v=20260804e" width="416" height="416" loading="lazy" alt="">
           <div><div class="cv-head-name">Willow</div><div class="cv-head-role">Grounding</div></div>
           <span class="cv-help">Get help now</span>
         </div>
@@ -874,32 +950,32 @@
 
       <div class="features-grid">
         <div class="feature-card">
-          <div class="icon-box"><img src="icons/feat-companion.png?v=20260804e" alt=""></div>
+          <div class="icon-box"><img src="icons/feat-companion.png?v=20260804e" width="192" height="192" loading="lazy" alt=""></div>
           <h3>Choose your companion</h3>
           <p>Pick the one whose temperament fits you — grounding, clear, flowing, hopeful, steady, or tender — give it a name, and it becomes a presence you actually know. Your AI guide, for daily practice and the hard days alike.</p>
         </div>
         <div class="feature-card">
-          <div class="icon-box"><img src="icons/feat-skills.png?v=20260804e" alt=""></div>
+          <div class="icon-box"><img src="icons/feat-skills.png?v=20260804e" width="192" height="192" loading="lazy" alt=""></div>
           <h3>Real DBT skills</h3>
           <p>All four modules — Mindfulness, Distress Tolerance, Emotion Regulation, Interpersonal Effectiveness — in small, plainspoken steps, with your companion to walk you through any of them at your own pace.</p>
         </div>
         <div class="feature-card">
-          <div class="icon-box"><img src="icons/feat-diary.png?v=20260804e" alt=""></div>
+          <div class="icon-box"><img src="icons/feat-diary.png?v=20260804e" width="192" height="192" loading="lazy" alt=""></div>
           <h3>A one-minute diary card</h3>
           <p>A real DBT diary card — mood, emotions, urges, and the skills you reached for — in under a minute. Tap it in or just speak it aloud, as light or detailed as you like, and look back gently over time.</p>
         </div>
         <div class="feature-card">
-          <div class="icon-box"><img src="icons/feat-breathing.png?v=20260804e" alt=""></div>
+          <div class="icon-box"><img src="icons/feat-breathing.png?v=20260804e" width="192" height="192" loading="lazy" alt=""></div>
           <h3>Guided exercises</h3>
           <p>STOP, TIPP, paced breathing, Self-Soothe, and a one-minute Wise Mind practice — guided step by step, and your companion can talk you through them out loud, in its own voice.</p>
         </div>
         <div class="feature-card">
-          <div class="icon-box"><img src="icons/feat-crisis.png?v=20260804e" alt=""></div>
+          <div class="icon-box"><img src="icons/feat-crisis.png?v=20260804e" width="192" height="192" loading="lazy" alt=""></div>
           <h3>Crisis kit, always free</h3>
           <p>988, 741741, and your local lines — never behind a paywall, and it works offline. Some things should never be gated.</p>
         </div>
         <div class="feature-card">
-          <div class="icon-box"><img src="icons/feat-privacy.png?v=20260804e" alt=""></div>
+          <div class="icon-box"><img src="icons/feat-privacy.png?v=20260804e" width="192" height="192" loading="lazy" alt=""></div>
           <h3>Private &amp; accountless</h3>
           <!-- PRIVACY TRAP: "stay on your device by default" was false. Every companion turn
                sends a 7-day diary recap — including the 0-5 suicidal-ideation and self-harm
@@ -1017,7 +1093,7 @@
                so the characters are the app's characters by construction. -->
           <img class="continuity-art" src="companions/group.png?v=20260804e"
                alt="The six Quietoak companions gathered together, all looking out"
-               loading="lazy" decoding="async" width="1738" height="988">
+               loading="lazy" decoding="async" width="900" height="508">
         </div>
       </div>
     </div>
@@ -1048,7 +1124,7 @@
   <section class="section-block tight">
     <div class="container">
       <div class="crisis-band">
-        <div class="glyph" aria-hidden="true"><img src="icons/feat-crisis.png?v=20260804e" alt=""></div>
+        <div class="glyph" aria-hidden="true"><img src="icons/feat-crisis.png?v=20260804e" width="192" height="192" loading="lazy" alt=""></div>
         <div>
           <h3>Help is always one tap away — and always free.</h3>
           <p>The Crisis Survival Kit is never behind Plus and works offline: <strong>988</strong> (call or text, US), <strong>741741</strong> (text HOME), and your local lines, resolved to your region. Your companion also watches each message for signs you're in danger and surfaces real help right in the chat — even if our AI is down. If you're in immediate danger, call your local emergency number.</p>

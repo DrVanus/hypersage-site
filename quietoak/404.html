@@ -12,7 +12,9 @@
   <link rel="apple-touch-icon" href="/quietoak/quietoak-icon.png?v=20260804e">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"></noscript>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -34,7 +36,7 @@
 </head>
 <body>
   <div class="wrap">
-    <img src="/quietoak/quietoak-icon.png?v=20260804e" alt="Quietoak">
+    <img src="/quietoak/quietoak-icon.png?v=20260804e" width="256" height="256" alt="Quietoak">
     <h1>This page wandered off.</h1>
     <p>Whatever you were after isn't here — but let's get you back to steadier ground.</p>
     <a class="btn" href="/quietoak/">Back to Quietoak →</a>
