@@ -1092,8 +1092,16 @@
     <div class="container">
       <div class="section-head">
         <span class="eyebrow">Our intelligence layer</span>
-        <h2>General models, shaped for specific work.</h2>
-        <p>In products with context-aware AI, the model is only one part. Depending on the product, the experience can combine information you provide, recent activity, product-specific knowledge, live data, tools, rules, and safeguards. The implementation varies by product; the goal is consistent: responses shaped for the situation and task.</p>
+        <!-- Every sentence here was adversarially fact-checked against the shipped
+             configs 2026-08-09. Three wordings were REJECTED as false and must not
+             come back: "OpenAI for voice" (Nightshelf sells an OpenAI narrator as a
+             Pro upgrade over a FREE on-device voice, Quietoak's on-device voice is
+             free, Rowan's cloud TTS route is off); "OpenAI leads the rest" (closes
+             the set, which wrongly assigns Mythwright, whose text vendor cannot be
+             determined); and any "our apps" universal (two products call no model at
+             all). "Most", "others" and "several" are load-bearing, not throat-clearing. -->
+        <h2>We build on Claude and OpenAI. The layer around them is ours.</h2>
+        <p>Where a product uses AI, it runs on models from Anthropic and OpenAI: Claude is the primary model in most of the products that write to you, OpenAI leads in others and makes every image a product generates while you use it. Any studio can call those same models. What we build is the layer around them — the part that decides what to ask, what the product already knows about your situation, and what it checks before you see an answer.</p>
       </div>
 
       <ol class="intelligence-flow" aria-label="How a context-aware response is formed">
@@ -1115,7 +1123,7 @@
         </li>
       </ol>
 
-      <p class="model-note">AI-enabled products use models from Anthropic and OpenAI; provider, data path, memory, and safety controls vary by product and feature.</p>
+      <p class="model-note">Not every product uses AI. Where one does, the provider, data path, memory, on-device versus cloud processing, and safety controls vary by product and feature — and most artwork ships with the app rather than being generated while you use it.</p>
     </div>
   </section>
 
