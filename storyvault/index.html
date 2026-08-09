@@ -30,8 +30,10 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="screenshots/home.jpg">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&display=swap" rel="stylesheet"></noscript>
+  <link rel="preload" as="image" href="screenshots/home.jpg" fetchpriority="high">
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1201,6 +1203,78 @@
 }
 </script>
 <!-- app-schema:end -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is the AI just rewriting the original book?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — the AI uses the book's world and voice as the setting, but every adventure is its own continuity. You're not reading Dracula. You're at Castle Dracula, making choices Jonathan Harker never had."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if the AI says something off?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It happens. Tap \"Try again\" on any turn to regenerate, or type a different choice to steer the story. The system prompt is tuned to keep prose in-period and on-tone, but AI is AI."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the AI train on my stories?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Your input is sent to our backend for the duration of the request, forwarded to Anthropic's Claude to write the next page (with OpenAI as a failover), and to OpenAI for scene art and voice narration. It isn't stored on either end, and we don't sell or share your input."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I read offline?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The 81 bundled books are fully offline-readable. AI Adventure requires a network connection — every turn is generated live by the model."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I cancel Pro?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You keep access through the end of the current period, then drop back to the free tier (3 AI Adventure turns / month). Your saved adventures and library stay — they're on your device."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is this different from AI Dungeon?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "StoryVault is built around literature — period-correct prose, hand-tuned scenarios, a real reader for the source books. The AI keeps you in the source's voice instead of letting the story drift into generic fantasy."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which devices does it run on?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "iPhone first. iPad and Mac are on the roadmap; Android is not committed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "I'm a teacher / parent / reviewer — how do I evaluate it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "StoryVault AI will be rated 13+ on the App Store — the community Tales feed sets that floor. The bundled library is public-domain literature, and the AI Adventure system prompt explicitly excludes explicit sexual content and any content that sexualizes minors. Reach out at support@hypersage.ai for review codes."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -1208,7 +1282,7 @@
   <nav class="site">
     <div class="container">
       <a class="brand" href="#top" aria-label="StoryVault AI home">
-        <img src="storyvault-mark.png" alt="">
+        <img src="storyvault-mark.png" alt="" width="640" height="640">
         StoryVault&nbsp;AI
       </a>
       <div class="links">
@@ -1253,7 +1327,7 @@
           <div class="device-stage">
             <div class="device device-hero">
               <div class="hero-carousel">
-                <img src="screenshots/home.jpg" width="720" height="1564" alt="StoryVault AI home in light mode — Continue Reading Frankenstein, Write a Story and AI Adventure buttons, and Most Popular classics">
+                <img src="screenshots/home.jpg" width="720" height="1564" fetchpriority="high" alt="StoryVault AI home in light mode — Continue Reading Frankenstein, Write a Story and AI Adventure buttons, and Most Popular classics">
                 <img src="screenshots/adventure-turn.jpg" width="720" height="1564" alt="A live AI Adventure turn — The Prismshard Heist in dark mode, a painted scene above the story text and a 'Type your own move' box" loading="lazy">
                 <img src="screenshots/library.jpg" width="720" height="1564" alt="Your Vault library in light mode — the Veilkeep Manor adventure beside Alice, Dracula, and Frankenstein" loading="lazy">
                 <img src="screenshots/reader-dark.jpg" width="720" height="1564" alt="The reader in dark mode — Alice in Wonderland in a clean night-reading view" loading="lazy">
@@ -1750,7 +1824,7 @@
   <footer class="site">
     <div class="footer-inner">
       <div class="brand">
-        <img src="storyvault-mark.png" alt="">
+        <img src="storyvault-mark.png" alt="" width="640" height="640" loading="lazy">
         <span>StoryVault AI
           <small>Branching tales, written with you.</small>
         </span>
