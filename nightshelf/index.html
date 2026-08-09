@@ -38,7 +38,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 
   <style>
     /* ================================================================
@@ -476,7 +478,7 @@
 
   <nav class="site">
     <div class="container">
-      <a class="brand" href="#top"><img src="app-icon.png" alt="" aria-hidden="true"> Nightshelf</a>
+      <a class="brand" href="#top"><img src="app-icon.png" alt="" aria-hidden="true" width="512" height="512"> Nightshelf</a>
       <div class="links">
         <a href="#screens">Screens</a>
         <a href="#features">Features</a>
@@ -501,7 +503,7 @@
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         Bedtime stories · iOS
       </span>
-      <img src="app-icon.png" alt="The Nightshelf app icon — books stacked beneath a crescent moon" class="crest">
+      <img src="app-icon.png" alt="The Nightshelf app icon — books stacked beneath a crescent moon" class="crest" width="512" height="512" fetchpriority="high">
       <h1 class="grad-text">Stories to <em>drift off</em> to</h1>
       <p class="sub">A shelf of bedtime stories — eighty-two timeless classics, and calm new ones written for you by AI with Nightshelf Pro, read aloud in a soft, sleepy voice with ambient sound underneath.</p>
       <div class="cta-row">
@@ -530,7 +532,7 @@
       </div>
       <div class="device-wrap reveal">
         <div class="device">
-          <img src="shots/home.jpg" alt="The Nightshelf home screen on iPhone — a nighttime library with tonight's story, fairy tales, and myths &amp; legends." width="840" height="1825">
+          <img src="shots/home.jpg" alt="The Nightshelf home screen on iPhone — a nighttime library with tonight's story, fairy tales, and myths &amp; legends." width="840" height="1825" loading="lazy">
         </div>
       </div>
       <div class="chip-col right" aria-hidden="true">
@@ -677,7 +679,7 @@
 
   <footer class="site">
     <div class="container">
-      <a class="brand" href="#top"><img src="app-icon.png" alt="" aria-hidden="true"> Nightshelf</a>
+      <a class="brand" href="#top"><img src="app-icon.png" alt="" aria-hidden="true" width="512" height="512" loading="lazy"> Nightshelf</a>
       <div class="flinks">
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
