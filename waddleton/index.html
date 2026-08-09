@@ -63,6 +63,81 @@
   }
   </script>
 
+  <!-- FAQPage schema: questions and answers are verbatim plain-text copies of the
+       on-page FAQ section (#faq) below. Keep the two in sync. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is it really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Every room, every mini-game and every feature is free, and there are no ads. Snowflakes are earned by playing and buy 135 of the shop's 154 items. To be exact about the rest: 15 are priced in Goldfish, a premium currency that will be purchasable when the mobile app ships, and 4 are for Waddleton Club members — an optional monthly subscription that will come with it. All 19 are cosmetic. Nothing you can buy affects a score, a leaderboard, or how well you play."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I have to make an account?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. One screen asks the month and year you were born, and then you're a penguin. The month and year themselves are never stored and never sent anywhere — only which age band you're in is kept with your penguin, because that is what decides chat and who can reach you. A guest identity is created for you automatically so other players can see you moving around the island, but there's no email, no password, and nothing to sign up for."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Will my penguin follow me to another device?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, if you sign in. Signing in is optional and exists for exactly this — it attaches the penguin you already have to your account so it follows you. Without it, your penguin is saved only in the browser or app you made it in, so your phone and your computer would be two separate penguins, and there's no way to recover a penguin if you clear your browser data."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there an iPhone or Android app?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Not yet. Waddleton isn't on the App Store or Google Play. It runs in the browser on phones and tablets, and you can add it to your home screen if you want it to feel like an app."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the chat safe?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Anything typed goes through one filter that the browser and the server both run, so a patched client doesn't get around it: profanity is masked, anything shaped like a phone number, an email, a link or an address is blocked outright, and leetspeak is normalised first so the obvious dodges collapse to the same word. Players under 13 don't type at all — they use a list of ready-made phrases, and they never see anyone else's typed text. Everyone can mute or block any player, and report anyone who's being a problem. To be straight with you: reports are recorded but there is no full-time moderation team reading them, so please use mute and block — they work immediately."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are the leaderboards legit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, for most games. When you beat your own personal best the score is posted to a shared board under your display name, where other players can see it — so pick a name you're happy being public. A board that looks quiet usually is: most are new. A few games don't have a shared board yet and show your personal best only. Nothing you can buy affects a score or a rank."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What do you collect about me?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Very little: the display name you chose, your penguin's appearance and progress, your scores, and — if you report someone — what you wrote in the report. No email, no real name, no location, no advertising identifiers, no analytics. The details are in the privacy policy."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Waddleton finished?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No, and that's the fun part. Areas, games, items, and events are still being added — the island in front of you today is smaller than the one that'll be there in a few months."
+        }
+      }
+    ]
+  }
+  </script>
+
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -389,7 +464,7 @@
   <nav class="site">
     <div class="container">
       <div class="brand">
-        <img src="waddleton-icon.png?v=20260731a" alt="">
+        <img src="waddleton-icon.png?v=20260731a" width="512" height="512" alt="">
         Waddleton
       </div>
       <div class="links">
@@ -437,7 +512,7 @@
       <p class="hero-note">Works on a phone, tablet, or computer. Nothing to install.</p>
 
       <div class="hero-shot">
-        <img src="rooms/plaza.jpg?v=20260731a" width="1100" height="733" alt="Waddleton's town square at night — a wide oval ice rink with a glowing ice sculpture of a penguin at its centre, a lamplit wooden lodge and a small awninged igloo shop on the left, a taller lit building and a red-and-white lighthouse on the right, and a full moon and green-and-violet aurora over the frozen sea beyond">
+        <img src="rooms/plaza.jpg?v=20260731a" width="1100" height="733" fetchpriority="high" alt="Waddleton's town square at night — a wide oval ice rink with a glowing ice sculpture of a penguin at its centre, a lamplit wooden lodge and a small awninged igloo shop on the left, a taller lit building and a red-and-white lighthouse on the right, and a full moon and green-and-violet aurora over the frozen sea beyond">
       </div>
 
       <div class="stats">
