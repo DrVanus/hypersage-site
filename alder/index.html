@@ -446,6 +446,95 @@
 }
 </script>
 <!-- app-schema:end -->
+<!-- FAQPage schema: plain-text copies of the on-page FAQ (#faq). Keep in sync with it. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Alder therapy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Alder does not provide therapy, counseling, or clinical care, and using it doesn't create a professional relationship with anyone. It's a self-help companion that keeps your sober time, sits with you through hard moments, and points you toward real support. If you're working with a professional, Alder is meant to sit alongside that — never instead of it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Am I talking to a real person?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Alder is designed to be an AI companion — not a therapist or a doctor, and not a stand-in for the people who support your recovery — and to say so plainly: a standing label sits at the top of the chat screen, and it re-states what it is as time goes on. Nobody is reading your messages as you send them. That's the privacy trade: it also means Alder can't call for help on your behalf, which is why the phone numbers are always one tap away."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I relapse?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You get a debrief, not a lecture. Alder asks what happened, what led up to it, and what you'd want to do differently — and the time you'd already put in keeps counting toward your total across all attempts. Never being shamed for a lapse is a hard rule in this product, not a nice-to-have."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I track more than one thing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, and this was deliberate. Alcohol, substances, vaping, gambling and more can each have their own clock, so a hard week in one area doesn't wipe out what you've built in another."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will it tell me how to detox or taper?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Never, for anything. Alder gives no detox, tapering, or dosing guidance of any kind. Stopping some substances abruptly — alcohol among them — can be genuinely dangerous, and that is a conversation for a medical professional, not an app. Alder will tell you that and help you find someone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it work with medication-assisted recovery?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, and it takes a clear position: buprenorphine, methadone, and naltrexone are recovery. Alder will never treat medication as cheating, and will never nudge you away from it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data private?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There's no account, no name, and no email, and your recovery record is kept on your phone — we run no database of it. There are no ads and no third-party analytics, and we don't sell or share anything. Your messages are sent to Anthropic to generate replies, along with a slice of that record. You are told exactly who and exactly which fields, and asked to agree, before a single message is sent — the consent check sits in the transport rather than the screen, so nothing can slip past it. Full detail is in the privacy policy. What we won't do is claim a kind of legal confidentiality this app doesn't have."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does it cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Alder is free to use. There is an optional subscription, Alder Plus — US$9.99 per month or US$59.99 per year, billed by Apple. The SOS screen and the crisis numbers are never metered, limited, or put behind a payment."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When can I use it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Alder is iPhone-first, US-first, and 18+. Leave your email and we'll get you in."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who is Alder for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Adults 18 and over who want private support in between the humans in their life — whether you're in a program, in treatment with professionals, going to meetings, or doing this on your own for now."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -455,7 +544,7 @@
   <nav class="site">
     <div class="container">
       <div class="brand">
-        <img src="alder-icon.png?v=20260731a" alt="">
+        <img src="alder-icon.png?v=20260731a" alt="" width="512" height="512">
         Alder
       </div>
       <div class="links">
@@ -500,7 +589,7 @@
           <p class="hero-note">Alder is an AI companion — not a therapist or a doctor, and not a stand-in for the people who support your recovery — and it won't replace meetings, medication, or professional care.</p>
         </div>
         <div class="hero-image">
-          <img class="companion-art" src="art/alder_steady.png?v=20260731a" alt="Alder, a warm barn-owl companion lit like a candle in the dark">
+          <img class="companion-art" src="art/alder_steady.png?v=20260731a" alt="Alder, a warm barn-owl companion lit like a candle in the dark" width="760" height="760" fetchpriority="high">
         </div>
       </div>
     </div>
@@ -555,7 +644,9 @@
           </ol>
         </div>
         <div>
-          <img class="how-image companion-art" src="art/alder_listening.png?v=20260731a" alt="Alder listening, head tilted">
+          <!-- No width/height here: .how-image CSS sets width but not height, so a
+               height attribute would apply as a presentational hint and change layout. -->
+          <img class="how-image companion-art" src="art/alder_listening.png?v=20260731a" alt="Alder listening, head tilted" loading="lazy">
         </div>
       </div>
     </div>
@@ -750,9 +841,9 @@
           <h2>A letter, <em>not a payout.</em></h2>
           <p style="color: var(--muted-fg); font-size: 1.04rem;">Nine chips, from day one to a year. Tap one you've earned and Alder writes you a short note about it.</p>
           <div class="chip-row" style="justify-content:flex-start; margin-top: 22px;">
-            <div class="chip-item"><img class="companion-art" src="art/chip_d30.png?v=20260731a" alt="30-day milestone chip" loading="lazy"><span>30 days</span></div>
-            <div class="chip-item"><img class="companion-art" src="art/chip_d90.png?v=20260731a" alt="90-day milestone chip" loading="lazy"><span>90 days</span></div>
-            <div class="chip-item"><img class="companion-art" src="art/chip_y1.png?v=20260731a" alt="One-year milestone chip" loading="lazy"><span>One year</span></div>
+            <div class="chip-item"><img class="companion-art" src="art/chip_d30.png?v=20260731a" alt="30-day milestone chip" width="200" height="200" loading="lazy"><span>30 days</span></div>
+            <div class="chip-item"><img class="companion-art" src="art/chip_d90.png?v=20260731a" alt="90-day milestone chip" width="200" height="200" loading="lazy"><span>90 days</span></div>
+            <div class="chip-item"><img class="companion-art" src="art/chip_y1.png?v=20260731a" alt="One-year milestone chip" width="200" height="200" loading="lazy"><span>One year</span></div>
           </div>
           <ul class="spotlight-points" role="list">
             <li><strong>No confetti, no coins, no jackpot.</strong> Variable rewards are the wrong machinery to point at people in recovery, so there isn't any.</li>
