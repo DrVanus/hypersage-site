@@ -32,7 +32,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -593,7 +595,7 @@
   <nav class="site">
     <div class="container">
       <div class="brand">
-        <img src="app-icon-512.png?v=20260711a" alt="">
+        <img src="app-icon-512.png?v=20260711a" alt="" width="512" height="512">
         Hexhunter
       </div>
       <div class="links">
@@ -644,12 +646,12 @@
           <div class="carousel-column">
             <div class="device">
               <div class="carousel" id="heroCarousel" aria-roledescription="carousel" aria-label="Hexhunter gameplay screenshots">
-                <img class="active" fetchpriority="high" src="assets/screens/screen-home.jpg?v=20260718b" alt="The Hexhunter home screen — a hooded huntress in the gothic dark above the 'Enter the Hunt' button, showing a 16:39 best time, 2340 essence, and 5 of 8 heroes unlocked.">
-                <img src="assets/screens/screen-combat-massacre.jpg?v=20260718b" alt="The hunter standing clear in the open Ossuary, loosing a magenta hex beam that strikes a skeleton across the crypt floor at range as a 'Massacre' streak lands.">
-                <img src="assets/screens/screen-combat-annihilation.jpg?v=20260718b" alt="A hunter in the red Ashlands detonating a green poison-nova hex across a scattered pack of skeletons at level 16 for an 'Annihilation' streak.">
-                <img src="assets/screens/screen-gameplay2.jpg?v=20260718b" alt="Chain-lightning and frost hexes detonating across a swarm of skeletons at level 13, the hunter clear in the open and firing from range.">
-                <img src="assets/screens/screen-boss.jpg?v=20260718b" alt="Boss fight against the Ember Titan amid molten fire in the Ashlands, the hunter kiting the flames from range.">
-                <img src="assets/screens/screen-results.jpg?v=20260718b" alt="Run results — a new best of 146 seconds, 301 slain, with Arcane Bolt topping the weapon breakdown as MVP.">
+                <img class="active" fetchpriority="high" src="assets/screens/screen-home.jpg?v=20260718b" width="620" height="1347" alt="The Hexhunter home screen — a hooded huntress in the gothic dark above the 'Enter the Hunt' button, showing a 16:39 best time, 2340 essence, and 5 of 8 heroes unlocked.">
+                <img src="assets/screens/screen-combat-massacre.jpg?v=20260718b" width="720" height="1560" alt="The hunter standing clear in the open Ossuary, loosing a magenta hex beam that strikes a skeleton across the crypt floor at range as a 'Massacre' streak lands.">
+                <img src="assets/screens/screen-combat-annihilation.jpg?v=20260718b" width="620" height="1344" alt="A hunter in the red Ashlands detonating a green poison-nova hex across a scattered pack of skeletons at level 16 for an 'Annihilation' streak.">
+                <img src="assets/screens/screen-gameplay2.jpg?v=20260718b" width="460" height="1000" alt="Chain-lightning and frost hexes detonating across a swarm of skeletons at level 13, the hunter clear in the open and firing from range.">
+                <img src="assets/screens/screen-boss.jpg?v=20260718b" width="620" height="1347" alt="Boss fight against the Ember Titan amid molten fire in the Ashlands, the hunter kiting the flames from range.">
+                <img src="assets/screens/screen-results.jpg?v=20260718b" width="620" height="1347" alt="Run results — a new best of 146 seconds, 301 slain, with Arcane Bolt topping the weapon breakdown as MVP.">
               </div>
             </div>
             <div class="carousel-dots" id="heroDots" role="tablist" aria-label="Choose a screenshot"></div>
@@ -735,9 +737,9 @@
         </div>
         <div class="showcase-media">
           <div class="phone-row stagger">
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-combat-massacre.jpg?v=20260718a" alt="A hunter standing clear in the open, loosing a magenta hex beam that strikes a skeleton across the crypt floor at range" loading="lazy"></div><figcaption><div class="screen-kind">Combat</div><div class="screen-name">Fire from range</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-gameplay2.jpg?v=20260717a" alt="Chain-lightning and frost hexes detonating across a swarm of skeletons at level 13, the hunter clear in the open" loading="lazy"></div><figcaption><div class="screen-kind">Combat</div><div class="screen-name">Hexes fill the dark</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-combat-horde.jpg?v=20260718a" alt="A hunter kiting across open ground with clear space around them as ghouls, bone hounds and cultists converge from every edge and hex rings burst on the horde at range" loading="lazy"></div><figcaption><div class="screen-kind">Combat</div><div class="screen-name">Never stop moving</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-combat-massacre.jpg?v=20260718a" width="720" height="1560" alt="A hunter standing clear in the open, loosing a magenta hex beam that strikes a skeleton across the crypt floor at range" loading="lazy"></div><figcaption><div class="screen-kind">Combat</div><div class="screen-name">Fire from range</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-gameplay2.jpg?v=20260717a" width="460" height="1000" alt="Chain-lightning and frost hexes detonating across a swarm of skeletons at level 13, the hunter clear in the open" loading="lazy"></div><figcaption><div class="screen-kind">Combat</div><div class="screen-name">Hexes fill the dark</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-combat-horde.jpg?v=20260718a" width="720" height="1560" alt="A hunter kiting across open ground with clear space around them as ghouls, bone hounds and cultists converge from every edge and hex rings burst on the horde at range" loading="lazy"></div><figcaption><div class="screen-kind">Combat</div><div class="screen-name">Never stop moving</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -764,14 +766,14 @@
         </div>
         <div class="showcase-media">
           <div class="phone-row stagger">
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-lobby.jpg?v=20260717a" alt="The loadout screen with Vess the Huntress selected and the Ossuary chosen as the stage" loading="lazy"></div><figcaption><div class="screen-kind">Loadout</div><div class="screen-name">Pick your hunter</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-home.jpg?v=20260717a" alt="The Hexhunter home screen showing a 16:39 best time, 2340 essence, and 5 of 8 heroes unlocked" loading="lazy"></div><figcaption><div class="screen-kind">Roster</div><div class="screen-name">Unlock all eight</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-lobby.jpg?v=20260717a" width="620" height="1344" alt="The loadout screen with Vess the Huntress selected and the Ossuary chosen as the stage" loading="lazy"></div><figcaption><div class="screen-kind">Loadout</div><div class="screen-name">Pick your hunter</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-home.jpg?v=20260717a" width="620" height="1347" alt="The Hexhunter home screen showing a 16:39 best time, 2340 essence, and 5 of 8 heroes unlocked" loading="lazy"></div><figcaption><div class="screen-kind">Roster</div><div class="screen-name">Unlock all eight</div></figcaption></figure>
           </div>
         </div>
       </div>
       <div class="heroes-grid showcase-detail">
         <div class="hero-card">
-          <img class="portrait" src="assets/heroes/huntress.png?v=20260718b" alt="Vess, the Huntress">
+          <img class="portrait" src="assets/heroes/huntress.png?v=20260718b" width="256" height="256" loading="lazy" alt="Vess, the Huntress">
           <div class="name">Vess</div>
           <div class="epithet">the Huntress</div>
           <p>The balanced hunter — no weakness, no crutch. The clean way to learn the horde.</p>
@@ -779,7 +781,7 @@
           <div class="weapon">Starts with <b>Arcane Bolt</b></div>
         </div>
         <div class="hero-card locked">
-          <img class="portrait" src="assets/heroes/gravewarden.png?v=20260718b" alt="Maugrim, the Gravewarden">
+          <img class="portrait" src="assets/heroes/gravewarden.png?v=20260718b" width="256" height="256" loading="lazy" alt="Maugrim, the Gravewarden">
           <div class="name">Maugrim</div>
           <div class="epithet">the Gravewarden</div>
           <p>The heavy vanguard. Wades into the swarm and simply refuses to fall.</p>
@@ -787,7 +789,7 @@
           <div class="weapon">Starts with <b>Cleaving Arc</b></div>
         </div>
         <div class="hero-card locked">
-          <img class="portrait" src="assets/heroes/pyromancer.png?v=20260718b" alt="Kael, the Pyromancer">
+          <img class="portrait" src="assets/heroes/pyromancer.png?v=20260718b" width="256" height="256" loading="lazy" alt="Kael, the Pyromancer">
           <div class="name">Kael</div>
           <div class="epithet">the Pyromancer</div>
           <p>Burns bright, burns fast. Glass-cannon damage that turns the field to ash.</p>
@@ -795,7 +797,7 @@
           <div class="weapon">Starts with <b>Venom Cloud</b> (as fire)</div>
         </div>
         <div class="hero-card locked">
-          <img class="portrait" src="assets/heroes/warden.png?v=20260718b" alt="Thorne, the Warden">
+          <img class="portrait" src="assets/heroes/warden.png?v=20260718b" width="256" height="256" loading="lazy" alt="Thorne, the Warden">
           <div class="name">Thorne</div>
           <div class="epithet">the Warden</div>
           <p>The last one standing. Tanky, wide magnet reach, built for the long soak.</p>
@@ -803,7 +805,7 @@
           <div class="weapon">Starts with <b>Boomerang</b></div>
         </div>
         <div class="hero-card locked">
-          <img class="portrait" src="assets/heroes/swift.png?v=20260718b" alt="Lyra, the Swift">
+          <img class="portrait" src="assets/heroes/swift.png?v=20260718b" width="256" height="256" loading="lazy" alt="Lyra, the Swift">
           <div class="name">Lyra</div>
           <div class="epithet">the Swift</div>
           <p>Too fast to catch. Extra draft picks mean her build snowballs first.</p>
@@ -811,7 +813,7 @@
           <div class="weapon">Starts with <b>Orbiting Blades</b></div>
         </div>
         <div class="hero-card locked">
-          <img class="portrait" src="assets/heroes/hexweaver.png?v=20260718b" alt="Nyx, the Hexweaver">
+          <img class="portrait" src="assets/heroes/hexweaver.png?v=20260718b" width="256" height="256" loading="lazy" alt="Nyx, the Hexweaver">
           <div class="name">Nyx</div>
           <div class="epithet">the Hexweaver</div>
           <p>Master of the arcane. Evolves weapons a level early — she reaches the payoff first.</p>
@@ -819,7 +821,7 @@
           <div class="weapon">Starts with <b>Chain Lightning</b></div>
         </div>
         <div class="hero-card locked">
-          <img class="portrait" src="assets/heroes/witch.png?v=20260718b" alt="Ravenna, the Witch">
+          <img class="portrait" src="assets/heroes/witch.png?v=20260718b" width="256" height="256" loading="lazy" alt="Ravenna, the Witch">
           <div class="name">Ravenna</div>
           <div class="epithet">the Witch</div>
           <p>Hexes fly faster than feet. Rides a broom, shreds cooldowns, floods the screen.</p>
@@ -827,7 +829,7 @@
           <div class="weapon">Starts with <b>Chain Lightning</b></div>
         </div>
         <div class="hero-card locked">
-          <img class="portrait" src="assets/heroes/revenant.png?v=20260718b" alt="Ashborne, the Revenant">
+          <img class="portrait" src="assets/heroes/revenant.png?v=20260718b" width="256" height="256" loading="lazy" alt="Ashborne, the Revenant">
           <div class="name">Ashborne</div>
           <div class="epithet">the Revenant</div>
           <p>Stronger with every kill. A berserker whose damage ramps as the streak climbs.</p>
@@ -854,7 +856,7 @@
         </div>
         <div class="showcase-media">
           <div class="phone-row single">
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-lobby2.jpg?v=20260717a" alt="Stage selection on the loadout screen with the Frostvault chosen, showing a +39% essence bonus" loading="lazy"></div><figcaption><div class="screen-kind">Descent</div><div class="screen-name">Choose your stage</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-lobby2.jpg?v=20260717a" width="620" height="1344" alt="Stage selection on the loadout screen with the Frostvault chosen, showing a +39% essence bonus" loading="lazy"></div><figcaption><div class="screen-kind">Descent</div><div class="screen-name">Choose your stage</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -909,9 +911,9 @@
         </div>
         <div class="showcase-media">
           <div class="phone-row stagger">
-            <figure class="screen-card"><div class="screen-frame"><img src="shots/04-levelup.jpg?v=20260717a" alt="Level-up draft offering Cleaving Arc, an Arcane Bolt upgrade, and Bone Spear" loading="lazy"></div><figcaption><div class="screen-kind">Draft</div><div class="screen-name">Choose one</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-draft.jpg?v=20260716c" alt="Level-up draft offering the Nova Pulse weapon alongside the Lucky Charm and Swift Boots items" loading="lazy"></div><figcaption><div class="screen-kind">Items</div><div class="screen-name">Bend the run</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-results.jpg?v=20260717a" alt="Run results with a weapon MVP breakdown led by Arcane Bolt at 1,345 damage" loading="lazy"></div><figcaption><div class="screen-kind">Results</div><div class="screen-name">See your MVP</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="shots/04-levelup.jpg?v=20260717a" width="828" height="1799" alt="Level-up draft offering Cleaving Arc, an Arcane Bolt upgrade, and Bone Spear" loading="lazy"></div><figcaption><div class="screen-kind">Draft</div><div class="screen-name">Choose one</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-draft.jpg?v=20260716c" width="620" height="1344" alt="Level-up draft offering the Nova Pulse weapon alongside the Lucky Charm and Swift Boots items" loading="lazy"></div><figcaption><div class="screen-kind">Items</div><div class="screen-name">Bend the run</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-results.jpg?v=20260717a" width="620" height="1347" alt="Run results with a weapon MVP breakdown led by Arcane Bolt at 1,345 damage" loading="lazy"></div><figcaption><div class="screen-kind">Results</div><div class="screen-name">See your MVP</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -968,8 +970,8 @@
         </div>
         <div class="showcase-media">
           <div class="phone-row stagger">
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-gameplay.jpg?v=20260717a" alt="The Plague Abbot looming at the edge of the Ossuary, its boss health bar full across the top of the screen" loading="lazy"></div><figcaption><div class="screen-kind">Boss</div><div class="screen-name">The Plague Abbot</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-boss.jpg?v=20260712a" alt="Boss fight against the Ember Titan amid molten fire in the Ashlands" loading="lazy"></div><figcaption><div class="screen-kind">Boss</div><div class="screen-name">The Ember Titan</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-gameplay.jpg?v=20260717a" width="460" height="1000" alt="The Plague Abbot looming at the edge of the Ossuary, its boss health bar full across the top of the screen" loading="lazy"></div><figcaption><div class="screen-kind">Boss</div><div class="screen-name">The Plague Abbot</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-boss.jpg?v=20260712a" width="620" height="1347" alt="Boss fight against the Ember Titan amid molten fire in the Ashlands" loading="lazy"></div><figcaption><div class="screen-kind">Boss</div><div class="screen-name">The Ember Titan</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -988,22 +990,22 @@
       <p class="lede">Every hero, boss, and horror is illustrated in the same gothic woodcut style — one art direction, held plate by plate across the whole bestiary. A look at the art you'll be fighting through.</p>
       <div class="gallery-grid">
         <figure class="art-card">
-          <img src="assets/gallery-hero-vess.png?v=20260711a" alt="Vess, the Huntress — gothic woodcut hero art" loading="lazy">
+          <img src="assets/gallery-hero-vess.png?v=20260711a" width="256" height="256" alt="Vess, the Huntress — gothic woodcut hero art" loading="lazy">
           <div class="art-shade" aria-hidden="true"></div>
           <figcaption class="art-cap"><div class="art-kind">Hero</div><div class="art-name">Vess, the Huntress</div></figcaption>
         </figure>
         <figure class="art-card">
-          <img src="assets/gallery-hero-ravenna.png?v=20260711a" alt="Ravenna, the Witch — gothic woodcut hero art" loading="lazy">
+          <img src="assets/gallery-hero-ravenna.png?v=20260711a" width="256" height="256" alt="Ravenna, the Witch — gothic woodcut hero art" loading="lazy">
           <div class="art-shade" aria-hidden="true"></div>
           <figcaption class="art-cap"><div class="art-kind">Hero</div><div class="art-name">Ravenna, the Witch</div></figcaption>
         </figure>
         <figure class="art-card">
-          <img src="assets/gallery-boss.png?v=20260809a" alt="The Plague Abbot — gothic woodcut boss art" loading="lazy">
+          <img src="assets/gallery-boss.png?v=20260809a" width="320" height="320" alt="The Plague Abbot — gothic woodcut boss art" loading="lazy">
           <div class="art-shade" aria-hidden="true"></div>
           <figcaption class="art-cap"><div class="art-kind">Boss</div><div class="art-name">The Plague Abbot</div></figcaption>
         </figure>
         <figure class="art-card">
-          <img src="assets/gallery-enemy.png?v=20260711a" alt="The Bone Golem — gothic woodcut enemy art" loading="lazy">
+          <img src="assets/gallery-enemy.png?v=20260711a" width="256" height="256" alt="The Bone Golem — gothic woodcut enemy art" loading="lazy">
           <div class="art-shade" aria-hidden="true"></div>
           <figcaption class="art-cap"><div class="art-kind">Enemy</div><div class="art-name">The Bone Golem</div></figcaption>
         </figure>
@@ -1015,7 +1017,7 @@
   <section class="section-block" id="about">
     <div class="container">
       <div class="about-card">
-        <img src="app-icon-512.png?v=20260711a" alt="Hexhunter icon">
+        <img src="app-icon-512.png?v=20260711a" width="512" height="512" loading="lazy" alt="Hexhunter icon">
         <div>
           <div class="section-eyebrow">The studio</div>
           <h3>From HyperSage</h3>
