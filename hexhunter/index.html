@@ -390,8 +390,15 @@
     }
     .hero-card:hover { transform: translateY(-5px); border-color: var(--border-strong); box-shadow: 0 20px 46px rgba(0,0,0,0.5); }
     .hero-card .portrait {
+      /* padding 13, not 6: the plates carry only ~9-10% internal margin top and
+         bottom against 21-26% at the sides, so a tall figure (Kael 0.65 w/h,
+         Vess 0.73) sits flush to the rounded frame and READS as cut off even
+         though nothing is cropped — object-fit is contain and always was. The
+         art now draws at 88% of the old box, which is the same remedy the app's
+         lobby portrait took in 87a53f2. The glow still fills the full 132, so
+         the card's footprint and rhythm are unchanged. */
       width: 132px; height: 132px; object-fit: contain; margin: 0 auto 12px; display: block;
-      border-radius: 28%; padding: 6px;
+      border-radius: 28%; padding: 13px;
       background: radial-gradient(circle at 50% 38%, var(--violet-glow), transparent 70%);
       filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
     }
