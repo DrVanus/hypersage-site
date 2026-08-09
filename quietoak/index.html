@@ -546,6 +546,33 @@
     footer.site .links a:hover { color: var(--primary); }
     footer.site .copyright { margin-top: 10px; }
 
+    /* ===== FOOTER: MORE FROM HYPERSAGE ===== */
+    /* Sibling-app strip. Pills wrap freely so a 390px phone never scrolls
+       sideways; every colour comes from the footer's own tokens. */
+    .qo-more {
+      max-width: 820px; margin: 26px auto 22px; padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .qo-more-title {
+      font-weight: 800; font-size: 0.95rem; color: var(--fg);
+      letter-spacing: -0.01em; margin-bottom: 14px;
+    }
+    .qo-more-list {
+      list-style: none; display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 8px 10px;
+    }
+    .qo-more-list li { max-width: 100%; min-width: 0; }
+    .qo-more-list a {
+      display: block; padding: 6px 12px;
+      color: var(--muted-fg); font-weight: 600; font-size: 0.84rem; line-height: 1.45;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); transition: color .2s, background .2s, border-color .2s;
+    }
+    .qo-more-list a:hover {
+      color: var(--primary-dark); background: var(--card-soft);
+      border-color: var(--border-strong);
+    }
+
     /* ===== ACCESSIBILITY ===== */
     /* Visible keyboard focus on every interactive element (WCAG 2.4.7) — the
        gradient button + list-style-none summaries hide the default UA ring. */
@@ -1237,6 +1264,21 @@
       <a href="support.html">Support</a>
       <a href="mailto:support@hypersage.ai">Contact</a>
     </div>
+    <nav class="qo-more" aria-labelledby="qo-more-title">
+      <h3 class="qo-more-title" id="qo-more-title">More from HyperSage AI Labs</h3>
+      <ul class="qo-more-list">
+        <li><a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a></li>
+        <li><a href="https://hypersage.ai/saffra/">Saffra — AI Personal Chef</a></li>
+        <li><a href="https://hypersage.ai/storyvault/">StoryVault AI — Interactive Fiction</a></li>
+        <li><a href="https://hypersage.ai/nightshelf/">Nightshelf — Sleep Stories</a></li>
+        <li><a href="https://hypersage.ai/hexhunter/">Hexhunter — Gothic Horde-Survivor</a></li>
+        <li><a href="https://hypersage.ai/mythwright/">Mythwright — Strategy Card Game</a></li>
+        <li><a href="https://hypersage.ai/rowan/">Rowan — Chronic-Condition Companion</a></li>
+        <li><a href="https://hypersage.ai/alder/">Alder — Recovery Companion</a></li>
+        <li><a href="https://hypersage.ai/waddleton/">Waddleton — Social World / Arcade</a></li>
+        <li><a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a></li>
+      </ul>
+    </nav>
     <div class="copyright"><a href="https://hypersage.ai/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">A HyperSage AI Labs app</a></div>
     <div class="copyright">© 2026 HyperSage AI Labs LLC. Quietoak — rooted and steady, through the storm.</div>
   </footer>

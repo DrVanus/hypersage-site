@@ -23,6 +23,43 @@
 <link rel="apple-touch-icon" href="mythkin-icon.png">
 <link rel="sitemap" type="application/xml" href="sitemap.xml">
 <link rel="stylesheet" href="style.css?v=20260808-anatomy">
+<style>
+/* "More from HyperSage AI Labs" — the sibling-product strip in the footer.
+   Lives here rather than in style.css because that stylesheet is shared with
+   the legal pages, which carry no such strip. Every selector is scoped to
+   footer.site (which also outranks footer.site a) and to the hs-more- prefix,
+   so nothing already on the page can be reached by these rules. Colour and
+   metrics are the existing tokens only, so dark mode follows :root with no
+   second declaration, and the pill idiom is the page's own .mem-chips/.badge. */
+footer.site .hs-more{flex:1 0 100%;min-width:0;margin:0;
+  padding-bottom:1.1rem;border-bottom:1px solid var(--border)}
+footer.site .hs-more-title{margin:0 0 .6rem;color:var(--dim);font-size:.72rem;
+  font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+footer.site .hs-more-list{list-style:none;margin:0;padding:0;
+  display:flex;flex-wrap:wrap;gap:.45rem}
+footer.site .hs-more-list li{max-width:100%}
+footer.site .hs-more-list a{display:block;max-width:100%;overflow-wrap:break-word;
+  color:var(--dim);text-decoration:none;font-size:.8rem;background:var(--surface);
+  border:1px solid var(--border);border-radius:999px;padding:.38rem .75rem}
+footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
+  color:var(--tint);border-color:var(--tint);text-decoration:underline}
+</style>
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Mythkin",
+    "applicationCategory": "EntertainmentApplication",
+    "operatingSystem": "iOS",
+    "description": "Create your own AI characters, meet legends of history and myth, put them in stories, and share them. Characters that actually remember you. 18+.",
+    "url": "https://hypersage.ai/mythkin/",
+    "contentRating": "18+",
+    "author": {
+      "@type": "Organization",
+      "name": "HyperSage AI Labs LLC"
+    }
+  }
+</script>
 </head>
 <body>
 <div class="wrap landing">
@@ -217,6 +254,21 @@ currency, by your app store.</p>
 </section>
 
 <footer class="site">
+  <div class="hs-more">
+    <h3 class="hs-more-title">More from HyperSage AI Labs</h3>
+    <ul class="hs-more-list">
+      <li><a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a></li>
+      <li><a href="https://hypersage.ai/quietoak/">Quietoak — DBT Skills Companion</a></li>
+      <li><a href="https://hypersage.ai/saffra/">Saffra — AI Personal Chef</a></li>
+      <li><a href="https://hypersage.ai/storyvault/">StoryVault AI — Interactive Fiction</a></li>
+      <li><a href="https://hypersage.ai/nightshelf/">Nightshelf — Sleep Stories</a></li>
+      <li><a href="https://hypersage.ai/hexhunter/">Hexhunter — Gothic Horde-Survivor</a></li>
+      <li><a href="https://hypersage.ai/mythwright/">Mythwright — Strategy Card Game</a></li>
+      <li><a href="https://hypersage.ai/rowan/">Rowan — Chronic-Condition Companion</a></li>
+      <li><a href="https://hypersage.ai/alder/">Alder — Recovery Companion</a></li>
+      <li><a href="https://hypersage.ai/waddleton/">Waddleton — Social World / Arcade</a></li>
+    </ul>
+  </div>
   <span>Mythkin — an app by <a href="https://hypersage.ai/">HyperSage AI Labs</a></span>
   <a href="safety.html">Safety</a>
   <a href="privacy.html">Privacy</a>

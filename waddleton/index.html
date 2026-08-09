@@ -433,6 +433,19 @@
     footer.site .links a:hover { color: var(--ice); }
     footer.site .copyright { margin-top: 10px; color: var(--faint); }
 
+    /* ===== FOOTER: SIBLING PRODUCTS ===== */
+    .wdl-more { max-width: 780px; margin: 30px auto 0; padding-top: 26px; border-top: 1px solid var(--border); }
+    .wdl-more-title { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--aurora-teal); margin-bottom: 14px; }
+    .wdl-more-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; list-style: none; }
+    .wdl-more-list a {
+      display: block; max-width: 100%; padding: 8px 14px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: rgba(255,255,255,0.028);
+      color: var(--muted-fg); font-weight: 600; font-size: 0.85rem; line-height: 1.45;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .wdl-more-list a:hover { color: var(--ice); border-color: var(--border-strong); background: rgba(255,255,255,0.06); }
+
     /* ===== A11Y ===== */
     a:focus-visible, summary:focus-visible, .btn-play:focus-visible, .btn-ghost:focus-visible {
       outline: 3px solid var(--aurora-teal); outline-offset: 3px; border-radius: 8px;
@@ -815,6 +828,21 @@
       <a href="terms.html">Terms</a>
       <a href="support.html">Support</a>
       <a href="mailto:support@hypersage.ai">Contact</a>
+    </div>
+    <div class="wdl-more">
+      <h3 class="wdl-more-title">More from HyperSage AI Labs</h3>
+      <ul class="wdl-more-list" role="list">
+        <li><a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a></li>
+        <li><a href="https://hypersage.ai/quietoak/">Quietoak — DBT Skills Companion</a></li>
+        <li><a href="https://hypersage.ai/saffra/">Saffra — AI Personal Chef</a></li>
+        <li><a href="https://hypersage.ai/storyvault/">StoryVault AI — Interactive Fiction</a></li>
+        <li><a href="https://hypersage.ai/nightshelf/">Nightshelf — Sleep Stories</a></li>
+        <li><a href="https://hypersage.ai/hexhunter/">Hexhunter — Gothic Horde-Survivor</a></li>
+        <li><a href="https://hypersage.ai/mythwright/">Mythwright — Strategy Card Game</a></li>
+        <li><a href="https://hypersage.ai/rowan/">Rowan — Chronic-Condition Companion</a></li>
+        <li><a href="https://hypersage.ai/alder/">Alder — Recovery Companion</a></li>
+        <li><a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a></li>
+      </ul>
     </div>
     <div class="copyright"><a href="https://hypersage.ai/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">A HyperSage Studio Game</a></div>
     <div class="copyright">© 2026 HyperSage AI Labs LLC. Waddleton — mind the thin ice.</div>
