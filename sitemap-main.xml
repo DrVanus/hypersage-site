@@ -2,12 +2,13 @@
 <!-- Studio-level pages. Product sites have their own child sitemaps, all tied
      together by the <sitemapindex> in sitemap.xml.
      <priority> and <changefreq> are deliberately absent: Google ignores both.
-     Origin is the GitHub Pages project URL the site is actually served from;
-     see the switch-over checklist in index.html <head>. -->
+     Origin is hypersage.ai, live since 2026-08-06 and attached by this repo's CNAME.
+     <lastmod> values are generated from each file's last commit date — regenerate
+     them when a page changes rather than hand-editing. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://hypersage.ai/</loc>
-    <lastmod>2026-08-08</lastmod>
+    <lastmod>2026-08-09</lastmod>
   </url>
   <url>
     <loc>https://hypersage.ai/press.html</loc>
@@ -15,14 +16,14 @@
   </url>
   <url>
     <loc>https://hypersage.ai/privacy.html</loc>
-    <lastmod>2026-07-31</lastmod>
+    <lastmod>2026-08-08</lastmod>
   </url>
   <url>
     <loc>https://hypersage.ai/terms.html</loc>
-    <lastmod>2026-07-31</lastmod>
+    <lastmod>2026-08-08</lastmod>
   </url>
   <url>
     <loc>https://hypersage.ai/support.html</loc>
-    <lastmod>2026-07-31</lastmod>
+    <lastmod>2026-08-08</lastmod>
   </url>
 </urlset>
