@@ -1,0 +1,30 @@
+# Hypersage AI Labs
+
+> Hypersage AI Labs is an independent product studio building distinctive consumer
+> apps for relationships, health, recovery, food, stories, markets, and sleep —
+> alongside original games. Where AI belongs, its products add a product-specific
+> intelligence layer that combines information a person provides and relevant
+> in-product context with domain knowledge, tools, and safeguards. The studio
+> designs, builds, and operates the entire portfolio in-house. Legal entity:
+> HyperSage AI Labs LLC (Delaware, USA). Contact: support@hypersage.ai.
+
+## Products
+
+- [Wingmate](https://hypersage.ai/wingmate/): AI dating coach that organizes context by connection (iOS, coming soon)
+- [Quietoak](https://hypersage.ai/quietoak/): companion for practicing DBT skills; not therapy or crisis care (iOS, coming soon)
+- [CryptoSage AI](https://cryptosageai.io/): market-research workspace; informational, not investment advice (iOS, coming soon)
+- [Saffra](https://hypersage.ai/saffra/): AI cooking companion that adapts prepared recipes to your kitchen (iOS, coming soon)
+- [StoryVault AI](https://hypersage.ai/storyvault/): interactive fiction where story state shapes each new page (iOS, coming soon)
+- [Nightshelf](https://hypersage.ai/nightshelf/): wind-down app of calming books, narration, and ambient sound (iOS, coming soon)
+- [Hexhunter](https://hypersage.ai/hexhunter/): gothic horde-survivor game (iOS, coming soon)
+- [Mythwright](https://hypersage.ai/mythwright/): tactical card battler with literary heroes (iOS, coming soon)
+- [Rowan](https://hypersage.ai/rowan/): chronic-condition companion that turns conversations into structured records (iOS, coming soon)
+- [Alder](https://hypersage.ai/alder/): recovery companion for cravings, lapses, and progress (iOS, coming soon)
+- [Waddleton](https://waddleton.pages.dev/): snowy social world in the browser, free to play (live, [about](https://hypersage.ai/waddleton/))
+- [Mythkin](https://hypersage.ai/mythkin/): original AI characters plus figures from history and myth (iOS, coming soon)
+
+## Studio
+
+- [Press kit](https://hypersage.ai/press.html): boilerplate, fact sheet, downloadable marks
+- [Support](https://hypersage.ai/support.html)
+- [Privacy](https://hypersage.ai/privacy.html): the studio site collects nothing; each product has its own policy
