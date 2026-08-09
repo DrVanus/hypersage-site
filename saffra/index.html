@@ -36,7 +36,11 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+  <!-- Async font loading: preload the stylesheet, apply it via the media-swap
+       trick so it never blocks first paint; <noscript> keeps fonts with JS off. -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet"></noscript>
   <!-- Stamps `js` on <html> before first paint. Every rule that HIDES content
        pending a script must hang off this class, so that with JS off the page
        renders fully instead of blank. See the `.js .anim` rule below. -->
@@ -1009,6 +1013,113 @@
 }
 </script>
 <!-- app-schema:end -->
+<!-- FAQPage schema: plain-text copies of the on-page #faq section below.
+     Keep in sync with the visible FAQ — Google requires the markup to match
+     the rendered text. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How is Saffra different from a recipe site or a general chatbot?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Three differences matter. First: a general model may draft a recipe from model knowledge alone. Saffra's flagship recipes are built before you ask for them: the dish is cross-referenced across tested, editor-vetted sources, three AI chef personas draft from that consensus, and the merged draft receives food-safety and allergen-completeness checks. Second: the assistant works with your pantry, equipment, allergies, skill level, and current cooking step rather than treating each question in isolation. Third: product-specific tools handle catalog search, substitutions, techniques, and hands-free cooking, so the model is one part of a larger cooking system."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's actually powering Saffra?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The core assistant uses a multimodal AI model, with a faster utility model for tasks such as parsing receipt text and folding older conversations into summaries. Recipe search uses vector embeddings over the curated library. Voice synthesis uses a neural TTS voice with content-addressed caching, while speech recognition runs on-device through Apple's Speech framework with an OpenAI Whisper fallback when on-device accuracy is insufficient. Receipt and cookbook OCR runs on-device through Apple's Vision framework; shelf photos are sent to the server for vision analysis and are not stored. The recipe catalog is built ahead of time through a multi-source consensus pipeline with food-safety and allergen checks."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate is the cooking advice?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Two things keep her grounded. One: when you ask for a specific dish or \"what should I cook?\", she calls a tool that searches our curated recipe library — hand-curated flagship recipes plus 230,000 CC0-licensed recipes — instead of improvising one from memory. So you get a real recipe, adapted for you, not a hallucination. Two: for techniques and substitutions she calls dedicated tools (technique explainer, substitution lookup) rather than guessing. She also won't claim to have personally tasted something — she'll say \"by the numbers, this should read bright and savory\" instead of \"I love this.\" If she's not sure, she says so."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How broad is the recipe coverage?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Saffra works across cuisines including Thai, Mexican regional, Korean, Vietnamese, French, Italian regional, Chinese regional, West African, Levantine, and Peruvian; dietary needs including vegan, keto, halal, kosher, FODMAP, Whole30, and celiac; skill levels from first-time cooks to technique-focused home cooks; and kitchens ranging from induction-only or no-oven setups to fully equipped spaces. For dishes outside the flagship catalog, it applies regional and technique-specific guidance and states uncertainty when appropriate."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will she remember what I've cooked?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Conversations are persisted, your pantry is tracked, and recipes you rate 4-5 stars influence future suggestions. After about 24 turns the older messages fold into a compact summary so context stays sharp without bloating. She knows what you've cooked recently (and won't repeat last Tuesday's dinner unless you ask), what you've loved, and what fell flat. She'll weight suggestions toward your wins, vary within genres you've succeeded at, and treat anything she's already pitched in this thread as off the table."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does she know what's in my pantry?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You tell her — but quickly. Snap a grocery receipt and on-device OCR extracts the lines, then a lightweight AI model parses them into clean line items (your photo never leaves the phone). Or scan a barcode — the lookup runs against Open Food Facts and items land in your pantry pre-tagged with category, expiration, and allergen flags. Or photograph a shelf and let her name what she sees — that photo is the one that does leave, going to our server to be read by a vision model before you confirm the list (it isn't stored). Or just type things in. As you cook, she tracks what's used and what's running low. Items going off (\"the cilantro's gone yellow\") get surfaced for tonight's dinner instead of going in the trash."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I have to use voice?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Never. Text-mode chat is the default and works exactly the same. Voice mode is for when your hands are deep in dough or holding a knife. Toggle it per-session in Settings, or open Cooking Mode for full hands-free narration with the wake phrase \"hey saffra\" — note that the wake phrase is only armed inside Cooking Mode, never app-wide, so the mic isn't listening when you're not cooking. Voice timers fire silently and land in Live Activities (Lock Screen + Dynamic Island). Free tier is text-only; Pro unlocks voice cooking."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What about allergies and food safety?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Declared allergens are treated as hard product rules. Saffra either names a substitution or declines the recipe and offers an alternative rather than silently proceeding. For serious allergies (peanut, tree nut, shellfish, sesame, and gluten for celiac users), it also flags cross-contamination risks in shared oils, fryers, and cutting boards. Adapted recipes carry a persistent allergen notice, and recipes include target internal temperatures where appropriate. Saffra is still an AI system: verify allergens and cooking temperatures yourself, and do not treat it as medical or dietary advice."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the free tier actually usable?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Free gives you 10 chef messages in total — a lifetime allowance, not a daily one — plus full recipe-library browsing, one recipe adaptation, pantry tracking, and the same safety rules. Pro adds unlimited chat, voice cooking, ongoing recipe adaptation, receipt and barcode scanning, recipe import from URLs and cookbook photos, and a personal library that learns from your cooking history."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How are Saffra's flagship recipes built?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Saffra separates recipe construction from real-time adaptation. Each flagship dish is cross-referenced across tested, editor-vetted sources with different trust weights. Ingredients supported by the strongest consensus become core; others are classified as variations or rejected as common mistakes. Three AI chef perspectives — authenticity, weeknight ease, and technique — draft from that evidence, the drafts are weighted and merged, and the result receives food-safety and allergen-completeness checks. When you ask for the dish, Saffra starts from that prepared catalog entry and adapts it to your pantry, equipment, allergies, and skill level."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When is Saffra launching?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Saffra is preparing for TestFlight beta. Join the waitlist above to be notified when invitations open. The first release is focused on iPhone; no timing has been announced for other platforms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What about my data?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sign in with Apple or Google. We never sell data. We never use your conversations to train models. We never track you across apps or websites. Voice transcription runs on-device by default — normally only the text reaches our server. If on-device accuracy fails in a noisy kitchen, a short clip is sent to OpenAI's Whisper and discarded after transcription. Receipt and cookbook photos run through Apple's Vision framework on your phone — only the extracted text leaves the device. The one image that does leave is the shelf photo you take to stock your pantry: that is sent to our server and read by OpenAI's vision model, and not stored. You can delete your account and every byte of your data from Profile / Me at any time. Full policy at /privacy."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -1016,7 +1127,7 @@
 <nav class="navbar">
   <div class="container">
     <a href="#" class="nav-logo">
-      <div class="logo-mark"><img src="saffra-hat.png" alt="Saffra"></div>
+      <div class="logo-mark"><img src="saffra-hat.png" width="576" height="576" alt="Saffra"></div>
       <span>Saffra</span>
     </a>
     <div class="nav-links" id="navLinks">
@@ -1057,7 +1168,7 @@
           <div class="hero-phone-frame" id="heroRotator" aria-roledescription="carousel" aria-label="Saffra app walkthrough">
             <img class="hero-phone-img is-active"
                  src="screenshots-raw/01-chef-tab-light.png"
-                 width="417" height="900" decoding="async"
+                 width="417" height="900" fetchpriority="high" decoding="async"
                  data-caption="Pantry-aware ways to begin"
                  alt="Saffra Chef tab in light mode — pantry-aware quick-start prompts">
             <img class="hero-phone-img"
@@ -1202,7 +1313,7 @@
       <div class="time-card anim anim-d1">
         <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>7:00 AM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/08-recipes-breakfast-light.png" loading="lazy"
+          <img src="screenshots-raw/08-recipes-breakfast-light.png" width="417" height="900" loading="lazy"
                alt="Recipes tab in the morning — Saffra's breakfast pick and a Quick breakfast rail">
         </div>
         <h3>Morning</h3>
@@ -1211,7 +1322,7 @@
       <div class="time-card anim anim-d2">
         <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>12:30 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/09-recipes-lunch-light.png" loading="lazy"
+          <img src="screenshots-raw/09-recipes-lunch-light.png" width="417" height="900" loading="lazy"
                alt="Recipes tab at midday — Saffra's lunch pick with bowls and salads ranked first">
         </div>
         <h3>Midday</h3>
@@ -1220,7 +1331,7 @@
       <div class="time-card anim anim-d3">
         <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/></svg>6:30 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/10-recipes-dinner-dark.png" loading="lazy"
+          <img src="screenshots-raw/10-recipes-dinner-dark.png" width="417" height="900" loading="lazy"
                alt="Recipes tab in the evening — Saffra picks for tonight with a Quick tonight rail">
         </div>
         <h3>Evening</h3>
@@ -1229,7 +1340,7 @@
       <div class="time-card anim anim-d4">
         <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>11:50 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/11-recipes-latenight-dark.png" loading="lazy"
+          <img src="screenshots-raw/11-recipes-latenight-dark.png" width="417" height="900" loading="lazy"
                alt="Recipes tab late at night — a late-night pick and a rail of 25-minute dishes">
         </div>
         <h3>Late night</h3>
@@ -1269,7 +1380,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/07-chat-recipe-dark.png" loading="lazy"
+          <img src="screenshots-raw/07-chat-recipe-dark.png" width="417" height="900" loading="lazy"
                alt="Ask Saffra — visible tool chips show her checking the pantry and searching recipes before answering with a recipe card">
           <div class="fd-shot-caption">Tool chips = her actually checking, live</div>
         </div>
@@ -1366,12 +1477,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/02-cooking-mode-light.png" loading="lazy"
+          <img src="screenshots-raw/02-cooking-mode-light.png" width="417" height="900" loading="lazy"
                alt="Cooking Mode step 1 — Saffra reads the step aloud with ingredient chips and a suggested 15-minute timer">
           <div class="fd-shot-caption">Step 1 — she's reading it aloud</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/14-cooking-step2-dark.png" loading="lazy"
+          <img src="screenshots-raw/14-cooking-step2-dark.png" width="417" height="900" loading="lazy"
                alt="Cooking Mode mid-recipe — the dish photo on the step card with progress bar and hands-free controls">
           <div class="fd-shot-caption">Mid-recipe, dark mode</div>
         </div>
@@ -1414,12 +1525,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/01-chef-tab-light.png" loading="lazy"
+          <img src="screenshots-raw/01-chef-tab-light.png" width="417" height="900" loading="lazy"
                alt="The Saffra tab — time-of-day greeting, pantry pills, and quick-start prompts">
           <div class="fd-shot-caption">The greeting knows your kitchen</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/07-chat-recipe-light.png" loading="lazy"
+          <img src="screenshots-raw/07-chat-recipe-light.png" width="417" height="900" loading="lazy"
                alt="Ask Saffra answering with a tappable recipe card after checking the pantry">
           <div class="fd-shot-caption">She answers with a real recipe</div>
         </div>
@@ -1466,7 +1577,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/03-pantry-light.png" loading="lazy"
+          <img src="screenshots-raw/03-pantry-light.png" width="417" height="900" loading="lazy"
                alt="The pantry — item counts by category with expiring and stale flags, plus photo, receipt, and barcode capture">
           <div class="fd-shot-caption">Grocery, fridge &amp; freshness at a glance</div>
         </div>
@@ -1502,7 +1613,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/05-recipes-dark.png" loading="lazy"
+          <img src="screenshots-raw/05-recipes-dark.png" width="417" height="900" loading="lazy"
                alt="Recipe results as photo cards, each showing cuisine and cook time up front">
           <div class="fd-shot-caption">Every result is a photo card</div>
         </div>
@@ -1542,12 +1653,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/04-recipe-detail-light.png" loading="lazy"
+          <img src="screenshots-raw/04-recipe-detail-light.png" width="417" height="900" loading="lazy"
                alt="Recipe detail — hero photo with timing, difficulty, servings, and the Let's cook button">
           <div class="fd-shot-caption">The top: vitals + "Let's cook"</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/13-recipe-ingredients-dark.png" loading="lazy"
+          <img src="screenshots-raw/13-recipe-ingredients-dark.png" width="417" height="900" loading="lazy"
                alt="Recipe detail scrolled — the ingredient list checked against your pantry">
           <div class="fd-shot-caption">Below the fold: ingredients &amp; more</div>
         </div>
@@ -1765,7 +1876,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="#" class="nav-logo">
-          <div class="logo-mark" style="width:30px;height:30px;border-radius:8px;"><img src="saffra-hat.png" alt="Saffra" style="width:22px;height:22px"></div>
+          <div class="logo-mark" style="width:30px;height:30px;border-radius:8px;"><img src="saffra-hat.png" width="576" height="576" loading="lazy" alt="Saffra" style="width:22px;height:22px"></div>
           <span>Saffra</span>
         </a>
         <p>Your personal AI chef. Premium recipes you can trust — built from a weighted consensus of tested sources, adapted to your kitchen.</p>
