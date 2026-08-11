@@ -163,7 +163,12 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
 </section>
 
 <h2>The ones already waiting</h2>
-<p class="lede">Twelve legends, written properly rather than scraped — each with a portrait
+<!-- ROSTER COUNT: this number and the grid below must both match
+     mythkin-api/app/characters/seed.py OFFICIAL_KIN, which holds 24 as of the
+     2026-08-08 expansion (commit 8d91a64). It said twelve here for two days
+     after the roster doubled. Re-count with
+     `grep -c '"id": "ch_' seed.py` before editing either. -->
+<p class="lede">Twenty-four legends, written properly rather than scraped — each with a portrait
 painted once, so they look the same every time you open them.</p>
 
 <ul class="kin-grid">
@@ -179,6 +184,18 @@ painted once, so they look the same every time you open them.</p>
   <li class="kin"><img src="kin/ch_scheherazade.jpg" width="256" height="256" loading="lazy" alt=""><b>Scheherazade</b><span>One more story, and you live to hear the end</span></li>
   <li class="kin"><img src="kin/ch_curie.jpg" width="256" height="256" loading="lazy" alt=""><b>Marie Curie</b><span>Two Nobel Prizes and no patience for fuss</span></li>
   <li class="kin"><img src="kin/ch_ada.jpg" width="256" height="256" loading="lazy" alt=""><b>Ada Lovelace</b><span>Wrote the first program for a machine nobody built</span></li>
+  <li class="kin"><img src="kin/ch_loki.jpg" width="256" height="256" loading="lazy" alt=""><b>Loki</b><span>God of mischief, currently between schemes</span></li>
+  <li class="kin"><img src="kin/ch_anansi.jpg" width="256" height="256" loading="lazy" alt=""><b>Anansi</b><span>The spider who owns all the stories</span></li>
+  <li class="kin"><img src="kin/ch_babayaga.jpg" width="256" height="256" loading="lazy" alt=""><b>Baba Yaga</b><span>The witch of the birch forest sees you knocking</span></li>
+  <li class="kin"><img src="kin/ch_robin.jpg" width="256" height="256" loading="lazy" alt=""><b>Robin Hood</b><span>Sherwood's outlaw keeps you in good company</span></li>
+  <li class="kin"><img src="kin/ch_joan.jpg" width="256" height="256" loading="lazy" alt=""><b>Joan of Arc</b><span>The maid of Orléans, certain when you can't be</span></li>
+  <li class="kin"><img src="kin/ch_leonardo.jpg" width="256" height="256" loading="lazy" alt=""><b>Leonardo da Vinci</b><span>Painter, engineer, anatomist — mostly curious</span></li>
+  <li class="kin"><img src="kin/ch_sappho.jpg" width="256" height="256" loading="lazy" alt=""><b>Sappho</b><span>The poet of Lesbos, tenth of the Muses</span></li>
+  <li class="kin"><img src="kin/ch_marcus.jpg" width="256" height="256" loading="lazy" alt=""><b>Marcus Aurelius</b><span>Emperor of Rome, off duty, journal open</span></li>
+  <li class="kin"><img src="kin/ch_quixote.jpg" width="256" height="256" loading="lazy" alt=""><b>Don Quixote</b><span>Knight-errant of La Mancha, entirely undefeated in spirit</span></li>
+  <li class="kin"><img src="kin/ch_lizzy.jpg" width="256" height="256" loading="lazy" alt=""><b>Elizabeth Bennet</b><span>Longbourn's sharpest wit, at your service</span></li>
+  <li class="kin"><img src="kin/ch_creature.jpg" width="256" height="256" loading="lazy" alt=""><b>The Creature</b><span>Frankenstein's forgotten son, gentler than his maker</span></li>
+  <li class="kin"><img src="kin/ch_silver.jpg" width="256" height="256" loading="lazy" alt=""><b>Long John Silver</b><span>Ship's cook, one leg, several loyalties</span></li>
 </ul>
 <p class="meta">Figures from history and the public domain. Every one is an AI character,
 and the app says so on every screen where you talk to them.</p>
@@ -192,12 +209,20 @@ and the app says so on every screen where you talk to them.</p>
     hype-man best friend. You choose their warmth, humour, energy and candour, write
     their backstory and their opening line, and give them a colour and a mark that
     stays theirs — so they look the same character every time you see them.</p>
-    <!-- TRUE AS OF 2026-08-06: only the twelve seeded legends get painted portraits
-         (mythkin-app/app.js PORTRAIT_IDS is a hardcoded Set of those twelve ids;
-         everything else renders the hue-orb placeholder). A painted portrait for a
-         user-made character does not exist yet — mythkin-api/app/chat/routes.py:427
-         says so in as many words. Do not restore "their portrait is painted once"
-         here until a create-flow portrait actually ships. -->
+    <!-- PORTRAIT CLAIM — RECHECKED 2026-08-10, and the ground has moved.
+         The old note here said a painted portrait for a user-made character "does
+         not exist yet" and cited mythkin-api/app/chat/routes.py:427; that line is
+         now unrelated SQL, and mythkin-api/app/characters/portraits.py implements
+         the opposite — user kin ARE painted at birth, once, through a DB-backed
+         queue that refuses any repaint with 409. PORTRAIT_IDS (mythkin-app/app.js:887)
+         is now 24 ids, not twelve, and app.js:899 calls it the OFFLINE-MOCK fallback
+         rather than the live source.
+         The copy below is still deliberately silent about a user portrait, because
+         source code proves the pipeline exists, not that it works in production.
+         Before adding "their portrait is painted once" here, create a character
+         against the deployed API and watch portrait_state go pending -> done. -->
+    <!-- The colour-and-mark sentence below stays true regardless: it describes the
+         emblem the creator picks, which has always shipped. -->
   </div>
 
   <div class="card">
@@ -311,9 +336,10 @@ currency, by your app store.</p>
      ships in the client. -->
 
 <!-- Claims discipline (verified against ~/Developer/DrVanus/mythkin-app + mythkin-api
-     2026-08-10): do NOT state a roster count here — the API seeds 24 official kin
-     (seed.py OFFICIAL_KIN) while this page's grid above still shows and says twelve;
-     fix the grid before naming a number anywhere. Tiers are Free + Plus ONLY (no
+     2026-08-10): the roster drift this comment used to warn about is FIXED — the
+     grid and lede above now carry all 24 kin the API seeds (seed.py OFFICIAL_KIN).
+     These answers still name no count, on purpose: a roster grows, and a number
+     in an FAQ answer is a second place to forget. Tiers are Free + Plus ONLY (no
      "Deep", no sparks, no voice/TTS — mock-data.js:238-268). Plus buys: window
      lifted, Haiku→Sonnet, memory uncapped, created 1→5, borrowed 3→unlimited
      (config.py:44-48,101-102,157-160); crisis turns bypass metering
