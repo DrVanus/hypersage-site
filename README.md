@@ -70,10 +70,12 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
 
 - `logo.png` / `favicon.png` / `apple-touch-icon.png` — the Hypersage mark (teal→violet
   infinity). Source in `brand/`.
-- `icons/` — 256px app icons, 13 on disk but **12 referenced** by `index.html` (hero strip
+- `icons/` — 256px app icons, 14 on disk but **13 referenced** by `index.html` (hero strip
   + product grid). `theone.png` is orphaned: The One was pulled from the portfolio
-  2026-08-08 and nothing references its icon.
-- `og-image.png` — 1200×630 social card, referenced with the `?v=20260811b` cache-buster
+  2026-08-08 and nothing references its icon. The referenced count tracks the portfolio,
+  so it moves whenever a product lands — Gemburrow took it from 12 to 13 — but the gap of
+  exactly one, and its cause, is the part that stays true until `theone.png` is deleted.
+- `og-image.png` — 1200×630 social card, referenced with the `?v=20260811c` cache-buster
   on all **five** pages that carry it: `index.html`, `press.html`, `privacy.html`,
   `terms.html`, `support.html`. Bump the suffix whenever the bytes change, in all five —
   and **only** when they change; a new `?v=` on identical bytes just forces a pointless

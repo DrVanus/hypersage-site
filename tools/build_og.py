@@ -43,6 +43,7 @@ NAMES = {
     "saffra": "Saffra", "storyvault": "StoryVault", "nightshelf": "Nightshelf",
     "hexhunter": "Hexhunter", "mythwright": "Mythwright", "rowan": "Rowan",
     "alder": "Alder", "waddleton": "Waddleton", "mythkin": "Mythkin",
+    "gemburrow": "Gemburrow",
 }
 
 
