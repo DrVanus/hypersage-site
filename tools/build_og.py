@@ -1,7 +1,7 @@
 """Render hypersage.ai's og-image FROM THE SITE'S OWN MARKUP.
 
     python3 tools/build_og.py            # writes og-image.png (1200x630)
-    python3 tools/build_og.py --check    # fail if the product list has drifted
+    python3 tools/build_og.py --check    # fail if the preview no longer matches the page
 
 WHY THIS IS A RENDERER AND NOT A DESIGN FILE
 --------------------------------------------
@@ -26,6 +26,7 @@ so adding or removing a product updates the preview on the next build and
 from __future__ import annotations
 
 import argparse
+import hashlib
 import pathlib
 import re
 import sys
@@ -123,14 +124,43 @@ def build_html() -> str:
 </body></html>"""
 
 
+STAMP = ROOT / "og-image.inputs.sha256"
+
+
+def inputs_digest() -> str:
+    """Hash exactly what the render is made of: the page's style block, its hero
+    figure, and the product list. Nothing else about index.html matters — an FAQ
+    edit must not report the preview as stale, and a change to the diagram must."""
+    style, figure, products = site_parts()
+    h = hashlib.sha256()
+    for part in (style, figure, "\n".join(products)):
+        h.update(part.encode())
+        h.update(b"\0")
+    return h.hexdigest()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true",
-                    help="verify the product list resolves; render nothing")
+                    help="verify the product list resolves AND that og-image.png "
+                         "was rendered from the page as it stands now; render nothing")
     args = ap.parse_args()
     _, _, products = site_parts()
     print(f"{len(products)} products from index.html: {', '.join(products)}")
     if args.check:
+        # The failure this catches actually happened: the hero diagram's result
+        # changed from "Fit to the task" to "The best possible answer", nobody
+        # re-ran this, and every shared link kept promising the old thing. A
+        # renderer that CAN stay in sync still needs something to notice when it
+        # has not — same lesson as store frames going stale silently.
+        want = inputs_digest()
+        have = STAMP.read_text().strip() if STAMP.exists() else "(never stamped)"
+        if want != have:
+            sys.exit(f"og-image.png is STALE — the hero style/figure/products it was\n"
+                     f"rendered from have changed since it was built.\n"
+                     f"  stamped: {have}\n  current: {want}\n"
+                     f"Fix: python3 tools/build_og.py   (then bump the ?v= cache-buster)")
+        print(f"og-image.png is current ({have[:16]}…)")
         return
     # Written to the SITE ROOT, not tools/, so every relative asset in the
     # lifted markup (logo.png, and anything added to the hero later) resolves
@@ -147,7 +177,10 @@ def main() -> None:
         pg.screenshot(path=str(OUT))
         b.close()
     tmp.unlink(missing_ok=True)
-    print(f"wrote {OUT.name}  {OUT.stat().st_size // 1024} KB")
+    # Stamp what this render was made of, so --check can tell later whether
+    # the page moved on without it.
+    STAMP.write_text(inputs_digest() + "\n")
+    print(f"wrote {OUT.name}  {OUT.stat().st_size // 1024} KB  (stamped {STAMP.name})")
 
 
 if __name__ == "__main__":
