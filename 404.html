@@ -2,17 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Absolute on purpose. GitHub Pages serves this file for any missing path
-       WITHOUT redirecting, so the URL bar keeps that path and a relative href
-       would resolve against it (/hypersage-site/docs/gone -> docs/index.html).
-       If the site moves to an apex domain, swap these three for "/" paths. -->
+  <!-- ROOT-RELATIVE on purpose, and every asset URL on this page must stay that way.
+       GitHub Pages serves this file for any missing path WITHOUT redirecting, so the
+       URL bar keeps that path and a document-relative href resolves against it:
+       "fonts/fonts.css" requested at /docs/gone becomes /docs/fonts/fonts.css and
+       404s, which is how this page silently lost its typefaces on any nested miss.
+       A leading "/" resolves at the origin root whatever the path, so it is immune.
+       These were absolute hypersage.ai URLs while the site was served from a project
+       path; the CNAME now puts it on the apex domain, which is the switch-over the
+       previous note here described. Do not reintroduce a bare relative href. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#080B11">
   <title>Page not found — Hypersage AI Labs</title>
   <meta name="robots" content="noindex">
-  <link rel="icon" type="image/png" href="https://hypersage.ai/favicon.png">
-  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/fonts/fonts.css">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root { --bg: #080B11; --fg: #EAEEF5; --muted: #98A6BB; --line: rgba(255,255,255,0.14); --a: #2DD4BF; --b: #A78BFA; }
@@ -44,11 +49,11 @@
 </head>
 <body>
   <main class="wrap">
-    <img class="mark" src="https://hypersage.ai/logo.png" alt="Hypersage AI Labs">
+    <img class="mark" src="/logo.png" alt="Hypersage AI Labs">
     <div class="code">Error 404</div>
     <h1>This page wandered off.</h1>
     <p>The page you're looking for doesn't exist or has moved. Let's get you back to the studio.</p>
-    <a class="home" href="https://hypersage.ai/"><span>Back to Hypersage</span><span aria-hidden="true">→</span></a>
+    <a class="home" href="/"><span>Back to Hypersage</span><span aria-hidden="true">→</span></a>
   </main>
 </body>
 </html>

@@ -70,12 +70,19 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
 
 - `logo.png` / `favicon.png` / `apple-touch-icon.png` — the Hypersage mark (teal→violet
   infinity). Source in `brand/`.
-- `icons/` — 256px app icons for all 13 products (hero strip + product grid). All 13 are
-  referenced by `index.html`.
-- `og-image.png` — 1200×630 social card, referenced with the `?v=20260811a` cache-buster
-  on all four studio pages. Bump the suffix whenever the bytes change, in all four —
+- `icons/` — 256px app icons, 14 on disk but **13 referenced** by `index.html` (hero strip
+  + product grid). `theone.png` is orphaned: The One was pulled from the portfolio
+  2026-08-08 and nothing references its icon. The referenced count tracks the portfolio,
+  so it moves whenever a product lands — Gemburrow took it from 12 to 13 — but the gap of
+  exactly one, and its cause, is the part that stays true until `theone.png` is deleted.
+- `og-image.png` — 1200×630 social card, referenced with the `?v=20260811d` cache-buster
+  on all **five** pages that carry it: `index.html`, `press.html`, `privacy.html`,
+  `terms.html`, `support.html`. Bump the suffix whenever the bytes change, in all five —
   and **only** when they change; a new `?v=` on identical bytes just forces a pointless
-  refetch, while changed bytes under an old `?v=` keep the stale picture forever.
+  refetch, while changed bytes under an old `?v=` keep the stale picture forever. The
+  count is the part that keeps going wrong: two re-renders in a row (`b96aee9`,
+  `7fdaa4c`) bumped `index.html` alone and left the other four on a version that no
+  longer existed.
 - **Every og-image in this repo is GENERATED. Never hand-draw or hand-edit one.**
   `tools/build_og.py` renders the studio card by lifting the page's own `<style>` and
   hero figure; `tools/build_app_og.py` renders all eleven product cards from each
