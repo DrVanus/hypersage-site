@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Gemburrow's site is committed-warm-dark (lantern light in a burrow) —
+       declare it so a light-mode OS never tries to auto-lighten it. -->
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17100A">
+  <title>Gemburrow — cozy gem-digging puzzle for iPhone</title>
+  <meta name="description" content="The gem-jar game those ads promised, built for real. Dig gems out of a physics-packed jar, fill the orders on the line, and decide what your dragon keeps. Coming to iPhone.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://hypersage.ai/gemburrow/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Gemburrow — Dig the jar. Fill the orders. Feed the dragon.">
+  <meta property="og:description" content="A cozy gem-digging puzzle for iPhone. Every gem and rock is real physics: pull one out and the whole pile settles.">
+  <meta property="og:url" content="https://hypersage.ai/gemburrow/">
+  <meta property="og:site_name" content="Gemburrow">
+  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260811a">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Gemburrow — a cozy gem-digging puzzle set in a mole's underground gem shop">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Gemburrow — Dig the jar. Fill the orders. Feed the dragon.">
+  <meta name="twitter:description" content="A cozy gem-digging puzzle for iPhone. Pull one gem and the whole pile settles.">
+  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260811a">
+  <meta name="twitter:image:alt" content="Gemburrow — a cozy gem-digging puzzle for iPhone">
+
+  <link rel="icon" type="image/png" href="app-icon-512.png?v=20260811a">
+  <link rel="apple-touch-icon" href="app-icon-512.png?v=20260811a">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* Burrow palette — lifted from the game's own lantern-lit shop room. */
+      --bg: #17100A;          /* deep soil */
+      --bg-2: #1E1510;        /* raised panel */
+      --surface: #241A12;
+      --card: #261C13;
+      --card-soft: #2F2318;
+      --fg: #F6ECDC;          /* warm bone ink */
+      --muted-fg: #CBB79C;
+      /* Kept light enough that 0.78–0.92rem labels clear AA over the warm
+         gradient wash, not just against the flat page colour. */
+      --tertiary-fg: #A4917A;
+      --lantern: #FFD75E;     /* the coin/lantern gold the game draws in */
+      --lantern-bright: #FFE9A8;
+      --ember: #E08A3C;
+      --ruby: #E0475B;
+      --sapphire: #5B8CE8;
+      --emerald: #46B073;
+      --amber: #E3A24A;
+      --prism: #CFE8F5;
+      --dragon: #B98BDD;
+      --border: rgba(255, 215, 94, 0.14);
+      --border-strong: rgba(255, 215, 94, 0.30);
+      --gold-glow: rgba(255, 215, 94, 0.18);
+      --radius: 0.8rem;
+      --radius-lg: 1.25rem;
+    }
+
+    html { scroll-behavior: smooth; color-scheme: dark; background: var(--bg); }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Lantern light: a warm glow from above and a low ember pool, plus a
+       vignette so the page edges fall away like the burrow walls do. */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 85% 55% at 50% -8%, rgba(255, 205, 110, 0.14), transparent 58%),
+        radial-gradient(ellipse 60% 40% at 12% 22%, rgba(224, 138, 60, 0.07), transparent 62%),
+        radial-gradient(ellipse 75% 55% at 50% 106%, rgba(120, 74, 30, 0.16), transparent 66%);
+      pointer-events: none; z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      box-shadow: inset 0 0 200px 36px rgba(0, 0, 0, 0.6);
+      pointer-events: none; z-index: 0;
+    }
+
+    h1, h2, h3, .brand, .stat b { font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif; line-height: 1.15; }
+    h1 { font-size: clamp(2.4rem, 6.4vw, 4rem); font-weight: 800; letter-spacing: -0.01em; }
+    h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; }
+    h3 { font-size: 1.22rem; font-weight: 700; }
+
+    a { color: var(--lantern); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--lantern-bright); }
+
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ===== NAV ===== */
+    nav.site {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(23, 16, 10, 0.80);
+      backdrop-filter: saturate(150%) blur(16px);
+      -webkit-backdrop-filter: saturate(150%) blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav.site .container {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 12px; padding-bottom: 12px;
+    }
+    nav.site .brand {
+      display: flex; align-items: center; gap: 12px;
+      font-weight: 800; color: var(--fg); font-size: 1.22rem;
+    }
+    nav.site .brand img { width: 38px; height: 38px; border-radius: 10px; box-shadow: 0 0 20px var(--gold-glow); }
+    nav.site .links { display: flex; gap: 22px; font-size: 0.92rem; flex-wrap: nowrap; white-space: nowrap; }
+    nav.site .links a { color: var(--muted-fg); font-weight: 600; letter-spacing: 0.01em; }
+    nav.site .links a:hover { color: var(--lantern); }
+
+    .mobile-menu { display: none; position: relative; }
+    .mobile-menu summary {
+      list-style: none; cursor: pointer; color: var(--muted-fg);
+      padding: 8px; border-radius: 10px; border: 1px solid var(--border);
+      display: flex; align-items: center;
+    }
+    .mobile-menu summary::-webkit-details-marker { display: none; }
+    .mobile-menu .mobile-links {
+      position: absolute; right: 0; top: calc(100% + 10px);
+      background: var(--bg-2); border: 1px solid var(--border-strong);
+      border-radius: var(--radius); padding: 10px; min-width: 190px;
+      display: flex; flex-direction: column; gap: 2px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+    }
+    .mobile-menu .mobile-links a { color: var(--muted-fg); font-weight: 600; padding: 9px 12px; border-radius: 8px; }
+    .mobile-menu .mobile-links a:hover { color: var(--lantern); background: rgba(255, 215, 94, 0.07); }
+
+    /* ===== BUTTONS ===== */
+    .btn-primary, .btn-ghost {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 26px; border-radius: 999px;
+      font-weight: 700; font-size: 1rem; border: 1px solid transparent;
+      transition: transform .18s, box-shadow .18s, background .18s, border-color .18s;
+    }
+    .btn-primary {
+      background: linear-gradient(180deg, var(--lantern-bright), var(--lantern));
+      color: #2A1B08; box-shadow: 0 10px 30px rgba(255, 215, 94, 0.22);
+    }
+    .btn-primary:hover { transform: translateY(-2px); color: #2A1B08; box-shadow: 0 14px 36px rgba(255, 215, 94, 0.30); }
+    .btn-ghost { background: rgba(255, 215, 94, 0.05); color: var(--fg); border-color: var(--border-strong); }
+    .btn-ghost:hover { transform: translateY(-2px); color: var(--lantern-bright); border-color: var(--lantern); }
+
+    /* ===== HERO ===== */
+    .hero { padding: 76px 0 40px; }
+    .hero .container { display: grid; grid-template-columns: 1.06fr 0.94fr; gap: 54px; align-items: center; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--lantern); background: rgba(255, 215, 94, 0.09);
+      border: 1px solid var(--border-strong); border-radius: 999px; padding: 6px 15px;
+      margin-bottom: 22px;
+    }
+    .hero h1 .hl {
+      background: linear-gradient(100deg, var(--lantern-bright), var(--amber) 55%, var(--ruby));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .lede { font-size: 1.12rem; color: var(--muted-fg); margin: 20px 0 30px; max-width: 34rem; }
+    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .hero-note { font-size: 0.84rem; color: var(--tertiary-fg); margin-top: 16px; }
+
+    /* the phone frame — a device frame reads as a product, floating UI does not */
+    .phone {
+      position: relative; margin: 0 auto; width: 100%; max-width: 320px;
+      border-radius: 42px; padding: 11px;
+      background: linear-gradient(160deg, #3B2C1E, #1A120C 60%);
+      border: 1px solid rgba(255, 215, 94, 0.22);
+      box-shadow: 0 34px 70px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 190, 90, 0.09);
+    }
+    .phone img { display: block; width: 100%; height: auto; border-radius: 32px; }
+    .phone::after {
+      content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+      top: 17px; width: 76px; height: 20px; border-radius: 999px;
+      background: #0C0805; opacity: 0.9;
+    }
+
+    /* ===== SECTIONS ===== */
+    .section-block { padding: 72px 0; position: relative; }
+    .section-block.panel { background: linear-gradient(180deg, rgba(38, 28, 19, 0.55), rgba(23, 16, 10, 0)); border-top: 1px solid var(--border); }
+    .section-eyebrow {
+      font-size: 0.76rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--ember); margin-bottom: 12px;
+    }
+    .section-lede { color: var(--muted-fg); max-width: 46rem; margin-top: 14px; }
+    .center { text-align: center; }
+    .center .section-lede { margin-left: auto; margin-right: auto; }
+
+    /* ===== THE JAR (the interactive bit) ===== */
+    .jarband { padding: 20px 0 76px; }
+    .jarwrap {
+      display: grid; grid-template-columns: 360px 1fr; gap: 40px; align-items: center;
+      background: linear-gradient(180deg, rgba(47, 35, 24, 0.75), rgba(30, 21, 16, 0.5));
+      border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
+      padding: 30px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+    }
+    #jar {
+      display: block; width: 100%; height: 420px; touch-action: none; cursor: pointer;
+      border-radius: var(--radius);
+      background: radial-gradient(ellipse 80% 60% at 50% 8%, rgba(255, 200, 110, 0.10), transparent 60%), #1B130D;
+      border: 1px solid rgba(255, 215, 94, 0.16);
+    }
+    .jar-side h2 { margin-bottom: 6px; }
+    .jar-hud { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 14px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(20, 13, 8, 0.7); border: 1px solid var(--border-strong);
+      border-radius: 999px; padding: 7px 15px; font-weight: 700; font-size: 0.92rem;
+    }
+    .chip .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .chip b { color: var(--lantern); font-variant-numeric: tabular-nums; }
+    .jar-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .jar-actions button {
+      font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer;
+      background: rgba(255, 215, 94, 0.06); color: var(--fg);
+      border: 1px solid var(--border-strong); border-radius: 999px; padding: 9px 18px;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .jar-actions button:hover { color: var(--lantern-bright); border-color: var(--lantern); background: rgba(255, 215, 94, 0.11); }
+    .jar-actions button:focus-visible { outline: 2px solid var(--lantern); outline-offset: 3px; }
+    .jar-foot { font-size: 0.86rem; color: var(--tertiary-fg); margin-top: 16px; }
+
+    /* ===== FEATURE CARDS ===== */
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 40px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; margin-top: 40px; }
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--bg-2));
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 26px; transition: transform .2s, border-color .2s;
+    }
+    .card:hover { transform: translateY(-3px); border-color: var(--border-strong); }
+    .card .ico {
+      width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center;
+      background: rgba(255, 215, 94, 0.09); border: 1px solid var(--border-strong);
+      margin-bottom: 16px; color: var(--lantern);
+    }
+    .card .ico svg { display: block; }
+    .card p { color: var(--muted-fg); font-size: 0.97rem; margin-top: 9px; }
+
+    /* ===== MODES ===== */
+    .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 40px; }
+    .mode {
+      background: linear-gradient(180deg, var(--card-soft), var(--bg-2));
+      border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px;
+      border-top: 3px solid var(--accent, var(--lantern));
+    }
+    .mode .kind { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--accent, var(--lantern)); }
+    .mode h3 { margin: 8px 0 10px; }
+    .mode p { color: var(--muted-fg); font-size: 0.97rem; }
+    .mode ul { list-style: none; margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+    .mode li { color: var(--tertiary-fg); font-size: 0.9rem; padding-left: 18px; position: relative; }
+    .mode li::before { content: '·'; position: absolute; left: 5px; color: var(--accent, var(--lantern)); font-weight: 800; }
+
+    /* ===== DRAGON ===== */
+    .dragon-row { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 46px; align-items: center; }
+    .dragon-art {
+      border-radius: var(--radius-lg); border: 1px solid var(--border-strong); overflow: hidden;
+      background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(185, 139, 221, 0.18), transparent 70%), var(--bg-2);
+      display: grid; place-items: center; padding: 26px;
+    }
+    .dragon-art img { width: 200px; height: 200px; filter: drop-shadow(0 16px 30px rgba(0, 0, 0, 0.5)); }
+    .ladder { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+    .rung {
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(20, 13, 8, 0.55); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 16px;
+    }
+    .rung .n {
+      min-width: 42px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+      background: rgba(185, 139, 221, 0.14); border: 1px solid rgba(185, 139, 221, 0.35);
+      color: var(--dragon); font-weight: 800; font-size: 0.9rem;
+    }
+    .rung span { color: var(--muted-fg); font-size: 0.95rem; }
+
+    /* ===== SCREENS ===== */
+    .screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 42px; }
+    .screen-card { display: flex; flex-direction: column; gap: 12px; }
+    .screen-frame {
+      border-radius: 26px; padding: 8px; background: linear-gradient(160deg, #392A1C, #191108 62%);
+      border: 1px solid rgba(255, 215, 94, 0.18); box-shadow: 0 20px 42px rgba(0, 0, 0, 0.48);
+    }
+    .screen-frame img { display: block; width: 100%; height: auto; border-radius: 19px; }
+    .screen-kind { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ember); font-weight: 700; }
+    .screen-name { font-weight: 700; font-size: 0.98rem; }
+    figcaption { text-align: center; }
+
+    /* ===== HONEST ===== */
+    .honest { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 38px; }
+    .honest > div {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: rgba(20, 13, 8, 0.5); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+    }
+    /* the text column must be allowed to shrink, or a long <b> pushes the
+       paragraph into a 3-word ribbon */
+    .honest > div > div { flex: 1 1 auto; min-width: 0; }
+    .honest .tick { color: var(--emerald); font-weight: 800; font-size: 1.1rem; line-height: 1.4; flex: 0 0 auto; }
+    .honest b { display: block; margin-bottom: 2px; }
+    .honest p { color: var(--muted-fg); font-size: 0.92rem; }
+
+    /* ===== FAQ ===== */
+    .faq-list { max-width: 50rem; margin: 34px auto 0; display: flex; flex-direction: column; gap: 12px; }
+    details.faq {
+      background: linear-gradient(180deg, var(--card), var(--bg-2));
+      border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 22px;
+    }
+    details.faq[open] { border-color: var(--border-strong); }
+    details.faq summary {
+      cursor: pointer; font-weight: 700; list-style: none; display: flex;
+      justify-content: space-between; align-items: center; gap: 16px;
+    }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after { content: '+'; color: var(--lantern); font-size: 1.4rem; font-weight: 700; line-height: 1; }
+    details.faq[open] summary::after { content: '–'; }
+    details.faq p { color: var(--muted-fg); margin-top: 12px; font-size: 0.97rem; }
+
+    /* ===== ABOUT / CTA ===== */
+    .about-card {
+      display: grid; grid-template-columns: 96px 1fr; gap: 24px; align-items: center;
+      background: linear-gradient(180deg, var(--card), var(--bg-2));
+      border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px;
+    }
+    .about-card img { width: 96px; height: 96px; border-radius: 22px; }
+    .about-card p { color: var(--muted-fg); margin-top: 8px; }
+
+    .cta-strip {
+      text-align: center; padding: 74px 24px;
+      background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(255, 200, 110, 0.12), transparent 70%);
+      border-top: 1px solid var(--border);
+    }
+    .cta-strip p { color: var(--muted-fg); max-width: 34rem; margin: 14px auto 26px; }
+
+    /* ===== FOOTER ===== */
+    footer.site { border-top: 1px solid var(--border); padding: 46px 24px 40px; text-align: center; }
+    .foot-brand { font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 800; font-size: 1.2rem; }
+    footer.site .links { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; margin: 14px 0 26px; font-size: 0.92rem; }
+    footer.site .links a { color: var(--muted-fg); font-weight: 600; }
+    footer.site .links a:hover { color: var(--lantern); }
+    .foot-more { border-top: 1px solid var(--border); padding-top: 26px; margin-top: 6px; }
+    .foot-more-title { font-size: 0.76rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tertiary-fg); font-weight: 700; margin-bottom: 16px; }
+    .foot-more-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
+      gap: 9px 24px; max-width: 860px; margin: 0 auto; text-align: left;
+    }
+    .foot-more-grid a { color: var(--muted-fg); font-size: 0.88rem; }
+    .foot-more-grid a:hover { color: var(--lantern); }
+    .copyright { color: var(--tertiary-fg); font-size: 0.84rem; margin-top: 28px; }
+
+    /* ===== REVEAL — progressive enhancement only =====
+       Content is VISIBLE by default. The hidden state only exists once the
+       head script has proven motion is welcome and IntersectionObserver is
+       available, so a no-JS or reduced-motion reader never sees a blank page. */
+    .js-reveal .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+    .js-reveal .reveal.in { opacity: 1; transform: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    @media (max-width: 980px) {
+      .hero .container { grid-template-columns: 1fr; gap: 40px; }
+      .jarwrap { grid-template-columns: 1fr; gap: 26px; }
+      .dragon-row { grid-template-columns: 1fr; gap: 30px; }
+      .grid-3, .modes, .screens { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 760px) {
+      nav.site .links { display: none; }
+      .mobile-menu { display: block; }
+      .hero { padding: 52px 0 26px; }
+      .grid-3, .grid-2, .modes, .screens, .honest { grid-template-columns: 1fr; }
+      .about-card { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+      #jar { height: 360px; }
+    }
+  </style>
+
+  <script>
+    // Runs in <head> so the class is set before paint: only opt IN to the
+    // reveal when motion is welcome and IntersectionObserver exists.
+    (function () {
+      try {
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+          document.documentElement.classList.add('js-reveal');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- app-schema:start -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "Gemburrow",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "iOS",
+    "description": "A cozy gem-digging puzzle for iPhone. Dig gems out of a physics-packed jar, assemble full sets in your satchel to fill the orders hanging on the line, and decide which rare gems your dragon keeps forever.",
+    "url": "https://hypersage.ai/gemburrow/",
+    "author": {
+      "@type": "Organization",
+      "name": "HyperSage AI Labs LLC"
+    }
+  }
+  </script>
+  <!-- app-schema:end -->
+  <!-- FAQPage schema: questions and answers are verbatim plain-text copies of
+       the on-page FAQ section (#faq) below. Keep the two in sync. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "When can I play Gemburrow?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Soon. Gemburrow is coming to iPhone and isn't on the App Store yet. If you'd like a note the day the shop opens, email support@hypersage.ai and we'll tell you at launch. In the meantime, the jar at the top of this page is playable right now in your browser."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this the game from those gem-jar ads?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It's the game those ads were pretending to be. That jar-full-of-gems clip has run against a dozen different apps, and downloading any of them gets you something else entirely. Gemburrow is that clip built as the actual game: a jar packed with gems and rocks, real physics, and orders to fill by digging the right ones out."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does it cost anything, and are there ads?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Gemburrow is free, and there is nothing to buy. It ships with no in-app purchases, no subscription, no advertising SDK, and no energy meter or wait timers. The coins you spend in the mole's shop are earned by digging — there is no way to buy them, because there is no store to buy them from."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What do coins actually do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "They bank between shifts and buy dig walls in the mole's shop — six of them, from Burrow Clay up to Deep Basalt. Those are purely cosmetic on purpose: the Daily Dig has to be the same jar and the same seven satchel slots for everybody, so nothing you can buy is allowed to change how a dig plays. Coins also pay for a Deeper Pick, which adds eight swings to one retry of a career level you're stuck on."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the Daily Dig?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "One jar a day, identical for every player in the world — same gems, same rocks, same buried prisms — and a leaderboard of the day's best hauls. It resets at midnight UTC. Posting a score sends only a random ID made on your device, an auto-generated name like MOLE-4F2A, and the run's numbers; there is no account and no sign-in anywhere in the game."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I play without a connection?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes — Career and Free digs make no network calls at all, and your progress is stored on your phone. The Daily Dig plays offline too; only posting your score and drawing the leaderboard need a connection, and a score dug offline is queued and sent the next time the game opens online."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long is a shift, and is there a timer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "There is no session clock, deliberately — a pile of physics takes as long as it takes to settle, and that is different on every phone, so billing you for it would be unfair. What limits a shift is the pickaxe: 55 swings, one per gem or rock you pull. Individual Rush orders do carry their own 45-second countdown, shown as a dial on the card."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the art hand-painted?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No — it's AI-generated, and we'd rather say so than pretend. Every gem, rock, the mole and the dragon come from an AI image model working under one painterly art direction, then get curated and repaired until the whole set holds together. The music is composed and rendered in-house by our own script — no stock art, no licensed audio."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ===== NAV ===== -->
+  <nav class="site" id="top">
+    <div class="container">
+      <a class="brand" href="#top" aria-label="Gemburrow — back to top">
+        <img src="app-icon-512.png?v=20260811a" alt="" width="512" height="512">
+        Gemburrow
+      </a>
+      <div class="links">
+        <a href="#jar-band">Try it</a>
+        <a href="#play">How it plays</a>
+        <a href="#dragon">Hoardling</a>
+        <a href="#modes">Modes</a>
+        <a href="#screens">Screens</a>
+        <a href="#honest">Honest</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <details class="mobile-menu">
+        <summary aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></summary>
+        <div class="mobile-links">
+          <a href="#jar-band">Try it</a>
+          <a href="#play">How it plays</a>
+          <a href="#dragon">Hoardling</a>
+          <a href="#modes">Modes</a>
+          <a href="#screens">Screens</a>
+          <a href="#honest">Honest</a>
+          <a href="#faq">FAQ</a>
+          <a href="#notify">Get notified</a>
+        </div>
+      </details>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <div class="container">
+      <div>
+        <span class="eyebrow">Coming to iPhone</span>
+        <h1>Dig the jar.<br>Fill the orders.<br><span class="hl">Feed the dragon.</span></h1>
+        <p class="lede">
+          You've seen the ad: a jar packed with gems and rocks, and someone plucking
+          the treasures out to fill an order. That game never existed. This is it —
+          a cozy gem-digging puzzle where every gem and every rock is real physics,
+          and pulling one out brings the whole pile down.
+        </p>
+        <div class="hero-cta">
+          <a class="btn-primary" href="#notify">
+            <span>Get notified at launch</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="btn-ghost" href="#jar-band">Dig a jar right here</a>
+        </div>
+        <p class="hero-note">Free · no ads · no in-app purchases · iPhone, portrait</p>
+      </div>
+      <div class="phone">
+        <img src="shots/daily.jpg?v=20260811a" width="828" height="1795" loading="eager"
+             alt="Gemburrow gameplay: five order cards pegged to a line above a glass jar packed with gems and rocks, a huge Heartstone buried near the bottom, and a sleeping dragon on the shop ledge">
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== THE PLAYABLE JAR ===== -->
+  <section class="jarband" id="jar-band">
+    <div class="container">
+      <div class="jarwrap">
+        <div>
+          <canvas id="jar" width="360" height="420"
+                  role="img"
+                  aria-label="An interactive jar of gems and rocks. Tap a gem to pull it out; the pile settles into the gap. Use the Dig a gem button for the same thing without a pointer."></canvas>
+        </div>
+        <div class="jar-side">
+          <div class="section-eyebrow">The verb, in your browser</div>
+          <h2>This is the whole game.</h2>
+          <p class="section-lede">
+            Pull a gem and watch the pile fall into the hole it left. That's the
+            hook — no tutorial, no timer, no wait. In the app there are orders to
+            fill, a satchel that jams if you grab without thinking, a pickaxe that
+            only swings 55 times a shift, and a dragon with opinions about your
+            rarest finds.
+          </p>
+          <div class="jar-hud" aria-live="polite">
+            <span class="chip"><span class="dot" style="background:var(--emerald)"></span>Gems dug <b id="jarGems">0</b></span>
+            <span class="chip"><span class="dot" style="background:var(--tertiary-fg)"></span>Rocks cleared <b id="jarRocks">0</b></span>
+            <span class="chip" id="orderChip"><span class="dot" id="orderDot" style="background:var(--ruby)"></span><span id="orderLabel">Order: 3 rubies</span> <b id="orderProg">0/3</b></span>
+          </div>
+          <div class="jar-actions">
+            <button type="button" id="jarDig">Dig a gem</button>
+            <button type="button" id="jarRefill">Refill the jar</button>
+          </div>
+          <p class="jar-foot">
+            Same painted gems, same fixed-timestep circle physics family as the
+            game — a taste, not the app. The real jar is deeper, the rocks are in
+            the way on purpose, and every swing counts.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT PLAYS ===== -->
+  <section class="section-block panel" id="play">
+    <div class="container">
+      <div class="section-eyebrow">How it plays</div>
+      <h2>Grabbing is easy. Digging is the game.</h2>
+      <p class="section-lede">
+        Five orders hang on a line above the jar. Every one wants a specific set of
+        gems, and you only get paid when a set is <em>complete</em> — so the jar
+        stops being a pile of treasure and starts being a plan.
+      </p>
+      <div class="grid-3">
+        <article class="card reveal">
+          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9a7 7 0 0 1 14 0v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M9 9V7a3 3 0 0 1 6 0v2"/><path d="M5 13h14"/></svg></div>
+          <h3>The satchel</h3>
+          <p>
+            Seven slots. Gems you dig go in the bag and stay there until they finish
+            an order. Fill it with things nobody asked for and the next gem you pull
+            is scrap — the pressure sits on every single tap, not on rare mistakes.
+          </p>
+        </article>
+        <article class="card reveal">
+          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20l9-9"/><path d="M14 3c-2.6.5-5 1.9-6.8 3.8C9.1 5 11.5 3.6 14 3z"/><path d="M4.5 8.5c3-3.2 7.3-5 11.7-5-.2 4.4-2 8.7-5.2 11.7z"/><path d="M13 9l4 4"/></svg></div>
+          <h3>55 swings</h3>
+          <p>
+            One swing per gem or rock, and that's the whole shift. No clock, because
+            a pile of physics settles at its own pace on its own phone — but spam
+            the top layer and you'll run out of pickaxe before you run out of orders.
+          </p>
+        </article>
+        <article class="card reveal">
+          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><circle cx="16" cy="16" r="3"/><circle cx="12" cy="7.5" r="3.5"/></svg></div>
+          <h3>The pile answers back</h3>
+          <p>
+            Pull a stone from the middle and everything above it collapses into the
+            gap, exposing gems that weren't reachable a second ago. Rocks pay a coin
+            and cost a swing — sometimes clearing one is the whole move.
+          </p>
+        </article>
+        <article class="card reveal">
+          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6h12v14l-2.5-1.6L13 20l-2.5-1.6L8 20l-2-1.4z"/><path d="M9 10h6"/><path d="M9 13.5h4"/><path d="M12 6V3"/></svg></div>
+          <h3>Orders that refill</h3>
+          <p>
+            Deliver a set and a fresh card drops onto the line in its place. A Rush
+            order arrives with a 45-second dial and pays for the hurry. Throughput
+            against payout is the economy of a shift.
+          </p>
+        </article>
+        <article class="card reveal">
+          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18"/><path d="M9.5 9L12 20"/><path d="M14.5 9L12 20"/><path d="M9.5 9L10.5 4"/><path d="M14.5 9L13.5 4"/></svg></div>
+          <h3>Heartstones and geodes</h3>
+          <p>
+            Some rocks crack open into live gems. And buried deep in the biggest
+            jars is a Heartstone — a colossal gem that takes three pries to free,
+            then asks whether it's worth 200 coins or worth keeping.
+          </p>
+        </article>
+        <article class="card reveal">
+          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/></svg></div>
+          <h3>It rings in tune</h3>
+          <p>
+            Every combo ladder is harmonised to the chord the soundtrack is actually
+            playing, and the fanfare scales with what you actually earned. A shift
+            that lost money never gets a celebration.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DRAGON ===== -->
+  <section class="section-block" id="dragon">
+    <div class="container dragon-row">
+      <div class="dragon-art reveal">
+        <img src="demo/dragon.png?v=20260811a" width="200" height="200" loading="lazy"
+             alt="Hoardling, a small purple dragon asleep on a heap of gems and coins">
+      </div>
+      <div>
+        <div class="section-eyebrow">The collection</div>
+        <h2>Sell it… or feed the dragon.</h2>
+        <p class="section-lede">
+          Hoardling sleeps on a ledge in the shop. When you unearth a rare prism and
+          an order happens to want it, the game stops and asks: take the payout, or
+          keep it forever? Let the clock run out and it always sells — a payout is
+          never quietly taken from you.
+        </p>
+        <div class="ladder">
+          <div class="rung"><span class="n">3</span><span>Hoardling wakes up</span></div>
+          <div class="rung"><span class="n">7</span><span>The hoard starts to sparkle</span></div>
+          <div class="rung"><span class="n">12</span><span>A bigger bag on free digs</span></div>
+          <div class="rung"><span class="n">20</span><span>Golden Hoardling</span></div>
+        </div>
+        <p class="jar-foot">
+          The hoard is permanent and it's the one thing that carries across every
+          shift you ever dig. The bigger bag is deliberately free-digs-only — the
+          Daily has to stay the same seven slots for everyone.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MODES ===== -->
+  <section class="section-block panel" id="modes">
+    <div class="container">
+      <div class="section-eyebrow">Three ways to dig</div>
+      <h2>A ladder, a race, and somewhere to just play.</h2>
+      <div class="modes">
+        <article class="mode reveal" style="--accent: var(--amber);">
+          <div class="kind">Career</div>
+          <h3>40 levels</h3>
+          <p>The mole's job ladder. Clear every order before the pickaxe dies; earn one to three stars on the swings you had left at the bell.</p>
+          <ul>
+            <li>Identical Level N for every player</li>
+            <li>Rush orders from level 3, prisms from level 5</li>
+            <li>Stuck? A Deeper Pick buys eight more swings for one retry</li>
+          </ul>
+        </article>
+        <article class="mode reveal" style="--accent: var(--sapphire);">
+          <div class="kind">Daily Dig</div>
+          <h3>One shared jar</h3>
+          <p>The same gems, the same rocks and the same buried prisms for everybody in the world, with a leaderboard of the day's best hauls. New jar at midnight UTC.</p>
+          <ul>
+            <li>No account, no sign-in — a name is generated for you</li>
+            <li>Your best run of the day is the one that stands</li>
+            <li>Dug offline? The score posts next time you're online</li>
+          </ul>
+        </article>
+        <article class="mode reveal" style="--accent: var(--emerald);">
+          <div class="kind">Free Dig</div>
+          <h3>A fresh jar, no stakes</h3>
+          <p>A brand-new random jar whenever you want one. Practice a route, chase a personal best, or just take the lid off and make a mess.</p>
+          <ul>
+            <li>Every run banks its coins</li>
+            <li>Where the eighth satchel slot pays off</li>
+            <li>No network calls at all</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SCREENS ===== -->
+  <section class="section-block" id="screens">
+    <div class="container">
+      <div class="section-eyebrow center">Screens</div>
+      <h2 class="center">Lantern light, all the way down.</h2>
+      <div class="screens">
+        <figure class="screen-card reveal">
+          <div class="screen-frame"><img src="shots/dig.jpg?v=20260811a" width="828" height="1795" loading="lazy" alt="A career shift in progress: five order cards on the line, three gems in the satchel, 49 swings left on the pickaxe meter"></div>
+          <figcaption><div class="screen-kind">The shift</div><div class="screen-name">Read the line, then dig</div></figcaption>
+        </figure>
+        <figure class="screen-card reveal">
+          <div class="screen-frame"><img src="shots/choice.jpg?v=20260811a" width="828" height="1795" loading="lazy" alt="A prism has been unearthed and the game asks: sell it to the order, or hoard it, with a countdown ring around the gem"></div>
+          <figcaption><div class="screen-kind">The dilemma</div><div class="screen-name">Sell it, or hoard it</div></figcaption>
+        </figure>
+        <figure class="screen-card reveal">
+          <div class="screen-frame"><img src="shots/dragon.jpg?v=20260811a" width="828" height="1795" loading="lazy" alt="The Golden Hoardling milestone fires as the twentieth gem joins the dragon's hoard"></div>
+          <figcaption><div class="screen-kind">The hoard</div><div class="screen-name">Twenty gems kept forever</div></figcaption>
+        </figure>
+        <figure class="screen-card reveal">
+          <div class="screen-frame"><img src="shots/results.jpg?v=20260811a" width="828" height="1795" loading="lazy" alt="Level 13 cleared with three stars, eighteen swings left at the bell and 788 coins banked"></div>
+          <figcaption><div class="screen-kind">The bell</div><div class="screen-name">Three stars, coins banked</div></figcaption>
+        </figure>
+        <figure class="screen-card reveal">
+          <div class="screen-frame"><img src="shots/shop.jpg?v=20260811a" width="828" height="1795" loading="lazy" alt="The mole's shop listing six dig walls: Burrow Clay, Amber Seam, Frost Vein, Malachite, Rose Quartz and Deep Basalt"></div>
+          <figcaption><div class="screen-kind">The shop</div><div class="screen-name">Six walls, all cosmetic</div></figcaption>
+        </figure>
+        <figure class="screen-card reveal">
+          <div class="screen-frame"><img src="shots/menu.jpg?v=20260811a" width="828" height="1795" loading="lazy" alt="The Gemburrow title screen in the mole's shop, with the career path strip, today's daily dig and the hoard count"></div>
+          <figcaption><div class="screen-kind">The shop room</div><div class="screen-name">Where every shift starts</div></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HONEST ===== -->
+  <!-- CLAIMS: every line below is checked against the shipped build and the
+       approvals in site-audit-contract.json. No ad or analytics SDK is linked
+       (package.json ships only @capacitor/core|ios|android|haptics|preferences);
+       there is no StoreKit and no purchase path; there is no sign-in surface.
+       The ONE thing that leaves the device is a Daily Dig score — stated here
+       and on privacy.html rather than glossed. Do not soften "no in-app
+       purchases" into "no pay-to-win" or harden the offline line into
+       "nothing ever leaves your device". -->
+  <section class="section-block panel" id="honest">
+    <div class="container">
+      <div class="section-eyebrow">The deal</div>
+      <h2>An honest game about greed.</h2>
+      <p class="section-lede">
+        Gemburrow is about hoarding treasure. It would be a poor joke to build that
+        on a slot machine, so we didn't: there is nothing to buy in it, and nothing
+        that stops you playing.
+      </p>
+      <div class="honest">
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>No in-app purchases</b><p>Not a subscription, not a coin pack, not a starter bundle. There is no purchase path in the app at all.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>No ads</b><p>No advertising SDK is linked into the build, so there is nothing to watch, skip, or accidentally tap.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>No energy, no timers</b><p>Play as long as you like. Nothing recharges, and nothing asks you to come back in four hours.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>No account</b><p>No sign-in, no email, no profile. The leaderboard names you MOLE-something and gets on with it.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>Nothing you buy changes a dig</b><p>The shop sells dig walls — colour, nothing else. The Daily has to be the same jar for everyone, so it is.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>One thing leaves your phone</b><p>A Daily Dig score: a random ID made on your device, an auto-generated name and the run's numbers. Career and Free digs send nothing. <a href="privacy.html">The details</a>.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ =====
+       Every answer here is mirrored verbatim in the FAQPage JSON-LD in <head>.
+       Edit the two together. Sources: no purchase/ad SDK (gemburrow/package.json,
+       no StoreKit anywhere); wallet + six WALL_SKINS 0..2400c and DEEPER_PICK_COST
+       250 / +8 swings (game.js); CAREER_MAX 40; CFG.swings 55; CFG.timedDur 45;
+       daily seed shared, leaderboard payload day/seed/player/coins/pops/client_id;
+       art generated through artcore, music rendered by tools/generate_music.py. -->
+  <section class="section-block" id="faq">
+    <div class="container">
+      <div class="section-eyebrow center">Common questions</div>
+      <h2 class="center">FAQ</h2>
+      <div class="faq-list">
+        <details class="faq">
+          <summary>When can I play Gemburrow?</summary>
+          <p>Soon. Gemburrow is coming to iPhone and isn't on the App Store yet. If you'd like a note the day the shop opens, email <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Gemburrow%20launches">support@hypersage.ai</a> and we'll tell you at launch. In the meantime, the jar at the top of this page is playable right now in your browser.</p>
+        </details>
+        <details class="faq">
+          <summary>Is this the game from those gem-jar ads?</summary>
+          <p>It's the game those ads were pretending to be. That jar-full-of-gems clip has run against a dozen different apps, and downloading any of them gets you something else entirely. Gemburrow is that clip built as the actual game: a jar packed with gems and rocks, real physics, and orders to fill by digging the right ones out.</p>
+        </details>
+        <details class="faq">
+          <summary>Does it cost anything, and are there ads?</summary>
+          <p>Gemburrow is free, and there is nothing to buy. It ships with no in-app purchases, no subscription, no advertising SDK, and no energy meter or wait timers. The coins you spend in the mole's shop are earned by digging — there is no way to buy them, because there is no store to buy them from.</p>
+        </details>
+        <details class="faq">
+          <summary>What do coins actually do?</summary>
+          <p>They bank between shifts and buy dig walls in the mole's shop — six of them, from Burrow Clay up to Deep Basalt. Those are purely cosmetic on purpose: the Daily Dig has to be the same jar and the same seven satchel slots for everybody, so nothing you can buy is allowed to change how a dig plays. Coins also pay for a Deeper Pick, which adds eight swings to one retry of a career level you're stuck on.</p>
+        </details>
+        <details class="faq">
+          <summary>What is the Daily Dig?</summary>
+          <p>One jar a day, identical for every player in the world — same gems, same rocks, same buried prisms — and a leaderboard of the day's best hauls. It resets at midnight UTC. Posting a score sends only a random ID made on your device, an auto-generated name like MOLE-4F2A, and the run's numbers; there is no account and no sign-in anywhere in the game.</p>
+        </details>
+        <details class="faq">
+          <summary>Can I play without a connection?</summary>
+          <p>Yes — Career and Free digs make no network calls at all, and your progress is stored on your phone. The Daily Dig plays offline too; only posting your score and drawing the leaderboard need a connection, and a score dug offline is queued and sent the next time the game opens online.</p>
+        </details>
+        <details class="faq">
+          <summary>How long is a shift, and is there a timer?</summary>
+          <p>There is no session clock, deliberately — a pile of physics takes as long as it takes to settle, and that is different on every phone, so billing you for it would be unfair. What limits a shift is the pickaxe: 55 swings, one per gem or rock you pull. Individual Rush orders do carry their own 45-second countdown, shown as a dial on the card.</p>
+        </details>
+        <details class="faq">
+          <summary>Is the art hand-painted?</summary>
+          <p>No — it's AI-generated, and we'd rather say so than pretend. Every gem, rock, the mole and the dragon come from an AI image model working under one painterly art direction, then get curated and repaired until the whole set holds together. The music is composed and rendered in-house by our own script — no stock art, no licensed audio.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ABOUT ===== -->
+  <section class="section-block" id="about">
+    <div class="container">
+      <div class="about-card">
+        <img src="app-icon-512.png?v=20260811a" width="512" height="512" loading="lazy" alt="Gemburrow app icon">
+        <div>
+          <div class="section-eyebrow">The studio</div>
+          <h3>From Hypersage</h3>
+          <p>Gemburrow is built by <a href="https://hypersage.ai/">Hypersage</a> — an independent studio making opinionated, carefully-built apps and games. One painted art direction, physics written from scratch so a phone can hold sixty frames, and a daily jar that is provably the same for everyone. <a href="https://hypersage.ai/">See the studio <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="cta-strip" id="notify">
+    <h2>The jar is full. Grandpa left you the shop.</h2>
+    <p>Gemburrow is coming to iPhone. Leave us a line and we'll tell you the day the lantern goes on.</p>
+    <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Gemburrow%20launches" class="btn-primary">
+      <span>Get notified at launch</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site">
+    <div class="foot-brand">Gemburrow</div>
+    <div class="links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="mailto:support@hypersage.ai">Contact</a>
+    </div>
+    <div class="foot-more">
+      <h3 class="foot-more-title">More from Hypersage AI Labs</h3>
+      <div class="foot-more-grid">
+        <a href="https://hypersage.ai/hexhunter/">Hexhunter — Gothic Horde-Survivor</a>
+        <a href="https://hypersage.ai/waddleton/">Waddleton — Social World / Arcade</a>
+        <a href="https://hypersage.ai/mythwright/">Mythwright — Strategy Card Game</a>
+        <a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a>
+        <a href="https://hypersage.ai/storyvault/">StoryVault AI — Interactive Fiction</a>
+        <a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a>
+        <a href="https://hypersage.ai/saffra/">Saffra — AI Personal Chef</a>
+        <a href="https://hypersage.ai/nightshelf/">Nightshelf — Sleep Stories</a>
+        <a href="https://hypersage.ai/quietoak/">Quietoak — DBT Skills Companion</a>
+        <a href="https://hypersage.ai/rowan/">Rowan — Chronic-Condition Companion</a>
+        <a href="https://hypersage.ai/alder/">Alder — Recovery Companion</a>
+      </div>
+    </div>
+    <!-- No App Store age rating exists yet — Gemburrow is unreleased and the ASC
+         questionnaire has not been filed. Do not print a number here until Apple
+         has actually assigned one. -->
+    <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Dig responsibly; the dragon is watching.</div>
+  </footer>
+
+  <script>
+  /* ============================================================
+     The jar. A small position-based circle solver — the same family as the
+     game's (fixed substeps, displacement-derived motion, no impulses), cut
+     down to what a landing page needs. It sleeps when nothing is moving, so
+     an idle tab costs nothing.
+     ============================================================ */
+  (function () {
+    var canvas = document.getElementById('jar');
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
+
+    var GEMS = [
+      { key: 'ruby',     label: 'rubies',    color: '#E0475B', r: 17 },
+      { key: 'sapphire', label: 'sapphires', color: '#5B8CE8', r: 18 },
+      { key: 'emerald',  label: 'emeralds',  color: '#46B073', r: 18 },
+      { key: 'amber',    label: 'amber',     color: '#E3A24A', r: 16 },
+      { key: 'prism',    label: 'prisms',    color: '#CFE8F5', r: 19 }
+    ];
+    var ROCKS = [
+      { key: 'rock_s', r: 15 }, { key: 'rock_m', r: 19 }, { key: 'rock_l', r: 24 }
+    ];
+
+    var imgs = {}, loaded = 0, wanted = GEMS.length + ROCKS.length;
+    GEMS.concat(ROCKS).forEach(function (t) {
+      var im = new Image();
+      im.onload = function () { loaded++; wake(); };
+      im.onerror = function () { loaded++; };           // draw a flat disc instead
+      im.src = 'demo/' + t.key + '.png?v=20260811a';
+      imgs[t.key] = im;
+    });
+
+    var W = 0, H = 0, dpr = 1;
+    var jar = { l: 0, r: 0, top: 0, bot: 0 };
+    var bodies = [];
+    var GRAV = 1500, STEP = 1 / 120, ITER = 5, SLOP = 0.4;
+    var acc = 0, last = 0, awake = 0, running = false;
+    var pops = [];                                       // cosmetic burst rings
+
+    var stats = { gems: 0, rocks: 0 };
+    var order = null;
+    var elGems = document.getElementById('jarGems');
+    var elRocks = document.getElementById('jarRocks');
+    var elLabel = document.getElementById('orderLabel');
+    var elProg = document.getElementById('orderProg');
+    var elDot = document.getElementById('orderDot');
+
+    function layout() {
+      var box = canvas.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = box.width; H = box.height;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      jar = { l: 18, r: W - 18, top: 40, bot: H - 18 };
+    }
+
+    function rand(a, b) { return a + Math.random() * (b - a); }
+
+    function newOrder() {
+      var g = GEMS[(Math.random() * (GEMS.length - 1)) | 0];   // never demand prisms
+      order = { key: g.key, label: g.label, color: g.color, need: 3, got: 0 };
+      elDot.style.background = g.color;
+      draw();
+      syncHud();
+    }
+
+    function syncHud() {
+      elGems.textContent = stats.gems;
+      elRocks.textContent = stats.rocks;
+      if (order) {
+        elLabel.textContent = 'Order: 3 ' + order.label;
+        elProg.textContent = order.got + '/' + order.need;
+      }
+    }
+
+    function fill() {
+      bodies = [];
+      pops = [];
+      var jarW = jar.r - jar.l, jarH = jar.bot - jar.top;
+      var area = jarW * jarH, filled = 0, guard = 0;
+      // area-budgeted pour: circles pack to about 90%, so stop well short or
+      // the pile can never settle
+      while (filled < area * 0.60 && guard++ < 400) {
+        var isGem = Math.random() < 0.52;
+        var t = isGem ? GEMS[(Math.random() * GEMS.length) | 0]
+                      : ROCKS[(Math.random() * ROCKS.length) | 0];
+        if (t.key === 'prism' && Math.random() < 0.7) continue;   // prisms stay rare
+        var r = t.r;
+        bodies.push({
+          key: t.key, gem: isGem, color: t.color || '#8A7B69', r: r,
+          x: rand(jar.l + r + 2, jar.r - r - 2),
+          y: rand(jar.top - jarH * 0.9, jar.top - r),
+          px: 0, py: 0, rot: rand(-0.4, 0.4)
+        });
+        bodies[bodies.length - 1].px = bodies[bodies.length - 1].x;
+        bodies[bodies.length - 1].py = bodies[bodies.length - 1].y;
+        filled += Math.PI * r * r;
+      }
+      awake = 4.5;
+      run();
+    }
+
+    function step(dt) {
+      var i, j, a, b;
+      for (i = 0; i < bodies.length; i++) {
+        a = bodies[i];
+        var vx = (a.x - a.px) * 0.995, vy = (a.y - a.py) * 0.995;
+        a.px = a.x; a.py = a.y;
+        a.x += vx; a.y += vy + GRAV * dt * dt;
+      }
+      for (var k = 0; k < ITER; k++) {
+        for (i = 0; i < bodies.length; i++) {
+          a = bodies[i];
+          for (j = i + 1; j < bodies.length; j++) {
+            b = bodies[j];
+            var dx = b.x - a.x, dy = b.y - a.y;
+            var min = a.r + b.r;
+            if (dx > min || dx < -min || dy > min || dy < -min) continue;
+            var d2 = dx * dx + dy * dy;
+            if (d2 >= min * min || d2 === 0) continue;
+            var d = Math.sqrt(d2), push = (min - d - SLOP);
+            if (push <= 0) continue;
+            var nx = dx / d * push * 0.5, ny = dy / d * push * 0.5;
+            a.x -= nx; a.y -= ny; b.x += nx; b.y += ny;
+          }
+          if (a.x < jar.l + a.r) a.x = jar.l + a.r;
+          if (a.x > jar.r - a.r) a.x = jar.r - a.r;
+          if (a.y > jar.bot - a.r) a.y = jar.bot - a.r;
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // jar glass
+      ctx.save();
+      var g = ctx.createLinearGradient(0, jar.top, 0, jar.bot);
+      g.addColorStop(0, 'rgba(255,236,200,0.07)');
+      g.addColorStop(1, 'rgba(120,80,40,0.10)');
+      ctx.fillStyle = g;
+      roundRect(jar.l - 8, jar.top - 10, (jar.r - jar.l) + 16, (jar.bot - jar.top) + 18, 16);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,215,94,0.22)';
+      ctx.lineWidth = 1.5;
+      roundRect(jar.l - 8, jar.top - 10, (jar.r - jar.l) + 16, (jar.bot - jar.top) + 18, 16);
+      ctx.stroke();
+      ctx.restore();
+
+      for (var i = 0; i < bodies.length; i++) {
+        var b = bodies[i], im = imgs[b.key];
+        if (im && im.complete && im.naturalWidth) {
+          var s = b.r * 2.06;
+          ctx.drawImage(im, b.x - s / 2, b.y - s / 2, s, s);
+        } else {
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, 6.283);
+          ctx.fillStyle = b.color;
+          ctx.fill();
+        }
+      }
+
+      for (var p = 0; p < pops.length; p++) {
+        var q = pops[p], a = 1 - q.t / 0.45;
+        if (a <= 0) continue;
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, q.r + (1 - a) * 26, 0, 6.283);
+        ctx.strokeStyle = 'rgba(255,215,94,' + (a * 0.7).toFixed(3) + ')';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      }
+
+      // glass highlight, drawn over the pile
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillRect(jar.l + 4, jar.top + 6, 7, (jar.bot - jar.top) * 0.42);
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function frame(ts) {
+      if (!running) return;
+      if (!last) last = ts;
+      var dt = Math.min(0.05, (ts - last) / 1000);
+      last = ts;
+      acc += dt;
+      var n = 0;
+      while (acc >= STEP && n < 10) { step(STEP); acc -= STEP; n++; }
+      for (var p = pops.length - 1; p >= 0; p--) {
+        pops[p].t += dt;
+        if (pops[p].t > 0.45) pops.splice(p, 1);
+      }
+      draw();
+      awake -= dt;
+      if (awake <= 0 && !pops.length) { running = false; last = 0; return; }
+      requestAnimationFrame(frame);
+    }
+
+    function run() { if (!running) { running = true; last = 0; requestAnimationFrame(frame); } }
+    function wake() { awake = Math.max(awake, 1.6); run(); }
+
+    function extract(b, i) {
+      bodies.splice(i, 1);
+      pops.push({ x: b.x, y: b.y, r: b.r, t: 0 });
+      if (b.gem) {
+        stats.gems++;
+        if (order && b.key === order.key) {
+          order.got++;
+          if (order.got >= order.need) { newOrder(); }
+        }
+      } else {
+        stats.rocks++;
+      }
+      syncHud();
+      wake();
+      if (bodies.length < 12) fill();
+    }
+
+    function pick(cx, cy) {
+      // topmost body under the point — the same "what did I actually tap"
+      // rule the game uses, with no slop forgiveness
+      var best = -1, bestY = Infinity;
+      for (var i = 0; i < bodies.length; i++) {
+        var b = bodies[i], dx = cx - b.x, dy = cy - b.y;
+        if (dx * dx + dy * dy <= b.r * b.r && b.y < bestY) { best = i; bestY = b.y; }
+      }
+      if (best >= 0) extract(bodies[best], best);
+    }
+
+    canvas.addEventListener('pointerdown', function (e) {
+      var box = canvas.getBoundingClientRect();
+      pick(e.clientX - box.left, e.clientY - box.top);
+    });
+
+    document.getElementById('jarDig').addEventListener('click', function () {
+      // keyboard/no-pointer parity: take the shallowest gem, which is what a
+      // sighted player reaches for anyway
+      var best = -1, bestY = Infinity;
+      for (var i = 0; i < bodies.length; i++) {
+        if (bodies[i].gem && bodies[i].y < bestY) { best = i; bestY = bodies[i].y; }
+      }
+      if (best >= 0) extract(bodies[best], best);
+    });
+    document.getElementById('jarRefill').addEventListener('click', function () {
+      stats.gems = 0; stats.rocks = 0;
+      newOrder();
+      fill();
+      syncHud();
+    });
+
+    var ro = window.ResizeObserver ? new ResizeObserver(function () { layout(); draw(); }) : null;
+    if (ro) ro.observe(canvas); else window.addEventListener('resize', function () { layout(); draw(); });
+
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) wake(); });
+
+    layout();
+    newOrder();
+    fill();
+  })();
+
+  /* Scroll reveal — only ever runs when the head script opted in.
+     A dead-man switch backs it: if the observer has not fired within 1.2s
+     (throttled background tab, a scraper, a future browser quirk) every
+     element is revealed anyway. Content must never be able to stay hidden
+     because an enhancement did not run. */
+  (function () {
+    if (!document.documentElement.classList.contains('js-reveal')) return;
+    var els = [].slice.call(document.querySelectorAll('.reveal'));
+    var revealAll = function () { els.forEach(function (el) { el.classList.add('in'); }); };
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+    els.forEach(function (el) { io.observe(el); });
+    setTimeout(revealAll, 1200);
+  })();
+  </script>
+</body>
+</html>

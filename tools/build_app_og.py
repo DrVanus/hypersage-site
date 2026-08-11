@@ -38,6 +38,7 @@ FONTS = {
     'waddleton': '',
     'mythkin': '',
     'hexhunter': 'family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800',
+    'gemburrow': 'family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800',
 }
 
 # Per-site card: colors are the site's own :root values, copy is the page's own
@@ -344,6 +345,40 @@ CARDS = {
         "kicker": "AI characters · 18+",
         "h1": "Characters made<br>by people,<br>alive with you.",
         "sub": "Write a character. Give them a temperament, a history, a first line. Then talk to them — and they remember. Share them, or borrow someone else's.",
+    },
+    "gemburrow": {
+        "art": "shots/daily.jpg",
+        "css": """
+  /* The page's own lantern wash (body::before) over --bg-2 -> --bg, with one
+     extra warm pass at the top so the card carries the same light the shop room
+     does at message-bubble size. Every colour below is a :root token from
+     gemburrow/index.html — nothing new is mixed. */
+  .og { background:
+        radial-gradient(ellipse 74% 60% at 20% -6%, rgba(255,205,110,0.18), transparent 60%),
+        radial-gradient(ellipse 85% 55% at 50% -8%, rgba(255,205,110,0.14), transparent 58%),
+        radial-gradient(ellipse 60% 40% at 12% 22%, rgba(224,138,60,0.07), transparent 62%),
+        radial-gradient(ellipse 75% 55% at 50% 106%, rgba(120,74,30,0.16), transparent 66%),
+        linear-gradient(160deg, #1E1510 0%, #17100A 62%); }
+  /* One row or the headline gets shoved down (the saffra lesson): the full
+     "Cozy gem-digging puzzle · Coming to iPhone" wrapped at 21px, so it is
+     sized down and pinned. Measured: 519px of the 568px column. */
+  .kicker { color: #E08A3C; font-size: 19px; letter-spacing: 0.10em; white-space: nowrap; }
+  /* Baloo 2 at 800 is the page's own display face; 54px keeps "Feed the dragon."
+     on one line at this width. */
+  h1 { font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif; font-weight: 800;
+       font-size: 54px; letter-spacing: -0.01em;
+       background-image: linear-gradient(178deg, #F6ECDC 62%, #CBB79C 165%); }
+  h1 .grad { background-image: linear-gradient(100deg, #FFE9A8, #E3A24A 55%, #E0475B); }
+  .sub { color: #CBB79C; max-width: 540px; }
+  /* The Daily Dig frame, bled full height and feathered into the lantern glow —
+     828x1795 at h=630 is w=291, so nothing is cropped off the jar. */
+  .art { width: 291px; height: 630px; object-position: 50% 42%;
+         -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%);
+         mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%); }
+""",
+        "kicker": "Cozy gem-digging puzzle \u00b7 Coming to iPhone",
+        "h1": 'Dig the jar.<br>Feed the <span class="grad">dragon.</span>',
+        "sub": "Every gem and rock is real physics: pull one out and the whole pile settles. Fill the orders on the line \u2014 and decide what the dragon keeps.",
     },
     "hexhunter": {
         "art": "assets/art/cover.jpg",

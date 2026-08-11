@@ -1,0 +1,60 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://hypersage.ai/gemburrow/",
+  "_why": "Written 2026-08-11 when the Gemburrow subsite was first folded into this origin. Gemburrow's privacy story is strong but NOT absolute: the game makes exactly one kind of network call — a Daily Dig score posted to Supabase — and every claim below is worded to leave room for it. Verified against /Users/dee/Developer/DrVanus/gemburrow at commit a6d2fd4.",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "There is no sign-in surface anywhere: a case-insensitive grep of gemburrow/game.js for signin, sign_in, login, password, email, oauth, 'apple id', GameCenter and GameKit returns nothing. The game is one file, so that grep covers the whole client.",
+        "SCOPE: the Daily Dig leaderboard identifies a device, not a person. game.js Meta.mint() generates a random UUID on first run and derives the display name 'MOLE-' + its first four characters (game.js:690-696); the player cannot choose or edit it. privacy.html gives that identifier its own section and says plainly that it is not an Apple ID, not an advertising identifier, and not linked to any identity. Do not reword the site's 'no account' into 'nothing identifies you'."
+      ]
+    },
+    "no_tracking": {
+      "approved": true,
+      "evidence": [
+        "No analytics, attribution or crash SDK is linked. package.json dependencies are exactly @capacitor/android, @capacitor/cli, @capacitor/core, @capacitor/haptics, @capacitor/ios and @capacitor/preferences — no Firebase, no Sentry, no AppsFlyer, no GA.",
+        "The only outbound HTTP in the client is the leaderboard: game.js:750 (POST a daily score) and game.js:769 (GET the day's top rows). The other two fetch() calls (game.js:939, 942) load the game's own bundled audio from the app package. No behavioural, session or crash telemetry exists to send.",
+        "native/ios/PrivacyInfo.xcprivacy declares NSPrivacyTracking = false and requests no advertising identifier; tools/apply_ios_overlay.py stamps it into the Xcode project on every ship and step 4 of ship_ios.sh asserts it against the built binary."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "No advertising SDK is linked into the build (package.json dependency list above), and a grep of game.js for admob, adsbygoogle and revenuecat returns nothing. There is no ad unit, no placement and no rewarded path.",
+        "SCOPE: this is a plain, present-tense claim about the shipping build, not a promise about every future version. If an ad SDK is ever integrated, this approval and the site's 'No ads' card both expire."
+      ]
+    },
+    "no_personal_data": {
+      "approved": true,
+      "evidence": [
+        "The save (localStorage key gb_meta_v1, mirrored to Capacitor Preferences) holds only game state: hoardTotal, tutorialDone, bestDaily, bestFree, coins, owned, equipped, careerLevel, careerStars, plus the random clientId and the derived MOLE- name (game.js:675-677 and the careerStars/careerLevel writes at game.js:1732-1750). privacy.html enumerates exactly that list.",
+        "No field anywhere collects a name, email, address, phone number or contact detail: there is no text-entry surface in the game at all, and the leaderboard name is generated rather than typed, which is why a personal detail cannot reach the public board.",
+        "The game requests no location, contacts, photos, microphone or camera permission — no such usage-description key exists in the Info.plist stamped by tools/apply_ios_overlay.py."
+      ]
+    },
+    "no_purchases": {
+      "approved": true,
+      "evidence": [
+        "There is no StoreKit dependency and no purchase code: a case-insensitive grep of game.js for storekit, purchase, iap and revenuecat returns only two comment lines about 'purchased cosmetic ids' and 'a purchased deeper pick' — both referring to spending in-game coins (game.js:672, 1195).",
+        "The shop's six dig walls cost 0..2400 coins (WALL_SKINS, game.js:607-614) and the Deeper Pick costs 250 coins (DEEPER_PICK_COST, game.js:605). Coins are only ever earned by digging: Meta.data.coins is incremented at game.js:1744 and 1767 from run payouts and nowhere else."
+      ]
+    },
+    "local_only": {
+      "approved": true,
+      "evidence": [
+        "SCOPE — the site never makes a page-level 'nothing leaves your device' claim, and it must not. index.html attaches the local claim to specific modes ('Career and Free digs send nothing') and gives the exception its own card ('One thing leaves your phone'), and privacy.html devotes a section to the Daily Dig post.",
+        "That mode split is real: the leaderboard submit at game.js:1776-1787 is inside an `if (this.isDaily)` branch, so a Career or Free run reaches no network code at all.",
+        "Progress itself is genuinely local: Meta.save() writes localStorage and the Capacitor Preferences mirror (game.js:684-689) and there is no sync path of ours anywhere in the client."
+      ]
+    },
+    "offline": {
+      "approved": true,
+      "evidence": [
+        "Career and Free digs make no network calls, so they are fully playable offline — same evidence as local_only (the isDaily branch at game.js:1776).",
+        "The Daily Dig is playable offline too, and the site says only that POSTING the score and drawing the board need a connection: an unsent score is kept in Meta.data.pendingScore (game.js:1780) and cleared only once a submission is acknowledged (game.js:1785), so it is retried on a later launch.",
+        "The bundled music and art are files inside the app package (fetch of audio/*.m4a at game.js:939-942 is same-origin to the WebView's bundle), so nothing about presentation needs the network either."
+      ]
+    }
+  }
+}
