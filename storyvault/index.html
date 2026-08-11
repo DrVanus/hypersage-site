@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StoryVault AI — AI story adventures in classic worlds</title>
+  <title>StoryVault — AI adventures you write, and 80 classics</title>
   <!-- Bundled-book count is 80. It was 87, then 81 (six US-only-public-domain titles
        removed, f7075b6 2026-08-04), then 80 (The Metamorphosis removed, 555351d — the
        Gutenberg English translation is its own copyrighted work). Verify with
@@ -15,18 +15,18 @@
   <link rel="canonical" href="https://hypersage.ai/storyvault/">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="StoryVault AI — Branching tales, written with you.">
-  <meta property="og:description" content="Step into a classic. Or a world only the AI has dreamed. Every choice rewrites the next page.">
+  <meta property="og:title" content="StoryVault — AI Adventures">
+  <meta property="og:description" content="Write a world from a single line and the AI builds it out. Or step inside one of eighty complete classics and change where it goes.">
   <meta property="og:url" content="https://hypersage.ai/storyvault/">
   <meta property="og:site_name" content="StoryVault AI">
-  <meta property="og:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260810a">
+  <meta property="og:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260811a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="StoryVault AI — branching tales, written with you: a glowing gilded storybook">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="StoryVault AI — Branching tales, written with you.">
-  <meta name="twitter:description" content="Step into a classic. Or invent your own world. Every choice rewrites the next page.">
-  <meta name="twitter:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260810a">
+  <meta name="twitter:title" content="StoryVault — AI Adventures">
+  <meta name="twitter:description" content="Write your own world and the AI builds it out — or play one of eighty complete classics.">
+  <meta name="twitter:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260811a">
   <meta name="twitter:image:alt" content="StoryVault AI — branching tales, written with you: a glowing gilded storybook">
 
   <link rel="icon" type="image/png" href="storyvault-mark.png">
@@ -1125,6 +1125,104 @@
       font-size: 0.97rem; line-height: 1.75;
     }
 
+    /* ===== DATA PATH (inside the "does the AI train on my stories?" answer) =====
+       The answer above, drawn: your input → our backend → Anthropic's Claude for
+       the next page (OpenAI as the failover) and OpenAI for scene art and voice
+       narration, stored on neither end. Same connector idiom as the branch map —
+       stretched SVG fans on wide, hairline drops on narrow. */
+    .datapath { margin: 2px 0 20px; }
+    .dp-flow {
+      display: grid;
+      grid-template-columns: 1fr 44px 1fr 44px 1.05fr;
+      align-items: center;
+    }
+    .dp-node {
+      position: relative;
+      padding: 11px 13px;
+      background: rgba(217,181,127,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .dp-node.dp-hub {
+      border-color: var(--border-strong);
+      background: rgba(217,181,127,0.09);
+    }
+    .dp-node b {
+      display: block;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 600; font-size: 0.97rem; line-height: 1.3;
+      color: var(--accent-light);
+      padding-bottom: 0.08em;
+    }
+    .dp-node i {
+      display: block;
+      font-style: normal;
+      font-size: 0.78rem; line-height: 1.5;
+      color: var(--muted-fg);
+      margin-top: 2px;
+    }
+    /* Dashed qualifier chip: the thing above it is conditional, not the default
+       path (the Claude failover; scene art being Pro-only and metered). */
+    .dp-chip {
+      display: block;
+      margin-top: 9px;
+      padding: 5px 9px;
+      border: 1px dashed var(--border-strong);
+      border-radius: 9px;
+      font-size: 0.74rem; line-height: 1.45;
+      color: var(--muted-fg);
+    }
+    .dp-ends {
+      position: relative;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .dp-fan { width: 100%; height: 100%; min-height: 88px; align-self: stretch; display: block; }
+    .dp-fan path {
+      fill: none;
+      stroke: var(--border-strong);
+      stroke-width: 1.4;
+      vector-effect: non-scaling-stroke;
+    }
+    /* The fan is two destinations, NOT two simultaneous sends: only the Claude
+       edge is accented + live, the OpenAI edge stays the muted base stroke. It
+       is deliberately NOT dashed — this page already spends dashes on "the
+       user-typed branch" (.bm-typed, .bm-choice.bm-custom in the branch map
+       this figure imitates), and one idiom cannot carry two meanings with no
+       legend. The Pro/metered qualifier travels in the chip's words instead. */
+    .dp-fan path.dp-live {
+      stroke: var(--accent);
+      stroke-width: 2;
+      filter: drop-shadow(0 0 5px rgba(217,181,127,0.35));
+      animation: bm-pulse 3.2s ease-in-out infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .dp-fan path.dp-live { animation: none; }
+    }
+    .dp-seal { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 16px; }
+    .dp-seal span {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(30,20,64,0.6), rgba(23,16,48,0.6));
+      font-size: 0.78rem; line-height: 1.5;
+      color: var(--muted-fg);
+    }
+    .dp-seal span::before { content: '✦'; color: var(--accent); font-size: 0.62rem; }
+    @media (max-width: 700px) {
+      /* Stack: the fans go, hairline drops carry the flow downward instead. */
+      .dp-flow { grid-template-columns: 1fr; }
+      .dp-fan { display: none; }
+      .dp-node.dp-hub, .dp-ends { margin-top: 30px; }
+      .dp-node.dp-hub::before, .dp-ends::before {
+        content: '';
+        position: absolute;
+        left: 50%; top: -24px;
+        width: 1px; height: 18px;
+        background: linear-gradient(180deg, transparent, var(--accent));
+      }
+    }
+
     /* ===== CTA STRIP ===== */
     .cta-strip {
       text-align: center;
@@ -1231,7 +1329,7 @@
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "StoryVault AI",
+  "name": "StoryVault",
   "applicationCategory": "EntertainmentApplication",
   "operatingSystem": "iOS",
   "description": "Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty bundled classics. Free to try.",
@@ -1814,6 +1912,62 @@
                this back to "OpenAI" — the site was the only surface saying that, and
                privacy.html had the two providers the wrong way round. -->
           <p>No. Your input is sent to our backend for the duration of the request, forwarded to Anthropic's Claude to write the next page (with OpenAI as a failover), and to OpenAI for scene art and voice narration. It isn't stored on either end, and we don't sell or share your input.</p>
+          <!-- The sentence above, drawn. Every node/edge label restates a clause of it;
+               the first two seal chips are lifted from it near-verbatim and the third
+               ("The AI never trains on your stories") is verbatim from the Yours-alone
+               card and is what actually answers this <summary>. Extra visible text
+               beyond the FAQPage acceptedAnswer.text (:1367) is fine — the rule runs
+               the other way (the JSON-LD answer must be visible on the page), so do NOT
+               delete a grounded chip to "match" it.
+               Four rules this figure was rejected for breaking once; keep them:
+               1. NEVER paraphrase the backend's role with a retention verb. It "forwards"
+                  — it does not "hold", "keep" or "store". That chip sits inches above
+                  "It isn't stored on either end".
+               2. The Pro qualifier must cover the WHOLE OpenAI node, not one of its two
+                  purposes. Both scene art (:1866) and voice narration (:1865) are Pro
+                  bullets; qualifying only the art implies narration is free.
+               3. Quote the art meter COMPLETE — "10 turns a day, 100 a month" (:1687).
+                  This chip is the mitigation for the rejected "scene art at every turn"
+                  claim, so a half-meter here is the same defect one size down.
+               4. No dashed edge: dashes already mean "user-typed branch" on this page.
+               Decorative: aria-hidden, so the answer text stays the one source of truth
+               for assistive tech. Do not add a hop, a provider, or a purpose the answer
+               does not name. -->
+          <figure class="datapath" aria-hidden="true">
+            <div class="dp-flow">
+              <div class="dp-node">
+                <b>Your input</b>
+              </div>
+              <svg class="dp-fan" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
+                <path class="dp-live" d="M0,50 H100"/>
+              </svg>
+              <div class="dp-node dp-hub">
+                <b>Our backend</b>
+                <i>for the duration of the request, then forwards it</i>
+              </div>
+              <svg class="dp-fan" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
+                <path class="dp-live" d="M0,50 C45,50 55,28 100,28"/>
+                <path d="M0,50 C45,50 55,80 100,80"/>
+              </svg>
+              <div class="dp-ends">
+                <div class="dp-node">
+                  <b>Anthropic's Claude</b>
+                  <i>writes the next page</i>
+                  <span class="dp-chip">OpenAI as a failover</span>
+                </div>
+                <div class="dp-node">
+                  <b>OpenAI</b>
+                  <i>scene art and voice narration</i>
+                  <span class="dp-chip">Both with Pro — scene art up to 10 turns a day, 100 a month</span>
+                </div>
+              </div>
+            </div>
+            <div class="dp-seal">
+              <span>It isn't stored on either end</span>
+              <span>We don't sell or share your input</span>
+              <span>The AI never trains on your stories</span>
+            </div>
+          </figure>
         </details>
         <details class="faq">
           <summary>Can I read offline?</summary>
