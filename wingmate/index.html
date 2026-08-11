@@ -482,6 +482,22 @@
 
     /* ===== PLATFORMS ===== */
     .platforms-strip { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+    /* ===== FAQ ===== */
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    details.faq { padding: 18px 0; border-bottom: 1px solid var(--line); }
+    details.faq summary {
+      font-weight: 600; font-size: 1.04rem; cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      color: var(--fg-strong);
+    }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after {
+      content: '+'; color: var(--amber); font-weight: 400; font-size: 1.4rem;
+      line-height: 1; flex: 0 0 auto; transition: transform .2s;
+    }
+    details.faq[open] summary::after { transform: rotate(45deg); }
+    details.faq p { margin-top: 12px; color: var(--muted); font-size: .97rem; line-height: 1.7; }
     .platform-chip {
       display: inline-flex; align-items: center; justify-content: center;
       padding: 15px 30px; background: var(--surface);
@@ -582,6 +598,64 @@
 }
 </script>
 <!-- app-schema:end -->
+<!-- FAQPage schema: questions and answers are verbatim plain-text copies of the
+     on-page FAQ section (#faq) below. Keep the two in sync. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Wingmate a chatbot I date?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — it's the opposite. Wingmate is a coach for your real dating life: you talk to Marcus, Jade, Eli, or Ava about actual conversations with actual people, and they hand you concrete replies to send. Nobody here plays your girlfriend; the whole point is what happens off the app."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I have to connect my dating apps?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — Wingmate doesn't plug into Tinder, Hinge, Bumble, or anything else, and it isn't affiliated with them. You share what you choose: drop a screenshot of a thread or describe the situation, and your coach works from that."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens to my screenshots and messages?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "They're sent to our server and on to the AI that writes the coaching, and they aren't stored — our backend keeps no database of your conversations; it relays them and forgets them. Everything Wingmate saves for you — connections, notes, openers, chat history — lives on your phone, and you can clear your conversations in Settings. There's no account and no ads; the privacy policy has the full picture."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do the coaches remember the people I'm talking to?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — that's the Connections tab. Each person you're tracking has a profile: the platform, the stage things are at, your notes, and the details your coaches pick up along the way. All four coaches share that memory, so switching from Marcus to Ava for a second opinion doesn't mean starting over. It's all stored on your phone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's free, and what does Wingmate Plus add?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Every feature is free — all four coaches, screenshot analysis, openers, connections, voice, and date planning. The free plan has a daily allowance of coaching messages; Wingmate Plus raises that allowance, and that's the only difference — no feature is locked behind it. The exact numbers and prices are shown in the app."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When does Wingmate launch?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Soon. Wingmate is coming to iPhone (iOS 17 or later) and isn't on the App Store yet. Email support@hypersage.ai and we'll let you know the day it's live."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -597,6 +671,7 @@
         <a href="#screens">Screens</a>
         <a href="#coaches">Coaches</a>
         <a href="#how">How it works</a>
+        <a href="#faq">FAQ</a>
         <a href="#notify" class="btn btn-ghost">Launch notice</a>
       </div>
       <details class="mobile-menu">
@@ -607,6 +682,7 @@
           <a href="#coaches">Coaches</a>
           <a href="#how">How it works</a>
           <a href="#platforms">Platforms</a>
+          <a href="#faq">FAQ</a>
           <a href="#notify">Launch notice</a>
         </div>
       </details>
@@ -1053,6 +1129,53 @@
         <div class="platform-chip">
           <span>Texting</span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <!-- Claims discipline (verified against ~/Developer/DrVanus/Wingmate + wingmate-api
+       2026-08-10): Plus buys EXACTLY ONE thing — a higher daily message allowance
+       (rateLimit.js:70,91). Never print the allowance numbers here: the shipping caps
+       are 10/150 while store/listing.md still says 200/1,000 — both are server settings
+       that move, so the app is the only honest surface for them. No prices exist
+       anywhere (no ASC products yet). Backend is a stateless relay — no DB, no
+       conversation storage (package.json, chat.js has no write path); user data lives
+       on-device (GirlStore/OpenerStore/TranscriptCache). No account (Keychain UUID
+       only), no push notifications, no third-party SDKs. iPhone-only iOS 17+
+       (project.yml:4-5,44). Not on the App Store — Prepare for Submission. Not
+       affiliated with Tinder/Hinge/Bumble/Instagram (store/listing.md disclaimer). -->
+  <section class="block panel" id="faq">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">Common questions</span>
+        <h2>Straight <span class="grad-text">answers.</span></h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq">
+          <summary>Is Wingmate a chatbot I date?</summary>
+          <p>No — it's the opposite. Wingmate is a coach for your real dating life: you talk to Marcus, Jade, Eli, or Ava about actual conversations with actual people, and they hand you concrete replies to send. Nobody here plays your girlfriend; the whole point is what happens off the app.</p>
+        </details>
+        <details class="faq">
+          <summary>Do I have to connect my dating apps?</summary>
+          <p>No — Wingmate doesn't plug into Tinder, Hinge, Bumble, or anything else, and it isn't affiliated with them. You share what you choose: drop a screenshot of a thread or describe the situation, and your coach works from that.</p>
+        </details>
+        <details class="faq">
+          <summary>What happens to my screenshots and messages?</summary>
+          <p>They're sent to our server and on to the AI that writes the coaching, and they aren't stored — our backend keeps no database of your conversations; it relays them and forgets them. Everything Wingmate saves for you — connections, notes, openers, chat history — lives on your phone, and you can clear your conversations in Settings. There's no account and no ads; the <a href="privacy.html">privacy policy</a> has the full picture.</p>
+        </details>
+        <details class="faq">
+          <summary>Do the coaches remember the people I'm talking to?</summary>
+          <p>Yes — that's the Connections tab. Each person you're tracking has a profile: the platform, the stage things are at, your notes, and the details your coaches pick up along the way. All four coaches share that memory, so switching from Marcus to Ava for a second opinion doesn't mean starting over. It's all stored on your phone.</p>
+        </details>
+        <details class="faq">
+          <summary>What's free, and what does Wingmate Plus add?</summary>
+          <p>Every feature is free — all four coaches, screenshot analysis, openers, connections, voice, and date planning. The free plan has a daily allowance of coaching messages; Wingmate Plus raises that allowance, and that's the only difference — no feature is locked behind it. The exact numbers and prices are shown in the app.</p>
+        </details>
+        <details class="faq">
+          <summary>When does Wingmate launch?</summary>
+          <p>Soon. Wingmate is coming to iPhone (iOS 17 or later) and isn't on the App Store yet. Email <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Wingmate%20launches">support@hypersage.ai</a> and we'll let you know the day it's live.</p>
+        </details>
       </div>
     </div>
   </section>

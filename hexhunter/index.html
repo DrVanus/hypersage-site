@@ -520,6 +520,22 @@
     /* Sub-grids that sit under a showcase intro keep their own top margin. */
     .showcase-detail { margin-top: 56px; }
 
+    /* ===== FAQ ===== */
+    .faq-list { max-width: 760px; margin: 0 auto; }
+    details.faq { padding: 18px 0; border-bottom: 1px solid var(--border); }
+    details.faq summary {
+      font-weight: 700; font-size: 1.05rem; cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      color: var(--fg);
+    }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after {
+      content: '+'; color: var(--gold); font-weight: 400; font-size: 1.4rem;
+      line-height: 1; flex: 0 0 auto; transition: transform .2s;
+    }
+    details.faq[open] summary::after { transform: rotate(45deg); }
+    details.faq p { margin-top: 12px; color: var(--muted-fg); font-size: 0.98rem; line-height: 1.7; }
+
     /* ===== ABOUT ===== */
     .about-card {
       display: flex; gap: 26px; align-items: center;
@@ -606,6 +622,64 @@
 }
 </script>
 <!-- app-schema:end -->
+<!-- FAQPage schema: questions and answers are verbatim plain-text copies of the
+     on-page FAQ section (#faq) below. Keep the two in sync. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "When can I play Hexhunter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Soon. Hexhunter is coming to iPhone (iOS 17 or later) and isn't on the App Store yet. If you'd like a note the day the crypt doors open, email support@hypersage.ai and we'll notify you at launch."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need an internet connection to play?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The hunt runs entirely on your phone — no account, no server, and nothing to sign into. A connection is only used by the optional extras: Game Center leaderboards and achievements, and the App Store when you buy or restore an unlock. Your progress lives on the device either way."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I unlock everything just by playing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Hunters unlock with essence earned on every run, deeper biomes open by surviving long enough, and relics are bought with that same essence. There are exactly two optional one-time purchases — Unlock All, which opens every hunter, stage, and relic permanently, and a Starter Pack of essence plus a hero — and that's the whole catalog. No subscription, no ads, no consumables: nothing is sold that can't also be earned by playing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Hexhunter have leaderboards?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — two Game Center leaderboards, longest survival and most kills, plus 33 achievements. Game Center is entirely optional: decline it and everything still plays. Scores earned while signed out are kept on your phone and submitted if you ever sign in, and achievements ride your Game Center account, so they come back after a reinstall or on a new phone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Hexhunter collect about me?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nothing. There are no ads, no analytics, no tracking, and no account to create — the app has no server of its own, and your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, those run through Apple under Apple's terms; Hexhunter itself sends nothing anywhere."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the art hand-drawn?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — it's AI-generated, and we'd rather say so than pretend. Every hero, enemy, and boss plate comes from an AI image model working under one art direction, then gets curated and repaired until the whole bestiary holds a single gothic woodcut line. The music is synthesized from scratch in-house too — no stock art, no licensed audio."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -623,6 +697,7 @@
         <a href="#biomes">Biomes</a>
         <a href="#weapons">Arsenal</a>
         <a href="#bosses">Bosses</a>
+        <a href="#faq">FAQ</a>
         <a href="#download">Download</a>
       </div>
       <details class="mobile-menu">
@@ -635,6 +710,7 @@
           <a href="#weapons">Arsenal</a>
           <a href="#bosses">Bosses</a>
           <a href="#art">Art</a>
+          <a href="#faq">FAQ</a>
           <a href="#download">Download</a>
         </div>
       </details>
@@ -1027,6 +1103,50 @@
           <div class="art-shade" aria-hidden="true"></div>
           <figcaption class="art-cap"><div class="art-kind">Enemy</div><div class="art-name">The Bone Golem</div></figcaption>
         </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <!-- Claims discipline (verified against ~/Developer/DrVanus/Hexhunter 2026-08-10):
+       iPhone-only iOS 17+ (project.yml:4-5,70). Exactly two non-consumable IAPs
+       (Sources/Core/StoreManager.swift:123); NO prices here — Products.storekit is a
+       local test config, not ASC. Two leaderboards (Sources/Game/HexhunterGame.swift:14-15),
+       33 achievements (Sources/Core/AchievementManager.swift:30-76), GC optional with
+       offline score banking (GameCenterManager.swift:195-208). No network stack, no
+       analytics/ads SDKs; PrivacyInfo.xcprivacy declares zero collected data types.
+       Do NOT claim a daily challenge (dead code path in v1.0, HomeView.swift:69 passes
+       .free) and do NOT claim iPad. Art: AI-generated via gpt-image-1 (scripts/gen_*.py) —
+       never describe it as hand-drawn; music synthesized by scripts/generate_music.py. -->
+  <section class="section-block panel" id="faq">
+    <div class="container">
+      <div class="section-eyebrow" style="text-align:center;">Common questions</div>
+      <h2 style="text-align:center;">FAQ</h2>
+      <div class="faq-list">
+        <details class="faq">
+          <summary>When can I play Hexhunter?</summary>
+          <p>Soon. Hexhunter is coming to iPhone (iOS 17 or later) and isn't on the App Store yet. If you'd like a note the day the crypt doors open, email <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Hexhunter%20launches">support@hypersage.ai</a> and we'll notify you at launch.</p>
+        </details>
+        <details class="faq">
+          <summary>Do I need an internet connection to play?</summary>
+          <p>No. The hunt runs entirely on your phone — no account, no server, and nothing to sign into. A connection is only used by the optional extras: Game Center leaderboards and achievements, and the App Store when you buy or restore an unlock. Your progress lives on the device either way.</p>
+        </details>
+        <details class="faq">
+          <summary>Can I unlock everything just by playing?</summary>
+          <p>Yes. Hunters unlock with essence earned on every run, deeper biomes open by surviving long enough, and relics are bought with that same essence. There are exactly two optional one-time purchases — Unlock All, which opens every hunter, stage, and relic permanently, and a Starter Pack of essence plus a hero — and that's the whole catalog. No subscription, no ads, no consumables: nothing is sold that can't also be earned by playing.</p>
+        </details>
+        <details class="faq">
+          <summary>Does Hexhunter have leaderboards?</summary>
+          <p>Yes — two Game Center leaderboards, longest survival and most kills, plus 33 achievements. Game Center is entirely optional: decline it and everything still plays. Scores earned while signed out are kept on your phone and submitted if you ever sign in, and achievements ride your Game Center account, so they come back after a reinstall or on a new phone.</p>
+        </details>
+        <details class="faq">
+          <summary>What does Hexhunter collect about me?</summary>
+          <p>Nothing. There are no ads, no analytics, no tracking, and no account to create — the app has no server of its own, and your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, those run through Apple under Apple's terms; Hexhunter itself sends nothing anywhere.</p>
+        </details>
+        <details class="faq">
+          <summary>Is the art hand-drawn?</summary>
+          <p>No — it's AI-generated, and we'd rather say so than pretend. Every hero, enemy, and boss plate comes from an AI image model working under one art direction, then gets curated and repaired until the whole bestiary holds a single gothic woodcut line. The music is synthesized from scratch in-house too — no stock art, no licensed audio.</p>
+        </details>
       </div>
     </div>
   </section>

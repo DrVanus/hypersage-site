@@ -285,6 +285,23 @@
     .faction h3 { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.1rem; color: var(--gold-bright); margin-bottom: 5px; }
     .faction p { font-size: .9rem; color: var(--tertiary-fg); }
 
+    /* FAQ */
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    details.faq { padding: 17px 0; border-bottom: 1px solid var(--border); }
+    details.faq summary {
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.02rem;
+      cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      color: var(--fg);
+    }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after {
+      content: '+'; color: var(--gold); font-weight: 400; font-size: 1.35rem;
+      line-height: 1; flex: 0 0 auto; transition: transform .2s;
+    }
+    details.faq[open] summary::after { transform: rotate(45deg); }
+    details.faq p { margin-top: 11px; color: var(--muted-fg); font-size: .97rem; line-height: 1.68; }
+
     /* Lanes explainer */
     .lanes {
       display: flex; gap: 12px; margin-top: 8px;
@@ -381,6 +398,64 @@
 }
 </script>
 <!-- app-schema:end -->
+<!-- FAQPage schema: questions and answers are verbatim plain-text copies of the
+     on-page FAQ section (#faq) below. Keep the two in sync. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Do I need an internet connection?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Mythwright is an online game — every match is resolved on our server, including Practice against the AI, so there's no offline mode. That's also what makes asynchronous PvP, the seasonal ladder, and a collection that follows your account possible."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need an account?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not to start. Practice works as a guest, with no sign-up at all. Ranked, Campaign, and Conquest ask you to sign in — with Apple or Google, no password to invent — and signing in upgrades your guest profile in place, so nothing you've collected is lost. Signing in shares your email address with us; the privacy policy says exactly what we hold."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it pay-to-win?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The cards aren't for sale. There are no card packs bought with money, no loot boxes, and no consumable purchases — credits are earned by playing and spent in the shop. The one purchase is Mythwright Pro, an optional subscription that unlocks the AI Card Forge, Conquest mode, variant forging, and the premium season track; its price is shown in the app. Ranked, the campaign, deck building, and daily missions are all free."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Am I playing real people?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "In Ranked, yes — matchmaking pairs you with a player near your cube level, and matches are asynchronous, so you're never waiting on a live clock. If no opponent is in the queue, a bot steps in after a few seconds so you can keep playing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the game itself AI?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The duel isn't — matches run on a deterministic rules engine, and no model ever decides a reveal. AI appears in one place: the Pro Card Forge, where a model writes your described card's stats and ability and paints its art, with prompts moderated before anything is generated. The bundled card portraits were AI-painted during development and ship as fixed art."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When can I play it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Soon. Mythwright is coming to iPhone and iPad (iOS 17 or later) and isn't on the App Store yet. Email support@hypersage.ai to be told the day it goes live."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <nav class="site">
@@ -391,6 +466,7 @@
         <a href="#features">Features</a>
         <a href="#factions">Factions</a>
         <a href="#lanes">How it plays</a>
+        <a href="#faq">FAQ</a>
         <a href="#get" class="btn ghost">Coming to iOS</a>
       </div>
       <details class="mobile-menu">
@@ -400,6 +476,7 @@
           <a href="#features">Features</a>
           <a href="#factions">Factions</a>
           <a href="#lanes">How it plays</a>
+          <a href="#faq">FAQ</a>
           <a href="#get">Coming to iOS</a>
         </div>
       </details>
@@ -590,6 +667,58 @@
         <div class="faction"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.2" cy="10.2" r="6"/><path d="M14.6 14.6 20.4 20.4"/></svg></div><h3>Detective</h3><p>Information advantage. Sherlock, Moriarty, Irene Adler.</p></div>
         <div class="faction"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.8c1.5 0 1.5 1.4 3 1.4s1.5-1.4 3-1.4 1.5 1.4 3 1.4 1.5-1.4 3-1.4 1.5 1.4 3 1.4 1.5-1.4 3-1.4"/><path d="M3 13.4c1.5 0 1.5 1.4 3 1.4s1.5-1.4 3-1.4 1.5 1.4 3 1.4 1.5-1.4 3-1.4 1.5 1.4 3 1.4 1.5-1.4 3-1.4"/></svg></div><h3>Sea</h3><p>Deep control &amp; area destruction. Ahab, Moby Dick, the Kraken.</p></div>
         <div class="faction"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18.8 4.2c-7.2 0-12.6 3.4-12.6 9.4 0 1.4.3 2.6.9 3.7C9.8 13 13.4 10.4 17 9.2c-3.4 1.9-6.5 4.6-8.6 8.2.9.6 2 .9 3.2.9 6 0 8.4-5.4 7.2-14.1z"/></svg></div><h3>Folklore</h3><p>Synergy buffs &amp; trickster shifts. Beowulf, Anansi, Baba Yaga.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <!-- Claims discipline (verified against ~/Developer/DrVanus/Mythwright +
+       mythwright-api 2026-08-10): NOTHING is playable offline — every mode including
+       Practice is a server round-trip (MatchView.swift:3542+, no local engine). Guest
+       sessions cover Practice only; Ranked/Campaign/Conquest gate on Apple/Google
+       sign-in (PlayView.swift:935-949), which DOES share the email (commit 3691fe3
+       "Stop claiming we don't get your email"). Zero consumable IAP / packs-for-money
+       (Configuration.storekit products:[]); Pro gates exactly: Forge, Conquest,
+       variant forging, premium season track (PaywallView.swift:104-129, enforced
+       server-side). NO prices or trial claims here — Configuration.storekit is a local
+       test config. Do not add card counts to this section: the client bundles 256 but
+       the live server resolves 244 (the 12 Vault ids are missing server-side), and
+       "Vault cards come from Mystery Packs" is FALSE against the deployed pool.
+       Forge models are OpenAI (config.py:74,90 — the README's "Sonnet" is stale);
+       the match engine is deterministic, no LLM (engine.py:14-16). Bot fallback after
+       15s in Ranked (config.py:139); don't claim the UI labels bots — only the wire
+       flag is verified. iPhone AND iPad (project.yml:97). -->
+  <section id="faq">
+    <div class="container">
+      <div class="section-head">
+        <h2>Common questions</h2>
+        <p>The short, honest answers.</p>
+      </div>
+      <div class="faq-list">
+        <details class="faq">
+          <summary>Do I need an internet connection?</summary>
+          <p>Yes. Mythwright is an online game — every match is resolved on our server, including Practice against the AI, so there's no offline mode. That's also what makes asynchronous PvP, the seasonal ladder, and a collection that follows your account possible.</p>
+        </details>
+        <details class="faq">
+          <summary>Do I need an account?</summary>
+          <p>Not to start. Practice works as a guest, with no sign-up at all. Ranked, Campaign, and Conquest ask you to sign in — with Apple or Google, no password to invent — and signing in upgrades your guest profile in place, so nothing you've collected is lost. Signing in shares your email address with us; the <a href="privacy.html">privacy policy</a> says exactly what we hold.</p>
+        </details>
+        <details class="faq">
+          <summary>Is it pay-to-win?</summary>
+          <p>The cards aren't for sale. There are no card packs bought with money, no loot boxes, and no consumable purchases — credits are earned by playing and spent in the shop. The one purchase is Mythwright Pro, an optional subscription that unlocks the AI Card Forge, Conquest mode, variant forging, and the premium season track; its price is shown in the app. Ranked, the campaign, deck building, and daily missions are all free.</p>
+        </details>
+        <details class="faq">
+          <summary>Am I playing real people?</summary>
+          <p>In Ranked, yes — matchmaking pairs you with a player near your cube level, and matches are asynchronous, so you're never waiting on a live clock. If no opponent is in the queue, a bot steps in after a few seconds so you can keep playing.</p>
+        </details>
+        <details class="faq">
+          <summary>Is the game itself AI?</summary>
+          <p>The duel isn't — matches run on a deterministic rules engine, and no model ever decides a reveal. AI appears in one place: the Pro Card Forge, where a model writes your described card's stats and ability and paints its art, with prompts moderated before anything is generated. The bundled card portraits were AI-painted during development and ship as fixed art.</p>
+        </details>
+        <details class="faq">
+          <summary>When can I play it?</summary>
+          <p>Soon. Mythwright is coming to iPhone and iPad (iOS 17 or later) and isn't on the App Store yet. Email <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Mythwright%20launches">support@hypersage.ai</a> to be told the day it goes live.</p>
+        </details>
       </div>
     </div>
   </section>

@@ -43,6 +43,19 @@ footer.site .hs-more-list a{display:block;max-width:100%;overflow-wrap:break-wor
   border:1px solid var(--border);border-radius:999px;padding:.38rem .75rem}
 footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
   color:var(--tint);border-color:var(--tint);text-decoration:underline}
+
+/* FAQ — scoped to .faq-section for the same reason as the strip above: style.css
+   is shared with the legal pages, which have no FAQ. Tokens only, so dark mode
+   follows :root with no second declaration. */
+.faq-section{margin:2.4rem 0}
+.faq-section details{border-bottom:1px solid var(--border);padding:.95rem 0}
+.faq-section summary{cursor:pointer;font-weight:700;list-style:none;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.faq-section summary::-webkit-details-marker{display:none}
+.faq-section summary::after{content:'+';color:var(--tint);font-size:1.3rem;
+  font-weight:400;line-height:1;flex:0 0 auto;transition:transform .2s}
+.faq-section details[open] summary::after{transform:rotate(45deg)}
+.faq-section details p{margin:.7rem 0 0;color:var(--dim);line-height:1.65}
 </style>
 <script type="application/ld+json">
   {
@@ -59,6 +72,56 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
       "name": "HyperSage AI Labs LLC"
     }
   }
+</script>
+<!-- FAQPage schema: questions and answers are verbatim plain-text copies of the
+     on-page FAQ section (#faq) below. Keep the two in sync. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Am I talking to a real person?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — everyone here is AI, and Mythkin says so before you ever open a chat. Every kin is labelled an AI character on the screens where you talk to them, no kin will ever claim to be human, and none of them will play your therapist. The other side of that coin: nothing you say in a chat is reviewed by a person either."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is Mythkin 18+ if there's no sexual content?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Because open-ended AI conversation is an adult product, and we'd rather draw that line at the door than pretend otherwise. There is no sexual content in Mythkin — not as a tier, not as an unlock — and characters who are minors are blocked outright. The 18+ gate isn't hiding anything racy; it's a policy about who this kind of app is for."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "If I borrow someone's character, can they read my chats?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Borrowing a character never shows its creator your conversation — creators see how many people are talking to their kin, never a word of what's said. The same protection covers you when you share: your borrowers' chats stay their own."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Mythkin remember about me, and can I delete it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A kin keeps a visible list of memories — the things you told it that matter — and you can read the whole list, trace where each one came from, edit anything, or delete anything for good. There's no account behind it: no email, no password. Your data is keyed to the device in your hand, and you can export it or erase it entirely. One honest caveat: if other people are borrowing a kin you shared, erasing yourself strips your name from that kin rather than pulling it out of their hands."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Mythkin Plus change?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Less than you'd fear. The free plan is the full app — the official kin, borrowing, stories, memory, and one character of your own, with a message limit. Plus lifts the limit, answers with a more capable model, keeps memory uncapped, and raises how many characters you can make and borrow. Prices are shown in the app, in your own currency, by your app store. And Plus never buys affection or safety — crisis support is never behind a payment."
+      }
+    }
+  ]
+}
 </script>
 </head>
 <body>
@@ -246,6 +309,42 @@ currency, by your app store.</p>
      characters 1 -> 5 (config.py free_/plus_max_created_characters) and borrowed
      3 -> unlimited (marketplace/routes.py:452). Do not re-add voice here until it
      ships in the client. -->
+
+<!-- Claims discipline (verified against ~/Developer/DrVanus/mythkin-app + mythkin-api
+     2026-08-10): do NOT state a roster count here — the API seeds 24 official kin
+     (seed.py OFFICIAL_KIN) while this page's grid above still shows and says twelve;
+     fix the grid before naming a number anywhere. Tiers are Free + Plus ONLY (no
+     "Deep", no sparks, no voice/TTS — mock-data.js:238-268). Plus buys: window
+     lifted, Haiku→Sonnet, memory uncapped, created 1→5, borrowed 3→unlimited
+     (config.py:44-48,101-102,157-160); crisis turns bypass metering
+     (app/chat/routes.py:239-330) and Plus gates nothing safety-related (plus.js:16-25).
+     Borrow privacy invariant: marketplace/routes.py:9-21. Deletion anonymises a
+     shared kin, it does not unshare it (data_rights.py:13-18). 18+ gate is hard,
+     client AND server (deps.py:73-103). Never print message-limit numbers or
+     prices. -->
+<section class="faq-section" id="faq" aria-labelledby="faq-title">
+  <h2 id="faq-title">Common questions</h2>
+  <details>
+    <summary>Am I talking to a real person?</summary>
+    <p>No — everyone here is AI, and Mythkin says so before you ever open a chat. Every kin is labelled an AI character on the screens where you talk to them, no kin will ever claim to be human, and none of them will play your therapist. The other side of that coin: nothing you say in a chat is reviewed by a person either.</p>
+  </details>
+  <details>
+    <summary>Why is Mythkin 18+ if there's no sexual content?</summary>
+    <p>Because open-ended AI conversation is an adult product, and we'd rather draw that line at the door than pretend otherwise. There is no sexual content in Mythkin — not as a tier, not as an unlock — and characters who are minors are blocked outright. The 18+ gate isn't hiding anything racy; it's a policy about who this kind of app is for.</p>
+  </details>
+  <details>
+    <summary>If I borrow someone's character, can they read my chats?</summary>
+    <p>No. Borrowing a character never shows its creator your conversation — creators see how many people are talking to their kin, never a word of what's said. The same protection covers you when you share: your borrowers' chats stay their own.</p>
+  </details>
+  <details>
+    <summary>What does Mythkin remember about me, and can I delete it?</summary>
+    <p>A kin keeps a visible list of memories — the things you told it that matter — and you can read the whole list, trace where each one came from, edit anything, or delete anything for good. There's no account behind it: no email, no password. Your data is keyed to the device in your hand, and you can export it or erase it entirely. One honest caveat: if other people are borrowing a kin you shared, erasing yourself strips your name from that kin rather than pulling it out of their hands.</p>
+  </details>
+  <details>
+    <summary>What does Mythkin Plus change?</summary>
+    <p>Less than you'd fear. The free plan is the full app — the official kin, borrowing, stories, memory, and one character of your own, with a message limit. Plus lifts the limit, answers with a more capable model, keeps memory uncapped, and raises how many characters you can make and borrow. Prices are shown in the app, in your own currency, by your app store. And Plus never buys affection or safety — crisis support is never behind a payment.</p>
+  </details>
+</section>
 
 <section class="availability" aria-labelledby="availability-title">
   <h2 id="availability-title">Availability</h2>
