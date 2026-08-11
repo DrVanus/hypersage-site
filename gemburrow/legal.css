@@ -1,0 +1,136 @@
+/* Shared stylesheet for /privacy, /terms and /support — keeps the Gemburrow
+   brand consistent without duplicating the landing page's CSS. Warm burrow
+   palette, re-keyed from the index.html design tokens. Edit the tokens here
+   and on index.html together. */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #17100A;
+  --surface: #241A12;
+  --card: #2F2318;
+  --fg: #F6ECDC;
+  --muted-fg: #CBB79C;
+  --tertiary-fg: #A4917A;
+  --lantern: #FFD75E;
+  --lantern-bright: #FFE9A8;
+  --ember: #E08A3C;
+  --emerald: #46B073;
+  --border: rgba(255, 215, 94, 0.14);
+  --border-strong: rgba(255, 215, 94, 0.30);
+}
+
+html { scroll-behavior: smooth; color-scheme: dark; background: var(--bg); }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.72;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Faint lantern wash, same family as the landing page. */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 85% 50% at 50% -6%, rgba(255, 205, 110, 0.11), transparent 56%),
+    radial-gradient(ellipse 75% 55% at 50% 108%, rgba(120, 74, 30, 0.13), transparent 66%);
+  pointer-events: none; z-index: 0;
+}
+
+a { color: var(--lantern); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--lantern-bright); }
+a:focus-visible { outline: 3px solid var(--lantern); outline-offset: 3px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.container { max-width: 760px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+.legal-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(23, 16, 10, 0.84);
+  backdrop-filter: saturate(150%) blur(14px);
+  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.legal-nav .container {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 13px; padding-bottom: 13px;
+}
+.legal-nav .brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  font-weight: 800; color: var(--fg); font-size: 1.1rem;
+}
+.legal-nav .brand img { width: 32px; height: 32px; border-radius: 9px; box-shadow: 0 0 16px rgba(255, 215, 94, 0.22); }
+.legal-nav .links { display: flex; gap: 20px; font-size: 0.95rem; }
+.legal-nav .links a { color: var(--muted-fg); font-weight: 600; }
+.legal-nav .links a:hover { color: var(--lantern); }
+.legal-nav .links a.active { color: var(--lantern); }
+
+@media (max-width: 560px) {
+  .legal-nav .container { gap: 12px; }
+  .legal-nav .brand { font-size: 0.95rem; gap: 8px; }
+  .legal-nav .brand img { width: 27px; height: 27px; }
+  .legal-nav .links { gap: 13px; font-size: 0.85rem; }
+}
+
+main.legal {
+  max-width: 760px; margin: 0 auto;
+  padding: 56px 24px 96px;
+  position: relative; z-index: 1;
+}
+main.legal h1 {
+  font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  font-weight: 800; font-size: 2.5rem; line-height: 1.15;
+  margin-bottom: 12px; color: var(--fg);
+}
+main.legal .updated { color: var(--tertiary-fg); font-size: 0.95rem; margin-bottom: 36px; }
+main.legal h2 {
+  font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  font-size: 1.35rem; font-weight: 700;
+  margin-top: 38px; margin-bottom: 12px; color: var(--lantern);
+}
+main.legal h3 { font-size: 1.05rem; font-weight: 700; margin-top: 22px; margin-bottom: 8px; color: var(--fg); }
+main.legal p, main.legal li { color: var(--muted-fg); margin-bottom: 14px; }
+main.legal ul { padding-left: 22px; margin-bottom: 14px; }
+main.legal li { margin-bottom: 6px; }
+main.legal strong { color: var(--fg); font-weight: 700; }
+main.legal code {
+  background: var(--card); padding: 2px 6px; border-radius: 6px;
+  font-size: 0.9em; color: var(--lantern-bright);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.callout {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--lantern);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 24px 0;
+}
+.callout strong { color: var(--lantern-bright); }
+
+.faq-block {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 22px; margin-bottom: 12px;
+}
+.faq-block h3 { margin-top: 0; }
+.faq-block p:last-child { margin-bottom: 0; }
+
+footer.legal-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+  padding: 28px 24px 40px;
+  text-align: center;
+  color: var(--tertiary-fg); font-size: 0.9rem;
+  position: relative; z-index: 1;
+}
+footer.legal-footer a { color: var(--muted-fg); margin: 0 12px; font-weight: 600; }
+footer.legal-footer a:hover { color: var(--lantern-bright); }
+footer.legal-footer .copyright { display: block; margin-top: 16px; color: var(--tertiary-fg); }
+footer.legal-footer .copyright a { margin: 0; color: inherit; text-decoration: underline; text-underline-offset: 2px; }

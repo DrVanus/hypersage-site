@@ -773,12 +773,12 @@
 <body>
 
   <!-- ===== NAV ===== -->
-  <nav class="site">
+  <nav class="site" id="top">
     <div class="container">
-      <div class="brand">
+      <a class="brand" href="#top" aria-label="Quietoak — back to top">
         <img src="quietoak-icon.png?v=20260810w" width="256" height="256" alt="">
         <span class="wordmark">Quiet<span class="wm-oak">oak</span></span>
-      </div>
+      </a>
       <div class="links">
         <a href="#how">How it works</a>
         <a href="#companions">Companions</a>
@@ -920,15 +920,44 @@
            question this whole section exists to answer. -->
       <div class="pair-intro">
         <h3>Choosing one isn&rsquo;t a commitment</h3>
-        <p>Hear a sample of each before you decide, and switch whenever you like &mdash; every companion keeps its own history with you, so nothing is lost by trying another.</p>
+        <!-- The "hear a sample of each" clause used to open this paragraph, and
+             nothing under it showed sampling: the one screen with "Hear a sample"
+             buttons is the picker, which lives in the continuity spotlight (it was
+             moved out of here because the six companion cards directly above
+             already show the same six — Vanus's objection, recorded below). So the
+             claim sat over two frames that cannot support it: a conversations
+             drawer and a voice screen. The claim is TRUE of the app and it is
+             still made — in the continuity section, where the picker illustrates
+             it and the bullet already reads "hear a voice sample first". A claim
+             belongs beside the picture that proves it, not in the section that
+             happens to be about choosing. -->
+        <p>Switch whenever you like &mdash; every companion keeps its own history with you, so nothing is lost by trying another.</p>
       </div>
       <div class="pair-grid">
         <div class="screen-card">
-          <div class="screen-frame"><img src="screenshots/08-switcher.jpg?v=20260810w" alt="Quietoak's companion picker — six companions with a short description and a listen-to-a-sample button for each" loading="lazy"></div>
-          <div class="screen-label"><strong>Pick who fits today</strong>A sample of each voice, and a line on how they listen</div>
+          <!-- The companion PICKER used to sit here, and it was the third
+               telling of one idea: the six companion cards directly above this
+               already show all six with their names and how each listens, and
+               the picker screenshot shows the same six again. That is the same
+               objection Vanus raised about the group illustration further down
+               this page — "i dont like the companions being there in that spot
+               right where they are already shown in the screenshot". The picker
+               now appears ONCE, in the continuity spotlight, where it is the
+               only image that can carry "whoever you need".
+               The conversations drawer replaces it because it illustrates this
+               section's own otherwise-unillustrated sentence: every companion
+               keeps its own history with you. -->
+          <div class="screen-frame"><img src="screenshots/09-conversations.jpg?v=20260811a" alt="Quietoak conversations drawer — saved talks with each companion, and what your companion remembers between chats" loading="lazy"></div>
+          <div class="screen-label"><strong>Each keeps its own history</strong>Switch freely — nothing is lost by trying another</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img src="screenshots/07-voice.jpg?v=20260810w" alt="Quietoak voice mode — tap once and talk with your companion hands-free" loading="lazy"></div>
+          <!-- SOL, not Willow. 07-voice.jpg is the voice screen this page already
+               gives a whole section to (#voice), and showing the identical capture
+               twice was the duplication Vanus spotted. 14-sol-voice is the same
+               screen with a different companion, which is also what this caption
+               claims — "any companion, hands-free" reads as a promise when the
+               picture underneath it is the same fawn both times. -->
+          <div class="screen-frame"><img src="screenshots/14-sol-voice.jpg?v=20260811c" alt="Quietoak voice mode with Sol — tap once and talk with any companion, hands-free" loading="lazy"></div>
           <div class="screen-label"><strong>Or just say it out loud</strong>Tap once and talk &mdash; any companion, hands-free</div>
         </div>
       </div>
@@ -979,7 +1008,7 @@
     <div class="container">
       <div class="spotlight-grid">
         <div class="spotlight-phone">
-          <div class="screen-frame"><img src="screenshots/06-context.jpg?v=20260810w" alt="Quietoak onboarding — sharing what you're navigating, with a Wondering / Pretty sure / Diagnosed level picker" loading="lazy"></div>
+          <div class="screen-frame"><img src="screenshots/06-context.jpg?v=20260811a" alt="Quietoak onboarding — sharing what you're navigating, with a Wondering / Pretty sure / Diagnosed level picker" loading="lazy"></div>
         </div>
         <div>
           <div class="section-eyebrow">Knows you better</div>
@@ -1125,7 +1154,7 @@
           <div class="screen-label"><strong>Today</strong>Your companion, every day</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="screenshots/02b-cards.jpg?v=20260810w" data-light="screenshots/02b-cards.jpg?v=20260810w" data-dark="screenshots/02b-cards-dark.jpg?v=20260810w" alt="Quietoak companion chat with DBT skill cards brought right into the conversation" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="screenshots/02b-cards.jpg?v=20260811a" data-light="screenshots/02b-cards.jpg?v=20260811a" data-dark="screenshots/02b-cards-dark.jpg?v=20260811a" alt="Quietoak companion chat with DBT skill cards brought right into the conversation" loading="lazy"></div>
           <div class="screen-label"><strong>In-chat skills</strong>Lessons, right in the chat</div>
         </div>
         <div class="screen-card">
@@ -1133,7 +1162,17 @@
           <div class="screen-label"><strong>Skills</strong>Real DBT skills, guided</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="screenshots/04-diary-trends.jpg?v=20260810x" data-light="screenshots/04-diary-trends.jpg?v=20260810x" data-dark="screenshots/04-diary-trends-dark.jpg?v=20260810x" alt="Quietoak diary trends — a mood chart and an urges chart tracking suicidal and self-harm urges over the past two weeks" loading="lazy"></div>
+          <!-- 04-diary, NOT 04-diary-trends. The trends pair was captured by
+               HAND, outside take-screenshots.sh, so nothing regenerated or
+               checked it: both frames caught a card sliding under the status
+               bar mid-scroll, and the 9:41 printed straight through the words
+               "up for yourself." It shipped that way, and a republish (the
+               ?v=…x on this line, when everything else was …w) did not fix it.
+               04-diary comes from a real manifest row, passes the capture gate,
+               matches this caption better — the label sells "a one-minute
+               card", which is the screen it actually leads with — and still
+               carries the Mood trend chart lower down. -->
+          <div class="screen-frame"><img class="shot-img" src="screenshots/04-diary.jpg?v=20260811a" data-light="screenshots/04-diary.jpg?v=20260811a" data-dark="screenshots/04-diary-dark.jpg?v=20260811a" alt="Quietoak diary — today's one-minute card with mood and skills, the week's check-ins, and a mood trend chart" loading="lazy"></div>
           <div class="screen-label"><strong>Diary</strong>A one-minute card</div>
         </div>
         <div class="screen-card">
@@ -1156,11 +1195,21 @@
       <p class="lede" style="text-align:center; max-width: 680px; margin-left:auto; margin-right:auto;">Your companion won't push a skill every time. Often it just wants to understand — asking what's going on, validating, and giving you room to vent. When something might genuinely help, it brings a guided exercise right into the chat, never buried in a menu.</p>
       <div class="responds-pair">
         <div class="responds-card">
-          <div class="screen-frame"><img src="screenshots/02-companion-listen.jpg?v=20260810w" alt="Quietoak companion listening — validating and asking what made the day hard" loading="lazy"></div>
-          <div class="screen-label"><strong>Sometimes it just listens</strong>Asks, validates, lets you vent</div>
+          <!-- "It listens first" and NOT "Sometimes it just listens". The
+               caption used to promise a frame with no skill card, over a frame
+               that ends on an Emotion Regulation card — the picture contradicted
+               its own label. The App Store set already carries the corrected
+               wording for this exact capture (store/listing.md slot 3); the
+               site had not picked it up. The seeded transcripts are authored so
+               their LAST screen is the skill the conversation earned, and the
+               chat opens scrolled to the bottom, so no re-capture through this
+               rig can produce a card-free ending here — the words have to move,
+               not the picture. -->
+          <div class="screen-frame"><img src="screenshots/02-companion-listen.jpg?v=20260811a" alt="Quietoak companion listening — validating what happened before offering the Check the Facts skill" loading="lazy"></div>
+          <div class="screen-label"><strong>It listens first</strong>Asks, validates, then offers a skill</div>
         </div>
         <div class="responds-card">
-          <div class="screen-frame"><img src="screenshots/02-companion-guide.jpg?v=20260810w" alt="Quietoak companion walking through a paced-breathing exercise in the chat" loading="lazy"></div>
+          <div class="screen-frame"><img src="screenshots/02-companion-guide.jpg?v=20260811a" alt="Quietoak companion bringing the Self-Soothe with the five senses skill into the chat, and quietly noting how the user is feeling" loading="lazy"></div>
           <div class="screen-label"><strong>And guides when it helps</strong>A skill, right in the chat</div>
         </div>
       </div>
@@ -1173,8 +1222,14 @@
       <div class="spotlight-grid">
         <div class="spotlight-phone">
           <div class="spotlight-duo">
-            <div class="screen-frame"><img src="screenshots/09-conversations.jpg?v=20260810w" alt="Quietoak conversations drawer — saved talks and what your companion remembers between chats" loading="lazy"></div>
-            <div class="screen-frame"><img src="screenshots/08-switcher.jpg?v=20260810w" alt="Quietoak companion switcher — choosing which companion you need right now, each with a voice sample" loading="lazy"></div>
+            <!-- These two carry the two halves of the headline, one each:
+                 02-companion is "it remembers you" (its Pick up where you left
+                 off list is literally that), 08-switcher is "whoever you need".
+                 The drawer that used to hold the first slot moved up to the
+                 companions section, so no screenshot on this page is now shown
+                 twice. -->
+            <div class="screen-frame"><img src="screenshots/02-companion.jpg?v=20260811a" alt="Quietoak companion chat — a Pick up where you left off list of earlier talks, ready to resume" loading="lazy"></div>
+            <div class="screen-frame"><img src="screenshots/08-switcher.jpg?v=20260811a" alt="Quietoak companion switcher — choosing which companion you need right now, each with a voice sample" loading="lazy"></div>
           </div>
         </div>
         <div>
@@ -1456,6 +1511,11 @@
         <li><a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a></li>
         <li><a href="https://hypersage.ai/waddleton/">Waddleton — Social World / Arcade</a></li>
         <li><a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a></li>
+        <!-- Hexhunter and Mythwright were the two the other ten footers list and
+             this one did not — an 8-of-10 grid reads as a complete set, so the
+             omission is invisible until you count it. -->
+        <li><a href="https://hypersage.ai/hexhunter/">Hexhunter — Gothic Horde-Survivor</a></li>
+        <li><a href="https://hypersage.ai/mythwright/">Mythwright — Strategy Card Game</a></li>
       </ul>
     </nav>
     <div class="copyright">
@@ -1465,7 +1525,7 @@
         <span><span class="sm-name">Hypersage</span><span class="sm-sub"> AI Labs</span></span>
       </a>
     </div>
-    <div class="copyright">© 2026 HyperSage AI Labs LLC. Quietoak — rooted and steady, through the storm.</div>
+    <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Quietoak — rooted and steady, through the storm.</div>
   </footer>
 
   <script>

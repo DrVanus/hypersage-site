@@ -6,6 +6,19 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FBF6EC" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#140B26" media="(prefers-color-scheme: dark)">
+<!-- BLOCKING, and deliberately in <head> rather than with the rest of the JS at
+     the end of the body. A deferred script runs after the first paint, so a
+     reader on a dark OS who chose Light watches the page render plum and flip.
+     Kept dependency-free and tiny for the same reason. The preference is stored
+     RAW, not JSON, so these four lines can read it without a parse. -->
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('mythkin.theme');
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
 <title>Mythkin — create AI characters &amp; chat with legends</title>
 <meta name="description" content="Create your own AI characters, meet legends of history and myth, put them in stories, and share them. Characters that actually remember you. 18+.">
 <link rel="canonical" href="https://hypersage.ai/mythkin/">
@@ -186,6 +199,15 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
     <a href="terms.html">Terms</a>
     <a href="support.html">Support</a>
   </nav>
+  <!-- Three states, not two: "System" is the default most people want, and a
+       binary switch cannot express it. Choosing System REMOVES the key rather
+       than storing a third value, so the page goes back to following the OS —
+       including when the OS flips at sunset. -->
+  <div class="themepick" id="themepick" role="group" aria-label="Colour theme">
+    <button type="button" data-theme-set="system" aria-pressed="true">Auto</button>
+    <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+  </div>
 </header>
 
 <section class="hero">
@@ -212,7 +234,7 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
          Both schemes are shipped because this page follows the reader's, and a
          dark-mode visitor was previously reading it beside a cream screenshot. -->
     <picture>
-      <source srcset="screens/01-discover-dark.jpg" media="(prefers-color-scheme: dark)">
+      <source data-scheme-src srcset="screens/01-discover-dark.jpg" media="(prefers-color-scheme: dark)">
       <img src="screens/01-discover.jpg" width="786" height="1704" fetchpriority="high"
            alt="The Mythkin shelf: Alice featured this week with her painted portrait, and Athena and Beowulf below with their conversation and borrow counts.">
     </picture>
@@ -226,15 +248,15 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
 <div class="shots">
   <figure class="shot">
     <picture>
-      <source srcset="screens/02-chat-dark.jpg" media="(prefers-color-scheme: dark)">
+      <source data-scheme-src srcset="screens/02-chat-dark.jpg" media="(prefers-color-scheme: dark)">
       <img src="screens/02-chat.jpg" width="786" height="1704" loading="lazy"
-           alt="A conversation with Sherlock Holmes: you mention a torn ticket from a trip you don't remember and a damp pocket, and he reasons about how long the moisture has been there before asking when you last wore the coat.">
+           alt="A conversation with Sherlock Holmes: you mention a torn ticket from a trip you don't remember, then that the pocket was damp, and he reasons from those two details before pressing you with follow-up questions about the ticket and the coat.">
     </picture>
     <figcaption>They answer in their own voice, and press for the detail</figcaption>
   </figure>
   <figure class="shot">
     <picture>
-      <source srcset="screens/03-kin-dark.jpg" media="(prefers-color-scheme: dark)">
+      <source data-scheme-src srcset="screens/03-kin-dark.jpg" media="(prefers-color-scheme: dark)">
       <img src="screens/03-kin.jpg" width="786" height="1704" loading="lazy"
            alt="Sherlock Holmes's page in Mythkin — his portrait, an Official mark, conversation and borrower counts, a Talk with them button, and sample exchanges written in his voice.">
     </picture>
@@ -242,7 +264,7 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
   </figure>
   <figure class="shot">
     <picture>
-      <source srcset="screens/04-create-dark.jpg" media="(prefers-color-scheme: dark)">
+      <source data-scheme-src srcset="screens/04-create-dark.jpg" media="(prefers-color-scheme: dark)">
       <img src="screens/04-create.jpg" width="786" height="1704" loading="lazy"
            alt="Making a new kin called Maeve, a cottage-witch mentor, with a Night witch emblem chosen and a live preview card updating as the form is filled.">
     </picture>
@@ -250,7 +272,7 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
   </figure>
   <figure class="shot">
     <picture>
-      <source srcset="screens/05-story-dark.jpg" media="(prefers-color-scheme: dark)">
+      <source data-scheme-src srcset="screens/05-story-dark.jpg" media="(prefers-color-scheme: dark)">
       <img src="screens/05-story.jpg" width="786" height="1704" loading="lazy"
            alt="The Stories shelf — The Cold Shore, Notes Toward an Engine, The Greenwood Ledger and A Letter from Longbourn, each with a chapter count and a Begin button.">
     </picture>
@@ -535,7 +557,7 @@ currency, by your app store.</p>
 
 <footer class="site">
   <div class="hs-more">
-    <h3 class="hs-more-title">More from HyperSage AI Labs</h3>
+    <h3 class="hs-more-title">More from Hypersage AI Labs</h3>
     <ul class="hs-more-list">
       <li><a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a></li>
       <li><a href="https://hypersage.ai/quietoak/">Quietoak — DBT Skills Companion</a></li>
@@ -549,11 +571,18 @@ currency, by your app store.</p>
       <li><a href="https://hypersage.ai/waddleton/">Waddleton — Social World / Arcade</a></li>
     </ul>
   </div>
-  <span>Mythkin — an app by <a href="https://hypersage.ai/">HyperSage AI Labs</a></span>
+  <span>Mythkin — an app by <a href="https://hypersage.ai/">Hypersage AI Labs</a></span>
   <a href="safety.html">Safety</a>
   <a href="privacy.html">Privacy</a>
   <a href="terms.html">Terms</a>
   <a href="support.html">Support</a>
+  <!-- Mythkin was the only one of the eleven with no copyright line at all.
+       Trading style ("Hypersage") in the sentence above, registered entity here
+       — see the README's "Two names" section. -->
+  <!-- flex-basis inline, not in style.css: another session is editing that file
+       tonight, and this is one declaration. footer.site is a wrapping flex row,
+       so without it the copyright sits inline among the legal links. -->
+  <span style="flex-basis:100%">© 2026 HyperSage AI Labs LLC. Mythkin — characters made by people, alive with you.</span>
 </footer>
 
 </div>
@@ -628,6 +657,90 @@ currency, by your app store.</p>
 
   document.querySelector('.landing').classList.add('kin-selector-ready');
   select(0);
+})();
+</script>
+
+<script>
+/* THE THEME CONTROL. The <head> script already applied the stored choice before
+   first paint; this only wires the buttons and keeps two things in sync that
+   CSS cannot reach on its own.
+   1. <meta name="theme-color"> is media-scoped, so the browser picks it from
+      the OS — an explicit choice would otherwise leave the address bar and
+      status chrome in the other scheme.
+   2. The screenshots. <picture><source media="(prefers-color-scheme:dark)">
+      resolves against the OS ONLY; it does not know about data-theme, so
+      without this the app shots would keep showing the system's scheme while
+      the whole page around them had switched — which is exactly the complaint
+      that prompted this control. Flipping each source's own media attribute is
+      what makes them follow, and it keeps the no-JS case correct: untouched,
+      the markup still resolves to the reader's OS scheme. */
+(function () {
+  var KEY = 'mythkin.theme';
+  var pick = document.getElementById('themepick');
+  if (!pick) return;
+  var root = document.documentElement;
+  var dark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+  function stored() {
+    try { var v = localStorage.getItem(KEY); return v === 'light' || v === 'dark' ? v : 'system'; }
+    catch (e) { return 'system'; }
+  }
+  function effective(mode) {
+    return mode === 'system' ? (dark && dark.matches ? 'dark' : 'light') : mode;
+  }
+  function apply(mode) {
+    if (mode === 'system') delete root.dataset.theme;
+    else root.dataset.theme = mode;
+
+    var isDark = effective(mode) === 'dark';
+
+    /* theme-color: drop the media-scoped pair for an explicit choice and keep a
+       single unscoped tag, then restore the pair for System. */
+    var metas = [].slice.call(document.querySelectorAll('meta[name="theme-color"]'));
+    metas.forEach(function (m) { m.remove(); });
+    function meta(content, media) {
+      var m = document.createElement('meta');
+      m.name = 'theme-color';
+      m.content = content;
+      if (media) m.media = media;
+      document.head.appendChild(m);
+    }
+    if (mode === 'system') {
+      meta('#FBF6EC', '(prefers-color-scheme: light)');
+      meta('#140B26', '(prefers-color-scheme: dark)');
+    } else {
+      meta(isDark ? '#140B26' : '#FBF6EC');
+    }
+
+    /* The dark <source> of every screenshot: match always, never, or defer to
+       the OS. "not all" is the standard never-matches query. */
+    [].forEach.call(document.querySelectorAll('picture source[data-scheme-src]'), function (s) {
+      s.media = mode === 'system' ? '(prefers-color-scheme: dark)'
+              : (isDark ? 'all' : 'not all');
+    });
+
+    [].forEach.call(pick.querySelectorAll('[data-theme-set]'), function (b) {
+      b.setAttribute('aria-pressed', b.dataset.themeSet === mode ? 'true' : 'false');
+    });
+  }
+
+  pick.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-theme-set]');
+    if (!btn) return;
+    var mode = btn.dataset.themeSet;
+    try { mode === 'system' ? localStorage.removeItem(KEY) : localStorage.setItem(KEY, mode); }
+    catch (err) {}
+    apply(mode);
+  });
+
+  /* A System reader whose OS flips (sunset, Low Power Mode) must follow. */
+  if (dark) {
+    var onChange = function () { if (stored() === 'system') apply('system'); };
+    if (dark.addEventListener) dark.addEventListener('change', onChange);
+    else if (dark.addListener) dark.addListener(onChange);
+  }
+
+  apply(stored());
 })();
 </script>
 </body>

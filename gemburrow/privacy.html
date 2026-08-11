@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17100A">
+  <title>Gemburrow — Privacy Policy</title>
+  <meta name="description" content="What Gemburrow stores on your phone, the one thing that leaves it (a Daily Dig score), and what it never collects. No accounts, no analytics, no advertising SDK.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://hypersage.ai/gemburrow/privacy.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Gemburrow — Privacy Policy">
+  <meta property="og:description" content="What Gemburrow stores on your phone, the one thing that leaves it, and what it never collects.">
+  <meta property="og:url" content="https://hypersage.ai/gemburrow/privacy.html">
+  <meta property="og:site_name" content="Gemburrow">
+  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260811a">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Gemburrow — a cozy gem-digging puzzle for iPhone">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Gemburrow — Privacy Policy">
+  <meta name="twitter:description" content="What Gemburrow stores on your phone, and the one thing that leaves it.">
+  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260811a">
+  <meta name="twitter:image:alt" content="Gemburrow — a cozy gem-digging puzzle for iPhone">
+  <link rel="icon" type="image/png" href="app-icon-512.png?v=20260811a">
+  <link rel="apple-touch-icon" href="app-icon-512.png?v=20260811a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="legal.css?v=20260811a">
+</head>
+<body>
+
+  <nav class="legal-nav">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <img src="app-icon-512.png?v=20260811a" alt="" width="512" height="512">
+        Gemburrow
+      </a>
+      <div class="links">
+        <a href="privacy.html" class="active">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="support.html">Support</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- DERIVED FROM THE SHIPPED BUILD, not from a template. Sources:
+       game.js Meta (localStorage key gb_meta_v1 mirrored to Capacitor
+       Preferences), Lb (the ONE network client — Supabase REST, daily only),
+       package.json (Capacitor core/ios/android/haptics/preferences and nothing
+       else: no analytics, no ads, no StoreKit). If any of those change, this
+       page and the App Store Connect App Privacy answers change together. -->
+  <main class="legal">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: August 11, 2026</p>
+
+    <div class="callout">
+      <strong>The short version.</strong> Gemburrow has no account, no analytics,
+      no advertising SDK and no in-app purchases. Your progress lives on your
+      phone. The one thing that ever leaves it is a <strong>Daily Dig score</strong> —
+      a random ID made on your device, an auto-generated name like
+      <code>MOLE-4F2A</code>, and the numbers from that run.
+    </div>
+
+    <h2>What is stored on your phone</h2>
+    <p>
+      Gemburrow saves your progress locally, in your device's app storage. That
+      save contains:
+    </p>
+    <ul>
+      <li>your coin balance, and which dig walls you have bought and are wearing;</li>
+      <li>your career level and the stars earned on each level;</li>
+      <li>your hoard total — the gems you have given to the dragon;</li>
+      <li>your best Daily Dig and Free Dig results;</li>
+      <li>whether you have seen the first-run coaching, and your sound settings;</li>
+      <li>a random identifier and the display name generated from it (below).</li>
+    </ul>
+    <p>
+      This save is not sent to us. Deleting the app deletes it. It may be
+      included in your own iCloud or iTunes device backup, which is Apple's
+      backup of your phone, not a service of ours.
+    </p>
+
+    <h2>The random identifier</h2>
+    <p>
+      The first time Gemburrow runs it generates a random UUID on the device and
+      builds a display name from its first four characters — for example
+      <code>MOLE-4F2A</code>. That identifier exists for exactly one purpose: so
+      the Daily Dig leaderboard can recognise a repeat submission from the same
+      device and keep only your best score for the day.
+    </p>
+    <p>
+      It is not your Apple ID, your advertising identifier, or any device
+      identifier issued by Apple. It is not linked to your name, email, or any
+      other identity, it is not shared with anyone, and it is not used to track
+      you across apps or websites. Deleting the app discards it; reinstalling
+      generates a new one.
+    </p>
+
+    <h2>The one network call: Daily Dig scores</h2>
+    <p>
+      When you finish a <strong>Daily Dig</strong>, the game posts that run to our
+      leaderboard, hosted on Supabase. The message contains only:
+    </p>
+    <ul>
+      <li>the day the jar belongs to, and that day's shared jar seed;</li>
+      <li>your auto-generated <code>MOLE-</code> name and the random identifier above;</li>
+      <li>the run's results — coins earned and swings used.</li>
+    </ul>
+    <p>
+      The game then reads back the day's top scores to draw the board. If you
+      were offline, the score is held on your phone and sent the next time the
+      game opens with a connection. <strong>Career digs and Free digs make no
+      network calls at all</strong>, and nothing about how you play — timings,
+      taps, sessions, crashes — is ever sent anywhere.
+    </p>
+    <p>
+      Scores are stored for the leaderboard and are visible to other players as a
+      name and a number. If you would like a score row removed, email
+      <a href="mailto:support@hypersage.ai?subject=Gemburrow%20leaderboard%20row">support@hypersage.ai</a>
+      with the <code>MOLE-</code> name shown on your results screen and we will
+      delete it.
+    </p>
+
+    <h2>What Gemburrow does not do</h2>
+    <ul>
+      <li><strong>No account.</strong> There is no sign-in, no email, no profile, and no password anywhere in the game.</li>
+      <li><strong>No analytics or crash SDK.</strong> None is linked into the build. We do not know how many levels you cleared or when you played.</li>
+      <li><strong>No advertising.</strong> No ad SDK, no ad identifier, no tracking across apps or websites.</li>
+      <li><strong>No purchases.</strong> There are no in-app purchases and no subscription, so no payment data exists to collect.</li>
+      <li><strong>No location, contacts, photos, microphone or camera.</strong> The game never asks for any of them.</li>
+    </ul>
+
+    <h2>Children's privacy</h2>
+    <p>
+      Gemburrow is a cozy puzzle game suitable for a wide audience and is not
+      directed at children under 13 specifically. It collects no personal
+      information from anyone, of any age. The only text a player can send
+      anywhere is nothing at all — the leaderboard name is generated by the game
+      and cannot be edited, precisely so no personal detail can end up on a
+      public board.
+    </p>
+
+    <h2>This website</h2>
+    <p>
+      This page and the rest of <a href="index.html">hypersage.ai/gemburrow</a>
+      are static files served by GitHub Pages. There is no analytics script, no
+      cookie set by us, no advertising pixel and no form. The playable jar on the
+      home page runs entirely in your browser and sends nothing anywhere; it
+      keeps no state between visits. Web fonts are requested from Google Fonts,
+      which receives the request as any font host would.
+    </p>
+
+    <h2>Changes to this policy</h2>
+    <p>
+      If the game's data behaviour changes, this page changes with it, and the
+      date at the top moves. Material changes will also be reflected in the
+      App Store's own privacy summary for Gemburrow.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Questions, corrections, or a leaderboard row you want gone:
+      <a href="mailto:support@hypersage.ai?subject=Gemburrow%20privacy">support@hypersage.ai</a>.
+    </p>
+    <p>
+      Gemburrow is published by HyperSage AI Labs LLC, a Delaware limited
+      liability company.
+    </p>
+  </main>
+
+  <footer class="legal-footer">
+    <a href="index.html">Home</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="support.html">Support</a>
+    <span class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener">HyperSage AI Labs LLC</a></span>
+  </footer>
+
+</body>
+</html>

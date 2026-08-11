@@ -4,7 +4,7 @@
      here, or its pages go undeclared. This file previously listed 3 of the 11 product
      folders (rowan, alder, waddleton) while hexhunter, mythkin, mythwright, nightshelf,
      quietoak, saffra, storyvault and wingmate all shipped a valid sitemap.xml that
-     nothing pointed at. All 11 are listed below; add the twelfth when it arrives.
+     nothing pointed at. All 12 are listed below; add the thirteenth when it arrives.
      CryptoSage AI and The One are NOT here on purpose — they are served from other
      origins (cryptosageai.io, drvanus.github.io/theone-app), and a sitemap index may
      only reference sitemaps on its own host.
@@ -19,6 +19,10 @@
   <sitemap>
     <loc>https://hypersage.ai/alder/sitemap.xml</loc>
     <lastmod>2026-08-08</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/gemburrow/sitemap.xml</loc>
+    <lastmod>2026-08-11</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://hypersage.ai/hexhunter/sitemap.xml</loc>
