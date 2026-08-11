@@ -75,7 +75,7 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
   2026-08-08 and nothing references its icon. The referenced count tracks the portfolio,
   so it moves whenever a product lands — Gemburrow took it from 12 to 13 — but the gap of
   exactly one, and its cause, is the part that stays true until `theone.png` is deleted.
-- `og-image.png` — 1200×630 social card, referenced with the `?v=20260811c` cache-buster
+- `og-image.png` — 1200×630 social card, referenced with the `?v=20260811d` cache-buster
   on all **five** pages that carry it: `index.html`, `press.html`, `privacy.html`,
   `terms.html`, `support.html`. Bump the suffix whenever the bytes change, in all five —
   and **only** when they change; a new `?v=` on identical bytes just forces a pointless
