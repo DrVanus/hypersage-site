@@ -514,6 +514,23 @@
     /* ===== PRODUCTS ===== */
     .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
     @media (max-width: 700px) { .products-grid { grid-template-columns: 1fr; } }
+    /* An ODD number of products leaves the last card alone in its row with a
+       hole beside it — visible the moment Gemburrow made it thirteen.
+       `article:last-of-type:nth-of-type(odd)` matches only when the ARTICLE count is
+       odd — it must count articles, not children, because the "Interested in the
+       portfolio?" `<aside class="product">` is the grid's 14th child. This
+       centres the orphan today and switches itself off the moment a fourteenth
+       product arrives. No list to maintain, nothing to remember.
+       Width is `calc(50% - 10px)` — half the row minus half the 20px gap — so
+       the centred card is exactly as wide as every other card rather than
+       stretching to full width, which would read as a different kind of card. */
+    @media (min-width: 701px) {
+      .products-grid > article:last-of-type:nth-of-type(odd) {
+        grid-column: 1 / -1;
+        width: calc(50% - 10px);
+        margin-inline: auto;
+      }
+    }
     .product {
       --accent: var(--brand-a);
       /* Text tone for links. Cards whose accent is too dark to read on --panel override
