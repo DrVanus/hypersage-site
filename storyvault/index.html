@@ -229,8 +229,34 @@
       color: var(--accent-light);
       transform: translateY(-1px);
     }
+    /* The mobile menu. Without it this rule hid all seven nav links below 860px
+       and offered nothing to reveal them: a phone visitor got the wordmark and
+       "See plans" and no way to reach How it works, Pro, FAQ or Support from the
+       top of the page. Same <details>/<summary> disclosure the other nine
+       subsites use, in this site's own tokens. */
+    .mobile-menu { display: none; position: relative; }
+    .mobile-menu > summary {
+      list-style: none; cursor: pointer; padding: 6px 10px;
+      border: 1px solid var(--border); border-radius: 10px;
+      color: var(--fg); font-weight: 800; font-size: 1.1rem; line-height: 1.3;
+    }
+    .mobile-menu > summary::-webkit-details-marker { display: none; }
+    .mobile-menu[open] > summary { background: var(--card); }
+    .mobile-links {
+      position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
+      display: flex; flex-direction: column; gap: 2px; min-width: 200px;
+      /* --card, NOT --surface: this site defines no --surface token, and an
+         undefined custom property falls back to TRANSPARENT — the panel let the
+         hero type read straight through it. Check the token exists before
+         copying a pattern between subsites. */
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 8px; box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+    }
+    .mobile-links a { color: var(--fg); font-weight: 600; padding: 10px 12px; border-radius: 8px; }
+    .mobile-links a:hover { background: rgba(255,255,255,0.07); }
     @media (max-width: 860px) {
       nav.site .links { display: none; }
+      .mobile-menu { display: block; }
     }
 
     /* ===== BUTTONS ===== */
@@ -1433,6 +1459,18 @@
         <a href="support.html">Support</a>
       </div>
       <a href="#plans" class="btn-nav">See plans</a>
+      <details class="mobile-menu">
+        <summary aria-label="Open menu">☰</summary>
+        <div class="mobile-links">
+          <a href="#how">How it works</a>
+          <a href="#adventure">AI Adventure</a>
+          <a href="#features">Features</a>
+          <a href="#screens">Screens</a>
+          <a href="#plans">Pro</a>
+          <a href="#faq">FAQ</a>
+          <a href="support.html">Support</a>
+        </div>
+      </details>
     </div>
   </nav>
 

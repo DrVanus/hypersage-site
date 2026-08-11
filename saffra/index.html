@@ -976,7 +976,12 @@
       .nav-links.open {
         display: flex; flex-direction: column; position: absolute;
         top: 64px; left: 0; right: 0;
-        background: rgba(14,12,10,0.95); backdrop-filter: blur(16px);
+        /* -webkit- prefix REQUIRED: this was the one backdrop-filter of seven in
+           this file without it, and iOS Safari needs the prefixed form. Without
+           the blur, a 0.95-alpha panel lets the hero type read straight through
+           the open menu — "Time-Aware" landing on top of "Your kitchen," — on
+           the exact devices this site is selling to. */
+        background: rgba(14,12,10,0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
         padding: 20px 24px; gap: 16px; border-bottom: 1px solid var(--border);
       }
       .nav-toggle { display: block; }
@@ -1214,32 +1219,32 @@
                dark captures alternate, but the visitor chooses when to advance. -->
           <div class="hero-phone-frame" id="heroRotator" aria-roledescription="carousel" aria-label="Saffra app walkthrough">
             <img class="hero-phone-img is-active"
-                 src="screenshots-raw/01-chef-tab-light.png"
+                 src="screenshots-raw/01-chef-tab-light.png?v=20260811b"
                  width="417" height="900" fetchpriority="high" decoding="async"
                  data-caption="Pantry-aware ways to begin"
                  alt="Saffra Chef tab in light mode — pantry-aware quick-start prompts">
             <img class="hero-phone-img"
-                 src="screenshots-raw/07-chat-recipe-dark.png"
+                 src="screenshots-raw/07-chat-recipe-dark.png?v=20260811b"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Answers grounded in the recipe catalog"
                  alt="Ask Saffra in dark mode — she answers with a recipe pulled from the catalog">
             <img class="hero-phone-img"
-                 src="screenshots-raw/05-recipes-light.png"
+                 src="screenshots-raw/05-recipes-light.png?v=20260811b"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="A trusted recipe catalog, ready to adapt"
                  alt="Recipes in light mode — the flagship catalog with Saffra's daily pick">
             <img class="hero-phone-img"
-                 src="screenshots-raw/02-cooking-mode-dark.png"
+                 src="screenshots-raw/02-cooking-mode-dark.png?v=20260811b"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Hands-free guidance while you cook"
                  alt="Cooking Mode in dark mode — hands-free voice with a suggested step timer">
             <img class="hero-phone-img"
-                 src="screenshots-raw/06-search-light.png"
+                 src="screenshots-raw/06-search-light.png?v=20260811b"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Search by meaning, not just title"
                  alt="Search in light mode — semantic recipe search across the whole catalog">
             <img class="hero-phone-img"
-                 src="screenshots-raw/10-recipes-dinner-dark.png"
+                 src="screenshots-raw/10-recipes-dinner-dark.png?v=20260811b"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Suggestions shaped for tonight"
                  alt="Recipes at dinner time in dark mode — Saffra picks for tonight">
@@ -1360,7 +1365,7 @@
       <div class="time-card anim anim-d1">
         <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>7:00 AM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/08-recipes-breakfast-light.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/08-recipes-breakfast-light.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Recipes tab in the morning — Saffra's breakfast pick and a Quick breakfast rail">
         </div>
         <h3>Morning</h3>
@@ -1369,7 +1374,7 @@
       <div class="time-card anim anim-d2">
         <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>12:30 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/09-recipes-lunch-light.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/09-recipes-lunch-light.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Recipes tab at midday — Saffra's lunch pick with bowls and salads ranked first">
         </div>
         <h3>Midday</h3>
@@ -1378,7 +1383,7 @@
       <div class="time-card anim anim-d3">
         <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/></svg>6:30 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/10-recipes-dinner-dark.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/10-recipes-dinner-dark.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Recipes tab in the evening — Saffra picks for tonight with a Quick tonight rail">
         </div>
         <h3>Evening</h3>
@@ -1387,7 +1392,7 @@
       <div class="time-card anim anim-d4">
         <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>11:50 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/11-recipes-latenight-dark.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/11-recipes-latenight-dark.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Recipes tab late at night — a late-night pick and a rail of 25-minute dishes">
         </div>
         <h3>Late night</h3>
@@ -1427,7 +1432,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/07-chat-recipe-dark.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/07-chat-recipe-dark.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Ask Saffra — visible tool chips show her checking the pantry and searching recipes before answering with a recipe card">
           <div class="fd-shot-caption">Tool chips = her actually checking, live</div>
         </div>
@@ -1587,12 +1592,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/02-cooking-mode-light.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/02-cooking-mode-light.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Cooking Mode step 1 — Saffra reads the step aloud with ingredient chips and a suggested 15-minute timer">
           <div class="fd-shot-caption">Step 1 — she's reading it aloud</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/14-cooking-step2-dark.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/14-cooking-step2-dark.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Cooking Mode mid-recipe — the dish photo on the step card with progress bar and hands-free controls">
           <div class="fd-shot-caption">Mid-recipe, dark mode</div>
         </div>
@@ -1635,12 +1640,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/01-chef-tab-light.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/01-chef-tab-light.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="The Saffra tab — time-of-day greeting, pantry pills, and quick-start prompts">
           <div class="fd-shot-caption">The greeting knows your kitchen</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/07-chat-recipe-light.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/07-chat-recipe-light.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Ask Saffra answering with a tappable recipe card after checking the pantry">
           <div class="fd-shot-caption">She answers with a real recipe</div>
         </div>
@@ -1687,7 +1692,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/03-pantry-light.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/03-pantry-light.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="The pantry — item counts by category with expiring and stale flags, plus photo, receipt, and barcode capture">
           <div class="fd-shot-caption">Grocery, fridge &amp; freshness at a glance</div>
         </div>
@@ -1723,7 +1728,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/05-recipes-dark.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/05-recipes-dark.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Recipe results as photo cards, each showing cuisine and cook time up front">
           <div class="fd-shot-caption">Every result is a photo card</div>
         </div>
@@ -1763,12 +1768,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/04-recipe-detail-light.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/04-recipe-detail-light.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Recipe detail — hero photo with timing, difficulty, servings, and the Let's cook button">
           <div class="fd-shot-caption">The top: vitals + "Let's cook"</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/13-recipe-ingredients-dark.png" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/13-recipe-ingredients-dark.png?v=20260811b" width="417" height="900" loading="lazy"
                alt="Recipe detail scrolled — the ingredient list checked against your pantry">
           <div class="fd-shot-caption">Below the fold: ingredients &amp; more</div>
         </div>
