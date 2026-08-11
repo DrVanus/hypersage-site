@@ -282,11 +282,13 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
 
 <h2>The ones already waiting</h2>
 <!-- ROSTER COUNT: this number and the grid below must both match
-     mythkin-api/app/characters/seed.py OFFICIAL_KIN, which holds 24 as of the
-     2026-08-08 expansion (commit 8d91a64). It said twelve here for two days
-     after the roster doubled. Re-count with
-     `grep -c '"id": "ch_' seed.py` before editing either. -->
-<p class="lede">Twenty-four legends, written properly rather than scraped — each with a portrait
+     mythkin-api/app/characters/seed.py OFFICIAL_KIN, which holds 30 as of the
+     2026-08-11 Rome batch. It said twelve here for two days after the roster
+     doubled, then twenty-four for a day after the Rome batch — the number and
+     the grid have now drifted twice, so change BOTH or neither. Re-count with
+     `grep -o '"id": "ch_[a-z]*"' seed.py | sort -u | wc -l` (30), and check the
+     portrait count matches: `ls kin | wc -l`. -->
+<p class="lede">Thirty legends, written properly rather than scraped — each with a portrait
 painted once, so they look the same every time you open them.</p>
 
 <ul class="kin-grid">
@@ -314,6 +316,18 @@ painted once, so they look the same every time you open them.</p>
   <li class="kin"><img src="kin/ch_lizzy.jpg" width="256" height="256" loading="lazy" alt=""><b>Elizabeth Bennet</b><span>Longbourn's sharpest wit, at your service</span></li>
   <li class="kin"><img src="kin/ch_creature.jpg" width="256" height="256" loading="lazy" alt=""><b>The Creature</b><span>Frankenstein's forgotten son, gentler than his maker</span></li>
   <li class="kin"><img src="kin/ch_silver.jpg" width="256" height="256" loading="lazy" alt=""><b>Long John Silver</b><span>Ship's cook, one leg, several loyalties</span></li>
+<!-- The 2026-08-11 Rome batch. Names and one-liners are copied verbatim from
+     mythkin-api/app/characters/seed.py (OFFICIAL_KIN) — the same source the app
+     renders from — so this grid cannot drift from the roster by paraphrase.
+     Portraits come from mythkin-app/art/kin/ downscaled 768 -> 256 to match the
+     rest of the set; shipping the 768s would have been 9x the bytes for a card
+     that declares width=256. -->
+<li class="kin"><img src="kin/ch_caesar.jpg" width="256" height="256" loading="lazy" alt=""><b>Julius Caesar</b><span>Decisive to a fault, and the fault was famous</span></li>
+<li class="kin"><img src="kin/ch_augustus.jpg" width="256" height="256" loading="lazy" alt=""><b>Augustus</b><span>First emperor. Patient in a way people found unnerving.</span></li>
+<li class="kin"><img src="kin/ch_livia.jpg" width="256" height="256" loading="lazy" alt=""><b>Livia Drusilla</b><span>Empress. Nothing said here leaves the room.</span></li>
+<li class="kin"><img src="kin/ch_seneca.jpg" width="256" height="256" loading="lazy" alt=""><b>Seneca</b><span>Stoic philosopher, first to admit he was bad at it</span></li>
+<li class="kin"><img src="kin/ch_spartacus.jpg" width="256" height="256" loading="lazy" alt=""><b>Spartacus</b><span>Was owned once. Spent the rest of it refusing.</span></li>
+<li class="kin"><img src="kin/ch_hadrian.jpg" width="256" height="256" loading="lazy" alt=""><b>Hadrian</b><span>Emperor who would rather be walking somewhere else</span></li>
 </ul>
 <p class="meta">Figures from history and the public domain. Every one is an AI character,
 and the app says so on every screen where you talk to them.</p>
@@ -333,7 +347,7 @@ and the app says so on every screen where you talk to them.</p>
          now unrelated SQL, and mythkin-api/app/characters/portraits.py implements
          the opposite — user kin ARE painted at birth, once, through a DB-backed
          queue that refuses any repaint with 409. PORTRAIT_IDS (mythkin-app/app.js:887)
-         is now 24 ids, not twelve, and app.js:899 calls it the OFFLINE-MOCK fallback
+         is now 30 ids, and app.js:899 calls it the OFFLINE-MOCK fallback
          rather than the live source.
          The copy below is still deliberately silent about a user portrait, because
          source code proves the pipeline exists, not that it works in production.
@@ -514,7 +528,7 @@ currency, by your app store.</p>
 
 <!-- Claims discipline (verified against ~/Developer/DrVanus/mythkin-app + mythkin-api
      2026-08-10): the roster drift this comment used to warn about is FIXED — the
-     grid and lede above now carry all 24 kin the API seeds (seed.py OFFICIAL_KIN).
+     grid and lede above now carry all 30 kin the API seeds (seed.py OFFICIAL_KIN).
      These answers still name no count, on purpose: a roster grows, and a number
      in an FAQ answer is a second place to forget. Tiers are Free + Plus ONLY (no
      "Deep", no sparks, no voice/TTS — mock-data.js:238-268). Plus buys: window

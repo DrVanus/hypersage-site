@@ -129,7 +129,7 @@ ul.plain li{padding:.35rem 0;border-bottom:1px solid var(--border)}
 .kin span{display:block;color:var(--dim);font-size:.8rem;line-height:1.4;margin-top:.2rem}
 
 /* Progressive character stage ------------------------------------------------
-   JavaScript builds this only after the complete card gallery exists (24 kin as
+   JavaScript builds this only after the complete card gallery exists (30 kin as
    of 2026-08-08; the script counts the cards, so it needs no number here).
    Without JS the original grid above remains the entire, readable experience. */
 .kin-showcase{position:relative;isolation:isolate;overflow:hidden;
