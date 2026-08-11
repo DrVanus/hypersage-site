@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StoryVault AI — AI story adventures in classic worlds</title>
-  <!-- Bundled-book count is 81, not 87: six US-only-public-domain titles were removed
-       (commit f7075b6, 2026-08-04). Verify with
+  <!-- Bundled-book count is 80. It was 87, then 81 (six US-only-public-domain titles
+       removed, f7075b6 2026-08-04), then 80 (The Metamorphosis removed, 555351d — the
+       Gutenberg English translation is its own copyrighted work). Verify with
        `ls storyvault-ios/StoryVaultAI/StoryVaultAI/Resources/Books/*.txt | wc -l`
-       before changing this number anywhere on the site. terms.html:66 already says 81. -->
-  <meta name="description" content="Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty-one classics included. Free to try.">
+       AND `jq length .../Resources/Books/books.json` before changing this number
+       anywhere on the site. terms.html §7 carries the same number — change both. -->
+  <meta name="description" content="Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty bundled classics. Free to try.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/storyvault/">
 
@@ -1232,7 +1234,7 @@
   "name": "StoryVault AI",
   "applicationCategory": "EntertainmentApplication",
   "operatingSystem": "iOS",
-  "description": "Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty-one classics included. Free to try.",
+  "description": "Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page. Eighty bundled classics. Free to try.",
   "url": "https://hypersage.ai/storyvault/",
   "author": {
     "@type": "Organization",
@@ -1275,7 +1277,7 @@
       "name": "Can I read offline?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The 81 bundled books are fully offline-readable. AI Adventure requires a network connection — every turn is generated live by the model."
+        "text": "The 80 bundled books are fully offline-readable. AI Adventure requires a network connection — every turn is generated live by the model."
       }
     },
     {
@@ -1352,7 +1354,7 @@
             <a href="#how" class="btn-outline">See how it works</a>
           </div>
           <div class="hero-trust">
-            <span>81 classics bundled</span>
+            <span>80 classics bundled</span>
             <span>No account needed</span>
             <span>Free to try</span>
           </div>
@@ -1382,13 +1384,13 @@
   <!-- ===== STATS STRIP ===== -->
   <div class="container">
     <div class="stats-strip reveal">
-      <!-- 81 = `ls .../Resources/Books/*.txt | wc -l`. 250+ = Scenario.all in a Release
-           build, which computes to 258 today: originals 22 + bookThemed 81 + myths 34
+      <!-- 80 = `ls .../Resources/Books/*.txt | wc -l`. 250+ = Scenario.all in a Release
+           build, which computes to 257 today: originals 22 + bookThemed 80 + myths 34
            + folklore 33 + stageScreen 29 + history 35 + epicPoetry 24 (devOnly is
            DEBUG-only and empty in Release). The page previously said 190+ here and
            "195 doors" two sections down; both were stale and disagreed with each other. -->
       <div class="stat">
-        <span class="stat-value grad">81</span>
+        <span class="stat-value grad">80</span>
         <span class="stat-label">Classics included</span>
       </div>
       <div class="stat">
@@ -1417,7 +1419,7 @@
           <ol class="how-steps">
             <li>
               <h3>Pick a tale</h3>
-              <p>Eighty-one bundled classics — Dracula, Sherlock, Beowulf, the Odyssey — each with a hand-curated AI scenario. Plus myth, folklore, history, stage, and epic-poetry worlds. Or invent your own.</p>
+              <p>Eighty bundled classics — Dracula, Sherlock, Beowulf, the Odyssey — each with a hand-curated AI scenario. Plus myth, folklore, history, stage, and epic-poetry worlds. Or invent your own.</p>
             </li>
             <li>
               <h3>Read what the AI writes</h3>
@@ -1504,7 +1506,7 @@
                tier to imageGenerationsPerMonth/PerDay = 0, and AdventureView.swift:4222
                sends `wantImage: purchase.isPremiumUser`. Free users get zero scene art,
                ever — do not drop the "with Pro" qualifier here, at :1288, or in the FAQ. -->
-          <p class="turn-note">The turn shown on the phone, set in readable type — a live run of the real Prismshard Heist scenario. With Pro, each turn opens with a scene the app paints for it; every branch is written fresh, so no two runs are the same.</p>
+          <p class="turn-note">The turn shown on the phone, set in readable type — a live run of the real Prismshard Heist scenario. With Pro, turns are illustrated with a scene the app paints for them — up to 10 a day; every branch is written fresh, so no two runs are the same.</p>
         </div>
       </div>
 
@@ -1562,7 +1564,7 @@
           </div>
         </div>
       </div>
-      <p class="adv-more reveal">Plus <strong>81 classics</strong> with scenarios in the source's own voice, and whole shelves of <strong>myth, folklore, history, stage &amp; screen, and epic poetry</strong> — 250+ scenarios in all.</p>
+      <p class="adv-more reveal">Plus <strong>80 classics</strong> with scenarios in the source's own voice, and whole shelves of <strong>myth, folklore, history, stage &amp; screen, and epic poetry</strong> — 250+ scenarios in all.</p>
     </div>
   </section>
 
@@ -1577,7 +1579,7 @@
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5C10.3 4.2 8 3.6 4.8 3.6a.8.8 0 0 0-.8.8v12.4a.8.8 0 0 0 .8.8c3.2 0 5.5.6 7.2 1.9 1.7-1.3 4-1.9 7.2-1.9a.8.8 0 0 0 .8-.8V4.4a.8.8 0 0 0-.8-.8C16 3.6 13.7 4.2 12 5.5z"/><path d="M12 5.5V19.5"/></svg></div>
           <h3>Live a classic</h3>
-          <p>Eighty-one public-domain books pre-loaded — Dracula, Pride &amp; Prejudice, Sherlock Holmes, Treasure Island, the Odyssey, and 76 more. Each has its own AI Adventure scenario calibrated to the source's voice.</p>
+          <p>Eighty public-domain books pre-loaded — Dracula, Pride &amp; Prejudice, Sherlock Holmes, Treasure Island, the Odyssey, and 75 more. Each has its own AI Adventure scenario calibrated to the source's voice.</p>
         </div>
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.4L12 17l-1.9-5.6L4.5 10l5.6-1.4z"/><path d="M18.5 15.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg></div>
@@ -1587,7 +1589,7 @@
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5l6 6-9 9c-1.3 1.3-3.2 1.6-4.4.4-1.2-1.2-.9-3.1.4-4.4z"/><path d="M11 7l6 6"/><path d="M7 15.5c-1.6.4-2.5 1.6-3 3.5 1.9-.5 3.1-1.4 3.5-3"/></svg></div>
           <h3>Painted, not printed</h3>
-          <p>Every book and adventure gets a painted cover in a Victorian-engraving-meets-illuminated-manuscript style — 81 painted classics, plus a fresh cover conjured for each story you start. In AI Adventure with Pro, every turn opens with a new scene the app paints for the moment.</p>
+          <p>Every book and adventure gets a painted cover in a Victorian-engraving-meets-illuminated-manuscript style — 80 painted classics, plus a fresh cover conjured for each story you start. In AI Adventure, Pro paints a fresh scene for the moment — up to 10 turns a day, 100 a month.</p>
         </div>
         <div class="feature-card">
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4.5" width="4.5" height="15" rx="1"/><rect x="9.5" y="4.5" width="4.5" height="15" rx="1"/><path d="M15.4 5.6l3.8 1 .9 13.4-4.2-1.1z" transform="rotate(-6 17 12)"/></svg></div>
@@ -1728,7 +1730,7 @@
   <section class="section-block tight">
     <div class="container">
       <div class="section-eyebrow center">The bundled vault</div>
-      <h2 style="text-align:center;" class="reveal"><em class="grad">Eighty-one</em> classics, free forever</h2>
+      <h2 style="text-align:center;" class="reveal"><em class="grad">Eighty</em> classics, free forever</h2>
       <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">All public-domain. All offline-readable. All yours to keep.</p>
       <div class="library-tape reveal">
         <div class="library-chip"><em>Dracula</em> · Bram Stoker</div>
@@ -1743,8 +1745,8 @@
         <div class="library-chip"><em>The Count of Monte Cristo</em> · A. Dumas</div>
         <div class="library-chip"><em>Wuthering Heights</em> · Emily Brontë</div>
         <div class="library-chip"><em>Carmilla</em> · J. Sheridan Le Fanu</div>
-        <!-- 12 titles are named above, so this is 81 - 12 = 69. Recount if a chip is added. -->
-        <div class="library-chip">+ 69 more</div>
+        <!-- 12 titles are named above, so this is 80 - 12 = 68. Recount if a chip is added. -->
+        <div class="library-chip">+ 68 more</div>
       </div>
     </div>
   </section>
@@ -1766,7 +1768,7 @@
             <li>Unlimited custom premises</li>
             <li>Unlimited saved adventures</li>
             <li>AI voice narration</li>
-            <li>AI-painted scene art every turn</li>
+            <li>AI-painted scene art, up to 10 turns a day</li>
           </ul>
         </div>
         <!-- Prices must match what is registered at ASC: Configuration.storekit:74 monthly
@@ -1815,7 +1817,7 @@
         </details>
         <details class="faq">
           <summary>Can I read offline?</summary>
-          <p>The 81 bundled books are fully offline-readable. AI Adventure requires a network connection — every turn is generated live by the model.</p>
+          <p>The 80 bundled books are fully offline-readable. AI Adventure requires a network connection — every turn is generated live by the model.</p>
         </details>
         <details class="faq">
           <summary>What happens if I cancel Pro?</summary>
@@ -1851,7 +1853,7 @@
   <section class="cta-strip">
     <div class="ornament" aria-hidden="true">✦</div>
     <h2 class="reveal">The page is <em class="grad">open.</em></h2>
-    <p class="reveal">Free to try. Eighty-one classics already in the vault. The next one is yours to write.</p>
+    <p class="reveal">Free to try. Eighty classics already in the vault. The next one is yours to write.</p>
     <a href="#plans" class="btn-warm">
       <span>See plans</span>
       <span aria-hidden="true">→</span>

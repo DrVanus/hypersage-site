@@ -481,7 +481,31 @@
     }
 
     /* ===== PLATFORMS ===== */
-    .platforms-strip { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .platform-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 960px) { .platform-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 640px) { .platform-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 420px) { .platform-cards { grid-template-columns: 1fr; max-width: 300px; margin: 0 auto; } }
+    .platform-card {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: 20px 14px 24px; background: var(--surface);
+      border: 1px solid var(--line); border-radius: var(--radius);
+      position: relative; overflow: hidden;
+      transition: transform .22s ease, border-color .22s, box-shadow .22s;
+    }
+    .platform-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--amber), transparent 70%);
+      opacity: 0.35; transition: opacity .22s;
+    }
+    .platform-card:hover { transform: translateY(-5px); border-color: rgba(232,168,56,0.3); box-shadow: 0 20px 46px rgba(0,0,0,0.35); }
+    .platform-card:hover::before { opacity: 0.9; }
+    .platform-card svg { width: 100%; max-width: 172px; height: auto; display: block; margin-bottom: 14px; }
+    .platform-card .pc-you { transition: transform .25s ease; }
+    @media (prefers-reduced-motion: no-preference) {
+      .platform-card:hover .pc-you { transform: translateX(4px); }
+    }
+    .pc-name { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 700; font-size: 1.02rem; letter-spacing: -0.01em; color: var(--fg-strong); }
+    .pc-rule { font-size: 0.8rem; color: var(--muted); margin-top: 4px; line-height: 1.45; }
 
     /* ===== FAQ ===== */
     .faq-list { max-width: 720px; margin: 0 auto; }
@@ -498,15 +522,6 @@
     }
     details.faq[open] summary::after { transform: rotate(45deg); }
     details.faq p { margin-top: 12px; color: var(--muted); font-size: .97rem; line-height: 1.7; }
-    .platform-chip {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: 15px 30px; background: var(--surface);
-      border: 1px solid var(--line); border-radius: 999px;
-      font-weight: 600; font-size: 1rem; letter-spacing: 0.01em; color: var(--fg);
-      transition: transform .22s ease, border-color .22s, background .22s, box-shadow .22s;
-    }
-    .platform-chip:hover { transform: translateY(-3px); border-color: rgba(232,168,56,0.4); background: var(--card); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
-
     /* ===== CTA ===== */
     .cta {
       text-align: center; padding: 100px 24px;
@@ -567,7 +582,7 @@
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-      .feature-card:hover, .coach-card:hover, .step:hover, .btn:hover, .screen-card:hover .device { transform: none !important; }
+      .feature-card:hover, .coach-card:hover, .step:hover, .btn:hover, .screen-card:hover .device, .platform-card:hover { transform: none !important; }
       .carousel img { transition: none; }
     }
   </style>
@@ -1113,22 +1128,66 @@
         <h2>Coaching that knows <span class="grad-text">the platform.</span></h2>
         <p>Every app has its own rules. Your coach adjusts their advice to how each one actually works — not one-size-fits-all tips.</p>
       </div>
-      <div class="platforms-strip">
-        <div class="platform-chip">
-          <span>Tinder</span>
+      <div class="platform-cards">
+
+        <!-- Tinder — "short and punchy": a quick thread of short bubbles -->
+        <div class="platform-card">
+          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <rect x="16" y="12" width="56" height="16" rx="8" fill="rgba(255,255,255,0.08)"/>
+            <rect class="pc-you" x="128" y="38" width="56" height="16" rx="8" fill="rgba(232,168,56,0.28)"/>
+            <rect x="16" y="64" width="42" height="16" rx="8" fill="rgba(255,255,255,0.08)"/>
+          </svg>
+          <span class="pc-name">Tinder</span>
+          <span class="pc-rule">Short and punchy</span>
         </div>
-        <div class="platform-chip">
-          <span>Hinge</span>
+
+        <!-- Hinge — "prompt-based": a prompt card, then your reply -->
+        <div class="platform-card">
+          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <rect x="16" y="8" width="122" height="44" rx="10" fill="var(--card)" stroke="var(--line-strong)"/>
+            <rect x="28" y="20" width="82" height="5" rx="2.5" fill="rgba(255,255,255,0.16)"/>
+            <rect x="28" y="31" width="58" height="5" rx="2.5" fill="rgba(255,255,255,0.10)"/>
+            <rect class="pc-you" x="112" y="64" width="72" height="16" rx="8" fill="rgba(232,168,56,0.28)"/>
+          </svg>
+          <span class="pc-name">Hinge</span>
+          <span class="pc-rule">Prompt-based</span>
         </div>
-        <div class="platform-chip">
-          <span>Bumble</span>
+
+        <!-- Bumble — "she messages first": her bubble opens the thread -->
+        <div class="platform-card">
+          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <circle cx="23" cy="26" r="3" fill="var(--amber)"/>
+            <rect x="33" y="18" width="92" height="16" rx="8" fill="rgba(255,255,255,0.10)" stroke="rgba(232,168,56,0.55)"/>
+            <rect class="pc-you" x="112" y="62" width="72" height="16" rx="8" fill="rgba(232,168,56,0.28)"/>
+          </svg>
+          <span class="pc-name">Bumble</span>
+          <span class="pc-rule">She messages first</span>
         </div>
-        <div class="platform-chip">
-          <span>Instagram</span>
+
+        <!-- Instagram — "story replies, not pickup lines": a story ring, then your reply -->
+        <div class="platform-card">
+          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <circle cx="40" cy="34" r="18" fill="none" stroke="var(--amber)" stroke-width="2.2" opacity="0.7"/>
+            <circle cx="40" cy="34" r="11.5" fill="rgba(255,255,255,0.10)"/>
+            <path d="M60 46q22 14 40 18" fill="none" stroke="var(--line-strong)" stroke-dasharray="3 4"/>
+            <rect class="pc-you" x="104" y="60" width="80" height="16" rx="8" fill="rgba(232,168,56,0.28)"/>
+          </svg>
+          <span class="pc-name">Instagram</span>
+          <span class="pc-rule">Story replies, not pickup lines</span>
         </div>
-        <div class="platform-chip">
-          <span>Texting</span>
+
+        <!-- Texting — "its own game": a longer back-and-forth thread -->
+        <div class="platform-card">
+          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <rect x="16" y="6" width="72" height="15" rx="7.5" fill="rgba(255,255,255,0.08)"/>
+            <rect class="pc-you" x="112" y="28" width="72" height="15" rx="7.5" fill="rgba(232,168,56,0.28)"/>
+            <rect x="16" y="50" width="58" height="15" rx="7.5" fill="rgba(255,255,255,0.08)"/>
+            <rect class="pc-you" x="126" y="72" width="58" height="15" rx="7.5" fill="rgba(232,168,56,0.28)"/>
+          </svg>
+          <span class="pc-name">Texting</span>
+          <span class="pc-rule">Its own game</span>
         </div>
+
       </div>
     </div>
   </section>

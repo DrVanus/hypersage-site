@@ -333,6 +333,24 @@
     }
     @keyframes vgFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
+    /* Match-arc ribbon — the six-turn shape of a match, closing the phase
+       panels. Depicts only what this section states: six turns, both sides
+       stage face-down then reveal at once, one cube at stake, best two of
+       three lanes takes the match. */
+    .match-arc { max-width: 640px; margin: 26px auto 0; }
+    .match-arc svg { display: block; width: 100%; height: auto; }
+    .match-arc .cap { text-align: center; margin-top: 12px; font-size: .92rem; color: var(--muted-fg); font-weight: 600; }
+    .match-arc .ma-lbl {
+      font: 700 10px 'Inter', sans-serif; letter-spacing: .14em;
+      text-transform: uppercase; fill: var(--tertiary-fg);
+    }
+    .match-arc .ma-n { font: 700 13px 'Cinzel', Georgia, serif; letter-spacing: .06em; fill: var(--gold); }
+    @media (prefers-reduced-motion: no-preference) {
+      /* "On-reveal abilities cascade" — a glow travels turn I → VI. */
+      .match-arc .ma-rv { animation: maPulse 4s ease-in-out infinite; }
+    }
+    @keyframes maPulse { 0%, 18%, 100% { opacity: 0; } 7% { opacity: .9; } }
+
     /* CTA band */
     .cta-band {
       text-align: center; background:
@@ -650,6 +668,92 @@
         <div class="lane"><div class="n">I</div><h3>Stage</h3><p>Commit cards face-down to any lane. Locations twist the rules — Castle Dracula buffs Gothic, the Styx destroys its lane on turn six.</p></div>
         <div class="lane"><div class="n">II</div><h3>Reveal</h3><p>Both sides flip at once. On-reveal abilities cascade, powers stack, and lane scores swing.</p></div>
         <div class="lane"><div class="n">III</div><h3>Wager</h3><p>Every match starts at one cube. Confident? Wager to double the stakes. Outmatched? Yield and cut your losses.</p></div>
+      </div>
+      <!-- Match-arc ribbon. Depicts ONLY what this section already says in text:
+           six turns (numbered I–VI), both sides staging face-down then revealing
+           at once, the one cube every match starts at, and best two of three
+           lanes taking the match. The travelling pulse echoes "On-reveal
+           abilities cascade". No stats, names, or counts beyond those. -->
+      <div class="match-arc">
+        <svg viewBox="0 0 660 108" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="maBack" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#2A2011"/>
+              <stop offset="1" stop-color="#181207"/>
+            </linearGradient>
+            <linearGradient id="maWin" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#F6CE6A"/>
+              <stop offset="1" stop-color="#B08526"/>
+            </linearGradient>
+            <g id="maDown">
+              <rect x="-12" y="-17" width="24" height="34" rx="4" fill="url(#maBack)" stroke="rgba(224,179,76,0.5)"/>
+              <rect x="-8.5" y="-13.5" width="17" height="27" rx="3" fill="none" stroke="rgba(224,179,76,0.22)"/>
+              <path d="M0 -5 5 0 0 5 -5 0Z" fill="none" stroke="#B08526" stroke-width="1.1"/>
+              <circle r="1.2" fill="#E0B34C"/>
+            </g>
+            <g id="maUp">
+              <rect x="-12" y="-17" width="24" height="34" rx="4" fill="#241B0D" stroke="rgba(246,206,106,0.55)"/>
+              <circle cy="-6.5" r="5.2" fill="none" stroke="rgba(224,179,76,0.5)"/>
+              <path d="M-7 4.5h14M-7 9.5h10" stroke="rgba(224,179,76,0.38)" stroke-width="1.4" stroke-linecap="round"/>
+            </g>
+            <rect id="maHalo" x="-14.5" y="-19.5" width="29" height="39" rx="5.5" fill="none" stroke="#F6CE6A" stroke-width="1.2"/>
+          </defs>
+
+          <text x="312" y="14" text-anchor="middle" class="ma-lbl">Stage face-down · reveal at once</text>
+          <path d="M60 52H555" stroke="rgba(224,179,76,0.16)" stroke-dasharray="2 5"/>
+
+          <!-- "Every match starts at one cube." -->
+          <polygon points="38,38 47,43 38,48 29,43" fill="#F6CE6A"/>
+          <polygon points="29,43 38,48 38,59 29,54" fill="#B08526"/>
+          <polygon points="47,43 38,48 38,59 47,54" fill="#7E5F1B"/>
+          <text x="38" y="94" text-anchor="middle" class="ma-lbl">One cube</text>
+
+          <!-- Six turns: each stages face-down, then reveals at once. -->
+          <g transform="translate(100 52)">
+            <use href="#maDown" transform="translate(-9 2) rotate(-6)"/>
+            <use href="#maUp" transform="translate(10 -2) rotate(5)"/>
+            <use href="#maHalo" transform="translate(10 -2) rotate(5)" class="ma-rv" opacity="0"/>
+            <text y="42" text-anchor="middle" class="ma-n">I</text>
+          </g>
+          <g transform="translate(185 52)">
+            <use href="#maDown" transform="translate(-9 2) rotate(5)"/>
+            <use href="#maUp" transform="translate(10 -2) rotate(-4)"/>
+            <use href="#maHalo" transform="translate(10 -2) rotate(-4)" class="ma-rv" opacity="0" style="animation-delay:.5s"/>
+            <text y="42" text-anchor="middle" class="ma-n">II</text>
+          </g>
+          <g transform="translate(270 52)">
+            <use href="#maDown" transform="translate(-9 2) rotate(-4)"/>
+            <use href="#maUp" transform="translate(10 -2) rotate(6)"/>
+            <use href="#maHalo" transform="translate(10 -2) rotate(6)" class="ma-rv" opacity="0" style="animation-delay:1s"/>
+            <text y="42" text-anchor="middle" class="ma-n">III</text>
+          </g>
+          <g transform="translate(355 52)">
+            <use href="#maDown" transform="translate(-9 2) rotate(6)"/>
+            <use href="#maUp" transform="translate(10 -2) rotate(-5)"/>
+            <use href="#maHalo" transform="translate(10 -2) rotate(-5)" class="ma-rv" opacity="0" style="animation-delay:1.5s"/>
+            <text y="42" text-anchor="middle" class="ma-n">IV</text>
+          </g>
+          <g transform="translate(440 52)">
+            <use href="#maDown" transform="translate(-9 2) rotate(-5)"/>
+            <use href="#maUp" transform="translate(10 -2) rotate(4)"/>
+            <use href="#maHalo" transform="translate(10 -2) rotate(4)" class="ma-rv" opacity="0" style="animation-delay:2s"/>
+            <text y="42" text-anchor="middle" class="ma-n">V</text>
+          </g>
+          <g transform="translate(525 52)">
+            <use href="#maDown" transform="translate(-9 2) rotate(4)"/>
+            <use href="#maUp" transform="translate(10 -2) rotate(-6)"/>
+            <use href="#maHalo" transform="translate(10 -2) rotate(-6)" class="ma-rv" opacity="0" style="animation-delay:2.5s"/>
+            <text y="42" text-anchor="middle" class="ma-n">VI</text>
+          </g>
+
+          <!-- "Best two of three lanes takes the match." -->
+          <rect x="565" y="30" width="14" height="44" rx="4" fill="url(#maWin)"/>
+          <rect x="585" y="30" width="14" height="44" rx="4" fill="#221A0C" stroke="rgba(224,179,76,0.30)"/>
+          <rect x="605" y="30" width="14" height="44" rx="4" fill="url(#maWin)"/>
+          <text x="592" y="90" text-anchor="middle" class="ma-lbl">Best two</text>
+          <text x="592" y="102" text-anchor="middle" class="ma-lbl">of three</text>
+        </svg>
+        <p class="cap">Six turns of stage and reveal, one cube at stake — best two of three lanes takes the match.</p>
       </div>
     </div>
   </section>

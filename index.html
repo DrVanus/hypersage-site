@@ -319,17 +319,26 @@
       transform: translateX(-50%); border-radius: 50%; background: var(--brand-b);
       box-shadow: 0 0 12px rgba(167,139,250,.72);
     }
+    /* The output is the payoff of the whole diagram, so it carries the strongest
+       treatment: brand-gradient text and a glow that answers the packet arrivals. */
     .engine-output {
       position: absolute; z-index: 2; right: 3.5%; top: 50%; width: 23%;
-      transform: translateY(-50%); padding: 11px 9px; text-align: center;
-      border: 1px solid rgba(167,139,250,.22); border-radius: 11px;
-      background: linear-gradient(145deg, rgba(45,212,191,.09), rgba(167,139,250,.09));
+      transform: translateY(-50%); padding: 12px 9px 11px; text-align: center;
+      border: 1px solid rgba(167,139,250,.36); border-radius: 11px;
+      background: linear-gradient(145deg, rgba(45,212,191,.13), rgba(167,139,250,.15));
+      box-shadow: 0 10px 28px rgba(0,0,0,.26), 0 0 20px rgba(167,139,250,.12);
     }
-    .engine-output span {
+    .engine-output::after {
+      content: ''; position: absolute; inset: -1px; border-radius: 12px;
+      pointer-events: none; opacity: 0;
+      box-shadow: 0 0 26px rgba(167,139,250,.45), inset 0 0 14px rgba(45,212,191,.2);
+    }
+    .engine-output > span {
       display: block; margin-bottom: 3px; font-family: 'JetBrains Mono', monospace;
       color: var(--brand-a); font-size: .5rem; letter-spacing: .12em; text-transform: uppercase;
     }
-    .engine-output strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: .7rem; line-height: 1.2; }
+    .engine-output strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: .7rem; line-height: 1.25; }
+    .engine-output small { display: block; margin-top: 4px; color: var(--faint); font-size: .5rem; letter-spacing: .04em; }
     .engine-foot {
       position: absolute; left: 18px; right: 18px; bottom: 13px; z-index: 4;
       color: var(--faint); font-size: .51rem; letter-spacing: .02em; text-align: right;
@@ -352,10 +361,12 @@
     .context-engine.motion-start .packet-current { animation: packetCurrent 1.05s cubic-bezier(.4,0,.2,1) 1.36s both; }
     .context-engine.motion-start .packet-output { animation: packetOutput 1.05s cubic-bezier(.4,0,.2,1) 2.15s both; }
     .context-engine.motion-start .engine-output { animation: engineOutputIn .58s cubic-bezier(.16,.8,.3,1) 2.74s both; }
+    .context-engine.motion-start .engine-output::after { animation: outputGlow .95s ease 3.3s both; }
     @keyframes engineNodeIn { from { opacity: 0; transform: translateX(-7px); } to { opacity: 1; transform: none; } }
     @keyframes engineFadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes engineCoreIn { from { opacity: 0; transform: translate(-50%,-50%) scale(.82); } to { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
     @keyframes engineOutputIn { from { opacity: 0; transform: translate(-7px,-50%); } to { opacity: 1; transform: translate(0,-50%); } }
+    @keyframes outputGlow { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
     @keyframes engineOrbit { from { transform: rotate(-165deg); opacity: .1; } to { transform: rotate(0); opacity: 1; } }
     @keyframes packetRecord {
       0% { opacity: 0; transform: translate(150px,80px) scale(.6); }
@@ -383,6 +394,9 @@
     .context-engine.motion-idle .packet-recent { animation: packetRecentLoop 9s cubic-bezier(.4,0,.2,1) 2.25s infinite; }
     .context-engine.motion-idle .packet-current { animation: packetCurrentLoop 9s cubic-bezier(.4,0,.2,1) 2.5s infinite; }
     .context-engine.motion-idle .packet-output { animation: packetOutputLoop 9s cubic-bezier(.4,0,.2,1) 3.4s infinite; }
+    /* Same 9s clock and 3.4s delay as the output packet, peaking just after the
+       packet's 12% arrival keyframe, so the box lights when the answer lands. */
+    .context-engine.motion-idle .engine-output::after { animation: outputGlowLoop 9s cubic-bezier(.4,0,.2,1) 3.4s infinite; }
     @keyframes engineOrbitSpin { to { transform: rotate(360deg); } }
     @keyframes packetRecordLoop {
       0% { opacity: 0; transform: translate(150px,80px) scale(.6); }
@@ -404,6 +418,7 @@
       2.5%, 9.5% { opacity: .85; }
       12%, 100% { opacity: 0; transform: translate(356px,145px) scale(.75); }
     }
+    @keyframes outputGlowLoop { 0%, 10% { opacity: 0; } 14%, 19% { opacity: .85; } 28%, 100% { opacity: 0; } }
     @media (max-width: 980px) {
       .hero-stage {
         grid-template-columns: 1fr; grid-template-areas: "eyebrow" "title" "copy" "engine";
@@ -791,7 +806,8 @@
 
           <div class="engine-output">
             <span>Result</span>
-            <strong>Shaped for the task</strong>
+            <strong class="grad-text">The best possible answer</strong>
+            <small>✓&nbsp;grounded &nbsp;✓&nbsp;checked</small>
           </div>
           <figcaption class="engine-foot">* In products that support live task context.</figcaption>
         </figure>
@@ -1117,8 +1133,8 @@
           <p>What you're working on right now, plus the product's own domain knowledge, live data, tools, rules, and safeguards.</p>
         </li>
         <li class="flow-step">
-          <h3>A useful result</h3>
-          <p>An answer, brief, recipe, story beat, or next action shaped for the task.</p>
+          <h3>The best possible answer</h3>
+          <p>An answer, brief, recipe, story beat, or next action — grounded in your context and checked before you see it.</p>
         </li>
       </ol>
 
