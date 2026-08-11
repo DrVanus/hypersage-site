@@ -851,7 +851,7 @@
                com.vanus.hexhunter.unlockall and com.vanus.hexhunter.starterpack). The page
                must not read as if essence is the only route. Prices are deliberately absent
                here: the .storekit file is a local test config, not the ASC-registered price. -->
-          <p class="lede">Pick your hunter in the loadout, then earn the rest with essence — or take the optional one-time Unlock All purchase and skip the grind. Every hero rewrites the run — a passive, a stat identity, and a starting weapon that sets the whole build in motion. Start with Vess; unlock the other seven.</p>
+          <p class="lede">Pick your hunter in the loadout, then earn the rest with essence — or take the optional one-time Unlock All purchase and skip the grind. Every hero rewrites the run — a passive, a stat identity, and a starting weapon that sets the whole build in motion. Start with Vess and Kael; unlock the other six.</p>
           <ul class="showcase-points">
             <li><b>8 distinct hunters</b> — from the balanced Huntress to the kill-hungry Revenant.</li>
             <li><b>Each shifts the whole build</b> with its own passive and starting weapon.</li>
@@ -865,6 +865,16 @@
           </div>
         </div>
       </div>
+      <!-- ORDER AND LOCK STATE MIRROR THE SHIPPED ROSTER, `HexHeroes.all` in
+           Hexhunter/Sources/Game/HexMeta.swift: free heroes first, then the
+           purchasable ones. TWO heroes are `unlockCost: 0` — Vess (HexMeta.swift:90)
+           and Kael (HexMeta.swift:109, free since a3b6531) — so exactly two cards
+           here are unlocked and the copy says "the other six". Kael's zero cost is
+           deliberate, not a bug: one free hero out of eight made a new player's only
+           choice "stare at seven locked cards", and he is the pick precisely because
+           he is NOT `StoreManager.starterPackHeroID` (Maugrim), whose freeing would
+           gut the Starter Pack IAP. If the roster's free count ever changes, change
+           the lede above with it. -->
       <div class="heroes-grid showcase-detail">
         <div class="hero-card">
           <img class="portrait" src="assets/heroes/huntress.png?v=20260718b" width="256" height="256" loading="lazy" alt="Vess, the Huntress">
@@ -874,6 +884,14 @@
           <div class="stat-line">Standard stats</div>
           <div class="weapon">Starts with <b>Arcane Bolt</b></div>
         </div>
+        <div class="hero-card">
+          <img class="portrait" src="assets/heroes/pyromancer.png?v=20260718b" width="256" height="256" loading="lazy" alt="Kael, the Pyromancer">
+          <div class="name">Kael</div>
+          <div class="epithet">the Pyromancer</div>
+          <p>Burns bright, burns fast. Glass-cannon damage that turns the field to ash.</p>
+          <div class="stat-line">+20% DMG · −15% HP</div>
+          <div class="weapon">Starts with <b>Venom Cloud</b> (as fire)</div>
+        </div>
         <div class="hero-card locked">
           <img class="portrait" src="assets/heroes/gravewarden.png?v=20260718b" width="256" height="256" loading="lazy" alt="Maugrim, the Gravewarden">
           <div class="name">Maugrim</div>
@@ -881,14 +899,6 @@
           <p>The heavy vanguard. Wades into the swarm and simply refuses to fall.</p>
           <div class="stat-line">+40% HP · +10% DMG · −12% SPD</div>
           <div class="weapon">Starts with <b>Cleaving Arc</b></div>
-        </div>
-        <div class="hero-card locked">
-          <img class="portrait" src="assets/heroes/pyromancer.png?v=20260718b" width="256" height="256" loading="lazy" alt="Kael, the Pyromancer">
-          <div class="name">Kael</div>
-          <div class="epithet">the Pyromancer</div>
-          <p>Burns bright, burns fast. Glass-cannon damage that turns the field to ash.</p>
-          <div class="stat-line">+20% DMG · −15% HP</div>
-          <div class="weapon">Starts with <b>Venom Cloud</b> (as fire)</div>
         </div>
         <div class="hero-card locked">
           <img class="portrait" src="assets/heroes/warden.png?v=20260718b" width="256" height="256" loading="lazy" alt="Thorne, the Warden">
