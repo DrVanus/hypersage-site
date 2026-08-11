@@ -72,8 +72,18 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
   infinity). Source in `brand/`.
 - `icons/` — 256px app icons for all 13 products (hero strip + product grid). All 13 are
   referenced by `index.html`.
-- `og-image.png` — 1200×630 social card, referenced with the `?v=20260806c` cache-buster
-  on all four studio pages. Bump the suffix whenever the bytes change, in all four.
+- `og-image.png` — 1200×630 social card, referenced with the `?v=20260811a` cache-buster
+  on all four studio pages. Bump the suffix whenever the bytes change, in all four —
+  and **only** when they change; a new `?v=` on identical bytes just forces a pointless
+  refetch, while changed bytes under an old `?v=` keep the stale picture forever.
+- **Every og-image in this repo is GENERATED. Never hand-draw or hand-edit one.**
+  `tools/build_og.py` renders the studio card by lifting the page's own `<style>` and
+  hero figure; `tools/build_app_og.py` renders all eleven product cards from each
+  subsite's own `:root` tokens, webfont stack, hero words and shipped art. Seven were
+  hand-made until 2026-08-11 and every one had drifted from its page — see the
+  header comment in each tool for what that cost.
+- `*/og-image.inputs.sha256` — the stamp each renderer writes, recording what its card
+  was built from. It is what makes `--check` able to say "the page moved".
 - `shots/` — **orphaned.** Two leftover screenshots (`quietoak.jpg`, `theone.jpg`) from a
   removed "A look at the work" showcase. Nothing in this repo references them.
 - `legal.css` — shared stylesheet for the three legal pages.
@@ -94,6 +104,20 @@ may link to a live experience when one exists, but studio-level copy should expl
 portfolio and its shared product architecture rather than compare release status.
 
 ## Audit tooling
+
+Run these two first — unlike the legacy auditor below, they ARE pass/fail and they are
+cheap:
+
+```bash
+python3 tools/build_og.py --check        # studio card still matches the studio page
+python3 tools/build_app_og.py --check    # all eleven product cards still match their pages
+```
+
+They fail when a page moves under its card (CSS tokens, `<h1>`, `og:title`,
+`og:description`, or the art file's bytes), when a number in a card appears nowhere on
+its page, when a kicker claims iOS while the page links no App Store listing, or when a
+card uses a colour that is not one of the site's own. An unrelated copy edit does not
+trip them. Fix by re-rendering that site, then bumping its `?v=`.
 
 ```bash
 python3 ~/.claude/skills/no-build-marketing-site/site_audit.py . --contract site-audit-contract.json
