@@ -24,10 +24,17 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 W, H = 1200, 630
 
 FONTS = {
-    "nightshelf": "family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400..800",
-    "mythwright": "family=Cinzel:wght@500..800&family=Inter:wght@400..800",
-    "storyvault": "family=Playfair+Display:ital,wght@0,500..800;1,500..800&family=Inter:wght@400..800",
-    "saffra":     "family=Playfair+Display:ital,wght@1,600&family=Inter:wght@400..800",
+    'nightshelf': 'family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700',
+    'mythwright': 'family=Cinzel:wght@500..800&family=Inter:wght@400..800',
+    'storyvault': 'family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700',
+    'saffra': 'family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600',
+    'quietoak': 'family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600',
+    'rowan': '',
+    'alder': '',
+    'wingmate': 'family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700',
+    'waddleton': '',
+    'mythkin': '',
+    'hexhunter': 'family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800',
 }
 
 # Per-site card: colors are the site's own :root values, copy is the page's own
@@ -48,9 +55,12 @@ CARDS = {
          box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(232,177,92,0.20); }
 """,
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
-        "kicker": "Bedtime stories · iOS",
+        "kicker": "Bedtime stories · Coming to iOS",
         "h1": "Stories to <em>drift&nbsp;off</em>&nbsp;to",
-        "sub": "Eighty-two timeless classics and calm new AI stories, read aloud in a soft, sleepy voice with ambient sound underneath.",
+        # "with Nightshelf Pro" is load-bearing and must never be trimmed away:
+        # conjuring a story is Pro-only with NO free allowance (the backend hard-402s,
+        # index.html:706-711). An unqualified "AI stories" line overclaims the free tier.
+        "sub": "Eighty-two timeless classics, and calm new ones written by AI with Nightshelf&nbsp;Pro, read aloud in a soft, sleepy voice with ambient sound underneath.",
     },
     "mythwright": {
         "art": "app-icon.png",
@@ -69,20 +79,28 @@ CARDS = {
          border: 1px solid rgba(224,179,76,0.30);
          box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 90px rgba(224,179,76,0.16); }
 """,
-        "kicker": "Collectible card game · iOS",
+        "kicker": "Collectible card game · Coming to iOS",
         "h1": "Collect.<br>Build.<br>Battle.",
         "sub": "The heroes and monsters of classic literature, at war across three lanes. 256 cards, six factions, a full campaign.",
     },
     "storyvault": {
         "art": "storyvault-mark.png",
         "css": """
+  /* Every hex below is copied verbatim from storyvault/index.html :root —
+     --card #171030, --bg #0D0620, --bg-deeper #060312, --accent #D9B57F,
+     --fg #F5F1E8, --muted-fg #B8AEC6, and --gold-grad for the italic line.
+     The site has ONE scheme (no prefers-color-scheme block), so this is it. */
   .og { background: linear-gradient(160deg, #171030 0%, #0D0620 52%, #060312 100%); }
   .kicker { color: #D9B57F; }
-  h1 { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 63px;
+  /* Mirrors .hero-text h1: Playfair Display 700, letter-spacing -0.02em. */
+  h1 { font-family: 'Playfair Display', 'Iowan Old Style', Georgia, serif; font-weight: 700;
+       font-size: 63px; letter-spacing: -0.02em;
        background-image: linear-gradient(178deg, #F5F1E8 30%, #B8AEC6 108%); }
-  /* "written with you." must stay ONE line — a wrapped orphan "you." killed the
-     460px read. Sized 63px so the nowrap span still clears the column. */
-  h1 .grad { font-style: italic; white-space: nowrap;
+  /* The page's own accent span is .italic-anything.grad — italic 600 painted
+     with --gold-grad. "written with you." must stay ONE line; a wrapped orphan
+     "you." killed the 460px read, hence 63px + nowrap (measured: 449px in a
+     548px column, so it clears). */
+  h1 .grad { font-style: italic; font-weight: 600; white-space: nowrap;
        background-image: linear-gradient(115deg, #F3E3BD 0%, #E4C48F 38%, #D9B57F 62%, #C09A62 100%); }
   .sub { color: #B8AEC6; }
   /* The mark's own nebula feathers into the card bg instead of sitting in a box. */
@@ -90,7 +108,10 @@ CARDS = {
          -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 98%);
          mask-image: radial-gradient(closest-side, #000 55%, transparent 98%); }
 """,
-        "kicker": "AI story adventures · iOS",
+        # The page's own eyebrow ornament: .hero-eyebrow::before { content: '✦' }.
+        "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.6l2.3 7.8 7.8 2.3-7.8 2.3-2.3 7.8-2.3-7.8L1.9 11.7l7.8-2.3z"/></svg>',
+        # NOT "· iOS": the page's eyebrow says "Coming to iOS" and links no App Store.
+        "kicker": "AI Adventures · Coming to iOS",
         "h1": 'Branching tales,<br><span class="grad">written with you.</span>',
         "sub": "Step into Beowulf, Dracula, or a world only the AI has dreamed. Every choice rewrites the next page.",
     },
@@ -100,22 +121,259 @@ CARDS = {
   .og { background:
         radial-gradient(circle at 79% 52%, rgba(224,130,48,0.16), transparent 55%),
         linear-gradient(160deg, #1A1612 0%, #0E0C0A 62%); }
-  .kicker { color: #E08230; }
+  /* The page is pre-release ("Coming Soon to iOS", waitlist CTA, no App Store
+     link), so the kicker carries that instead of the fleet's "<category> · iOS".
+     It is longer, so it is sized down and pinned to one row — a wrapped kicker
+     shoves the headline off the card. Measured: 424px of the 568px column. */
+  .kicker { color: #E08230; font-size: 19px; letter-spacing: 0.10em; white-space: nowrap; }
   h1 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 78px;
-       background-image: linear-gradient(178deg, #F5EFE5 40%, #CDBFA9 108%); }
+       background-image: linear-gradient(178deg, #F5EFE5 40%, #9A8E80 122%); }
+  /* Exactly the page's own .italic-anything: Playfair italic 600 over the site's
+     three-stop warm gradient (--primary-light / --primary / --primary-dark),
+     plus its padding-right so the final "d." can't clip on the italic overhang. */
   h1 .ital { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 600;
-       background-image: linear-gradient(115deg, #F5C088 0%, #E08230 100%); }
+       background-image: linear-gradient(135deg, #F5C088 0%, #E08230 50%, #B8651C 100%);
+       padding-right: 0.08em; }
   .sub { color: #9A8E80; }
   .art { width: 470px; height: 470px; }
 """,
-        "kicker": "AI recipe app · iOS",
+        "kicker": "AI recipe app · Coming soon to iOS",
         "h1": 'Your kitchen,<br><span class="ital">understood.</span>',
         "sub": "Premium recipes you can trust — built from a weighted consensus of tested, editor-vetted sources, then rewritten for your pantry.",
+    },
+    "quietoak": {
+        "art": "companions/group-painting.png",
+        "css": """
+  /* The page's own calm-daytime atmosphere (body::before) over --bg, plus the
+     sage glow the hero already puts behind this same painting (.hero-image::after).
+     Every value is copied out of the subsite's :root — nothing new is mixed. */
+  .og { background:
+        radial-gradient(ellipse 26% 44% at 78% 52%, rgba(157,191,168,0.20), transparent 65%),
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(157,191,168,0.22), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 85% 15%, rgba(241,201,165,0.18), transparent 70%),
+        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(62,125,138,0.05), transparent 70%),
+        #F3F6F5; }
+  /* The kicker slot carries the BRAND LOCKUP, not a category line. Quietoak has
+     no store link — the hero eyebrow says "Coming to iOS" and the CTA is a
+     notify-me mailto — so the fleet's "<category> · iOS" kicker would read as an
+     availability claim this page does not make. Split exactly the way the nav
+     splits it: "Quiet" in --fg, "oak" in --sage-deep. display:block because the
+     shared .kicker is a flex row whose 10px gap opened it to "Quiet oak". */
+  .kicker { display: block; font-family: 'Nunito', ui-rounded, sans-serif;
+            font-size: 100px; font-weight: 800; letter-spacing: -0.01em;
+            text-transform: none; color: #21353B; }
+  .kicker .oak { color: #6F9C82; }
+  /* Flat ink, not a gradient: this site is a declared light, flat design whose
+     headline is one token (--fg) with one accent (--primary). The shell's
+     background-clip:text machinery is switched off rather than fed an invented ramp. */
+  h1 { font-family: 'Nunito', ui-rounded, sans-serif; font-weight: 800; font-size: 58px;
+       letter-spacing: -0.025em;
+       background-image: none; -webkit-background-clip: border-box; background-clip: border-box;
+       color: #21353B; }
+  h1 em { font-style: normal; color: #3E7D8A; }   /* the page's own <span class="soft"> */
+  .sub { font-family: 'Nunito', ui-rounded, sans-serif; color: #4A5E64;
+         /* 440px keeps the page's sentence break ("...DBT skills." / "A crisis
+            kit...") instead of orphaning "A crisis" onto the first line. */
+         max-width: 440px; }
+  /* 506x310 is group-painting.png's own 640x392 aspect to within 0.03%, so
+     object-fit: cover crops nothing off the six companions. */
+  .art { width: 506px; height: 310px; }
+""",
+        "kicker": 'Quiet<span class="oak">oak</span>',
+        "h1": 'A calmer way to<br><em>practice DBT&nbsp;skills.</em>',
+        "sub": "Choose a companion. Real DBT skills. A crisis kit that's always free.",
+    },
+    "rowan": {
+        "art": "art/rowan_welcome.png",
+        "css": """
+  /* Rowan's page is warm cream, not violet: --bg #FBF4EF under the three
+     body::before radial washes, copied verbatim. The third stop is the page's
+     own --primary-glow (the .hero-image::after halo) moved under the art. */
+  .og { background:
+        radial-gradient(ellipse 85% 55% at 15% 0%, rgba(251,227,214,0.85), transparent 62%),
+        radial-gradient(ellipse 70% 50% at 88% 10%, rgba(241,234,247,0.90), transparent 68%),
+        radial-gradient(ellipse 34% 62% at 78% 50%, rgba(111,91,197,0.14), transparent 65%),
+        radial-gradient(ellipse 70% 45% at 50% 100%, rgba(111,91,197,0.05), transparent 70%),
+        #FBF4EF; }
+  /* No webfonts on this site — the page's own system stacks, or the card
+     renders in a face Rowan never uses. .eyebrow is --primary-dark. */
+  .kicker { font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, system-ui, sans-serif;
+            color: #5B49A8; }
+  /* Flat --fg ink, not a gradient: kill the shell's background-clip:text or the
+     headline renders as transparent glyphs on a light card. */
+  h1 { font-family: ui-serif, 'New York', Charter, Georgia, 'Times New Roman', serif;
+       font-weight: 700; font-size: 60px; letter-spacing: -0.025em;
+       background-image: none; color: #3B2D4F; }
+  /* .hero-text h1 .soft — --primary, and upright: the page never italicises it. */
+  h1 em { font-style: normal; color: #6F5BC5; }
+  .sub { font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, system-ui, sans-serif;
+         color: #6E5E7C; }
+  /* The 712x800 hero sprite at its own ratio — contain, not the shell's cover,
+     and no drop-shadow: on cream it greys the halo the art already paints. */
+  .art { width: 432px; height: 486px; object-fit: contain; }
+""",
+        "kicker_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+        "kicker": "Health companion · Coming to iOS",
+        "h1": "The health<br>companion that<br><em>knows your story.</em>",
+        "sub": "Talk about your day in plain words. Rowan turns it into a record you can use — and a brief you hand your doctor.",
+    },
+    "alder": {
+        "art": "art/alder_steady.png",
+        "css": """
+  /* Alder is committed-dark ("Hearth"): the page's own --bg #171310 under its own
+     glows — the hero halo rgba(224,164,88,0.18) moved to the art side, plus the two
+     body::before lamps (amber 0.13, healing green 0.07). */
+  .og { background:
+        radial-gradient(ellipse 48% 66% at 79% 50%, rgba(224,164,88,0.18), transparent 66%),
+        radial-gradient(ellipse 65% 45% at 10% -12%, rgba(224,164,88,0.13), transparent 62%),
+        radial-gradient(ellipse 55% 45% at 94% 4%, rgba(143,185,150,0.07), transparent 66%),
+        #171310; }
+  /* The site's eyebrow is a pill, not bare text: --tint on --tint-soft, --border-strong. */
+  .kicker { display: inline-flex; font-size: 19px; letter-spacing: 0.16em; color: #E0A458;
+            font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, system-ui, sans-serif;
+            padding: 9px 20px; background: #3A2E1F; border: 1px solid #4A3D30; border-radius: 999px; }
+  /* Alder loads no webfont: h1 is the page's ui-serif stack, body text its system stack. */
+  h1 { font-family: ui-serif, Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 72px;
+       background-image: linear-gradient(180deg, #F5EDE3 0%, #F5EDE3 100%); }
+  /* The hero's .soft span is flat --tint and NOT italic. The shell only clips
+     .grad/.ital, so em carries its own clip; nowrap keeps "at 3am." whole. */
+  h1 em { font-style: normal; white-space: nowrap; color: transparent;
+          -webkit-background-clip: text; background-clip: text;
+          background-image: linear-gradient(180deg, #E0A458 0%, #E0A458 100%); }
+  .sub { font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, system-ui, sans-serif;
+         color: #A99C8C; }
+  /* The companion ships RGB with a baked dark field, so the page's own mask feathers
+     it into the card instead of pasting a square onto it. */
+  .art { width: 470px; height: 470px;
+         -webkit-mask-image: radial-gradient(closest-side, #000 58%, transparent 92%);
+         mask-image: radial-gradient(closest-side, #000 58%, transparent 92%); }
+""",
+        "kicker": "Sobriety companion · Coming to iOS · 18+",
+        "h1": "Someone to<br>talk to <em>at 3am.</em>",
+        "sub": "It counts your sober time, sits with you through an urge, and never makes you feel small for having one. No account, no name, no email.",
+    },
+    "wingmate": {
+        "art": "app-icon.png",
+        "css": """
+  /* body::before's mesh, verbatim, over --bg — plus the hero-art's own amber
+     halo (rgba(232,168,56,0.14)) moved to where the icon sits on the card. */
+  .og { background:
+        radial-gradient(ellipse 44% 62% at 79% 50%, rgba(232,168,56,0.14), transparent 62%),
+        radial-gradient(ellipse 60% 50% at 10% -8%, rgba(232,168,56,0.10), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 95% 5%, rgba(167,139,250,0.07), transparent 55%),
+        radial-gradient(ellipse 70% 45% at 50% 110%, rgba(52,211,153,0.05), transparent 65%),
+        #13151A; }
+  .kicker { color: #E8A838; }
+  /* The page's h1 is flat --fg-strong, but the shell clips h1 to a gradient — so
+     white is spelled as a flat two-stop rather than invented as a ramp. */
+  h1 { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 700; font-size: 66px;
+       line-height: 1.18; letter-spacing: -0.02em;
+       background-image: linear-gradient(#FFFFFF, #FFFFFF); }
+  /* .grad-text — the page's own accent on "actually get it." (not italic there). */
+  h1 em { font-style: normal;
+       -webkit-background-clip: text; background-clip: text; color: transparent;
+       background-image: linear-gradient(135deg, #F5CC6A 10%, #E8A838 90%); }
+  .sub { color: #9CA3B4; }
+  /* Radius is the site's own icon treatment (.brand img = 10px on 36px, scaled);
+     the halo is --amber-glow-strong so a near-black tile leaves a near-black card. */
+  .art { width: 424px; height: 424px; border-radius: 118px;
+         box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(232,168,56,0.24); }
+""",
+        "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+        "kicker": "Coming to iOS",
+        "h1": 'AI dating<br>coaches that<br><em>actually get&nbsp;it.</em>',
+        "sub": "Four coaches, four perspectives. Drop a screenshot and get exact replies to send — platform-aware advice for Tinder, Hinge, Bumble, and texting.",
+    },
+    "waddleton": {
+        "art": "waddleton-icon.png",
+        "css": """
+  .og { background:
+        radial-gradient(circle at 78% 44%, rgba(79,208,192,0.20), transparent 56%),
+        radial-gradient(circle at 97% 88%, rgba(176,138,255,0.16), transparent 50%),
+        linear-gradient(160deg, #0A1230 0%, #0B1026 64%); }
+  /* Waddleton loads no webfont, so FONTS["waddleton"] is "" — these two rules put the
+     site's own system stack back over the shell's 'Inter' default. */
+  .kicker, .sub { font-family: -apple-system, 'Avenir Next', 'Segoe UI', system-ui, sans-serif; }
+  .kicker { color: #4FD0C0; }
+  h1 { font-family: -apple-system, 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+       font-weight: 800; font-size: 58px;
+       background-image: linear-gradient(178deg, #F4F9FF 8%, #EAF4FF 100%); }
+  /* The page's own .hero h1 .grad, tokens resolved: aurora-teal -> ice -> aurora-violet.
+     58px is the size at which "A snowy island to" still holds one line in the 568px
+     column — at 60px "to" drops to an orphan line. */
+  h1 .grad { background-image: linear-gradient(110deg, #4FD0C0 0%, #59C8FF 45%, #B08AFF 100%); }
+  .sub { color: #A8BEDE; }
+  .art { width: 424px; height: 424px; border-radius: 96px;
+         border: 1px solid rgba(255,255,255,0.17);
+         box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 100px rgba(79,208,192,0.22); }
+""",
+        "kicker_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5v19M3.77 7.25l16.46 9.5M20.23 7.25L3.77 16.75"/><path d="M9.4 5.1L12 6.9l2.6-1.8M9.4 18.9L12 17.1l2.6 1.8"/><path d="M4.2 10.9l3.1.9-.8 3.1M19.8 13.1l-3.1-.9.8-3.1"/><path d="M19.8 10.9l-3.1.9.8 3.1M4.2 13.1l3.1-.9-.8-3.1"/></svg>',
+        "kicker": "Free · Plays in your browser",
+        "h1": 'A snowy island to<br><span class="grad">waddle&nbsp;around.</span>',
+        "sub": "Make a penguin, wander a painted arctic island, meet other players, and dive into 15 arcade games. No sign-up, no cost.",
+    },
+    "mythkin": {
+        "art": "mythkin-icon.png",
+        "css": """
+  /* The page's DEFAULT scheme is the light one: style.css :root is the cream
+     palette and the dark set sits behind prefers-color-scheme. Tokens verbatim —
+     --bg #FBF6EC, --surface #fff, --text #1A1526, --dim #6B6478,
+     --tint #6B3FA0, --gold #9A7B22. */
+  .og { background:
+        radial-gradient(circle at 78% 48%, rgba(107,63,160,0.16), transparent 56%),
+        linear-gradient(160deg, #FFFFFF 0%, #FBF6EC 42%); }
+  .kicker { color: #9A7B22; }
+  h1 { font-family: 'New York', 'Iowan Old Style', Georgia, serif; font-weight: 700; font-size: 56px;
+       background-image: linear-gradient(178deg, #1A1526 26%, #6B3FA0 116%); }
+  /* Mythkin loads no webfont at all: --serif above and --sans here are its own
+     stacks, so the card uses them instead of the shell's Inter. */
+  .kicker, .sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .sub { color: #6B6478; }
+  /* 106px is the site's own icon rounding — .mark img is 11px on a 44px tile —
+     and the dark painted tile is what carries this otherwise pale card. */
+  .art { width: 424px; height: 424px; border-radius: 106px;
+         box-shadow: 0 26px 60px rgba(26,21,38,0.30), 0 0 90px rgba(154,123,34,0.22); }
+""",
+        # The page's own spark glyph (.bf-glyph--spark, drawn in var(--gold)).
+        "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9z"/></svg>',
+        # No "· iOS" here, unlike the other four: the page says Mythkin is not in
+        # the app stores yet, so the card must not imply it ships.
+        "kicker": "AI characters · 18+",
+        "h1": "Characters made<br>by people,<br>alive with you.",
+        "sub": "Write a character. Give them a temperament, a history, a first line. Then talk to them — and they remember. Share them, or borrow someone else's.",
+    },
+    "hexhunter": {
+        "art": "assets/art/cover.jpg",
+        "css": """
+  /* The page's own atmosphere (body::before) over --bg-2 -> --bg, plus one extra
+     --violet-glow pass so the top-left burns as hot as the 640px card this replaces. */
+  .og { background:
+        radial-gradient(ellipse 78% 62% at 14% -4%, rgba(139,92,246,0.22), transparent 60%),
+        radial-gradient(ellipse 90% 60% at 15% -5%, rgba(139,92,246,0.16), transparent 55%),
+        radial-gradient(ellipse 70% 50% at 90% 5%, rgba(212,175,55,0.07), transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 108%, rgba(109,40,217,0.14), transparent 65%),
+        linear-gradient(160deg, #120E1F 0%, #0C0A14 62%); }
+  .kicker { color: #D4AF37; }
+  /* Cinzel has no true lowercase, so this reads as caps exactly like the page's
+     hero h1; the 18-character first line sets the ceiling at 52px (56px wraps to 4). */
+  h1 { font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: 52px;
+       background-image: linear-gradient(178deg, #ECE7F5 60%, #A99EC2 165%); }
+  h1 .grad { background-image: linear-gradient(180deg, #F0D875 0%, #D4AF37 78%); }
+  .sub { color: #A99EC2; }
+  /* The hero's own cover plate (the page's .hero-bg), bled full-height like the
+     card it replaces and feathered into the violet so the huntress faces the horde. */
+  .art { width: 540px; height: 630px; object-position: 60% 45%; opacity: 0.82;
+         -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 100%);
+         mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 100%); }
+""",
+        "kicker": "Gothic horde-survivor · Coming to iOS",
+        "h1": 'Survive the Horde.<br>Draft Your <span class="grad">Doom.</span>',
+        "sub": "Pick a hero, draft upgrades every level, evolve your weapons into ascended forms, and fight to survive the endless dark.",
     },
 }
 
 SHELL = """<!DOCTYPE html><html><head><meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?{fonts}&display=block" rel="stylesheet">
+{font_link}
 <style>
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
   .og {{ width: {w}px; height: {h}px; overflow: hidden; display: flex; align-items: center; }}
@@ -151,7 +409,13 @@ def render(names: list[str]) -> None:
         pg = b.new_page(viewport={"width": W, "height": H}, device_scale_factor=1)
         for name in names:
             c = CARDS[name]
-            html = SHELL.format(w=W, h=H, fonts=FONTS[name], css=c["css"],
+            # Four of the eleven subsites ship no webfont at all; handing them an
+            # empty css2? query would request a broken stylesheet and leave
+            # document.fonts.status pending. They style their own stack in css.
+            q = FONTS.get(name, "")
+            font_link = (f'<link href="https://fonts.googleapis.com/css2?{q}&display=block" '
+                         f'rel="stylesheet">') if q else ""
+            html = SHELL.format(w=W, h=H, font_link=font_link, css=c["css"],
                                 kicker_svg=c.get("kicker_svg", ""), kicker=c["kicker"],
                                 h1=c["h1"], sub=c["sub"], art=c["art"])
             # Written into the SUBSITE dir so the art path resolves as it does live.
