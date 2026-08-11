@@ -205,13 +205,58 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
     </div>
   </div>
   <div class="phone">
-    <!-- A real capture from the running app against the live server, untouched.
-         The engagement counts read zero because nothing has launched yet; that
-         is the honest number and it stays until it isn't. -->
-    <img src="screens/discover.png" width="390" height="844" fetchpriority="high"
-         alt="The Mythkin discover screen, showing Sherlock Holmes and Cleopatra with painted portraits and Borrow buttons.">
+    <!-- Real captures from the running app against the live server, untouched,
+         posed by mythkin-app/tools/site_shots.py — never by the nav gate, whose
+         cold walk lands on an empty form and a chat nobody has spoken in.
+         Re-shoot with that script rather than cropping anything by hand.
+         Both schemes are shipped because this page follows the reader's, and a
+         dark-mode visitor was previously reading it beside a cream screenshot. -->
+    <picture>
+      <source srcset="screens/01-discover-dark.jpg" media="(prefers-color-scheme: dark)">
+      <img src="screens/01-discover.jpg" width="786" height="1704" fetchpriority="high"
+           alt="The Mythkin shelf: Alice featured this week with her painted portrait, and Athena and Beowulf below with their conversation and borrow counts.">
+    </picture>
   </div>
 </section>
+
+<!-- Four screens, four different jobs — no two show the same surface, which is
+     also what keeps the auditor's duplicate-screenshot rule satisfied. Captions
+     say what the screen IS; nothing here promises a feature the app lacks. -->
+<h2>What it looks like in the hand</h2>
+<div class="shots">
+  <figure class="shot">
+    <picture>
+      <source srcset="screens/02-chat-dark.jpg" media="(prefers-color-scheme: dark)">
+      <img src="screens/02-chat.jpg" width="786" height="1704" loading="lazy"
+           alt="A conversation with Sherlock Holmes: you mention a torn ticket from a trip you don't remember and a damp pocket, and he reasons about how long the moisture has been there before asking when you last wore the coat.">
+    </picture>
+    <figcaption>They answer in their own voice, and press for the detail</figcaption>
+  </figure>
+  <figure class="shot">
+    <picture>
+      <source srcset="screens/03-kin-dark.jpg" media="(prefers-color-scheme: dark)">
+      <img src="screens/03-kin.jpg" width="786" height="1704" loading="lazy"
+           alt="Sherlock Holmes's page in Mythkin — his portrait, an Official mark, conversation and borrower counts, a Talk with them button, and sample exchanges written in his voice.">
+    </picture>
+    <figcaption>Every kin has a page, and a sample of how they talk</figcaption>
+  </figure>
+  <figure class="shot">
+    <picture>
+      <source srcset="screens/04-create-dark.jpg" media="(prefers-color-scheme: dark)">
+      <img src="screens/04-create.jpg" width="786" height="1704" loading="lazy"
+           alt="Making a new kin called Maeve, a cottage-witch mentor, with a Night witch emblem chosen and a live preview card updating as the form is filled.">
+    </picture>
+    <figcaption>Make your own — a name, a line, a temperament</figcaption>
+  </figure>
+  <figure class="shot">
+    <picture>
+      <source srcset="screens/05-story-dark.jpg" media="(prefers-color-scheme: dark)">
+      <img src="screens/05-story.jpg" width="786" height="1704" loading="lazy"
+           alt="The Stories shelf — The Cold Shore, Notes Toward an Engine, The Greenwood Ledger and A Letter from Longbourn, each with a chapter count and a Begin button.">
+    </picture>
+    <figcaption>Or put them in a story with chapters</figcaption>
+  </figure>
+</div>
 
 <h2>The ones already waiting</h2>
 <!-- ROSTER COUNT: this number and the grid below must both match
