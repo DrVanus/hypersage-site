@@ -6,9 +6,32 @@
   --serif:"New York","Iowan Old Style",Georgia,serif;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
+/* THREE-WAY, and the explicit choice must win in BOTH directions. The media
+   query is scoped :not([data-theme="light"]) so a reader on a dark OS who picks
+   Light actually gets light; html[data-theme="dark"] is the mirror for a light
+   OS. Without both halves a toggle only ever works one way, which reads as a
+   broken control. `color-scheme` moves too, or form controls and scrollbars
+   keep rendering in the OS's scheme underneath the chosen palette. */
 @media (prefers-color-scheme:dark){
-  :root{--bg:#140B26;--surface:#1F1238;--text:#F3ECFF;--dim:#B8AEC9;
+  :root:not([data-theme="light"]){--bg:#140B26;--surface:#1F1238;--text:#F3ECFF;--dim:#B8AEC9;
         --tint:#9D6FD9;--gold:#E8C06A;--border:#2E1D55;}
+}
+html[data-theme="dark"]{--bg:#140B26;--surface:#1F1238;--text:#F3ECFF;--dim:#B8AEC9;
+        --tint:#9D6FD9;--gold:#E8C06A;--border:#2E1D55;color-scheme:dark}
+html[data-theme="light"]{color-scheme:light}
+
+/* The control itself: three segments, not a switch — a binary cannot express
+   "follow my system", which is what most people actually want. */
+.themepick{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--border);
+  border-radius:999px;background:var(--surface);line-height:1}
+.themepick button{
+  appearance:none;border:0;background:none;cursor:pointer;
+  font:600 .72rem/1 var(--sans);color:var(--dim);
+  padding:.42rem .6rem;border-radius:999px;min-height:32px}
+.themepick button[aria-pressed="true"]{background:var(--tint);color:#fff}
+.themepick button:focus-visible{outline:2px solid var(--tint);outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){
+  .themepick button{transition:background .15s ease,color .15s ease}
 }
 *{box-sizing:border-box}
 body{margin:0;font:16px/1.6 var(--sans);background:var(--bg);color:var(--text)}
