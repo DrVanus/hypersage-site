@@ -25,13 +25,15 @@
   <meta property="og:description" content="82 complete classics and calm new stories written by AI with Nightshelf Pro, read aloud with ambient sound underneath.">
   <meta property="og:url" content="https://hypersage.ai/nightshelf/">
   <meta property="og:site_name" content="Nightshelf">
-  <meta property="og:image" content="https://hypersage.ai/nightshelf/app-icon.png">
-  <meta property="og:image:width" content="512">
-  <meta property="og:image:height" content="512">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20260810a">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Nightshelf — stories to drift off to: stacked books beneath a crescent moon">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Nightshelf — Bedtime stories, read aloud">
   <meta name="twitter:description" content="Bedtime classics, plus AI-written stories with Nightshelf Pro — read aloud in a soft, sleepy voice.">
-  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/app-icon.png">
+  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20260810a">
+  <meta name="twitter:image:alt" content="Nightshelf — stories to drift off to: stacked books beneath a crescent moon">
 
   <link rel="icon" type="image/png" href="app-icon.png">
   <link rel="apple-touch-icon" href="app-icon.png">
@@ -392,6 +394,22 @@
     .step h3 { font-size: 1.14rem; line-height: 1.4; margin-bottom: 6px; }
     .step p { font-size: .95rem; color: var(--muted-fg); line-height: 1.65; }
 
+    /* ============================= FAQ ============================= */
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    details.faq { padding: 18px 0; border-bottom: 1px solid var(--border); }
+    details.faq summary {
+      font-weight: 600; font-size: 1.05rem; cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      color: var(--fg);
+    }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after {
+      content: '+'; color: var(--accent); font-weight: 400; font-size: 1.35rem;
+      line-height: 1; flex: 0 0 auto; transition: transform .2s;
+    }
+    details.faq[open] summary::after { transform: rotate(45deg); }
+    details.faq p { margin-top: 12px; color: var(--muted-fg); font-size: .97rem; line-height: 1.7; }
+
     /* =========================== CTA BAND =========================== */
     .cta-band {
       position: relative; text-align: center; overflow: hidden;
@@ -494,6 +512,64 @@
 }
 </script>
 <!-- app-schema:end -->
+<!-- FAQPage schema: questions and answers are verbatim plain-text copies of the
+     on-page FAQ section (#faq) below. Keep the two in sync. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Do I need an account?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. There's nothing to sign up for — no account, no email, no password, and no ads. Your place in every story and your settings live on your phone and sync through your own private iCloud, so they're waiting on a new phone without Nightshelf ever keeping a copy."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's free, and what needs Nightshelf Pro?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Thirteen of the eighty-two classics are free and complete, read aloud by the on-device voice, with every ambient soundscape, the sleep timer, and dimming — no time limit, no ads. Nightshelf Pro opens the other sixty-nine books, the six warm AI narrators, the longer 90- and 120-minute timers, and conjuring Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial — the paywall shows the trial only when your Apple ID is eligible."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it work offline?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — the shelf is built for airplane mode. Every book ships inside the app, and the on-device voice reads any of them aloud with the network off, with ambient sound and the sleep timer running as usual. Only two things need a connection: the six cloud narrators, and conjuring a fresh Tonight's Story."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are the books abridged?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Every book on the shelf is the complete text of the story — real chapters, not summaries or retellings — drawn from public-domain editions. That's also how the whole shelf can ship inside the app."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where do my words go?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nowhere, unless you say so. Reading, listening with the on-device voice, ambient sound, and the timer all happen on your phone. The two features that send anything off the device — cloud narration and Tonight's Story — ask your permission first, before the first word leaves; decline and they simply stay off while everything else keeps working. The privacy policy names every stop those words make, and the one small thing that isn't behind the permission."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When can I get it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Soon. Nightshelf is coming to iPhone and isn't on the App Store yet. It runs on iPhones with iOS 17 or later — it's an iPhone app rather than an iPad one, and the whole interface keeps to the dark, because it's made for the last minutes of the day."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars2"></div></div>
@@ -505,6 +581,7 @@
         <a href="#screens">Screens</a>
         <a href="#features">Features</a>
         <a href="#ritual">How it works</a>
+        <a href="#faq">FAQ</a>
         <a href="#get" class="btn ghost sm">Coming to iOS</a>
       </div>
       <details class="mobile-menu">
@@ -513,6 +590,7 @@
           <a href="#screens">Screens</a>
           <a href="#features">Features</a>
           <a href="#ritual">How it works</a>
+          <a href="#faq">FAQ</a>
           <a href="#get">Coming to iOS</a>
         </div>
       </details>
@@ -679,6 +757,54 @@
         <figcaption class="wd-cap">A warm voice reads the story while rain or firelight murmurs underneath — and the sleep timer fades everything out as you drift off.</figcaption>
       </figure>
       <p class="fleuron" aria-hidden="true">✦ ✦ ✦</p>
+    </div>
+  </section>
+
+  <!-- ============================= FAQ ============================= -->
+  <!-- Claims discipline (verified against ~/Developer/DrVanus/Nightshelf 2026-08-10):
+       counts are 82 books / 13 free / 69 Pro (SleepCatalog.swift — never 86 or 73);
+       6 cloud narrators (NightshelfVoices.swift:55-62), Pro-gated; Tonight's Story is
+       Pro-only with a NIGHTLY CAP whose number is a server setting — never print a
+       quota number or a price (Configuration.storekit is a local test config).
+       Trial is ANNUAL-ONLY and eligibility-gated (PolicyView.swift:219). Ambient,
+       timer, dimming are free. Never say "collects nothing" — PrivacyInfo.xcprivacy
+       declares DeviceID + OtherUserContent; the honest line is "nothing leaves unless
+       you opt in" (AIConsent.swift:124-127 gates exactly two features). Do not name
+       Project Gutenberg (PolicyView.swift:240-252). iPhone-only (pbxproj:293,328),
+       dark-only (NightshelfApp.swift:116). "Unabridged" only as "the complete text
+       of the story" — front-matter is trimmed (BookText.swift:176-200). -->
+  <section id="faq" style="padding-top: 20px;">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Common questions</span>
+        <h2 class="grad-text">FAQ</h2>
+      </div>
+      <div class="faq-list reveal">
+        <details class="faq">
+          <summary>Do I need an account?</summary>
+          <p>No. There's nothing to sign up for — no account, no email, no password, and no ads. Your place in every story and your settings live on your phone and sync through your own private iCloud, so they're waiting on a new phone without Nightshelf ever keeping a copy.</p>
+        </details>
+        <details class="faq">
+          <summary>What's free, and what needs Nightshelf Pro?</summary>
+          <p>Thirteen of the eighty-two classics are free and complete, read aloud by the on-device voice, with every ambient soundscape, the sleep timer, and dimming — no time limit, no ads. Nightshelf Pro opens the other sixty-nine books, the six warm AI narrators, the longer 90- and 120-minute timers, and conjuring Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial — the paywall shows the trial only when your Apple ID is eligible.</p>
+        </details>
+        <details class="faq">
+          <summary>Does it work offline?</summary>
+          <p>Yes — the shelf is built for airplane mode. Every book ships inside the app, and the on-device voice reads any of them aloud with the network off, with ambient sound and the sleep timer running as usual. Only two things need a connection: the six cloud narrators, and conjuring a fresh Tonight's Story.</p>
+        </details>
+        <details class="faq">
+          <summary>Are the books abridged?</summary>
+          <p>No. Every book on the shelf is the complete text of the story — real chapters, not summaries or retellings — drawn from public-domain editions. That's also how the whole shelf can ship inside the app.</p>
+        </details>
+        <details class="faq">
+          <summary>Where do my words go?</summary>
+          <p>Nowhere, unless you say so. Reading, listening with the on-device voice, ambient sound, and the timer all happen on your phone. The two features that send anything off the device — cloud narration and Tonight's Story — ask your permission first, before the first word leaves; decline and they simply stay off while everything else keeps working. The <a href="privacy.html">privacy policy</a> names every stop those words make, and the one small thing that isn't behind the permission.</p>
+        </details>
+        <details class="faq">
+          <summary>When can I get it?</summary>
+          <p>Soon. Nightshelf is coming to iPhone and isn't on the App Store yet. It runs on iPhones with iOS 17 or later — it's an iPhone app rather than an iPad one, and the whole interface keeps to the dark, because it's made for the last minutes of the day.</p>
+        </details>
+      </div>
     </div>
   </section>
 

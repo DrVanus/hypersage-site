@@ -19,14 +19,14 @@
   <meta property="og:description" content="Practice DBT skills with a warm companion you choose — and who's there in the hard moments too. Crisis support is always free.">
   <meta property="og:url" content="https://hypersage.ai/quietoak/">
   <meta property="og:site_name" content="Quietoak">
-  <meta property="og:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260806b">
+  <meta property="og:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260810y">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Quietoak — a calmer way to practice DBT skills">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Quietoak — A calmer way to practice DBT skills.">
   <meta name="twitter:description" content="Practice DBT skills with a warm companion you choose. The crisis kit is always free.">
-  <meta name="twitter:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260806b">
+  <meta name="twitter:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260810y">
   <meta name="twitter:image:alt" content="Quietoak — a calmer way to practice DBT skills">
 
   <link rel="icon" type="image/png" href="quietoak-icon.png?v=20260810w">
@@ -123,6 +123,29 @@
       letter-spacing: -0.01em;
     }
     nav.site .brand img { width: 36px; height: 36px; border-radius: 9px; }
+    /* The wordmark is split the way every piece of Quietoak artwork already
+       splits it — sampled straight off og-image.png: "Quiet" is #21353b and
+       "oak" is #6f9c82, which are exactly this sheet's --fg and --sage-deep.
+       The header was the one surface still setting it in a single colour, so
+       the site disagreed with its own ads. No new colours were invented.
+       (A wordmark is a logotype, which WCAG 1.4.3 exempts from the contrast
+       floor — this is the brand's own lockup, not body copy.) */
+    nav.site .brand .wordmark { white-space: nowrap; }
+    nav.site .brand .wm-oak { color: var(--sage-deep); }
+
+    /* Footer studio attribution, mirroring hypersage.ai's own lockup
+       (`Hypersage` + a lighter `AI Labs`) so the parent brand reads the same
+       everywhere. Also fixes the casing: it said "HyperSage", the brand is
+       "Hypersage". */
+    .studio-mark {
+      display: inline-flex; align-items: center; gap: 9px;
+      color: var(--fg); font-weight: 700; text-decoration: none;
+      padding: 6px 2px; border-radius: 8px;
+    }
+    .studio-mark img { width: 20px; height: 22px; opacity: .9; }
+    .studio-mark .sm-sub { color: var(--tertiary-fg); font-weight: 500; }
+    .studio-mark:hover .sm-name { text-decoration: underline; text-underline-offset: 3px; }
+    .studio-mark:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
     nav.site .links { display: flex; gap: 20px; font-size: 0.95rem; flex-wrap: nowrap; white-space: nowrap; }
     nav.site .links a { color: var(--muted-fg); font-weight: 600; }
     nav.site .links a:hover { color: var(--primary-dark); }
@@ -694,7 +717,7 @@
     <div class="container">
       <div class="brand">
         <img src="quietoak-icon.png?v=20260810w" width="256" height="256" alt="">
-        Quietoak
+        <span class="wordmark">Quiet<span class="wm-oak">oak</span></span>
       </div>
       <div class="links">
         <a href="#how">How it works</a>
@@ -1307,7 +1330,7 @@
       <a href="mailto:support@hypersage.ai">Contact</a>
     </div>
     <nav class="qo-more" aria-labelledby="qo-more-title">
-      <h3 class="qo-more-title" id="qo-more-title">More from HyperSage AI Labs</h3>
+      <h3 class="qo-more-title" id="qo-more-title">More from Hypersage AI Labs</h3>
       <!-- CURATED FOR THIS AUDIENCE, not a full catalogue dump. A reader of this
            page may be managing self-harm urges or suicidality; the footer is the
            last thing they see. Care-adjacent siblings lead, gentler entertainment
@@ -1330,7 +1353,13 @@
         <li><a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a></li>
       </ul>
     </nav>
-    <div class="copyright"><a href="https://hypersage.ai/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">A HyperSage AI Labs app</a></div>
+    <div class="copyright">
+      <a class="studio-mark" href="https://hypersage.ai/" target="_blank" rel="noopener"
+         aria-label="Quietoak is made by Hypersage AI Labs — visit hypersage.ai">
+        <img src="../logo.png" alt="" width="34" height="38" loading="lazy">
+        <span><span class="sm-name">Hypersage</span><span class="sm-sub"> AI Labs</span></span>
+      </a>
+    </div>
     <div class="copyright">© 2026 HyperSage AI Labs LLC. Quietoak — rooted and steady, through the storm.</div>
   </footer>
 

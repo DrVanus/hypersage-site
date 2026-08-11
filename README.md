@@ -73,7 +73,7 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
 - `icons/` — 256px app icons, 13 on disk but **12 referenced** by `index.html` (hero strip
   + product grid). `theone.png` is orphaned: The One was pulled from the portfolio
   2026-08-08 and nothing references its icon.
-- `og-image.png` — 1200×630 social card, referenced with the `?v=20260810w` cache-buster
+- `og-image.png` — 1200×630 social card, referenced with the `?v=20260810y` cache-buster
   on all **five** pages that carry it: `index.html`, `press.html`, `privacy.html`,
   `terms.html`, `support.html`. Bump the suffix whenever the bytes change, in all five —
   the 2026-08-10 re-render bumped only `index.html` and left the other four advertising a

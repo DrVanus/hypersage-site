@@ -134,7 +134,7 @@
     <ul>
       <li><strong>OpenAI (chat)</strong> — your chat messages, plus a summary of your profile and pantry, are sent to OpenAI to generate and adapt the chef's replies. Your recipe searches and imported recipe text also go to OpenAI to create the embeddings that power recipe search — there is no external web-search provider.</li>
       <li><strong>OpenAI (text-to-speech)</strong> — the text you want spoken aloud, for the premium voice. You can turn premium voice off in Settings and use on-device iOS voices only, in which case no text leaves your device to be spoken.</li>
-      <li><strong>Anthropic (Claude)</strong> — only if you share a cook photo to the Community: that photo is checked by Anthropic's model before it goes live. Your chats, profile, and pantry never go to Anthropic.</li>
+      <li><strong>OpenAI (community photo review)</strong> — only if you share a cook photo to the Community: that photo is checked by OpenAI's vision model before it goes live. Private cook photos are never uploaded.</li>
       <!-- The shelf-photo line is a required disclosure, not a nicety: it is the one
            image path that leaves the device (saffra-api/app/pantry/photo_vision.py,
            reached from IngredientCameraScanView.swift). Deleting it puts this page

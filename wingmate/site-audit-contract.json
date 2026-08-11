@@ -9,6 +9,14 @@
         "There is no sign-in surface: a grep of Wingmate for ASAuthorization, SignInWithApple, GIDSignIn and signIn( returns nothing, and no password, profile or registration screen exists.",
         "Identity to the backend is a locally minted random id, not a personal one: Wingmate/App/SpeechManager.swift:156 reads WingmateDeviceIdentity.deviceId and passes it at :166 and :250. That is the same pattern Rowan and Alder use, and it is what makes support.html's 'There is no account and no sign-in. Nothing to reset, and no password to lose' true."
       ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "Verified 2026-08-10 for the FAQ's 'no account and no ads' line: the app has zero third-party SDKs — no SPM/CocoaPods dependencies exist (grep XCRemoteSwiftPackage over Wingmate.xcodeproj/project.pbxproj returns nothing, and project.yml declares none), so no ad SDK can ship.",
+        "No AdSupport, AppTrackingTransparency, or IDFA reference anywhere in Wingmate/; PrivacyInfo.xcprivacy declares NSPrivacyTracking=false with an empty NSPrivacyTrackingDomains array.",
+        "The backend serves coaching only: wingmate-api's dependencies are express, cors, uuid, @anthropic-ai/sdk and @apple/app-store-server-library (package.json:10-16) — no ad network integration exists server-side either."
+      ]
     }
   },
   "contract_notes": "Pre-launch. Re-run tools/audit_sites.py wingmate at launch and delete the 'coming to iOS' line from support.html and the eyebrow from index.html at the same time (status policy: status lives in one line, behaviour copy stays present-tense). A client-minted device id is an identifier, not an identity — it must never be treated as an authorization or entitlement proof."
