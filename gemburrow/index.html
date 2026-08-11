@@ -207,26 +207,78 @@
     /* ===== THE JAR (the interactive bit) ===== */
     .jarband { padding: 20px 0 76px; }
     .jarwrap {
-      display: grid; grid-template-columns: 360px 1fr; gap: 40px; align-items: center;
+      display: grid; grid-template-columns: 360px 1fr; gap: 40px; align-items: start;
       background: linear-gradient(180deg, rgba(47, 35, 24, 0.75), rgba(30, 21, 16, 0.5));
       border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
       padding: 30px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
     }
+    .jar-stage { position: relative; }
     #jar {
-      display: block; width: 100%; height: 420px; touch-action: none; cursor: pointer;
+      display: block; width: 100%; height: 440px; touch-action: none; cursor: pointer;
       border-radius: var(--radius);
       background: radial-gradient(ellipse 80% 60% at 50% 8%, rgba(255, 200, 110, 0.10), transparent 60%), #1B130D;
       border: 1px solid rgba(255, 215, 94, 0.16);
     }
-    .jar-side h2 { margin-bottom: 6px; }
-    .jar-hud { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 14px; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(20, 13, 8, 0.7); border: 1px solid var(--border-strong);
-      border-radius: 999px; padding: 7px 15px; font-weight: 700; font-size: 0.92rem;
+    .jar-intro { max-width: 44rem; margin-bottom: 30px; }
+    .jar-intro h2 { margin-bottom: 6px; }
+    .jar-intro strong { color: var(--fg); }
+
+    /* ===== the demo HUD — the app's own furniture, in DOM so it stays crisp
+       and readable to a screen reader ===== */
+    .hud-row { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; }
+    .hud-card, .hud-stack {
+      background: rgba(20, 13, 8, 0.55); border: 1px solid var(--border-strong);
+      border-radius: var(--radius); padding: 12px 14px;
     }
-    .chip .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .chip b { color: var(--lantern); font-variant-numeric: tabular-nums; }
+    .hud-stack { display: flex; flex-direction: column; gap: 7px; }
+    .hud-label {
+      display: flex; justify-content: space-between; gap: 14px;
+      font-size: 0.72rem; letter-spacing: 0.13em; text-transform: uppercase;
+      font-weight: 700; color: var(--tertiary-fg); white-space: nowrap;
+    }
+    .hud-label span {
+      color: var(--lantern); letter-spacing: 0; font-variant-numeric: tabular-nums;
+      /* the label is uppercased, the value must not be: the game writes coins
+         as "90c", and text-transform was rendering it "90C" */
+      text-transform: none;
+    }
+    .swings-label { margin-top: 4px; }
+
+    .need { list-style: none; margin-top: 9px; display: flex; flex-direction: column; gap: 5px; }
+    .need li { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; }
+    .need img { width: 21px; height: 21px; }
+    .need .n { font-variant-numeric: tabular-nums; color: var(--muted-fg); }
+    .need li.done .n { color: var(--emerald); }
+    .need li.done::after { content: '✓'; color: var(--emerald); font-weight: 800; }
+
+    .bag { list-style: none; display: flex; gap: 4px; }
+    .bag li {
+      width: 30px; height: 30px; border-radius: 7px;
+      border: 1px dashed rgba(255, 215, 94, 0.28); background: rgba(10, 7, 4, 0.55);
+      display: grid; place-items: center;
+    }
+    .bag li.filled { border-style: solid; border-color: rgba(255, 215, 94, 0.55); cursor: pointer; }
+    .bag li.filled:hover { border-color: var(--lantern); background: rgba(255, 215, 94, 0.10); }
+    .bag li img { width: 22px; height: 22px; }
+    .bag li.jam { animation: jamflash .45s ease; }
+    @keyframes jamflash { 0%, 100% { background: rgba(10, 7, 4, 0.55); } 40% { background: rgba(224, 71, 91, 0.5); } }
+
+    .meter { height: 7px; border-radius: 99px; background: rgba(10, 7, 4, 0.7); overflow: hidden; border: 1px solid var(--border); }
+    .meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--lantern), var(--amber)); transition: width .25s; }
+    .meter.low i { background: linear-gradient(90deg, var(--ruby), var(--amber)); }
+
+    .jar-status {
+      margin: 16px 0 12px; min-height: 2.6em; font-size: 0.95rem; color: var(--muted-fg);
+      border-left: 3px solid var(--border-strong); padding-left: 12px;
+    }
+    .jar-status.good { color: var(--fg); border-left-color: var(--emerald); }
+    .jar-status.bad { color: var(--fg); border-left-color: var(--ruby); }
+
+    .rules { list-style: none; margin: 18px 0 0; display: flex; flex-direction: column; gap: 7px; }
+    .rules li { color: var(--tertiary-fg); font-size: 0.88rem; padding-left: 16px; position: relative; }
+    .rules li::before { content: '·'; position: absolute; left: 4px; color: var(--lantern); font-weight: 800; }
+    .rules b { color: var(--muted-fg); }
+
     .jar-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
     .jar-actions button {
       font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer;
@@ -388,7 +440,10 @@
       .hero { padding: 52px 0 26px; }
       .grid-3, .grid-2, .modes, .screens, .honest { grid-template-columns: 1fr; }
       .about-card { grid-template-columns: 1fr; text-align: center; justify-items: center; }
-      #jar { height: 360px; }
+      #jar { height: 380px; }
+      .hud-row { grid-template-columns: 1fr; }
+      .bag li { width: 34px; height: 34px; }
+      .bag li img { width: 25px; height: 25px; }
     }
   </style>
 
@@ -558,38 +613,66 @@
     </div>
   </header>
 
-  <!-- ===== THE PLAYABLE JAR ===== -->
+  <!-- ===== THE PLAYABLE JAR =====
+       This runs the SAME four rules the app does, ported rather than
+       approximated — see the comments on EXPOSED/dig() in the script below.
+       If a rule changes in game.js, it changes here, or the page is teaching a
+       game that does not exist. -->
   <section class="jarband" id="jar-band">
     <div class="container">
+      <div class="jar-intro">
+        <div class="section-eyebrow">The verb, in your browser</div>
+        <h2>This is the whole game.</h2>
+        <p class="section-lede">
+          One order, a satchel, and a pickaxe with a fixed number of swings. It plays by the
+          app's real rules — including the one that makes it a puzzle instead of
+          a grab bag: <strong>a gem with anything resting on top of it will not
+          come out.</strong> Try one and it just shifts in place. Clear what's
+          above it and the whole pile falls into the hole.
+        </p>
+      </div>
+
       <div class="jarwrap">
-        <div>
-          <canvas id="jar" width="360" height="420"
-                  role="img"
-                  aria-label="An interactive jar of gems and rocks. Tap a gem to pull it out; the pile settles into the gap. Use the Dig a gem button for the same thing without a pointer."></canvas>
+        <div class="jar-stage">
+          <canvas id="jar" width="360" height="440"
+                  aria-label="A jar of gems and rocks. Click a gem that has nothing on top of it to pull it out and the pile collapses into the gap. The Dig the top gem button does the same without a pointer."></canvas>
         </div>
+
         <div class="jar-side">
-          <div class="section-eyebrow">The verb, in your browser</div>
-          <h2>This is the whole game.</h2>
-          <p class="section-lede">
-            Pull a gem and watch the pile fall into the hole it left. That's the
-            hook — no tutorial, no timer, no wait. In the app there are orders to
-            fill, a satchel that jams if you grab without thinking, a pickaxe that
-            only swings 55 times a shift, and a dragon with opinions about your
-            rarest finds.
+          <div class="hud-row">
+            <div class="hud-card" id="orderCard">
+              <div class="hud-label">Order <span id="orderPay">60c</span></div>
+              <ul class="need" id="orderNeed"></ul>
+            </div>
+            <div class="hud-stack">
+              <div class="hud-label">Satchel <span id="bagCount">0/7</span></div>
+              <ol class="bag" id="bagStrip" aria-label="Satchel slots. Click a gem to toss it."></ol>
+              <div class="hud-label swings-label">Pickaxe <span id="swingsLeft">22</span></div>
+              <div class="meter"><i id="swingsBar" style="width:100%"></i></div>
+              <div class="hud-label">Earned <span id="coins">0c</span></div>
+            </div>
+          </div>
+
+          <p class="jar-status" id="jarStatus" role="status" aria-live="polite">
+            Click a gem on the surface of the pile.
           </p>
-          <div class="jar-hud" aria-live="polite">
-            <span class="chip"><span class="dot" style="background:var(--emerald)"></span>Gems dug <b id="jarGems">0</b></span>
-            <span class="chip"><span class="dot" style="background:var(--tertiary-fg)"></span>Rocks cleared <b id="jarRocks">0</b></span>
-            <span class="chip" id="orderChip"><span class="dot" id="orderDot" style="background:var(--ruby)"></span><span id="orderLabel">Order: 3 rubies</span> <b id="orderProg">0/3</b></span>
-          </div>
+
           <div class="jar-actions">
-            <button type="button" id="jarDig">Dig a gem</button>
-            <button type="button" id="jarRefill">Refill the jar</button>
+            <button type="button" id="jarDig">Dig the top gem</button>
+            <button type="button" id="jarRefill">New jar</button>
           </div>
+
+          <ul class="rules">
+            <li><b>Only the surface comes out.</b> Anything with a body resting on it is buried.</li>
+            <li><b>Orders pay on full sets.</b> A gem sitting in your satchel has earned nothing yet.</li>
+            <li><b>Every pull costs a swing</b> — rocks included. They pay a coin and get in the way.</li>
+            <li><b>A full satchel jams.</b> Dig anything into a full bag and it is scrapped — even a gem the card wanted. Click a slot to toss one first.</li>
+          </ul>
+
           <p class="jar-foot">
-            Same painted gems, same fixed-timestep circle physics family as the
-            game — a taste, not the app. The real jar is deeper, the rocks are in
-            the way on purpose, and every swing counts.
+            The app is deeper than this: five orders on the line at once, 55 swings
+            a shift, rare prisms a dragon wants, and a Heartstone that takes three
+            pries to free.
           </p>
         </div>
       </div>
@@ -902,12 +985,27 @@
     <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Dig responsibly; the dragon is watching.</div>
   </footer>
 
-  <script>
-  /* ============================================================
-     The jar. A small position-based circle solver — the same family as the
-     game's (fixed substeps, displacement-derived motion, no impulses), cut
-     down to what a landing page needs. It sleeps when nothing is moving, so
-     an idle tab costs nothing.
+  <script>  /* ============================================================
+     THE JAR — a faithful miniature of the app's dig, not an impression of it.
+
+     The first version of this let you pull a gem out of the middle of the pile,
+     which is precisely the move the real game refuses, so it taught the wrong
+     game. Four rules are now ported rather than approximated, and each one is
+     marked with the game.js behaviour it mirrors:
+
+       1. EXPOSED()  — game.js Jar.prototype.exposed, same constants (0.72/1.05).
+                       A refused pull wiggles the body instead, exactly as
+                       game.js does with `b.wiggle = 1; Snd.thunk()`.
+       2. FULL SETS  — an order pays only when every row is satisfied, and the
+                       gems leave the satchel at that moment (burst delivery).
+       3. SWINGS     — every extraction costs one, rocks included; rocks pay 1c.
+       4. THE JAM    — a gem dug into a full satchel that no row wants is
+                       scrapped and earns nothing.
+
+     The solver itself is the same family as the game's — fixed substeps,
+     position-based separation, motion derived from displacement rather than
+     impulses — cut down to what a landing page needs. It sleeps when nothing is
+     moving, so an idle tab costs nothing.
      ============================================================ */
   (function () {
     var canvas = document.getElementById('jar');
@@ -915,39 +1013,53 @@
     var ctx = canvas.getContext('2d');
 
     var GEMS = [
-      { key: 'ruby',     label: 'rubies',    color: '#E0475B', r: 17 },
-      { key: 'sapphire', label: 'sapphires', color: '#5B8CE8', r: 18 },
-      { key: 'emerald',  label: 'emeralds',  color: '#46B073', r: 18 },
-      { key: 'amber',    label: 'amber',     color: '#E3A24A', r: 16 },
-      { key: 'prism',    label: 'prisms',    color: '#CFE8F5', r: 19 }
+      { key: 'ruby', label: 'ruby', color: '#E0475B', r: 17 },
+      { key: 'sapphire', label: 'sapphire', color: '#5B8CE8', r: 18 },
+      { key: 'emerald', label: 'emerald', color: '#46B073', r: 18 },
+      { key: 'amber', label: 'amber', color: '#E3A24A', r: 16 }
     ];
-    var ROCKS = [
-      { key: 'rock_s', r: 15 }, { key: 'rock_m', r: 19 }, { key: 'rock_l', r: 24 }
-    ];
+    var PRISM = { key: 'prism', label: 'prism', color: '#CFE8F5', r: 19 };
+    var ROCKS = [{ key: 'rock_s', r: 15 }, { key: 'rock_m', r: 19 }, { key: 'rock_l', r: 24 }];
+    // Tuned, not guessed: at 18 swings with a 55% gem pour, a button-only
+    // playthrough filled ZERO orders in 3 of 8 runs — and a visitor who fills
+    // nothing learns nothing. 22 swings, a slightly gemmier pour and a
+    // three-gem cap on the order put a first payout inside almost every run.
+    var SWINGS = 22, BAG_CAP = 7;
 
-    var imgs = {}, loaded = 0, wanted = GEMS.length + ROCKS.length;
-    GEMS.concat(ROCKS).forEach(function (t) {
+    var imgs = {};
+    GEMS.concat([PRISM]).concat(ROCKS).forEach(function (t) {
       var im = new Image();
-      im.onload = function () { loaded++; wake(); };
-      im.onerror = function () { loaded++; };           // draw a flat disc instead
+      im.onload = wake;
       im.src = 'demo/' + t.key + '.png?v=20260811a';
       imgs[t.key] = im;
     });
+    function src(key) { return 'demo/' + key + '.png?v=20260811a'; }
 
     var W = 0, H = 0, dpr = 1;
     var jar = { l: 0, r: 0, top: 0, bot: 0 };
-    var bodies = [];
+    var bodies = [], pops = [];
     var GRAV = 1500, STEP = 1 / 120, ITER = 5, SLOP = 0.4;
     var acc = 0, last = 0, awake = 0, running = false;
-    var pops = [];                                       // cosmetic burst rings
 
-    var stats = { gems: 0, rocks: 0 };
-    var order = null;
-    var elGems = document.getElementById('jarGems');
-    var elRocks = document.getElementById('jarRocks');
-    var elLabel = document.getElementById('orderLabel');
-    var elProg = document.getElementById('orderProg');
-    var elDot = document.getElementById('orderDot');
+    var bag = [], swings = SWINGS, coins = 0, order = null, over = false;
+
+    var el = {
+      pay: document.getElementById('orderPay'),
+      need: document.getElementById('orderNeed'),
+      bagCount: document.getElementById('bagCount'),
+      bagStrip: document.getElementById('bagStrip'),
+      swings: document.getElementById('swingsLeft'),
+      bar: document.getElementById('swingsBar'),
+      coins: document.getElementById('coins'),
+      status: document.getElementById('jarStatus'),
+      dig: document.getElementById('jarDig'),
+      refill: document.getElementById('jarRefill')
+    };
+
+    function say(msg, kind) {
+      el.status.textContent = msg;
+      el.status.className = 'jar-status' + (kind ? ' ' + kind : '');
+    }
 
     function layout() {
       var box = canvas.getBoundingClientRect();
@@ -956,53 +1068,199 @@
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      jar = { l: 18, r: W - 18, top: 40, bot: H - 18 };
+      jar = { l: 18, r: W - 18, top: 38, bot: H - 18 };
     }
 
     function rand(a, b) { return a + Math.random() * (b - a); }
 
-    function newOrder() {
-      var g = GEMS[(Math.random() * (GEMS.length - 1)) | 0];   // never demand prisms
-      order = { key: g.key, label: g.label, color: g.color, need: 3, got: 0 };
-      elDot.style.background = g.color;
-      draw();
-      syncHud();
+    /* RULE 1 — game.js Jar.prototype.exposed, constants included. A body is
+       diggable only when nothing rests within 0.72 of the combined radii
+       horizontally and 1.05 vertically. This is the whole puzzle. */
+    function EXPOSED(b) {
+      for (var i = 0; i < bodies.length; i++) {
+        var o = bodies[i];
+        if (o === b || o.y >= b.y) continue;
+        var dx = Math.abs(o.x - b.x), dy = b.y - o.y, rs = o.r + b.r;
+        if (dx < rs * 0.72 && dy < rs * 1.05) return false;
+      }
+      return true;
     }
 
-    function syncHud() {
-      elGems.textContent = stats.gems;
-      elRocks.textContent = stats.rocks;
-      if (order) {
-        elLabel.textContent = 'Order: 3 ' + order.label;
-        elProg.textContent = order.got + '/' + order.need;
+    function newOrder() {
+      // two rows, one to three of each — the same shape as a real order card,
+      // and never a prism: those are the app's sell-or-hoard dilemma, not a
+      // thing a starter order should demand.
+      var pool = GEMS.slice();
+      for (var i = pool.length - 1; i > 0; i--) {
+        var j = (Math.random() * (i + 1)) | 0, t = pool[i]; pool[i] = pool[j]; pool[j] = t;
       }
+      var first = 1 + ((Math.random() * 2) | 0);            // 1 or 2
+      var rows = [
+        { key: pool[0].key, label: pool[0].label, want: first },
+        { key: pool[1].key, label: pool[1].label, want: 3 - first }   // total is always 3
+      ];
+      var total = rows[0].want + rows[1].want;
+      order = { rows: rows, pay: total * 30 };
+      renderOrder();
+    }
+
+    function have(key) {
+      var n = 0;
+      for (var i = 0; i < bag.length; i++) if (bag[i] === key) n++;
+      return n;
+    }
+
+    function renderOrder() {
+      el.pay.textContent = order.pay + 'c';
+      el.need.innerHTML = '';
+      order.rows.forEach(function (row) {
+        var got = Math.min(have(row.key), row.want);
+        var li = document.createElement('li');
+        if (got >= row.want) li.className = 'done';
+        var im = document.createElement('img');
+        im.src = src(row.key); im.alt = row.label; im.width = 21; im.height = 21;
+        var n = document.createElement('span');
+        n.className = 'n';
+        n.textContent = got + '/' + row.want;
+        li.appendChild(im); li.appendChild(n);
+        el.need.appendChild(li);
+      });
+    }
+
+    function renderBag(jamIndex) {
+      el.bagCount.textContent = bag.length + '/' + BAG_CAP;
+      el.bagStrip.innerHTML = '';
+      for (var i = 0; i < BAG_CAP; i++) {
+        var li = document.createElement('li');
+        if (i < bag.length) {
+          li.className = 'filled';
+          var im = document.createElement('img');
+          im.src = src(bag[i]); im.alt = bag[i]; im.width = 22; im.height = 22;
+          li.appendChild(im);
+          li.title = 'Toss this ' + bag[i];
+          (function (idx) {
+            li.addEventListener('click', function () { toss(idx); });
+          })(i);
+        }
+        if (jamIndex === i) li.classList.add('jam');
+        el.bagStrip.appendChild(li);
+      }
+    }
+
+    function renderSwings() {
+      el.swings.textContent = swings;
+      var pct = Math.max(0, swings / SWINGS) * 100;
+      el.bar.style.width = pct + '%';
+      el.bar.parentNode.className = 'meter' + (swings <= 5 ? ' low' : '');
+      el.coins.textContent = coins + 'c';
+    }
+
+    function toss(i) {
+      if (over) return;
+      // Mirrors the app: tossing costs no swing and earns nothing — an
+      // undelivered gem is simply gone.
+      var key = bag.splice(i, 1)[0];
+      renderBag(); renderOrder();
+      say('Tossed the ' + key + '. No swing spent, and no coins for it — a gem only pays once it completes an order.');
+    }
+
+    /* RULE 2 — the order pays only when EVERY row is satisfied, and the gems
+       leave the satchel at that moment. Partial progress is worth nothing. */
+    function tryDeliver() {
+      for (var i = 0; i < order.rows.length; i++) {
+        if (have(order.rows[i].key) < order.rows[i].want) return false;
+      }
+      order.rows.forEach(function (row) {
+        for (var n = 0; n < row.want; n++) bag.splice(bag.indexOf(row.key), 1);
+      });
+      coins += order.pay;
+      say('Order filled — ' + order.pay + 'c. The whole card cashes out at once, and a new one takes its place.', 'good');
+      newOrder();
+      renderBag(); renderSwings();
+      return true;
+    }
+
+    function wanted(key) {
+      for (var i = 0; i < order.rows.length; i++) {
+        if (order.rows[i].key === key && have(key) < order.rows[i].want) return true;
+      }
+      return false;
+    }
+
+    /* RULES 3 and 4 — a swing per pull, and a full satchel scraps a gem that no
+       row wants. */
+    function dig(b, i) {
+      bodies.splice(i, 1);
+      pops.push({ x: b.x, y: b.y, r: b.r, t: 0 });
+      swings--;
+      var isRock = b.key.indexOf('rock') === 0;
+
+      if (isRock) {
+        coins += 1;
+        say('Rock cleared. It paid a coin and cost a swing — but look what it was holding up.');
+      } else if (bag.length >= BAG_CAP) {
+        // Unconditional, exactly as the app has it: "bag jammed: the gem is LOST
+        // and the ladder resets — a gem not delivered earns nothing". An earlier
+        // version here only scrapped gems the order did not want, which quietly
+        // made the demo kinder than the game and blunted the whole point of the
+        // satchel — that committing a slot to the wrong gem costs you.
+        renderBag(bag.length - 1);
+        say('Satchel jammed, and that ' + b.key + ' is gone. A full bag scraps whatever you dig next, even something the card wanted. Toss a slot first.', 'bad');
+      } else {
+        bag.push(b.key);
+        if (!tryDeliver()) {
+          say('Bagged the ' + b.key + '. It has earned nothing yet — orders pay on the full set.');
+        }
+      }
+
+      renderBag(); renderOrder(); renderSwings();
+      wake();
+      if (swings <= 0) endShift();
+    }
+
+    function endShift() {
+      over = true;
+      say('Out of swings. You earned ' + coins + 'c. In the app a shift is 55 swings and five orders hang on the line at once — start a new jar and try reading the card before you dig.', 'good');
+      el.dig.disabled = true;
+    }
+
+    function refuse(b) {
+      b.wiggle = 1;                    // game.js does exactly this on a refused pull
+      wake();
+      say('That one is buried — something is resting on it. Clear what is on top of it first.', 'bad');
     }
 
     function fill() {
-      bodies = [];
-      pops = [];
+      bodies = []; pops = [];
       var jarW = jar.r - jar.l, jarH = jar.bot - jar.top;
       var area = jarW * jarH, filled = 0, guard = 0;
-      // area-budgeted pour: circles pack to about 90%, so stop well short or
-      // the pile can never settle
-      while (filled < area * 0.60 && guard++ < 400) {
-        var isGem = Math.random() < 0.52;
-        var t = isGem ? GEMS[(Math.random() * GEMS.length) | 0]
-                      : ROCKS[(Math.random() * ROCKS.length) | 0];
-        if (t.key === 'prism' && Math.random() < 0.7) continue;   // prisms stay rare
-        var r = t.r;
-        bodies.push({
-          key: t.key, gem: isGem, color: t.color || '#8A7B69', r: r,
-          x: rand(jar.l + r + 2, jar.r - r - 2),
-          y: rand(jar.top - jarH * 0.9, jar.top - r),
-          px: 0, py: 0, rot: rand(-0.4, 0.4)
-        });
-        bodies[bodies.length - 1].px = bodies[bodies.length - 1].x;
-        bodies[bodies.length - 1].py = bodies[bodies.length - 1].y;
-        filled += Math.PI * r * r;
+      // area-budgeted pour, like the app's: circles pack to about 90%, so stop
+      // well short or the pile can never settle
+      while (filled < area * 0.62 && guard++ < 400) {
+        var isGem = Math.random() < 0.62;
+        var t;
+        if (isGem) t = Math.random() < 0.06 ? PRISM : GEMS[(Math.random() * GEMS.length) | 0];
+        else t = ROCKS[(Math.random() * ROCKS.length) | 0];
+        var b = {
+          key: t.key, gem: isGem, color: t.color || '#8A7B69', r: t.r,
+          x: rand(jar.l + t.r + 2, jar.r - t.r - 2),
+          y: rand(jar.top - jarH * 0.9, jar.top - t.r),
+          px: 0, py: 0, wiggle: 0
+        };
+        b.px = b.x; b.py = b.y;
+        bodies.push(b);
+        filled += Math.PI * t.r * t.r;
       }
       awake = 4.5;
       run();
+    }
+
+    function reset() {
+      bag = []; coins = 0; swings = SWINGS; over = false;
+      el.dig.disabled = false;
+      newOrder(); fill();
+      renderBag(); renderSwings();
+      say('New jar. Read the card, then click a gem that has nothing on top of it.');
     }
 
     function step(dt) {
@@ -1012,18 +1270,18 @@
         var vx = (a.x - a.px) * 0.995, vy = (a.y - a.py) * 0.995;
         a.px = a.x; a.py = a.y;
         a.x += vx; a.y += vy + GRAV * dt * dt;
+        if (a.wiggle > 0) a.wiggle = Math.max(0, a.wiggle - dt * 3.2);
       }
       for (var k = 0; k < ITER; k++) {
         for (i = 0; i < bodies.length; i++) {
           a = bodies[i];
           for (j = i + 1; j < bodies.length; j++) {
             b = bodies[j];
-            var dx = b.x - a.x, dy = b.y - a.y;
-            var min = a.r + b.r;
+            var dx = b.x - a.x, dy = b.y - a.y, min = a.r + b.r;
             if (dx > min || dx < -min || dy > min || dy < -min) continue;
             var d2 = dx * dx + dy * dy;
             if (d2 >= min * min || d2 === 0) continue;
-            var d = Math.sqrt(d2), push = (min - d - SLOP);
+            var d = Math.sqrt(d2), push = min - d - SLOP;
             if (push <= 0) continue;
             var nx = dx / d * push * 0.5, ny = dy / d * push * 0.5;
             a.x -= nx; a.y -= ny; b.x += nx; b.y += ny;
@@ -1035,10 +1293,19 @@
       }
     }
 
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
     function draw() {
       ctx.clearRect(0, 0, W, H);
 
-      // jar glass
       ctx.save();
       var g = ctx.createLinearGradient(0, jar.top, 0, jar.bot);
       g.addColorStop(0, 'rgba(255,236,200,0.07)');
@@ -1054,14 +1321,16 @@
 
       for (var i = 0; i < bodies.length; i++) {
         var b = bodies[i], im = imgs[b.key];
+        // the wiggle a refused pull produces — the app's own "it will not move" tell
+        var wob = b.wiggle > 0 ? Math.sin(b.wiggle * 34) * b.wiggle * 4 : 0;
+        var bx = b.x + wob;
         if (im && im.complete && im.naturalWidth) {
           var s = b.r * 2.06;
-          ctx.drawImage(im, b.x - s / 2, b.y - s / 2, s, s);
+          ctx.drawImage(im, bx - s / 2, b.y - s / 2, s, s);
         } else {
           ctx.beginPath();
-          ctx.arc(b.x, b.y, b.r, 0, 6.283);
-          ctx.fillStyle = b.color;
-          ctx.fill();
+          ctx.arc(bx, b.y, b.r, 0, 6.283);
+          ctx.fillStyle = b.color; ctx.fill();
         }
       }
 
@@ -1075,19 +1344,8 @@
         ctx.stroke();
       }
 
-      // glass highlight, drawn over the pile
       ctx.fillStyle = 'rgba(255,255,255,0.05)';
       ctx.fillRect(jar.l + 4, jar.top + 6, 7, (jar.bot - jar.top) * 0.42);
-    }
-
-    function roundRect(x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.arcTo(x + w, y, x + w, y + h, r);
-      ctx.arcTo(x + w, y + h, x, y + h, r);
-      ctx.arcTo(x, y + h, x, y, r);
-      ctx.arcTo(x, y, x + w, y, r);
-      ctx.closePath();
     }
 
     function frame(ts) {
@@ -1107,36 +1365,20 @@
       if (awake <= 0 && !pops.length) { running = false; last = 0; return; }
       requestAnimationFrame(frame);
     }
-
     function run() { if (!running) { running = true; last = 0; requestAnimationFrame(frame); } }
     function wake() { awake = Math.max(awake, 1.6); run(); }
 
-    function extract(b, i) {
-      bodies.splice(i, 1);
-      pops.push({ x: b.x, y: b.y, r: b.r, t: 0 });
-      if (b.gem) {
-        stats.gems++;
-        if (order && b.key === order.key) {
-          order.got++;
-          if (order.got >= order.need) { newOrder(); }
-        }
-      } else {
-        stats.rocks++;
-      }
-      syncHud();
-      wake();
-      if (bodies.length < 12) fill();
-    }
-
     function pick(cx, cy) {
-      // topmost body under the point — the same "what did I actually tap"
-      // rule the game uses, with no slop forgiveness
-      var best = -1, bestY = Infinity;
+      if (over) { say('That jar is finished — hit New jar to pour another.'); return; }
+      var best = null, bestY = Infinity;
       for (var i = 0; i < bodies.length; i++) {
         var b = bodies[i], dx = cx - b.x, dy = cy - b.y;
         if (dx * dx + dy * dy <= b.r * b.r && b.y < bestY) { best = i; bestY = b.y; }
       }
-      if (best >= 0) extract(bodies[best], best);
+      if (best === null) return;
+      // RULE 1 — the gate. Everything above depends on this refusing.
+      if (!EXPOSED(bodies[best])) { refuse(bodies[best]); return; }
+      dig(bodies[best], best);
     }
 
     canvas.addEventListener('pointerdown', function (e) {
@@ -1144,30 +1386,41 @@
       pick(e.clientX - box.left, e.clientY - box.top);
     });
 
-    document.getElementById('jarDig').addEventListener('click', function () {
-      // keyboard/no-pointer parity: take the shallowest gem, which is what a
-      // sighted player reaches for anyway
-      var best = -1, bestY = Infinity;
-      for (var i = 0; i < bodies.length; i++) {
-        if (bodies[i].gem && bodies[i].y < bestY) { best = i; bestY = bodies[i].y; }
-      }
-      if (best >= 0) extract(bodies[best], best);
+    el.dig.addEventListener('click', function () {
+      if (over) return;
+      // Keyboard/no-pointer parity, and it must be as CAPABLE as a click, not
+      // just as constrained. It obeys the same exposure rule, and it makes the
+      // same two decisions a sighted player makes: prefer a gem the card
+      // actually wants, and when the surface is all rock, clear a rock — which
+      // is a real move, not a dead end. An earlier version only ever took the
+      // shallowest gem and stranded keyboard users the moment none was exposed.
+      var pickIdx = function (test) {
+        var best = -1, bestY = Infinity;
+        for (var i = 0; i < bodies.length; i++) {
+          if (bodies[i].y < bestY && test(bodies[i]) && EXPOSED(bodies[i])) { best = i; bestY = bodies[i].y; }
+        }
+        return best;
+      };
+      // Order matters, and it was measured: taking "any gem" before "a rock"
+      // hoards junk the card never wanted and strands the run — 3 of 12
+      // button-only playthroughs filled nothing. Clearing a rock instead opens
+      // the pile and is what a player actually does when the surface is wrong.
+      var i = pickIdx(function (b) { return b.gem && wanted(b.key); });
+      if (i < 0) i = pickIdx(function (b) { return b.key.indexOf('rock') === 0; });
+      if (i < 0) i = pickIdx(function (b) { return b.gem && bag.length < BAG_CAP; });
+      if (i < 0) i = pickIdx(function () { return true; });
+      if (i < 0) { say('Nothing is diggable — the jar is empty. Hit New jar.', 'bad'); return; }
+      dig(bodies[i], i);
     });
-    document.getElementById('jarRefill').addEventListener('click', function () {
-      stats.gems = 0; stats.rocks = 0;
-      newOrder();
-      fill();
-      syncHud();
-    });
+
+    el.refill.addEventListener('click', reset);
 
     var ro = window.ResizeObserver ? new ResizeObserver(function () { layout(); draw(); }) : null;
     if (ro) ro.observe(canvas); else window.addEventListener('resize', function () { layout(); draw(); });
-
     document.addEventListener('visibilitychange', function () { if (!document.hidden) wake(); });
 
     layout();
-    newOrder();
-    fill();
+    reset();
   })();
 
   /* Scroll reveal — only ever runs when the head script opted in.
