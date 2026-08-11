@@ -514,6 +514,19 @@
     /* ===== PRODUCTS ===== */
     .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
     @media (max-width: 700px) { .products-grid { grid-template-columns: 1fr; } }
+    /* The portfolio card FINISHES the last row instead of starting a new one.
+       With an odd number of products (thirteen, since Gemburrow) the last
+       product sits alone with a hole beside it — so the contact card drops into
+       that hole at normal card size and closes the section.
+       It has to flip back when the count is even, or the card would be the one
+       left alone. `article:last-of-type:nth-of-type(even) ~ aside` says exactly
+       that: only when the last PRODUCT is even-numbered does the card span the
+       full row. Counting articles (not children) matters because the card is
+       itself a child of this grid. Nothing to maintain when app fourteen lands. */
+    @media (min-width: 701px) {
+      .products-grid > aside { grid-column: auto; }
+      .products-grid > article:last-of-type:nth-of-type(even) ~ aside { grid-column: 1 / -1; }
+    }
     .product {
       --accent: var(--brand-a);
       /* Text tone for links. Cards whose accent is too dark to read on --panel override
@@ -1113,7 +1126,10 @@
         </article>
 
         <!-- PORTFOLIO CONTACT -->
-        <aside class="product" aria-label="Portfolio contact" style="--accent: var(--brand-b); justify-content: center; text-align: center; grid-column: 1 / -1;">
+        <!-- No inline grid-column: it would beat the stylesheet, and which
+             column this card spans depends on whether the product count is odd
+             or even. That decision lives in the .products-grid rules above. -->
+        <aside class="product" aria-label="Portfolio contact" style="--accent: var(--brand-b); justify-content: center; text-align: center;">
           <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding: 10px 0;">
             <h3 style="font-size:1.3rem;">Interested in the portfolio?</h3>
             <p class="desc" style="margin-bottom: 6px;">We welcome conversations with investors, product partners, press, and early users.</p>
