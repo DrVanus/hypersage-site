@@ -130,10 +130,19 @@ STAMP = ROOT / "og-image.inputs.sha256"
 def inputs_digest() -> str:
     """Hash exactly what the render is made of: the page's style block, its hero
     figure, and the product list. Nothing else about index.html matters — an FAQ
-    edit must not report the preview as stale, and a change to the diagram must."""
+    edit must not report the preview as stale, and a change to the diagram must.
+
+    The headline and og:title are in here too even though this file HARDCODES
+    the left column: that is precisely why they belong. If the page's hero
+    headline is rewritten, nothing about the lifted figure changes, and the
+    preview would keep promising the old line in silence."""
     style, figure, products = site_parts()
+    html = INDEX.read_text()
+    h1 = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S)
+    h1 = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", h1.group(1))).strip() if h1 else ""
+    ogt = re.search(r'<meta property="og:title" content="([^"]*)"', html)
     h = hashlib.sha256()
-    for part in (style, figure, "\n".join(products)):
+    for part in (style, figure, "\n".join(products), h1, ogt.group(1) if ogt else ""):
         h.update(part.encode())
         h.update(b"\0")
     return h.hexdigest()
