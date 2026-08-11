@@ -351,6 +351,38 @@
     .safety-band p { color: var(--muted-fg); font-size: 0.98rem; }
     .safety-band strong { color: var(--emergency); }
 
+    /* ===== SAFETY FLOW (the band's two checks, drawn) =====
+       Same arrow idiom, keyframes and motion gate as .hero-flow. Every label
+       restates the safety-band paragraph or the "safety layer" feature card —
+       no new claims. Contrast: --muted-fg on --card-soft is 4.97:1;
+       --emergency on --surface is 5.93:1. */
+    .safety-flow { margin-top: 22px; padding-top: 20px; border-top: 1px dashed var(--border-strong); }
+    .sf-caption { font-size: 0.74rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--tertiary-fg); margin-bottom: 16px; }
+    .sf-lane { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+    .sf-node { position: relative; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 12px 12px; text-align: center; }
+    .sf-node.gate { background: var(--card-soft); }
+    .sf-node + .sf-node::before { content: '→'; position: absolute; left: -24px; top: 50%; transform: translateY(-50%); color: var(--primary); font-weight: 700; font-size: 1.2rem; line-height: 1; }
+    .sf-step, .sf-glyph { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; margin-bottom: 8px; }
+    .sf-step { border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong); color: var(--primary-dark); font-family: ui-serif, Georgia, serif; font-weight: 700; font-size: 0.9rem; }
+    .sf-glyph { color: var(--primary-dark); }
+    .sf-glyph svg { width: 20px; height: 20px; }
+    .sf-name { display: block; font-family: ui-serif, 'New York', Charter, Georgia, serif; font-weight: 700; font-size: 0.98rem; color: var(--fg); line-height: 1.25; }
+    .sf-desc { display: block; margin-top: 4px; font-size: 0.8rem; color: var(--muted-fg); line-height: 1.45; }
+    .sf-exit { position: relative; grid-column: 2 / 4; padding: 12px 16px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--emergency); border-radius: var(--radius); font-size: 0.85rem; color: var(--muted-fg); }
+    .sf-exit::before { content: '↓'; position: absolute; top: -24px; left: 50%; transform: translateX(-50%); color: var(--emergency); font-weight: 700; font-size: 1.1rem; line-height: 1; }
+    .sf-exit strong { color: var(--emergency); }
+    @media (max-width: 760px) {
+      .sf-lane { grid-template-columns: 1fr; gap: 26px; max-width: 340px; margin-left: auto; margin-right: auto; }
+      .sf-node + .sf-node::before { left: 50%; top: -22px; transform: translate(-50%, 0) rotate(90deg); }
+      .sf-exit { grid-column: auto; }
+      .sf-exit::before { display: none; }
+    }
+    /* Progressive enhancement only, same gate as the hero-flow arrows: the
+       static frame (arrows at rest) is complete without it. */
+    @media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+      .sf-node + .sf-node::before { animation: flow-nudge 2.8s ease-in-out infinite; }
+    }
+
     /* ===== BOUNDARY (what it is / isn't) ===== */
     .boundary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 860px; margin: 0 auto; }
     @media (max-width: 700px) { .boundary { grid-template-columns: 1fr; } }
@@ -817,6 +849,34 @@
         <div>
           <h2>In an emergency, don't type — call 911.</h2>
           <p>Rowan is not an emergency service and never delays care. Your phone screens every message the moment you send it for signs of a medical emergency, and halts the conversation there if it finds one; everything else is read by an independent check on our server before Rowan answers. Either way, when something looks urgent Rowan points you to emergency care instead of continuing — but neither check is a substitute for calling for help. Those turns are <strong>never metered and never paywalled</strong>. Never delay care because of something in this app.</p>
+          <!-- The paragraph above, drawn. aria-hidden: every label restates the
+               paragraph or the "safety layer" feature card verbatim or
+               near-verbatim — the facts live in the ordinary text. -->
+          <div class="safety-flow" aria-hidden="true">
+            <div class="sf-caption">Two checks — neither can be switched off</div>
+            <div class="sf-lane">
+              <div class="sf-node">
+                <span class="sf-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                <span class="sf-name">Your message</span>
+                <span class="sf-desc">Every message, the moment you send it</span>
+              </div>
+              <div class="sf-node gate">
+                <span class="sf-step">1</span>
+                <span class="sf-name">On your phone</span>
+                <span class="sf-desc">Screened for signs of a medical emergency — no waiting for the network</span>
+              </div>
+              <div class="sf-node gate">
+                <span class="sf-step">2</span>
+                <span class="sf-name">On our server</span>
+                <span class="sf-desc">Everything else is read by an independent check before Rowan answers</span>
+              </div>
+              <div class="sf-node">
+                <span class="sf-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 7h8M8 11h5"/></svg></span>
+                <span class="sf-name">Rowan answers</span>
+              </div>
+              <div class="sf-exit"><strong>Looks urgent at either check?</strong> Rowan points you to emergency care instead of continuing — never metered, never paywalled.</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

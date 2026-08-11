@@ -56,6 +56,57 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
   font-weight:400;line-height:1;flex:0 0 auto;transition:transform .2s}
 .faq-section details[open] summary::after{transform:rotate(45deg)}
 .faq-section details p{margin:.7rem 0 0;color:var(--dim);line-height:1.65}
+
+/* Borrow-privacy figure — scoped to .borrow-flow/.bf- for the same reason as the
+   blocks above: style.css is shared with the legal pages. It depicts ONLY what
+   the "Share, or borrow" card and the borrow FAQ answer already say: publish ->
+   others borrow -> their conversations stay theirs; the creator sees a count,
+   never a word. Tokens only, so dark mode follows :root. The one animation is a
+   one-shot fade that rests at its final state, double-gated: wrapped in
+   no-preference here AND killed by style.css's global reduced-motion rule. */
+.borrow-flow{margin:1.5rem 0 0}
+.bf-diagram{display:grid;gap:1.05rem;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.35rem}
+.bf-kicker{color:var(--gold);font-size:.72rem;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase}
+.bf-row{display:flex;align-items:center;gap:.85rem}
+.bf-node{flex:1;display:grid;justify-items:center;gap:.1rem;text-align:center;
+  padding:.9rem .6rem;border:1px solid var(--border);border-radius:13px;background:var(--bg)}
+.bf-node b{font-size:.92rem;line-height:1.3}
+.bf-node>span{color:var(--dim);font-size:.78rem}
+.bf-glyph{display:grid;place-items:center;height:44px;min-width:44px;
+  margin-bottom:.5rem;border:1px solid var(--border);border-radius:999px;
+  background:var(--bg);background:color-mix(in srgb,var(--tint) 14%,var(--surface))}
+.bf-glyph--you{color:var(--tint)}
+.bf-glyph--spark{color:var(--gold)}
+.bf-glyph--chats{color:var(--tint);display:flex;align-items:center;gap:.18rem;padding:0 .6rem}
+.bf-glyph--chats svg:nth-child(2){transform:translateY(-3px)}
+.bf-link{flex:none;display:grid;justify-items:center;gap:.1rem;color:var(--dim)}
+.bf-link i{font-style:normal;font-size:.68rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase}
+.bf-link svg{display:block;color:var(--tint)}
+.bf-back{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;
+  border-top:1px dashed var(--border);padding-top:1.05rem}
+.bf-pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;
+  border:1px solid var(--border);border-radius:999px;padding:.28rem .75rem;background:var(--bg)}
+.bf-pill svg{flex:none}
+.bf-pill--yes{color:var(--text);border-color:color-mix(in srgb,var(--tint) 45%,var(--border))}
+.bf-pill--yes svg{color:var(--tint)}
+.bf-pill--no{color:var(--dim);border-style:dashed}
+.borrow-flow figcaption{margin-top:.6rem}
+@media (max-width:600px){
+  .bf-row{flex-direction:column;align-items:stretch}
+  .bf-link{display:flex;align-items:center;justify-content:center;gap:.5rem}
+  .bf-link svg{transform:rotate(90deg)}
+}
+@media (prefers-reduced-motion:no-preference){
+  .bf-pill{animation:bf-in .7s ease backwards}
+  .bf-pill--no{animation-delay:.15s}
+  @keyframes bf-in{from{opacity:0;transform:translateY(5px)}}
+}
+@media (forced-colors:active){
+  .bf-diagram,.bf-node,.bf-glyph,.bf-pill{background:Canvas;border-color:CanvasText}
+}
 </style>
 <script type="application/ld+json">
   {
@@ -308,6 +359,65 @@ and the app says so on every screen where you talk to them.</p>
     </dl>
   </div>
 </section>
+
+<!-- Borrow-privacy figure: draws ONLY what the "Share, or borrow" card above and
+     the borrow FAQ answer below already say in text — publish, others borrow,
+     their conversations stay theirs; the creator sees how many, never a word.
+     Every label is a verbatim or near-verbatim fragment of those sentences. The
+     three chat bubbles are a generic plural for "other people"; no numeral is
+     printed anywhere, because no count exists on this page. Diagram is
+     decorative (aria-hidden); the visible figcaption carries the fact. -->
+<figure class="borrow-flow">
+  <div class="bf-diagram" aria-hidden="true">
+    <span class="bf-kicker">Share, or borrow</span>
+    <div class="bf-row">
+      <div class="bf-node">
+        <span class="bf-glyph bf-glyph--you">
+          <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="8" r="3.6" fill="currentColor"/><path d="M4.8 19.6a7.2 7.2 0 0 1 14.4 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </span>
+        <b>You</b>
+        <span>the creator</span>
+      </div>
+      <div class="bf-link">
+        <i>publish</i>
+        <svg viewBox="0 0 44 44" width="44" height="44"><path d="M2 22h32" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M34 16.5 42 22l-8 5.5z" fill="currentColor"/></svg>
+      </div>
+      <div class="bf-node">
+        <span class="bf-glyph bf-glyph--spark">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9z"/></svg>
+        </span>
+        <b>A character</b>
+        <span>other people can borrow</span>
+      </div>
+      <div class="bf-link">
+        <i>borrow</i>
+        <svg viewBox="0 0 44 44" width="44" height="44"><path d="M2 22h32" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M34 16.5 42 22l-8 5.5z" fill="currentColor"/></svg>
+      </div>
+      <div class="bf-node">
+        <span class="bf-glyph bf-glyph--chats">
+          <svg viewBox="0 0 24 24" width="19" height="19"><path d="M4.5 4h15A2.5 2.5 0 0 1 22 6.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 4v-4h-3A2.5 2.5 0 0 1 2 14.5v-8A2.5 2.5 0 0 1 4.5 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.6 10.4V9.3a2.4 2.4 0 0 1 4.8 0v1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="8.6" y="10.3" width="6.8" height="5" rx="1.2" fill="currentColor"/></svg>
+          <svg viewBox="0 0 24 24" width="19" height="19"><path d="M4.5 4h15A2.5 2.5 0 0 1 22 6.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 4v-4h-3A2.5 2.5 0 0 1 2 14.5v-8A2.5 2.5 0 0 1 4.5 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.6 10.4V9.3a2.4 2.4 0 0 1 4.8 0v1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="8.6" y="10.3" width="6.8" height="5" rx="1.2" fill="currentColor"/></svg>
+          <svg viewBox="0 0 24 24" width="19" height="19"><path d="M4.5 4h15A2.5 2.5 0 0 1 22 6.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 4v-4h-3A2.5 2.5 0 0 1 2 14.5v-8A2.5 2.5 0 0 1 4.5 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.6 10.4V9.3a2.4 2.4 0 0 1 4.8 0v1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="8.6" y="10.3" width="6.8" height="5" rx="1.2" fill="currentColor"/></svg>
+        </span>
+        <b>Their conversations</b>
+        <span>stay theirs</span>
+      </div>
+    </div>
+    <div class="bf-back">
+      <span class="bf-pill bf-pill--yes">
+        <svg viewBox="0 0 24 24" width="15" height="15"><path d="M6 5v14M12 5v14M18 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+        You see how many people are talking
+      </span>
+      <span class="bf-pill bf-pill--no">
+        <svg viewBox="0 0 24 24" width="15" height="15"><path d="M4.5 4h15A2.5 2.5 0 0 1 22 6.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 4v-4h-3A2.5 2.5 0 0 1 2 14.5v-8A2.5 2.5 0 0 1 4.5 4z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4 20 20 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Never a word of what they say
+      </span>
+    </div>
+  </div>
+  <figcaption class="meta">Publish a character and other people can borrow them.
+  Their conversations stay theirs — you see how many people are talking, never a
+  word of what they say.</figcaption>
+</figure>
 
 <h2>What Mythkin will not do</h2>
 <div class="refusals">

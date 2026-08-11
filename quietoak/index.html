@@ -495,6 +495,38 @@
     .companion-card .role { color: var(--primary-dark); font-size: 0.82rem; font-weight: 700; margin: 2px 0 8px; text-transform: uppercase; letter-spacing: 0.06em; }
     .companion-card p { color: var(--muted-fg); font-size: 0.92rem; }
 
+    /* ── The chain, at a glance (#chain). Every chip is a near-verbatim lift
+       from the copy beside it; the hairline connectors echo the .mods-grid
+       cross, the kicker echoes .cv-card .k, the filled end pill echoes .cv-me.
+       The marked link's glow is progressive enhancement — gated on
+       no-preference and killed again by the global reduce-motion block. */
+    .chainviz { max-width: 680px; margin: 44px auto 0; }
+    .chainviz-row { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; row-gap: 12px; }
+    .chainviz-row li { display: flex; align-items: center; }
+    .chainviz-row li::before { content: ''; flex: none; width: 18px; height: 1px; background: var(--border-strong); margin: 0 5px; }
+    .chainviz-row li:first-child::before { display: none; }
+    .chainviz-chip {
+      display: inline-flex; flex-direction: column; align-items: center;
+      padding: 7px 14px; background: var(--card);
+      border: 1px solid var(--border-strong); border-radius: 999px;
+      font-weight: 700; font-size: 0.88rem; line-height: 1.35;
+      color: var(--fg); white-space: nowrap;
+    }
+    .chainviz-chip.mark {
+      padding: 8px 16px; background: var(--sage-glow);
+      border-color: var(--primary); border-radius: 16px;
+      box-shadow: 0 0 0 4px var(--sage-glow);
+    }
+    .chainviz-k { font-size: 0.64rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--primary-dark); }
+    .chainviz-chip.plan { background: var(--primary-dark); border-color: var(--primary-dark); color: #fff; }
+    @media (prefers-reduced-motion: no-preference) {
+      .chainviz-chip.mark { animation: chainviz-glow 6s ease-in-out infinite; }
+    }
+    @keyframes chainviz-glow {
+      0%, 100% { box-shadow: 0 0 0 3px var(--sage-glow); }
+      50% { box-shadow: 0 0 0 9px var(--sage-glow); }
+    }
+
     /* ===== CRISIS BAND ===== */
     .crisis-band {
       display: flex; gap: 18px; align-items: center;
@@ -1194,6 +1226,8 @@
             <li><strong>The whole chain, in your words.</strong> The spark, what made you more vulnerable that day, then each link — a thought, a feeling, a body sensation, an urge, something you did — laid out in order.</li>
             <li><strong>Ends on a plan, not a post-mortem.</strong> Mark the skills that could change a link next time, and what you'd repair. That plan is what your companion carries into your next conversation.</li>
             <li><strong>Skip anything, keep everything.</strong> Every field is optional and nothing is graded. Your chains stay on your device and are yours to reopen, edit or delete.</li>
+            <!-- chainviz figure below depends on this copy staying as-is: its
+                 chip labels are lifted from the lede and the first two bullets. -->
             <!-- READY TO SHIP WITH 1.1 — uncomment the <li> below the day the build
                  carrying ChainDetailView is the one on the App Store. The backend
                  half is already live and verified in production (storyvault-api
@@ -1210,6 +1244,34 @@
           </ul>
         </div>
       </div>
+
+      <!-- ── The chain, at a glance. Inline CSS chips only; it depicts nothing
+           this section doesn't already say. Labels are near-verbatim lifts:
+           "The spark, what made you more vulnerable that day, then each link —
+           a thought, a feeling, a body sensation, an urge, something you did —
+           laid out in order" and "Ends on a plan". The single marked link
+           restates the heading ("Find the link you can change"); marking the
+           urge is the reading the Progress section states outright ("Feeling
+           an urge and not acting on it is the skill working"). One link marked,
+           never two — the lede says "the one place". -->
+      <figure class="chainviz">
+        <ol class="chainviz-row">
+          <li><span class="chainviz-chip">The spark</span></li>
+          <li><span class="chainviz-chip">Vulnerable that day</span></li>
+          <li><span class="chainviz-chip">A thought</span></li>
+          <li><span class="chainviz-chip">A feeling</span></li>
+          <li><span class="chainviz-chip">A body sensation</span></li>
+          <li>
+            <span class="chainviz-chip mark">
+              <span class="chainviz-k">The link you can change</span>
+              <span>An urge</span>
+            </span>
+          </li>
+          <li><span class="chainviz-chip">What you did</span></li>
+          <li><span class="chainviz-chip plan">Your plan</span></li>
+        </ol>
+        <figcaption class="mods-cap">Laid out in order — and one link marked: the one place a skill could have changed it.</figcaption>
+      </figure>
     </div>
   </section>
 

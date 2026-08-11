@@ -403,6 +403,32 @@
     .honest-card h3 { font-weight: 800; font-size: 1.1rem; margin-bottom: 8px; color: var(--aurora-teal); }
     .honest-card p { color: var(--muted-fg); font-size: 0.95rem; }
 
+    /* ===== SHOP SPLIT BAR (decorative) =====
+       Drawn to scale from copy already on this page: 135 + 15 + 4 = 154,
+       and 15 + 4 = the 19 cosmetic premium pieces. The facts live in the
+       honest-card and FAQ text; this only makes the proportions visible.
+       No animation, so the reduced-motion block needs no new rule. */
+    .shop-bar { max-width: 720px; margin: 0 auto 50px; }
+    .shop-bar-title { text-align: center; color: var(--faint); font-size: 0.85rem; margin-bottom: 12px; }
+    .shop-track { display: flex; gap: 3px; height: 46px; }
+    .shop-track .seg { display: flex; align-items: center; justify-content: center; min-width: 4px; border-radius: 6px; }
+    .shop-track .seg:first-child { border-radius: 999px 6px 6px 999px; }
+    .shop-track .seg:last-child { border-radius: 6px 999px 999px 6px; }
+    .shop-track .seg span { font-weight: 800; font-size: 0.85rem; white-space: nowrap; overflow: hidden; }
+    .seg.s-snow { flex: 135; background: linear-gradient(180deg, rgba(89,200,255,0.34), rgba(90,168,232,0.16)); border: 1px solid rgba(89,200,255,0.35); color: var(--snow); }
+    .seg.s-gold { flex: 15; background: linear-gradient(180deg, #ffc678, var(--beak)); color: #221304; }
+    .seg.s-club { flex: 4; background: linear-gradient(180deg, rgba(176,138,255,0.85), rgba(176,138,255,0.5)); }
+    .shop-brace { display: flex; justify-content: flex-end; }
+    .shop-brace > div { width: 12.3%; min-width: 46px; height: 9px; margin-top: 5px; border: 1px solid var(--border-strong); border-top: none; border-radius: 0 0 9px 9px; }
+    .shop-brace-label { text-align: right; color: var(--faint); font-size: 0.8rem; margin-top: 5px; white-space: nowrap; }
+    .shop-key { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 26px; margin-top: 16px; font-size: 0.88rem; color: var(--muted-fg); }
+    .shop-key li { display: flex; align-items: center; gap: 9px; }
+    .shop-key .chip { width: 12px; height: 12px; border-radius: 4px; flex: none; }
+    .shop-key .chip.c-snow { background: rgba(89,200,255,0.5); border: 1px solid var(--ice); }
+    .shop-key .chip.c-gold { background: var(--beak); }
+    .shop-key .chip.c-club { background: var(--aurora-violet); }
+    .shop-key strong { color: var(--fg); }
+
     /* ===== FAQ ===== */
     .faq-list { max-width: 720px; margin: 0 auto; }
     details.faq { padding: 18px 0; border-bottom: 1px solid var(--border); }
@@ -731,6 +757,25 @@
         <div class="section-eyebrow">Straight answers</div>
         <h2>Free, and honest about <em>what that means.</em></h2>
         <p class="lede">Games for kids have a long history of being sold as free. Here's exactly what Waddleton is.</p>
+      </div>
+      <!-- Decorative restatement of the split described in the card below and in the
+           "Is it really free?" FAQ: 135 Snowflake items + 15 Goldfish + 4 Club = 154,
+           and 15 + 4 = the 19 cosmetic premium pieces. Change those sentences first
+           if these numbers ever move. -->
+      <div class="shop-bar" aria-hidden="true">
+        <div class="shop-bar-title">135 of the shop's 154 items — drawn to scale</div>
+        <div class="shop-track">
+          <div class="seg s-snow"><span>135 · Snowflakes ❄</span></div>
+          <div class="seg s-gold"><span>15</span></div>
+          <div class="seg s-club"></div>
+        </div>
+        <div class="shop-brace"><div></div></div>
+        <div class="shop-brace-label">all 19 are cosmetic</div>
+        <ul class="shop-key">
+          <li><span class="chip c-snow"></span><span><strong>135</strong> — Snowflakes, earned by playing</span></li>
+          <li><span class="chip c-gold"></span><span><strong>15</strong> — Goldfish, when the mobile app ships</span></li>
+          <li><span class="chip c-club"></span><span><strong>4</strong> — Waddleton Club members</span></li>
+        </ul>
       </div>
       <div class="honest">
         <div class="honest-card">
