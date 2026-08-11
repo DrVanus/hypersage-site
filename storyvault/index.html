@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StoryVault — 80 classic books to read, hear and play</title>
+  <title>StoryVault — the classics, played, read and heard</title>
   <!-- Bundled-book count is 80. It was 87, then 81 (six US-only-public-domain titles
        removed, f7075b6 2026-08-04), then 80 (The Metamorphosis removed, 555351d — the
        Gutenberg English translation is its own copyrighted work). Verify with
@@ -15,7 +15,7 @@
   <link rel="canonical" href="https://hypersage.ai/storyvault/">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="StoryVault — Read, hear &amp; play 80 classic books">
+  <meta property="og:title" content="StoryVault — Classics You Play">
   <meta property="og:description" content="Eighty complete classics, free and offline. Step inside any of them and the story bends to your choices — or hear it read aloud.">
   <meta property="og:url" content="https://hypersage.ai/storyvault/">
   <meta property="og:site_name" content="StoryVault AI">
@@ -24,7 +24,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="StoryVault AI — branching tales, written with you: a glowing gilded storybook">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="StoryVault — Read, hear &amp; play 80 classic books">
+  <meta name="twitter:title" content="StoryVault — Classics You Play">
   <meta name="twitter:description" content="Eighty complete classics, free and offline. Read them, play them, or hear them read aloud.">
   <meta name="twitter:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260810a">
   <meta name="twitter:image:alt" content="StoryVault AI — branching tales, written with you: a glowing gilded storybook">
@@ -1125,6 +1125,96 @@
       font-size: 0.97rem; line-height: 1.75;
     }
 
+    /* ===== DATA PATH (inside the "does the AI train on my stories?" answer) =====
+       The answer above, drawn: your input → our backend → Anthropic's Claude for
+       the next page (OpenAI as the failover) and OpenAI for scene art and voice
+       narration, stored on neither end. Same connector idiom as the branch map —
+       stretched SVG fans on wide, hairline drops on narrow. */
+    .datapath { margin: 2px 0 20px; }
+    .dp-flow {
+      display: grid;
+      grid-template-columns: 1fr 44px 1fr 44px 1.05fr;
+      align-items: center;
+    }
+    .dp-node {
+      position: relative;
+      padding: 11px 13px;
+      background: rgba(217,181,127,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .dp-node.dp-hub {
+      border-color: var(--border-strong);
+      background: rgba(217,181,127,0.09);
+    }
+    .dp-node b {
+      display: block;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 600; font-size: 0.97rem; line-height: 1.3;
+      color: var(--accent-light);
+      padding-bottom: 0.08em;
+    }
+    .dp-node i {
+      display: block;
+      font-style: normal;
+      font-size: 0.78rem; line-height: 1.5;
+      color: var(--muted-fg);
+      margin-top: 2px;
+    }
+    .dp-failover {
+      display: block;
+      margin-top: 9px;
+      padding: 5px 9px;
+      border: 1px dashed var(--border-strong);
+      border-radius: 9px;
+      font-size: 0.74rem; line-height: 1.45;
+      color: var(--muted-fg);
+    }
+    .dp-ends {
+      position: relative;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .dp-fan { width: 100%; height: 100%; min-height: 88px; align-self: stretch; display: block; }
+    .dp-fan path {
+      fill: none;
+      stroke: var(--border-strong);
+      stroke-width: 1.4;
+      vector-effect: non-scaling-stroke;
+    }
+    .dp-fan path.dp-live {
+      stroke: var(--accent);
+      stroke-width: 2;
+      filter: drop-shadow(0 0 5px rgba(217,181,127,0.35));
+      animation: bm-pulse 3.2s ease-in-out infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .dp-fan path.dp-live { animation: none; }
+    }
+    .dp-seal { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 16px; }
+    .dp-seal span {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(30,20,64,0.6), rgba(23,16,48,0.6));
+      font-size: 0.78rem; line-height: 1.5;
+      color: var(--muted-fg);
+    }
+    .dp-seal span::before { content: '✦'; color: var(--accent); font-size: 0.62rem; }
+    @media (max-width: 700px) {
+      /* Stack: the fans go, hairline drops carry the flow downward instead. */
+      .dp-flow { grid-template-columns: 1fr; }
+      .dp-fan { display: none; }
+      .dp-node.dp-hub, .dp-ends { margin-top: 30px; }
+      .dp-node.dp-hub::before, .dp-ends::before {
+        content: '';
+        position: absolute;
+        left: 50%; top: -24px;
+        width: 1px; height: 18px;
+        background: linear-gradient(180deg, transparent, var(--accent));
+      }
+    }
+
     /* ===== CTA STRIP ===== */
     .cta-strip {
       text-align: center;
@@ -1814,6 +1904,50 @@
                this back to "OpenAI" — the site was the only surface saying that, and
                privacy.html had the two providers the wrong way round. -->
           <p>No. Your input is sent to our backend for the duration of the request, forwarded to Anthropic's Claude to write the next page (with OpenAI as a failover), and to OpenAI for scene art and voice narration. It isn't stored on either end, and we don't sell or share your input.</p>
+          <!-- The sentence above, drawn. Every label restates a clause of it: "sent
+               to our backend for the duration of the request" / "forwarded to
+               Anthropic's Claude to write the next page" / "with OpenAI as a
+               failover" / "to OpenAI for scene art and voice narration" / "It isn't
+               stored on either end, and we don't sell or share your input", plus the
+               "The AI never trains on your stories" line in the Yours-alone card.
+               Decorative: aria-hidden, so the answer text stays the one source of
+               truth for assistive tech. Do not add a hop, a provider, or a purpose
+               that the answer does not name. -->
+          <figure class="datapath" aria-hidden="true">
+            <div class="dp-flow">
+              <div class="dp-node">
+                <b>Your input</b>
+                <i>for the duration of the request</i>
+              </div>
+              <svg class="dp-fan" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
+                <path class="dp-live" d="M0,50 H100"/>
+              </svg>
+              <div class="dp-node dp-hub">
+                <b>Our backend</b>
+                <i>forwards the request</i>
+              </div>
+              <svg class="dp-fan" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
+                <path class="dp-live" d="M0,50 C45,50 55,28 100,28"/>
+                <path d="M0,50 C45,50 55,80 100,80"/>
+              </svg>
+              <div class="dp-ends">
+                <div class="dp-node">
+                  <b>Anthropic's Claude</b>
+                  <i>writes the next page</i>
+                  <span class="dp-failover">OpenAI as a failover</span>
+                </div>
+                <div class="dp-node">
+                  <b>OpenAI</b>
+                  <i>scene art and voice narration</i>
+                </div>
+              </div>
+            </div>
+            <div class="dp-seal">
+              <span>Isn't stored on either end</span>
+              <span>Never sold or shared</span>
+              <span>Never trains on your stories</span>
+            </div>
+          </figure>
         </details>
         <details class="faq">
           <summary>Can I read offline?</summary>
