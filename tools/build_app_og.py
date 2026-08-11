@@ -1,7 +1,8 @@
 """Render the four app-subsite og-images (1200x630) from each SITE'S OWN pieces.
 
-    python3 tools/build_app_og.py                 # all four
+    python3 tools/build_app_og.py                 # all eleven
     python3 tools/build_app_og.py nightshelf …    # a subset
+    python3 tools/build_app_og.py --check         # fail if a page moved under a card
 
 Same philosophy as build_og.py one directory up: these are not design files
 drawn beside the site — every card is composed from the subsite's own color
@@ -17,7 +18,9 @@ Two renderer lessons inherited from build_og.py, kept:
 """
 from __future__ import annotations
 
+import hashlib
 import pathlib
+import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -402,6 +405,144 @@ SHELL = """<!DOCTYPE html><html><head><meta charset="utf-8">
 </body></html>"""
 
 
+
+# ---------------------------------------------------------------------------
+# Drift gate
+#
+# The cards' copy is deliberately NOT lifted from the page the way build_og.py
+# lifts the root's figure: a card subhead is a shortened, line-broken rewrite of
+# a hero lede, and blind-lifting produces four-line paragraphs that shrink the
+# type to nothing. What can be automated is noticing when the page has moved
+# out from under a card, and refusing the two kinds of lie found in the
+# 2026-08-11 audit:
+#
+#   * a NUMBER in the picture the page contradicts — waddleton's card said
+#     "14 arcade games" while its own og:description said 15;
+#   * an AVAILABILITY claim the store does not support — four cards said
+#     "· iOS" for apps with no App Store listing anywhere on their page.
+#
+# The digest deliberately covers only what a card depends on — the site's CSS
+# custom properties, its <h1>, its og:description, and the art file's bytes — so
+# an FAQ rewrite does not cry stale while a rebrand, a retitle, a repositioning
+# or a repainted icon does.
+# ---------------------------------------------------------------------------
+
+def _site_css(name: str) -> str:
+    """The subsite's CSS, inline or linked — where its :root tokens live."""
+    html = (ROOT / name / "index.html").read_text()
+    css = "\n".join(re.findall(r"<style>(.*?)</style>", html, re.S))
+    for href in re.findall(r'<link rel="stylesheet" href="([^"]+\.css)[^"]*"', html):
+        f = ROOT / name / href.split("?")[0]
+        if f.exists():
+            css += "\n" + f.read_text()
+    return css
+
+
+def _page_text(name: str) -> str:
+    html = (ROOT / name / "index.html").read_text()
+    html = re.sub(r"<(script|style)\b.*?</\1>", " ", html, flags=re.S)
+    return re.sub(r"<[^>]+>", " ", html)
+
+
+def signals(name: str) -> dict:
+    html = (ROOT / name / "index.html").read_text()
+    tokens = sorted(set(re.findall(r"(--[\w-]+)\s*:\s*([^;]+);", _site_css(name))))
+    h1 = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S)
+    og = re.search(r'<meta property="og:description" content="([^"]*)"', html)
+    # og:title too: a RETITLE is exactly the drift that would not show up in the
+    # h1 or the tokens — storyvault was renamed mid-audit on 2026-08-11 — and the
+    # card's headline is the page's title in shortened form.
+    ogt = re.search(r'<meta property="og:title" content="([^"]*)"', html)
+    art = (ROOT / name / CARDS[name]["art"])
+    return {
+        "tokens": ["%s:%s" % (k, v.strip()) for k, v in tokens],
+        "h1": re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", h1.group(1))).strip() if h1 else "",
+        "og_description": og.group(1) if og else "",
+        "og_title": ogt.group(1) if ogt else "",
+        "art_sha": hashlib.sha256(art.read_bytes()).hexdigest() if art.exists() else "MISSING",
+    }
+
+
+def digest(name: str) -> str:
+    s = signals(name)
+    h = hashlib.sha256()
+    for part in ("\n".join(s["tokens"]), s["h1"], s["og_title"],
+                 s["og_description"], s["art_sha"]):
+        h.update(part.encode())
+        h.update(b"\0")
+    return h.hexdigest()
+
+
+def stamp_path(name: str) -> pathlib.Path:
+    return ROOT / name / "og-image.inputs.sha256"
+
+
+def check(names: list[str]) -> int:
+    bad = 0
+    for name in names:
+        c = CARDS[name]
+        problems = []
+
+        art = ROOT / name / c["art"]
+        if not art.exists():
+            problems.append(f'art {c["art"]} does not exist')
+
+        page = _page_text(name)
+        copy = " ".join(str(c.get(k, "")) for k in ("kicker", "h1", "sub"))
+        copy_text = re.sub(r"<[^>]+>", " ", copy)
+        # Digits only: a card that spells "Eighty-two" cannot be checked this
+        # way, and pretending otherwise would be a gate that reports safety it
+        # does not provide.
+        for n in sorted(set(re.findall(r"\b\d[\d,]*\+?\b", copy_text))):
+            if n not in page:
+                problems.append(f'card says "{n}" — not found anywhere on the page')
+
+        kicker = re.sub(r"<[^>]+>", "", str(c.get("kicker", ""))).lower()
+        if "ios" in kicker and "coming" not in kicker:
+            if "apps.apple.com" not in (ROOT / name / "index.html").read_text():
+                problems.append('kicker claims "iOS" but the page links no App Store listing '
+                                '— say "Coming to iOS" until it ships')
+
+        # Compare colours NORMALIZED. mythkin declares --surface:#fff and the
+        # card writes #FFFFFF; those are the same colour, and a gate that calls
+        # that drift is a gate people learn to ignore.
+        def _hexes(text: str) -> set[str]:
+            out = set()
+            for h in re.findall(r"#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\b", text):
+                h = h.lower()
+                out.add("".join(ch * 2 for ch in h) if len(h) == 3 else h)
+            return out
+
+        # Pure black and white are structural, not brand: hexhunter's #000 is a
+        # mask-image alpha stop and every card's shadow is some rgba(0,0,0,..).
+        # The point of this check is catching an INVENTED palette after a
+        # rebrand, not policing scrims.
+        site_hexes = _hexes(_site_css(name)) | {"000000", "ffffff"}
+        for hexcol in sorted(_hexes(c["css"]) - site_hexes):
+            problems.append(f'card colour #{hexcol} appears nowhere in the site CSS '
+                            f'— it is not one of this site\'s tokens')
+
+        sp = stamp_path(name)
+        have = sp.read_text().strip() if sp.exists() else "(never stamped)"
+        want = digest(name)
+        if have != want:
+            problems.append("never stamped — render it once so drift can be detected"
+                            if not sp.exists() else
+                            f"page moved since this card was rendered "
+                            f"(stamped {have[:12]}, now {want[:12]}) — re-render it")
+
+        if problems:
+            bad += 1
+            print(f"FAIL {name}")
+            for p in problems:
+                print(f"       - {p}")
+        else:
+            print(f"ok   {name}")
+    if bad:
+        print(f"\n{bad} card(s) need attention. Re-render with: "
+              f"python3 tools/build_app_og.py <site>")
+    return 1 if bad else 0
+
 def render(names: list[str]) -> None:
     from playwright.sync_api import sync_playwright
     with sync_playwright() as pw:
@@ -428,6 +569,9 @@ def render(names: list[str]) -> None:
                 pg.wait_for_timeout(150)
                 out = ROOT / name / "og-image.png"
                 pg.screenshot(path=str(out))
+                # Stamp what this render was made of, so --check can tell later
+                # whether the page moved on without it.
+                stamp_path(name).write_text(digest(name) + "\n")
                 print(f"wrote {name}/og-image.png  {out.stat().st_size // 1024} KB")
             finally:
                 tmp.unlink(missing_ok=True)
@@ -435,8 +579,10 @@ def render(names: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    picked = sys.argv[1:] or list(CARDS)
+    args = sys.argv[1:]
+    checking = "--check" in args
+    picked = [a for a in args if not a.startswith("-")] or list(CARDS)
     unknown = [n for n in picked if n not in CARDS]
     if unknown:
         sys.exit(f"unknown site(s): {', '.join(unknown)} — know: {', '.join(CARDS)}")
-    render(picked)
+    sys.exit(check(picked)) if checking else render(picked)

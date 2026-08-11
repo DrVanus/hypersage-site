@@ -500,11 +500,23 @@
        cross, the kicker echoes .cv-card .k, the filled end pill echoes .cv-me.
        The marked link's glow is progressive enhancement — gated on
        no-preference and killed again by the global reduce-motion block. */
-    .chainviz { max-width: 680px; margin: 44px auto 0; }
+    /* THREE STAGES, not one wrapping row. Eight chips never fit on one line
+       (they measure ~1214px against a 1100px container), so the old single row
+       wrapped 4/3/1 on desktop and 2/2/1/1/2 on a phone — and because the
+       connector is a ::before with only :first-child suppressed, EVERY wrapped
+       line began with a hairline pointing at nothing. Authoring the groups the
+       copy already names — what set it up, the links, the plan it ends on —
+       makes each break meaningful and puts a real first-child at the start of
+       each one. Below 760px each stage stacks and the connectors turn vertical,
+       so nothing wraps at all. */
+    .chainviz { max-width: 820px; margin: 44px auto 0; }
     .chainviz-row { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; row-gap: 12px; }
     .chainviz-row li { display: flex; align-items: center; }
     .chainviz-row li::before { content: ''; flex: none; width: 18px; height: 1px; background: var(--border-strong); margin: 0 5px; }
     .chainviz-row li:first-child::before { display: none; }
+    /* The vertical hop between stages. It replaces the dangling horizontal
+       stub the wrap used to leave in front of "A body sensation". */
+    .chainviz-drop { width: 1px; height: 18px; margin: 10px auto; background: var(--border-strong); }
     .chainviz-chip {
       display: inline-flex; flex-direction: column; align-items: center;
       padding: 7px 14px; background: var(--card);
@@ -518,7 +530,23 @@
       box-shadow: 0 0 0 4px var(--sage-glow);
     }
     .chainviz-k { font-size: 0.64rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--primary-dark); }
-    .chainviz-chip.plan { background: var(--primary-dark); border-color: var(--primary-dark); color: #fff; }
+    /* NOT `.plan` — that class belongs to the pricing cards further down
+       (`.plan { padding: 32px 28px; border-radius: var(--radius-lg) }`), and the
+       chip was silently inheriting it: the end of the chain rendered as an 85px
+       dark BOX among 35px pills. Renamed so the two cannot collide again. */
+    .chainviz-chip.chainviz-end { background: var(--primary-dark); border-color: var(--primary-dark); color: #fff; }
+    /* 860, not 760: the chain stage needs 755px of chips-plus-connectors, and a
+       768px viewport only offers it ~720 — so it wrapped and put a stub in
+       front of "What you did". Stack until the row genuinely fits. */
+    @media (max-width: 860px) {
+      .chainviz-row { flex-direction: column; }
+      /* The li is a flex ROW by default, which puts its ::before connector to
+         the LEFT of the chip — a stub beside every pill. Stacking the li makes
+         the connector sit above the chip, where a vertical chain expects it. */
+      .chainviz-row li { flex-direction: column; }
+      .chainviz-row li::before { width: 1px; height: 14px; margin: 6px auto; }
+      .chainviz-chip { white-space: normal; text-align: center; }
+    }
     @media (prefers-reduced-motion: no-preference) {
       .chainviz-chip.mark { animation: chainviz-glow 6s ease-in-out infinite; }
     }
@@ -1255,9 +1283,17 @@
            an urge and not acting on it is the skill working"). One link marked,
            never two — the lede says "the one place". -->
       <figure class="chainviz">
+        <!-- The three groups are the copy's own: "The spark, what made you more
+             vulnerable that day" / "then each link — a thought, a feeling, a
+             body sensation, an urge, something you did" / "Ends on a plan".
+             Each is its own list so its first chip really is a :first-child and
+             starts without a connector. -->
         <ol class="chainviz-row">
           <li><span class="chainviz-chip">The spark</span></li>
           <li><span class="chainviz-chip">Vulnerable that day</span></li>
+        </ol>
+        <div class="chainviz-drop" aria-hidden="true"></div>
+        <ol class="chainviz-row">
           <li><span class="chainviz-chip">A thought</span></li>
           <li><span class="chainviz-chip">A feeling</span></li>
           <li><span class="chainviz-chip">A body sensation</span></li>
@@ -1268,7 +1304,10 @@
             </span>
           </li>
           <li><span class="chainviz-chip">What you did</span></li>
-          <li><span class="chainviz-chip plan">Your plan</span></li>
+        </ol>
+        <div class="chainviz-drop" aria-hidden="true"></div>
+        <ol class="chainviz-row">
+          <li><span class="chainviz-chip chainviz-end">Your plan</span></li>
         </ol>
         <figcaption class="mods-cap">Laid out in order — and one link marked: the one place a skill could have changed it.</figcaption>
       </figure>
