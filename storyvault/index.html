@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StoryVault — the classics, played, read and heard</title>
+  <title>StoryVault — AI adventures you write, and 80 classics</title>
   <!-- Bundled-book count is 80. It was 87, then 81 (six US-only-public-domain titles
        removed, f7075b6 2026-08-04), then 80 (The Metamorphosis removed, 555351d — the
        Gutenberg English translation is its own copyrighted work). Verify with
@@ -15,8 +15,8 @@
   <link rel="canonical" href="https://hypersage.ai/storyvault/">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="StoryVault — Classics You Play">
-  <meta property="og:description" content="Eighty complete classics, free and offline. Step inside any of them and the story bends to your choices — or hear it read aloud.">
+  <meta property="og:title" content="StoryVault — AI Adventures">
+  <meta property="og:description" content="Write a world from a single line and the AI builds it out. Or step inside one of eighty complete classics and change where it goes.">
   <meta property="og:url" content="https://hypersage.ai/storyvault/">
   <meta property="og:site_name" content="StoryVault AI">
   <meta property="og:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260810a">
@@ -24,8 +24,8 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="StoryVault AI — branching tales, written with you: a glowing gilded storybook">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="StoryVault — Classics You Play">
-  <meta name="twitter:description" content="Eighty complete classics, free and offline. Read them, play them, or hear them read aloud.">
+  <meta name="twitter:title" content="StoryVault — AI Adventures">
+  <meta name="twitter:description" content="Write your own world and the AI builds it out — or play one of eighty complete classics.">
   <meta name="twitter:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260810a">
   <meta name="twitter:image:alt" content="StoryVault AI — branching tales, written with you: a glowing gilded storybook">
 
@@ -1161,7 +1161,9 @@
       color: var(--muted-fg);
       margin-top: 2px;
     }
-    .dp-failover {
+    /* Dashed qualifier chip: the thing above it is conditional, not the default
+       path (the Claude failover; scene art being Pro-only and metered). */
+    .dp-chip {
       display: block;
       margin-top: 9px;
       padding: 5px 9px;
@@ -1181,6 +1183,9 @@
       stroke-width: 1.4;
       vector-effect: non-scaling-stroke;
     }
+    /* Dashed = conditional. The fan is two destinations, NOT two simultaneous
+       sends: only the Claude edge is live on every turn. */
+    .dp-fan path.dp-cond { stroke-dasharray: 5 5; }
     .dp-fan path.dp-live {
       stroke: var(--accent);
       stroke-width: 2;
@@ -1904,48 +1909,52 @@
                this back to "OpenAI" — the site was the only surface saying that, and
                privacy.html had the two providers the wrong way round. -->
           <p>No. Your input is sent to our backend for the duration of the request, forwarded to Anthropic's Claude to write the next page (with OpenAI as a failover), and to OpenAI for scene art and voice narration. It isn't stored on either end, and we don't sell or share your input.</p>
-          <!-- The sentence above, drawn. Every label restates a clause of it: "sent
-               to our backend for the duration of the request" / "forwarded to
-               Anthropic's Claude to write the next page" / "with OpenAI as a
-               failover" / "to OpenAI for scene art and voice narration" / "It isn't
-               stored on either end, and we don't sell or share your input", plus the
-               "The AI never trains on your stories" line in the Yours-alone card.
-               Decorative: aria-hidden, so the answer text stays the one source of
-               truth for assistive tech. Do not add a hop, a provider, or a purpose
-               that the answer does not name. -->
+          <!-- The sentence above, drawn. Every label but one restates a clause of it,
+               and the two seal chips are lifted from it verbatim so the visible answer
+               region adds no string the FAQPage acceptedAnswer.text (:1367) lacks — that
+               JSON-LD is the other half of this claim and must not drift from what is
+               drawn here. The one exception is the dashed Pro chip on the OpenAI node,
+               which is required: the answer sentence is a provider/purpose disclosure
+               listing every destination across the product, so drawing it as a fan out
+               of one backend would otherwise read as "every input is painted". Scene
+               art is Pro-only and metered — see :1687, :1866 and the note at :1600 —
+               so that qualifier has to travel with the art label, and its edge is
+               dashed (.dp-cond) rather than live. Decorative: aria-hidden, so the
+               answer text stays the one source of truth for assistive tech. Do not add
+               a hop, a provider, or a purpose that the answer does not name, and do not
+               drop the "With Pro" qualifier. -->
           <figure class="datapath" aria-hidden="true">
             <div class="dp-flow">
               <div class="dp-node">
                 <b>Your input</b>
-                <i>for the duration of the request</i>
               </div>
               <svg class="dp-fan" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
                 <path class="dp-live" d="M0,50 H100"/>
               </svg>
               <div class="dp-node dp-hub">
                 <b>Our backend</b>
-                <i>forwards the request</i>
+                <i>holds it for the duration of the request, then forwards it</i>
               </div>
               <svg class="dp-fan" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
                 <path class="dp-live" d="M0,50 C45,50 55,28 100,28"/>
-                <path d="M0,50 C45,50 55,80 100,80"/>
+                <path class="dp-cond" d="M0,50 C45,50 55,80 100,80"/>
               </svg>
               <div class="dp-ends">
                 <div class="dp-node">
                   <b>Anthropic's Claude</b>
                   <i>writes the next page</i>
-                  <span class="dp-failover">OpenAI as a failover</span>
+                  <span class="dp-chip">OpenAI as a failover</span>
                 </div>
                 <div class="dp-node">
                   <b>OpenAI</b>
                   <i>scene art and voice narration</i>
+                  <span class="dp-chip">With Pro — scene art up to 10 turns a day</span>
                 </div>
               </div>
             </div>
             <div class="dp-seal">
-              <span>Isn't stored on either end</span>
-              <span>Never sold or shared</span>
-              <span>Never trains on your stories</span>
+              <span>It isn't stored on either end</span>
+              <span>We don't sell or share your input</span>
             </div>
           </figure>
         </details>
