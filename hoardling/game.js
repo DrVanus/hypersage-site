@@ -1386,57 +1386,89 @@
       this.sceneLevel = game.levelIdx;
     },
     machine: function (type) {
+      // The painted machines are WOOD + BRASS contraptions with rivets, crews
+      // and working parts. The first 3D pass was a stone disc with a box on
+      // top — which is why they read as placeholders. Each rig now carries the
+      // three things that say "built": a PLANKED base with brass banding, a
+      // visible MECHANISM (crank, wheel, coil, bellows), and a warm lamp.
       var T = this.T, m = this._mats, g = new T.Group();
-      var base = new T.Mesh(new T.CylinderGeometry(26, 30, 10, 9), m.stoneD);
-      base.position.y = 5; base.castShadow = base.receiveShadow = true; g.add(base);
-      // a small warm lantern on every machine: the lit accent that separates
-      // "built thing" from "rock" at phone size
+      var deck = new T.Mesh(new T.CylinderGeometry(25, 29, 7, 9), m.wood);
+      deck.position.y = 3.5; deck.castShadow = deck.receiveShadow = true; g.add(deck);
+      var band = new T.Mesh(new T.TorusGeometry(26, 1.8, 5, 12), m.brass);
+      band.position.y = 6.4; band.rotation.x = Math.PI / 2; g.add(band);
+      for (var rv = 0; rv < 6; rv++) {                    // rivets catch the key light
+        var a4 = rv / 6 * 6.283;
+        var riv = new T.Mesh(new T.SphereGeometry(1.5, 5, 4), m.brass);
+        riv.position.set(Math.cos(a4) * 24, 6.5, Math.sin(a4) * 24); g.add(riv);
+      }
       var lamp = new T.Mesh(new T.SphereGeometry(3.4, 6, 5), m.flame);
-      lamp.position.set(20, 14, 14); g.add(lamp);
+      lamp.position.set(20, 13, 14); g.add(lamp);
       g.scale.set(1.15, 1.15, 1.15);
       var add = function (mesh, x, y, z) { mesh.position.set(x || 0, y || 0, z || 0); mesh.castShadow = true; g.add(mesh); return mesh; };
       if (type === 'ballista') {
-        add(new T.Mesh(new T.BoxGeometry(14, 16, 14), m.wood), 0, 18);
-        var head = new T.Group(); head.position.y = 30; g.add(head);
-        var bow = new T.Mesh(new T.BoxGeometry(46, 4, 4), m.wood2); bow.castShadow = true; head.add(bow);
-        var stock = new T.Mesh(new T.BoxGeometry(5, 4, 30), m.wood); stock.position.z = 4; stock.castShadow = true; head.add(stock);
-        g.userData.head = head;
+        add(new T.Mesh(new T.CylinderGeometry(11, 13, 15, 8), m.wood2), 0, 14);
+        var head = new T.Group(); head.position.y = 27; g.add(head);
+        var bow = new T.Mesh(new T.BoxGeometry(48, 3.4, 3.4), m.wood2); bow.castShadow = true; head.add(bow);
+        var arms = new T.Mesh(new T.BoxGeometry(44, 1.2, 1.2), m.iron); arms.position.z = -3; head.add(arms);
+        var stock = new T.Mesh(new T.BoxGeometry(5, 4, 30), m.wood); stock.position.z = 5; stock.castShadow = true; head.add(stock);
+        var wheel = new T.Mesh(new T.TorusGeometry(6, 1.4, 5, 10), m.brass);
+        wheel.position.set(9, -3, -6); head.add(wheel);
+        var kob = new T.Mesh(new T.CapsuleGeometry(3.4, 5, 3, 6), m.green);
+        kob.position.set(-9, -2, -8); kob.castShadow = true; head.add(kob);
+        g.userData.head = head; g.userData.wheel = wheel;
       } else if (type === 'mimic') {
-        var chest = add(new T.Mesh(new T.BoxGeometry(34, 22, 26), m.wood2), 0, 20);
-        var lid = new T.Mesh(new T.BoxGeometry(34, 8, 26), m.wood);
-        lid.position.set(0, 34, -8); lid.rotation.x = -0.7; lid.castShadow = true; g.add(lid);
-        for (var th = 0; th < 5; th++) add(new T.Mesh(new T.ConeGeometry(2.5, 6, 4), m.pale), -12 + th * 6, 32, 10);
-        add(new T.Mesh(new T.SphereGeometry(6, 7, 6), m.gold), 0, 26, 2);
-        g.userData.lid = lid; g.userData.chest = chest;
+        var chest = add(new T.Mesh(new T.BoxGeometry(34, 20, 26), m.wood2), 0, 17);
+        for (var bnd = -1; bnd <= 1; bnd += 2) {
+          add(new T.Mesh(new T.BoxGeometry(3, 22, 27), m.brass), bnd * 12, 17, 0);
+        }
+        var lid = new T.Mesh(new T.BoxGeometry(34, 7, 26), m.wood);
+        lid.position.set(0, 31, -8); lid.rotation.x = -0.75; lid.castShadow = true; g.add(lid);
+        for (var th = 0; th < 5; th++) add(new T.Mesh(new T.ConeGeometry(2.4, 6, 4), m.pale), -12 + th * 6, 28, 11);
+        add(new T.Mesh(new T.SphereGeometry(6, 8, 6), m.gold), 0, 23, 3);
+        g.userData.lid = lid;
       } else if (type === 'brazier') {
-        add(new T.Mesh(new T.SphereGeometry(20, 9, 7), m.iron), 0, 24);
-        add(new T.Mesh(new T.CylinderGeometry(5, 6, 16, 6), m.brass), 10, 44);
-        var glow = add(new T.Mesh(new T.SphereGeometry(9, 7, 6), m.flame), 0, 24, 14);
-        glow.scale.z = 0.4; g.userData.glow = glow;
+        add(new T.Mesh(new T.SphereGeometry(17, 10, 8), m.iron), 0, 22);
+        add(new T.Mesh(new T.TorusGeometry(13, 1.6, 5, 10), m.brass), 0, 22).rotation.x = Math.PI / 2;
+        var flue = add(new T.Mesh(new T.CylinderGeometry(4, 5, 18, 6), m.brass), 11, 40);
+        flue.rotation.z = -0.22;
+        var glow = add(new T.Mesh(new T.SphereGeometry(8, 8, 6), m.flame), 0, 22, 13);
+        glow.scale.z = 0.45;
+        g.userData.glow = glow;
       } else if (type === 'crystal') {
-        for (var cr = 0; cr < 4; cr++) add(new T.Mesh(new T.CylinderGeometry(10 - cr * 1.7, 11 - cr * 1.7, 7, 8), m.brass), 0, 14 + cr * 9);
+        for (var cr = 0; cr < 5; cr++) {
+          var ring = add(new T.Mesh(new T.TorusGeometry(9 - cr * 1.2, 1.6, 5, 10), m.brass), 0, 14 + cr * 8);
+          ring.rotation.x = Math.PI / 2;
+        }
+        add(new T.Mesh(new T.CylinderGeometry(2, 2, 44, 6), m.iron), 0, 32);
         var gem = add(new T.Mesh(new T.OctahedronGeometry(11, 0), m.teal), 0, 60);
         g.userData.gem = gem;
       } else if (type === 'perch') {
-        add(new T.Mesh(new T.CylinderGeometry(9, 12, 44, 7), m.stone), 0, 30);
-        var gar = new T.Group(); gar.position.y = 58; g.add(gar);
-        var bod = new T.Mesh(new T.SphereGeometry(11, 8, 6), m.stoneD); bod.castShadow = true; gar.add(bod);
+        add(new T.Mesh(new T.CylinderGeometry(8, 12, 42, 7), m.stone), 0, 28);
+        add(new T.Mesh(new T.TorusGeometry(9, 1.5, 5, 10), m.brass), 0, 46).rotation.x = Math.PI / 2;
+        var gar = new T.Group(); gar.position.y = 56; g.add(gar);
+        var bod = new T.Mesh(new T.SphereGeometry(10, 9, 7), m.stoneD); bod.castShadow = true; gar.add(bod);
+        var gh = new T.Mesh(new T.SphereGeometry(5.5, 8, 6), m.stoneD); gh.position.set(0, 8, 4); gar.add(gh);
         for (var s2 = -1; s2 <= 1; s2 += 2) {
-          var wing = new T.Mesh(new T.BoxGeometry(3, 12, 18), m.brass);
-          wing.position.set(s2 * 12, 4, -2); wing.rotation.z = s2 * 0.6; wing.castShadow = true; gar.add(wing);
+          var wing = new T.Mesh(new T.BoxGeometry(2.6, 13, 17), m.brass);
+          wing.position.set(s2 * 11, 5, -2); wing.rotation.z = s2 * 0.55; wing.castShadow = true; gar.add(wing);
         }
         g.userData.head = gar;
       } else if (type === 'bellows') {
-        var fan = add(new T.Mesh(new T.CylinderGeometry(18, 18, 6, 12, 1, false, 0, 3.14), m.wood2), 0, 34);
+        var frame = add(new T.Mesh(new T.BoxGeometry(6, 30, 6), m.wood2), -8, 20);
+        var fan = add(new T.Mesh(new T.CylinderGeometry(17, 17, 7, 12, 1, false, 0, 3.14), m.wood2), 2, 30);
         fan.rotation.z = Math.PI / 2; fan.rotation.y = Math.PI / 2;
-        add(new T.Mesh(new T.ConeGeometry(7, 14, 8), m.brass), 0, 52).rotation.x = -0.6;
+        var horn = add(new T.Mesh(new T.ConeGeometry(8, 16, 8), m.brass), 6, 48);
+        horn.rotation.x = -0.55;
+        add(new T.Mesh(new T.TorusGeometry(5, 1.3, 5, 9), m.brass), -8, 34).rotation.y = 0.4;
         g.userData.fan = fan;
       } else if (type === 'press') {
-        add(new T.Mesh(new T.BoxGeometry(22, 8, 22), m.iron), 0, 14);
-        add(new T.Mesh(new T.CylinderGeometry(4, 4, 30, 7), m.brass), 0, 32);
-        var star = add(new T.Mesh(new T.BoxGeometry(26, 4, 5), m.brass), 0, 48);
-        add(new T.Mesh(new T.BoxGeometry(5, 4, 26), m.brass), 0, 48);
-        add(new T.Mesh(new T.CylinderGeometry(7, 7, 2, 8), m.gold), 0, 19);
+        add(new T.Mesh(new T.BoxGeometry(24, 9, 24), m.iron), 0, 12);
+        for (var pl = -1; pl <= 1; pl += 2) add(new T.Mesh(new T.CylinderGeometry(2, 2, 34, 6), m.brass), pl * 9, 30);
+        add(new T.Mesh(new T.CylinderGeometry(3.4, 3.4, 30, 8), m.brass), 0, 32);
+        var star = add(new T.Mesh(new T.BoxGeometry(26, 3.4, 4.4), m.brass), 0, 48);
+        add(new T.Mesh(new T.BoxGeometry(4.4, 3.4, 26), m.brass), 0, 48);
+        add(new T.Mesh(new T.CylinderGeometry(8, 8, 2.4, 9), m.gold), 0, 18);
+        add(new T.Mesh(new T.BoxGeometry(11, 7, 11), m.wood), -15, 16, 8);
         g.userData.screw = star;
       }
       return g;
@@ -1627,6 +1659,7 @@
           if (tgt) o.userData.head.rotation.y = Math.atan2(tgt.x - tw.x, tgt.y - tw.y) + Math.PI;
         }
         if (o.userData.gem) o.userData.gem.rotation.y = now * 1.5;
+        if (o.userData.wheel) o.userData.wheel.rotation.z = -st * 7;   // crank winds back
         if (o.userData.glow) {
           var gk = st < 0.4 ? 1 - st / 0.4 : 0;
           o.userData.glow.scale.set(1 + gk * 0.5, 1 + gk * 0.5, 0.4 + gk * 0.3);
