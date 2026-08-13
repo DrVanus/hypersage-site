@@ -653,9 +653,19 @@
   // v2 (levels): stars is an array, one slot per campaign level. A v1 save's
   // single campaignStars migrates into stars[0]; unknown/corrupt data never
   // crashes the boot.
+  // The Forge — the star-tree the design studio specced. 9 total ranks = the
+  // 9 campaign stars; free respec; CAMPAIGN-ONLY effects (daily-neutrality law).
+  var FORGE_NODES = [
+    { id: 'dmg',    name: 'Whetted Fangs',   desc: '+8% tower damage / rank',  ranks: 3 },
+    { id: 'range',  name: 'Far-Seeing Eyes', desc: '+6% tower range / rank',   ranks: 2 },
+    { id: 'gold',   name: 'Seed Purse',      desc: '+25 starting gold / rank', ranks: 2 },
+    { id: 'breath', name: 'Deep Lungs',      desc: "Wick's breath: 14s -> 11s", ranks: 1 },
+    { id: 'refund', name: 'Honest Fences',   desc: 'sell refund 70% -> 80%',   ranks: 1 },
+  ];
+
   var Save = (function () {
     var KEY2 = 'hoardling.save.v2', KEY1 = 'hoardling.save.v1';
-    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0 };
+    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {} };
     try {
       var raw = localStorage.getItem(KEY2);
       if (raw) {
@@ -665,6 +675,13 @@
         }
         if (typeof p.dailyBestWave === 'number') data.dailyBestWave = p.dailyBestWave | 0;
         if (typeof p.tut === 'number') data.tut = p.tut | 0;
+        if (p.daily && typeof p.daily.day === 'number') data.daily = { day: p.daily.day | 0, best: p.daily.best | 0 };
+        if (p.forge && typeof p.forge === 'object') {
+          for (var fi = 0; fi < FORGE_NODES.length; fi++) {
+            var nid = FORGE_NODES[fi].id;
+            data.forge[nid] = Math.min(FORGE_NODES[fi].ranks, (p.forge[nid] | 0) || 0);
+          }
+        }
       } else {
         var raw1 = localStorage.getItem(KEY1);
         if (raw1) {
@@ -677,7 +694,24 @@
     } catch (e) { /* corrupt save: keep defaults */ }
     function write() { try { localStorage.setItem(KEY2, JSON.stringify(data)); } catch (e) {} }
     function unlocked(level) { return level === 0 || data.stars[level - 1] > 0; }
-    return { data: data, write: write, unlocked: unlocked };
+    function starsTotal() { return (data.stars[0] | 0) + (data.stars[1] | 0) + (data.stars[2] | 0); }
+    function forgeSpent() {
+      var s = 0;
+      for (var i = 0; i < FORGE_NODES.length; i++) s += data.forge[FORGE_NODES[i].id] | 0;
+      return s;
+    }
+    function forgeMods() {
+      var f = data.forge;
+      return {
+        dmgMul: 1 + 0.08 * ((f.dmg | 0) || 0),
+        rangeMul: 1 + 0.06 * ((f.range | 0) || 0),
+        startGold: 25 * ((f.gold | 0) || 0),
+        breathCd: (f.breath | 0) ? 11 : 14,
+        sellRefund: (f.refund | 0) ? 0.8 : 0,
+      };
+    }
+    return { data: data, write: write, unlocked: unlocked,
+             starsTotal: starsTotal, forgeSpent: forgeSpent, forgeMods: forgeMods };
   })();
 
   // ===== Daily leaderboard — the WADDLETON foundation (fail-soft, lane 3) ==
@@ -849,6 +883,7 @@
       mound:     'art/gold_mound.png',
       hero:      'art/hero_whelp.png',
       hero_back: 'art/hero_back.png',
+      hero_title: 'art/hero_title.png',
       t_mimic:   'art/tower_mimic.png',
       t_ballista:'art/tower_ballista.png',
       t_brazier: 'art/tower_brazier.png',
@@ -942,12 +977,17 @@
     this.enemies = []; this.towers = []; this.projectiles = [];
     this.nextId = 1;
     var hs = MAP.heroStart || { x: 210, y: 470 };
-    this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0, breathCd: 6, spd: 85, selected: false };
+    this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0, breathCd: 6, spd: 85, selected: false, castBreath: false };
     this.menu = null;                       // { padIdx } build menu | { towerIdx } manage menu
     this.stolenLost = 0; this.kills = 0;
-    this.breathUsed = false;                // Mother's Breath fires once per level
+    this.breathUsed = false;                // Mother's Breath spends once per level
+    this.motherReady = false; this.castMother = false;
+    // Forge mods: CAMPAIGN ONLY — the Daily sim takes no input but the seed
+    this.mods = (this.mode === 'campaign') ? Save.forgeMods() : {};   // {} for daily: LAW
+    if (this.mods.startGold) this.gold += this.mods.startGold;
     this.hitstopT = 0;
     this.resultLockT = 0;
+    this._ocSeen = false;
     this.speed = 1;                         // every run starts at 1x
     this.result = null;
   };
@@ -1061,15 +1101,24 @@
       }
     }
 
-    // -- Mother's Breath: once per level, when the hoard runs cold, Auremma
-    // half-stirs and exhales — a screen-wide wave that scours every raider.
-    if (!this.breathUsed && this.hoard <= CFG.breathAt) {
+    // -- Mother's Breath: when the hoard runs cold Auremma half-wakes and the
+    // KEEP starts glowing — the PLAYER unleashes her by tapping it (audit:
+    // never auto-resolve the game's tensest beat). Armed once per level and
+    // stays armed until spent.
+    if (!this.breathUsed && !this.motherReady && this.hoard <= CFG.breathAt) {
+      this.motherReady = true;
+      this.fxQueue.push({ k: 'float', x: MAP.keep.x, y: MAP.keep.y + 70, txt: 'MOTHER STIRS — TAP THE KEEP!', c: '#ffcf6a' });
+      Sfx.play('wave');
+    }
+    if (this.castMother && this.motherReady) {
+      this.castMother = false;
+      this.motherReady = false;
       this.breathUsed = true;
       for (var mb = 0; mb < this.enemies.length; mb++) this.enemies[mb].hp -= 60;
       this.hitstopT = 0.12;   // ultimate beat, just inside the hitch ceiling
       this.fxQueue.push({ k: 'mother' });
       Sfx.play('breath');
-    }
+    } else this.castMother = false;
 
     // -- boss war-drum aura: +speed to allies near the Hoard King --
     for (var au = 0; au < this.enemies.length; au++) this.enemies[au].auraF = 1;
@@ -1185,11 +1234,30 @@
       var pp = pathPointAt(e.d); e.px = pp.x; e.py = pp.y;
     }
 
+    // -- Overclock: the inventor at his machine. The nearest tower within
+    // reach of Wick runs 25% faster — positioning is the input (deterministic).
+    var ocIdx = -1, ocD = 62 * 62;
+    for (var oc = 0; oc < this.towers.length; oc++) {
+      var op2 = MAP.pads[this.towers[oc].padIdx];
+      var odx = op2.x - this.hero.x, ody = op2.y - this.hero.y;
+      var odd = odx * odx + ody * ody;
+      if (odd < ocD) { ocD = odd; ocIdx = oc; }
+      this.towers[oc]._oc = false;
+    }
+    if (ocIdx !== -1) {
+      this.towers[ocIdx]._oc = true;
+      if (!this._ocSeen) {
+        this._ocSeen = true;
+        var ocp = MAP.pads[this.towers[ocIdx].padIdx];
+        this.fxQueue.push({ k: 'float', x: ocp.x, y: ocp.y - 46, txt: 'OVERCLOCKED!', c: '#ffcf6a' });
+      }
+    }
+
     // -- towers --
     for (var t = 0; t < this.towers.length; t++) {
       var tw = this.towers[t];
       var tt = TOWER_TYPES[tw.type], lv = tt.levels[tw.level];
-      tw.cd -= STEP;
+      tw.cd -= STEP * (tw._oc ? 1.25 : 1);
       if (tw.cd > 0) continue;
       var pad = MAP.pads[tw.padIdx];
       // crystal: pulse-slow everything in range, no target needed.
@@ -1200,11 +1268,12 @@
         for (var c = this.enemies.length - 1; c >= 0; c--) {
           var ce = this.enemies[c];
           if (ce.hp <= 0) continue;
+          var cR = lv.range * (this.mods.rangeMul || 1);
           var cdx = ce.px - pad.x, cdy = ce.py - pad.y;
-          if (cdx * cdx + cdy * cdy <= lv.range * lv.range) {
+          if (cdx * cdx + cdy * cdy <= cR * cR) {
             ce.slowF = Math.min(ce.slowF, ce.type === 'boss' ? 0.75 : 1 - lv.slow);
             ce.slowT = lv.slowDur;
-            if (lv.dmg) this._damage(ce, lv.dmg, { kind: 'magic', tower: tw });
+            if (lv.dmg) this._damage(ce, lv.dmg * (this.mods.dmgMul || 1), { kind: 'magic', tower: tw });
             hitAny++;
           }
         }
@@ -1212,20 +1281,21 @@
         tw.cd = hitAny ? 1 / lv.rate : 0.1;   // idle rescan at 6 Hz, not 60
         continue;
       }
-      var target = this._pickTarget(pad, lv.range, tt.hitsAir, tt.airBonus);
+      var mDmg = this.mods.dmgMul || 1, mRng = this.mods.rangeMul || 1;
+      var target = this._pickTarget(pad, lv.range * mRng, tt.hitsAir, tt.airBonus, tw.targeting | 0);
       if (!target) { tw.cd = 0.1; continue; }   // miss: rescan at 6 Hz, not 60
       tw.cd = 1 / lv.rate;
       var tp = { x: target.px, y: target.py };
       if (tw.type === 'mimic') {                            // instant bite
-        this._damage(target, lv.dmg, { kind: 'melee', tower: tw });
+        this._damage(target, lv.dmg * mDmg, { kind: 'melee', tower: tw });
         if (lv.special === 'bleed') target.bleedT = 2;
         this.fxQueue.push({ k: 'bite', x: tp.x, y: tp.y });
         Sfx.play('bite');
       } else if (tw.type === 'brazier') {                   // lobbed splash
-        this.projectiles.push({ kind: 'lob', x: pad.x, y: pad.y - 26, sx: pad.x, sy: pad.y - 26, tx: tp.x, ty: tp.y, t: 0, dur: 0.55, dmg: lv.dmg, splash: lv.splash, burn: lv.burn || 0, tower: t });
+        this.projectiles.push({ kind: 'lob', x: pad.x, y: pad.y - 26, sx: pad.x, sy: pad.y - 26, tx: tp.x, ty: tp.y, t: 0, dur: 0.55, dmg: lv.dmg * mDmg, splash: lv.splash, burn: lv.burn || 0, tower: t });
         Sfx.play('lob');
       } else {                                              // homing bolt (crossbow / roost)
-        var dmg = lv.dmg;
+        var dmg = lv.dmg * mDmg;
         if (tw.type === 'perch' && target.flyer) dmg *= (lv.airBonus3 || tt.airBonus || 1);
         // crit: LANE 1 keyed on this tower's shot index — deterministic, order-free
         tw.shots = (tw.shots || 0) + 1;
@@ -1301,13 +1371,19 @@
       var ndx = en2.px - h.x, ndy = en2.py - h.y;
       if (ndx * ndx + ndy * ndy <= h.range * h.range) inR.push(en2);
     }
-    if (h.breathCd <= 0 && inR.length >= 3) {
-      h.breathCd = 14;
-      // breath is armor-piercing (kind 'breath' — the _damage contract)
-      for (var br = inR.length - 1; br >= 0; br--) this._damage(inR[br], 26, { kind: 'breath' });
-      this.fxQueue.push({ k: 'breath', x: h.x, y: h.y, r: h.range });
-      Sfx.play('breath');
-    } else if (h.cd <= 0 && inR.length) {
+    if (h.castBreath) {
+      h.castBreath = false;
+      if (h.breathCd <= 0 && inR.length) {          // player-cast; needs a target
+        h.breathCd = this.mods.breathCd || 14;
+        // breath is armor-piercing (kind 'breath' — the _damage contract)
+        for (var br = inR.length - 1; br >= 0; br--) this._damage(inR[br], 26, { kind: 'breath' });
+        this.fxQueue.push({ k: 'breath', x: h.x, y: h.y, r: h.range });
+        Sfx.play('breath');
+      } else if (h.breathCd <= 0) {
+        this.fxQueue.push({ k: 'float', x: h.x, y: h.y - 40, txt: 'no raiders in reach', c: '#c9b8ff' });
+      }
+    }
+    if (h.cd <= 0 && inR.length) {
       var pick = inR[0];
       for (var pk = 1; pk < inR.length; pk++) if (inR[pk].d > pick.d) pick = inR[pk];
       h.cd = 1 / h.rate;
@@ -1328,9 +1404,11 @@
     }
   };
 
-  Game.prototype._pickTarget = function (pad, range, hitsAir, airBonus) {
-    // Priority: fleeing thieves (they carry OUR gold) — and among fleers the
-    // one CLOSEST TO ESCAPING (smallest d) — then furthest-along marcher.
+  var AIM_MODES = ['FIRST', 'STRONG', 'LAST'];
+  Game.prototype._pickTarget = function (pad, range, hitsAir, airBonus, mode) {
+    // Fleeing thieves ALWAYS lead (they carry OUR gold), closest-to-escaping
+    // first. The player-set mode picks the focus among marchers:
+    //   FIRST = furthest along · STRONG = most HP · LAST = newest arrivals.
     // Deterministic tie-break on id.
     var best = null, bestKey = -Infinity;
     for (var i = 0; i < this.enemies.length; i++) {
@@ -1339,8 +1417,12 @@
       if (e.flyer && !hitsAir) continue;
       var dx = e.px - pad.x, dy = e.py - pad.y;
       if (dx * dx + dy * dy > range * range) continue;
-      var urgency = e.fleeing ? (PATH.len - e.d) : e.d;
-      var key = (e.fleeing ? 1e6 : 0) + (e.flyer && airBonus ? 5e5 : 0) + urgency - e.id * 1e-7;
+      var metric;
+      if (e.fleeing) metric = PATH.len - e.d;
+      else if (mode === 1) metric = e.hp * 0.001;           // STRONG
+      else if (mode === 2) metric = PATH.len - e.d;         // LAST
+      else metric = e.d;                                    // FIRST
+      var key = (e.fleeing ? 1e6 : 0) + (e.flyer && airBonus ? 5e5 : 0) + metric - e.id * 1e-7;
       if (key > bestKey) { bestKey = key; best = e; }
     }
     return best;
@@ -1408,7 +1490,12 @@
     var stars = this.stolenLost <= 5 ? 3 : this.stolenLost <= 20 ? 2 : 1;
     this.result = { won: won, stars: stars, hoard: this.hoard, lost: this.stolenLost, kills: this.kills, wave: this.wave };
     if (this.mode === 'campaign' && won && stars > Save.data.stars[this.levelIdx]) Save.data.stars[this.levelIdx] = stars;
-    if (this.mode === 'daily' && this.wave > Save.data.dailyBestWave) Save.data.dailyBestWave = this.wave;
+    if (this.mode === 'daily') {
+      var today2 = dayNumber();
+      if (Save.data.daily.day !== today2) Save.data.daily = { day: today2, best: 0 };
+      if (this.wave > Save.data.daily.best) Save.data.daily.best = this.wave;
+      if (this.wave > Save.data.dailyBestWave) Save.data.dailyBestWave = this.wave;
+    }
     Save.write();
     // daily board: submit this run, then pull today's top — UI-only state
     if (this.mode === 'daily' && Lb.on()) {
@@ -1455,7 +1542,33 @@
         }
         if (w.y > 596 && w.y < 648) { this.reset(dailySeed(), 'daily'); this.state = 'playing'; return; }
       }
-      if (w.x > WORLD_W / 2 - 70 && w.x < WORLD_W / 2 + 70 && w.y > 676 && w.y < 712) { Sfx.toggle(); return; }
+      if (w.y > 686 && w.y < 722) {
+        if (w.x > WORLD_W / 2 - 140 && w.x < WORLD_W / 2 - 8) { this.state = 'forge'; return; }
+        if (w.x > WORLD_W / 2 + 8 && w.x < WORLD_W / 2 + 140) { Sfx.toggle(); return; }
+      }
+      return;
+    }
+    if (this.state === 'forge') {
+      var rows0 = 250;
+      for (var fn = 0; fn < FORGE_NODES.length; fn++) {
+        var ry = rows0 + fn * 74;
+        if (w.y > ry && w.y < ry + 62 && w.x > WORLD_W - 118 && w.x < WORLD_W - 30) {
+          var node = FORGE_NODES[fn];
+          var cur = Save.data.forge[node.id] | 0;
+          if (cur < node.ranks && Save.starsTotal() - Save.forgeSpent() > 0) {
+            Save.data.forge[node.id] = cur + 1; Save.write(); Sfx.play('upg');
+          }
+          return;
+        }
+      }
+      if (w.y > 640 && w.y < 680) {
+        if (w.x > WORLD_W / 2 - 150 && w.x < WORLD_W / 2 - 10) {   // respec
+          Save.data.forge = {}; Save.write(); Sfx.play('sell'); return;
+        }
+        if (w.x > WORLD_W / 2 + 10 && w.x < WORLD_W / 2 + 150) {   // back
+          this.state = 'menu'; return;
+        }
+      }
       return;
     }
     if (this.state === 'won' || this.state === 'lost') {
@@ -1490,7 +1603,7 @@
           var tid = TOWER_ORDER[bestB];
           if (this.gold >= TOWER_TYPES[tid].cost) {
             this.gold -= TOWER_TYPES[tid].cost;
-            this.towers.push({ type: tid, level: 0, padIdx: m.padIdx, cd: 0 });
+            this.towers.push({ type: tid, level: 0, padIdx: m.padIdx, cd: 0, targeting: 0 });
             this.fxQueue.push({ k: 'place', x: pad.x, y: pad.y });
             Sfx.play('place');
           }
@@ -1500,23 +1613,31 @@
         var tw = this.towers[m.towerIdx];
         if (tw) {
           var pad2 = MAP.pads[tw.padIdx];
-          var up = this._menuBtnPos(pad2, 0, 2), sell = this._menuBtnPos(pad2, 1, 2);
+          var btns = [this._menuBtnPos(pad2, 0, 3), this._menuBtnPos(pad2, 1, 3), this._menuBtnPos(pad2, 2, 3)];
           var lvl = TOWER_TYPES[tw.type].levels[tw.level];
-          var ud = (w.x - up.x) * (w.x - up.x) + (w.y - up.y) * (w.y - up.y);
-          var sd = (w.x - sell.x) * (w.x - sell.x) + (w.y - sell.y) * (w.y - sell.y);
-          if (Math.min(ud, sd) < 24 * 24) {
-            if (ud <= sd) {
+          var bi2 = -1, bd2 = 24 * 24;
+          for (var mb2 = 0; mb2 < 3; mb2++) {
+            var mdx = w.x - btns[mb2].x, mdy = w.y - btns[mb2].y, mdd = mdx * mdx + mdy * mdy;
+            if (mdd < bd2) { bd2 = mdd; bi2 = mb2; }
+          }
+          if (bi2 !== -1) {
+            if (bi2 === 0) {                                 // upgrade
               if (tw.level < 2 && this.gold >= lvl.upgradeCost) {
                 this.gold -= lvl.upgradeCost; tw.level++;
                 this.fxQueue.push({ k: 'place', x: pad2.x, y: pad2.y });
                 Sfx.play('upg');
+                this.menu = null;
               }
-            } else {
+            } else if (bi2 === 1) {                          // cycle aim mode (menu stays open)
+              tw.targeting = ((tw.targeting | 0) + 1) % 3;
+              Sfx.play('place');
+            } else {                                         // sell
               this.gold += this._sellValue(tw);
               this.towers.splice(m.towerIdx, 1);
               Sfx.play('sell');
+              this.menu = null;
             }
-            this.menu = null; return;
+            return;
           }
         }
       }
@@ -1524,10 +1645,18 @@
       return;
     }
 
-    // hero select / move
+    // Mother's Breath: the armed keep eats the tap
+    if (this.motherReady) {
+      var kdx = w.x - MAP.keep.x, kdy = w.y - (MAP.keep.y - 20);
+      if (kdx * kdx + kdy * kdy < 70 * 70) { this.castMother = true; return; }
+    }
+    // hero select / move — a CHARGED Wick casts his breath on tap instead
     var hh = this.hero;
     var hdx = w.x - hh.x, hdy = w.y - hh.y;
-    if (hdx * hdx + hdy * hdy < 30 * 30) { hh.selected = !hh.selected; return; }
+    if (hdx * hdx + hdy * hdy < 30 * 30) {
+      if (hh.breathCd <= 0) { hh.castBreath = true; return; }
+      hh.selected = !hh.selected; return;
+    }
     if (hh.selected) {
       var tx = clamp(w.x, 20, WORLD_W - 20), ty = clamp(w.y, 120, WORLD_H - 30);
       // keep Wick OFF the pads so he can never mask a pad's tap target
@@ -1565,7 +1694,7 @@
   Game.prototype._sellValue = function (tw) {
     var tt = TOWER_TYPES[tw.type], spent = tt.cost;
     for (var l = 0; l < tw.level; l++) spent += tt.levels[l].upgradeCost;
-    return Math.round(spent * CFG.sellRefund);
+    return Math.round(spent * (this.mods.sellRefund || CFG.sellRefund));
   };
   Game.prototype._menuBtnPos = function (pad, i, n) {
     // arc of buttons above the pad, clamped inside the world
@@ -1638,6 +1767,13 @@
       fl.t -= dtRaw; fl.y -= 26 * dtRaw;
       if (fl.t <= 0) this.floats.splice(f, 1);
     }
+    // overclocked machine throws brass sparks (cosmetic)
+    for (var os = 0; os < this.towers.length; os++) {
+      if (this.towers[os]._oc && Math.random() < dtRaw * 5) {
+        var osp = MAP.pads[this.towers[os].padIdx];
+        this.particles.push({ kind: 'dot', x: osp.x + (Math.random() - 0.5) * 22, y: osp.y - 20 - Math.random() * 18, vx: (Math.random() - 0.5) * 40, vy: -20 - Math.random() * 30, r: 1.2 + Math.random() * 1.4, life: 0.3, T: 0.3, c: '#ffcf6a' });
+      }
+    }
     // heavy footfalls kick dust; laden thieves drip gold sparks (cosmetic scan)
     for (var ci = 0; ci < this.enemies.length; ci++) {
       var ce2 = this.enemies[ci];
@@ -1693,6 +1829,7 @@
     this._drawWorldHints(ctx);
     if (this.menu) this._drawMenus(ctx);
     if (this.state === 'menu') this._drawTitle(ctx);
+    if (this.state === 'forge') this._drawForge(ctx);
     if (this.state === 'won' || this.state === 'lost') this._drawResult(ctx);
     if (this.state === 'paused') {
       ctx.fillStyle = 'rgba(10,6,4,0.55)';
@@ -1869,6 +2006,14 @@
 
   Game.prototype._drawKeep = function (ctx) {
     var k = MAP.keep;
+    if (this.motherReady) {
+      var mp2 = 0.5 + 0.5 * Math.sin(this.worldT * 7);
+      var mg2 = ctx.createRadialGradient(k.x, k.y - 30, 8, k.x, k.y - 30, 120 + mp2 * 24);
+      mg2.addColorStop(0, 'rgba(255,190,90,' + (0.30 + mp2 * 0.25) + ')');
+      mg2.addColorStop(1, 'rgba(255,140,40,0)');
+      ctx.fillStyle = mg2;
+      ctx.beginPath(); ctx.arc(k.x, k.y - 30, 150 + mp2 * 24, 0, 6.283); ctx.fill();
+    }
     if (drawSpriteBottom(ctx, 'keep', k.x, k.y + 40, 158)) { /* sprite */ }
     else {
       // chunky keep: main cylinder + two side turrets, blue conical roofs
@@ -1989,6 +2134,12 @@
     }
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 22, 10, 0, 0, 6.283); ctx.fill();
+    if (tw._oc) {   // Wick is at the crank: brass ring + hurry
+      var ocp2 = 0.6 + 0.4 * Math.sin(this.worldT * 8);
+      ctx.strokeStyle = 'rgba(212,168,64,' + ocp2 + ')';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 26 + ocp2 * 3, 12 + ocp2 * 2, 0, 0, 6.283); ctx.stroke();
+    }
     var timg = ART.images[spriteId];
     if (timg) {
       // recoil press-down right after firing + gentle idle breathing
@@ -2208,6 +2359,15 @@
       ctx.beginPath(); ctx.moveTo(h.x - 8, h.y - 26 + bob); ctx.lineTo(h.x - 10, h.y - 33 + bob); ctx.lineTo(h.x - 4, h.y - 28 + bob); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(h.x + 8, h.y - 26 + bob); ctx.lineTo(h.x + 10, h.y - 33 + bob); ctx.lineTo(h.x + 4, h.y - 28 + bob); ctx.closePath(); ctx.fill();
     }
+    // charged: a pulsing flame ring says TAP ME
+    if (h.breathCd <= 0 && this.state === 'playing') {
+      var rp = 0.6 + 0.4 * Math.sin(this.worldT * 6);
+      ctx.strokeStyle = 'rgba(255,154,60,' + rp + ')';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(h.x, h.y - 14, 24 + rp * 4, 0, 6.283); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,207,106,' + (0.7 + rp * 0.3) + ')';
+      ctx.beginPath(); ctx.ellipse(h.x, h.y - 46, 4, 7 + rp * 2, 0, 0, 6.283); ctx.fill();
+    }
     // breath meter
     if (h.breathCd > 0 && h.breathCd < 14) {
       ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(h.x - 12, h.y - 42, 24, 3);
@@ -2406,7 +2566,16 @@
       if (!tw) return;
       var pad2 = MAP.pads[tw.padIdx];
       var lvl = TOWER_TYPES[tw.type].levels[tw.level];
-      var up = this._menuBtnPos(pad2, 0, 2), sell = this._menuBtnPos(pad2, 1, 2);
+      var up = this._menuBtnPos(pad2, 0, 3), aim = this._menuBtnPos(pad2, 1, 3), sell = this._menuBtnPos(pad2, 2, 3);
+      ctx.fillStyle = 'rgba(38,26,18,0.95)';
+      ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = '#a8e6ff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.stroke();
+      ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 9px system-ui, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('AIM', aim.x, aim.y - 3);
+      ctx.fillStyle = '#a8e6ff';
+      ctx.fillText(AIM_MODES[tw.targeting | 0], aim.x, aim.y + 9);
+      ctx.textAlign = 'left';
       var canUp = tw.level < 2, affordUp = canUp && this.gold >= lvl.upgradeCost;
       ctx.fillStyle = affordUp ? 'rgba(38,26,18,0.95)' : 'rgba(28,20,16,0.7)';
       ctx.beginPath(); ctx.arc(up.x, up.y, 22, 0, 6.283); ctx.fill();
@@ -2440,9 +2609,9 @@
     ctx.fillText('Keep the warm in.', WORLD_W / 2, 322);
     ctx.fillStyle = '#ffe9c4';
     ctx.font = '14px system-ui, sans-serif';
-    ctx.fillText('Mother sleeps beneath the hoard, healing.', WORLD_W / 2, 356);
-    ctx.fillText('The Guild has posted her gold on every job board.', WORLD_W / 2, 376);
-    ctx.fillText('Hold the chokepoints, little Wick. Recover every coin.', WORLD_W / 2, 396);
+    ctx.fillText('A dragon too young for dragonfire —', WORLD_W / 2, 356);
+    ctx.fillText('so he built his own.', WORLD_W / 2, 376);
+    ctx.fillText('Guard the gold. Overclock the machines. Recover every coin.', WORLD_W / 2, 396);
     // campaign level buttons — locked levels grey out until the previous
     // keep is held (any stars)
     for (var li = 0; li < MAPS.length; li++) {
@@ -2478,24 +2647,80 @@
       Lb.top(1, function (rows) { self2._lbTop = (rows && rows[0]) || null; });
     }
     ctx.font = '12px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
-    var dl = this._lbTop
-      ? Lb.safeName(String(this._lbTop.display_name || '')) + ' holds wave ' + (this._lbTop.value | 0)
-      : 'same siege + map for everyone today';
-    if (Save.data.dailyBestWave > 0) dl += ' — your best: wave ' + Save.data.dailyBestWave;
-    ctx.fillText(dl, WORLD_W / 2, 664);
-    // sound toggle
-    ctx.fillStyle = 'rgba(255,233,196,0.12)';
-    rr(ctx, WORLD_W / 2 - 70, 676, 140, 36, 10); ctx.fill();
-    drawSpeaker(ctx, WORLD_W / 2 - 46, 694, Sfx.isMuted());
+    var todaysMap = MAPS[dailySeed() % MAPS.length].name;
+    var todayBest = (Save.data.daily.day === dayNumber()) ? Save.data.daily.best : 0;
+    var dl = 'today: ' + todaysMap + (todayBest ? ' — your best wave ' + todayBest : '');
+    ctx.fillText(dl, WORLD_W / 2, 660);
+    var dl2 = this._lbTop
+      ? 'all-time: ' + Lb.safeName(String(this._lbTop.display_name || '')) + ' holds wave ' + (this._lbTop.value | 0)
+      : (Save.data.dailyBestWave > 0 ? 'your all-time best: wave ' + Save.data.dailyBestWave : '');
+    if (dl2) { ctx.fillStyle = 'rgba(201,184,255,0.75)'; ctx.fillText(dl2, WORLD_W / 2, 675); }
+    // FORGE | SOUND row
+    var fAvail = Save.starsTotal() - Save.forgeSpent();
+    ctx.fillStyle = 'rgba(255,215,94,0.16)';
+    rr(ctx, WORLD_W / 2 - 140, 686, 132, 36, 10); ctx.fill();
+    ctx.strokeStyle = fAvail > 0 ? '#ffd75e' : 'rgba(255,215,94,0.3)'; ctx.lineWidth = 1.5;
+    rr(ctx, WORLD_W / 2 - 140, 686, 132, 36, 10); ctx.stroke();
     ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 13px system-ui, sans-serif';
-    ctx.fillText(Sfx.isMuted() ? 'SOUND OFF' : 'SOUND ON', WORLD_W / 2 + 12, 699);
-    // Wick keeps watch from the corner
-    var wimg = ART.images.hero;
+    ctx.fillText('THE FORGE' + (fAvail > 0 ? ' (' + fAvail + '★)' : ''), WORLD_W / 2 - 74, 709);
+    ctx.fillStyle = 'rgba(255,233,196,0.12)';
+    rr(ctx, WORLD_W / 2 + 8, 686, 132, 36, 10); ctx.fill();
+    drawSpeaker(ctx, WORLD_W / 2 + 32, 704, Sfx.isMuted());
+    ctx.fillStyle = '#ffe9c4';
+    ctx.fillText(Sfx.isMuted() ? 'OFF' : 'ON', WORLD_W / 2 + 84, 709);
+    // Wick keeps watch from the corner (title pose when we have it)
+    var wimg = ART.images.hero_title || ART.images.hero;
     if (wimg) {
       var ww = 78, wh = ww * (wimg.height / wimg.width);
       var wb = Math.sin(this.worldT * 4) * 2;
       ctx.drawImage(wimg, WORLD_W - ww - 14, 766 - wh + wb, ww, wh);
     }
+    ctx.textAlign = 'left';
+  };
+
+  Game.prototype._drawForge = function (ctx) {
+    var v = this.view;
+    ctx.fillStyle = 'rgba(12,7,5,0.85)';
+    ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 34px Georgia, serif';
+    ctx.fillText('THE FORGE', WORLD_W / 2, 150);
+    ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
+    ctx.fillText('Campaign stars buy lasting craft. Campaign only —', WORLD_W / 2, 182);
+    ctx.fillText('the Daily Siege is the same fair fight for everyone.', WORLD_W / 2, 198);
+    var avail = Save.starsTotal() - Save.forgeSpent();
+    ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 17px Georgia, serif';
+    ctx.fillText('★ ' + avail + ' to spend', WORLD_W / 2, 228);
+    for (var i = 0; i < FORGE_NODES.length; i++) {
+      var node = FORGE_NODES[i], ry = 250 + i * 74;
+      var cur = Save.data.forge[node.id] | 0;
+      uiPanel(ctx, 26, ry, WORLD_W - 52, 62, 11);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.fillText(node.name, 42, ry + 24);
+      ctx.fillStyle = '#b9a27f'; ctx.font = '12px system-ui, sans-serif';
+      ctx.fillText(node.desc, 42, ry + 43);
+      for (var rp2 = 0; rp2 < node.ranks; rp2++) {
+        ctx.fillStyle = rp2 < cur ? '#ffd75e' : 'rgba(255,215,94,0.2)';
+        ctx.beginPath(); ctx.arc(42 + rp2 * 16, ry + 54, 4, 0, 6.283); ctx.fill();
+      }
+      var can = cur < node.ranks && avail > 0;
+      ctx.fillStyle = can ? 'rgba(214,69,69,0.9)' : 'rgba(70,52,44,0.7)';
+      rr(ctx, WORLD_W - 118, ry + 12, 88, 38, 10); ctx.fill();
+      ctx.fillStyle = can ? '#fff' : '#8a7f72';
+      ctx.font = 'bold 14px system-ui, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(cur >= node.ranks ? 'MAX' : 'FORGE ★', WORLD_W - 74, ry + 36);
+      ctx.textAlign = 'left';
+    }
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(80,60,140,0.9)';
+    rr(ctx, WORLD_W / 2 - 150, 640, 140, 40, 10); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 14px system-ui, sans-serif';
+    ctx.fillText('RESPEC (free)', WORLD_W / 2 - 80, 665);
+    ctx.fillStyle = 'rgba(214,69,69,0.9)';
+    rr(ctx, WORLD_W / 2 + 10, 640, 140, 40, 10); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.fillText('BACK', WORLD_W / 2 + 80, 665);
     ctx.textAlign = 'left';
   };
 
@@ -2531,7 +2756,7 @@
     // daily: the global best-runs ladder (names render through safeName ONLY)
     if (this.mode === 'daily' && Lb.on()) {
       ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
-      ctx.fillText('— GLOBAL BEST SIEGES —', WORLD_W / 2, 584);
+      ctx.fillText('— ALL-TIME BEST SIEGES —', WORLD_W / 2, 584);
       if (this.lbRows === 'loading') {
         ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
         ctx.fillText('fetching the ladder…', WORLD_W / 2, 610);
