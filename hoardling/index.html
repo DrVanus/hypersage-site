@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport-fit=cover is REQUIRED for env(safe-area-inset-*) to resolve on
+       notched phones and under Android's forced edge-to-edge (targetSdk 35+). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="Hoardling — defend the sleeping dragon's hoard. Hold the chokepoints, recover every stolen coin.">
+  <title>Hoardling</title>
+  <meta name="theme-color" content="#17100e">
+  <!-- installable PWA: "Add to Home Screen" gives a fullscreen portrait app -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png">
+  <link rel="apple-touch-icon" href="art/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hoardling">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-wrap">
+    <canvas id="game-canvas" aria-label="Hoardkeep game area"></canvas>
+    <!-- The whole game is drawn on <canvas>. Any HUD/menus/touch controls you add
+         go here as a DOM overlay (see bunny-bus-hop index.html for the pattern):
+         position them with top:max(10px, env(safe-area-inset-top)) etc. -->
+  </div>
+  <script src="game.js" defer></script>
+</body>
+</html>
