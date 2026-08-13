@@ -174,26 +174,123 @@
     [{ type: 'boss',   count: 1,  gap: 1.0, delay: 0 }, { type: 'looter', count: 12, gap: 1.5, delay: 2 }, { type: 'warlock', count: 4, gap: 6.0, delay: 5 }],
   ];
 
-  // The map — hand-authored to echo the reference fantasy: a torch-lit cavern,
-  // the keep on a mountain of gold at the top, raiders entering from a cave
-  // mouth at the bottom and switchbacking up through two chokepoints.
-  var MAP = {
-    keep: { x: 175, y: 200 },
-    mound: { x: 180, y: 248, rx: 118, ry: 46 },
-    // path control points, ENTRANCE (d=0) -> KEEP (d=len)
-    path: [
-      [398, 748], [330, 722], [222, 702], [122, 668], [80, 612],
-      [120, 560], [232, 540], [322, 506], [346, 452], [300, 402],
-      [200, 386], [110, 360], [88, 302], [130, 262], [196, 238], [186, 218],
-    ],
-    pads: [
-      { x: 300, y: 758 }, { x: 168, y: 736 }, { x: 56, y: 684 },
-      { x: 192, y: 612 }, { x: 332, y: 574 }, { x: 252, y: 448 },
-      { x: 58, y: 424 }, { x: 158, y: 312 },
-    ],
-    torches: [[86, 648], [336, 478], [92, 332], [244, 692], [306, 366], [46, 552]],
-    pathW: 34,
-  };
+  // Level 2 — everything arrives sooner, flyers ride the long gallery, and
+  // filcher packs test the double-pass coverage.
+  var LEVEL2_WAVES = [
+    [{ type: 'looter', count: 12, gap: 1.2, delay: 0 }],
+    [{ type: 'looter', count: 12, gap: 0.9, delay: 0 }, { type: 'scout', count: 3, gap: 1.2, delay: 8 }],
+    [{ type: 'scout',  count: 6,  gap: 0.8, delay: 0 }, { type: 'looter', count: 10, gap: 1.0, delay: 2 }],
+    [{ type: 'bat',    count: 5,  gap: 1.6, delay: 0 }, { type: 'looter', count: 10, gap: 0.9, delay: 1 }],
+    [{ type: 'brute',  count: 2,  gap: 7.0, delay: 0 }, { type: 'scout', count: 8, gap: 0.8, delay: 2 }],
+    [{ type: 'shield', count: 4,  gap: 2.2, delay: 0 }, { type: 'bat', count: 4, gap: 1.5, delay: 3 }],
+    [{ type: 'looter', count: 18, gap: 0.6, delay: 0 }, { type: 'scout', count: 6, gap: 1.0, delay: 3 }],
+    [{ type: 'blinker', count: 4, gap: 2.2, delay: 0 }, { type: 'looter', count: 10, gap: 0.9, delay: 1 }],
+    [{ type: 'bat',    count: 8,  gap: 1.1, delay: 0 }, { type: 'shield', count: 4, gap: 2.0, delay: 2 }],
+    [{ type: 'brute',  count: 4,  gap: 3.5, delay: 0 }, { type: 'warlock', count: 2, gap: 7.0, delay: 3 }, { type: 'scout', count: 8, gap: 0.8, delay: 6 }],
+    [{ type: 'scout',  count: 14, gap: 0.5, delay: 0 }, { type: 'bat', count: 6, gap: 1.2, delay: 4 }],
+    [{ type: 'shield', count: 6,  gap: 1.8, delay: 0 }, { type: 'blinker', count: 4, gap: 2.0, delay: 3 }],
+    [{ type: 'brute',  count: 5,  gap: 2.6, delay: 0 }, { type: 'bat', count: 6, gap: 1.2, delay: 4 }, { type: 'warlock', count: 1, gap: 1, delay: 8 }],
+    [{ type: 'looter', count: 24, gap: 0.45, delay: 0 }, { type: 'scout', count: 8, gap: 0.8, delay: 3 }],
+    [{ type: 'blinker', count: 6, gap: 1.6, delay: 0 }, { type: 'shield', count: 6, gap: 1.6, delay: 2 }, { type: 'warlock', count: 2, gap: 5.0, delay: 6 }],
+    [{ type: 'bat',    count: 12, gap: 0.8, delay: 0 }, { type: 'brute', count: 3, gap: 3.0, delay: 4 }],
+    [{ type: 'boss',   count: 1,  gap: 1.0, delay: 0, hpMul: 0.45 }, { type: 'scout', count: 10, gap: 0.8, delay: 3 }],
+    [{ type: 'brute',  count: 7,  gap: 2.0, delay: 0 }, { type: 'warlock', count: 3, gap: 4.0, delay: 3 }],
+    [{ type: 'shield', count: 8,  gap: 1.3, delay: 0 }, { type: 'bat', count: 8, gap: 1.0, delay: 3 }, { type: 'blinker', count: 5, gap: 1.8, delay: 6 }],
+    [{ type: 'boss',   count: 1,  gap: 1.0, delay: 0 }, { type: 'shield', count: 8, gap: 1.6, delay: 3 }, { type: 'warlock', count: 3, gap: 5.0, delay: 8 }],
+  ];
+
+  // Level 3 — the switchback wall: centre pads see three lanes, so the waves
+  // bring armor, healers and a double-boss finale to answer it.
+  var LEVEL3_WAVES = [
+    [{ type: 'looter', count: 14, gap: 1.0, delay: 0 }],
+    [{ type: 'scout',  count: 8,  gap: 0.8, delay: 0 }, { type: 'looter', count: 8, gap: 0.9, delay: 2 }],
+    [{ type: 'shield', count: 3,  gap: 2.5, delay: 0 }, { type: 'looter', count: 12, gap: 0.8, delay: 1 }],
+    [{ type: 'bat',    count: 6,  gap: 1.3, delay: 0 }, { type: 'scout', count: 6, gap: 0.9, delay: 2 }],
+    [{ type: 'brute',  count: 3,  gap: 5.0, delay: 0 }, { type: 'looter', count: 12, gap: 0.8, delay: 1 }],
+    [{ type: 'blinker', count: 5, gap: 1.8, delay: 0 }, { type: 'shield', count: 4, gap: 2.0, delay: 2 }],
+    [{ type: 'warlock', count: 2, gap: 6.0, delay: 0 }, { type: 'brute', count: 3, gap: 3.5, delay: 1 }, { type: 'looter', count: 10, gap: 0.8, delay: 4 }],
+    [{ type: 'bat',    count: 10, gap: 0.9, delay: 0 }, { type: 'scout', count: 8, gap: 0.8, delay: 3 }],
+    [{ type: 'looter', count: 30, gap: 0.35, delay: 0 }, { type: 'blinker', count: 5, gap: 1.6, delay: 4 }],
+    [{ type: 'boss',   count: 1,  gap: 1.0, delay: 0, hpMul: 0.45 }, { type: 'warlock', count: 3, gap: 4.0, delay: 2 }],
+    [{ type: 'shield', count: 8,  gap: 1.3, delay: 0 }, { type: 'bat', count: 9, gap: 1.0, delay: 3 }],
+    [{ type: 'brute',  count: 7,  gap: 2.0, delay: 0 }, { type: 'warlock', count: 3, gap: 4.0, delay: 4 }],
+    [{ type: 'scout',  count: 20, gap: 0.4, delay: 0 }, { type: 'blinker', count: 7, gap: 1.3, delay: 3 }],
+    [{ type: 'shield', count: 8,  gap: 1.4, delay: 0 }, { type: 'brute', count: 5, gap: 2.4, delay: 2 }, { type: 'warlock', count: 3, gap: 4.0, delay: 6 }],
+    [{ type: 'bat',    count: 16, gap: 0.65, delay: 0 }, { type: 'scout', count: 10, gap: 0.7, delay: 4 }],
+    [{ type: 'blinker', count: 9, gap: 1.2, delay: 0 }, { type: 'warlock', count: 3, gap: 4.0, delay: 3 }, { type: 'looter', count: 16, gap: 0.5, delay: 6 }],
+    [{ type: 'brute',  count: 9,  gap: 1.6, delay: 0 }, { type: 'shield', count: 8, gap: 1.4, delay: 4 }],
+    [{ type: 'boss',   count: 1,  gap: 1.0, delay: 0, hpMul: 0.55 }, { type: 'bat', count: 10, gap: 0.9, delay: 3 }, { type: 'blinker', count: 6, gap: 1.5, delay: 7 }],
+    [{ type: 'looter', count: 34, gap: 0.32, delay: 0 }, { type: 'scout', count: 14, gap: 0.55, delay: 3 }, { type: 'warlock', count: 3, gap: 4.0, delay: 8 }],
+    [{ type: 'boss',   count: 2,  gap: 24.0, delay: 0, hpMul: 0.85 }, { type: 'shield', count: 10, gap: 1.3, delay: 4 }, { type: 'warlock', count: 5, gap: 4.5, delay: 10 }],
+  ];
+
+  var WAVE_TABLES = [LEVEL1_WAVES, LEVEL2_WAVES, LEVEL3_WAVES];
+
+  // The maps — hand-authored to echo the reference fantasy: a torch-lit
+  // cavern, the keep on a mountain of gold at the top, raiders entering from a
+  // cave mouth and winding up through chokepoints. Three campaign levels with
+  // distinct path geometry; the keep/mound sit fixed so the fantasy reads the
+  // same on every map.
+  var MAPS = [
+    { // Level 1 — "The Long Sleep": the gentle S-curve
+      name: 'The Long Sleep',
+      keep: { x: 175, y: 200 },
+      mound: { x: 180, y: 248, rx: 118, ry: 46 },
+      path: [
+        [398, 748], [330, 722], [222, 702], [122, 668], [80, 612],
+        [120, 560], [232, 540], [322, 506], [346, 452], [300, 402],
+        [200, 386], [110, 360], [88, 302], [130, 262], [196, 238], [186, 218],
+      ],
+      pads: [
+        { x: 300, y: 758 }, { x: 168, y: 736 }, { x: 56, y: 684 },
+        { x: 192, y: 612 }, { x: 332, y: 574 }, { x: 252, y: 448 },
+        { x: 58, y: 424 }, { x: 158, y: 312 },
+      ],
+      torches: [[86, 648], [336, 478], [92, 332], [244, 692], [306, 366], [46, 552]],
+      heroStart: { x: 210, y: 470 },
+      pathW: 34,
+    },
+    { // Level 2 — "The Undergallery": a long double-pass gallery mid-map;
+      // pads inside the loop cover BOTH passes
+      name: 'The Undergallery',
+      keep: { x: 175, y: 200 },
+      mound: { x: 180, y: 248, rx: 118, ry: 46 },
+      path: [
+        [28, 752], [140, 722], [300, 702], [368, 640], [330, 572],
+        [180, 556], [72, 520], [58, 442], [150, 410], [300, 420],
+        [362, 362], [300, 302], [190, 292], [122, 252], [158, 218],
+      ],
+      pads: [
+        { x: 218, y: 646 }, { x: 78, y: 674 }, { x: 356, y: 724 },
+        { x: 226, y: 486 }, { x: 138, y: 328 }, { x: 356, y: 262 },
+        { x: 44, y: 348 }, { x: 288, y: 356 }, { x: 168, y: 770 },
+      ],
+      torches: [[40, 690], [368, 580], [40, 480], [330, 250], [230, 726], [368, 420]],
+      heroStart: { x: 150, y: 600 },
+      pathW: 34,
+    },
+    { // Level 3 — "The Coldroot Stair": five switchback rungs; centre pads
+      // see three lanes at once, but the waves know it
+      name: 'The Coldroot Stair',
+      keep: { x: 175, y: 200 },
+      mound: { x: 180, y: 248, rx: 118, ry: 46 },
+      path: [
+        [395, 762], [300, 734], [160, 734], [90, 682], [152, 632],
+        [290, 636], [358, 586], [298, 532], [150, 536], [86, 482],
+        [150, 432], [290, 436], [354, 386], [288, 332], [170, 332],
+        [122, 282], [162, 230],
+      ],
+      pads: [
+        { x: 224, y: 684 }, { x: 224, y: 584 }, { x: 222, y: 484 },
+        { x: 222, y: 384 }, { x: 62, y: 584 }, { x: 372, y: 484 },
+        { x: 62, y: 384 }, { x: 300, y: 282 },
+      ],
+      torches: [[46, 730], [380, 660], [46, 530], [380, 410], [60, 300], [250, 750]],
+      heroStart: { x: 300, y: 610 },
+      pathW: 32,
+    },
+  ];
+  var MAP = MAPS[0];   // switched by setLevel(); every drawer/updater reads MAP
 
   // ===== PATH — pure geometry, built once ==================================
   // Catmull-Rom smooth through MAP.path, sampled to an arc-length table so
@@ -213,8 +310,8 @@
     out.push([pts[pts.length - 1][0], pts[pts.length - 1][1]]);
     return out;
   }
-  function buildPath() {
-    var pts = smoothPath(MAP.path, 8);
+  function buildPathFrom(ctrl) {
+    var pts = smoothPath(ctrl, 8);
     var cum = [0];
     for (var i = 1; i < pts.length; i++) {
       var dx = pts[i][0] - pts[i - 1][0], dy = pts[i][1] - pts[i - 1][1];
@@ -222,7 +319,17 @@
     }
     return { pts: pts, cum: cum, len: cum[cum.length - 1] };
   }
-  var PATH = buildPath();
+  var PATHS = [];
+  for (var _m = 0; _m < MAPS.length; _m++) PATHS.push(buildPathFrom(MAPS[_m].path));
+  var PATH = PATHS[0];
+  // Level switch — called ONLY from reset() (deterministic; never mid-run)
+  function setLevel(i) {
+    i = Math.max(0, Math.min(MAPS.length - 1, i | 0));
+    MAP = MAPS[i];
+    PATH = PATHS[i];
+    return i;
+  }
+  function buildPath() { return buildPathFrom(MAPS[0].path); }   // legacy export shape
   function pathPointAt(d) {
     if (d <= 0) { var a0 = PATH.pts[0]; return { x: a0[0], y: a0[1] }; }
     if (d >= PATH.len) { var aN = PATH.pts[PATH.pts.length - 1]; return { x: aN[0], y: aN[1] }; }
@@ -275,9 +382,10 @@
       seedStream: seedStream, streamFloat: streamFloat, rngInt: rngInt,
       dayNumber: dayNumber, dailySeed: dailySeed,
       dailyWaveComp: dailyWaveComp, dailyHpMul: dailyHpMul,
-      buildPath: buildPath, pathPointAt: pathPointAt, PATH_LEN: PATH.len,
+      buildPath: buildPath, buildPathFrom: buildPathFrom, pathPointAt: pathPointAt,
+      PATH_LEN: PATH.len, setLevel: setLevel,
       TOWER_TYPES: TOWER_TYPES, ENEMY_TYPES: ENEMY_TYPES, LEVEL1_WAVES: LEVEL1_WAVES,
-      MAP: MAP, CFG: CFG,
+      WAVE_TABLES: WAVE_TABLES, MAPS: MAPS, MAP: MAP, CFG: CFG,
     };
   }
 
@@ -542,20 +650,34 @@
   })();
 
   // ===== Save — tiny, versioned, quarantined on parse failure =============
+  // v2 (levels): stars is an array, one slot per campaign level. A v1 save's
+  // single campaignStars migrates into stars[0]; unknown/corrupt data never
+  // crashes the boot.
   var Save = (function () {
-    var KEY = 'hoardling.save.v1';
-    var data = { campaignStars: 0, dailyBestWave: 0, tut: 0 };
+    var KEY2 = 'hoardling.save.v2', KEY1 = 'hoardling.save.v1';
+    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0 };
     try {
-      var raw = localStorage.getItem(KEY);
+      var raw = localStorage.getItem(KEY2);
       if (raw) {
         var p = JSON.parse(raw);
-        if (typeof p.campaignStars === 'number') data.campaignStars = p.campaignStars | 0;
+        if (Array.isArray(p.stars)) {
+          for (var i = 0; i < data.stars.length; i++) data.stars[i] = (p.stars[i] | 0) || 0;
+        }
         if (typeof p.dailyBestWave === 'number') data.dailyBestWave = p.dailyBestWave | 0;
         if (typeof p.tut === 'number') data.tut = p.tut | 0;
+      } else {
+        var raw1 = localStorage.getItem(KEY1);
+        if (raw1) {
+          var p1 = JSON.parse(raw1);
+          if (typeof p1.campaignStars === 'number') data.stars[0] = p1.campaignStars | 0;
+          if (typeof p1.dailyBestWave === 'number') data.dailyBestWave = p1.dailyBestWave | 0;
+          if (typeof p1.tut === 'number') data.tut = p1.tut | 0;
+        }
       }
-    } catch (e) { /* corrupt save: keep defaults, never crash the boot */ }
-    function write() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
-    return { data: data, write: write };
+    } catch (e) { /* corrupt save: keep defaults */ }
+    function write() { try { localStorage.setItem(KEY2, JSON.stringify(data)); } catch (e) {} }
+    function unlocked(level) { return level === 0 || data.stars[level - 1] > 0; }
+    return { data: data, write: write, unlocked: unlocked };
   })();
 
   // Placeholder + preview tint per enemy (shared by the enemy drawer and the
@@ -641,9 +763,13 @@
     requestAnimationFrame(this._frame);
   }
 
-  Game.prototype.reset = function (seed, mode) {
+  Game.prototype.reset = function (seed, mode, level) {
     this.seed = (seed >>> 0) || dailySeed();
     this.mode = mode || this.mode;
+    // level select: campaign takes the chosen map; the Daily rotates its map
+    // as a PURE function of the seed, so every player fights the same layout
+    if (this.mode === 'daily') this.levelIdx = setLevel(this.seed % MAPS.length);
+    else this.levelIdx = setLevel(level !== undefined ? level : (this.levelIdx || 0));
     seedStream(this.seed);                  // LANE 2 seeded once, at reset
     this.worldT = 0;
     this.gold = CFG.startGold;
@@ -655,7 +781,8 @@
     this.spawnQueue = [];                   // built at wave start, drained by time
     this.enemies = []; this.towers = []; this.projectiles = [];
     this.nextId = 1;
-    this.hero = { x: 210, y: 470, tx: 210, ty: 470, range: 76, dmg: 9, rate: 1.25, cd: 0, breathCd: 6, spd: 85, selected: false };
+    var hs = MAP.heroStart || { x: 210, y: 470 };
+    this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0, breathCd: 6, spd: 85, selected: false };
     this.menu = null;                       // { padIdx } build menu | { towerIdx } manage menu
     this.stolenLost = 0; this.kills = 0;
     this.breathUsed = false;                // Mother's Breath fires once per level
@@ -691,19 +818,19 @@
 
   // ---- wave construction (deterministic: static tables or lane-1 gen) ----
   Game.prototype.buildWave = function (w) {
-    var groups = this.mode === 'daily' ? dailyWaveComp(w, this.seed) : LEVEL1_WAVES[w];
+    var groups = this.mode === 'daily' ? dailyWaveComp(w, this.seed) : WAVE_TABLES[this.levelIdx][w];
     var hpMul = this.mode === 'daily' ? dailyHpMul(w) : 1;
     var q = [];
     for (var g = 0; g < groups.length; g++) {
       var gr = groups[g];
       for (var i = 0; i < gr.count; i++) {
-        q.push({ t: gr.delay + i * gr.gap, type: gr.type, hpMul: hpMul });
+        q.push({ t: gr.delay + i * gr.gap, type: gr.type, hpMul: hpMul * (gr.hpMul || 1) });
       }
     }
     q.sort(function (a, b) { return a.t - b.t || (a.type < b.type ? -1 : 1); });
     return q;
   };
-  Game.prototype.totalWaves = function () { return this.mode === 'daily' ? Infinity : LEVEL1_WAVES.length; };
+  Game.prototype.totalWaves = function () { return this.mode === 'daily' ? Infinity : WAVE_TABLES[this.levelIdx].length; };
 
   Game.prototype.startWave = function () {
     if (this.waveActive || this.state !== 'playing') return;
@@ -1105,7 +1232,7 @@
     // stars grade COINS LOST FOREVER (escaped carriers), not the closing balance
     var stars = this.stolenLost <= 5 ? 3 : this.stolenLost <= 20 ? 2 : 1;
     this.result = { won: won, stars: stars, hoard: this.hoard, lost: this.stolenLost, kills: this.kills, wave: this.wave };
-    if (this.mode === 'campaign' && won && stars > Save.data.campaignStars) Save.data.campaignStars = stars;
+    if (this.mode === 'campaign' && won && stars > Save.data.stars[this.levelIdx]) Save.data.stars[this.levelIdx] = stars;
     if (this.mode === 'daily' && this.wave > Save.data.dailyBestWave) Save.data.dailyBestWave = this.wave;
     Save.write();
     Sfx.play(won ? 'win' : 'lose');
@@ -1119,11 +1246,17 @@
     if (w.x < 0 || w.x > WORLD_W || w.y < 0 || w.y > WORLD_H) return;   // letterbox
 
     if (this.state === 'menu') {
-      if (w.x > WORLD_W / 2 - 110 && w.x < WORLD_W / 2 + 110) {
-        if (w.y > 430 && w.y < 492) { this.reset(1, 'campaign'); this.state = 'playing'; return; }
-        if (w.y > 520 && w.y < 582) { this.reset(dailySeed(), 'daily'); this.state = 'playing'; return; }
+      if (w.x > WORLD_W / 2 - 130 && w.x < WORLD_W / 2 + 130) {
+        for (var lv = 0; lv < MAPS.length; lv++) {
+          var by = 414 + lv * 60;
+          if (w.y > by && w.y < by + 52) {
+            if (!Save.unlocked(lv)) return;      // locked: tap does nothing
+            this.reset(1, 'campaign', lv); this.state = 'playing'; return;
+          }
+        }
+        if (w.y > 596 && w.y < 648) { this.reset(dailySeed(), 'daily'); this.state = 'playing'; return; }
       }
-      if (w.x > WORLD_W / 2 - 70 && w.x < WORLD_W / 2 + 70 && w.y > 622 && w.y < 662) { Sfx.toggle(); return; }
+      if (w.x > WORLD_W / 2 - 70 && w.x < WORLD_W / 2 + 70 && w.y > 676 && w.y < 712) { Sfx.toggle(); return; }
       return;
     }
     if (this.state === 'won' || this.state === 'lost') {
@@ -1356,7 +1489,7 @@
   // the bg art arrives) — the per-frame cost of the cavern + path drops to two
   // blits instead of gradients, 26 ellipses, and four wide path strokes.
   Game.prototype._buildSceneCache = function () {
-    var key = (ART.images.bg ? 'art' : 'proc');
+    var key = (ART.images.bg ? 'art' : 'proc') + ':' + this.levelIdx;   // path differs per level
     if (this._bgKey === key && this._bgCache) return;
     this._bgKey = key;
     var res = 2;
@@ -1882,7 +2015,7 @@
       ctx.font = 'bold 12px system-ui, sans-serif'; ctx.fillStyle = '#ffe9c4';
       if (this.wave > 0) ctx.fillText('auto in ' + Math.ceil(this.countdown) + 's — call early for +gold', WORLD_W / 2, WORLD_H - 36);
       // next-wave composition preview: colored heads + counts above the button
-      var groups = this.mode === 'daily' ? dailyWaveComp(this.wave, this.seed) : LEVEL1_WAVES[this.wave];
+      var groups = this.mode === 'daily' ? dailyWaveComp(this.wave, this.seed) : WAVE_TABLES[this.levelIdx][this.wave];
       var counts = {}, order = [];
       for (var gi = 0; gi < groups.length; gi++) {
         var gt = groups[gi].type;
@@ -1968,37 +2101,49 @@
     ctx.fillText('Mother sleeps beneath the hoard, healing.', WORLD_W / 2, 356);
     ctx.fillText('The Guild has posted her gold on every job board.', WORLD_W / 2, 376);
     ctx.fillText('Hold the chokepoints, little Wick. Recover every coin.', WORLD_W / 2, 396);
-    // buttons
-    ctx.fillStyle = '#d64545';
-    rr(ctx, WORLD_W / 2 - 110, 430, 220, 62, 14); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 22px system-ui, sans-serif';
-    ctx.fillText('CAMPAIGN', WORLD_W / 2, 469);
-    ctx.fillStyle = 'rgba(80,60,140,0.92)';
-    rr(ctx, WORLD_W / 2 - 110, 520, 220, 62, 14); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.fillText('DAILY SIEGE', WORLD_W / 2, 559);
-    ctx.font = '12px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
-    var dl = 'same siege for everyone today';
-    if (Save.data.dailyBestWave > 0) dl += ' — your best: wave ' + Save.data.dailyBestWave;
-    ctx.fillText(dl, WORLD_W / 2, 596);
-    if (Save.data.campaignStars > 0) {
-      ctx.fillStyle = '#ffd75e'; ctx.font = '14px system-ui, sans-serif';
-      var st = '';
-      for (var si = 0; si < 3; si++) st += si < Save.data.campaignStars ? '★' : '☆';
-      ctx.fillText(st, WORLD_W / 2, 508);
+    // campaign level buttons — locked levels grey out until the previous
+    // keep is held (any stars)
+    for (var li = 0; li < MAPS.length; li++) {
+      var by = 414 + li * 60;
+      var open = Save.unlocked(li);
+      ctx.fillStyle = open ? '#d64545' : 'rgba(70,52,44,0.85)';
+      rr(ctx, WORLD_W / 2 - 130, by, 260, 52, 13); ctx.fill();
+      ctx.fillStyle = open ? '#fff' : '#8a7f72';
+      ctx.font = 'bold 17px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText((li + 1) + '.  ' + MAPS[li].name, WORLD_W / 2 - 112, by + 32);
+      ctx.textAlign = 'right';
+      if (open) {
+        var st = '';
+        for (var si = 0; si < 3; si++) st += si < Save.data.stars[li] ? '★' : '☆';
+        ctx.fillStyle = '#ffd75e'; ctx.font = '15px system-ui, sans-serif';
+        ctx.fillText(st, WORLD_W / 2 + 114, by + 33);
+      } else {
+        ctx.fillStyle = '#8a7f72'; ctx.font = '16px system-ui, sans-serif';
+        ctx.fillText('🔒', WORLD_W / 2 + 114, by + 34);
+      }
+      ctx.textAlign = 'center';
     }
+    ctx.fillStyle = 'rgba(80,60,140,0.92)';
+    rr(ctx, WORLD_W / 2 - 130, 596, 260, 52, 13); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 18px system-ui, sans-serif';
+    ctx.fillText('DAILY SIEGE', WORLD_W / 2, 629);
+    ctx.font = '12px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
+    var dl = 'same siege + map for everyone today';
+    if (Save.data.dailyBestWave > 0) dl += ' — your best: wave ' + Save.data.dailyBestWave;
+    ctx.fillText(dl, WORLD_W / 2, 664);
     // sound toggle
     ctx.fillStyle = 'rgba(255,233,196,0.12)';
-    rr(ctx, WORLD_W / 2 - 70, 622, 140, 40, 10); ctx.fill();
-    drawSpeaker(ctx, WORLD_W / 2 - 46, 642, Sfx.isMuted());
-    ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 14px system-ui, sans-serif';
-    ctx.fillText(Sfx.isMuted() ? 'SOUND OFF' : 'SOUND ON', WORLD_W / 2 + 12, 647);
-    // Wick himself, keeping watch under the menu
+    rr(ctx, WORLD_W / 2 - 70, 676, 140, 36, 10); ctx.fill();
+    drawSpeaker(ctx, WORLD_W / 2 - 46, 694, Sfx.isMuted());
+    ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.fillText(Sfx.isMuted() ? 'SOUND OFF' : 'SOUND ON', WORLD_W / 2 + 12, 699);
+    // Wick keeps watch from the corner
     var wimg = ART.images.hero;
     if (wimg) {
-      var ww = 96, wh = ww * (wimg.height / wimg.width);
+      var ww = 78, wh = ww * (wimg.height / wimg.width);
       var wb = Math.sin(this.worldT * 4) * 2;
-      ctx.drawImage(wimg, WORLD_W / 2 - ww / 2, 758 - wh + wb, ww, wh);
+      ctx.drawImage(wimg, WORLD_W - ww - 14, 766 - wh + wb, ww, wh);
     }
     ctx.textAlign = 'left';
   };
