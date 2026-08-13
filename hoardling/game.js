@@ -23,7 +23,12 @@
     startGold: 120,
     startHoard: 60,      // treasure coins = the life bar
     breathAt: 15,        // hoard level that wakes Mother's Breath (once per level)
-    waveCountdown: 12,   // seconds between waves; calling early pays the remainder
+    // 12s of dead air between waves is most of why the game "goes slow and
+    // nothing is happening" (VANUS). 7s still leaves room to spend and
+    // reposition, and the early-call bonus is unchanged — it just pays less
+    // per wave, which is the correct direction: the reward for playing fast
+    // should be tempo, not a fatter purse.
+    waveCountdown: 7,    // seconds between waves; calling early pays the remainder
   };
   var WORLD_W = 420, WORLD_H = 780;   // fixed world; whole map on one screen
   var VIEW_MIN_W = 420;               // portrait collapses view.w to this (§3d)
@@ -1430,6 +1435,11 @@
     for (var t = 0; t < this.towers.length; t++) {
       var tw = this.towers[t];
       var tt = TOWER_TYPES[tw.type], lv = lvlRow(tw);
+      // Time since this machine ACTUALLY fired. The recoil used to be driven
+      // by the cooldown, but an idle machine rescans every 0.1s, which
+      // retriggered the wind-up ~8x a second forever — every contraption on
+      // the board vibrated even with nothing to shoot at.
+      tw.shotT = (tw.shotT === undefined ? 9 : tw.shotT) + STEP;
       tw.cd -= STEP * (tw._manned ? 1.7 : tw._oc ? 1.25 : 1);
       if (tw.cd > 0) continue;
       var pad = MAP.pads[tw.padIdx];
@@ -1454,6 +1464,7 @@
             hitAny++;
           }
         }
+        if (hitAny) tw.shotT = 0;
         if (hitAny) this.fxQueue.push({ k: 'pulse', x: pad.x, y: pad.y, r: lv.range, n: hitAny });
         tw.cd = hitAny ? 1 / lv.rate : 0.1;   // idle rescan at 6 Hz, not 60
         continue;
@@ -1464,6 +1475,7 @@
       tw.cd = 1 / lv.rate;
       var tp = { x: target.px, y: target.py };
       if (tw.type === 'mimic') {                            // instant bite
+        tw.shotT = 0;
         this._damage(target, lv.dmg * mDmg, { kind: 'melee', tower: tw });
         if (lv.special === 'rend') { target.bleedT = lv.rendDur; target.bleedDps = lv.rendDps; }
         // Magnet Jaws: shake a stolen coin home (cap 2/raider). Losing weight
@@ -1476,6 +1488,7 @@
         this.fxQueue.push({ k: 'bite', x: tp.x, y: tp.y });
         Sfx.play('bite');
       } else if (tw.type === 'brazier') {                   // lobbed splash
+        tw.shotT = 0;
         this.projectiles.push({
           kind: 'lob', x: pad.x, y: pad.y - 26, sx: pad.x, sy: pad.y - 26, tx: tp.x, ty: tp.y,
           t: 0, dur: 0.55, dmg: lv.dmg * mDmg, splash: lv.splash, burn: lv.burn || 0, tower: t,
@@ -1499,6 +1512,7 @@
           else { tw.lockId = target.id; tw.ramp = 0; }
           dmg += tw.ramp;
         }
+        tw.shotT = 0;
         this.projectiles.push({
           kind: 'bolt', x: pad.x, y: pad.y - 30, target: target.id, spd: 340,
           dmg: dmg, crit: crit, hops: lv.pierce || 0,
@@ -2619,10 +2633,13 @@
     if (timg) {
       // recoil press-down right after firing + gentle idle breathing
       var tlv = lvlRow(tw);
-      var re = Math.max(0, Math.min(1, tw.cd * tlv.rate));
-      var press = re > 0.7 ? (re - 0.7) / 0.3 : 0;
-      var windup = (re > 0 && re < 0.18) ? (0.18 - re) / 0.18 : 0;   // pre-shot rise
-      var tsq = 1 - 0.09 * press + windup * 0.05 + Math.sin(this.worldT * 3 + tw.padIdx) * 0.015;
+      // ONE recoil envelope per real shot: a hard kick that settles over 0.34s
+      // and then holds perfectly still. Keyed to shotT, never to the cooldown,
+      // so an idle machine does not vibrate.
+      var st = tw.shotT === undefined ? 9 : tw.shotT;
+      var kick = st < 0.34 ? (1 - st / 0.34) : 0;
+      kick *= kick;                                   // sharp attack, soft tail
+      var tsq = 1 - 0.10 * kick + Math.sin(this.worldT * 1.6 + tw.padIdx) * 0.008;
       var tw0 = 54 * (1 + lvl * 0.12);
       var th0 = tw0 * (timg.height / timg.width);
       ctx.save();
