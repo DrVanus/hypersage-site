@@ -136,18 +136,61 @@ function tower(x,z){
 }
 tower(-17,4); tower(17,2); tower(-9,20); tower(11,22);
 
-// ── raiders: a marching block, like the ad's red column
+// ── raiders — ART PASS. The capsule-and-helmet proxy is exactly what read as
+// "very basic figures" on the phone. A readable little person at 30px needs
+// FOUR things a capsule cannot give: a waist (torso vs legs), a shoulder line
+// (pauldrons widen the silhouette where the eye looks), swinging limbs, and a
+// held object breaking the outline. Cost: ~11 shared-geometry meshes each.
+const GEO = {
+  torso:  new THREE.BoxGeometry(0.92, 1.05, 0.62),
+  hips:   new THREE.BoxGeometry(0.78, 0.34, 0.56),
+  leg:    new THREE.BoxGeometry(0.30, 0.86, 0.32),
+  boot:   new THREE.BoxGeometry(0.36, 0.22, 0.46),
+  arm:    new THREE.BoxGeometry(0.26, 0.78, 0.28),
+  pauld:  new THREE.BoxGeometry(0.34, 0.30, 0.50),
+  head:   new THREE.SphereGeometry(0.42, 9, 7),
+  helm:   new THREE.CylinderGeometry(0.44, 0.46, 0.30, 8),
+  brim:   new THREE.CylinderGeometry(0.60, 0.60, 0.07, 9),
+  plume:  new THREE.ConeGeometry(0.13, 0.5, 5),
+  sackG:  new THREE.SphereGeometry(0.42, 7, 6),
+  hilt:   new THREE.BoxGeometry(0.09, 0.62, 0.09),
+  blade:  new THREE.BoxGeometry(0.15, 0.95, 0.05),
+};
+const LEATHER = mat(0x6b4a2e), SKIN = mat(0xe8bb92), STEEL = mat(0xa8b0bc, 0.45);
 const raiders = [];
 function raider(i){
   const g = new THREE.Group();
-  const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.62,1.15,3,7), RED);
-  b.position.y = 1.25; b.castShadow = true; g.add(b);
-  const h = new THREE.Mesh(new THREE.SphereGeometry(0.5,8,6), mat(0xf0c9a0));
-  h.position.y = 2.35; h.castShadow = true; g.add(h);
-  const hat = new THREE.Mesh(new THREE.ConeGeometry(0.62,0.55,7), IRON);
-  hat.position.y = 2.72; hat.castShadow = true; g.add(hat);
+  const cloth = i % 3 === 0 ? mat(0xb03a2e) : i % 3 === 1 ? mat(0x9c3327) : mat(0xc0483a);
+  const put = (geo, m, x, y, z) => {
+    const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; g.add(o); return o;
+  };
+  put(GEO.hips, LEATHER, 0, 0.98, 0);
+  const legL = put(GEO.leg, LEATHER, -0.22, 0.55, 0);
+  const legR = put(GEO.leg, LEATHER,  0.22, 0.55, 0);
+  put(GEO.boot, mat(0x3f2c1b), -0.22, 0.13, 0.06);
+  put(GEO.boot, mat(0x3f2c1b),  0.22, 0.13, 0.06);
+  put(GEO.torso, cloth, 0, 1.92, 0);                    // waist: the key read
+  put(GEO.pauld, STEEL, -0.60, 2.24, 0);                // shoulder line
+  put(GEO.pauld, STEEL,  0.60, 2.24, 0);
+  const armL = put(GEO.arm, cloth, -0.60, 1.82, 0.04);
+  const armR = put(GEO.arm, cloth,  0.60, 1.82, 0.04);
+  put(GEO.head, SKIN, 0, 2.72, 0.02);
+  put(GEO.helm, STEEL, 0, 2.92, 0);
+  put(GEO.brim, STEEL, 0, 2.80, 0);
+  if (i % 5 === 0) put(GEO.plume, mat(0xd8c24a), 0, 3.24, -0.04);   // a sergeant
+  // a stolen sack on the back — the silhouette break that says "thief"
+  const sack = put(GEO.sackG, mat(0xc9a86a), -0.12, 2.16, -0.46);
+  sack.scale.set(1, 0.86, 0.9);
+  // a sword held out, so the outline isn't a smooth column
+  const sword = new THREE.Group();
+  sword.position.set(0.68, 1.86, 0.12);
+  sword.rotation.z = -0.42;
+  const hilt = new THREE.Mesh(GEO.hilt, mat(0x4a3a22)); hilt.castShadow = true; sword.add(hilt);
+  const blade = new THREE.Mesh(GEO.blade, STEEL);
+  blade.position.y = 0.74; blade.castShadow = true; sword.add(blade);
+  g.add(sword);
   const col = i % 6, row = (i/6)|0;
-  g.userData = { t: -row*1.5 - col*0.12, lane: (col-2.5)*1.9 };
+  g.userData = { t: -row*1.5 - col*0.12, lane: (col-2.5)*1.9, legL, legR, armL, armR, ph: i * 0.7 };
   scene.add(g); raiders.push(g); return g;
 }
 for (let i=0;i<30;i++) raider(i);
@@ -236,6 +279,14 @@ function tick(){
     r.userData.t += dt*0.9;
     const p = Math.max(0, r.userData.t);
     r.position.set(r.userData.lane, Math.abs(Math.sin(p*6))*0.22, 34 - p*4.4);
+    // MARCH: legs and arms counter-swing. Static limbs on a walking body read
+    // as a statue sliding along the ground — this is most of the "alive".
+    const sw = Math.sin(p*6 + r.userData.ph);
+    r.userData.legL.rotation.x =  sw * 0.55;
+    r.userData.legR.rotation.x = -sw * 0.55;
+    r.userData.armL.rotation.x = -sw * 0.40;
+    r.userData.armR.rotation.x =  sw * 0.40;
+    r.rotation.z = Math.sin(p*6 + r.userData.ph) * 0.035;
     if (r.position.z < -8){ r.userData.t = -6 - Math.random()*4; }
     r.rotation.y = Math.PI;
   }

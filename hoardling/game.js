@@ -1253,12 +1253,34 @@
       return { x: cssX / v.scale - v.ox, y: cssY / v.scale - v.oy };
     },
     // view tap -> world coords via ground-plane raycast (the input contract)
-    pick: function (vx, vy) {
+    pick: function (vx, vy, game) {
       if (!this.ready) return null;
       var v = this._v;
       var ndc = new this.T.Vector2((vx * v.scale) / v.cw * 2 - 1, -((vy * v.scale) / v.ch * 2 - 1));
       var ray = new this.T.Raycaster();
       ray.setFromCamera(ndc, this.cam);
+      // TALL OBJECTS FIRST. A ground-plane-only pick resolves a tap on a
+      // machine's BODY 40-200 units up-road (offset = h/(camH-h) * distance),
+      // so tapping a manned machine walked Wick off it instead of opening its
+      // menu. Hit the real meshes, then fall back to the floor.
+      if (game && game.towers) {
+        var objs = [];
+        for (var pid in this.pools.tower) objs.push(this.pools.tower[pid]);
+        if (objs.length) {
+          var hits = ray.intersectObjects(objs, true);
+          if (hits.length) {
+            var node = hits[0].object;
+            while (node && objs.indexOf(node) === -1) node = node.parent;
+            if (node) {
+              for (var ti2 = 0; ti2 < game.towers.length; ti2++) {
+                if (this.pools.tower['w' + game.towers[ti2].tid] === node) {
+                  return { x: game.towers[ti2].x, y: game.towers[ti2].y };
+                }
+              }
+            }
+          }
+        }
+      }
       var t = -ray.ray.origin.y / ray.ray.direction.y;
       if (!(t > 0)) return null;
       var hit = ray.ray.origin.clone().addScaledVector(ray.ray.direction, t);
@@ -1419,58 +1441,67 @@
       }
       return g;
     },
+    // Shared rig geometry — built once, reused by every raider. A capsule is
+    // not a person: readability at ~30px needs a WAIST (torso over hips), a
+    // SHOULDER LINE (pauldrons widen where the eye lands), SWINGING limbs, and
+    // a held object to break the outline. Proven in proto3d before porting.
+    rigGeo: function () {
+      var T = this.T;
+      return this._rg || (this._rg = {
+        torso: new T.BoxGeometry(9.2, 10.5, 6.2), hips: new T.BoxGeometry(7.8, 3.4, 5.6),
+        leg: new T.BoxGeometry(3.0, 8.6, 3.2), boot: new T.BoxGeometry(3.6, 2.2, 4.6),
+        arm: new T.BoxGeometry(2.6, 7.8, 2.8), pauld: new T.BoxGeometry(3.4, 3.0, 5.0),
+        head: new T.SphereGeometry(4.2, 9, 7), helm: new T.CylinderGeometry(4.4, 4.6, 3.0, 8),
+        brim: new T.CylinderGeometry(6.0, 6.0, 0.7, 9), plume: new T.ConeGeometry(1.3, 5, 5),
+        sack: new T.SphereGeometry(4.2, 7, 6), hilt: new T.BoxGeometry(0.9, 6.2, 0.9),
+        blade: new T.BoxGeometry(1.5, 9.5, 0.5), pav: new T.BoxGeometry(1.6, 15, 11),
+        staff: new T.CylinderGeometry(0.8, 0.8, 26, 5), orb: new T.SphereGeometry(3.2, 7, 6),
+        club: new T.CylinderGeometry(2.2, 3.8, 18, 6), wing: new T.BoxGeometry(1.4, 9, 14),
+        crown: new T.CylinderGeometry(5.2, 5.6, 3.2, 6),
+      });
+    },
     raiderRig: function (type) {
-      var T = this.T, m = this._mats, g = new T.Group();
-      var big = type === 'brute' || type === 'boss';
-      var s = type === 'boss' ? 1.8 : type === 'brute' ? 1.35 : 1;
-      var bodyM = type === 'warlock' ? m.purple : type === 'blinker' ? m.gold :
-                  type === 'bat' ? m.purple : big ? m.iron : m.red;
-      var body = new T.Mesh(new T.CapsuleGeometry(7 * s, 12 * s, 3, 7), bodyM);
-      body.position.y = 14 * s; body.castShadow = true; g.add(body);
-      var head = new T.Mesh(new T.SphereGeometry(5.4 * s, 8, 6), m.skin);
-      head.position.y = 26 * s; head.castShadow = true; g.add(head);
-      if (type === 'boss') {
-        var crown = new T.Mesh(new T.CylinderGeometry(6, 6.6, 4, 6), m.gold);
-        crown.position.y = 33 * s; crown.castShadow = true; g.add(crown);
-      } else if (type === 'warlock') {
-        var hat = new T.Mesh(new T.ConeGeometry(6, 14, 7), m.purple);
-        hat.position.y = 32; hat.castShadow = true; g.add(hat);
-      } else {
-        var helm = new T.Mesh(new T.ConeGeometry(6 * s, 6 * s, 7), m.iron);
-        helm.position.y = 30 * s; helm.castShadow = true; g.add(helm);
-      }
-      // ARMS + a WEAPON give the silhouette a soldier's read at 30px
-      for (var ar = -1; ar <= 1; ar += 2) {
-        var arm = new T.Mesh(new T.CapsuleGeometry(2.2 * s, 8 * s, 2, 5), bodyM);
-        arm.position.set(8.4 * s * ar, 16 * s, 1);
-        arm.rotation.z = ar * 0.5; arm.castShadow = true; g.add(arm);
-      }
+      var T = this.T, m = this._mats, G = this.rigGeo(), g = new T.Group();
+      var big = type === 'boss' ? 1.55 : type === 'brute' ? 1.22 : 1;
+      var cloth = type === 'warlock' ? m.purple : type === 'blinker' ? m.brass :
+                  type === 'bat' ? m.purple : type === 'shield' ? m.iron : m.red;
+      var leather = m.wood, steel = m.iron;
+      var put = function (geo, mm, x, y, z) {
+        var o = new T.Mesh(geo, mm); o.position.set(x, y, z); o.castShadow = true; g.add(o); return o;
+      };
+      put(G.hips, leather, 0, 9.8, 0);
+      var legL = put(G.leg, leather, -2.2, 5.5, 0), legR = put(G.leg, leather, 2.2, 5.5, 0);
+      put(G.boot, m.stoneD, -2.2, 1.3, 0.6); put(G.boot, m.stoneD, 2.2, 1.3, 0.6);
+      put(G.torso, cloth, 0, 19.2, 0);
+      put(G.pauld, steel, -6.0, 22.4, 0); put(G.pauld, steel, 6.0, 22.4, 0);
+      var armL = put(G.arm, cloth, -6.0, 18.2, 0.4), armR = put(G.arm, cloth, 6.0, 18.2, 0.4);
+      put(G.head, m.skin, 0, 27.2, 0.2);
+      if (type === 'boss') put(G.crown, m.gold, 0, 30.4, 0);
+      else if (type === 'warlock') put(G.plume, m.purple, 0, 31, 0);
+      else { put(G.helm, steel, 0, 29.2, 0); put(G.brim, steel, 0, 28.0, 0); }
+      // per-type weapon: the outline break that says WHICH raider this is
       if (type === 'brute' || type === 'boss') {
-        var club = new T.Mesh(new T.CylinderGeometry(2.4 * s, 4.2 * s, 22 * s, 6), m.wood);
-        club.position.set(12 * s, 20 * s, 2); club.rotation.z = 0.6; club.castShadow = true; g.add(club);
+        var club = put(G.club, m.wood, 8.5, 20, 1); club.rotation.z = 0.5;
       } else if (type === 'warlock') {
-        var staff = new T.Mesh(new T.CylinderGeometry(1.2, 1.2, 30, 5), m.wood);
-        staff.position.set(10, 16, 2); staff.castShadow = true; g.add(staff);
-        var orb = new T.Mesh(new T.SphereGeometry(3.6, 7, 6), m.teal);
-        orb.position.set(10, 33, 2); g.add(orb);
-      } else if (type !== 'bat') {
-        var blade = new T.Mesh(new T.BoxGeometry(1.6, 12 * s, 3), m.iron);
-        blade.position.set(11 * s, 18 * s, 3); blade.rotation.z = 0.35; blade.castShadow = true; g.add(blade);
-      }
-      if (type === 'shield') {
-        var pav = new T.Mesh(new T.BoxGeometry(3, 22, 16), m.pale);
-        pav.position.set(-10, 15, 0); pav.castShadow = true; g.add(pav);
-      }
-      if (type === 'bat') {
-        for (var s3 = -1; s3 <= 1; s3 += 2) {
-          var w2 = new T.Mesh(new T.BoxGeometry(14, 2, 9), m.purple);
-          w2.position.set(s3 * 11, 22, 0); w2.rotation.z = s3 * 0.4; g.add(w2);
-          g.userData['wing' + s3] = w2;
+        put(G.staff, m.wood, 7.5, 17, 1); put(G.orb, m.teal, 7.5, 31, 1);
+      } else if (type === 'shield') {
+        put(G.pav, m.pale, -7.5, 17, 1);
+        var sw2 = put(G.blade, steel, 7.4, 22, 1); sw2.rotation.z = -0.35;
+      } else if (type === 'bat') {
+        for (var w3 = -1; w3 <= 1; w3 += 2) {
+          var wg = put(G.wing, m.purple, w3 * 8, 22, -1); wg.rotation.z = w3 * 0.4;
+          g.userData['wing' + w3] = wg;
         }
+      } else {
+        put(G.hilt, m.wood, 7.2, 19, 1.2);
+        var bl = put(G.blade, steel, 7.2, 26, 1.2); bl.rotation.z = -0.12;
       }
-      var sack = new T.Mesh(new T.SphereGeometry(5 * s, 7, 6), m.wood2);
-      sack.position.set(6 * s, 20 * s, -5 * s); sack.visible = false; g.add(sack);
+      var sack = put(G.sack, m.wood2, -1.2, 21.6, -4.6);
+      sack.scale.set(1, 0.86, 0.9); sack.visible = false;
       g.userData.sack = sack;
+      g.userData.legL = legL; g.userData.legR = legR;
+      g.userData.armL = armL; g.userData.armR = armR;
+      g.scale.set(big, big, big);
       return g;
     },
     heroRig: function () {
@@ -1617,6 +1648,15 @@
         r.rotation.y = Math.atan2(ahead.x - en.px, ahead.y - en.py);
         r.rotation.z = Math.sin(now * 9 + en.id) * 0.06;
         if (r.userData.sack) r.userData.sack.visible = en.stolen > 0;
+        // MARCH: counter-swinging limbs. Static limbs on a moving body read as
+        // a statue sliding along the floor — this is most of the "alive".
+        if (r.userData.legL && en.grabT <= 0) {
+          var sw3 = Math.sin(now * (fly ? 6 : 9) + en.id * 1.3);
+          r.userData.legL.rotation.x = sw3 * 0.55;
+          r.userData.legR.rotation.x = -sw3 * 0.55;
+          r.userData.armL.rotation.x = -sw3 * 0.40;
+          r.userData.armR.rotation.x = sw3 * 0.40;
+        }
         if (r.userData['wing-1']) {
           r.userData['wing-1'].rotation.z = -0.4 - Math.sin(now * 16) * 0.35;
           r.userData['wing1'].rotation.z = 0.4 + Math.sin(now * 16) * 0.35;
@@ -1715,6 +1755,14 @@
           this._camBase.z);
       }
       this.gl.render(this.scene, this.cam);
+      // The shake is a RENDER effect only. Left in the matrix it would feed
+      // the next frame's tap raycast and every projected UI anchor through
+      // Math.random — taps missing by ±13-20 units after a big hit, and a
+      // replay's world-space taps re-mapped. Restore the base immediately.
+      if (this._camBase) {
+        this.cam.position.set(this._camBase.x, this._camBase.y, this._camBase.z);
+        this.cam.updateMatrixWorld();
+      }
     },
   };
 
@@ -2486,7 +2534,7 @@
     // button's hit zone somewhere else than its pixels.
     var wl = { x: tap.x, y: tap.y, vx: tap.vx, vy: tap.vy };   // linear (2D UI)
     if (R3D.on && R3D.ready && this.state === 'playing' && tap.vx !== undefined) {
-      var w3 = R3D.pick(tap.vx, tap.vy);
+      var w3 = R3D.pick(tap.vx, tap.vy, this);
       if (w3) w = { x: w3.x, y: w3.y, vx: tap.vx, vy: tap.vy };
     }
     var v = this.view;
@@ -4023,18 +4071,12 @@
   // world-anchored hints only (the pad ring); everything else lives in the
   // view-anchored HUD so it hugs the REAL screen edges on every device
   Game.prototype._drawWorldHints = function (ctx) {
-    if (this.state === 'playing' && this.mode === 'campaign' && !Save.data.tut && !this.towers.length) {
-      var tpulse = 0.6 + 0.4 * Math.sin(this.worldT * 5);
-      var tp2 = MAP.pads[3];
-      ctx.strokeStyle = 'rgba(158,245,143,' + tpulse + ')';
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.ellipse(tp2.x, tp2.y, 32 + tpulse * 6, 20 + tpulse * 4, 0, 0, 6.283); ctx.stroke();
-      ctx.fillStyle = 'rgba(16,10,7,0.8)';
-      rr(ctx, tp2.x - 108, tp2.y - 64, 216, 30, 9); ctx.fill();
-      ctx.fillStyle = '#9ef58f'; ctx.font = 'bold 14px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('Tap a stone ring to build a defender', tp2.x, tp2.y - 44);
-      ctx.textAlign = 'left';
-    }
+    // The first-run hint used to pulse a ring around MAP.pads[3] and say "Tap a
+    // stone ring to build a defender". Free placement removed tap-to-build from
+    // pads — the shop owns building now and a pad is just cheaper ground — so
+    // the very first instruction a new player received was a dead end: the tap
+    // it asked for does nothing at all. The hint lives on the shop now, in
+    // _drawHudView, where the thing it points at actually is.
   };
 
   // gold-trimmed slate panel — the art-bible UI language
@@ -4219,9 +4261,25 @@
       }
       if (this.shopPick >= 0) {
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 12px system-ui, sans-serif';
-        ctx.fillText('tap the cavern floor to build  ·  pads cost 20% less',
-                     G.cx, G.shopY - 8);
+        ctx.font = 'bold 12px system-ui, sans-serif';
+        inkText(ctx, 'tap the cavern floor to build  ·  pads cost 20% less',
+                G.cx, G.shopY - 8, '#ffe9c4', 4, 1);
+        ctx.textAlign = 'left';
+      } else if (this.mode === 'campaign' && !Save.data.tut && !this.towers.length) {
+        // FIRST RUN, step 1: point at the shelf, which is where building now
+        // starts. Step 2 is the line above, which the shop already showed.
+        var tp = 0.6 + 0.4 * Math.sin(this.worldT * 5);
+        ctx.strokeStyle = 'rgba(158,245,143,' + tp.toFixed(3) + ')';
+        ctx.lineWidth = 3;
+        rr(ctx, G.shopX - 3, G.shopY - 3, G.shopW + 6, G.shopH + 6, 13); ctx.stroke();
+        // ABOVE the action row. Sitting it just over the shelf put it inside
+        // the START WAVE button's band (measured: plate 810..838, button
+        // 777..829), and the button draws after it, so the hint was invisible.
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(16,10,7,0.88)';
+        rr(ctx, G.cx - 118, G.startY - 38, 236, 28, 9); ctx.fill();
+        ctx.font = 'bold 13px system-ui, sans-serif';
+        inkText(ctx, 'Pick a machine, then tap the floor', G.cx, G.startY - 19, '#9ef58f', 4, 1);
         ctx.textAlign = 'left';
       }
       uiPanel(ctx, G.mute, G.btnY, 44, 34, 9);
