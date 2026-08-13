@@ -1684,11 +1684,24 @@
         // MARCH: counter-swinging limbs. Static limbs on a moving body read as
         // a statue sliding along the floor — this is most of the "alive".
         if (r.userData.legL && en.grabT <= 0) {
-          var sw3 = Math.sin(now * (fly ? 6 : 9) + en.id * 1.3);
-          r.userData.legL.rotation.x = sw3 * 0.55;
-          r.userData.legR.rotation.x = -sw3 * 0.55;
-          r.userData.armL.rotation.x = -sw3 * 0.40;
-          r.userData.armR.rotation.x = sw3 * 0.40;
+          if (fly) {
+            // AIRBORNE: legs tuck, arms trail, wings beat, body banks with the
+            // turn. Marching limbs on a flyer read as a man walking on air.
+            var beat = Math.sin(now * 15 + en.id);
+            r.userData.legL.rotation.x = -0.75; r.userData.legR.rotation.x = -0.6;
+            r.userData.armL.rotation.x = -0.5; r.userData.armR.rotation.x = -0.5;
+            if (r.userData['wing-1']) {
+              r.userData['wing-1'].rotation.z = -0.4 - beat * 0.5;
+              r.userData['wing1'].rotation.z = 0.4 + beat * 0.5;
+            }
+            r.rotation.z = Math.sin(now * 2 + en.id) * 0.12;
+          } else {
+            var sw3 = Math.sin(now * 9 + en.id * 1.3);
+            r.userData.legL.rotation.x = sw3 * 0.55;
+            r.userData.legR.rotation.x = -sw3 * 0.55;
+            r.userData.armL.rotation.x = -sw3 * 0.40;
+            r.userData.armR.rotation.x = sw3 * 0.40;
+          }
         }
         if (r.userData['wing-1']) {
           r.userData['wing-1'].rotation.z = -0.4 - Math.sin(now * 16) * 0.35;
@@ -1768,16 +1781,31 @@
       if (this._flames) for (var f2 = 0; f2 < this._flames.length; f2++) {
         this._flames[f2].scale.y = 0.8 + Math.sin(now * 7 + f2 * 2.1) * 0.25;
       }
-      // retire dead objects
+      // retire dead objects — but a RAIDER topples first. Popping a body out
+      // of existence is the single cheapest way to make combat feel weightless;
+      // 0.45s of falling costs nothing and sells every kill.
       for (var pool in this.pools) {
         for (var pid in this.pools[pool]) {
-          if (!seen[pool][pid]) { scene.remove(this.pools[pool][pid]); delete this.pools[pool][pid]; }
+          if (seen[pool][pid]) continue;
+          var dead = this.pools[pool][pid];
+          if (pool === 'enemy' && dead.userData.fallT === undefined) dead.userData.fallT = 0;
+          if (pool === 'enemy') {
+            dead.userData.fallT += Math.min(0.05, this._rdt || 0.016);
+            var fk = dead.userData.fallT / 0.45;
+            if (fk < 1) {
+              dead.rotation.x = -fk * 1.5;                  // topples backward
+              dead.position.y = Math.max(0, dead.position.y - fk * 26);
+              dead.scale.setScalar((dead.scale.x || 1) * 0.995);
+              continue;                                    // keep it one more frame
+            }
+          }
+          scene.remove(dead); delete this.pools[pool][pid];
         }
       }
       // fx particles tick on a render-lane clock (never the sim's)
       var rnow = performance.now() / 1000;
       var rdt = Math.min(0.05, rnow - (this._rlast || rnow));
-      this._rlast = rnow;
+      this._rlast = rnow; this._rdt = rdt;
       this._fxTick(rdt);
       // screenshake reaches the 3D camera: jitter around the stored base
       if (this._camBase) {
