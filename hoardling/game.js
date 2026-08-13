@@ -1025,14 +1025,37 @@
   // walk-cycle frames (masked-inpaint legs; upper bodies identical to the
   // master plate by construction). Behind a toggle per the animation memory.
   var WALK_FRAMES = !/[?&]frames=0/.test(location.search);
+  // Reduce-motion, cached and live-updating. Used to PIN the title's clock at
+  // t=0 rather than delete anything: the room keeps its embers, its firelight
+  // and its call-to-action ring, all frozen at their mean values. The screen
+  // goes still, not dead.
+  var RM = false;
+  try {
+    var _mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    RM = _mq.matches;
+    if (_mq.addEventListener) _mq.addEventListener('change', function (e) { RM = e.matches; });
+    else if (_mq.addListener) _mq.addListener(function (e) { RM = e.matches; });
+  } catch (e) {}
   // Build stamp, published by build-web.py before this script runs. Art
   // filenames are stable forever, so WITHOUT this every cache in the chain
   // (proxy, WKWebView URLCache, PWA store) can serve the original bytes
   // indefinitely — the "it's all the old art" bug. New build => new URL.
   var BUILD = (typeof window !== 'undefined' && window.__BUILD__) || '';
-  function assetURL(p) { return BUILD ? p + '?v=' + BUILD : p; }
+  // tools/optimize_art.py compiles art/ down to a phone-sized WebP set at build
+  // time (18.4 MB of masters -> 1.5 MB shipped) and build-web.py publishes the
+  // extension here. Dev runs straight off the PNG masters, so both paths use
+  // the same manifest and the same ids.
+  var ART_EXT = (typeof window !== 'undefined' && window.__ART_EXT__) || '';
+  function assetURL(p) {
+    if (ART_EXT) p = p.replace(/\.png$/, '.' + ART_EXT);
+    return BUILD ? p + '?v=' + BUILD : p;
+  }
   var ANIM = { meta: {}, images: {} };
-  if (WALK_FRAMES && typeof window !== 'undefined' && window.fetch) {
+  // Walk-cycle frames are an ENHANCEMENT: without them a raider still walks,
+  // it just uses the static plate. So they load AFTER the boot set rather than
+  // competing with it for the connection.
+  function loadWalkFrames() {
+    if (!WALK_FRAMES || typeof window === 'undefined' || !window.fetch) return;
     fetch(assetURL('art/anim/meta.json')).then(function (r) { return r.ok ? r.json() : {}; }).then(function (m) {
       ANIM.meta = m || {};
       Object.keys(ANIM.meta).forEach(function (k) {
@@ -1072,18 +1095,53 @@
       bg:        'art/cavern_bg.png',
       road:      'art/road.png',
     },
-    images: {}, missing: {},
-    load: function () {
+    images: {}, missing: {}, ready: false,
+    // onProgress(0..1) drives the splash bar; onReady(loaded, total) starts the
+    // game. onReady fires EXACTLY ONCE, and it is guaranteed to fire: a dead
+    // connection, a 404, or a hung CDN must still land the player on the title
+    // screen. A slow load is a bad first impression; a permanent splash is a
+    // broken game, and this boot chain is the only thing standing between the
+    // player and a black screen.
+    load: function (onProgress, onReady) {
       var self = this;
-      Object.keys(this.manifest).forEach(function (id) {
+      var ids = Object.keys(this.manifest);
+      var total = ids.length, done = 0, fired = false;
+      function finish() {
+        if (fired) return;
+        fired = true;
+        self.ready = true;
+        var loaded = 0;
+        for (var i = 0; i < ids.length; i++) if (self.images[ids[i]]) loaded++;
+        if (onReady) onReady(loaded, total);
+      }
+      function tick() {
+        done++;
+        if (onProgress) onProgress(done / total);
+        if (done >= total) finish();
+      }
+      // The escape hatch. 12s is well past a cold 1.5 MB load on 3G.
+      var bail = setTimeout(finish, 12000);
+      ids.forEach(function (id) {
         var img = new Image();
-        img.onload = function () { self.images[id] = img; delete self.missing[id]; };
-        img.onerror = function () { self.missing[id] = 1; };
+        img.onload = function () {
+          self.images[id] = img;
+          delete self.missing[id];
+          // Warm the decode so the first drawImage cannot stall a frame — but
+          // NEVER WAIT ON IT. In an embedded WebView, decode() on an image
+          // that is not in the document can stay pending forever: measured
+          // here, onload fired at 7ms and the decode promise had still not
+          // settled 3s later on a fully-loaded 519px PNG. Counting the asset
+          // on that promise hung the whole boot behind the 12s bail and put
+          // the player on a splash that looked broken.
+          if (img.decode) { try { img.decode().catch(function () {}); } catch (e) {} }
+          tick();
+        };
+        img.onerror = function () { self.missing[id] = 1; tick(); };
         img.src = assetURL(self.manifest[id]);
       });
+      if (!total) { clearTimeout(bail); finish(); }
     },
   };
-  ART.load();
 
   // ===== Input — tap queue (consumed inside the fixed-step sim) ===========
   // Taps are converted to WORLD coordinates at CAPTURE time, with the view
@@ -1111,7 +1169,7 @@
   // Contract: R3D reads sim state, never writes it, never touches the seeded
   // stream. Taps are raycast to the ground so the SAME input logic runs.
   var R3D = {
-    on: /[?&]r3d=1/.test(location.search),
+    on: !/[?&]r3d=0/.test(location.search),   // DEFAULT — ?r3d=0 is the 2D opt-out
     ready: false, T: null, scene: null, cam: null, gl: null,
     pools: { tower: {}, enemy: {}, proj: {}, tar: {} },
     hero: null, sceneLevel: -1,
@@ -1149,10 +1207,10 @@
         var M = function (c, r) { return new T.MeshStandardMaterial({ color: c, roughness: r === undefined ? 0.95 : r, flatShading: true }); };
         self._mats = {
           floor: M(0x6a5344), road: M(0x93826e), roadEdge: M(0x3a2d24),
-          rock: M(0x5c4638), wood: M(0x8a5a30), wood2: M(0xa8703c),
+          rock: M(0x54402f), wood: M(0x9c6532), wood2: M(0xc08448),
           stone: M(0x9a8f80), stoneD: M(0x6e6458), iron: M(0x8d94a0, 0.5),
-          brass: M(0xc8963c, 0.35), gold: M(0xf0b429, 0.4), red: M(0xc0392b),
-          dragon: M(0xd8442f), belly: M(0xe8c07a), teal: M(0x4fc3d0, 0.5),
+          brass: M(0xe0aa3e, 0.3), gold: M(0xf0b429, 0.4), red: M(0xc0392b),
+          dragon: M(0xe85535), belly: M(0xf0cc84), teal: M(0x4fc3d0, 0.5),
           roofBlue: M(0x3f6fc0), flame: new T.MeshBasicMaterial({ color: 0xff9a3c }),
           tar: M(0x1a120c, 0.99), purple: M(0x7b3fa0), pale: M(0xd8cdb8),
           green: M(0x6a8a4a), skin: M(0xe8c8a0),
@@ -1171,8 +1229,11 @@
       this.cam.aspect = v.cw / v.ch;
       // Frame the whole world in portrait with a documentary tilt: camera
       // beyond the cave mouth, looking up the road toward the keep.
-      this.cam.position.set(0, 730, 820);
-      this.cam.lookAt(0, -20, -170);
+      // frame the world into the band between the HUD and the shop bar:
+      // centre on the mid-road so the cave mouth clears the bottom UI
+      this._camBase = { x: 0, y: 780, z: 930 };
+      this.cam.position.set(this._camBase.x, this._camBase.y, this._camBase.z);
+      this.cam.lookAt(0, -10, -60);
       this.cam.updateProjectionMatrix();
       this._v = v;
     },
@@ -1300,6 +1361,11 @@
       var T = this.T, m = this._mats, g = new T.Group();
       var base = new T.Mesh(new T.CylinderGeometry(26, 30, 10, 9), m.stoneD);
       base.position.y = 5; base.castShadow = base.receiveShadow = true; g.add(base);
+      // a small warm lantern on every machine: the lit accent that separates
+      // "built thing" from "rock" at phone size
+      var lamp = new T.Mesh(new T.SphereGeometry(3.4, 6, 5), m.flame);
+      lamp.position.set(20, 14, 14); g.add(lamp);
+      g.scale.set(1.15, 1.15, 1.15);
       var add = function (mesh, x, y, z) { mesh.position.set(x || 0, y || 0, z || 0); mesh.castShadow = true; g.add(mesh); return mesh; };
       if (type === 'ballista') {
         add(new T.Mesh(new T.BoxGeometry(14, 16, 14), m.wood), 0, 18);
@@ -1367,6 +1433,24 @@
         var helm = new T.Mesh(new T.ConeGeometry(6 * s, 6 * s, 7), m.iron);
         helm.position.y = 30 * s; helm.castShadow = true; g.add(helm);
       }
+      // ARMS + a WEAPON give the silhouette a soldier's read at 30px
+      for (var ar = -1; ar <= 1; ar += 2) {
+        var arm = new T.Mesh(new T.CapsuleGeometry(2.2 * s, 8 * s, 2, 5), bodyM);
+        arm.position.set(8.4 * s * ar, 16 * s, 1);
+        arm.rotation.z = ar * 0.5; arm.castShadow = true; g.add(arm);
+      }
+      if (type === 'brute' || type === 'boss') {
+        var club = new T.Mesh(new T.CylinderGeometry(2.4 * s, 4.2 * s, 22 * s, 6), m.wood);
+        club.position.set(12 * s, 20 * s, 2); club.rotation.z = 0.6; club.castShadow = true; g.add(club);
+      } else if (type === 'warlock') {
+        var staff = new T.Mesh(new T.CylinderGeometry(1.2, 1.2, 30, 5), m.wood);
+        staff.position.set(10, 16, 2); staff.castShadow = true; g.add(staff);
+        var orb = new T.Mesh(new T.SphereGeometry(3.6, 7, 6), m.teal);
+        orb.position.set(10, 33, 2); g.add(orb);
+      } else if (type !== 'bat') {
+        var blade = new T.Mesh(new T.BoxGeometry(1.6, 12 * s, 3), m.iron);
+        blade.position.set(11 * s, 18 * s, 3); blade.rotation.z = 0.35; blade.castShadow = true; g.add(blade);
+      }
       if (type === 'shield') {
         var pav = new T.Mesh(new T.BoxGeometry(3, 22, 16), m.pale);
         pav.position.set(-10, 15, 0); pav.castShadow = true; g.add(pav);
@@ -1385,6 +1469,7 @@
     },
     heroRig: function () {
       var T = this.T, m = this._mats, g = new T.Group();
+      g.scale.set(1.18, 1.18, 1.18);
       var body = new T.Mesh(new T.CapsuleGeometry(9, 12, 4, 8), m.dragon);
       body.position.y = 15; body.rotation.x = 0.2; body.castShadow = true; g.add(body);
       var bel = new T.Mesh(new T.CapsuleGeometry(6.4, 8, 3, 7), m.belly);
@@ -1404,6 +1489,78 @@
       var tail = new T.Mesh(new T.ConeGeometry(4.8, 22, 6), m.dragon);
       tail.position.set(0, 11, -14.5); tail.rotation.x = 1.35; tail.castShadow = true; g.add(tail);
       return g;
+    },
+    fx: [],
+    event: function (fx) {
+      // cosmetic-lane 3D effects fed off the SAME event stream the 2D
+      // renderer spends. Math.random only — never the seeded stream.
+      var T = this.T; if (!T) return;
+      var mk = this._mkFx || (this._mkFx = { bursts: [], rings: [] });
+      if (fx.k === 'boom' || fx.k === 'death' || fx.k === 'recover' || fx.k === 'blink' || fx.k === 'steal' || fx.k === 'fireburst') {
+        var col = fx.k === 'recover' || fx.k === 'steal' ? 0xf0b429 :
+                  fx.k === 'blink' ? 0xb39dff : fx.k === 'death' ? 0xc0392b : 0xff9a3c;
+        this.fx.push({ kind: 'burst', x: fx.x, y: fx.y, t: 0, col: col,
+                       n: fx.k === 'boom' ? 10 : 7, group: null });
+      } else if (fx.k === 'breath') {
+        this.fx.push({ kind: 'ring', x: fx.x, y: fx.y, t: 0, col: 0xff9a3c, R: 80, group: null });
+      } else if (fx.k === 'pulse') {
+        this.fx.push({ kind: 'ring', x: fx.x, y: fx.y, t: 0, col: 0x4fc3d0, R: fx.r || 90, group: null });
+      }
+      if (this.fx.length > 24) this.fx.splice(0, this.fx.length - 24);
+    },
+    _fxTick: function (dt) {
+      var T = this.T, scene = this.scene;
+      for (var i = this.fx.length - 1; i >= 0; i--) {
+        var f = this.fx[i];
+        f.t += dt;
+        var life = f.kind === 'ring' ? 0.5 : 0.55;
+        if (f.t >= life) {
+          if (f.group) scene.remove(f.group);
+          if (f.mat) f.mat.dispose();
+          this.fx.splice(i, 1); continue;
+        }
+        if (!f.group) {
+          var g = new T.Group();
+          var P = this.W(f.x, f.y);
+          g.position.set(P.x, 6, P.z);
+          // SHARED geometries (never disposed), ONE cloneable material per
+          // event (disposed on retire) — hundreds of fx events per run must
+          // not each mint geometry, or GPU memory grows for the whole run
+          var FG = this._fxGeo || (this._fxGeo = {
+            cube: new T.BoxGeometry(4, 4, 4),
+            ring: new T.RingGeometry(6, 10, 24),
+          });
+          if (f.kind === 'burst') {
+            var mat2 = new T.MeshBasicMaterial({ color: f.col, transparent: true });
+            f.mat = mat2;
+            for (var b2 = 0; b2 < f.n; b2++) {
+              var cube = new T.Mesh(FG.cube, mat2);
+              var a3 = Math.random() * 6.283, sp = 40 + Math.random() * 90;
+              cube.userData.v = { x: Math.cos(a3) * sp, y: 60 + Math.random() * 70, z: Math.sin(a3) * sp };
+              g.add(cube);
+            }
+          } else {
+            var rmat = new T.MeshBasicMaterial({ color: f.col, transparent: true, side: T.DoubleSide });
+            f.mat = rmat;
+            var ring = new T.Mesh(FG.ring, rmat);
+            ring.rotation.x = -Math.PI / 2; g.add(ring);
+          }
+          scene.add(g); f.group = g;
+        }
+        var k2 = f.t / life;
+        if (f.kind === 'burst') {
+          for (var c4 = 0; c4 < f.group.children.length; c4++) {
+            var cu = f.group.children[c4], v2 = cu.userData.v;
+            cu.position.set(v2.x * f.t, v2.y * f.t - 160 * f.t * f.t, v2.z * f.t);
+            cu.rotation.x += dt * 9; cu.rotation.y += dt * 7;
+            cu.material.opacity = 1 - k2;
+          }
+        } else {
+          var sc = 1 + k2 * (f.R / 8);
+          f.group.children[0].scale.set(sc, sc, 1);
+          f.group.children[0].material.opacity = 0.9 * (1 - k2);
+        }
+      }
     },
     sync: function (game, alpha) {
       if (!this.ready) { this.boot(game); return; }
@@ -1428,6 +1585,10 @@
           if (tgt) o.userData.head.rotation.y = Math.atan2(tgt.x - tw.x, tgt.y - tw.y) + Math.PI;
         }
         if (o.userData.gem) o.userData.gem.rotation.y = now * 1.5;
+        if (o.userData.glow) {
+          var gk = st < 0.4 ? 1 - st / 0.4 : 0;
+          o.userData.glow.scale.set(1 + gk * 0.5, 1 + gk * 0.5, 0.4 + gk * 0.3);
+        }
         if (o.userData.screw) o.userData.screw.rotation.y = now * 0.8;
         if (o.userData.fan) o.userData.fan.rotation.x = Math.sin(now * 3) * 0.25;
         seen.tower[id] = 1;
@@ -1460,15 +1621,25 @@
         var po = this.pools.proj[pr._r3dId];
         if (!po) {
           po = new T.Group();
+          var PG = this._projGeo || (this._projGeo = {
+            shaft: new T.CylinderGeometry(0.9, 0.9, 20, 5),
+            head: new T.ConeGeometry(2.2, 6, 5),
+            tail: new T.ConeGeometry(1.6, 16, 5),
+            ball: new T.SphereGeometry(5, 7, 6),
+            lob: new T.SphereGeometry(4.4, 7, 6),
+          });
           if (pr.kind === 'bolt') {
-            var sh = new T.Mesh(new T.CylinderGeometry(0.9, 0.9, 20, 5), m.wood);
+            var sh = new T.Mesh(PG.shaft, m.wood);
             sh.rotation.x = Math.PI / 2; po.add(sh);
-            var hd = new T.Mesh(new T.ConeGeometry(2.2, 6, 5), m.iron);
+            var hd = new T.Mesh(PG.head, m.iron);
             hd.rotation.x = Math.PI / 2; hd.position.z = 12; po.add(hd);
+            var tmat = this._tailMat || (this._tailMat = new T.MeshBasicMaterial({ color: 0xfff0c0, transparent: true, opacity: 0.35 }));
+            var tail = new T.Mesh(PG.tail, tmat);
+            tail.rotation.x = -Math.PI / 2; tail.position.z = -16; po.add(tail);
           } else if (pr.kind === 'fire') {
-            po.add(new T.Mesh(new T.SphereGeometry(5, 7, 6), m.flame));
+            po.add(new T.Mesh(PG.ball, m.flame));
           } else {
-            po.add(new T.Mesh(new T.SphereGeometry(4.4, 7, 6), m.flame));
+            po.add(new T.Mesh(PG.lob, m.flame));
           }
           scene.add(po); this.pools.proj[pr._r3dId] = po;
         }
@@ -1508,6 +1679,19 @@
         for (var pid in this.pools[pool]) {
           if (!seen[pool][pid]) { scene.remove(this.pools[pool][pid]); delete this.pools[pool][pid]; }
         }
+      }
+      // fx particles tick on a render-lane clock (never the sim's)
+      var rnow = performance.now() / 1000;
+      var rdt = Math.min(0.05, rnow - (this._rlast || rnow));
+      this._rlast = rnow;
+      this._fxTick(rdt);
+      // screenshake reaches the 3D camera: jitter around the stored base
+      if (this._camBase) {
+        var sh = game.shake > 0 ? game.shake : 0;
+        this.cam.position.set(
+          this._camBase.x + (sh ? (Math.random() - 0.5) * 26 * sh : 0),
+          this._camBase.y + (sh ? (Math.random() - 0.5) * 14 * sh : 0),
+          this._camBase.z);
       }
       this.gl.render(this.scene, this.cam);
     },
@@ -2273,9 +2457,13 @@
   // -> HUD buttons -> start-wave. Interactive elements always beat big rects.
   Game.prototype._handleTap = function (tap) {
     var w = tap;   // world-space + .vx/.vy view-space (converted at capture)
-    // R3D: the linear view->world transform no longer matches what the player
-    // sees — recover world coords by raycasting the tap through the 3D camera
-    if (R3D.on && R3D.ready && tap.vx !== undefined) {
+    // TWO coordinate systems in R3D mode. The GROUND (pads, towers, walking,
+    // placement) lives under the 3D camera -> raycast. 2D-DRAWN UI (title,
+    // forge/trials screens, menu buttons, fork cards) is laid out in linear
+    // overlay coords -> keep the linear conversion. Mixing them up puts every
+    // button's hit zone somewhere else than its pixels.
+    var wl = { x: tap.x, y: tap.y, vx: tap.vx, vy: tap.vy };   // linear (2D UI)
+    if (R3D.on && R3D.ready && this.state === 'playing' && tap.vx !== undefined) {
       var w3 = R3D.pick(tap.vx, tap.vy);
       if (w3) w = { x: w3.x, y: w3.y, vx: tap.vx, vy: tap.vy };
     }
@@ -2347,24 +2535,19 @@
     }
 
     if (this.state === 'menu') {
-      if (w.x > WORLD_W / 2 - 130 && w.x < WORLD_W / 2 + 130) {
-        for (var lv = 0; lv < MAPS.length; lv++) {
-          var by = 414 + lv * 60;
-          if (w.y > by && w.y < by + 52) {
-            if (!Save.unlocked(lv)) return;      // locked: tap does nothing
-            this.reset(1, 'campaign', lv); this.state = 'playing'; return;
-          }
+      // Geometry comes from _titleGeom(), the same call _drawTitle draws from,
+      // so a layout change can never move a button away from its hit box.
+      var TG = this._titleGeom();
+      for (var lv = 0; lv < MAPS.length; lv++) {
+        if (hit(w, TG.rows[lv])) {
+          if (!Save.unlocked(lv)) return;        // locked: tap does nothing
+          this.reset(1, 'campaign', lv); this.state = 'playing'; return;
         }
-        if (w.y > 596 && w.y < 648) { this.reset(dailySeed(), 'daily'); this.state = 'playing'; return; }
       }
-      if (w.y > 686 && w.y < 722) {
-        if (w.x > WORLD_W / 2 - 186 && w.x < WORLD_W / 2 - 70) { this.state = 'forge'; return; }
-        if (w.x > WORLD_W / 2 - 58 && w.x < WORLD_W / 2 + 58) {
-          if (Save.starsTotal() > 0) this.state = 'trials';
-          return;
-        }
-        if (w.x > WORLD_W / 2 + 70 && w.x < WORLD_W / 2 + 186) { Sfx.toggle(); return; }
-      }
+      if (hit(w, TG.daily)) { this.reset(dailySeed(), 'daily'); this.state = 'playing'; return; }
+      if (hit(w, TG.pills[0])) { this.state = 'forge'; return; }
+      if (hit(w, TG.pills[1])) { if (Save.starsTotal() > 0) this.state = 'trials'; return; }
+      if (hit(w, TG.pills[2])) { Sfx.toggle(); return; }
       return;
     }
     if (this.state === 'trials') {
@@ -2440,7 +2623,7 @@
           var lvl = lvlRow(tw);
           var bi2 = -1, bd2 = 24 * 24;
           for (var mb2 = 0; mb2 < 4; mb2++) {
-            var mdx = w.x - btns[mb2].x, mdy = w.y - btns[mb2].y, mdd = mdx * mdx + mdy * mdy;
+            var mdx = wl.x - btns[mb2].x, mdy = wl.y - btns[mb2].y, mdd = mdx * mdx + mdy * mdy;
             if (mdd < bd2) { bd2 = mdd; bi2 = mb2; }
           }
           if (bi2 !== -1) {
@@ -2621,6 +2804,8 @@
     // re-read each pass so chained events spend in the same frame
     for (var q = 0; q < this.fxQueue.length; q++) {
       var fx = this.fxQueue[q];
+      // R3D taps the same event stream (cosmetic -> cosmetic, sim untouched)
+      if (R3D.on && R3D.ready) R3D.event(fx);
       if (fx.k === 'hit' || fx.k === 'bite') this._burst(fx.x, fx.y, fx.c || '#ffb14e', 5, 60);
       else if (fx.k === 'coinfly') {
         for (var cf = 0; cf < fx.n; cf++) {
@@ -2773,11 +2958,18 @@
     var ctx = this.ctx, v = this.view;
     // R3D: the WebGL canvas underneath draws the WORLD; this canvas goes
     // transparent and keeps only UI. Until three has booted, draw 2D as ever.
-    var use3d = R3D.on && R3D.ready;
-    if (R3D.on) R3D.sync(this, alpha);        // boots itself on first call
+    // The title screen composes its OWN room (see _drawTitle) — it is not the
+    // level with a scrim over it any more. So the menu neither boots the 3D
+    // world nor renders the 2D one: it draws 4 art files instead of 8, and
+    // _buildSceneCache stops running before the player has tapped anything.
+    var menuish = this.state === 'menu';
+    var use3d = R3D.on && R3D.ready && !menuish;
+    if (R3D.on && !menuish) R3D.sync(this, alpha);   // boots itself on first call
     ctx.setTransform(v.dpr * v.scale, 0, 0, v.dpr * v.scale, 0, 0);
     if (use3d) {
       ctx.clearRect(0, 0, v.w, v.h);
+    } else if (menuish) {
+      ctx.clearRect(0, 0, v.w, v.h);          // _drawTitle paints its own backdrop
     } else {
       ctx.fillStyle = '#17100e';
       ctx.fillRect(0, 0, v.w, v.h);
@@ -2798,7 +2990,9 @@
     var shy = this.shake > 0 ? (Math.random() - 0.5) * 6 * this.shake : 0;
     ctx.translate(v.ox + shx, v.oy + shy);
 
-    if (use3d) {
+    if (menuish) {
+      /* the title owns the whole screen; no world beneath it */
+    } else if (use3d) {
       this._drawOverlay3d(ctx);     // hp bars, coins, floats — over the 3D world
     } else {
     this._drawCavern(ctx);
@@ -3736,8 +3930,44 @@
     };
   };
 
+  // TITLE geometry — ONE source, consumed by both _drawTitle and the 'menu'
+  // branch of the tap handler, exactly like _hudGeom does for the HUD. These
+  // were 14 hand-duplicated magic numbers sitting ~1,650 lines apart; they
+  // happened to agree, and a screen this dense would not have kept it up.
+  //
+  // Hit rects are INFLATED past the visual rects and derived from view.scale,
+  // so every target clears Apple's 44pt minimum BY CONSTRUCTION rather than on
+  // the devices someone happened to test. The old bottom row was 36 world
+  // units — 26-37 CSS px — and failed on every device made.
+  Game.prototype._titleGeom = function () {
+    var s = this.view.scale || 1;
+    var minH = Math.max(62, 44 / s);
+    function row(y, h) {
+      var pad = (minH - h) / 2;
+      return { x: 80, y: y, w: 260, h: h,
+               hx: 62, hy: y - pad, hw: 296, hh: minH };
+    }
+    var pillY = 676, pillH = 52, pillPad = (minH - pillH) / 2;
+    var pills = [];
+    for (var i = 0; i < 3; i++) {
+      pills.push({ x: 48 + i * 102, y: pillY, w: 120, h: pillH,
+                   hx: 44 + i * 102, hy: pillY - pillPad, hw: 128, hh: minH });
+    }
+    return { rows: [row(368, 52), row(430, 52), row(492, 52)],
+             daily: row(578, 54), pills: pills };
+  };
+
+  function hit(w, r) {
+    return w.x >= r.hx && w.x <= r.hx + r.hw && w.y >= r.hy && w.y <= r.hy + r.hh;
+  }
+
   Game.prototype._drawHudView = function (ctx) {
     var v = this.view, G = this._hudGeom();
+    // The resource bar belongs to a RUN. It used to draw unconditionally, so
+    // the title screen wore an opaque "60 / GOLD 120 / WAVE 1/20" slab for a
+    // game that had not started — inert, but it read as leftover UI and it is
+    // the first thing on the screen.
+    if (this.state === 'menu' || this.state === 'forge' || this.state === 'trials') return;
     // top bar
     uiPanel(ctx, G.barX, G.topY, G.barW, 48, 13);
     var lx = G.barX + 14;
@@ -3982,96 +4212,284 @@
     }
   };
 
+  // ===== TITLE — Wick's workshop, lit ====================================
+  // This used to be level 1 rendered in full, buried under a flat 66% black
+  // rect, with four single-colour rounded rectangles stacked on it. It read as
+  // an unstyled prototype sitting on top of someone else's painting.
+  //
+  // Now the title composes its OWN room: Wick at proper size on his hoard
+  // between two braziers, under a hanging nameplate, with embers rising past
+  // the wordmark and dying before they reach the buttons. Motion above, calm
+  // below — the separation is most of why it reads premium instead of busy.
   Game.prototype._drawTitle = function (ctx) {
-    ctx.fillStyle = 'rgba(12,7,5,0.66)';
-    ctx.fillRect(-40, -40, WORLD_W + 80, WORLD_H + 80);
+    var v = this.view;
+    var t = RM ? 0 : this.worldT;              // reduce-motion PINS the clock
+    var X = -v.ox - 60, Y = -v.oy - 60, W = v.w + 120, H = v.h + 120;
+
+    // ---- 1. backdrop -----------------------------------------------------
+    ctx.fillStyle = '#0c0705';
+    ctx.fillRect(X, Y, W, H);
+    if (ART.images.bg) {
+      var bi = ART.images.bg;
+      var bs = Math.max(v.w / bi.width, v.h / bi.height);
+      ctx.drawImage(bi, -v.ox + (v.w - bi.width * bs) / 2, -v.oy + (v.h - bi.height * bs) / 2,
+                    bi.width * bs, bi.height * bs);
+    }
+    // A GRADED scrim, not a flat one: the painting survives at the top where
+    // nothing sits on it and is buried under the buttons where legibility is
+    // non-negotiable. The old flat 0.66 did neither well. Stops are keyed to
+    // world y so they land on the layout, not on the viewport.
+    var sg = ctx.createLinearGradient(0, 0, 0, WORLD_H);
+    sg.addColorStop(0.00, 'rgba(12,7,5,0.34)');
+    sg.addColorStop(0.28, 'rgba(12,7,5,0.52)');
+    sg.addColorStop(0.46, 'rgba(11,6,4,0.84)');
+    sg.addColorStop(1.00, 'rgba(8,4,3,0.93)');
+    ctx.fillStyle = sg; ctx.fillRect(X, Y, W, H);
+    // forge glow — two irrational frequencies never repeat on a visible
+    // period, so the room breathes instead of strobing
+    var heat = 0.13 + 0.035 * Math.sin(t * 1.9) + 0.020 * Math.sin(t * 4.3);
+    ctx.globalCompositeOperation = 'lighter';
+    var fg = ctx.createRadialGradient(196, 236, 10, 196, 236, 300);
+    fg.addColorStop(0.00, 'rgba(255,150,62,' + heat.toFixed(4) + ')');
+    fg.addColorStop(0.55, 'rgba(214,69,69,' + (heat * 0.42).toFixed(4) + ')');
+    fg.addColorStop(1.00, 'rgba(255,120,40,0)');
+    ctx.fillStyle = fg; ctx.fillRect(X, Y, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+    var vg = ctx.createRadialGradient(210, 360, 150, 210, 360, 470);
+    vg.addColorStop(0.00, 'rgba(6,3,2,0)');
+    vg.addColorStop(0.62, 'rgba(6,3,2,0.30)');
+    vg.addColorStop(1.00, 'rgba(4,2,1,0.86)');
+    ctx.fillStyle = vg; ctx.fillRect(X, Y, W, H);
+
+    embers(ctx, t, 0, 18, 1.0, 1.0);           // back layer, behind the sign
+
+    // ---- 2. the hanging nameplate ---------------------------------------
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffd75e';
     ctx.font = 'bold 54px Georgia, serif';
-    ctx.fillText('HOARDLING', WORLD_W / 2, 290);
-    ctx.fillStyle = '#ff9a3c';
-    ctx.font = 'italic 17px Georgia, serif';
-    ctx.fillText('Too young for dragonfire. Built his own.', WORLD_W / 2, 322);
-    ctx.fillStyle = '#ffe9c4';
-    ctx.font = '14px system-ui, sans-serif';
-    ctx.fillText('A dragon too young for dragonfire —', WORLD_W / 2, 356);
-    ctx.fillText('so he built his own.', WORLD_W / 2, 376);
-    ctx.fillText('Guard the gold. Overclock the machines. Recover every coin.', WORLD_W / 2, 396);
-    // campaign level buttons — locked levels grey out until the previous
-    // keep is held (any stars)
-    for (var li = 0; li < MAPS.length; li++) {
-      var by = 414 + li * 60;
-      var open = Save.unlocked(li);
-      ctx.fillStyle = open ? '#d64545' : 'rgba(70,52,44,0.85)';
-      rr(ctx, WORLD_W / 2 - 130, by, 260, 52, 13); ctx.fill();
-      ctx.fillStyle = open ? '#fff' : '#8a7f72';
-      ctx.font = 'bold 17px system-ui, sans-serif';
+    var fs = Math.min(54, 54 * 300 / ctx.measureText('HOARDLING').width);
+    ctx.font = 'bold ' + fs.toFixed(1) + 'px Georgia, serif';
+    var plateW = Math.max(300, ctx.measureText('HOARDLING').width + 44);
+    var px = 210 - plateW / 2, py = 26, ph = 78, ch = 16;
+    for (var cxi = 0; cxi < 2; cxi++) {        // two short brass chains
+      var chx = cxi ? 285 : 135;
+      var cg = ctx.createLinearGradient(0, 0, 0, 30);
+      cg.addColorStop(0, '#8f7038'); cg.addColorStop(1, '#d4a840');
+      ctx.strokeStyle = cg; ctx.lineWidth = 2;
+      for (var lk = 0; lk < 3; lk++) {
+        ctx.beginPath(); ctx.ellipse(chx, 2 + lk * 9, 3.5, 4.5, 0, 0, 6.283); ctx.stroke();
+      }
+    }
+    ctx.globalCompositeOperation = 'lighter';
+    var pg = ctx.createRadialGradient(210, 64, 0, 210, 64, 190);
+    pg.addColorStop(0, 'rgba(255,150,62,0.10)'); pg.addColorStop(1, 'rgba(255,150,62,0)');
+    ctx.fillStyle = pg; ctx.fillRect(X, Y, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+    function platePath(x, y, w, h, c) {        // chamfered lozenge, not a rect
+      ctx.beginPath();
+      ctx.moveTo(x + c, y); ctx.lineTo(x + w - c, y); ctx.lineTo(x + w, y + h / 2);
+      ctx.lineTo(x + w - c, y + h); ctx.lineTo(x + c, y + h); ctx.lineTo(x, y + h / 2);
+      ctx.closePath();
+    }
+    var bg2 = ctx.createLinearGradient(0, py, 0, py + ph);
+    bg2.addColorStop(0, 'rgba(46,28,18,0.92)'); bg2.addColorStop(1, 'rgba(18,10,8,0.95)');
+    ctx.fillStyle = bg2; platePath(px, py, plateW, ph, ch); ctx.fill();
+    ctx.strokeStyle = 'rgba(212,168,64,0.62)'; ctx.lineWidth = 2;
+    platePath(px + 1, py + 1, plateW - 2, ph - 2, ch); ctx.stroke();
+    for (var rvi = 0; rvi < 4; rvi++) {
+      var rvx = px + (rvi % 2 ? plateW - 22 : 22), rvy = py + (rvi < 2 ? 18 : ph - 18);
+      ctx.fillStyle = '#d4a840';
+      ctx.beginPath(); ctx.arc(rvx, rvy, 2.4, 0, 6.283); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.42)';
+      ctx.beginPath(); ctx.arc(rvx, rvy, 2.4, 0.5, 2.6); ctx.fill();
+    }
+
+    // ---- 3. the wordmark: six passes over one position -------------------
+    var bx = 210, by = 76;
+    ctx.fillStyle = 'rgba(8,4,3,0.78)'; ctx.fillText('HOARDLING', bx, by + 3);
+    ctx.strokeStyle = '#5b2a10'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round';
+    ctx.strokeText('HOARDLING', bx, by);
+    var mg = ctx.createLinearGradient(0, by - fs * 0.72, 0, by + fs * 0.10);
+    mg.addColorStop(0.00, '#fff3cf'); mg.addColorStop(0.42, '#ffd75e');
+    mg.addColorStop(0.78, '#e8a02a'); mg.addColorStop(1.00, '#b96a12');
+    ctx.fillStyle = mg; ctx.fillText('HOARDLING', bx, by);
+    var hg = ctx.createLinearGradient(0, by - fs * 0.72, 0, by + fs * 0.10);
+    hg.addColorStop(0.00, 'rgba(255,255,235,0.55)');
+    hg.addColorStop(0.30, 'rgba(255,255,235,0.10)');
+    hg.addColorStop(0.46, 'rgba(255,255,235,0)');
+    ctx.fillStyle = hg; ctx.fillText('HOARDLING', bx, by);
+    ctx.strokeStyle = 'rgba(255,225,160,0.42)'; ctx.lineWidth = 1;
+    ctx.strokeText('HOARDLING', bx, by);
+    ctx.globalCompositeOperation = 'lighter';   // warms and cools WITH the fire
+    ctx.fillStyle = 'rgba(255,190,90,' + (0.10 + 0.06 * Math.sin(t * 1.7)).toFixed(3) + ')';
+    ctx.fillText('HOARDLING', bx, by);
+    ctx.globalCompositeOperation = 'source-over';
+    // eyebrow — manual letterspacing; ctx.letterSpacing is not portable
+    ctx.font = 'bold 10px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(201,168,106,0.85)';
+    var eb = "WICK'S WORKSHOP", ebw = 0, ebi;
+    for (ebi = 0; ebi < eb.length; ebi++) ebw += ctx.measureText(eb[ebi]).width + 2.6;
+    var ebx = 210 - ebw / 2;
+    for (ebi = 0; ebi < eb.length; ebi++) {
       ctx.textAlign = 'left';
-      ctx.fillText((li + 1) + '.  ' + MAPS[li].name, WORLD_W / 2 - 112, by + 32);
-      ctx.textAlign = 'right';
+      ctx.fillText(eb[ebi], ebx, 96);
+      ebx += ctx.measureText(eb[ebi]).width + 2.6;
+    }
+    ctx.textAlign = 'center';
+
+    // ---- 4. the room: braziers, hoard, Wick ------------------------------
+    var torch = ART.images.torch;
+    if (torch) {
+      for (var ti = 0; ti < 2; ti++) {
+        // deliberately NOT mirrored: the right brazier is smaller, higher and
+        // dimmer, and that asymmetry is the whole depth cue
+        var tw = ti ? 56 : 72, th = tw * (torch.height / torch.width);
+        var tx = ti ? 352 : 2, tbase = ti ? 282 : 300;
+        var amp = ti ? 0.5 : 1, phz = ti ? 1.9 : 0;
+        ctx.globalCompositeOperation = 'lighter';
+        var tg = ctx.createRadialGradient(tx + tw / 2, tbase - th * 0.62, 0,
+                                          tx + tw / 2, tbase - th * 0.62, ti ? 76 : 110);
+        tg.addColorStop(0, 'rgba(255,150,62,' +
+          ((0.30 + 0.10 * Math.sin(t * 3.1 + phz)) * amp).toFixed(3) + ')');
+        tg.addColorStop(1, 'rgba(255,150,62,0)');
+        ctx.fillStyle = tg; ctx.fillRect(X, Y, W, H);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = ti ? 0.72 : 1;
+        ctx.drawImage(torch, tx, tbase - th, tw, th);
+        ctx.globalAlpha = 1;
+      }
+    }
+    var mound = ART.images.mound;
+    if (mound) {
+      // the SAME asset twice, same x / width / baseline, so the two halves can
+      // never misregister: back bank behind Wick, front lip in front of him
+      ctx.globalAlpha = 0.88;
+      ctx.drawImage(mound, 0, mound.height * 0.45, mound.width, mound.height * 0.55,
+                    60, 186, 300, 114);
+      ctx.globalAlpha = 1;
+    }
+    var cg2 = ctx.createRadialGradient(210, 264, 4, 210, 264, 58);
+    cg2.addColorStop(0, 'rgba(6,3,2,0.5)'); cg2.addColorStop(1, 'rgba(6,3,2,0)');
+    ctx.fillStyle = cg2;
+    ctx.save(); ctx.translate(210, 264); ctx.scale(1, 0.18);
+    ctx.beginPath(); ctx.arc(0, 0, 58, 0, 6.283); ctx.fill(); ctx.restore();
+    var wick = ART.images.hero_title || ART.images.hero;
+    if (wick) {
+      // 150 world px, not the 78px corner sticker that used to cover 59% of
+      // the sound button. This is the 918 KB hero asset finally used as a hero.
+      var ww = 150, wh = ww * (wick.height / wick.width);
+      var bob = RM ? 0 : Math.sin(t * 0.9) * 1.5;    // was sin(t*4)*2 — a twitch
+      ctx.drawImage(wick, 210 - ww / 2, 264 - wh + bob, ww, wh);
+    }
+    if (mound) {
+      ctx.drawImage(mound, 0, mound.height * 0.80, mound.width, mound.height * 0.20,
+                    60, 259, 300, 41);
+    }
+    embers(ctx, t, 18, 22, 1.4, 0.70);         // near-field parallax layer
+
+    ctx.font = 'italic 16px Georgia, serif';
+    inkText(ctx, 'Too young for dragonfire. Built his own.', 210, 326, '#ffb469', 5, 2);
+
+    // ---- 5. sections ------------------------------------------------------
+    var G = this._titleGeom();
+    var self = this;
+    function rule(y, label, col, alpha) {
+      ctx.font = 'bold 10px system-ui, sans-serif';
+      var lw = ctx.measureText(label).width + 18;
+      ctx.strokeStyle = 'rgba(' + col + ',' + alpha + ')'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(40, y); ctx.lineTo(210 - lw / 2, y);
+      ctx.moveTo(210 + lw / 2, y); ctx.lineTo(380, y); ctx.stroke();
+      ctx.fillStyle = 'rgba(' + col + ',' + (alpha + 0.5) + ')';
+      ctx.fillText(label, 210, y + 4);
+    }
+    rule(356, 'CAMPAIGN', '212,168,64', 0.28);
+
+    // which keep to hold next — the first unlocked level short of 3 stars
+    var next = -1;
+    for (var ri = 0; ri < MAPS.length; ri++) {
+      if (Save.unlocked(ri) && (Save.data.stars[ri] | 0) < 3) { next = ri; break; }
+    }
+    for (var li = 0; li < MAPS.length; li++) {
+      var r = G.rows[li], open = Save.unlocked(li);
+      if (open && li === next) {
+        // the recommended row breathes; nothing else on the screen moves
+        var pulse = 0.35 + 0.28 * (RM ? 0.5 : (0.5 + 0.5 * Math.sin(t * 2.2)));
+        ctx.strokeStyle = 'rgba(255,215,94,' + pulse.toFixed(3) + ')';
+        ctx.lineWidth = 2.5;
+        rr(ctx, r.x - 3, r.y - 3, r.w + 6, r.h + 6, 15); ctx.stroke();
+      }
+      forgePlate(ctx, r, open ? 'ember' : 'lock');
+      numeralSeal(ctx, r.x + 2, r.y + r.h / 2, li + 1, open);
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 17px system-ui, sans-serif';
       if (open) {
-        var st = '';
-        for (var si = 0; si < 3; si++) st += si < Save.data.stars[li] ? '★' : '☆';
-        ctx.fillStyle = '#ffd75e'; ctx.font = '15px system-ui, sans-serif';
-        ctx.fillText(st, WORLD_W / 2 + 114, by + 33);
+        inkText(ctx, MAPS[li].name, r.x + 30, r.y + 32, '#fff6e6', 4, 1.5);
+        for (var si = 0; si < 3; si++) {
+          starCoin(ctx, r.x + r.w - 62 + si * 22, r.y + r.h / 2, 9,
+                   si < (Save.data.stars[li] | 0));
+        }
       } else {
-        ctx.fillStyle = '#8a7f72'; ctx.font = '16px system-ui, sans-serif';
-        ctx.fillText('🔒', WORLD_W / 2 + 114, by + 34);
+        ctx.fillStyle = '#7a6a5c';
+        ctx.fillText(MAPS[li].name, r.x + 30, r.y + 27);
+        ctx.font = '11px system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(180,150,120,0.65)';
+        // say WHAT unlocks it — a bare padlock is a dead end
+        ctx.fillText('hold keep ' + li + ' to open', r.x + 30, r.y + 42);
+        lockGlyph(ctx, r.x + r.w - 26, r.y + r.h / 2, 1.25, '#6b5b4c');
       }
       ctx.textAlign = 'center';
     }
-    ctx.fillStyle = 'rgba(80,60,140,0.92)';
-    rr(ctx, WORLD_W / 2 - 130, 596, 260, 52, 13); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 18px system-ui, sans-serif';
-    ctx.fillText('DAILY SIEGE', WORLD_W / 2, 629);
-    // ladder peek: the world-best run on the caption line (throttled cosmetic
-    // fetch — render-lane IO, touches nothing in the sim)
+
+    rule(566, 'DAILY', '157,138,214', 0.30);
+    var D = G.daily;
+    forgePlate(ctx, D, 'cold');
+    ctx.font = 'bold 18px system-ui, sans-serif';
+    inkText(ctx, 'DAILY SIEGE', 210, D.y + 34, '#f0eaff', 5, 2);
     if (Lb.on() && (!this._lbTopT || Date.now() - this._lbTopT > 300000)) {
       this._lbTopT = Date.now();
-      var self2 = this;
-      Lb.top(1, function (rows) { self2._lbTop = (rows && rows[0]) || null; });
+      Lb.top(1, function (rows) { self._lbTop = (rows && rows[0]) || null; });
     }
-    ctx.font = '12px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
-    var todaysMap = MAPS[dailySeed() % MAPS.length].name;
+    ctx.font = '12px system-ui, sans-serif';
     var todayBest = (Save.data.daily.day === dayNumber()) ? Save.data.daily.best : 0;
-    var dl = 'today: ' + todaysMap + (todayBest ? ' — your best wave ' + todayBest : '');
-    ctx.fillText(dl, WORLD_W / 2, 660);
+    inkText(ctx, 'today: ' + MAPS[dailySeed() % MAPS.length].name +
+                 (todayBest ? ' — your best wave ' + todayBest : ''), 210, 650, '#c9b8ff', 4, 1);
     var dl2 = this._lbTop
-      ? 'all-time: ' + Lb.safeName(String(this._lbTop.display_name || '')) + ' holds wave ' + (this._lbTop.value | 0)
+      ? 'all-time: ' + Lb.safeName(String(this._lbTop.display_name || '')) +
+        ' holds wave ' + (this._lbTop.value | 0)
       : (Save.data.dailyBestWave > 0 ? 'your all-time best: wave ' + Save.data.dailyBestWave : '');
-    if (dl2) { ctx.fillStyle = 'rgba(201,184,255,0.75)'; ctx.fillText(dl2, WORLD_W / 2, 675); }
-    // FORGE | TRIALS | SOUND row
+    if (dl2) inkText(ctx, dl2, 210, 664, 'rgba(201,184,255,0.75)', 4, 1);
+
+    // ---- 6. utility row ---------------------------------------------------
     var fAvail = Save.starsTotal() - Save.forgeSpent();
     var anyWon = Save.starsTotal() > 0;
-    ctx.font = 'bold 12px system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,215,94,0.16)';
-    rr(ctx, WORLD_W / 2 - 186, 686, 116, 36, 10); ctx.fill();
-    ctx.strokeStyle = fAvail > 0 ? '#ffd75e' : 'rgba(255,215,94,0.3)'; ctx.lineWidth = 1.5;
-    rr(ctx, WORLD_W / 2 - 186, 686, 116, 36, 10); ctx.stroke();
-    ctx.fillStyle = '#ffe9c4';
-    ctx.fillText('FORGE' + (fAvail > 0 ? ' (' + fAvail + '★)' : ''), WORLD_W / 2 - 128, 709);
     var tDone = 0;
-    for (var tb = 0; tb < 3; tb++) { var tRow = Save.data.trials[tb] || {}; for (var tbk in tRow) tDone++; }
-    ctx.fillStyle = anyWon ? 'rgba(168,230,255,0.14)' : 'rgba(255,233,196,0.06)';
-    rr(ctx, WORLD_W / 2 - 58, 686, 116, 36, 10); ctx.fill();
-    ctx.strokeStyle = anyWon ? 'rgba(168,230,255,0.6)' : 'rgba(255,233,196,0.15)';
-    rr(ctx, WORLD_W / 2 - 58, 686, 116, 36, 10); ctx.stroke();
-    ctx.fillStyle = anyWon ? '#d9f2ff' : '#8a7f72';
-    ctx.fillText(anyWon ? 'TRIALS ' + tDone + '/9' : 'TRIALS', WORLD_W / 2, 709);
-    ctx.fillStyle = 'rgba(255,233,196,0.12)';
-    rr(ctx, WORLD_W / 2 + 70, 686, 116, 36, 10); ctx.fill();
-    drawSpeaker(ctx, WORLD_W / 2 + 92, 704, Sfx.isMuted());
-    ctx.fillStyle = '#ffe9c4';
-    ctx.fillText(Sfx.isMuted() ? 'OFF' : 'ON', WORLD_W / 2 + 140, 709);
-    // Wick keeps watch from the corner (title pose when we have it)
-    var wimg = ART.images.hero_title || ART.images.hero;
-    if (wimg) {
-      var ww = 78, wh = ww * (wimg.height / wimg.width);
-      var wb = Math.sin(this.worldT * 4) * 2;
-      ctx.drawImage(wimg, WORLD_W - ww - 14, 766 - wh + wb, ww, wh);
+    for (var tb = 0; tb < 3; tb++) { var tRow = Save.data.trials[tb] || {}; for (var tk in tRow) tDone++; }
+    for (var pi = 0; pi < 3; pi++) {
+      var pl = G.pills[pi];
+      var live = pi === 0 ? true : pi === 1 ? anyWon : true;
+      forgePlate(ctx, pl, 'util');
+      var pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      if (pi === 0) {
+        starCoin(ctx, pcx, pcy - 9, 8, fAvail > 0);
+        inkText(ctx, fAvail > 0 ? 'FORGE  ' + fAvail : 'FORGE', pcx, pcy + 17,
+                fAvail > 0 ? '#ffe9c4' : 'rgba(255,233,196,0.55)', 3, 1);
+      } else if (pi === 1) {
+        ctx.strokeStyle = live ? 'rgba(217,242,255,0.9)' : 'rgba(138,127,114,0.7)';
+        ctx.lineWidth = 2;
+        rr(ctx, pcx - 8, pcy - 17, 16, 14, 3); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(pcx - 4, pcy - 13); ctx.lineTo(pcx + 4, pcy - 13);
+        ctx.moveTo(pcx - 4, pcy - 8); ctx.lineTo(pcx + 4, pcy - 8); ctx.stroke();
+        inkText(ctx, live ? 'TRIALS ' + tDone + '/9' : 'TRIALS', pcx, pcy + 17,
+                live ? '#d9f2ff' : '#8a7f72', 3, 1);
+      } else {
+        drawSpeaker(ctx, pcx - 4, pcy - 9, Sfx.isMuted());
+        inkText(ctx, Sfx.isMuted() ? 'SOUND OFF' : 'SOUND ON', pcx, pcy + 17, '#ffe9c4', 3, 1);
+      }
     }
     ctx.textAlign = 'left';
   };
+
 
   Game.prototype._drawForge = function (ctx) {
     var v = this.view;
@@ -4273,6 +4691,156 @@
     ctx.arcTo(x, y, x + w, y, r);
     ctx.closePath();
   }
+  // ===== UI material kit ==================================================
+  // Wick's interface is meant to look like something he BUILT: cast plates
+  // bolted to the cave wall, engraved labels, struck-coin stars. The title
+  // screen used flat single-colour rounded rects, which read as an unstyled
+  // prototype sitting on top of the painted art. Everything below is vector —
+  // no new assets, and nothing that can fail to load.
+
+  /// Text with a real drop shadow. Nothing in this file had one before, so
+  /// every label was a flat fill fighting a busy painted background.
+  function inkText(ctx, txt, x, y, fill, blur, oy, shadow) {
+    ctx.save();
+    ctx.shadowColor = shadow || 'rgba(0,0,0,0.85)';
+    ctx.shadowBlur = blur === undefined ? 6 : blur;
+    ctx.shadowOffsetY = oy === undefined ? 2 : oy;
+    ctx.fillStyle = fill;
+    ctx.fillText(txt, x, y);
+    ctx.restore();
+  }
+
+  /// Engraved label: a light bottom edge under a dark top edge reads as a
+  /// letter cut INTO metal rather than painted on it.
+  function engrave(ctx, txt, x, y, fill) {
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillText(txt, x, y - 1);
+    ctx.fillStyle = 'rgba(255,226,170,0.16)';
+    ctx.fillText(txt, x, y + 1.5);
+    ctx.fillStyle = fill;
+    ctx.fillText(txt, x, y);
+  }
+
+  /// THE PLATE LANGUAGE. Every button on the title is one of four tones of the
+  /// same cast object — that consistency is most of what separates a shipped
+  /// game from a set of coloured rectangles.
+  function forgePlate(ctx, r, tone) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+    var g = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+    if (tone === 'ember') { g.addColorStop(0, '#e05a4a'); g.addColorStop(0.52, '#b93636'); g.addColorStop(1, '#8e2626'); }
+    else if (tone === 'cold') { g.addColorStop(0, '#6a4fb0'); g.addColorStop(0.55, '#4c357f'); g.addColorStop(1, '#3b2a6e'); }
+    else if (tone === 'lock') { g.addColorStop(0, '#3b2c25'); g.addColorStop(1, '#241a16'); }
+    else { g.addColorStop(0, 'rgba(46,28,18,0.88)'); g.addColorStop(1, 'rgba(18,10,8,0.92)'); }
+    ctx.fillStyle = g; rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.fill();
+    ctx.restore();
+    // a 1px lit lip along the top — the entire "this is metal" cue
+    ctx.strokeStyle = tone === 'cold' ? 'rgba(190,175,255,0.42)' : 'rgba(255,220,170,0.34)';
+    ctx.lineWidth = 1; ctx.beginPath();
+    ctx.moveTo(r.x + 13, r.y + 1.5); ctx.lineTo(r.x + r.w - 13, r.y + 1.5); ctx.stroke();
+    ctx.strokeStyle = tone === 'cold' ? 'rgba(160,138,223,0.72)'
+                    : tone === 'lock' ? 'rgba(212,168,64,0.20)' : 'rgba(255,215,94,0.55)';
+    ctx.lineWidth = 1.5; rr(ctx, r.x + 0.75, r.y + 0.75, r.w - 1.5, r.h - 1.5, 11); ctx.stroke();
+    // four struck rivets: the contraption cue, and what stops it reading as a sticker
+    var rv = [[r.x + 11, r.y + 11], [r.x + r.w - 11, r.y + 11],
+              [r.x + 11, r.y + r.h - 11], [r.x + r.w - 11, r.y + r.h - 11]];
+    for (var i = 0; i < 4; i++) {
+      ctx.fillStyle = tone === 'cold' ? '#8f7cc4' : '#d4a840';
+      ctx.beginPath(); ctx.arc(rv[i][0], rv[i][1], 2.4, 0, 6.283); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.42)';
+      ctx.beginPath(); ctx.arc(rv[i][0], rv[i][1], 2.4, 0.5, 2.6); ctx.fill();
+    }
+    // The Daily Siege is the one COLD object in a hot room, so it gets an edge
+    // the forge cannot reach. Inverting the light source is what makes it read
+    // as a different mode rather than a differently-coloured button.
+    if (tone === 'cold') {
+      var cl = ctx.createLinearGradient(r.x, 0, r.x + 9, 0);
+      cl.addColorStop(0, 'rgba(160,140,255,0.50)'); cl.addColorStop(1, 'rgba(160,140,255,0)');
+      ctx.fillStyle = cl; rr(ctx, r.x + 1, r.y + 1, 9, r.h - 2, 10); ctx.fill();
+    }
+  }
+
+  /// A star struck into a coin. The screen used the '★' / '☆' / '🔒' CHARACTERS
+  /// before; those fall through to the platform's colour-emoji font, so on iOS
+  /// the padlock rendered as a full-colour Apple glyph from a different game
+  /// and the stars changed typeface between devices. Paths render identically
+  /// everywhere.
+  function starCoin(ctx, cx, cy, rad, earned) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    var g = ctx.createRadialGradient(-rad * 0.3, -rad * 0.4, rad * 0.15, 0, 0, rad);
+    if (earned) { g.addColorStop(0, '#fff3c4'); g.addColorStop(0.55, '#ffd24a'); g.addColorStop(1, '#a86c14'); }
+    else { g.addColorStop(0, 'rgba(120,102,86,0.45)'); g.addColorStop(1, 'rgba(50,40,33,0.45)'); }
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, rad, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = earned ? 'rgba(120,74,12,0.9)' : 'rgba(90,76,62,0.45)';
+    ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var a = -Math.PI / 2 + i * Math.PI / 5;
+      var rr2 = (i % 2 ? rad * 0.36 : rad * 0.78);
+      ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * rr2, Math.sin(a) * rr2);
+    }
+    ctx.closePath();
+    ctx.fillStyle = earned ? '#fffbe8' : 'rgba(28,22,18,0.55)';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  /// A brass medallion carrying the level numeral, hung half off the plate's
+  /// left edge so the row reads as an anchored object, not text in a box.
+  function numeralSeal(ctx, cx, cy, n, live) {
+    var g = ctx.createRadialGradient(cx - 4, cy - 5, 2, cx, cy, 17);
+    if (live) { g.addColorStop(0, '#f4d98c'); g.addColorStop(1, '#8f6a20'); }
+    else { g.addColorStop(0, '#6a5a4a'); g.addColorStop(1, '#332721'); }
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2;
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, 17, 0, 6.283); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = live ? '#5b3d12' : '#241c17'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, 17, 0, 6.283); ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 17px Georgia, serif';
+    ctx.fillStyle = live ? '#2a1a08' : '#0f0b09';
+    ctx.fillText(String(n), cx, cy + 6);
+  }
+
+  /// Ember field. A PURE function of t — no RNG at all, so it cannot touch the
+  /// seeded stream, and two players on the same frame see the same room.
+  /// alpha = sin(p*PI)^2 means every ember is born at 0 and dies at 0, so none
+  /// ever pops into or out of existence.
+  function embers(ctx, t, from, to, sz, aMul) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = from; i < to; i++) {
+      var f = i * 0.6180339887; f -= (f | 0);      // golden ratio: even spread
+      var g = i * 0.7548776662; g -= (g | 0);      // a second irrational: no moiré
+      var p = t * (0.055 + 0.045 * g) + f; p -= Math.floor(p);
+      var y = 300 - p * 240;                       // the hoard line up to y=60
+      var x = 26 + g * 368 + Math.sin(t * (0.7 + 0.5 * f) + i) * (7 + 9 * f);
+      var a = Math.sin(p * Math.PI); a = a * a * 0.62 * aMul;
+      var r = (0.8 + 1.5 * f) * sz;
+      ctx.fillStyle = 'rgba(255,183,87,' + a.toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+      if ((i & 3) === 0) {
+        ctx.fillStyle = 'rgba(255,215,94,' + (a * 0.30).toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(x, y, r * 2.6, 0, 6.283); ctx.fill();
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /// Vector padlock — shackle + body, drawn to the same weight as the labels.
+  function lockGlyph(ctx, cx, cy, s, col) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.strokeStyle = col; ctx.lineWidth = 2 * s; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(0, -2.2 * s, 3.1 * s, Math.PI, 0); ctx.stroke();
+    ctx.fillStyle = col;
+    rr(ctx, -5 * s, -1.4 * s, 10 * s, 8 * s, 1.6 * s); ctx.fill();
+    ctx.restore();
+  }
+
   function drawTurret(ctx, x, baseY, rad, h, lit, shade, roof) {
     ctx.fillStyle = shade;
     ctx.fillRect(x - rad, baseY - h, rad * 2, h);
@@ -4318,11 +4886,49 @@
   // ===== boot + DEV-GATED debug surface (§3c) =============================
   var _dev = /[?&]dev=1/.test(location.search);   // DEV-HARNESS-COMPILE-TIME: strip
   var canvas = document.getElementById('game-canvas');
-  var game = new Game(canvas);
-  window.addEventListener('resize', function () { game.resize(); });
+  var game = null;
 
-  // Production exposes lifecycle pause only.
-  window.__game = { pause: function (v) { game.setPaused(v); } };
+  // Production exposes lifecycle pause only. Declared before boot so a shell
+  // that calls pause() during the splash cannot throw.
+  window.__game = { pause: function (v) { if (game) game.setPaused(v); } };
+
+  // Replaced by the dev harness at the bottom of this file. It has to exist in
+  // a stripped build too, because boot calls it unconditionally.
+  var bootDev = function () {};
+
+  // ===== BOOT ==============================================================
+  // Nothing renders until the art is DECODED. The game used to construct
+  // immediately and run its render loop against an empty ART.images, so the
+  // first seconds were the chunky procedural fallbacks — a flat blue-roofed
+  // box where the painted keep goes, a bare ellipse for the hoard. VANUS read
+  // that (correctly) as broken/stale art that "fixes itself up after a while".
+  // A splash that says "loading" is honest; a wrong-looking game is not.
+  //
+  // decode() rather than onload: onload only promises the bytes parsed, and
+  // Safari can still stall on the first drawImage of a large texture. Decoding
+  // up front moves that cost into the splash where it belongs.
+  ART.load(
+    function (frac) {
+      var fill = document.getElementById('boot-fill');
+      if (fill) fill.style.width = Math.round(frac * 100) + '%';
+    },
+    function (loaded, total) {
+      game = new Game(canvas);
+      window.addEventListener('resize', function () { game.resize(); });
+      loadWalkFrames();                    // enhancement: never blocks the boot
+      var boot = document.getElementById('boot');
+      if (boot) {
+        boot.classList.add('gone');
+        setTimeout(function () { if (boot.parentNode) boot.parentNode.removeChild(boot); }, 450);
+      }
+      if (loaded < total) {
+        // Loud in dev, silent for the player — a silent fallback hides missing
+        // assets, which is exactly how bad art ships unnoticed.
+        try { console.warn('hoardling: booted with ' + (total - loaded) + '/' + total +
+                           ' assets missing: ' + Object.keys(ART.missing).join(', ')); } catch (e) {}
+      }
+      bootDev();
+    });
 
   
 

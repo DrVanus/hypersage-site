@@ -1,0 +1,266 @@
+{
+ "quality": 84,
+ "min_psnr": 34.0,
+ "px_per_unit": 3.6,
+ "assets": {
+  "anim/blinker_a.png": {
+   "size": "541->160px",
+   "kb": 18.1,
+   "q": 92,
+   "codec_psnr": 34.4,
+   "as_drawn_psnr": 36.4
+  },
+  "anim/blinker_b.png": {
+   "size": "541->160px",
+   "kb": 18.6,
+   "q": 92,
+   "codec_psnr": 34.3,
+   "as_drawn_psnr": 36.2
+  },
+  "anim/boss_a.png": {
+   "size": "551->275px",
+   "kb": 34.0,
+   "q": 88,
+   "codec_psnr": 34.2,
+   "as_drawn_psnr": 36.3
+  },
+  "anim/boss_b.png": {
+   "size": "551->275px",
+   "kb": 35.5,
+   "q": 88,
+   "codec_psnr": 34.0,
+   "as_drawn_psnr": 36.1
+  },
+  "anim/brute_a.png": {
+   "size": "545->204px",
+   "kb": 15.4,
+   "q": 84,
+   "codec_psnr": 35.1,
+   "as_drawn_psnr": 37.2
+  },
+  "anim/brute_b.png": {
+   "size": "545->204px",
+   "kb": 15.1,
+   "q": 84,
+   "codec_psnr": 35.2,
+   "as_drawn_psnr": 37.2
+  },
+  "anim/looter_a.png": {
+   "size": "477->160px",
+   "kb": 14.1,
+   "q": 84,
+   "codec_psnr": 34.4,
+   "as_drawn_psnr": 36.1
+  },
+  "anim/looter_b.png": {
+   "size": "477->160px",
+   "kb": 13.9,
+   "q": 84,
+   "codec_psnr": 34.5,
+   "as_drawn_psnr": 36.3
+  },
+  "anim/scout_a.png": {
+   "size": "700->183px",
+   "kb": 12.1,
+   "q": 84,
+   "codec_psnr": 35.7,
+   "as_drawn_psnr": 37.6
+  },
+  "anim/scout_b.png": {
+   "size": "700->183px",
+   "kb": 11.7,
+   "q": 84,
+   "codec_psnr": 35.7,
+   "as_drawn_psnr": 37.6
+  },
+  "build_pad.png": {
+   "size": "700->206px",
+   "kb": 16.4,
+   "q": 92,
+   "codec_psnr": 32.3,
+   "as_drawn_psnr": 34.4
+  },
+  "cavern_bg.png": {
+   "size": "1024px",
+   "kb": 194.5,
+   "q": 84,
+   "codec_psnr": 36.8,
+   "as_drawn_psnr": 36.8
+  },
+  "enemy_bat.png": {
+   "size": "643->160px",
+   "kb": 13.6,
+   "q": 92,
+   "codec_psnr": 33.0,
+   "as_drawn_psnr": 35.4
+  },
+  "enemy_blinker.png": {
+   "size": "541->160px",
+   "kb": 19.7,
+   "q": 92,
+   "codec_psnr": 34.2,
+   "as_drawn_psnr": 36.1
+  },
+  "enemy_boss.png": {
+   "size": "551->275px",
+   "kb": 40.3,
+   "q": 92,
+   "codec_psnr": 33.6,
+   "as_drawn_psnr": 35.8
+  },
+  "enemy_brute.png": {
+   "size": "545->204px",
+   "kb": 16.2,
+   "q": 84,
+   "codec_psnr": 34.9,
+   "as_drawn_psnr": 37.0
+  },
+  "enemy_looter.png": {
+   "size": "477->160px",
+   "kb": 13.2,
+   "q": 84,
+   "codec_psnr": 34.2,
+   "as_drawn_psnr": 36.0
+  },
+  "enemy_scout.png": {
+   "size": "700->183px",
+   "kb": 11.9,
+   "q": 84,
+   "codec_psnr": 35.7,
+   "as_drawn_psnr": 37.7
+  },
+  "enemy_shield.png": {
+   "size": "297->160px",
+   "kb": 23.6,
+   "q": 92,
+   "codec_psnr": 33.1,
+   "as_drawn_psnr": 35.5
+  },
+  "enemy_warlock.png": {
+   "size": "497->160px",
+   "kb": 18.2,
+   "q": 92,
+   "codec_psnr": 33.2,
+   "as_drawn_psnr": 35.1
+  },
+  "gold_mound.png": {
+   "size": "700px",
+   "kb": 131.2,
+   "q": 92,
+   "codec_psnr": 30.2,
+   "as_drawn_psnr": 30.6
+  },
+  "hero_back.png": {
+   "size": "547->174px",
+   "kb": 12.5,
+   "q": 84,
+   "codec_psnr": 35.7,
+   "as_drawn_psnr": 37.3
+  },
+  "hero_title.png": {
+   "size": "863->594px",
+   "kb": 61.0,
+   "q": 84,
+   "codec_psnr": 37.9,
+   "as_drawn_psnr": 39.6
+  },
+  "hero_whelp.png": {
+   "size": "535->333px",
+   "kb": 37.1,
+   "q": 84,
+   "codec_psnr": 36.6,
+   "as_drawn_psnr": 38.5
+  },
+  "icon-180.png": {
+   "size": "png (icon)",
+   "kb": 44.1,
+   "q": 0,
+   "codec_psnr": 99.0,
+   "as_drawn_psnr": 99.0
+  },
+  "icon-192.png": {
+   "size": "png (icon)",
+   "kb": 49.5,
+   "q": 0,
+   "codec_psnr": 99.0,
+   "as_drawn_psnr": 99.0
+  },
+  "icon-512.png": {
+   "size": "png (icon)",
+   "kb": 319.5,
+   "q": 0,
+   "codec_psnr": 99.0,
+   "as_drawn_psnr": 99.0
+  },
+  "keep.png": {
+   "size": "519px",
+   "kb": 77.1,
+   "q": 84,
+   "codec_psnr": 34.6,
+   "as_drawn_psnr": 35.6
+  },
+  "road.png": {
+   "size": "512->326px",
+   "kb": 30.1,
+   "q": 84,
+   "codec_psnr": 34.0,
+   "as_drawn_psnr": 34.5
+  },
+  "torch.png": {
+   "size": "268->103px",
+   "kb": 16.4,
+   "q": 92,
+   "codec_psnr": 31.8,
+   "as_drawn_psnr": 34.0
+  },
+  "tower_ballista.png": {
+   "size": "554->291px",
+   "kb": 37.4,
+   "q": 88,
+   "codec_psnr": 34.4,
+   "as_drawn_psnr": 36.4
+  },
+  "tower_bellows.png": {
+   "size": "601->291px",
+   "kb": 26.9,
+   "q": 84,
+   "codec_psnr": 35.7,
+   "as_drawn_psnr": 37.6
+  },
+  "tower_brazier.png": {
+   "size": "588->291px",
+   "kb": 28.9,
+   "q": 88,
+   "codec_psnr": 34.1,
+   "as_drawn_psnr": 26.8
+  },
+  "tower_crystal.png": {
+   "size": "303->291px",
+   "kb": 54.9,
+   "q": 88,
+   "codec_psnr": 34.0,
+   "as_drawn_psnr": 35.5
+  },
+  "tower_mimic.png": {
+   "size": "503->291px",
+   "kb": 45.5,
+   "q": 92,
+   "codec_psnr": 34.3,
+   "as_drawn_psnr": 36.3
+  },
+  "tower_perch.png": {
+   "size": "418->291px",
+   "kb": 30.7,
+   "q": 84,
+   "codec_psnr": 35.7,
+   "as_drawn_psnr": 37.6
+  },
+  "tower_press.png": {
+   "size": "546->291px",
+   "kb": 34.7,
+   "q": 88,
+   "codec_psnr": 34.4,
+   "as_drawn_psnr": 36.6
+  }
+ }
+}
