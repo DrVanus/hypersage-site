@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Hoardling 3D — feasibility prototype</title>
+<style>
+  html,body{margin:0;height:100%;background:#c8a06a;overflow:hidden;
+    font:14px/1.4 system-ui,sans-serif;color:#fff;-webkit-user-select:none;user-select:none}
+  canvas{display:block}
+  #hud{position:fixed;left:0;right:0;top:0;padding:10px 14px;
+    background:linear-gradient(rgba(0,0,0,.45),transparent);pointer-events:none}
+  #hud b{font-size:17px}
+  #tip{position:fixed;left:0;right:0;bottom:0;padding:12px 14px 22px;text-align:center;
+    background:linear-gradient(transparent,rgba(0,0,0,.55));font-weight:600}
+</style>
+</head>
+<body>
+<div id="hud"><b>Hoardling 3D</b> — real-time, low-poly. <span id="stat"></span></div>
+<div id="tip">drag to look around · tap the ground to send the dragon there</div>
+<script type="module">
+import * as THREE from './three.module.js';
+
+// ── This is a FEASIBILITY PROTOTYPE, not the game. Every object here is
+// generated from primitives in code — no modelling, no texturing, no rigging.
+// That is the whole point: the Kingshot ad's look is low-poly enough that the
+// geometry IS code, which is a different proposition from recreating our
+// painted sprites as sculpted, rigged 3D characters.
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xd8b183);
+scene.fog = new THREE.Fog(0xd8b183, 60, 145);
+
+const camera = new THREE.PerspectiveCamera(46, innerWidth/innerHeight, 0.1, 400);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+// ── light: one warm key that CASTS, plus sky fill. This is what gives the
+// grounded look our 2D renderer had to fake with hand-drawn shadow ellipses.
+const key = new THREE.DirectionalLight(0xfff0d0, 2.5);
+key.position.set(-28, 40, 18);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+const d = 70;
+Object.assign(key.shadow.camera, { left:-d, right:d, top:d, bottom:-d, near:1, far:150 });
+scene.add(key, new THREE.HemisphereLight(0xbfd8ff, 0xc08a55, 1.1));
+
+const mat = (c, rough=0.95) => new THREE.MeshStandardMaterial({ color:c, roughness:rough, flatShading:true });
+const SAND=mat(0xd9a86a), ROCK=mat(0x9c5f47), WOOD=mat(0x8a5a30), WOOD2=mat(0xa8703c),
+      PALE=mat(0xe8e0cf), IRON=mat(0x8d94a0,0.55), RED=mat(0xc0392b), GOLD=mat(0xf0b429,0.4),
+      DRAGON=mat(0xd8442f), BELLY=mat(0xe8c07a), LEAF=mat(0x4f7a3a);
+
+// ── ground + canyon walls
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(300,300), SAND);
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+
+function rock(x,z,s){
+  const m = new THREE.Mesh(new THREE.DodecahedronGeometry(s,0), ROCK);
+  m.position.set(x, s*0.42, z);
+  m.rotation.set(Math.random(), Math.random()*3, Math.random()*0.4);
+  m.scale.y = 0.62; m.castShadow = m.receiveShadow = true; scene.add(m); return m;
+}
+for (let i=0;i<26;i++){
+  const a = i/26*Math.PI*2, r = 62 + Math.sin(i*2.3)*7;
+  rock(Math.cos(a)*r, Math.sin(a)*r, 7+Math.sin(i*1.7)*3);
+}
+for (let i=0;i<16;i++) rock((Math.random()-0.5)*95, (Math.random()-0.5)*95, 1.1+Math.random()*1.4);
+
+function cactus(x,z){
+  const g = new THREE.Group();
+  const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.85,4.4,3,7), LEAF);
+  b.position.y = 3.1; b.castShadow = true; g.add(b);
+  const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.5,2,3,6), LEAF);
+  arm.position.set(1.1,3.6,0); arm.rotation.z = -0.5; arm.castShadow = true; g.add(arm);
+  g.position.set(x,0,z); scene.add(g);
+}
+for (let i=0;i<9;i++) cactus((Math.random()-0.5)*100,(Math.random()-0.5)*100);
+
+// ── the keep: planks and boxes, exactly like the reference
+const keep = new THREE.Group();
+const body = new THREE.Mesh(new THREE.BoxGeometry(11,8,9), PALE);
+body.position.y = 4; body.castShadow = body.receiveShadow = true; keep.add(body);
+for (let i=0;i<7;i++){
+  const pl = new THREE.Mesh(new THREE.BoxGeometry(1.4,9.5,0.5), i%2?WOOD:WOOD2);
+  pl.position.set(-5.2+i*1.75, 4.9, 4.7); pl.rotation.z = (i%2?1:-1)*0.03;
+  pl.castShadow = true; keep.add(pl);
+}
+const roofA = new THREE.Mesh(new THREE.BoxGeometry(12.5,0.6,5.5), WOOD);
+roofA.position.set(0,8.6,-1.6); roofA.rotation.x = -0.42; roofA.castShadow = true; keep.add(roofA);
+const roofB = roofA.clone(); roofB.rotation.x = 0.42; roofB.position.z = 1.6; keep.add(roofB);
+const door = new THREE.Mesh(new THREE.BoxGeometry(3,4,0.4), mat(0x5d3a1e));
+door.position.set(0,2,4.95); keep.add(door);
+const crown = new THREE.Mesh(new THREE.BoxGeometry(1.8,1.2,0.3), GOLD);
+crown.position.set(0,5.2,5.0); keep.add(crown);
+const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,9,6), WOOD);
+pole.position.set(0,12,0); keep.add(pole);
+const flag = new THREE.Mesh(new THREE.BoxGeometry(4,1.6,0.12), mat(0x2f6fd0));
+flag.position.set(2.1,15.4,0); keep.add(flag);
+keep.position.set(0,0,-16); scene.add(keep);
+
+// ── gold pile the raiders are after
+const hoard = new THREE.Group();
+for (let i=0;i<44;i++){
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.62,0.16,8), GOLD);
+  const a = Math.random()*6.28, r = Math.random()*4.4;
+  c.position.set(Math.cos(a)*r, 0.1+Math.random()*0.9, Math.sin(a)*r);
+  c.rotation.set(Math.random()*0.4,Math.random()*3,Math.random()*0.4);
+  c.castShadow = true; hoard.add(c);
+}
+hoard.position.set(0,0,-8); scene.add(hoard);
+
+// ── crossbow towers — a platform, legs, and a bow that AIMS and RELEASES
+const towers = [];
+function tower(x,z){
+  const g = new THREE.Group();
+  for (const [lx,lz] of [[-1.5,-1.5],[1.5,-1.5],[-1.5,1.5],[1.5,1.5]]){
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.45,5,0.45), WOOD);
+    leg.position.set(lx,2.5,lz); leg.castShadow = true; g.add(leg);
+  }
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(4.4,0.4,4.4), WOOD2);
+  deck.position.y = 5.1; deck.castShadow = deck.receiveShadow = true; g.add(deck);
+  const head = new THREE.Group(); head.position.y = 5.9; g.add(head);
+  const stock = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.4,3.4), WOOD);
+  stock.castShadow = true; head.add(stock);
+  const bow = new THREE.Mesh(new THREE.BoxGeometry(4.6,0.32,0.32), mat(0x6d8fb0));
+  bow.position.z = 1.1; bow.castShadow = true; head.add(bow);
+  const nock = new THREE.Mesh(new THREE.BoxGeometry(0.16,0.16,2.2), PALE);
+  nock.position.z = 0.2; head.add(nock);
+  g.position.set(x,0,z); scene.add(g);
+  const t = { g, head, nock, cd: Math.random()*1.2, muzzle: new THREE.Vector3() };
+  towers.push(t); return t;
+}
+tower(-17,4); tower(17,2); tower(-9,20); tower(11,22);
+
+// ── raiders: a marching block, like the ad's red column
+const raiders = [];
+function raider(i){
+  const g = new THREE.Group();
+  const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.62,1.15,3,7), RED);
+  b.position.y = 1.25; b.castShadow = true; g.add(b);
+  const h = new THREE.Mesh(new THREE.SphereGeometry(0.5,8,6), mat(0xf0c9a0));
+  h.position.y = 2.35; h.castShadow = true; g.add(h);
+  const hat = new THREE.Mesh(new THREE.ConeGeometry(0.62,0.55,7), IRON);
+  hat.position.y = 2.72; hat.castShadow = true; g.add(hat);
+  const col = i % 6, row = (i/6)|0;
+  g.userData = { t: -row*1.5 - col*0.12, lane: (col-2.5)*1.9 };
+  scene.add(g); raiders.push(g); return g;
+}
+for (let i=0;i<30;i++) raider(i);
+
+// ── arrows: real objects that leave the bow and fly
+const arrows = [];
+const shaftGeo = new THREE.CylinderGeometry(0.07,0.07,2.1,5);
+const headGeo  = new THREE.ConeGeometry(0.19,0.5,5);
+function fire(from, to){
+  const g = new THREE.Group();
+  const sh = new THREE.Mesh(shaftGeo, WOOD); sh.rotation.x = Math.PI/2; g.add(sh);
+  const hd = new THREE.Mesh(headGeo, IRON); hd.rotation.x = Math.PI/2; hd.position.z = 1.3; g.add(hd);
+  for (const s of [-1,1]){
+    const f = new THREE.Mesh(new THREE.BoxGeometry(0.05,0.42,0.5), RED);
+    f.position.set(0.11*s,0,-0.95); f.rotation.z = 0.35*s; g.add(f);
+  }
+  g.position.copy(from); g.castShadow = true; scene.add(g);
+  arrows.push({ g, from: from.clone(), to: to.clone(), t: 0,
+                dur: from.distanceTo(to)/48 });
+}
+
+// ── the dragon you run around with
+const dragon = new THREE.Group();
+{
+  const b = new THREE.Mesh(new THREE.CapsuleGeometry(1.05,1.5,4,8), DRAGON);
+  b.position.y = 1.75; b.rotation.x = 0.22; b.castShadow = true; dragon.add(b);
+  const bel = new THREE.Mesh(new THREE.CapsuleGeometry(0.72,1.0,3,7), BELLY);
+  bel.position.set(0,1.6,0.5); bel.rotation.x = 0.22; dragon.add(bel);
+  const hd = new THREE.Mesh(new THREE.SphereGeometry(0.86,10,8), DRAGON);
+  hd.position.set(0,3.15,0.5); hd.castShadow = true; dragon.add(hd);
+  const snout = new THREE.Mesh(new THREE.BoxGeometry(0.72,0.6,0.9), DRAGON);
+  snout.position.set(0,3.0,1.25); dragon.add(snout);
+  for (const s of [-1,1]){
+    const horn = new THREE.Mesh(new THREE.ConeGeometry(0.2,0.75,5), BELLY);
+    horn.position.set(0.42*s,3.85,0.2); horn.rotation.z = 0.35*s; dragon.add(horn);
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(0.14,1.5,2.1), DRAGON);
+    wing.position.set(1.05*s,2.2,-0.35); wing.rotation.z = 0.5*s; wing.castShadow = true;
+    dragon.add(wing); dragon.userData['wing'+(s>0?'R':'L')] = wing;
+  }
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.55,2.6,6), DRAGON);
+  tail.position.set(0,1.35,-1.65); tail.rotation.x = 1.35; tail.castShadow = true; dragon.add(tail);
+}
+dragon.position.set(0,0,16); scene.add(dragon);
+const dTarget = dragon.position.clone();
+
+// ── camera orbit (drag) — this is the "I can run around" the ad has
+let yaw = 0.15, pitch = 0.86, dragging = false, lastX = 0, lastY = 0, moved = 0;
+const el = renderer.domElement;
+el.addEventListener('pointerdown', e => { dragging = true; moved = 0; lastX = e.clientX; lastY = e.clientY; });
+el.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const dx = e.clientX-lastX, dy = e.clientY-lastY; lastX = e.clientX; lastY = e.clientY;
+  moved += Math.abs(dx)+Math.abs(dy);
+  yaw -= dx*0.005; pitch = Math.max(0.42, Math.min(1.25, pitch - dy*0.004));
+});
+el.addEventListener('pointerup', e => {
+  dragging = false;
+  if (moved > 9) return;                       // that was a look, not a tap
+  const ndc = new THREE.Vector2((e.clientX/innerWidth)*2-1, -(e.clientY/innerHeight)*2+1);
+  const ray = new THREE.Raycaster(); ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObject(ground)[0];
+  if (hit) dTarget.copy(hit.point);
+});
+
+const clock = new THREE.Clock();
+const stat = document.getElementById('stat');
+let acc = 0, frames = 0;
+
+function tick(){
+  const dt = Math.min(0.05, clock.getDelta());
+  const now = clock.elapsedTime;
+
+  // dragon walks to where you tapped
+  const to = dTarget.clone().sub(dragon.position); to.y = 0;
+  if (to.length() > 0.6){
+    to.normalize();
+    dragon.position.addScaledVector(to, dt*15);
+    dragon.rotation.y = Math.atan2(to.x, to.z);
+    dragon.position.y = Math.abs(Math.sin(now*9))*0.28;      // a little bounce
+  } else dragon.position.y = Math.sin(now*2.2)*0.1;
+  dragon.userData.wingL.rotation.x = Math.sin(now*7)*0.25;
+  dragon.userData.wingR.rotation.x = Math.sin(now*7)*0.25;
+
+  // raiders march the lane toward the hoard
+  for (const r of raiders){
+    r.userData.t += dt*0.9;
+    const p = Math.max(0, r.userData.t);
+    r.position.set(r.userData.lane, Math.abs(Math.sin(p*6))*0.22, 34 - p*4.4);
+    if (r.position.z < -8){ r.userData.t = -6 - Math.random()*4; }
+    r.rotation.y = Math.PI;
+  }
+
+  // towers aim at the nearest raider and RELEASE a real arrow
+  for (const t of towers){
+    let best = null, bd = 1e9;
+    for (const r of raiders){
+      const dd = t.g.position.distanceToSquared(r.position);
+      if (dd < bd && dd < 34*34){ bd = dd; best = r; }
+    }
+    if (!best) continue;
+    const aim = best.position.clone().sub(t.g.position);
+    t.head.rotation.y = Math.atan2(aim.x, aim.z);
+    t.cd -= dt;
+    if (t.cd <= 0){
+      t.cd = 1.15;
+      t.nock.position.z = -0.9;                                  // string drawn
+      // the muzzle is the BOW's world position — the arrow leaves the bow
+      t.muzzle.set(0,0,1.3).applyQuaternion(t.head.getWorldQuaternion(new THREE.Quaternion()));
+      t.muzzle.add(t.g.position).add(new THREE.Vector3(0,5.9,0));
+      fire(t.muzzle, best.position.clone().setY(1.4));
+    }
+    t.nock.position.z += (0.2 - t.nock.position.z) * Math.min(1, dt*9);   // string returns
+  }
+
+  // arrows fly, arc slightly, and face their heading
+  for (let i=arrows.length-1;i>=0;i--){
+    const a = arrows[i];
+    a.t += dt/a.dur;
+    if (a.t >= 1){ scene.remove(a.g); arrows.splice(i,1); continue; }
+    const p = a.from.clone().lerp(a.to, a.t);
+    p.y += Math.sin(a.t*Math.PI)*1.6;
+    a.g.position.copy(p);
+    a.g.lookAt(a.to.x, a.to.y + (1-a.t)*1.2, a.to.z);
+  }
+
+  // camera orbits the dragon
+  const R = 46;
+  camera.position.set(
+    dragon.position.x + Math.sin(yaw)*Math.sin(pitch)*R,
+    Math.cos(pitch)*R + 26,
+    dragon.position.z + Math.cos(yaw)*Math.sin(pitch)*R);
+  camera.lookAt(dragon.position.x, 3, dragon.position.z - 4);
+
+  renderer.render(scene, camera);
+  acc += dt; frames++;
+  if (acc > 0.5){ stat.textContent = Math.round(frames/acc) + ' fps · ' +
+    renderer.info.render.triangles.toLocaleString() + ' tris · arrows in flight: ' + arrows.length;
+    acc = 0; frames = 0; }
+  requestAnimationFrame(tick);
+}
+tick();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+window.__proto3d = { scene, camera, renderer, towers, raiders, arrows, dragon };
+</script>
+</body>
+</html>
