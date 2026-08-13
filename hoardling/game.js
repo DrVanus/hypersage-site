@@ -1328,7 +1328,9 @@
         if (e.d <= 0) {                                    // escaped with treasure
           this.stolenLost += e.stolen;
           this.enemies.splice(i, 1);
-          this.fxQueue.push({ k: 'escape', x: PATH.pts[0][0], y: PATH.pts[0][1] });
+          // n is an ADDITIVE cosmetic payload on an event that already exists
+          // to feed the render lane: reads e.stolen, writes nothing
+          this.fxQueue.push({ k: 'escape', x: PATH.pts[0][0], y: PATH.pts[0][1], n: e.stolen });
           Sfx.play('leak');
           continue;
         }
@@ -1972,9 +1974,41 @@
         if (fx.boss) this.shake = Math.min(1, this.shake + 0.7);
       }
       else if (fx.k === 'boom') { this._burst(fx.x, fx.y, '#ff8a3c', 14, 110); this.shake = Math.min(1, this.shake + 0.25); }
-      else if (fx.k === 'steal') { this._burst(fx.x, fx.y, '#ff5b5b', 12, 100); this.floats.push({ x: fx.x, y: fx.y, txt: '-' + fx.n + ' treasure!', c: '#ff7b7b', t: 1.4 }); this.shake = Math.min(1, this.shake + 0.45); }
-      else if (fx.k === 'recover') { this._burst(fx.x, fx.y, '#9ef58f', 10, 90); this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.n + ' recovered!', c: '#9ef58f', t: 1.4 }); this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, tx: MAP.mound.x, ty: MAP.mound.y, n: Math.min(5, fx.n) }); }
-      else if (fx.k === 'escape') { this.floats.push({ x: fx.x + 30, y: fx.y - 20, txt: 'stolen!', c: '#ff5b5b', t: 1.2 }); this.shake = Math.min(1, this.shake + 0.3); }
+      else if (fx.k === 'steal') {
+        // THE SCOOP — coins fly OFF THE PILE and INTO him. Direction is the
+        // whole story of this beat; the old outward red burst read as damage
+        // at the one moment the game is about a TRANSFER.
+        var sn = fx.n || 1, sc = Math.min(8, 2 + Math.round(sn * 0.3));
+        for (var sp2 = 0; sp2 < sc; sp2++) {
+          this.particles.push({
+            kind: 'coin',
+            x: MAP.mound.x + (Math.random() - 0.5) * MAP.mound.rx * 1.4,
+            y: MAP.mound.y + (Math.random() - 0.5) * 14,
+            tx: fx.x, ty: fx.y - 18, arc: 24 + Math.random() * 30,
+            life: 0.22 + sp2 * 0.035, T: 0.22 + sp2 * 0.035,
+          });
+        }
+        this._burst(fx.x, fx.y, '#ff5b5b', 4, 70);
+        this.floats.push({ x: fx.x, y: fx.y, txt: '-' + sn + ' treasure!', c: '#ff7b7b', t: 1.4 });
+        this.shake = Math.min(1, this.shake + 0.12 + 0.014 * sn);   // was a flat 0.45 for ANY amount
+      }
+      else if (fx.k === 'recover') {
+        this._burst(fx.x, fx.y, '#9ef58f', 10, 90);
+        // SHAKE-LOOSE flash: a near-white ring is the most detectable transient
+        // on a dark floor — it tells the eye WHERE, the shorter Ledger is WHAT
+        this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 8, R: 26, life: 0.25, T: 0.25, c: '#fff8dc' });
+        this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.n + ' recovered!', c: '#9ef58f', t: 1.4 });
+        this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, tx: MAP.mound.x, ty: MAP.mound.y, n: Math.min(5, fx.n) });
+      }
+      else if (fx.k === 'escape') {
+        var en2 = fx.n || 1;
+        this.floats.push({ x: fx.x + 30, y: fx.y - 20, txt: 'stolen!', c: '#ff5b5b', t: 1.2 });
+        this.shake = Math.min(1, this.shake + 0.10 + 0.030 * en2);   // 0.13 @1 coin -> 0.85 @25
+        // gone FOREVER flies OUT through the mouth — the exact opposite
+        // direction of 'recover's flight home to the mound
+        this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, n: Math.min(8, en2),
+          tx: fx.x + (fx.x < WORLD_W / 2 ? -110 : 110), ty: fx.y + 90 });
+      }
       else if (fx.k === 'breath') { this._burst(fx.x, fx.y, '#ff9a3c', 30, 140); this.shake = Math.min(1, this.shake + 0.35); }
       else if (fx.k === 'mother') {
         // Auremma half-stirs: full-screen warm exhale
@@ -2023,8 +2057,10 @@
       if (!ce2.flyer && (ce2.type === 'brute' || ce2.type === 'boss') && ce2.grabT <= 0 && Math.random() < dtRaw * 5) {
         this.particles.push({ kind: 'dot', x: ce2.px + (Math.random() - 0.5) * 10, y: ce2.py + 2, vx: (Math.random() - 0.5) * 30, vy: -10 - Math.random() * 18, r: 1.5 + Math.random() * 2, life: 0.3 + Math.random() * 0.2, T: 0.5, c: 'rgba(120,100,80,0.5)' });
       }
-      if (ce2.fleeing && ce2.stolen > 0 && Math.random() < dtRaw * 7) {
-        this.particles.push({ kind: 'dot', x: ce2.px, y: ce2.py - 8, vx: (Math.random() - 0.5) * 16, vy: 12 + Math.random() * 14, r: 1.2 + Math.random() * 1.4, life: 0.35, T: 0.35, c: '#ffd75e' });
+      // GLITTER WAKE: drip rate scales with the LOAD — a Scrapling sheds the
+      // odd spark; the Hoard King lays a trail down the whole switchback
+      if (ce2.fleeing && ce2.stolen > 0 && Math.random() < dtRaw * Math.min(20, 2 + 1.4 * ce2.stolen)) {
+        this.particles.push({ kind: 'dot', x: ce2.px + (Math.random() - 0.5) * (6 + ce2.stolen), y: ce2.py - 8, vx: (Math.random() - 0.5) * 16, vy: 12 + Math.random() * 14, r: 1.0 + 0.05 * ce2.stolen + Math.random() * 1.2, life: 0.35, T: 0.35, c: '#ffd75e' });
       }
     }
     this.shake = Math.max(0, this.shake - dtRaw * 2.2);
@@ -2064,6 +2100,7 @@
     this._drawCavern(ctx);
     this._drawMoundAndKeep(ctx);   // mound + halo (keep sprite drawn AFTER the path)
     this._drawPath(ctx);
+    this._drawMouthAlarm(ctx);    // escape pressure, UNDER the entities
     this._drawTar(ctx);           // slag sits ON the road, under everyone
     this._drawKeep(ctx);          // the door arch overlaps the road's end
     this._drawPads(ctx);
@@ -2364,6 +2401,25 @@
     }
   };
 
+  // BEAT 4 — THE MOUTH WAKES. One scalar for the whole screen: how close the
+  // nearest loaded carrier is to escaping forever. Permanent loss used to be
+  // unforeshadowed (a carrier simply popped at d<=0), which is what made the
+  // coins-lost star grade feel arbitrary. O(1): two path ops per FRAME.
+  Game.prototype._drawMouthAlarm = function (ctx) {
+    var esc = 0;
+    for (var q = 0; q < this.enemies.length; q++) {
+      var c = this.enemies[q];
+      if (c.fleeing && c.stolen > 0) esc = Math.max(esc, 1 - Math.min(1, c.d / 220));
+    }
+    if (esc <= 0.02) return;                       // its mere presence is the alarm
+    var m0 = PATH.pts[0];
+    var pul = 0.65 + 0.35 * Math.sin(this.worldT * (4 + 8 * esc));   // rate rises as it closes
+    ctx.fillStyle = 'rgba(255,60,50,' + (0.08 + 0.20 * esc) + ')';
+    ctx.beginPath(); ctx.ellipse(m0[0], m0[1], 34 + 40 * esc, 26 + 30 * esc, 0.4, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,123,123,' + (0.20 + 0.65 * esc * pul) + ')';
+    ctx.lineWidth = 1.5 + 5 * esc;
+    ctx.beginPath(); ctx.ellipse(m0[0], m0[1], 34 + 14 * esc, 26 + 11 * esc, 0.4, 0, 6.283); ctx.stroke();
+  };
   Game.prototype._drawTar = function (ctx) {
     for (var i = 0; i < this.tar.length; i++) {
       var tp = this.tar[i];
@@ -2472,14 +2528,83 @@
     ctx.beginPath(); ctx.arc(p.x + 20, topY, 2.4, 0, 6.283); ctx.fill();
   };
 
+  // THE LOOT LEDGER — the carried amount, baked once into an atlas of 6 cells
+  // (1..5 coins as a constant-width column; 6+ as the boss's sack). Count and
+  // LENGTH and SHAPE carry the read, never hue: colour-blind safe and static,
+  // so it survives reduce-motion too. Cost per carrier: one drawImage.
+  // BOT margin: the capsule and the sack halo both hang ~2u BELOW their own
+  // origin, which without a margin bleeds into the next cell of the atlas and
+  // paints a stray sliver of the neighbouring glyph on every badge.
+  var LEDGER_CELL = 34, LEDGER_S = 3, LEDGER_BOT = 3;
+  Game.prototype._bakeLedger = function () {
+    var c = document.createElement('canvas');
+    c.width = LEDGER_CELL * LEDGER_S; c.height = LEDGER_CELL * LEDGER_S * 6;
+    var x = c.getContext('2d');
+    x.scale(LEDGER_S, LEDGER_S);
+    var gw = [], gh = [];
+    for (var i = 0; i < 6; i++) {
+      x.save();
+      x.translate(LEDGER_CELL / 2, (i + 1) * LEDGER_CELL - LEDGER_BOT);   // cell origin
+      if (i < 5) {                                  // 1..5 coins: stacked column
+        var n = i + 1, sh = 4.6 + (n - 1) * 5.6;
+        x.fillStyle = 'rgba(14,9,5,0.88)';
+        rr(x, -5.8, -sh - 1.6, 11.6, sh + 3.2, 5.8); x.fill();
+        x.fillStyle = 'rgba(120,78,26,0.85)';
+        x.fillRect(-0.8, -2.2, 1.6, 3.4);           // tether stub to the crown
+        for (var k = 0; k < n; k++) {
+          var cy = -2.3 - k * 5.6;
+          x.fillStyle = '#ffd75e';
+          x.beginPath(); x.ellipse(0, cy, 3.8, 2.3, 0, 0, 6.283); x.fill();
+          x.fillStyle = 'rgba(255,247,214,0.9)';
+          x.beginPath(); x.ellipse(0, cy - 0.7, 2.3, 0.9, 0, 0, 6.283); x.fill();
+        }
+        gw.push(11.6); gh.push(sh + 3.2);
+      } else {                                      // 6+: a SACK — a different SHAPE, not a taller stack
+        // Kept deliberately TIGHT (~21u): an earlier 32u version out-massed the
+        // 36u raider sprites and read as a pale blob competing with the cast.
+        x.fillStyle = 'rgba(12,8,4,0.92)';          // dark rim carries the silhouette
+        x.beginPath(); x.moveTo(-10.6, -6.4);
+        x.bezierCurveTo(-11.4, -15.6, -6.2, -17.4, -4.2, -19.2);
+        x.lineTo(4.2, -19.2);
+        x.bezierCurveTo(6.2, -17.4, 11.4, -15.6, 10.6, -6.4);
+        x.bezierCurveTo(9.6, -0.6, -9.6, -0.6, -10.6, -6.4);
+        x.closePath(); x.fill();
+        x.fillStyle = '#e8b23c';                    // deeper gold: pale reads as washed out
+        x.beginPath(); x.moveTo(-8.8, -6.6);
+        x.bezierCurveTo(-9.5, -14.6, -5.0, -16.2, -3.4, -17.8);
+        x.lineTo(3.4, -17.8);
+        x.bezierCurveTo(5.0, -16.2, 9.5, -14.6, 8.8, -6.6);
+        x.bezierCurveTo(8.0, -1.8, -8.0, -1.8, -8.8, -6.6);
+        x.closePath(); x.fill();
+        x.strokeStyle = 'rgba(96,58,14,0.75)'; x.lineWidth = 1.1;   // burlap seams
+        for (var bd = 0; bd < 2; bd++) {
+          x.beginPath(); x.ellipse(0, -5.4 + bd * 2.6, 7.6 - bd * 2.6, 2.4 - bd * 0.7, 0, 3.34, 6.08); x.stroke();
+        }
+        x.fillStyle = 'rgba(92,58,16,0.95)';        // cinched neck
+        rr(x, -3.6, -21.4, 7.2, 3.6, 1.4); x.fill();
+        x.fillStyle = '#ffd75e';                    // coins spilling over the tie
+        for (var s2 = 0; s2 < 3; s2++) {
+          x.beginPath(); x.ellipse(-4.2 + s2 * 4.2, -22.6 + (s2 === 1 ? -1.4 : 0), 2.2, 1.6, 0, 0, 6.283); x.fill();
+        }
+        gw.push(21.2); gh.push(23);
+      }
+      x.restore();
+    }
+    return { c: c, gw: gw, gh: gh };
+  };
+
   Game.prototype._drawEnemy = function (ctx, e, p) {
     var base = ENEMY_TYPES[e.type];
     var bob = Math.sin(this.worldT * 9 + e.id * 1.3) * 2;
     // a netted flyer sits on the road (groundedT), wings clipped
     var fy = eFly(e) ? -26 + Math.sin(this.worldT * 4 + e.id) * 4 : 0;
-    // shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath(); ctx.ellipse(p.x, p.y + 3, e.type === 'boss' ? 20 : 10, e.type === 'boss' ? 8 : 4.5, 0, 0, 6.283); ctx.fill();
+    // BEAT 1a — the shadow REACHES as he closes on the hoard: it darkens,
+    // widens and flattens over the last 70 units. Zero extra draw calls.
+    var near = e.fleeing ? 0 : Math.max(0, 1 - (PATH.len - e.d) / 70);
+    var srx = (e.type === 'boss' ? 20 : 10) * (1 + 0.55 * near);
+    var sry = (e.type === 'boss' ? 8 : 4.5) * (1 - 0.20 * near);
+    ctx.fillStyle = 'rgba(0,0,0,' + (0.30 + 0.28 * near) + ')';
+    ctx.beginPath(); ctx.ellipse(p.x, p.y + 3, srx, sry, 0, 0, 6.283); ctx.fill();
     var sid = 'e_' + e.type;
     var img = ART.images[sid];
     if (img) {
@@ -2495,6 +2620,14 @@
       var flip = (ahead.x - p.x) < -0.5 ? -native : native;
       if (Math.abs(ahead.x - p.x) <= 0.5) flip = native;   // vertical stretch: hold facing
       var wsp = boss ? 6 : 9 + (e.spd / 42) * 3;          // stride matches speed
+      // LOOT-WEIGHT GAIT: the sim already slows a laden thief; mirror that on
+      // the animation clock (read-only) so a heavy carrier MOVES heavy. The
+      // min() ceiling keeps frame-swaps inside the legibility band — nothing
+      // already in band moves (Recipe 9: saturate, don't clamp the symptom).
+      if (e.fleeing) {
+        var fmG = Math.max(CFG.fleeMin, CFG.fleeBase - CFG.fleeWeight * e.stolen) * (this.mods.fleeMul || 1);
+        wsp = Math.min(wsp * fmG, 13);
+      }
       var animKey = e.type === 'looter' ? 'looter' : e.type;   // meta keys match types
       var hasFrames = WALK_FRAMES && ANIM.meta[animKey] && ANIM.images[animKey + '_a'] && ANIM.images[animKey + '_b'];
       if (hasFrames && moving && !e.flyer) {
@@ -2506,17 +2639,46 @@
       var amp = (boss ? 0.05 : 0.085) * (hasFrames ? 0.55 : 1);   // frames carry the stride
       var waddle = (moving && !e.flyer) ? Math.sin(t * wsp + ph) * amp : 0;
       var squash;
-      if (e.grabT > 0) squash = 1 + Math.sin(t * 26 + ph) * 0.12;     // digging!
-      else if (e.flyer) squash = 1 + Math.sin(t * 16 + ph) * 0.06;    // wing-beat
+      if (e.flyer) squash = 1 + Math.sin(t * 16 + ph) * 0.06;         // wing-beat
       else squash = 1 + Math.abs(Math.sin(t * wsp + ph)) * (boss ? 0.05 : 0.08);
-      if (e.flashT > 0) squash *= 1 + e.flashT * 0.9;                 // impact pop
       var hop = (moving && !e.flyer) ? -Math.abs(Math.sin(t * wsp + ph)) * (boss ? 1.5 : 2.5) * (hasFrames ? 0.75 : 1) : 0;
+      // BEAT 2 — THE GRAB, in three acts, plus the turn. Every term is a pure
+      // function of grabT (sim state), so it is frame-rate independent and
+      // replay-identical: no latch, no per-enemy render state.
+      var face = flip;
+      if (e.grabT > 0) {
+        var gg = 1 - e.grabT / CFG.grabTime;                  // 0 -> 1 across the grab
+        if (gg < 0.20) squash = 0.80 + 0.14 * (gg / 0.20);    // PLUNGE into the pile
+        else if (gg < 0.68)                                   // DIG: frenzy that DECAYS
+          squash = 0.96 + Math.sin(t * 24 + ph) * 0.075 * (1 - (gg - 0.20) / 0.48);
+        else {                                                // HAUL: stands up under it
+          var uu = (gg - 0.68) / 0.32;
+          squash = 1 + 0.20 * Math.sin(uu * 3.6) * (1 - uu * 0.4); hop = -uu * 3.5;
+        }
+        // the turn gets 0.12s instead of one invisible frame — this is the
+        // instant he becomes a target worth chasing
+        face = -flip * Math.cos(Math.min(1, gg / 0.24) * Math.PI);
+      }
+      if (e.flashT > 0) squash *= 1 + e.flashT * 0.9;                 // impact pop
+      if (e.fleeing) hop *= 1 - 0.30 * Math.min(1, e.stolen / 8);     // laden: barely leaves the ground
+      // BEAT 1b — the rear-back wind-up over the last 26 units before the hoard
+      var lean = 0;
+      if (!e.fleeing && e.grabT <= 0) {
+        var toKeep = PATH.len - e.d;
+        if (toKeep < 26) {
+          var aw = 1 - toKeep / 26;
+          // TRAVEL direction, never `flip` (which is relative to each sprite's
+          // native side and would rear half the cast backwards)
+          lean = -((ahead.x - p.x) < -0.5 ? -1 : 1) * 0.26 * Math.sin(aw * Math.PI);
+          hop -= 2.4 * aw;
+        }
+      }
       var w0 = boss ? 62 : e.type === 'brute' ? 46 : 36;
       var hh2 = w0 * (img.height / img.width);
       ctx.save();
       ctx.translate(p.x, p.y + 6 + fy + hop);
-      ctx.rotate(waddle);
-      ctx.scale(flip * (2 - squash), squash);
+      ctx.rotate(waddle + lean);
+      ctx.scale(face * (2 - squash), squash);
       ctx.drawImage(img, -w0 / 2, -hh2, w0, hh2);
       if (e.flashT > 0) {                       // white-flash: re-draw lighter
         ctx.globalCompositeOperation = 'lighter';
@@ -2526,7 +2688,7 @@
         ctx.globalCompositeOperation = 'source-over';
       }
       ctx.restore();
-      if (e.fleeing) { // carrying OUR gold: warm loot glint underfoot
+      if (e.stolen > 0) { // CARRYING our gold (not merely fleeing empty-handed)
         ctx.fillStyle = 'rgba(255,120,90,0.35)';
         ctx.beginPath(); ctx.ellipse(p.x, p.y + 3, 12, 5, 0, 0, 6.283); ctx.fill();
       }
@@ -2557,11 +2719,27 @@
         ctx.beginPath(); ctx.moveTo(p.x - 10, yy - r - 2); ctx.lineTo(p.x - 6, yy - r - 10); ctx.lineTo(p.x - 2, yy - r - 3); ctx.lineTo(p.x + 2, yy - r - 11); ctx.lineTo(p.x + 6, yy - r - 3); ctx.lineTo(p.x + 10, yy - r - 2); ctx.closePath(); ctx.fill();
       }
     }
-    // stolen coins over their head
+    // THE LOOT LEDGER — how much of OUR gold this one is holding, anchored to
+    // the sprite's REAL drawn height (a fixed offset buries it in tall sprites
+    // and floats it off short ones). Inflates + reddens as the mouth nears, so
+    // the biggest badge on screen is always the most urgent target.
     if (e.stolen > 0) {
-      ctx.fillStyle = '#ffd75e';
-      ctx.beginPath(); ctx.arc(p.x, p.y - 26 + fy, 5, 0, 6.283); ctx.fill();
-      ctx.strokeStyle = '#8a5a1d'; ctx.lineWidth = 1; ctx.stroke();
+      var L = this._ledger || (this._ledger = this._bakeLedger());
+      var ci2 = e.stolen >= 6 ? 5 : e.stolen - 1;
+      var kk = e.fleeing ? Math.max(0, 1 - e.d / 220) : 0;
+      ctx.save();
+      ctx.translate(p.x, p.y + 6 + fy - Math.min(hh2 || 30, 78) - 8);
+      ctx.scale(1 + 0.45 * kk, 1 + 0.45 * kk);
+      if (kk > 0.02) {
+        ctx.fillStyle = 'rgba(255,123,123,' + (0.10 + 0.30 * kk) + ')';
+        ctx.beginPath();
+        ctx.ellipse(0, -L.gh[ci2] * 0.5, L.gw[ci2] * 0.5 + 3 + 4 * kk, L.gh[ci2] * 0.5 + 3 + 4 * kk, 0, 0, 6.283);
+        ctx.fill();
+      }
+      var cell = LEDGER_CELL * LEDGER_S;
+      ctx.drawImage(L.c, 0, ci2 * cell, cell, cell,
+        -LEDGER_CELL / 2, -(LEDGER_CELL - LEDGER_BOT), LEDGER_CELL, LEDGER_CELL);
+      ctx.restore();
     }
     // hp bar (only when hurt)
     if (e.hp < e.maxHp) {
