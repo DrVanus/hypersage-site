@@ -1169,7 +1169,13 @@
   // Contract: R3D reads sim state, never writes it, never touches the seeded
   // stream. Taps are raycast to the ground so the SAME input logic runs.
   var R3D = {
-    on: !/[?&]r3d=0/.test(location.search),   // DEFAULT — ?r3d=0 is the 2D opt-out
+    // OPT-IN PREVIEW — ?r3d=1. The painted 2D renderer is the default again.
+    // 3D shipped as the default for one build; VANUS's verdict on the phone was
+    // "maybe more 3-D but very basic, needs a ton of work" — the geometry is
+    // real but it is competing with finished painted art, and losing. It stays
+    // live behind the flag so the work is not lost and can be judged again once
+    // its art matures.
+    on: /[?&]r3d=1/.test(location.search),
     ready: false, T: null, scene: null, cam: null, gl: null,
     pools: { tower: {}, enemy: {}, proj: {}, tar: {} },
     hero: null, sceneLevel: -1,

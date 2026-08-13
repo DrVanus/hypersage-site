@@ -29,7 +29,7 @@
    "kb": 35.5,
    "q": 88,
    "codec_psnr": 34.0,
-   "as_drawn_psnr": 36.1
+   "as_drawn_psnr": 36.2
   },
   "anim/brute_a.png": {
    "size": "545->204px",
@@ -91,7 +91,7 @@
    "size": "643->160px",
    "kb": 13.6,
    "q": 92,
-   "codec_psnr": 33.0,
+   "codec_psnr": 33.1,
    "as_drawn_psnr": 35.4
   },
   "enemy_blinker.png": {
@@ -113,7 +113,7 @@
    "kb": 16.2,
    "q": 84,
    "codec_psnr": 34.9,
-   "as_drawn_psnr": 37.0
+   "as_drawn_psnr": 36.9
   },
   "enemy_looter.png": {
    "size": "477->160px",
