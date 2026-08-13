@@ -820,6 +820,23 @@
   // Sprites land as PNG cutouts in art/. Until then every drawer has a chunky
   // procedural fallback. The fallback is LOUD in dev: missing ids are listed
   // on screen (silent fallbacks hide assets — see HANDOFF invariants).
+  // walk-cycle frames (masked-inpaint legs; upper bodies identical to the
+  // master plate by construction). Behind a toggle per the animation memory.
+  var WALK_FRAMES = !/[?&]frames=0/.test(location.search);
+  var ANIM = { meta: {}, images: {} };
+  if (WALK_FRAMES && typeof window !== 'undefined' && window.fetch) {
+    fetch('art/anim/meta.json').then(function (r) { return r.ok ? r.json() : {}; }).then(function (m) {
+      ANIM.meta = m || {};
+      Object.keys(ANIM.meta).forEach(function (k) {
+        ['a', 'b'].forEach(function (tag) {
+          var img = new Image();
+          img.onload = function () { ANIM.images[k + '_' + tag] = img; };
+          img.src = 'art/anim/' + k + '_' + tag + '.png';
+        });
+      });
+    }).catch(function () {});
+  }
+
   var ART = {
     manifest: {
       keep:      'art/keep.png',
@@ -841,6 +858,7 @@
       pad:       'art/build_pad.png',
       torch:     'art/torch.png',
       bg:        'art/cavern_bg.png',
+      road:      'art/road.png',
     },
     images: {}, missing: {},
     load: function () {
@@ -1663,7 +1681,7 @@
   // the bg art arrives) — the per-frame cost of the cavern + path drops to two
   // blits instead of gradients, 26 ellipses, and four wide path strokes.
   Game.prototype._buildSceneCache = function () {
-    var key = (ART.images.bg ? 'art' : 'proc') + ':' + this.levelIdx;   // path differs per level
+    var key = (ART.images.bg ? 'art' : 'proc') + (ART.images.road ? '+road' : '') + ':' + this.levelIdx;
     if (this._bgKey === key && this._bgCache) return;
     this._bgKey = key;
     var res = 2;
@@ -1698,16 +1716,39 @@
     var pc = pv.getContext('2d');
     pc.scale(res, res);
     pc.lineCap = 'round'; pc.lineJoin = 'round';
-    // warm worn-stone road, art-bible palette, translucent edges so it beds
-    // into the painted floor instead of floating on it
+    // under-shadow beds the road into the floor either way
     strokePath(pc, PATH.pts, MAP.pathW + 8, 'rgba(18,10,6,0.55)');
-    strokePath(pc, PATH.pts, MAP.pathW, '#7b6a55');
-    strokePath(pc, PATH.pts, MAP.pathW - 8, '#8b7a68');
-    strokePath(pc, PATH.pts, MAP.pathW - 20, 'rgba(216,190,149,0.18)');
-    pc.save();
-    pc.setLineDash([5, 13]);
-    strokePath(pc, PATH.pts, MAP.pathW - 24, 'rgba(30,18,10,0.28)');
-    pc.restore();
+    if (ART.images.road) {
+      // PAINTED road: tile the cobble texture, then mask it to the path
+      // ribbon with a destination-in stroke; edge wear on top.
+      var rl = document.createElement('canvas');
+      rl.width = WORLD_W * res; rl.height = WORLD_H * res;
+      var rc = rl.getContext('2d');
+      rc.scale(res, res);
+      var tile = 148;                                   // ~12 world px per cobble
+      for (var ty = 0; ty < WORLD_H; ty += tile)
+        for (var tx = 0; tx < WORLD_W; tx += tile)
+          rc.drawImage(ART.images.road, tx, ty, tile, tile);
+      rc.globalCompositeOperation = 'destination-in';
+      rc.lineCap = 'round'; rc.lineJoin = 'round';
+      strokePath(rc, PATH.pts, MAP.pathW, 'rgba(0,0,0,1)');
+      rc.globalCompositeOperation = 'source-over';
+      strokePath(rc, PATH.pts, MAP.pathW - 4, 'rgba(216,190,149,0.07)');   // lit crown
+      rc.save();
+      rc.globalCompositeOperation = 'source-atop';
+      strokePath(rc, PATH.pts, MAP.pathW - 20, 'rgba(20,12,8,0.16)');      // boot-worn centre
+      rc.restore();
+      pc.drawImage(rl, 0, 0, WORLD_W, WORLD_H);
+    } else {
+      // procedural fallback: warm worn-stone strokes
+      strokePath(pc, PATH.pts, MAP.pathW, '#7b6a55');
+      strokePath(pc, PATH.pts, MAP.pathW - 8, '#8b7a68');
+      strokePath(pc, PATH.pts, MAP.pathW - 20, 'rgba(216,190,149,0.18)');
+      pc.save();
+      pc.setLineDash([5, 13]);
+      strokePath(pc, PATH.pts, MAP.pathW - 24, 'rgba(30,18,10,0.28)');
+      pc.restore();
+    }
     var e0 = PATH.pts[0];
     pc.fillStyle = '#0d0805';
     pc.beginPath(); pc.ellipse(e0[0] + 8, e0[1], 34, 26, 0.4, 0, 6.283); pc.fill();
@@ -1964,14 +2005,22 @@
       var ahead = pathPointAt(e.fleeing ? Math.max(0, e.d - 8) : Math.min(PATH.len, e.d + 8));
       var flip = (ahead.x - p.x) < -0.5 ? -1 : 1;
       var wsp = boss ? 6 : 9 + (e.spd / 42) * 3;          // stride matches speed
-      var amp = boss ? 0.05 : 0.085;
+      var animKey = e.type === 'looter' ? 'looter' : e.type;   // meta keys match types
+      var hasFrames = WALK_FRAMES && ANIM.meta[animKey] && ANIM.images[animKey + '_a'] && ANIM.images[animKey + '_b'];
+      if (hasFrames && moving && !e.flyer) {
+        var phase = ((t * wsp + ph) / 6.283) % 1;
+        var fi = Math.floor(phase * 4) % 4;                 // A -> rest -> B -> rest
+        if (fi === 0) img = ANIM.images[animKey + '_a'];
+        else if (fi === 2) img = ANIM.images[animKey + '_b'];
+      }
+      var amp = (boss ? 0.05 : 0.085) * (hasFrames ? 0.55 : 1);   // frames carry the stride
       var waddle = (moving && !e.flyer) ? Math.sin(t * wsp + ph) * amp : 0;
       var squash;
       if (e.grabT > 0) squash = 1 + Math.sin(t * 26 + ph) * 0.12;     // digging!
       else if (e.flyer) squash = 1 + Math.sin(t * 16 + ph) * 0.06;    // wing-beat
       else squash = 1 + Math.abs(Math.sin(t * wsp + ph)) * (boss ? 0.05 : 0.08);
       if (e.flashT > 0) squash *= 1 + e.flashT * 0.9;                 // impact pop
-      var hop = (moving && !e.flyer) ? -Math.abs(Math.sin(t * wsp + ph)) * (boss ? 1.5 : 2.5) : 0;
+      var hop = (moving && !e.flyer) ? -Math.abs(Math.sin(t * wsp + ph)) * (boss ? 1.5 : 2.5) * (hasFrames ? 0.75 : 1) : 0;
       var w0 = boss ? 62 : e.type === 'brute' ? 46 : 36;
       var hh2 = w0 * (img.height / img.width);
       ctx.save();
