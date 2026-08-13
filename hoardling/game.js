@@ -1482,8 +1482,13 @@
       bel.position.set(0, 13.5, 4); bel.rotation.x = 0.2; g.add(bel);
       var head = new T.Mesh(new T.SphereGeometry(7.6, 9, 7), m.dragon);
       head.position.set(0, 28, 4); head.castShadow = true; g.add(head);
+      g.userData.head = head;
       var snout = new T.Mesh(new T.BoxGeometry(6.4, 5, 8), m.dragon);
       snout.position.set(0, 26.5, 11); g.add(snout);
+      g.userData.snout = snout;
+      var jaw = new T.Mesh(new T.BoxGeometry(5.6, 2.2, 6.4), m.belly);
+      jaw.position.set(0, 24.2, 10.4); g.add(jaw);
+      g.userData.jaw = jaw;
       for (var s = -1; s <= 1; s += 2) {
         var horn = new T.Mesh(new T.ConeGeometry(1.8, 6.6, 5), m.belly);
         horn.position.set(3.7 * s, 34, 1.6); horn.rotation.z = 0.3 * s; g.add(horn);
@@ -1676,6 +1681,16 @@
       if (hMoving) this.hero.rotation.y = Math.atan2(hh.tx - hh.x, hh.ty - hh.y);
       this.hero.userData['wing-1'].rotation.z = -0.45 - Math.sin(now * 7) * 0.18;
       this.hero.userData['wing1'].rotation.z = 0.45 + Math.sin(now * 7) * 0.18;
+      // MOUTH-ORIGIN FIRE, 3D half: same beat clock as the 2D jaw
+      // (game._breathT 0.42 -> 0), so both renderers fire from one moment
+      var bt = game._breathT || 0;
+      if (this.hero.userData.jaw) {
+        var open = bt > 0 ? Math.sin((bt / 0.42) * Math.PI) : 0;
+        this.hero.userData.jaw.rotation.x = open * 0.85;           // jaw drops
+        this.hero.userData.jaw.position.y = 24.2 - open * 2.6;
+        this.hero.userData.head.rotation.x = -open * 0.30;         // head kicks back
+        this.hero.userData.snout.rotation.x = -open * 0.22;
+      }
       // flames flicker (cosmetic clock, render lane)
       if (this._flames) for (var f2 = 0; f2 < this._flames.length; f2++) {
         this._flames[f2].scale.y = 0.8 + Math.sin(now * 7 + f2 * 2.1) * 0.25;
@@ -1749,6 +1764,7 @@
     // cosmetic state must die with the run — a quit-to-title mid-battle must
     // not spray the LAST run's celebration into the next one (caught on film)
     this.particles = []; this.floats = []; this.fxQueue = []; this.shake = 0;
+    this._breathT = 0; this._heroFace = 1;
     this.nextId = 1;
     var hs = MAP.heroStart || { x: 210, y: 470 };
     this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0,
@@ -2525,8 +2541,14 @@
       if (vx >= G.breathX && vx <= G.breathX + 62 && vy >= G.breathY && vy <= G.breathY + 62) {
         this.hero.castBreath = true; return;         // the breath's own button
       }
-      // THE SHOP: pick a machine, then tap the cavern to place it
-      if (vy >= G.shopY && vy <= G.shopY + 54) {
+      // THE SHOP: pick a machine, then tap the cavern to place it.
+      // The card test is EXACT — it used to claim the whole width of the band
+      // and, when a machine was armed, swallow anything that landed in it. On
+      // a screen with no letterbox band the shop sits over the cavern floor,
+      // so a tap aimed at the ground behind it silently disarmed the shop
+      // instead of building. Now only the cards themselves consume a tap and
+      // everything between and around them falls through to the world.
+      if (vy >= G.shopY && vy <= G.shopY + G.shopH) {
         for (var sc = 0; sc < TOWER_ORDER.length; sc++) {
           var sxp = G.shopX + sc * G.shopStep;
           if (vx >= sxp && vx <= sxp + G.shopW) {
@@ -2536,7 +2558,6 @@
             return;
           }
         }
-        if (this.shopPick >= 0) { this.shopPick = -1; this.placeHint = null; return; }
       }
     }
 
@@ -2864,7 +2885,25 @@
         this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, n: Math.min(8, en2),
           tx: fx.x + (fx.x < WORLD_W / 2 ? -110 : 110), ty: fx.y + 90 });
       }
-      else if (fx.k === 'breath') { this._burst(fx.x, fx.y, '#ff9a3c', 30, 140); this.shake = Math.min(1, this.shake + 0.35); }
+      else if (fx.k === 'breath') {
+        // FROM THE MOUTH. The burst used to spawn at fx.y — Wick's FEET — so
+        // the one thing the game is named after looked like it came out of the
+        // floor. The muzzle offset is a RENDER fact (sprite height, facing), so
+        // it is computed here in the cosmetic lane and never enters the sim.
+        var mz = this._muzzle();
+        this._burst(mz.x, mz.y, '#ff9a3c', 30, 140);
+        // a directed jet on top of the radial burst: the breath has a SOURCE
+        for (var bj = 0; bj < 14; bj++) {
+          var ja = mz.f * (0.15 + Math.random() * 0.55) - 0.35;
+          var js = 90 + Math.random() * 120;
+          this.particles.push({ kind: 'dot', x: mz.x, y: mz.y,
+                                vx: Math.cos(ja) * js * mz.f, vy: Math.sin(ja) * js - 30,
+                                r: 2 + Math.random() * 3, life: 0.28 + Math.random() * 0.22,
+                                T: 0.5, c: bj % 3 ? '#ffd75e' : '#fff3cf' });
+        }
+        this._breathT = 0.42;                 // drives the open jaw + head recoil
+        this.shake = Math.min(1, this.shake + 0.35);
+      }
       else if (fx.k === 'mother') {
         // Auremma half-stirs: full-screen warm exhale
         this.particles.push({ kind: 'flash', life: 0.9, T: 0.9 });
@@ -2949,9 +2988,35 @@
       }
     }
     this.shake = Math.max(0, this.shake - dtRaw * 2.2);
+    // the open-jaw / recoil beat, cosmetic lane only — never read by update()
+    if (this._breathT > 0) this._breathT = Math.max(0, this._breathT - dtRaw);
     // music intensity follows the battle (cosmetic lane)
     Sfx.setMusicMode(this.state === 'playing' && this.waveActive ? 'battle' : 'calm');
   };
+  /// Where Wick's mouth is, in world space, and which way it points.
+  ///
+  /// RENDER-LANE ONLY. The sim knows he is at (h.x, h.y) standing on the floor;
+  /// the muzzle is a fact about the SPRITE — 44 units wide, bottom-anchored at
+  /// h.y+5, snout roughly 72% of the way up and a little forward of centre. The
+  /// sim must never see these numbers or a resized sprite would fork a replay.
+  // Where the snout sits on hero_whelp.png, as a fraction of sprite height from
+  // the feet, and how far forward of centre. Measured against the plate, and
+  // shared by _muzzle() (world space, for particles) and the jaw drawn inside
+  // the sprite's own transform — if these two disagree the fire leaves his face.
+  var MUZZLE_UP = 0.62, MUZZLE_FWD = 0.26;
+  Game.prototype._muzzle = function () {
+    var h = this.hero;
+    var img = ART.images.hero_whelp || ART.images.hero;
+    var hh = 44 * (img ? img.height / img.width : 1.3);
+    // Facing is derived from hero state with the SAME expression the drawer
+    // uses (hflip = (tx-x) > 0.5 ? -1 : 1, sprite faces left natively, so world
+    // facing is its negation). Reading the drawer's stored value instead would
+    // lag by a frame — _cosmetic() spends the fx queue BEFORE draw() runs — so
+    // a breath cast in the same frame he turns would leave his mouth.
+    var f = (h.tx - h.x) > 0.5 ? 1 : -1;
+    return { x: h.x + f * (44 * MUZZLE_FWD), y: h.y + 5 - hh * MUZZLE_UP, f: f };
+  };
+
   Game.prototype._burst = function (x, y, c, n, v) {
     for (var i = 0; i < n; i++) {
       var a = Math.random() * 6.283, s = v * (0.4 + Math.random() * 0.8);
@@ -3743,11 +3808,81 @@
       var hmoving = Math.abs(h.tx - h.x) + Math.abs(h.ty - h.y) > 3;
       var hsq = 1 + Math.sin(ht * (hmoving ? 9 : 5)) * (hmoving ? 0.05 : 0.035);
       var hw0 = 44, hh0 = hw0 * (himg.height / himg.width);
+      // the sprite is drawn facing LEFT natively, so world-facing is -hflip.
+      // _muzzle() reads this to put the breath where his mouth is.
+      this._heroFace = -hflip;
+      // BREATH RECOIL — a short kick back and up, easing out. b runs 1 -> 0.
+      var b = Math.max(0, (this._breathT || 0) / 0.42);
+      var kick = b * b;
       ctx.save();
-      ctx.translate(h.x, h.y + 5 - lift + Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5));
-      ctx.rotate(Math.sin(ht * 3) * 0.04 + (hmoving ? -hflip * 0.07 : 0));
-      ctx.scale(hflip * (2 - hsq), hsq);
+      ctx.translate(h.x - (this._heroFace) * kick * 4,
+                    h.y + 5 - lift - kick * 3 + Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5));
+      ctx.rotate(Math.sin(ht * 3) * 0.04 + (hmoving ? -hflip * 0.07 : 0) + this._heroFace * kick * 0.22);
+      ctx.scale(hflip * (2 - hsq) * (1 + kick * 0.10), hsq * (1 + kick * 0.06));
       ctx.drawImage(himg, -hw0 / 2, -hh0, hw0, hh0);
+      // THE MOUTH OPENS. The painted plate has a closed muzzle and there is no
+      // open-mouthed variant, so the jaw is drawn: a dark throat wedge at the
+      // snout with a hot core, scaled by the same eased kick. It sits inside
+      // the sprite's own transform, so the mirror puts it on whichever side he
+      // is facing and it can never drift off his face.
+      if (b > 0.01) {
+        var mx = -hw0 * MUZZLE_FWD, my = -hh0 * MUZZLE_UP;
+        var open = Math.sin(Math.min(1, b * 1.35) * Math.PI) * 0.9 + 0.1;
+        ctx.save();
+        ctx.translate(mx, my);
+        ctx.scale(1, open);
+        ctx.fillStyle = 'rgba(28,8,4,0.92)';                 // the open throat
+        ctx.beginPath(); ctx.ellipse(0, 0, 5.2, 4.6, 0, 0, 6.283); ctx.fill();
+        ctx.fillStyle = 'rgba(255,120,40,0.85)';             // fire down the gullet
+        ctx.beginPath(); ctx.ellipse(-0.6, 0.6, 3.4, 3.0, 0, 0, 6.283); ctx.fill();
+        ctx.fillStyle = 'rgba(255,240,190,0.9)';
+        ctx.beginPath(); ctx.ellipse(-1.0, 0.8, 1.6, 1.4, 0, 0, 6.283); ctx.fill();
+        ctx.restore();
+        // the jet leaving the mouth, drawn in the sprite's local frame so it
+        // always leaves the snout and never the floor
+        // A CONE, narrow at the lips and wide at the far end — a lens shape
+        // reads as a spark, not as breath. Brightness peaks mid-beat rather
+        // than tracking b, so the jet is at its hottest while the jaw is at
+        // its widest instead of already fading by the time the mouth is open.
+        var jb = Math.sin(Math.min(1, b * 1.25) * Math.PI);
+        var jl = 30 + 52 * (1 - b);            // it REACHES as the beat plays out
+        var jw = 5 + 17 * (1 - b);             // and spreads
+        ctx.globalCompositeOperation = 'lighter';
+        for (var jp = 0; jp < 2; jp++) {       // outer flame, then the white core
+          var k2 = jp ? 0.42 : 1;
+          var jg = ctx.createLinearGradient(mx, my, mx - jl * k2, my);
+          if (jp) {
+            jg.addColorStop(0, 'rgba(255,252,235,' + (0.95 * jb).toFixed(3) + ')');
+            jg.addColorStop(1, 'rgba(255,220,140,0)');
+          } else {
+            jg.addColorStop(0.00, 'rgba(255,236,170,' + (0.90 * jb).toFixed(3) + ')');
+            jg.addColorStop(0.40, 'rgba(255,150,50,' + (0.72 * jb).toFixed(3) + ')');
+            jg.addColorStop(1.00, 'rgba(210,60,20,0)');
+          }
+          ctx.fillStyle = jg;
+          ctx.beginPath();
+          ctx.moveTo(mx, my - 3.2 * open);
+          ctx.quadraticCurveTo(mx - jl * k2 * 0.55, my - jw * k2 * 0.55,
+                               mx - jl * k2, my - jw * k2);
+          ctx.quadraticCurveTo(mx - jl * k2 * 1.06, my, mx - jl * k2, my + jw * k2);
+          ctx.quadraticCurveTo(mx - jl * k2 * 0.55, my + jw * k2 * 0.55,
+                               mx, my + 3.2 * open);
+          ctx.closePath(); ctx.fill();
+        }
+        // Muzzle bloom — the light the jet throws back onto his own snout.
+        // BIASED FORWARD. Centred on the muzzle at r=16 it reached 21 world
+        // units BEHIND his head (measured off the canvas: recoil suppressed,
+        // fire alone still lit pixels a third of a body-length back), which
+        // read as a pale bar across his brow rather than as flame. Offsetting
+        // the centre down the jet keeps the backscatter to a few units.
+        var mbx = mx - 7;
+        var mb = ctx.createRadialGradient(mbx, my, 0, mbx, my, 12);
+        mb.addColorStop(0, 'rgba(255,210,130,' + (0.55 * jb).toFixed(3) + ')');
+        mb.addColorStop(1, 'rgba(255,160,60,0)');
+        ctx.fillStyle = mb;
+        ctx.beginPath(); ctx.arc(mbx, my, 12, 0, 6.283); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      }
       ctx.restore();
     }
     else {
@@ -3919,20 +4054,34 @@
     var v = this.view;
     var topY = Math.max(8, v.safeT + 4);
     var cx = v.w / 2;
+    var bm = Math.max(10, v.safeB + 6);       // bottom margin, safe-area aware
     return {
       topY: topY, cx: cx,
       barX: Math.max(8, v.ox + 8),
       barW: Math.min(v.w - 16, WORLD_W - 16),
       btnY: topY + 7,
       mute: v.w / 2 + WORLD_W / 2 - 168, pause: v.w / 2 + WORLD_W / 2 - 112, spd: v.w / 2 + WORLD_W / 2 - 56,
-      startY: v.h - Math.max(10, v.safeB + 6) - 56,
+      // ---- bottom stack -------------------------------------------------
+      // The machine shop is the BOTTOM-MOST row and the action row sits above
+      // it, per VANUS. It used to be the other way up, which put the shop bar
+      // across world y 713..767 — right on top of two of level 1's eight build
+      // pads (300,758) and (168,736). They were not merely hard to see: the
+      // shop's hit test claimed the whole band before the world-tap path ran,
+      // so those pads could not be tapped at all.
+      //
+      // Anchoring the shop to the very bottom pushes it below world y 780 on
+      // any phone with letterbox bands, which clears the map completely. On a
+      // bandless screen (SE-class, 375x667) some overlap is unavoidable while
+      // those two pads sit that low — see HANDOFF; moving them is a balance
+      // change and therefore VANUS's call, not a layout fix.
+      shopY: v.h - bm - 56,
+      shopX: v.w / 2 - WORLD_W / 2 + 12,
+      shopW: 52, shopStep: 56, shopH: 56,
       // Wick's breath lives on its own button. It used to fire when you tapped
       // HIM, which ate the tap that was supposed to pick him up and move him.
       breathX: v.w / 2 - WORLD_W / 2 + 10,
-      breathY: v.h - Math.max(10, v.safeB + 6) - 58,
-      shopY: v.h - Math.max(10, v.safeB + 6) - 122,
-      shopX: v.w / 2 - WORLD_W / 2 + 12,
-      shopW: 52, shopStep: 56,
+      breathY: v.h - bm - 56 - 10 - 62,
+      startY: v.h - bm - 56 - 10 - 57,
     };
   };
 
@@ -4008,14 +4157,33 @@
         ctx.arc(bcx, bcy, 28, -1.5708, -1.5708 + 6.283 * bFrac); ctx.closePath(); ctx.fill();
       }
       var bpul = bReady ? 0.72 + 0.28 * Math.sin(this.worldT * 5) : 0.3;
+      if (bReady) {                            // charged: the button throws light
+        ctx.globalCompositeOperation = 'lighter';
+        var bg3 = ctx.createRadialGradient(bcx, bcy, 4, bcx, bcy, 46);
+        bg3.addColorStop(0, 'rgba(255,140,50,' + (0.16 + 0.06 * Math.sin(this.worldT * 5)).toFixed(3) + ')');
+        bg3.addColorStop(1, 'rgba(255,140,50,0)');
+        ctx.fillStyle = bg3;
+        ctx.beginPath(); ctx.arc(bcx, bcy, 46, 0, 6.283); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      }
       ctx.strokeStyle = 'rgba(255,150,60,' + bpul + ')'; ctx.lineWidth = bReady ? 3 : 1.5;
       ctx.beginPath(); ctx.arc(bcx, bcy, 28, 0, 6.283); ctx.stroke();
+      flameGlyph(ctx, bcx, bcy - 4, 1.15, this.worldT, bReady);
       ctx.textAlign = 'center';
-      ctx.fillStyle = bReady ? '#ffcf6a' : '#8a7f72';
-      ctx.font = 'bold 20px system-ui, sans-serif';
-      ctx.fillText('🔥', bcx, bcy + 3);
       ctx.font = 'bold 9px system-ui, sans-serif';
-      ctx.fillText(bReady ? 'BREATH' : Math.ceil(this.hero.breathCd) + 's', bcx, bcy + 19);
+      inkText(ctx, bReady ? 'BREATH' : Math.ceil(this.hero.breathCd) + 's', bcx, bcy + 21,
+              bReady ? '#ffcf6a' : '#8a7f72', 3, 1);
+      // WHAT IT DOES, on the button. VANUS: "I'm not even sure what the breath
+      // does exactly" — and nothing in the game had ever said. It is a 26-damage
+      // burst on everything within Wick's radius that ignores armour, which is
+      // the only answer to a Bulwark pack, so the armour clause is the half
+      // worth the pixels.
+      // ABOVE the button, not below: below is the machine shelf, and the label
+      // sat on top of the first two cards.
+      if (bReady) {
+        ctx.font = 'bold 8px system-ui, sans-serif';
+        inkText(ctx, 'BURNS ARMOR', bcx, bcy - 36, 'rgba(255,190,120,0.92)', 4, 1);
+      }
       ctx.textAlign = 'left';
       // THE SHOP — pick a machine, then tap the cavern floor to place it
       for (var sc2 = 0; sc2 < TOWER_ORDER.length; sc2++) {
@@ -4024,22 +4192,29 @@
         var picked = this.shopPick === sc2;
         var chipCost = Math.round(stt.cost * crowdMul(this.towers.length));
         var can = this.gold >= Math.round(chipCost * PAD_DISCOUNT);
-        ctx.fillStyle = picked ? 'rgba(96,66,22,0.97)' : can ? 'rgba(30,22,16,0.92)' : 'rgba(24,18,15,0.8)';
-        rr(ctx, sxx, syy, G.shopW, 54, 10); ctx.fill();
-        ctx.strokeStyle = picked ? '#ffd75e' : can ? 'rgba(255,215,94,0.45)' : 'rgba(120,105,90,0.35)';
-        ctx.lineWidth = picked ? 2.5 : 1.3;
-        rr(ctx, sxx, syy, G.shopW, 54, 10); ctx.stroke();
+        forgePlate(ctx, { x: sxx, y: syy, w: G.shopW, h: G.shopH }, picked ? 'brasslit' : 'util');
+        if (picked) {
+          ctx.strokeStyle = '#ffd75e'; ctx.lineWidth = 2.5;
+          rr(ctx, sxx + 1, syy + 1, G.shopW - 2, G.shopH - 2, 11); ctx.stroke();
+        }
         var sIm = ART.images['t_' + sid2];
         if (sIm) {
-          var siw = 34, sih = siw * (sIm.height / sIm.width);
+          // FIT the machine INSIDE its card. It used to be blitted at a fixed
+          // 34px wide with its baseline at syy+26, so a 700px-tall master
+          // overhung the card by ~17px and floated out over the cavern floor.
+          // Seven of them doing that is what made the row read as a heap of
+          // stacked clutter instead of a shelf of buttons.
+          var boxW = G.shopW - 12, boxH = 32;
+          var sc3 = Math.min(boxW / sIm.width, boxH / sIm.height);
+          var siw = sIm.width * sc3, sih = sIm.height * sc3;
           ctx.globalAlpha = can ? 1 : 0.42;
-          ctx.drawImage(sIm, sxx + G.shopW / 2 - siw / 2, syy + 26 - sih, siw, sih);
+          ctx.drawImage(sIm, sxx + G.shopW / 2 - siw / 2, syy + 5 + (boxH - sih), siw, sih);
           ctx.globalAlpha = 1;
         }
         ctx.textAlign = 'center';
-        ctx.fillStyle = can ? '#ffd75e' : '#8a7f72';
         ctx.font = 'bold 11px system-ui, sans-serif';
-        ctx.fillText(chipCost + 'g', sxx + G.shopW / 2, syy + 46);
+        inkText(ctx, chipCost + 'g', sxx + G.shopW / 2, syy + G.shopH - 8,
+                can ? '#ffd75e' : '#8a7f72', 3, 1);
         ctx.textAlign = 'left';
       }
       if (this.shopPick >= 0) {
@@ -4737,6 +4912,7 @@
     if (tone === 'ember') { g.addColorStop(0, '#e05a4a'); g.addColorStop(0.52, '#b93636'); g.addColorStop(1, '#8e2626'); }
     else if (tone === 'cold') { g.addColorStop(0, '#6a4fb0'); g.addColorStop(0.55, '#4c357f'); g.addColorStop(1, '#3b2a6e'); }
     else if (tone === 'lock') { g.addColorStop(0, '#3b2c25'); g.addColorStop(1, '#241a16'); }
+    else if (tone === 'brasslit') { g.addColorStop(0, '#8a5f22'); g.addColorStop(0.55, '#634214'); g.addColorStop(1, '#4a3110'); }
     else { g.addColorStop(0, 'rgba(46,28,18,0.88)'); g.addColorStop(1, 'rgba(18,10,8,0.92)'); }
     ctx.fillStyle = g; rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.fill();
     ctx.restore();
@@ -4834,6 +5010,38 @@
       }
     }
     ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /// Wick's flame, drawn. The breath button used to render the '🔥' CHARACTER,
+  /// so the one ability the game is named after was represented by whatever
+  /// colour-emoji the platform happened to ship — a different artwork on iOS,
+  /// Android and desktop, in a typeface that belongs to no part of this game.
+  /// Three nested teardrops (outer/mid/core) read as flame at 20px and hold up
+  /// at 60. `t` drives a flicker that is a pure function of the world clock.
+  function flameGlyph(ctx, cx, cy, s, t, alive) {
+    var f = alive ? 1 + Math.sin(t * 9) * 0.05 + Math.sin(t * 21) * 0.025 : 1;
+    var lean = alive ? Math.sin(t * 6.3) * 0.055 : 0;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(lean);
+    ctx.scale(s, s * f);
+    var LAYERS = alive
+      ? [[1.00, '#b8290d'], [0.70, '#ff8a2c'], [0.40, '#ffd75e'], [0.17, '#fffbe8']]
+      : [[1.00, '#4a3a33'], [0.70, '#5d4a40'], [0.40, '#6b5b4c'], [0.17, '#7d6c5c']];
+    for (var i = 0; i < LAYERS.length; i++) {
+      var k = LAYERS[i][0];
+      ctx.fillStyle = LAYERS[i][1];
+      ctx.beginPath();
+      ctx.moveTo(0, -13 * k);                                  // the tip
+      ctx.bezierCurveTo(6.5 * k, -7 * k, 8 * k, -1 * k, 8 * k, 3 * k);
+      ctx.bezierCurveTo(8 * k, 9 * k, 3.6 * k, 12.5 * k, 0, 12.5 * k);
+      ctx.bezierCurveTo(-3.6 * k, 12.5 * k, -8 * k, 9 * k, -8 * k, 3 * k);
+      ctx.bezierCurveTo(-8 * k, -1 * k, -3.2 * k, -5 * k, -2.2 * k, -9.5 * k);
+      // the kink that stops it reading as a plain teardrop
+      ctx.bezierCurveTo(-1.0 * k, -6.5 * k, 1.6 * k, -7.5 * k, 0, -13 * k);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
   }
 
   /// Vector padlock — shackle + body, drawn to the same weight as the labels.
