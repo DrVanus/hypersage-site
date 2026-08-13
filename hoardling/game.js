@@ -700,9 +700,22 @@
     { id: 'refund', name: 'Honest Fences',   desc: 'sell refund 70% -> 80%',   ranks: 1 },
   ];
 
+  // TRIALS — replayable campaign mutators, unlocked per level after its first
+  // win. One badge per (level, trial). Pure DATA riding this.mods; the Daily
+  // never sees any of it (the Daily takes no input but the seed — LAW).
+  var TRIALS = {
+    purse:   { name: 'One Good Purse', pitch: 'No bounties. One purse, full refunds. Spend it well.',
+               mods: { bountyMul: 0, startGold: 480, sellRefund: 1 } },
+    picnic:  { name: 'Kobold Picnic',  pitch: 'Crossbow crews are picnicking — build without them.',
+               mods: { bannedTower: 'ballista' } },
+    greased: { name: 'Greased Boots',  pitch: 'Slick soles: the getaway is a sprint. Hold the door.',
+               mods: { fleeMul: 1.5 } },
+  };
+  var TRIAL_ORDER = ['purse', 'picnic', 'greased'];
+
   var Save = (function () {
     var KEY2 = 'hoardling.save.v2', KEY1 = 'hoardling.save.v1';
-    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {} };
+    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {}, trials: {} };
     try {
       var raw = localStorage.getItem(KEY2);
       if (raw) {
@@ -713,11 +726,28 @@
         if (typeof p.dailyBestWave === 'number') data.dailyBestWave = p.dailyBestWave | 0;
         if (typeof p.tut === 'number') data.tut = p.tut | 0;
         if (p.daily && typeof p.daily.day === 'number') data.daily = { day: p.daily.day | 0, best: p.daily.best | 0 };
-        if (p.seen && typeof p.seen === 'object') { for (var sk in p.seen) if (ENEMY_TYPES[sk]) data.seen[sk] = 1; }
+        if (p.seen && typeof p.seen === 'object') {
+          // same whitelist discipline: ENEMY_TYPES['toString'] is truthy too
+          for (var sk in ENEMY_TYPES) if (p.seen[sk]) data.seen[sk] = 1;
+        }
         if (p.forge && typeof p.forge === 'object') {
           for (var fi = 0; fi < FORGE_NODES.length; fi++) {
             var nid = FORGE_NODES[fi].id;
             data.forge[nid] = Math.min(FORGE_NODES[fi].ranks, (p.forge[nid] | 0) || 0);
+          }
+        }
+        if (p.trials && typeof p.trials === 'object') {
+          for (var tl in p.trials) {
+            var li = tl | 0;
+            // exact-key check: 'junk'|0 is 0 and must not touch level 0's row
+            if (String(li) !== tl || li < 0 || li > 2) continue;
+            if (!p.trials[tl] || typeof p.trials[tl] !== 'object') continue;
+            data.trials[li] = data.trials[li] || {};
+            // whitelist-iterate OUR keys, never for-in over hostile input —
+            // TRIALS['constructor'] is truthy via Object.prototype
+            for (var to = 0; to < TRIAL_ORDER.length; to++) {
+              if (p.trials[tl][TRIAL_ORDER[to]]) data.trials[li][TRIAL_ORDER[to]] = 1;
+            }
           }
         }
       } else {
@@ -1007,7 +1037,7 @@
     requestAnimationFrame(this._frame);
   }
 
-  Game.prototype.reset = function (seed, mode, level) {
+  Game.prototype.reset = function (seed, mode, level, trialKey) {
     this.seed = (seed >>> 0) || dailySeed();
     this.mode = mode || this.mode;
     // level select: campaign takes the chosen map; the Daily rotates its map
@@ -1037,6 +1067,16 @@
     this.motherReady = false; this.castMother = false;
     // Forge mods: CAMPAIGN ONLY — the Daily sim takes no input but the seed
     this.mods = (this.mode === 'campaign') ? Save.forgeMods() : {};   // {} for daily: LAW
+    // Trial mutator: campaign-only by construction; forge power still applies
+    this.trial = (this.mode === 'campaign' && trialKey && TRIALS[trialKey]) ? trialKey : null;
+    if (this.trial) {
+      var tm = TRIALS[this.trial].mods;
+      if (tm.startGold) this.mods.startGold = (this.mods.startGold | 0) + tm.startGold;
+      if (tm.sellRefund != null) this.mods.sellRefund = Math.max(this.mods.sellRefund || 0, tm.sellRefund);
+      if (tm.bountyMul != null) this.mods.bountyMul = tm.bountyMul;   // 0 is meaningful — never || it
+      if (tm.bannedTower) this.mods.bannedTower = tm.bannedTower;
+      if (tm.fleeMul) this.mods.fleeMul = tm.fleeMul;
+    }
     if (this.mods.startGold) this.gold += this.mods.startGold;
     this.hitstopT = 0;
     this.resultLockT = 0;
@@ -1281,8 +1321,9 @@
       // march / flee
       var v = e.spd * e.slowF * e.auraF * STEP;
       if (e.fleeing) {
-        // loot-weight rule: the more they carry, the slower they run
-        var fleeMul = Math.max(CFG.fleeMin, CFG.fleeBase - CFG.fleeWeight * e.stolen);
+        // loot-weight rule: the more they carry, the slower they run.
+        // Greased Boots multiplies the whole getaway leg (march-in untouched).
+        var fleeMul = Math.max(CFG.fleeMin, CFG.fleeBase - CFG.fleeWeight * e.stolen) * (this.mods.fleeMul || 1);
         e.d -= v * fleeMul;
         if (e.d <= 0) {                                    // escaped with treasure
           this.stolenLost += e.stolen;
@@ -1586,7 +1627,9 @@
   Game.prototype._killEnemy = function (i, greed) {
     var e = this.enemies[i];
     var base = ENEMY_TYPES[e.type];
-    var bounty = greed ? Math.round(base.bounty * 1.5) : base.bounty;
+    // NULL-check, not ||: One Good Purse sets bountyMul to 0 and zero must hold
+    var bMul = this.mods.bountyMul != null ? this.mods.bountyMul : 1;
+    var bounty = Math.round((greed ? base.bounty * 1.5 : base.bounty) * bMul);
     this.gold += bounty;
     this.kills++;
     var p = { x: e.px, y: e.py };
@@ -1606,8 +1649,13 @@
     this.resultLockT = 0.8;                 // battle taps can't skip the screen
     // stars grade COINS LOST FOREVER (escaped carriers), not the closing balance
     var stars = this.stolenLost <= 5 ? 3 : this.stolenLost <= 20 ? 2 : 1;
-    this.result = { won: won, stars: stars, hoard: this.hoard, lost: this.stolenLost, kills: this.kills, wave: this.wave };
+    this.result = { won: won, stars: stars, hoard: this.hoard, lost: this.stolenLost, kills: this.kills, wave: this.wave,
+                    trial: this.trial ? TRIALS[this.trial].name : null };
     if (this.mode === 'campaign' && won && stars > Save.data.stars[this.levelIdx]) Save.data.stars[this.levelIdx] = stars;
+    if (this.mode === 'campaign' && won && this.trial) {           // trial badge
+      if (!Save.data.trials[this.levelIdx]) Save.data.trials[this.levelIdx] = {};
+      Save.data.trials[this.levelIdx][this.trial] = 1;
+    }
     if (this.mode === 'daily') {
       var today2 = dayNumber();
       if (Save.data.daily.day !== today2) Save.data.daily = { day: today2, best: 0 };
@@ -1694,8 +1742,31 @@
         if (w.y > 596 && w.y < 648) { this.reset(dailySeed(), 'daily'); this.state = 'playing'; return; }
       }
       if (w.y > 686 && w.y < 722) {
-        if (w.x > WORLD_W / 2 - 140 && w.x < WORLD_W / 2 - 8) { this.state = 'forge'; return; }
-        if (w.x > WORLD_W / 2 + 8 && w.x < WORLD_W / 2 + 140) { Sfx.toggle(); return; }
+        if (w.x > WORLD_W / 2 - 186 && w.x < WORLD_W / 2 - 70) { this.state = 'forge'; return; }
+        if (w.x > WORLD_W / 2 - 58 && w.x < WORLD_W / 2 + 58) {
+          if (Save.starsTotal() > 0) this.state = 'trials';
+          return;
+        }
+        if (w.x > WORLD_W / 2 + 70 && w.x < WORLD_W / 2 + 186) { Sfx.toggle(); return; }
+      }
+      return;
+    }
+    if (this.state === 'trials') {
+      for (var tr = 0; tr < TRIAL_ORDER.length; tr++) {
+        var try2 = 250 + tr * 108;
+        if (w.y > try2 && w.y < try2 + 96) {
+          for (var tlv = 0; tlv < MAPS.length; tlv++) {
+            var chx = WORLD_W - 168 + tlv * 46;
+            if (w.x > chx && w.x < chx + 40 && w.y > try2 + 50 && w.y < try2 + 88) {
+              if (!(Save.data.stars[tlv] > 0)) return;       // trial needs the level won first
+              this.reset(1, 'campaign', tlv, TRIAL_ORDER[tr]);
+              this.state = 'playing'; return;
+            }
+          }
+        }
+      }
+      if (w.y > 640 && w.y < 680 && w.x > WORLD_W / 2 - 70 && w.x < WORLD_W / 2 + 70) {
+        this.state = 'menu'; return;
       }
       return;
     }
@@ -1753,6 +1824,10 @@
         }
         if (bestB !== -1) {
           var tid = TOWER_ORDER[bestB];
+          if (this.mods.bannedTower === tid) {     // Kobold Picnic: the ban must READ as theme
+            this.fxQueue.push({ k: 'float', x: pad.x, y: pad.y - 40, txt: 'On picnic!', c: '#c9d2dd' });
+            this.menu = null; return;
+          }
           if (this.gold >= TOWER_TYPES[tid].cost) {
             this.gold -= TOWER_TYPES[tid].cost;
             this.towers.push({ type: tid, level: 0, padIdx: m.padIdx, cd: 0, targeting: 0, fork: 0 });
@@ -1998,6 +2073,7 @@
     if (this.menu) this._drawMenus(ctx);
     if (this.state === 'menu') this._drawTitle(ctx);
     if (this.state === 'forge') this._drawForge(ctx);
+    if (this.state === 'trials') this._drawTrials(ctx);
     if (this.state === 'won' || this.state === 'lost') this._drawResult(ctx);
     if (this.state === 'paused') {
       ctx.fillStyle = 'rgba(10,6,4,0.55)';
@@ -2677,6 +2753,10 @@
     ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 19px Georgia, serif';
     var tot = this.totalWaves();
     ctx.fillText((this.waveActive ? this.wave + 1 : Math.min(this.wave + 1, tot === Infinity ? this.wave + 1 : tot)) + (tot === Infinity ? '' : '/' + tot), lx + 152, G.topY + 38);
+    if (this.trial) {   // which trial this run is — always visible, never loud
+      ctx.fillStyle = 'rgba(168,230,255,0.85)'; ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.fillText('TRIAL: ' + TRIALS[this.trial].name.toUpperCase(), lx + 27, G.topY + 50);
+    }
     if (this.state === 'playing') {
       uiPanel(ctx, G.mute, G.btnY, 44, 34, 9);
       uiPanel(ctx, G.pause, G.btnY, 44, 34, 9);
@@ -2804,7 +2884,8 @@
       for (var b = 0; b < TOWER_ORDER.length; b++) {
         var tid = TOWER_ORDER[b], tt = TOWER_TYPES[tid];
         var bp = this._menuBtnPos(pad, b, TOWER_ORDER.length);
-        var afford = this.gold >= tt.cost;
+        var banned = this.mods.bannedTower === tid;
+        var afford = !banned && this.gold >= tt.cost;
         ctx.fillStyle = afford ? 'rgba(38,26,18,0.95)' : 'rgba(28,20,16,0.7)';
         ctx.beginPath(); ctx.arc(bp.x, bp.y, 22, 0, 6.283); ctx.fill();
         ctx.strokeStyle = afford ? '#ffd75e' : '#5c5147'; ctx.lineWidth = 2;
@@ -2813,7 +2894,7 @@
         ctx.font = 'bold 10px system-ui, sans-serif'; ctx.textAlign = 'center';
         ctx.fillText(tt.name.split(' ')[0], bp.x, bp.y - 2);
         ctx.fillStyle = afford ? '#ffd75e' : '#8a7f72';
-        ctx.fillText(tt.cost + 'g', bp.x, bp.y + 10);
+        ctx.fillText(banned ? 'picnic' : tt.cost + 'g', bp.x, bp.y + 10);
         ctx.textAlign = 'left';
       }
     } else if (m.towerIdx !== undefined) {
@@ -2910,19 +2991,29 @@
       ? 'all-time: ' + Lb.safeName(String(this._lbTop.display_name || '')) + ' holds wave ' + (this._lbTop.value | 0)
       : (Save.data.dailyBestWave > 0 ? 'your all-time best: wave ' + Save.data.dailyBestWave : '');
     if (dl2) { ctx.fillStyle = 'rgba(201,184,255,0.75)'; ctx.fillText(dl2, WORLD_W / 2, 675); }
-    // FORGE | SOUND row
+    // FORGE | TRIALS | SOUND row
     var fAvail = Save.starsTotal() - Save.forgeSpent();
+    var anyWon = Save.starsTotal() > 0;
+    ctx.font = 'bold 12px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,215,94,0.16)';
-    rr(ctx, WORLD_W / 2 - 140, 686, 132, 36, 10); ctx.fill();
+    rr(ctx, WORLD_W / 2 - 186, 686, 116, 36, 10); ctx.fill();
     ctx.strokeStyle = fAvail > 0 ? '#ffd75e' : 'rgba(255,215,94,0.3)'; ctx.lineWidth = 1.5;
-    rr(ctx, WORLD_W / 2 - 140, 686, 132, 36, 10); ctx.stroke();
-    ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 13px system-ui, sans-serif';
-    ctx.fillText('THE FORGE' + (fAvail > 0 ? ' (' + fAvail + '★)' : ''), WORLD_W / 2 - 74, 709);
-    ctx.fillStyle = 'rgba(255,233,196,0.12)';
-    rr(ctx, WORLD_W / 2 + 8, 686, 132, 36, 10); ctx.fill();
-    drawSpeaker(ctx, WORLD_W / 2 + 32, 704, Sfx.isMuted());
+    rr(ctx, WORLD_W / 2 - 186, 686, 116, 36, 10); ctx.stroke();
     ctx.fillStyle = '#ffe9c4';
-    ctx.fillText(Sfx.isMuted() ? 'OFF' : 'ON', WORLD_W / 2 + 84, 709);
+    ctx.fillText('FORGE' + (fAvail > 0 ? ' (' + fAvail + '★)' : ''), WORLD_W / 2 - 128, 709);
+    var tDone = 0;
+    for (var tb = 0; tb < 3; tb++) { var tRow = Save.data.trials[tb] || {}; for (var tbk in tRow) tDone++; }
+    ctx.fillStyle = anyWon ? 'rgba(168,230,255,0.14)' : 'rgba(255,233,196,0.06)';
+    rr(ctx, WORLD_W / 2 - 58, 686, 116, 36, 10); ctx.fill();
+    ctx.strokeStyle = anyWon ? 'rgba(168,230,255,0.6)' : 'rgba(255,233,196,0.15)';
+    rr(ctx, WORLD_W / 2 - 58, 686, 116, 36, 10); ctx.stroke();
+    ctx.fillStyle = anyWon ? '#d9f2ff' : '#8a7f72';
+    ctx.fillText(anyWon ? 'TRIALS ' + tDone + '/9' : 'TRIALS', WORLD_W / 2, 709);
+    ctx.fillStyle = 'rgba(255,233,196,0.12)';
+    rr(ctx, WORLD_W / 2 + 70, 686, 116, 36, 10); ctx.fill();
+    drawSpeaker(ctx, WORLD_W / 2 + 92, 704, Sfx.isMuted());
+    ctx.fillStyle = '#ffe9c4';
+    ctx.fillText(Sfx.isMuted() ? 'OFF' : 'ON', WORLD_W / 2 + 140, 709);
     // Wick keeps watch from the corner (title pose when we have it)
     var wimg = ART.images.hero_title || ART.images.hero;
     if (wimg) {
@@ -2979,6 +3070,44 @@
     ctx.textAlign = 'left';
   };
 
+  Game.prototype._drawTrials = function (ctx) {
+    var v = this.view;
+    ctx.fillStyle = 'rgba(12,7,5,0.85)';
+    ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#a8e6ff'; ctx.font = 'bold 34px Georgia, serif';
+    ctx.fillText('TRIALS', WORLD_W / 2, 150);
+    ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
+    ctx.fillText('Wick sets himself a challenge on a keep he has held.', WORLD_W / 2, 182);
+    ctx.fillText('Win the level first; forge craft still counts.', WORLD_W / 2, 198);
+    for (var i = 0; i < TRIAL_ORDER.length; i++) {
+      var key = TRIAL_ORDER[i], tr = TRIALS[key], ry = 250 + i * 108;
+      uiPanel(ctx, 26, ry, WORLD_W - 52, 96, 11);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#d9f2ff'; ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.fillText(tr.name, 42, ry + 24);
+      ctx.fillStyle = '#b9a27f'; ctx.font = '11px system-ui, sans-serif';
+      ctx.fillText(tr.pitch, 42, ry + 42);
+      for (var lv2 = 0; lv2 < MAPS.length; lv2++) {
+        var chx = WORLD_W - 168 + lv2 * 46;
+        var wonLv = Save.data.stars[lv2] > 0;
+        var badge = wonLv && Save.data.trials[lv2] && Save.data.trials[lv2][key];
+        ctx.fillStyle = badge ? 'rgba(255,215,94,0.9)' : wonLv ? 'rgba(214,69,69,0.85)' : 'rgba(70,52,44,0.6)';
+        rr(ctx, chx, ry + 50, 40, 38, 8); ctx.fill();
+        ctx.fillStyle = badge ? '#3a2c14' : wonLv ? '#fff' : '#8a7f72';
+        ctx.font = 'bold 12px system-ui, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(badge ? '★' : 'L' + (lv2 + 1), chx + 20, ry + 73);
+        ctx.textAlign = 'left';
+      }
+    }
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(214,69,69,0.9)';
+    rr(ctx, WORLD_W / 2 - 70, 640, 140, 40, 10); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 14px system-ui, sans-serif';
+    ctx.fillText('BACK', WORLD_W / 2, 665);
+    ctx.textAlign = 'left';
+  };
+
   Game.prototype._drawResult = function (ctx) {
     var r = this.result || {};
     ctx.fillStyle = 'rgba(12,7,5,0.75)';
@@ -2987,6 +3116,11 @@
     ctx.fillStyle = r.won ? '#9ef58f' : '#ff7b7b';
     ctx.font = 'bold 42px Georgia, serif';
     ctx.fillText(r.won ? 'HOARD HELD!' : 'HOARD LOST', WORLD_W / 2, 320);
+    if (r.trial) {
+      ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.fillStyle = '#a8e6ff';
+      ctx.fillText(r.won ? 'TRIAL COMPLETE — ' + r.trial + ' ★' : 'TRIAL: ' + r.trial, WORLD_W / 2, 345);
+    }
     if (r.won) {
       ctx.font = '34px system-ui, sans-serif';
       var stars = '';
