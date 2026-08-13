@@ -92,13 +92,22 @@
   // and the design-studio numbers merge here without touching systems code.
   // Numbers merged from the design-studio balance pass (design/studio-output.json):
   // 1 path tile = 42 world units; ranges/speeds below are that table in world units.
+  // L3 is a FORK: upgrading a level-2 machine commits to one of two workshop
+  // mods (same price, different identity). forks[0] descends from the old L3
+  // special so veterans keep what they know; forks[1] is the new answer.
+  // Every special is DETERMINISTIC — counters and flags, no rolls at all.
   var TOWER_TYPES = {
     mimic: {
       name: 'Latch Mimic', cost: 80, hitsAir: false,
       levels: [
         { dmg: 8,  rate: 1.0, range: 40, upgradeCost: 70 },
         { dmg: 14, rate: 1.1, range: 40, upgradeCost: 120 },
-        { dmg: 22, rate: 1.2, range: 44, upgradeCost: 0, special: 'bleed' }, // 3 dmg/s for 2s
+      ],
+      forks: [
+        { key: 'rend', name: 'Gearjaw', pitch: 'Grinding gears rend 4/s — armor can\'t shave it.',
+          dmg: 22, rate: 1.2, range: 44, special: 'rend', rendDps: 4, rendDur: 2.5 },
+        { key: 'coinback', name: 'Magnet Jaws', pitch: 'Bites shake stolen coins loose — they fly home.',
+          dmg: 16, rate: 1.5, range: 48, special: 'coinback', coinCap: 2 },
       ],
     },
     ballista: {
@@ -106,7 +115,12 @@
       levels: [
         { dmg: 12, rate: 1.2, range: 105, upgradeCost: 60 },
         { dmg: 20, rate: 1.4, range: 118, upgradeCost: 110 },
-        { dmg: 34, rate: 1.6, range: 130, upgradeCost: 0, special: 'crit' }, // 20% for 2x (lane-1 keyed on shot index)
+      ],
+      forks: [
+        { key: 'overwind', name: 'Overwinder', pitch: 'Every 5th bolt overwinds for double damage.',
+          dmg: 34, rate: 1.6, range: 130, special: 'overwind', overwindEvery: 5, overwindMul: 2 },
+        { key: 'lockramp', name: 'Windlass Rig', pitch: 'Locks on: each hit on one target adds +5.',
+          dmg: 26, rate: 1.6, range: 130, special: 'lockramp', rampAdd: 5, rampMax: 40 },
       ],
     },
     brazier: {
@@ -114,7 +128,13 @@
       levels: [
         { dmg: 9,  rate: 0.8, range: 92,  splash: 38, upgradeCost: 90 },
         { dmg: 15, rate: 0.9, range: 101, splash: 38, upgradeCost: 160, burn: 4 },
-        { dmg: 24, rate: 1.0, range: 109, splash: 50, upgradeCost: 0, burn: 8, special: 'inferno' },
+      ],
+      forks: [
+        { key: 'scald', name: 'Whistlepot', pitch: 'Scalding burn — burning raiders can\'t be healed.',
+          dmg: 24, rate: 1.0, range: 109, splash: 50, burn: 9, special: 'scald', scaldDur: 3 },
+        { key: 'tarpatch', name: 'Tar Boiler', pitch: 'Slag patches burn both trips: in, and back out.',
+          dmg: 16, rate: 1.0, range: 109, splash: 38, burn: 4, special: 'tarpatch',
+          tarDps: 8, tarDur: 4, tarWidth: 30, maxPatches: 3 },
       ],
     },
     crystal: {
@@ -122,7 +142,12 @@
       levels: [
         { dmg: 3, rate: 1.0, range: 92,  slow: 0.30, slowDur: 1.5, upgradeCost: 50 },
         { dmg: 5, rate: 1.1, range: 105, slow: 0.40, slowDur: 2.0, upgradeCost: 90 },
-        { dmg: 8, rate: 1.2, range: 118, slow: 0.50, slowDur: 2.0, upgradeCost: 0, special: 'deepchill' },
+      ],
+      forks: [
+        { key: 'deepchill', name: 'Deepchill Coil', pitch: 'Deep chill: no blinking, deaf to the war drum.',
+          dmg: 8, rate: 1.2, range: 118, slow: 0.55, slowDur: 2.5, special: 'deepchill' },
+        { key: 'resonance', name: 'Tuning Fork', pitch: 'Chilled foes ring brittle — all hits do +25%.',
+          dmg: 6, rate: 1.2, range: 118, slow: 0.40, slowDur: 2.0, special: 'resonance', brittleMul: 1.25 },
       ],
     },
     perch: {
@@ -130,10 +155,22 @@
       levels: [
         { dmg: 18, rate: 0.6, range: 134, pierce: 2, upgradeCost: 80 },
         { dmg: 30, rate: 0.7, range: 147, pierce: 3, upgradeCost: 140 },
-        { dmg: 48, rate: 0.8, range: 160, pierce: 4, upgradeCost: 0, special: 'shieldbreak', airBonus3: 1.75 },
+      ],
+      forks: [
+        { key: 'shieldbreak', name: 'Drillbolt', pitch: 'Drill-tip bolts bore through pavise and ranks.',
+          dmg: 48, rate: 0.8, range: 160, pierce: 6, special: 'shieldbreak', airBonus3: 1.5 },
+        { key: 'downdraft', name: 'Netcaster', pitch: 'Netted flyers crash low — ground towers can bite.',
+          dmg: 38, rate: 0.9, range: 160, pierce: 4, special: 'downdraft', groundDur: 3, airBonus3: 2 },
       ],
     },
   };
+  // The row a tower actually runs on: its level row, or its chosen fork at L3.
+  function lvlRow(tw) {
+    var tt = TOWER_TYPES[tw.type];
+    return tw.level >= 2 ? tt.forks[tw.fork | 0] : tt.levels[tw.level];
+  }
+  // A netted flyer fights as ground troops until the net wears off.
+  function eFly(e) { return e.flyer && !(e.groundedT > 0); }
   var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'brazier']; // cheap -> dear
 
   var ENEMY_TYPES = {
@@ -987,6 +1024,10 @@
     this.countdown = 6;                     // grace before wave 1
     this.spawnQueue = [];                   // built at wave start, drained by time
     this.enemies = []; this.towers = []; this.projectiles = [];
+    this.tar = [];                          // Tar Boiler slag patches {d,w,dps,until,tw}
+    // cosmetic state must die with the run — a quit-to-title mid-battle must
+    // not spray the LAST run's celebration into the next one (caught on film)
+    this.particles = []; this.floats = []; this.fxQueue = []; this.shake = 0;
     this.nextId = 1;
     var hs = MAP.heroStart || { x: 210, y: 470 };
     this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0, breathCd: 6, spd: 85, selected: false, castBreath: false };
@@ -1111,7 +1152,8 @@
         this.enemies.push({
           id: this.nextId++, type: sp.type, d: 0,
           hp: Math.round(base.hp * sp.hpMul), maxHp: Math.round(base.hp * sp.hpMul),
-          spd: base.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0, bleedT: 0,
+          spd: base.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0, bleedT: 0, bleedDps: 0,
+          scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0,
           blinkT: base.blinkEvery || 0, healT: 1, grabT: 0, auraF: 1,
           stolen: 0, fleeing: false, flyer: !!base.flyer, summoned: false, shieldBroken: false,
           flashT: 0, px: PATH.pts[0][0], py: PATH.pts[0][1],
@@ -1147,6 +1189,7 @@
         var ally = this.enemies[aj];
         if (ally === bossE) continue;
         var adx = ally.px - bossE.px, ady = ally.py - bossE.py;
+        if (ally.deepT > 0) continue;         // Deepchill Coil: deaf to the war drum
         if (adx * adx + ady * ady <= bossB.auraR * bossB.auraR) ally.auraF = bossB.auraSpd;
       }
       // at half HP the King roars in reinforcements, once
@@ -1161,8 +1204,9 @@
           this.enemies.push({
             id: this.nextId++, type: 'looter', d: sd,
             hp: Math.round(lb.hp * sMul), maxHp: Math.round(lb.hp * sMul),
-            spd: lb.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0,
-            bleedT: 0, blinkT: 0, healT: 1, grabT: 0, auraF: 1,
+            spd: lb.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0, bleedT: 0, bleedDps: 0,
+            scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0,
+            blinkT: 0, healT: 1, grabT: 0, auraF: 1,
             stolen: 0, fleeing: false, flyer: false, summoned: false, shieldBroken: false,
             flashT: 0, px: sp2.x, py: sp2.y,
           });
@@ -1170,6 +1214,11 @@
         this.fxQueue.push({ k: 'float', x: bossE.px, y: bossE.py - 30, txt: 'ROAR!', c: '#ff7b7b' });
         Sfx.play('wave');
       }
+    }
+
+    // -- tar patches expire on the world clock --
+    for (var tx2 = this.tar.length - 1; tx2 >= 0; tx2--) {
+      if (this.tar[tx2].until <= this.worldT) this.tar.splice(tx2, 1);
     }
 
     // -- enemies --
@@ -1180,7 +1229,16 @@
       // status
       if (e.slowT > 0) { e.slowT -= STEP; if (e.slowT <= 0) e.slowF = 1; }
       if (e.burnT > 0) { e.burnT -= STEP; e.hp -= e.burnDps * STEP; if (e.burnT <= 0) e.burnDps = 0; }
-      if (e.bleedT > 0) { e.bleedT -= STEP; e.hp -= 3 * STEP; }
+      if (e.bleedT > 0) { e.bleedT -= STEP; e.hp -= (e.bleedDps || 3) * STEP; }
+      if (e.scaldT > 0) e.scaldT -= STEP;
+      if (e.brittleT > 0) { e.brittleT -= STEP; if (e.brittleT <= 0) e.brittleMul = 1; }
+      if (e.deepT > 0) e.deepT -= STEP;
+      if (e.groundedT > 0) e.groundedT -= STEP;
+      // Tar Boiler slag: 1D overlap on the path's arc length — both trips pay
+      for (var tp2 = 0; tp2 < this.tar.length; tp2++) {
+        var tpc = this.tar[tp2];
+        if (!eFly(e) && Math.abs(e.d - tpc.d) < tpc.w * 0.5) e.hp -= tpc.dps * STEP;
+      }
       if (e.flashT > 0) e.flashT -= STEP;
       // THE death check — BEFORE any movement. A corpse (DOT tick above,
       // Mother's Breath, or a pulse from last step) must never march, steal,
@@ -1194,6 +1252,7 @@
           for (var j = 0; j < this.enemies.length; j++) {
             var o = this.enemies[j];
             if (o === e || o.hp <= 0) continue;
+            if (o.scaldT > 0) continue;       // Whistlepot: the mend boils off as steam
             var dx = o.px - e.px, dy = o.py - e.py;
             if (dx * dx + dy * dy < base2.healR * base2.healR) {
               o.hp = Math.min(o.maxHp, o.hp + base2.heals);
@@ -1274,7 +1333,7 @@
     // -- towers --
     for (var t = 0; t < this.towers.length; t++) {
       var tw = this.towers[t];
-      var tt = TOWER_TYPES[tw.type], lv = tt.levels[tw.level];
+      var tt = TOWER_TYPES[tw.type], lv = lvlRow(tw);
       tw.cd -= STEP * (tw._oc ? 1.25 : 1);
       if (tw.cd > 0) continue;
       var pad = MAP.pads[tw.padIdx];
@@ -1290,7 +1349,11 @@
           var cdx = ce.px - pad.x, cdy = ce.py - pad.y;
           if (cdx * cdx + cdy * cdy <= cR * cR) {
             ce.slowF = Math.min(ce.slowF, ce.type === 'boss' ? 0.75 : 1 - lv.slow);
-            ce.slowT = lv.slowDur;
+            // max, not assign: a weaker crystal must never TRUNCATE a deep
+            // chill (deepT <= slowT must hold — blink immunity reads slowT)
+            ce.slowT = Math.max(ce.slowT, lv.slowDur);
+            if (lv.special === 'deepchill') ce.deepT = lv.slowDur;
+            if (lv.special === 'resonance') { ce.brittleT = lv.slowDur; ce.brittleMul = lv.brittleMul; }
             if (lv.dmg) this._damage(ce, lv.dmg * (this.mods.dmgMul || 1), { kind: 'magic', tower: tw });
             hitAny++;
           }
@@ -1306,23 +1369,45 @@
       var tp = { x: target.px, y: target.py };
       if (tw.type === 'mimic') {                            // instant bite
         this._damage(target, lv.dmg * mDmg, { kind: 'melee', tower: tw });
-        if (lv.special === 'bleed') target.bleedT = 2;
+        if (lv.special === 'rend') { target.bleedT = lv.rendDur; target.bleedDps = lv.rendDps; }
+        // Magnet Jaws: shake a stolen coin home (cap 2/raider). Losing weight
+        // makes the thief RUN FASTER — you save the coin, not the bounty.
+        if (lv.special === 'coinback' && target.hp > 0 && target.stolen > 0 && target.shaken < lv.coinCap) {
+          target.stolen--; target.shaken++;
+          this.hoard++;
+          this.fxQueue.push({ k: 'recover', x: tp.x, y: tp.y, n: 1 });
+        }
         this.fxQueue.push({ k: 'bite', x: tp.x, y: tp.y });
         Sfx.play('bite');
       } else if (tw.type === 'brazier') {                   // lobbed splash
-        this.projectiles.push({ kind: 'lob', x: pad.x, y: pad.y - 26, sx: pad.x, sy: pad.y - 26, tx: tp.x, ty: tp.y, t: 0, dur: 0.55, dmg: lv.dmg * mDmg, splash: lv.splash, burn: lv.burn || 0, tower: t });
+        this.projectiles.push({
+          kind: 'lob', x: pad.x, y: pad.y - 26, sx: pad.x, sy: pad.y - 26, tx: tp.x, ty: tp.y,
+          t: 0, dur: 0.55, dmg: lv.dmg * mDmg, splash: lv.splash, burn: lv.burn || 0, tower: t,
+          scald: lv.special === 'scald' ? lv.scaldDur : 0,
+          // Tar Boiler: the patch lands at the TARGET's path distance at fire
+          // time — 1D arc-length address, deterministic, no inverse projection.
+          // Keyed by PAD, not array index: a sell splices the towers array.
+          tar: lv.special === 'tarpatch' ? { d: target.d, w: lv.tarWidth, dps: lv.tarDps, dur: lv.tarDur, max: lv.maxPatches, pad: tw.padIdx } : null,
+        });
         Sfx.play('lob');
       } else {                                              // homing bolt (crossbow / roost)
         var dmg = lv.dmg * mDmg;
-        if (tw.type === 'perch' && target.flyer) dmg *= (lv.airBonus3 || tt.airBonus || 1);
-        // crit: LANE 1 keyed on this tower's shot index — deterministic, order-free
+        if (tw.type === 'perch' && eFly(target)) dmg *= (lv.airBonus3 || tt.airBonus || 1);
         tw.shots = (tw.shots || 0) + 1;
-        var crit = lv.special === 'crit' && noise01(tw.shots, (this.seed ^ (0xC217 + tw.padIdx * 131)) >>> 0) < 0.2;
-        if (crit) dmg *= 2;
+        // Overwinder: every Nth crank THUMPS — a countable crit, zero RNG
+        var crit = lv.special === 'overwind' && tw.shots % lv.overwindEvery === 0;
+        if (crit) dmg *= lv.overwindMul;
+        // Windlass Rig: the crosshair stays put and winds tighter per hit
+        if (lv.special === 'lockramp') {
+          if (tw.lockId === target.id) tw.ramp = Math.min(lv.rampMax, (tw.ramp || 0) + lv.rampAdd);
+          else { tw.lockId = target.id; tw.ramp = 0; }
+          dmg += tw.ramp;
+        }
         this.projectiles.push({
           kind: 'bolt', x: pad.x, y: pad.y - 30, target: target.id, spd: 340,
           dmg: dmg, crit: crit, hops: lv.pierce || 0,
-          shieldbreak: lv.special === 'shieldbreak', tower: t,
+          shieldbreak: lv.special === 'shieldbreak',
+          net: lv.special === 'downdraft' ? lv.groundDur : 0, tower: t,
         });
         Sfx.play('shoot');
       }
@@ -1339,14 +1424,21 @@
         if (a >= 1) {
           this.projectiles.splice(p, 1);
           this.fxQueue.push({ k: 'boom', x: pr.tx, y: pr.ty, r: pr.splash });
+          if (pr.tar) {                     // Tar Boiler: lay slag on the road
+            var mine = [];
+            for (var tf = 0; tf < this.tar.length; tf++) if (this.tar[tf].pad === pr.tar.pad) mine.push(tf);
+            if (mine.length >= pr.tar.max) this.tar.splice(mine[0], 1);   // evict oldest
+            this.tar.push({ d: pr.tar.d, w: pr.tar.w, dps: pr.tar.dps, until: this.worldT + pr.tar.dur, pad: pr.tar.pad });
+          }
           // BACKWARDS: _damage can kill+splice mid-loop
           for (var b = this.enemies.length - 1; b >= 0; b--) {
             var be = this.enemies[b];
-            if (be.flyer || be.hp <= 0) continue;
+            if (eFly(be) || be.hp <= 0) continue;
             var bdx = be.px - pr.tx, bdy = be.py - pr.ty;
             if (bdx * bdx + bdy * bdy <= pr.splash * pr.splash) {
               this._damage(be, pr.dmg, { kind: 'splash', tower: this.towers[pr.tower] });
               if (pr.burn) { be.burnT = 3; be.burnDps = Math.max(be.burnDps, pr.burn); }
+              if (pr.scald) be.scaldT = pr.scald;  // Whistlepot: heal-block rides the burn (duration is DATA)
             }
           }
           Sfx.play('hit');
@@ -1361,7 +1453,12 @@
         if (dist < 10) {
           this._damage(tgt, pr.dmg, { kind: 'bolt', tower: this.towers[pr.tower], shieldbreak: pr.shieldbreak });
           this.fxQueue.push({ k: 'hit', x: gp.x, y: gp.y, c: pr.crit ? '#ff9a3c' : '#ffd75e' });
-          if (pr.crit) this.fxQueue.push({ k: 'float', x: gp.x, y: gp.y - 14, txt: 'crit!', c: '#ff9a3c' });
+          if (pr.crit) this.fxQueue.push({ k: 'float', x: gp.x, y: gp.y - 14, txt: 'OVERWOUND!', c: '#ff9a3c' });
+          // Netcaster: a netted flyer crashes low and fights as ground troops
+          if (pr.net && tgt.flyer && !(tgt.groundedT > 0) && tgt.hp > 0) {
+            tgt.groundedT = pr.net;
+            this.fxQueue.push({ k: 'float', x: gp.x, y: gp.y - 24, txt: 'netted!', c: '#a8e6ff' });
+          }
           // pierce: hop to the next enemy behind, at 60% damage per hop
           if (pr.hops > 0) {
             var nxt = this._nextBehind(tgt);
@@ -1432,7 +1529,7 @@
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
       if (e.hp <= 0) continue;
-      if (e.flyer && !hitsAir) continue;
+      if (eFly(e) && !hitsAir) continue;    // a netted flyer is fair game for anyone
       var dx = e.px - pad.x, dy = e.py - pad.y;
       if (dx * dx + dy * dy > range * range) continue;
       var metric;
@@ -1440,7 +1537,7 @@
       else if (mode === 1) metric = e.hp * 0.001;           // STRONG
       else if (mode === 2) metric = PATH.len - e.d;         // LAST
       else metric = e.d;                                    // FIRST
-      var key = (e.fleeing ? 1e6 : 0) + (e.flyer && airBonus ? 5e5 : 0) + metric - e.id * 1e-7;
+      var key = (e.fleeing ? 1e6 : 0) + (eFly(e) && airBonus ? 5e5 : 0) + metric - e.id * 1e-7;
       if (key > bestKey) { bestKey = key; best = e; }
     }
     return best;
@@ -1449,7 +1546,7 @@
     var best = null;
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
-      if (e === tgt || e.hp <= 0 || e.flyer) continue;
+      if (e === tgt || e.hp <= 0 || eFly(e)) continue;
       if (e.d < tgt.d && (!best || e.d > best.d)) best = e;
     }
     return best;
@@ -1473,6 +1570,8 @@
       if (opts.shieldbreak) { e.shieldBroken = true; this.fxQueue.push({ k: 'float', x: pathPointAt(e.d).x, y: pathPointAt(e.d).y - 16, txt: 'shield broken!', c: '#c9d2dd' }); }
       else dmg *= 0.5;
     }
+    // Tuning Fork: a brittle (chill-rung) raider takes +25% from EVERY tower
+    if (e.brittleT > 0) dmg *= e.brittleMul;
     // Bulwark armor shaves flat damage off every direct hit (min 1);
     // magic (Gemsinger pulse) and breath ignore armor
     if (base.armor && opts.kind !== 'breath' && opts.kind !== 'magic') dmg = Math.max(1, dmg - base.armor);
@@ -1503,6 +1602,7 @@
   };
   Game.prototype._gameOver = function (won) {
     this.state = won ? 'won' : 'lost';
+    this.menu = null; this.infoCard = null; // an open chooser/menu must not outlive the run
     this.resultLockT = 0.8;                 // battle taps can't skip the screen
     // stars grade COINS LOST FOREVER (escaped carriers), not the closing balance
     var stars = this.stolenLost <= 5 ? 3 : this.stolenLost <= 20 ? 2 : 1;
@@ -1535,10 +1635,38 @@
     var vx = w.vx !== undefined ? w.vx : w.x + v.ox;
     var vy = w.vy !== undefined ? w.vy : w.y + v.oy;
 
-    // an open enemy card swallows its tap (dismiss)
+    // FORK CHOOSER IS MODAL — it swallows every tap before any other surface
+    // (HUD, start-wave, info card). A card buys; anywhere else closes. Bands
+    // included: w is out-of-world there, which simply reads as "close".
+    if (this.state === 'playing' && this.menu && this.menu.forkFor !== undefined) {
+      var ftw = this.towers[this.menu.forkFor];
+      if (ftw && ftw.level === 1) {
+        var fcost = TOWER_TYPES[ftw.type].levels[1].upgradeCost;
+        var cards = this._forkCards(ftw);
+        for (var fc = 0; fc < 2; fc++) {
+          var cr = cards[fc];
+          if (w.x >= cr.x && w.x <= cr.x + cr.w && w.y >= cr.y && w.y <= cr.y + cr.h) {
+            if (this.gold >= fcost) {
+              this.gold -= fcost; ftw.level = 2; ftw.fork = fc;
+              var fpad = MAP.pads[ftw.padIdx];
+              var fkRow = TOWER_TYPES[ftw.type].forks[fc];
+              this.fxQueue.push({ k: 'place', x: fpad.x, y: fpad.y });
+              this.fxQueue.push({ k: 'float', x: fpad.x, y: fpad.y - 52, txt: fkRow.name + '!', c: fc ? '#a8e6ff' : '#ffd75e' });
+              Sfx.play('upg');
+            }
+            this.menu = null; return;
+          }
+        }
+      }
+      this.menu = null; return;                              // tapped elsewhere: close
+    }
+    // an open enemy card swallows its tap (dismiss) — x-bounded to the panel,
+    // so a world tap beside the card still reaches pads under the band
     if (this.infoCard && this.state === 'playing') {
       var Gc = this._hudGeom();
-      if (vy > Gc.topY + 56 && vy < Gc.topY + 118) { this.infoCard = null; return; }
+      var cw2 = Math.min(this.view.w - 24, 372);
+      if (vy > Gc.topY + 56 && vy < Gc.topY + 114 &&
+          vx > this.view.w / 2 - cw2 / 2 && vx < this.view.w / 2 + cw2 / 2) { this.infoCard = null; return; }
     }
     // SCREEN-ANCHORED HUD first — it lives in the bands on tall phones
     if (this.state === 'playing') {
@@ -1612,6 +1740,7 @@
     if (w.x < 0 || w.x > WORLD_W || w.y < 0 || w.y > WORLD_H) return;
 
     // OPEN MENU first — its buttons beat everything else on screen
+    // (the fork chooser was already handled modally above, before the HUD)
     if (this.menu) {
       var m = this.menu;
       if (m.padIdx !== undefined) {                          // build menu — nearest-wins
@@ -1626,7 +1755,7 @@
           var tid = TOWER_ORDER[bestB];
           if (this.gold >= TOWER_TYPES[tid].cost) {
             this.gold -= TOWER_TYPES[tid].cost;
-            this.towers.push({ type: tid, level: 0, padIdx: m.padIdx, cd: 0, targeting: 0 });
+            this.towers.push({ type: tid, level: 0, padIdx: m.padIdx, cd: 0, targeting: 0, fork: 0 });
             this.fxQueue.push({ k: 'place', x: pad.x, y: pad.y });
             Sfx.play('place');
           }
@@ -1637,7 +1766,7 @@
         if (tw) {
           var pad2 = MAP.pads[tw.padIdx];
           var btns = [this._menuBtnPos(pad2, 0, 3), this._menuBtnPos(pad2, 1, 3), this._menuBtnPos(pad2, 2, 3)];
-          var lvl = TOWER_TYPES[tw.type].levels[tw.level];
+          var lvl = lvlRow(tw);
           var bi2 = -1, bd2 = 24 * 24;
           for (var mb2 = 0; mb2 < 3; mb2++) {
             var mdx = w.x - btns[mb2].x, mdy = w.y - btns[mb2].y, mdd = mdx * mdx + mdy * mdy;
@@ -1645,11 +1774,15 @@
           }
           if (bi2 !== -1) {
             if (bi2 === 0) {                                 // upgrade
-              if (tw.level < 2 && this.gold >= lvl.upgradeCost) {
+              if (tw.level === 0 && this.gold >= lvl.upgradeCost) {
                 this.gold -= lvl.upgradeCost; tw.level++;
                 this.fxQueue.push({ k: 'place', x: pad2.x, y: pad2.y });
                 Sfx.play('upg');
                 this.menu = null;
+              } else if (tw.level === 1 && this.gold >= lvl.upgradeCost) {
+                // L3 is a commitment: open the fork chooser, charge on the pick
+                this.menu = { forkFor: m.towerIdx };
+                Sfx.play('place');
               }
             } else if (bi2 === 1) {                          // cycle aim mode (menu stays open)
               tw.targeting = ((tw.targeting | 0) + 1) % 3;
@@ -1718,6 +1851,17 @@
     var tt = TOWER_TYPES[tw.type], spent = tt.cost;
     for (var l = 0; l < tw.level; l++) spent += tt.levels[l].upgradeCost;
     return Math.round(spent * (this.mods.sellRefund || CFG.sellRefund));
+  };
+  Game.prototype._forkCards = function (tw) {
+    // two stacked cards above the pad, clamped fully on-world
+    var pad = MAP.pads[tw.padIdx];
+    var w = 200, h = 64, gap = 10;
+    var cx = clamp(pad.x, w / 2 + 8, WORLD_W - w / 2 - 8);
+    var y0 = clamp(pad.y - 170, 96, WORLD_H - (h * 2 + gap + 40));
+    return [
+      { x: cx - w / 2, y: y0, w: w, h: h },
+      { x: cx - w / 2, y: y0 + h + gap, w: w, h: h },
+    ];
   };
   Game.prototype._menuBtnPos = function (pad, i, n) {
     // arc of buttons above the pad, clamped inside the world
@@ -1845,6 +1989,7 @@
     this._drawCavern(ctx);
     this._drawMoundAndKeep(ctx);   // mound + halo (keep sprite drawn AFTER the path)
     this._drawPath(ctx);
+    this._drawTar(ctx);           // slag sits ON the road, under everyone
     this._drawKeep(ctx);          // the door arch overlaps the road's end
     this._drawPads(ctx);
     this._drawEntities(ctx);
@@ -2143,13 +2288,30 @@
     }
   };
 
+  Game.prototype._drawTar = function (ctx) {
+    for (var i = 0; i < this.tar.length; i++) {
+      var tp = this.tar[i];
+      var fade = Math.min(1, (tp.until - this.worldT) / 0.6);   // last 0.6s cools off
+      var a = pathPointAt(tp.d);
+      var gl = 0.55 + 0.25 * Math.sin(this.worldT * 5 + tp.d);  // ember shimmer
+      ctx.fillStyle = 'rgba(24,14,8,' + (0.75 * fade) + ')';
+      ctx.beginPath(); ctx.ellipse(a.x, a.y, tp.w * 0.62, tp.w * 0.30, 0, 0, 6.283); ctx.fill();
+      ctx.fillStyle = 'rgba(255,120,40,' + (0.30 * gl * fade) + ')';
+      ctx.beginPath(); ctx.ellipse(a.x, a.y, tp.w * 0.45, tp.w * 0.20, 0, 0, 6.283); ctx.fill();
+      ctx.fillStyle = 'rgba(255,190,90,' + (0.35 * gl * fade) + ')';
+      for (var s = 0; s < 3; s++) {
+        var sa = pathPointAt(tp.d + (s - 1) * tp.w * 0.3);
+        ctx.beginPath(); ctx.arc(sa.x + Math.sin(this.worldT * 3 + s * 2.1 + tp.d) * 4, sa.y - 1, 1.6, 0, 6.283); ctx.fill();
+      }
+    }
+  };
   Game.prototype._drawTower = function (ctx, tw) {
     var p = MAP.pads[tw.padIdx];
     var lvl = tw.level;
     var spriteId = 't_' + tw.type;
     // range ring while its menu is open
     if (this.menu && this.menu.towerIdx !== undefined && this.towers[this.menu.towerIdx] === tw) {
-      var rr3 = TOWER_TYPES[tw.type].levels[lvl].range;
+      var rr3 = lvlRow(tw).range;
       ctx.fillStyle = 'rgba(255,215,94,0.10)';
       ctx.beginPath(); ctx.arc(p.x, p.y, rr3, 0, 6.283); ctx.fill();
       ctx.strokeStyle = 'rgba(255,215,94,0.45)'; ctx.lineWidth = 1.5;
@@ -2166,7 +2328,7 @@
     var timg = ART.images[spriteId];
     if (timg) {
       // recoil press-down right after firing + gentle idle breathing
-      var tlv = TOWER_TYPES[tw.type].levels[lvl];
+      var tlv = lvlRow(tw);
       var re = Math.max(0, Math.min(1, tw.cd * tlv.rate));
       var press = re > 0.7 ? (re - 0.7) / 0.3 : 0;
       var windup = (re > 0 && re < 0.18) ? (0.18 - re) / 0.18 : 0;   // pre-shot rise
@@ -2178,6 +2340,7 @@
       ctx.scale(2 - tsq, tsq);
       ctx.drawImage(timg, -tw0 / 2, -th0, tw0, th0);
       ctx.restore();
+      this._drawForkBadge(ctx, tw, p, p.y - th0 * 0.72);
     }
     else {
       var h = 30 + lvl * 8;
@@ -2219,13 +2382,25 @@
         ctx.fillStyle = '#ffd75e';
         ctx.beginPath(); ctx.arc(p.x - 8 + lp * 8, p.y + 12, 2.5, 0, 6.283); ctx.fill();
       }
+      this._drawForkBadge(ctx, tw, p, p.y - h - 14);   // fallback branch keeps the badge too
     }
+  };
+  Game.prototype._drawForkBadge = function (ctx, tw, p, topY) {
+    if (tw.level < 2) return;              // badge: which mod this machine keeps
+    var bc = tw.fork ? '#a8e6ff' : '#ffd75e';
+    ctx.fillStyle = 'rgba(28,20,14,0.9)';
+    ctx.beginPath(); ctx.arc(p.x + 20, topY, 6, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = bc; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(p.x + 20, topY, 6, 0, 6.283); ctx.stroke();
+    ctx.fillStyle = bc;
+    ctx.beginPath(); ctx.arc(p.x + 20, topY, 2.4, 0, 6.283); ctx.fill();
   };
 
   Game.prototype._drawEnemy = function (ctx, e, p) {
     var base = ENEMY_TYPES[e.type];
     var bob = Math.sin(this.worldT * 9 + e.id * 1.3) * 2;
-    var fy = e.flyer ? -26 + Math.sin(this.worldT * 4 + e.id) * 4 : 0;
+    // a netted flyer sits on the road (groundedT), wings clipped
+    var fy = eFly(e) ? -26 + Math.sin(this.worldT * 4 + e.id) * 4 : 0;
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.beginPath(); ctx.ellipse(p.x, p.y + 3, e.type === 'boss' ? 20 : 10, e.type === 'boss' ? 8 : 4.5, 0, 0, 6.283); ctx.fill();
@@ -2586,6 +2761,44 @@
 
   Game.prototype._drawMenus = function (ctx) {
     var m = this.menu;
+    if (m.forkFor !== undefined) {                 // L3 fork chooser cards
+      var ftw = this.towers[m.forkFor];
+      if (!ftw) return;
+      var ftt = TOWER_TYPES[ftw.type];
+      var fcost = ftt.levels[1].upgradeCost;
+      var cards = this._forkCards(ftw);
+      var v = this.view;
+      ctx.fillStyle = 'rgba(10,6,4,0.55)';         // scrim: this is a commitment
+      ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);   // FULL view, bands included
+      for (var fc = 0; fc < 2; fc++) {
+        var fk = ftt.forks[fc], cr = cards[fc];
+        var col = fc ? '#a8e6ff' : '#ffd75e';
+        ctx.fillStyle = 'rgba(38,26,18,0.97)';
+        rr(ctx, cr.x, cr.y, cr.w, cr.h, 10); ctx.fill();
+        ctx.strokeStyle = col; ctx.lineWidth = 2;
+        rr(ctx, cr.x, cr.y, cr.w, cr.h, 10); ctx.stroke();
+        ctx.textAlign = 'left';
+        ctx.fillStyle = col; ctx.font = 'bold 14px system-ui, sans-serif';
+        ctx.fillText(fk.name, cr.x + 12, cr.y + 22);
+        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.textAlign = 'right'; ctx.fillText(fcost + 'g', cr.x + cr.w - 10, cr.y + 22);
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ffe9c4'; ctx.font = '11px system-ui, sans-serif';
+        // pitch wraps to two lines at the nearest space to the middle
+        var words = fk.pitch.split(' '), l1 = '', l2 = '';
+        for (var wd = 0; wd < words.length; wd++) {
+          if (l1.length < fk.pitch.length / 2) l1 += (l1 ? ' ' : '') + words[wd];
+          else l2 += (l2 ? ' ' : '') + words[wd];
+        }
+        ctx.fillText(l1, cr.x + 12, cr.y + 40);
+        ctx.fillText(l2, cr.x + 12, cr.y + 54);
+      }
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#c9b8a8'; ctx.font = '11px system-ui, sans-serif';
+      ctx.fillText('Pick one — this machine keeps it', cards[0].x + cards[0].w / 2, cards[0].y - 10);
+      ctx.textAlign = 'left';
+      return;
+    }
     if (m.padIdx !== undefined) {
       var pad = MAP.pads[m.padIdx];
       for (var b = 0; b < TOWER_ORDER.length; b++) {
@@ -2607,7 +2820,7 @@
       var tw = this.towers[m.towerIdx];
       if (!tw) return;
       var pad2 = MAP.pads[tw.padIdx];
-      var lvl = TOWER_TYPES[tw.type].levels[tw.level];
+      var lvl = lvlRow(tw);
       var up = this._menuBtnPos(pad2, 0, 3), aim = this._menuBtnPos(pad2, 1, 3), sell = this._menuBtnPos(pad2, 2, 3);
       ctx.fillStyle = 'rgba(38,26,18,0.95)';
       ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.fill();
@@ -2625,7 +2838,7 @@
       ctx.beginPath(); ctx.arc(up.x, up.y, 22, 0, 6.283); ctx.stroke();
       ctx.fillStyle = affordUp ? '#ffe9c4' : '#8a7f72';
       ctx.font = 'bold 10px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(canUp ? 'UP' : 'MAX', up.x, up.y - 2);
+      ctx.fillText(!canUp ? 'MAX' : (tw.level === 1 ? 'FORK' : 'UP'), up.x, up.y - 2);
       if (canUp) ctx.fillText(lvl.upgradeCost + 'g', up.x, up.y + 10);
       ctx.fillStyle = 'rgba(38,26,18,0.95)';
       ctx.beginPath(); ctx.arc(sell.x, sell.y, 22, 0, 6.283); ctx.fill();
