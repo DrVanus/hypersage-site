@@ -1103,6 +1103,416 @@
     };
   })();
 
+  // ===== R3D — the low-poly 3D renderer (?r3d=1) ==========================
+  // The sim never knew it was 2D: update() emits state, a renderer draws it.
+  // This module is a SECOND renderer — three.js, low-poly primitives in the
+  // Kingshot-ad style VANUS chose — under the existing 2D canvas, which goes
+  // transparent and keeps drawing ONLY the HUD/menus/screens on top.
+  // Contract: R3D reads sim state, never writes it, never touches the seeded
+  // stream. Taps are raycast to the ground so the SAME input logic runs.
+  var R3D = {
+    on: /[?&]r3d=1/.test(location.search),
+    ready: false, T: null, scene: null, cam: null, gl: null,
+    pools: { tower: {}, enemy: {}, proj: {}, tar: {} },
+    hero: null, sceneLevel: -1,
+    _v: null, _mats: null,
+    boot: function (game) {
+      if (!this.on || this.ready || this._loading) return;
+      this._loading = true;
+      var self = this;
+      import('./proto3d/three.module.js').then(function (T) {
+        self.T = T;
+        var gl = new T.WebGLRenderer({ antialias: true });
+        gl.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+        gl.shadowMap.enabled = true;
+        gl.shadowMap.type = T.PCFSoftShadowMap;
+        gl.domElement.style.cssText = 'position:absolute;inset:0;z-index:0;';
+        var wrap = document.getElementById('game-wrap');
+        wrap.insertBefore(gl.domElement, wrap.firstChild);
+        game.canvas.style.position = 'relative';
+        game.canvas.style.zIndex = '1';
+        self.gl = gl;
+        var scene = new T.Scene();
+        scene.background = new T.Color(0x2c1e14);
+        scene.fog = new T.Fog(0x2c1e14, 1150, 2400);   // beyond the keep, not before it
+        self.scene = scene;
+        self.cam = new T.PerspectiveCamera(44, 1, 1, 2600);
+        var key = new T.DirectionalLight(0xffdfb0, 3.0);
+        key.position.set(-260, 420, 120);            // the measured upper-left law
+        key.castShadow = true;
+        key.shadow.mapSize.set(2048, 2048);
+        key.shadow.camera.left = -420; key.shadow.camera.right = 420;
+        key.shadow.camera.top = 520; key.shadow.camera.bottom = -520;
+        key.shadow.camera.near = 10; key.shadow.camera.far = 1400;
+        scene.add(key);
+        scene.add(new T.HemisphereLight(0x8a9cc8, 0x5a4530, 1.6));
+        var M = function (c, r) { return new T.MeshStandardMaterial({ color: c, roughness: r === undefined ? 0.95 : r, flatShading: true }); };
+        self._mats = {
+          floor: M(0x6a5344), road: M(0x93826e), roadEdge: M(0x3a2d24),
+          rock: M(0x5c4638), wood: M(0x8a5a30), wood2: M(0xa8703c),
+          stone: M(0x9a8f80), stoneD: M(0x6e6458), iron: M(0x8d94a0, 0.5),
+          brass: M(0xc8963c, 0.35), gold: M(0xf0b429, 0.4), red: M(0xc0392b),
+          dragon: M(0xd8442f), belly: M(0xe8c07a), teal: M(0x4fc3d0, 0.5),
+          roofBlue: M(0x3f6fc0), flame: new T.MeshBasicMaterial({ color: 0xff9a3c }),
+          tar: M(0x1a120c, 0.99), purple: M(0x7b3fa0), pale: M(0xd8cdb8),
+          green: M(0x6a8a4a), skin: M(0xe8c8a0),
+        };
+        self.ready = true; self._loading = false;
+        self.resize(game);
+      }).catch(function (e) { console.error('r3d boot failed', e); self.on = false; });
+    },
+    W: function (wx, wy, h) { return new this.T.Vector3(wx - 210, h || 0, wy - 390); },
+    resize: function (game) {
+      if (!this.ready) return;
+      var v = game.view;
+      this.gl.setSize(v.cw, v.ch, false);
+      this.gl.domElement.style.width = v.cw + 'px';
+      this.gl.domElement.style.height = v.ch + 'px';
+      this.cam.aspect = v.cw / v.ch;
+      // Frame the whole world in portrait with a documentary tilt: camera
+      // beyond the cave mouth, looking up the road toward the keep.
+      this.cam.position.set(0, 730, 820);
+      this.cam.lookAt(0, -20, -170);
+      this.cam.updateProjectionMatrix();
+      this._v = v;
+    },
+    // world(x,y) -> the 2D overlay's world coords, so menus/floats/hp bars on
+    // the 2D canvas land exactly over the 3D object they belong to.
+    remap: function (wx, wy, h) {
+      if (!this.ready) return { x: wx, y: wy };
+      var v = this._v;
+      var p = this.W(wx, wy, h || 0).project(this.cam);
+      var cssX = (p.x * 0.5 + 0.5) * v.cw, cssY = (-p.y * 0.5 + 0.5) * v.ch;
+      return { x: cssX / v.scale - v.ox, y: cssY / v.scale - v.oy };
+    },
+    // view tap -> world coords via ground-plane raycast (the input contract)
+    pick: function (vx, vy) {
+      if (!this.ready) return null;
+      var v = this._v;
+      var ndc = new this.T.Vector2((vx * v.scale) / v.cw * 2 - 1, -((vy * v.scale) / v.ch * 2 - 1));
+      var ray = new this.T.Raycaster();
+      ray.setFromCamera(ndc, this.cam);
+      var t = -ray.ray.origin.y / ray.ray.direction.y;
+      if (!(t > 0)) return null;
+      var hit = ray.ray.origin.clone().addScaledVector(ray.ray.direction, t);
+      return { x: hit.x + 210, y: hit.z + 390 };
+    },
+    buildWorld: function (game) {
+      if (!this.ready || this.sceneLevel === game.levelIdx) return;
+      var T = this.T, m = this._mats, scene = this.scene, self = this;
+      if (this._worldGroup) scene.remove(this._worldGroup);
+      for (var k in this.pools) {
+        for (var id in this.pools[k]) scene.remove(this.pools[k][id]);
+        this.pools[k] = {};
+      }
+      if (this.hero) { scene.remove(this.hero); this.hero = null; }
+      var g = new T.Group(); this._worldGroup = g;
+      var floor = new T.Mesh(new T.PlaneGeometry(1500, 1500), m.floor);
+      floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; g.add(floor);
+      // the road: a flat ribbon sampled off the real path (same arc length
+      // the sim marches, so what you see IS where they walk)
+      var half = MAP.pathW * 0.62, pts = [], up = [], dn = [];
+      for (var d = 0; d <= PATH.len; d += 10) {
+        var a = pathPointAt(d), b = pathPointAt(Math.min(PATH.len, d + 10));
+        var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
+        var nx = -dy / L * half, ny = dx / L * half;
+        up.push([a.x + nx, a.y + ny]); dn.push([a.x - nx, a.y - ny]);
+      }
+      var verts = [], road = new T.BufferGeometry();
+      for (var i = 0; i < up.length - 1; i++) {
+        var A = this.W(up[i][0], up[i][1], 0.6), B = this.W(dn[i][0], dn[i][1], 0.6),
+            C = this.W(up[i + 1][0], up[i + 1][1], 0.6), D = this.W(dn[i + 1][0], dn[i + 1][1], 0.6);
+        verts.push(A.x, A.y, A.z, B.x, B.y, B.z, C.x, C.y, C.z,
+                   B.x, B.y, B.z, D.x, D.y, D.z, C.x, C.y, C.z);
+      }
+      road.setAttribute('position', new T.Float32BufferAttribute(verts, 3));
+      road.computeVertexNormals();
+      m.road.side = T.DoubleSide;
+      var roadMesh = new T.Mesh(road, m.road);
+      roadMesh.receiveShadow = true; g.add(roadMesh);
+      // keep + gold mound at the top of the road
+      var keep = new T.Group();
+      var body = new T.Mesh(new T.BoxGeometry(120, 90, 92), m.stone);
+      body.position.y = 45; body.castShadow = body.receiveShadow = true; keep.add(body);
+      for (var t2 = 0; t2 < 2; t2++) {
+        var tw2 = new T.Mesh(new T.CylinderGeometry(22, 26, 120, 8), m.stone);
+        tw2.position.set(t2 ? 62 : -62, 60, 8); tw2.castShadow = true; keep.add(tw2);
+        var cap = new T.Mesh(new T.ConeGeometry(30, 40, 8), m.roofBlue);
+        cap.position.set(t2 ? 62 : -62, 140, 8); cap.castShadow = true; keep.add(cap);
+      }
+      var mainCap = new T.Mesh(new T.ConeGeometry(46, 60, 8), m.roofBlue);
+      mainCap.position.y = 120; mainCap.castShadow = true; keep.add(mainCap);
+      var door = new T.Mesh(new T.BoxGeometry(34, 46, 6), m.wood);
+      door.position.set(0, 23, 47); keep.add(door);
+      var kp = this.W(MAP.keep.x, MAP.keep.y); keep.position.set(kp.x, 0, kp.z - 26);
+      g.add(keep); this._keep = keep;
+      var mound = new T.Group();
+      for (var c2 = 0; c2 < 130; c2++) {
+        var coin = new T.Mesh(new T.CylinderGeometry(6.5, 6.5, 2, 7), m.gold);
+        var ang = Math.random() * 6.283, rr2 = Math.random();
+        var rad = rr2 * rr2 * 95;
+        coin.position.set(Math.cos(ang) * rad * 1.15, 1 + (1 - rr2) * 26 + Math.random() * 6, Math.sin(ang) * rad * 0.8);
+        coin.rotation.set(Math.random() * 0.5, Math.random() * 3, Math.random() * 0.5);
+        coin.castShadow = coin.receiveShadow = true;
+        mound.add(coin);
+      }
+      mound.position.set(kp.x, 0, kp.z + 30); g.add(mound); this._mound = mound;
+      // torches: emissive flames + a few real point lights (phones can carry ~6)
+      this._flames = [];
+      for (var ti = 0; ti < MAP.torches.length; ti++) {
+        var tp = this.W(MAP.torches[ti][0], MAP.torches[ti][1]);
+        var post = new T.Mesh(new T.CylinderGeometry(3, 4, 42, 6), m.wood);
+        post.position.set(tp.x, 21, tp.z); post.castShadow = true; g.add(post);
+        var fl = new T.Mesh(new T.ConeGeometry(7, 16, 6), m.flame);
+        fl.position.set(tp.x, 50, tp.z); g.add(fl); this._flames.push(fl);
+        var pl = new T.PointLight(0xff9a3c, 3.2, 190, 1.6);
+        pl.position.set(tp.x, 46, tp.z); g.add(pl);
+      }
+      // authored pads: stone discs (the discount ground you can see)
+      for (var pi = 0; pi < MAP.pads.length; pi++) {
+        var pp = this.W(MAP.pads[pi].x, MAP.pads[pi].y);
+        var disc = new T.Mesh(new T.CylinderGeometry(30, 33, 5, 9), m.stoneD);
+        disc.position.set(pp.x, 2.5, pp.z); disc.receiveShadow = true; g.add(disc);
+      }
+      // cavern dressing: rocks OUTSIDE the play rect (x beyond ±230 or z
+      // beyond the ends), never on the floor the raiders walk
+      for (var ri = 0; ri < 34; ri++) {
+        var ra = ri / 34 * 6.283, rr3 = 395 + Math.sin(ri * 2.7) * 55;
+        var rx = Math.cos(ra) * rr3, rz = Math.sin(ra) * rr3 * 1.15 - 40;
+        if (Math.abs(rx) < 250 && rz > -420 && rz < 430) rx = (rx < 0 ? -1 : 1) * (250 + Math.random() * 60);
+        var rk = new T.Mesh(new T.DodecahedronGeometry(38 + Math.sin(ri * 1.3) * 16, 0), m.rock);
+        rk.position.set(rx, 20, rz);
+        rk.rotation.set(Math.sin(ri), ri, 0.3);
+        rk.castShadow = true; g.add(rk);
+      }
+      // the cavern BACK WALL: fills the void above the keep with scenery
+      for (var bw = 0; bw < 14; bw++) {
+        var bx = -420 + bw * 65 + Math.sin(bw * 3.1) * 22;
+        var col = new T.Mesh(new T.CylinderGeometry(34 + Math.sin(bw * 1.7) * 12, 46, 320 + Math.sin(bw * 2.3) * 70, 6), m.rock);
+        col.position.set(bx, 130, -520 - Math.abs(Math.sin(bw * 1.3)) * 90);
+        col.rotation.y = bw;
+        g.add(col);
+      }
+      scene.add(g);
+      this.sceneLevel = game.levelIdx;
+    },
+    machine: function (type) {
+      var T = this.T, m = this._mats, g = new T.Group();
+      var base = new T.Mesh(new T.CylinderGeometry(26, 30, 10, 9), m.stoneD);
+      base.position.y = 5; base.castShadow = base.receiveShadow = true; g.add(base);
+      var add = function (mesh, x, y, z) { mesh.position.set(x || 0, y || 0, z || 0); mesh.castShadow = true; g.add(mesh); return mesh; };
+      if (type === 'ballista') {
+        add(new T.Mesh(new T.BoxGeometry(14, 16, 14), m.wood), 0, 18);
+        var head = new T.Group(); head.position.y = 30; g.add(head);
+        var bow = new T.Mesh(new T.BoxGeometry(46, 4, 4), m.wood2); bow.castShadow = true; head.add(bow);
+        var stock = new T.Mesh(new T.BoxGeometry(5, 4, 30), m.wood); stock.position.z = 4; stock.castShadow = true; head.add(stock);
+        g.userData.head = head;
+      } else if (type === 'mimic') {
+        var chest = add(new T.Mesh(new T.BoxGeometry(34, 22, 26), m.wood2), 0, 20);
+        var lid = new T.Mesh(new T.BoxGeometry(34, 8, 26), m.wood);
+        lid.position.set(0, 34, -8); lid.rotation.x = -0.7; lid.castShadow = true; g.add(lid);
+        for (var th = 0; th < 5; th++) add(new T.Mesh(new T.ConeGeometry(2.5, 6, 4), m.pale), -12 + th * 6, 32, 10);
+        add(new T.Mesh(new T.SphereGeometry(6, 7, 6), m.gold), 0, 26, 2);
+        g.userData.lid = lid; g.userData.chest = chest;
+      } else if (type === 'brazier') {
+        add(new T.Mesh(new T.SphereGeometry(20, 9, 7), m.iron), 0, 24);
+        add(new T.Mesh(new T.CylinderGeometry(5, 6, 16, 6), m.brass), 10, 44);
+        var glow = add(new T.Mesh(new T.SphereGeometry(9, 7, 6), m.flame), 0, 24, 14);
+        glow.scale.z = 0.4; g.userData.glow = glow;
+      } else if (type === 'crystal') {
+        for (var cr = 0; cr < 4; cr++) add(new T.Mesh(new T.CylinderGeometry(10 - cr * 1.7, 11 - cr * 1.7, 7, 8), m.brass), 0, 14 + cr * 9);
+        var gem = add(new T.Mesh(new T.OctahedronGeometry(11, 0), m.teal), 0, 60);
+        g.userData.gem = gem;
+      } else if (type === 'perch') {
+        add(new T.Mesh(new T.CylinderGeometry(9, 12, 44, 7), m.stone), 0, 30);
+        var gar = new T.Group(); gar.position.y = 58; g.add(gar);
+        var bod = new T.Mesh(new T.SphereGeometry(11, 8, 6), m.stoneD); bod.castShadow = true; gar.add(bod);
+        for (var s2 = -1; s2 <= 1; s2 += 2) {
+          var wing = new T.Mesh(new T.BoxGeometry(3, 12, 18), m.brass);
+          wing.position.set(s2 * 12, 4, -2); wing.rotation.z = s2 * 0.6; wing.castShadow = true; gar.add(wing);
+        }
+        g.userData.head = gar;
+      } else if (type === 'bellows') {
+        var fan = add(new T.Mesh(new T.CylinderGeometry(18, 18, 6, 12, 1, false, 0, 3.14), m.wood2), 0, 34);
+        fan.rotation.z = Math.PI / 2; fan.rotation.y = Math.PI / 2;
+        add(new T.Mesh(new T.ConeGeometry(7, 14, 8), m.brass), 0, 52).rotation.x = -0.6;
+        g.userData.fan = fan;
+      } else if (type === 'press') {
+        add(new T.Mesh(new T.BoxGeometry(22, 8, 22), m.iron), 0, 14);
+        add(new T.Mesh(new T.CylinderGeometry(4, 4, 30, 7), m.brass), 0, 32);
+        var star = add(new T.Mesh(new T.BoxGeometry(26, 4, 5), m.brass), 0, 48);
+        add(new T.Mesh(new T.BoxGeometry(5, 4, 26), m.brass), 0, 48);
+        add(new T.Mesh(new T.CylinderGeometry(7, 7, 2, 8), m.gold), 0, 19);
+        g.userData.screw = star;
+      }
+      return g;
+    },
+    raiderRig: function (type) {
+      var T = this.T, m = this._mats, g = new T.Group();
+      var big = type === 'brute' || type === 'boss';
+      var s = type === 'boss' ? 1.8 : type === 'brute' ? 1.35 : 1;
+      var bodyM = type === 'warlock' ? m.purple : type === 'blinker' ? m.gold :
+                  type === 'bat' ? m.purple : big ? m.iron : m.red;
+      var body = new T.Mesh(new T.CapsuleGeometry(7 * s, 12 * s, 3, 7), bodyM);
+      body.position.y = 14 * s; body.castShadow = true; g.add(body);
+      var head = new T.Mesh(new T.SphereGeometry(5.4 * s, 8, 6), m.skin);
+      head.position.y = 26 * s; head.castShadow = true; g.add(head);
+      if (type === 'boss') {
+        var crown = new T.Mesh(new T.CylinderGeometry(6, 6.6, 4, 6), m.gold);
+        crown.position.y = 33 * s; crown.castShadow = true; g.add(crown);
+      } else if (type === 'warlock') {
+        var hat = new T.Mesh(new T.ConeGeometry(6, 14, 7), m.purple);
+        hat.position.y = 32; hat.castShadow = true; g.add(hat);
+      } else {
+        var helm = new T.Mesh(new T.ConeGeometry(6 * s, 6 * s, 7), m.iron);
+        helm.position.y = 30 * s; helm.castShadow = true; g.add(helm);
+      }
+      if (type === 'shield') {
+        var pav = new T.Mesh(new T.BoxGeometry(3, 22, 16), m.pale);
+        pav.position.set(-10, 15, 0); pav.castShadow = true; g.add(pav);
+      }
+      if (type === 'bat') {
+        for (var s3 = -1; s3 <= 1; s3 += 2) {
+          var w2 = new T.Mesh(new T.BoxGeometry(14, 2, 9), m.purple);
+          w2.position.set(s3 * 11, 22, 0); w2.rotation.z = s3 * 0.4; g.add(w2);
+          g.userData['wing' + s3] = w2;
+        }
+      }
+      var sack = new T.Mesh(new T.SphereGeometry(5 * s, 7, 6), m.wood2);
+      sack.position.set(6 * s, 20 * s, -5 * s); sack.visible = false; g.add(sack);
+      g.userData.sack = sack;
+      return g;
+    },
+    heroRig: function () {
+      var T = this.T, m = this._mats, g = new T.Group();
+      var body = new T.Mesh(new T.CapsuleGeometry(9, 12, 4, 8), m.dragon);
+      body.position.y = 15; body.rotation.x = 0.2; body.castShadow = true; g.add(body);
+      var bel = new T.Mesh(new T.CapsuleGeometry(6.4, 8, 3, 7), m.belly);
+      bel.position.set(0, 13.5, 4); bel.rotation.x = 0.2; g.add(bel);
+      var head = new T.Mesh(new T.SphereGeometry(7.6, 9, 7), m.dragon);
+      head.position.set(0, 28, 4); head.castShadow = true; g.add(head);
+      var snout = new T.Mesh(new T.BoxGeometry(6.4, 5, 8), m.dragon);
+      snout.position.set(0, 26.5, 11); g.add(snout);
+      for (var s = -1; s <= 1; s += 2) {
+        var horn = new T.Mesh(new T.ConeGeometry(1.8, 6.6, 5), m.belly);
+        horn.position.set(3.7 * s, 34, 1.6); horn.rotation.z = 0.3 * s; g.add(horn);
+        var wing = new T.Mesh(new T.BoxGeometry(1.2, 13, 18), m.dragon);
+        wing.position.set(9.4 * s, 19, -3); wing.rotation.z = 0.45 * s;
+        wing.castShadow = true; g.add(wing);
+        g.userData['wing' + s] = wing;
+      }
+      var tail = new T.Mesh(new T.ConeGeometry(4.8, 22, 6), m.dragon);
+      tail.position.set(0, 11, -14.5); tail.rotation.x = 1.35; tail.castShadow = true; g.add(tail);
+      return g;
+    },
+    sync: function (game, alpha) {
+      if (!this.ready) { this.boot(game); return; }
+      var T = this.T, m = this._mats, scene = this.scene, self = this;
+      this.buildWorld(game);
+      var now = game.worldT;
+      var seen = { tower: {}, enemy: {}, proj: {}, tar: {} };
+      // machines
+      for (var i = 0; i < game.towers.length; i++) {
+        var tw = game.towers[i], id = 'w' + tw.tid;
+        var o = this.pools.tower[id];
+        if (!o) { o = this.machine(tw.type); scene.add(o); this.pools.tower[id] = o; o.userData.type = tw.type; }
+        var P = this.W(tw.x, tw.y);
+        o.position.set(P.x, 0, P.z);
+        var lvS = 1 + tw.level * 0.09;
+        o.scale.set(lvS, lvS, lvS);
+        var st = tw.shotT === undefined ? 9 : tw.shotT;
+        var kick = st < 0.34 ? Math.pow(1 - st / 0.34, 2) : 0;
+        o.scale.y = lvS * (1 - kick * 0.1);
+        if (o.userData.head) {
+          var tgt = game._r3dAim && game._r3dAim[tw.tid];
+          if (tgt) o.userData.head.rotation.y = Math.atan2(tgt.x - tw.x, tgt.y - tw.y) + Math.PI;
+        }
+        if (o.userData.gem) o.userData.gem.rotation.y = now * 1.5;
+        if (o.userData.screw) o.userData.screw.rotation.y = now * 0.8;
+        if (o.userData.fan) o.userData.fan.rotation.x = Math.sin(now * 3) * 0.25;
+        seen.tower[id] = 1;
+      }
+      // raiders
+      for (var e = 0; e < game.enemies.length; e++) {
+        var en = game.enemies[e], eid = 'e' + en.id;
+        var r = this.pools.enemy[eid];
+        if (!r) { r = this.raiderRig(en.type); scene.add(r); this.pools.enemy[eid] = r; }
+        var EP = this.W(en.px, en.py);
+        var fly = en.flyer && !(en.groundedT > 0);
+        var walk = Math.abs(Math.sin(now * 9 + en.id * 1.3));
+        r.position.set(EP.x, (fly ? 30 : 0) + (en.grabT > 0 ? Math.abs(Math.sin(now * 22)) * 3 : walk * 3), EP.z);
+        var ahead = pathPointAt(en.fleeing ? Math.max(0, en.d - 8) : Math.min(PATH.len, en.d + 8));
+        r.rotation.y = Math.atan2(ahead.x - en.px, ahead.y - en.py);
+        r.rotation.z = Math.sin(now * 9 + en.id) * 0.06;
+        if (r.userData.sack) r.userData.sack.visible = en.stolen > 0;
+        if (r.userData['wing-1']) {
+          r.userData['wing-1'].rotation.z = -0.4 - Math.sin(now * 16) * 0.35;
+          r.userData['wing1'].rotation.z = 0.4 + Math.sin(now * 16) * 0.35;
+        }
+        var flash = en.flashT > 0 ? 1.12 : 1;
+        r.scale.set(flash, flash * (en.slowT > 0 ? 0.94 : 1), flash);
+        seen.enemy[eid] = 1;
+      }
+      // projectiles: bolts are ARROWS, lobs are embers, fire is a comet
+      for (var p2 = 0; p2 < game.projectiles.length; p2++) {
+        var pr = game.projectiles[p2];
+        if (pr._r3dId === undefined) pr._r3dId = 'p' + (this._pid = (this._pid || 0) + 1);
+        var po = this.pools.proj[pr._r3dId];
+        if (!po) {
+          po = new T.Group();
+          if (pr.kind === 'bolt') {
+            var sh = new T.Mesh(new T.CylinderGeometry(0.9, 0.9, 20, 5), m.wood);
+            sh.rotation.x = Math.PI / 2; po.add(sh);
+            var hd = new T.Mesh(new T.ConeGeometry(2.2, 6, 5), m.iron);
+            hd.rotation.x = Math.PI / 2; hd.position.z = 12; po.add(hd);
+          } else if (pr.kind === 'fire') {
+            po.add(new T.Mesh(new T.SphereGeometry(5, 7, 6), m.flame));
+          } else {
+            po.add(new T.Mesh(new T.SphereGeometry(4.4, 7, 6), m.flame));
+          }
+          scene.add(po); this.pools.proj[pr._r3dId] = po;
+        }
+        var h2 = pr.kind === 'lob' ? Math.max(4, 30 - Math.abs(pr.y - pr.ty) * 0.2) : 14;
+        var PP = this.W(pr.x, pr.y, 0);
+        po.position.set(PP.x, pr.kind === 'lob' ? 10 + Math.sin(Math.min(1, pr.t / pr.dur) * Math.PI) * 34 : 16, PP.z);
+        if (pr.dx !== undefined) po.rotation.y = Math.atan2(pr.dx, pr.dy);
+        seen.proj[pr._r3dId] = 1;
+      }
+      // tar slag
+      for (var t3 = 0; t3 < game.tar.length; t3++) {
+        var tp2 = game.tar[t3], tid2 = 't' + Math.round(tp2.d) + '_' + tp2.tid;
+        var to2 = this.pools.tar[tid2];
+        if (!to2) {
+          var a2 = pathPointAt(tp2.d), TP = this.W(a2.x, a2.y);
+          to2 = new T.Mesh(new T.CylinderGeometry(tp2.w * 0.6, tp2.w * 0.66, 1.6, 9), m.tar);
+          to2.position.set(TP.x, 1.4, TP.z);
+          scene.add(to2); this.pools.tar[tid2] = to2;
+        }
+        seen.tar[tid2] = 1;
+      }
+      // Wick
+      if (!this.hero) { this.hero = this.heroRig(); scene.add(this.hero); }
+      var hh = game.hero;
+      var HP = this.W(hh.x, hh.y);
+      var hMoving = Math.abs(hh.tx - hh.x) + Math.abs(hh.ty - hh.y) > 3;
+      this.hero.position.set(HP.x, (hh.manned ? 34 : 0) + (hMoving ? Math.abs(Math.sin(now * 9)) * 3.5 : Math.sin(now * 2.2) * 1.2), HP.z);
+      if (hMoving) this.hero.rotation.y = Math.atan2(hh.tx - hh.x, hh.ty - hh.y);
+      this.hero.userData['wing-1'].rotation.z = -0.45 - Math.sin(now * 7) * 0.18;
+      this.hero.userData['wing1'].rotation.z = 0.45 + Math.sin(now * 7) * 0.18;
+      // flames flicker (cosmetic clock, render lane)
+      if (this._flames) for (var f2 = 0; f2 < this._flames.length; f2++) {
+        this._flames[f2].scale.y = 0.8 + Math.sin(now * 7 + f2 * 2.1) * 0.25;
+      }
+      // retire dead objects
+      for (var pool in this.pools) {
+        for (var pid in this.pools[pool]) {
+          if (!seen[pool][pid]) { scene.remove(this.pools[pool][pid]); delete this.pools[pool][pid]; }
+        }
+      }
+      this.gl.render(this.scene, this.cam);
+    },
+  };
+
   // ===== Game =============================================================
   function Game(canvas) {
     this.canvas = canvas;
@@ -1203,6 +1613,7 @@
     }
     // centre the fixed SIM world; the RENDER fills the whole viewport (bands
     // get painted scenery + the screen-anchored HUD, never dead black)
+    R3D.on && R3D.ready && setTimeout(function (g) { return function () { R3D.resize(g); }; }(this), 0);
     this.view = {
       cw: cw, ch: ch, dpr: dpr, scale: scale,
       w: cw / scale, h: ch / scale,
@@ -1532,7 +1943,8 @@
       }
       var mDmg = (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1) * (1 + (tw._auraDmg || 0)), mRng = this.mods.rangeMul || 1;
       var target = this._pickTarget(pad, lv.range * mRng, tt.hitsAir, tt.airBonus, tw.targeting | 0);
-      if (!target) { tw.cd = 0.1; continue; }   // miss: rescan at 6 Hz, not 60
+      if (!target) { tw.cd = 0.1; continue; }
+      (this._r3dAim = this._r3dAim || {})[tw.tid] = { x: target.px, y: target.py };   // miss: rescan at 6 Hz, not 60
       tw.cd = 1 / lv.rate;
       var tp = { x: target.px, y: target.py };
       if (tw.type === 'mimic') {                            // instant bite
@@ -1861,6 +2273,12 @@
   // -> HUD buttons -> start-wave. Interactive elements always beat big rects.
   Game.prototype._handleTap = function (tap) {
     var w = tap;   // world-space + .vx/.vy view-space (converted at capture)
+    // R3D: the linear view->world transform no longer matches what the player
+    // sees — recover world coords by raycasting the tap through the 3D camera
+    if (R3D.on && R3D.ready && tap.vx !== undefined) {
+      var w3 = R3D.pick(tap.vx, tap.vy);
+      if (w3) w = { x: w3.x, y: w3.y, vx: tap.vx, vy: tap.vy };
+    }
     var v = this.view;
     var vx = w.vx !== undefined ? w.vx : w.x + v.ox;
     var vy = w.vy !== undefined ? w.vy : w.y + v.oy;
@@ -2016,6 +2434,7 @@
         var tw = this.towers[m.towerIdx];
         if (tw) {
           var pad2 = tw;
+          pad2 = this._uiAnchor(pad2);
           var btns = [this._menuBtnPos(pad2, 0, 4), this._menuBtnPos(pad2, 1, 4),
                       this._menuBtnPos(pad2, 2, 4), this._menuBtnPos(pad2, 3, 4)];
           var lvl = lvlRow(tw);
@@ -2115,6 +2534,11 @@
     }
     hh.tx = clamp(tx, 20, WORLD_W - 20); hh.ty = clamp(ty, 120, WORLD_H - 30);
   };
+  // Where UI anchored to a world object should DRAW: identity in 2D, the
+  // 3D projection remapped into overlay coords when the 3D world is live.
+  Game.prototype._uiAnchor = function (o) {
+    return (R3D.on && R3D.ready) ? R3D.remap(o.x, o.y) : o;
+  };
   Game.prototype._towerByTid = function (tid) {
     for (var i = 0; i < this.towers.length; i++) if (this.towers[i].tid === tid) return this.towers[i];
     return null;
@@ -2171,7 +2595,7 @@
   };
   Game.prototype._forkCards = function (tw) {
     // two stacked cards above the pad, clamped fully on-world
-    var pad = tw;
+    var pad = this._uiAnchor(tw);
     var w = 200, h = 64, gap = 10;
     var cx = clamp(pad.x, w / 2 + 8, WORLD_W - w / 2 - 8);
     var y0 = clamp(pad.y - 170, 96, WORLD_H - (h * 2 + gap + 40));
@@ -2347,19 +2771,26 @@
   // ---- RENDER ONLY. Back-to-front off world state. No lane-2 draws. -------
   Game.prototype.draw = function (alpha) {
     var ctx = this.ctx, v = this.view;
+    // R3D: the WebGL canvas underneath draws the WORLD; this canvas goes
+    // transparent and keeps only UI. Until three has booted, draw 2D as ever.
+    var use3d = R3D.on && R3D.ready;
+    if (R3D.on) R3D.sync(this, alpha);        // boots itself on first call
     ctx.setTransform(v.dpr * v.scale, 0, 0, v.dpr * v.scale, 0, 0);
-    ctx.fillStyle = '#17100e';
-    ctx.fillRect(0, 0, v.w, v.h);
-    // the bands are SCENERY, not dead space: the cavern painting covers the
-    // whole viewport (cover-cropped), dimmed so the sim world reads brighter,
-    // with a soft blend at the world's edges
-    if (ART.images.bg) {
-      var bimg2 = ART.images.bg;
-      var bs2 = Math.max(v.w / bimg2.width, v.h / bimg2.height);
-      var bw2 = bimg2.width * bs2, bh2 = bimg2.height * bs2;
-      ctx.drawImage(bimg2, (v.w - bw2) / 2, (v.h - bh2) / 2, bw2, bh2);
-      ctx.fillStyle = 'rgba(10,6,4,0.45)';
+    if (use3d) {
+      ctx.clearRect(0, 0, v.w, v.h);
+    } else {
+      ctx.fillStyle = '#17100e';
       ctx.fillRect(0, 0, v.w, v.h);
+      // the bands are SCENERY, not dead space: the cavern painting covers the
+      // whole viewport (cover-cropped), dimmed so the sim world reads brighter
+      if (ART.images.bg) {
+        var bimg2 = ART.images.bg;
+        var bs2 = Math.max(v.w / bimg2.width, v.h / bimg2.height);
+        var bw2 = bimg2.width * bs2, bh2 = bimg2.height * bs2;
+        ctx.drawImage(bimg2, (v.w - bw2) / 2, (v.h - bh2) / 2, bw2, bh2);
+        ctx.fillStyle = 'rgba(10,6,4,0.45)';
+        ctx.fillRect(0, 0, v.w, v.h);
+      }
     }
     ctx.save();
     // cosmetic screenshake (lane 3 state, applied at render)
@@ -2367,6 +2798,9 @@
     var shy = this.shake > 0 ? (Math.random() - 0.5) * 6 * this.shake : 0;
     ctx.translate(v.ox + shx, v.oy + shy);
 
+    if (use3d) {
+      this._drawOverlay3d(ctx);     // hp bars, coins, floats — over the 3D world
+    } else {
     this._drawCavern(ctx);
     this._drawMoundAndKeep(ctx);   // mound + halo (keep sprite drawn AFTER the path)
     this._drawPath(ctx);
@@ -2377,6 +2811,7 @@
     this._drawEntities(ctx);
     this._drawParticles(ctx);
     this._drawWorldHints(ctx);
+    }
     if (this.menu) this._drawMenus(ctx);
     if (this.state === 'menu') this._drawTitle(ctx);
     if (this.state === 'forge') this._drawForge(ctx);
@@ -3154,6 +3589,61 @@
     }
   };
 
+  // R3D overlay: the sim UI that used to ride _drawEnemy/_drawParticles,
+  // re-anchored through R3D.remap so it sits exactly over the 3D bodies.
+  Game.prototype._drawOverlay3d = function (ctx) {
+    for (var i = 0; i < this.enemies.length; i++) {
+      var e = this.enemies[i];
+      var p = R3D.remap(e.px, e.py, e.flyer && !(e.groundedT > 0) ? 30 : 0);
+      if (e.hp < e.maxHp) {
+        var w = e.type === 'boss' ? 36 : 20;
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(p.x - w / 2, p.y - 46, w, 3.5);
+        ctx.fillStyle = e.fleeing ? '#ff7b7b' : '#9ef58f';
+        ctx.fillRect(p.x - w / 2, p.y - 46, w * Math.max(0, e.hp / e.maxHp), 3.5);
+      }
+      if (e.stolen > 0) {
+        ctx.fillStyle = '#ffd75e';
+        ctx.beginPath(); ctx.arc(p.x, p.y - 54, 5, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = '#8a5a1d'; ctx.lineWidth = 1; ctx.stroke();
+      }
+      if (e.slowT > 0) {
+        ctx.fillStyle = 'rgba(140,200,255,0.30)';
+        ctx.beginPath(); ctx.ellipse(p.x, p.y - 20, 12, 14, 0, 0, 6.283); ctx.fill();
+      }
+    }
+    // floats + simple particles, remapped
+    for (var f2 = 0; f2 < this.floats.length; f2++) {
+      var fl2 = this.floats[f2];
+      var fp = R3D.remap(fl2.x, fl2.y);
+      ctx.globalAlpha = Math.min(1, fl2.t);
+      ctx.fillStyle = fl2.c;
+      ctx.font = 'bold 15px system-ui, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(fl2.txt, fp.x, fp.y);
+    }
+    ctx.globalAlpha = 1; ctx.textAlign = 'left';
+    // escape pressure at the cave mouth (the O(1) alarm, remapped)
+    var esc = 0;
+    for (var q2 = 0; q2 < this.enemies.length; q2++) {
+      var c3 = this.enemies[q2];
+      if (c3.fleeing && c3.stolen > 0) esc = Math.max(esc, 1 - Math.min(1, c3.d / 220));
+    }
+    if (esc > 0.02) {
+      var m1 = pathPointAt(0), mp3 = R3D.remap(m1.x, m1.y);
+      var pul2 = 0.65 + 0.35 * Math.sin(this.worldT * (4 + 8 * esc));
+      ctx.strokeStyle = 'rgba(255,123,123,' + (0.2 + 0.6 * esc * pul2) + ')';
+      ctx.lineWidth = 2 + 5 * esc;
+      ctx.beginPath(); ctx.ellipse(mp3.x, mp3.y, 40 + 26 * esc, 18 + 12 * esc, 0, 0, 6.283); ctx.stroke();
+    }
+    // Mother's Breath prompt still needs its tap target visible
+    if (this.motherReady) {
+      var kp2 = R3D.remap(MAP.keep.x, MAP.keep.y - 20);
+      var kg = 0.5 + 0.5 * Math.sin(this.worldT * 4);
+      ctx.strokeStyle = 'rgba(255,207,106,' + (0.35 + 0.5 * kg) + ')'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(kp2.x, kp2.y, 46 + kg * 6, 0, 6.283); ctx.stroke();
+    }
+  };
+
   Game.prototype._drawParticles = function (ctx) {
     for (var i = 0; i < this.particles.length; i++) {
       var pa = this.particles[i];
@@ -3449,6 +3939,7 @@
       if (!tw) return;
       var pad2 = tw;
       var lvl = lvlRow(tw);
+      pad2 = this._uiAnchor(pad2);
       var up = this._menuBtnPos(pad2, 0, 4), aim = this._menuBtnPos(pad2, 1, 4),
           man = this._menuBtnPos(pad2, 2, 4), sell = this._menuBtnPos(pad2, 3, 4);
       var isManned = this.hero.manTid === tw.tid;
