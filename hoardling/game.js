@@ -665,7 +665,7 @@
 
   var Save = (function () {
     var KEY2 = 'hoardling.save.v2', KEY1 = 'hoardling.save.v1';
-    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {} };
+    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {} };
     try {
       var raw = localStorage.getItem(KEY2);
       if (raw) {
@@ -676,6 +676,7 @@
         if (typeof p.dailyBestWave === 'number') data.dailyBestWave = p.dailyBestWave | 0;
         if (typeof p.tut === 'number') data.tut = p.tut | 0;
         if (p.daily && typeof p.daily.day === 'number') data.daily = { day: p.daily.day | 0, best: p.daily.best | 0 };
+        if (p.seen && typeof p.seen === 'object') { for (var sk in p.seen) if (ENEMY_TYPES[sk]) data.seen[sk] = 1; }
         if (p.forge && typeof p.forge === 'object') {
           for (var fi = 0; fi < FORGE_NODES.length; fi++) {
             var nid = FORGE_NODES[fi].id;
@@ -846,6 +847,17 @@
   // Placeholder + preview tint per enemy (shared by the enemy drawer and the
   // next-wave preview so the icons teach the colors before the wave arrives).
   // native sprite facing: -1 = art faces LEFT (mirror when moving right).
+  var ENEMY_CARDS = {
+    looter:  ['SCRAPLING', 'Fodder with a loot sack. Everything works on him.'],
+    scout:   ['FILCHER', 'Fast — grabs 3 coins. Chomps and chills catch him.'],
+    brute:   ['BULWARK', 'Armor shrugs 5 off every hit. Flame and magic ignore it.'],
+    shield:  ['SHELLBACK', 'Pavise halves bolts. Roost L3 breaks it; fire does not care.'],
+    bat:     ['GLOOMWING', 'Flies over ground defenses. Bolt-thrower and Roost answer.'],
+    warlock: ['GREED HEXER', 'Heals the whole pack around him. Drop him first.'],
+    blinker: ['BLINKER', 'Teleports up the road. A chilled rogue cannot blink.'],
+    boss:    ['THE HOARD KING', 'War drums drive his court. At half health he calls more.'],
+  };
+
   var ENEMY_FACING = {
     looter: -1, scout: -1, brute: -1, shield: -1,
     bat: -1, warlock: -1, blinker: -1, boss: -1,
@@ -988,6 +1000,7 @@
     this.hitstopT = 0;
     this.resultLockT = 0;
     this._ocSeen = false;
+    this.infoCard = null;
     this.speed = 1;                         // every run starts at 1x
     this.result = null;
   };
@@ -1064,6 +1077,7 @@
   // ---- FIXED-TIMESTEP SIM. Deterministic. No ctx. No Math.random. --------
   Game.prototype.update = function (STEP) {
     this.worldT += STEP;
+    if (this.infoCard && (this.infoCard.t -= STEP) <= 0) this.infoCard = null;
     if (this.resultLockT > 0) this.resultLockT -= STEP;
     var taps = Input.drain();
     for (var ti = 0; ti < taps.length; ti++) {
@@ -1090,6 +1104,10 @@
       while (this.spawnQueue.length && this.spawnQueue[0].t <= this.waveT) {
         var sp = this.spawnQueue.shift();
         var base = ENEMY_TYPES[sp.type];
+        if (!Save.data.seen[sp.type] && ENEMY_CARDS[sp.type]) {
+          Save.data.seen[sp.type] = 1; Save.write();
+          this.infoCard = { type: sp.type, t: 6 };   // display-only; sim ignores it
+        }
         this.enemies.push({
           id: this.nextId++, type: sp.type, d: 0,
           hp: Math.round(base.hp * sp.hpMul), maxHp: Math.round(base.hp * sp.hpMul),
@@ -1517,6 +1535,11 @@
     var vx = w.vx !== undefined ? w.vx : w.x + v.ox;
     var vy = w.vy !== undefined ? w.vy : w.y + v.oy;
 
+    // an open enemy card swallows its tap (dismiss)
+    if (this.infoCard && this.state === 'playing') {
+      var Gc = this._hudGeom();
+      if (vy > Gc.topY + 56 && vy < Gc.topY + 118) { this.infoCard = null; return; }
+    }
     // SCREEN-ANCHORED HUD first — it lives in the bands on tall phones
     if (this.state === 'playing') {
       var G = this._hudGeom();
@@ -2488,6 +2511,25 @@
       ctx.fillRect(G.pause + 14, G.btnY + 9, 5, 16); ctx.fillRect(G.pause + 25, G.btnY + 9, 5, 16);
       ctx.font = 'bold 16px system-ui, sans-serif';
       ctx.fillText(this.speed + 'x', G.spd + 10, G.btnY + 22);
+    }
+    // first-encounter enemy card: sprite + the counter line
+    if (this.infoCard && this.state === 'playing') {
+      var card = ENEMY_CARDS[this.infoCard.type];
+      var fade = Math.min(1, this.infoCard.t / 0.4);
+      ctx.globalAlpha = fade;
+      var cw2 = Math.min(v.w - 24, 372);
+      var cx2 = v.w / 2 - cw2 / 2, cy2 = G.topY + 56;
+      uiPanel(ctx, cx2, cy2, cw2, 58, 12);
+      var ei2 = ART.images['e_' + this.infoCard.type];
+      if (ei2) {
+        var eh2 = 44, ew2 = eh2 * (ei2.width / ei2.height);
+        ctx.drawImage(ei2, cx2 + 10, cy2 + 7, ew2, eh2);
+      }
+      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(card[0], cx2 + 58, cy2 + 22);
+      ctx.fillStyle = '#e8dcc8'; ctx.font = '11.5px system-ui, sans-serif';
+      ctx.fillText(card[1], cx2 + 58, cy2 + 40);
+      ctx.globalAlpha = 1;
     }
     // bottom: start-wave button + sprite wave preview + hint
     if (this.state === 'playing' && !this.waveActive && this.wave < this.totalWaves()) {
