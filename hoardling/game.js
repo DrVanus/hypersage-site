@@ -216,6 +216,8 @@
   // A netted flyer fights as ground troops until the net wears off.
   function eFly(e) { return e.flyer && !(e.groundedT > 0); }
   var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'brazier']; // cheap -> dear
+  var PAD_SNAP = 34;          // build within this of a free pad and you snap to it
+  var PAD_DISCOUNT = 0.8;     // ...and it costs 20% less: the authored spots still matter
 
   var ENEMY_TYPES = {
     looter:   { name: 'Scrapling',     hp: 30,   spd: 42, bounty: 4,   steals: 1,  flyer: false },
@@ -1112,8 +1114,10 @@
     var hs = MAP.heroStart || { x: 210, y: 470 };
     this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0,
                   breathCd: 6, spd: 85, selected: false, castBreath: false,
-                  manPad: -1, manned: false };   // manPad: pad INDEX (survives tower splices)
+                  manTid: -1, manned: false };   // manTid: stable tower id (survives splices)
     this.menu = null;                       // { padIdx } build menu | { towerIdx } manage menu
+    this.shopPick = -1;                     // index into TOWER_ORDER while placing, else -1
+    this.placeHint = null;                  // {x,y,ok,why} — the last previewed spot
     this.stolenLost = 0; this.kills = 0;
     this.breathUsed = false;                // Mother's Breath spends once per level
     this.motherReady = false; this.castMother = false;
@@ -1410,7 +1414,7 @@
     // reach of Wick runs 25% faster — positioning is the input (deterministic).
     var ocIdx = -1, ocD = 62 * 62;
     for (var oc = 0; oc < this.towers.length; oc++) {
-      var op2 = MAP.pads[this.towers[oc].padIdx];
+      var op2 = this.towers[oc];
       var odx = op2.x - this.hero.x, ody = op2.y - this.hero.y;
       var odd = odx * odx + ody * ody;
       if (odd < ocD) { ocD = odd; ocIdx = oc; }
@@ -1419,14 +1423,14 @@
     // MANNED beats mere proximity: Wick at the crank IS the buff, and it is
     // visible (he is sitting on the machine) instead of an invisible aura.
     for (var mi = 0; mi < this.towers.length; mi++) {
-      this.towers[mi]._manned = this.hero.manned && this.towers[mi].padIdx === this.hero.manPad;
+      this.towers[mi]._manned = this.hero.manned && this.towers[mi].tid === this.hero.manTid;
       if (this.towers[mi]._manned) { this.towers[mi]._oc = false; if (ocIdx === mi) ocIdx = -1; }
     }
     if (ocIdx !== -1) {
       this.towers[ocIdx]._oc = true;
       if (!this._ocSeen) {
         this._ocSeen = true;
-        var ocp = MAP.pads[this.towers[ocIdx].padIdx];
+        var ocp = this.towers[ocIdx];
         this.fxQueue.push({ k: 'float', x: ocp.x, y: ocp.y - 46, txt: 'OVERCLOCKED!', c: '#ffcf6a' });
       }
     }
@@ -1442,7 +1446,7 @@
       tw.shotT = (tw.shotT === undefined ? 9 : tw.shotT) + STEP;
       tw.cd -= STEP * (tw._manned ? 1.7 : tw._oc ? 1.25 : 1);
       if (tw.cd > 0) continue;
-      var pad = MAP.pads[tw.padIdx];
+      var pad = tw;
       // crystal: pulse-slow everything in range, no target needed.
       // BACKWARDS: _damage can kill+splice, and a forward loop would skip
       // the enemy shifted into the vacated slot.
@@ -1496,7 +1500,7 @@
           // Tar Boiler: the patch lands at the TARGET's path distance at fire
           // time — 1D arc-length address, deterministic, no inverse projection.
           // Keyed by PAD, not array index: a sell splices the towers array.
-          tar: lv.special === 'tarpatch' ? { d: target.d, w: lv.tarWidth, dps: lv.tarDps, dur: lv.tarDur, max: lv.maxPatches, pad: tw.padIdx } : null,
+          tar: lv.special === 'tarpatch' ? { d: target.d, w: lv.tarWidth, dps: lv.tarDps, dur: lv.tarDur, max: lv.maxPatches, tid: tw.tid } : null,
         });
         Sfx.play('lob');
       } else {                                              // homing bolt (crossbow / roost)
@@ -1538,9 +1542,9 @@
           this.fxQueue.push({ k: 'boom', x: pr.tx, y: pr.ty, r: pr.splash });
           if (pr.tar) {                     // Tar Boiler: lay slag on the road
             var mine = [];
-            for (var tf = 0; tf < this.tar.length; tf++) if (this.tar[tf].pad === pr.tar.pad) mine.push(tf);
+            for (var tf = 0; tf < this.tar.length; tf++) if (this.tar[tf].tid === pr.tar.tid) mine.push(tf);
             if (mine.length >= pr.tar.max) this.tar.splice(mine[0], 1);   // evict oldest
-            this.tar.push({ d: pr.tar.d, w: pr.tar.w, dps: pr.tar.dps, until: this.worldT + pr.tar.dur, pad: pr.tar.pad });
+            this.tar.push({ d: pr.tar.d, w: pr.tar.w, dps: pr.tar.dps, until: this.worldT + pr.tar.dur, tid: pr.tar.tid });
           }
           // BACKWARDS: _damage can kill+splice mid-loop
           for (var b = this.enemies.length - 1; b >= 0; b--) {
@@ -1605,22 +1609,22 @@
     // MANNING: if his post is a pad that still holds a machine, walk to it and
     // mount. The pad index (not a towers[] index) is the key, so selling some
     // other tower can never silently re-point him at the wrong machine.
-    if (h.manPad >= 0) {
-      if (this._padTower(h.manPad) === -1) { h.manPad = -1; h.manned = false; }   // machine sold
-      else {
-        var mp = MAP.pads[h.manPad];
-        h.tx = mp.x; h.ty = mp.y - 6;
-      }
+    if (h.manTid >= 0) {
+      var mtw = this._towerByTid(h.manTid);
+      if (!mtw) { h.manTid = -1; h.manned = false; }        // machine sold
+      else { h.tx = mtw.x; h.ty = mtw.y - 6; }
     }
     var hdx = h.tx - h.x, hdy = h.ty - h.y;
     var hd = Math.sqrt(hdx * hdx + hdy * hdy);
     if (hd > 2) { h.x += hdx / hd * Math.min(h.spd * STEP, hd); h.y += hdy / hd * Math.min(h.spd * STEP, hd); }
     var wasManned = h.manned;
-    h.manned = h.manPad >= 0 && hd <= 3;
+    h.manned = h.manTid >= 0 && hd <= 3;
     if (h.manned && !wasManned) {
-      var mp2 = MAP.pads[h.manPad];
-      this.fxQueue.push({ k: 'float', x: mp2.x, y: mp2.y - 54, txt: 'MANNING!', c: '#ffcf6a' });
-      this.fxQueue.push({ k: 'place', x: mp2.x, y: mp2.y });
+      var mp2 = this._towerByTid(h.manTid);
+      if (mp2) {
+        this.fxQueue.push({ k: 'float', x: mp2.x, y: mp2.y - 54, txt: 'MANNING!', c: '#ffcf6a' });
+        this.fxQueue.push({ k: 'place', x: mp2.x, y: mp2.y });
+      }
     }
     h.cd -= STEP; h.breathCd -= STEP;
     var inR = [];
@@ -1802,7 +1806,7 @@
           if (w.x >= cr.x && w.x <= cr.x + cr.w && w.y >= cr.y && w.y <= cr.y + cr.h) {
             if (this.gold >= fcost) {
               this.gold -= fcost; ftw.level = 2; ftw.fork = fc;
-              var fpad = MAP.pads[ftw.padIdx];
+              var fpad = ftw;
               var fkRow = TOWER_TYPES[ftw.type].forks[fc];
               this.fxQueue.push({ k: 'place', x: fpad.x, y: fpad.y });
               this.fxQueue.push({ k: 'float', x: fpad.x, y: fpad.y - 52, txt: fkRow.name + '!', c: fc ? '#a8e6ff' : '#ffd75e' });
@@ -1836,6 +1840,19 @@
       }
       if (vx >= G.breathX && vx <= G.breathX + 62 && vy >= G.breathY && vy <= G.breathY + 62) {
         this.hero.castBreath = true; return;         // the breath's own button
+      }
+      // THE SHOP: pick a machine, then tap the cavern to place it
+      if (vy >= G.shopY && vy <= G.shopY + 54) {
+        for (var sc = 0; sc < TOWER_ORDER.length; sc++) {
+          var sxp = G.shopX + sc * G.shopStep;
+          if (vx >= sxp && vx <= sxp + G.shopW) {
+            this.shopPick = this.shopPick === sc ? -1 : sc;
+            this.placeHint = null;
+            Sfx.play('place');
+            return;
+          }
+        }
+        if (this.shopPick >= 0) { this.shopPick = -1; this.placeHint = null; return; }
       }
     }
 
@@ -1923,32 +1940,10 @@
     // (the fork chooser was already handled modally above, before the HUD)
     if (this.menu) {
       var m = this.menu;
-      if (m.padIdx !== undefined) {                          // build menu — nearest-wins
-        var pad = MAP.pads[m.padIdx];
-        var bestB = -1, bestD = 24 * 24;
-        for (var b = 0; b < TOWER_ORDER.length; b++) {
-          var bp = this._menuBtnPos(pad, b, TOWER_ORDER.length);
-          var dx = w.x - bp.x, dy = w.y - bp.y, dd = dx * dx + dy * dy;
-          if (dd < bestD) { bestD = dd; bestB = b; }
-        }
-        if (bestB !== -1) {
-          var tid = TOWER_ORDER[bestB];
-          if (this.mods.bannedTower === tid) {     // Kobold Picnic: the ban must READ as theme
-            this.fxQueue.push({ k: 'float', x: pad.x, y: pad.y - 40, txt: 'On picnic!', c: '#c9d2dd' });
-            this.menu = null; return;
-          }
-          if (this.gold >= TOWER_TYPES[tid].cost) {
-            this.gold -= TOWER_TYPES[tid].cost;
-            this.towers.push({ type: tid, level: 0, padIdx: m.padIdx, cd: 0, targeting: 0, fork: 0 });
-            this.fxQueue.push({ k: 'place', x: pad.x, y: pad.y });
-            Sfx.play('place');
-          }
-          this.menu = null; return;
-        }
-      } else if (m.towerIdx !== undefined) {                 // manage menu — nearest-wins
+      if (m.towerIdx !== undefined) {                 // manage menu — nearest-wins
         var tw = this.towers[m.towerIdx];
         if (tw) {
-          var pad2 = MAP.pads[tw.padIdx];
+          var pad2 = tw;
           var btns = [this._menuBtnPos(pad2, 0, 4), this._menuBtnPos(pad2, 1, 4),
                       this._menuBtnPos(pad2, 2, 4), this._menuBtnPos(pad2, 3, 4)];
           var lvl = lvlRow(tw);
@@ -1973,8 +1968,8 @@
               tw.targeting = ((tw.targeting | 0) + 1) % 3;
               Sfx.play('place');
             } else if (bi2 === 2) {                          // MAN / LEAVE the machine
-              if (this.hero.manPad === tw.padIdx) { this.hero.manPad = -1; this.hero.manned = false; }
-              else { this.hero.manPad = tw.padIdx; }
+              if (this.hero.manTid === tw.tid) { this.hero.manTid = -1; this.hero.manned = false; }
+              else { this.hero.manTid = tw.tid; }
               Sfx.play('place');
               this.menu = null;
             } else {                                         // sell
@@ -1999,22 +1994,43 @@
 
     // towers / pads beat the HUD bands and the start-wave rect
     for (var t = 0; t < this.towers.length; t++) {
-      var pd = MAP.pads[this.towers[t].padIdx];
+      var pd = this.towers[t];
       var tdx = w.x - pd.x, tdy = w.y - pd.y;
       if (tdx * tdx + tdy * tdy < 32 * 32) { this.menu = { towerIdx: t }; return; }
     }
-    for (var pI = 0; pI < MAP.pads.length; pI++) {
-      if (this._padTower(pI) !== -1) continue;
-      var pd2 = MAP.pads[pI];
-      var pdx = w.x - pd2.x, pdy = w.y - pd2.y;
-      if (pdx * pdx + pdy * pdy < 34 * 34) { this.menu = { padIdx: pI }; return; }
+    // (empty pads are no longer tap-to-build — the shop owns building now, and
+    // a pad is simply cheaper ground. That frees the whole floor for walking.)
+
+    // PLACING a machine from the shop: this tap is the placement.
+    if (this.shopPick >= 0) {
+      var stid = TOWER_ORDER[this.shopPick];
+      var chk = this._placeCheck(w.x, w.y);
+      if (!chk.ok) {
+        this.fxQueue.push({ k: 'float', x: w.x, y: w.y - 18, txt: chk.why, c: '#ff9a9a' });
+        return;                                   // stay armed: let them try again
+      }
+      var cost = Math.round(TOWER_TYPES[stid].cost * (chk.discount ? PAD_DISCOUNT : 1));
+      if (this.gold < cost) {
+        this.fxQueue.push({ k: 'float', x: w.x, y: w.y - 18, txt: 'not enough gold', c: '#ff9a9a' });
+        return;
+      }
+      var bx = w.x, by = w.y;
+      if (chk.pad >= 0) { bx = MAP.pads[chk.pad].x; by = MAP.pads[chk.pad].y; }   // snap to the pad
+      this.gold -= cost;
+      this.towers.push({ tid: this.nextId++, type: stid, level: 0, fork: 0,
+                         x: bx, y: by, padIdx: chk.pad, cd: 0, targeting: 0, shotT: 9 });
+      this.fxQueue.push({ k: 'place', x: bx, y: by });
+      if (chk.discount) this.fxQueue.push({ k: 'float', x: bx, y: by - 40, txt: 'PAD BONUS -20%', c: '#9ef58f' });
+      Sfx.play('place');
+      this.shopPick = -1; this.placeHint = null;
+      return;
     }
 
     // ANY other world tap WALKS WICK THERE. He used to need selecting first,
     // and tapping him fired his breath instead of selecting — so once breath
     // was charged (i.e. nearly always) he could not be moved at all.
     var hh = this.hero;
-    hh.manPad = -1; hh.manned = false;      // walking off a machine leaves it
+    hh.manTid = -1; hh.manned = false;      // walking off a machine leaves it
     var tx = clamp(w.x, 20, WORLD_W - 20), ty = clamp(w.y, 120, WORLD_H - 30);
     for (var pj = 0; pj < MAP.pads.length; pj++) {   // never park ON a pad's tap target
       var pp = MAP.pads[pj];
@@ -2027,6 +2043,51 @@
     }
     hh.tx = clamp(tx, 20, WORLD_W - 20); hh.ty = clamp(ty, 120, WORLD_H - 30);
   };
+  Game.prototype._towerByTid = function (tid) {
+    for (var i = 0; i < this.towers.length; i++) if (this.towers[i].tid === tid) return this.towers[i];
+    return null;
+  };
+  // FREE PLACEMENT (VANUS asked for the Bloons shop model): a machine may go
+  // anywhere off the road. The old pads are not gone — they are DISCOUNT
+  // ground, so the hand-authored chokepoints still mean something.
+  Game.prototype._nearestPad = function (x, y) {
+    var best = -1, bd = PAD_SNAP * PAD_SNAP;
+    for (var i = 0; i < MAP.pads.length; i++) {
+      if (this._padTower(i) !== -1) continue;
+      var p = MAP.pads[i], dx = x - p.x, dy = y - p.y, d2 = dx * dx + dy * dy;
+      if (d2 < bd) { bd = d2; best = i; }
+    }
+    return best;
+  };
+  Game.prototype._placeCheck = function (x, y) {
+    // An authored pad is ALWAYS valid ground — it was placed by hand and may
+    // sit outside the free-build bounds (several are below WORLD_H - 34, and
+    // they hug the road by design). Check it first or the game refuses to
+    // build on its own pads.
+    var padFirst = this._nearestPad(x, y);
+    if (padFirst >= 0) {
+      for (var q = 0; q < this.towers.length; q++) {
+        var qt = this.towers[q], qdx = MAP.pads[padFirst].x - qt.x, qdy = MAP.pads[padFirst].y - qt.y;
+        if (qdx * qdx + qdy * qdy < 30 * 30) return { ok: false, why: 'too close to another machine' };
+      }
+      return { ok: true, pad: padFirst, discount: true };
+    }
+    if (x < 26 || x > WORLD_W - 26 || y < 190 || y > WORLD_H - 34) return { ok: false, why: 'off the cavern floor' };
+    var kdx = x - MAP.keep.x, kdy = y - MAP.keep.y;
+    if (kdx * kdx + kdy * kdy < 96 * 96) return { ok: false, why: 'too close to the hoard' };
+    // the road: a machine must not stand in the raiders' way
+    var lim = MAP.pathW * 0.5 + 16;
+    for (var d = 0; d <= PATH.len; d += 7) {
+      var pt = pathPointAt(d), rdx = x - pt.x, rdy = y - pt.y;
+      if (rdx * rdx + rdy * rdy < lim * lim) return { ok: false, why: 'on the road' };
+    }
+    for (var t = 0; t < this.towers.length; t++) {
+      var tw = this.towers[t], tdx = x - tw.x, tdy = y - tw.y;
+      if (tdx * tdx + tdy * tdy < 46 * 46) return { ok: false, why: 'too close to another machine' };
+    }
+    var pi = this._nearestPad(x, y);
+    return { ok: true, pad: pi, discount: pi >= 0 };
+  };
   Game.prototype._padTower = function (padIdx) {
     for (var t = 0; t < this.towers.length; t++) if (this.towers[t].padIdx === padIdx) return t;
     return -1;
@@ -2038,7 +2099,7 @@
   };
   Game.prototype._forkCards = function (tw) {
     // two stacked cards above the pad, clamped fully on-world
-    var pad = MAP.pads[tw.padIdx];
+    var pad = tw;
     var w = 200, h = 64, gap = 10;
     var cx = clamp(pad.x, w / 2 + 8, WORLD_W - w / 2 - 8);
     var y0 = clamp(pad.y - 170, 96, WORLD_H - (h * 2 + gap + 40));
@@ -2183,7 +2244,7 @@
     // overclocked machine throws brass sparks (cosmetic)
     for (var os = 0; os < this.towers.length; os++) {
       if (this.towers[os]._oc && Math.random() < dtRaw * 5) {
-        var osp = MAP.pads[this.towers[os].padIdx];
+        var osp = this.towers[os];
         this.particles.push({ kind: 'dot', x: osp.x + (Math.random() - 0.5) * 22, y: osp.y - 20 - Math.random() * 18, vx: (Math.random() - 0.5) * 40, vy: -20 - Math.random() * 30, r: 1.2 + Math.random() * 1.4, life: 0.3, T: 0.3, c: '#ffcf6a' });
       }
     }
@@ -2503,7 +2564,7 @@
     function slot() { return draws[n] || (draws[n] = { y: 0, kind: '', ref: null, px: 0, py: 0 }); }
     for (i = 0; i < this.towers.length; i++) {
       rec = slot(); n++;
-      rec.y = MAP.pads[this.towers[i].padIdx].y; rec.kind = 'tower'; rec.ref = this.towers[i];
+      rec.y = this.towers[i].y; rec.kind = 'tower'; rec.ref = this.towers[i];
     }
     for (i = 0; i < this.enemies.length; i++) {
       var en = this.enemies[i];
@@ -2512,7 +2573,8 @@
     }
     rec = slot(); n++;
     // manning: sort just AFTER his machine so he sits ON it, not behind it
-    rec.y = this.hero.manned ? MAP.pads[this.hero.manPad].y + 1 : this.hero.y;
+    var mtw2 = this.hero.manned ? this._towerByTid(this.hero.manTid) : null;
+    rec.y = mtw2 ? mtw2.y + 1 : this.hero.y;
     rec.kind = 'hero'; rec.ref = null;
     draws.length = n;
     draws.sort(byY);
@@ -2607,7 +2669,7 @@
     }
   };
   Game.prototype._drawTower = function (ctx, tw) {
-    var p = MAP.pads[tw.padIdx];
+    var p = tw;
     var lvl = tw.level;
     var spriteId = 't_' + tw.type;
     // range ring while its menu is open
@@ -3106,6 +3168,9 @@
       // HIM, which ate the tap that was supposed to pick him up and move him.
       breathX: v.w / 2 - WORLD_W / 2 + 10,
       breathY: v.h - Math.max(10, v.safeB + 6) - 58,
+      shopY: v.h - Math.max(10, v.safeB + 6) - 122,
+      shopX: v.w / 2 - WORLD_W / 2 + 12,
+      shopW: 72, shopStep: 79,
     };
   };
 
@@ -3154,6 +3219,37 @@
       ctx.font = 'bold 9px system-ui, sans-serif';
       ctx.fillText(bReady ? 'BREATH' : Math.ceil(this.hero.breathCd) + 's', bcx, bcy + 19);
       ctx.textAlign = 'left';
+      // THE SHOP — pick a machine, then tap the cavern floor to place it
+      for (var sc2 = 0; sc2 < TOWER_ORDER.length; sc2++) {
+        var sid2 = TOWER_ORDER[sc2], stt = TOWER_TYPES[sid2];
+        var sxx = G.shopX + sc2 * G.shopStep, syy = G.shopY;
+        var picked = this.shopPick === sc2;
+        var can = this.gold >= Math.round(stt.cost * PAD_DISCOUNT);
+        ctx.fillStyle = picked ? 'rgba(96,66,22,0.97)' : can ? 'rgba(30,22,16,0.92)' : 'rgba(24,18,15,0.8)';
+        rr(ctx, sxx, syy, G.shopW, 54, 10); ctx.fill();
+        ctx.strokeStyle = picked ? '#ffd75e' : can ? 'rgba(255,215,94,0.45)' : 'rgba(120,105,90,0.35)';
+        ctx.lineWidth = picked ? 2.5 : 1.3;
+        rr(ctx, sxx, syy, G.shopW, 54, 10); ctx.stroke();
+        var sIm = ART.images['t_' + sid2];
+        if (sIm) {
+          var siw = 34, sih = siw * (sIm.height / sIm.width);
+          ctx.globalAlpha = can ? 1 : 0.42;
+          ctx.drawImage(sIm, sxx + G.shopW / 2 - siw / 2, syy + 26 - sih, siw, sih);
+          ctx.globalAlpha = 1;
+        }
+        ctx.textAlign = 'center';
+        ctx.fillStyle = can ? '#ffd75e' : '#8a7f72';
+        ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.fillText(stt.cost + 'g', sxx + G.shopW / 2, syy + 46);
+        ctx.textAlign = 'left';
+      }
+      if (this.shopPick >= 0) {
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText('tap the cavern floor to build  ·  pads cost 20% less',
+                     G.cx, G.shopY - 8);
+        ctx.textAlign = 'left';
+      }
       uiPanel(ctx, G.mute, G.btnY, 44, 34, 9);
       uiPanel(ctx, G.pause, G.btnY, 44, 34, 9);
       uiPanel(ctx, G.spd, G.btnY, 44, 34, 9);
@@ -3208,7 +3304,7 @@
         counts[gt] += groups[gi].count;
       }
       var cellW = 58, pw = order.length * cellW;
-      var py = by - 24;
+      var py = G.shopY - 30;   // ABOVE the shop bar, not on top of its chips
       uiPanel(ctx, G.cx - pw / 2 - 10, py - 18, pw + 20, 36, 10);
       for (var oi = 0; oi < order.length; oi++) {
         var px = G.cx - pw / 2 + cellW * oi + 16;
@@ -3275,32 +3371,14 @@
       ctx.textAlign = 'left';
       return;
     }
-    if (m.padIdx !== undefined) {
-      var pad = MAP.pads[m.padIdx];
-      for (var b = 0; b < TOWER_ORDER.length; b++) {
-        var tid = TOWER_ORDER[b], tt = TOWER_TYPES[tid];
-        var bp = this._menuBtnPos(pad, b, TOWER_ORDER.length);
-        var banned = this.mods.bannedTower === tid;
-        var afford = !banned && this.gold >= tt.cost;
-        ctx.fillStyle = afford ? 'rgba(38,26,18,0.95)' : 'rgba(28,20,16,0.7)';
-        ctx.beginPath(); ctx.arc(bp.x, bp.y, 22, 0, 6.283); ctx.fill();
-        ctx.strokeStyle = afford ? '#ffd75e' : '#5c5147'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(bp.x, bp.y, 22, 0, 6.283); ctx.stroke();
-        ctx.fillStyle = afford ? '#ffe9c4' : '#8a7f72';
-        ctx.font = 'bold 10px system-ui, sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(tt.name.split(' ')[0], bp.x, bp.y - 2);
-        ctx.fillStyle = afford ? '#ffd75e' : '#8a7f72';
-        ctx.fillText(banned ? 'picnic' : tt.cost + 'g', bp.x, bp.y + 10);
-        ctx.textAlign = 'left';
-      }
-    } else if (m.towerIdx !== undefined) {
+    if (m.towerIdx !== undefined) {
       var tw = this.towers[m.towerIdx];
       if (!tw) return;
-      var pad2 = MAP.pads[tw.padIdx];
+      var pad2 = tw;
       var lvl = lvlRow(tw);
       var up = this._menuBtnPos(pad2, 0, 4), aim = this._menuBtnPos(pad2, 1, 4),
           man = this._menuBtnPos(pad2, 2, 4), sell = this._menuBtnPos(pad2, 3, 4);
-      var isManned = this.hero.manPad === tw.padIdx;
+      var isManned = this.hero.manTid === tw.tid;
       ctx.fillStyle = isManned ? 'rgba(70,52,20,0.97)' : 'rgba(38,26,18,0.95)';
       ctx.beginPath(); ctx.arc(man.x, man.y, 22, 0, 6.283); ctx.fill();
       ctx.strokeStyle = '#ffcf6a'; ctx.lineWidth = 2;
