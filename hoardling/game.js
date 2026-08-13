@@ -239,7 +239,7 @@
       path: [
         [398, 748], [330, 722], [222, 702], [122, 668], [80, 612],
         [120, 560], [232, 540], [322, 506], [346, 452], [300, 402],
-        [200, 386], [110, 360], [88, 302], [130, 262], [196, 238], [186, 218],
+        [200, 386], [110, 360], [88, 302], [130, 262], [196, 238], [176, 232],
       ],
       pads: [
         { x: 300, y: 758 }, { x: 168, y: 736 }, { x: 56, y: 684 },
@@ -258,7 +258,7 @@
       path: [
         [28, 752], [140, 722], [300, 702], [368, 640], [330, 572],
         [180, 556], [72, 520], [58, 442], [150, 410], [300, 420],
-        [362, 362], [300, 302], [190, 292], [122, 252], [158, 218],
+        [362, 362], [300, 302], [190, 292], [122, 252], [176, 232],
       ],
       pads: [
         { x: 218, y: 646 }, { x: 78, y: 674 }, { x: 356, y: 724 },
@@ -278,7 +278,7 @@
         [395, 762], [300, 734], [160, 734], [90, 682], [152, 632],
         [290, 636], [358, 586], [298, 532], [150, 536], [86, 482],
         [150, 432], [290, 436], [354, 386], [288, 332], [170, 332],
-        [122, 282], [162, 230],
+        [122, 282], [176, 232],
       ],
       pads: [
         { x: 224, y: 684 }, { x: 224, y: 584 }, { x: 222, y: 484 },
@@ -811,6 +811,12 @@
 
   // Placeholder + preview tint per enemy (shared by the enemy drawer and the
   // next-wave preview so the icons teach the colors before the wave arrives).
+  // native sprite facing: -1 = art faces LEFT (mirror when moving right).
+  var ENEMY_FACING = {
+    looter: -1, scout: -1, brute: -1, shield: -1,
+    bat: -1, warlock: -1, blinker: -1, boss: -1,
+  };
+
   var ENEMY_COLORS = {
     looter: '#6fae52', scout: '#4fc978', brute: '#4a8a3a', shield: '#9aa2ad',
     bat: '#8a6ad6', warlock: '#7b3fa0', blinker: '#d6a64f', boss: '#c9b8a8',
@@ -842,6 +848,7 @@
       keep:      'art/keep.png',
       mound:     'art/gold_mound.png',
       hero:      'art/hero_whelp.png',
+      hero_back: 'art/hero_back.png',
       t_mimic:   'art/tower_mimic.png',
       t_ballista:'art/tower_ballista.png',
       t_brazier: 'art/tower_brazier.png',
@@ -886,7 +893,7 @@
     });
     return {
       setConverter: function (fn) { convert = fn; },
-      inject: function (wx, wy) { taps.push({ x: wx, y: wy }); },  // WORLD coords
+      inject: function (wx, wy, vx, vy) { taps.push({ x: wx, y: wy, vx: vx, vy: vy }); },
       drain: function () { var t = taps; taps = []; return t; },
     };
   })();
@@ -905,7 +912,13 @@
     this.reset((location && /[?&]seed=(\d+)/.exec(location.search) || [])[1] | 0 || dailySeed());
     this.resize();
     var self = this;
-    Input.setConverter(function (cx, cy) { return self.toWorld(cx, cy); });
+    Input.setConverter(function (cx, cy) {
+      var w = self.toWorld(cx, cy);
+      // view coords ride along for the screen-anchored HUD hit tests
+      w.vx = cx / self.view.scale;
+      w.vy = cy / self.view.scale;
+      return w;
+    });
     this._frame = this._frame.bind(this);
     requestAnimationFrame(this._frame);
   }
@@ -951,11 +964,21 @@
     this.canvas.width = Math.round(cw * dpr);
     this.canvas.height = Math.round(ch * dpr);
     var scale = Math.min(ch / VIEW_H, cw / VIEW_MIN_W);
-    // centre the fixed world in the viewport; letterbox is cavern-dark
+    // real safe-area insets, read from the env() probe div (canvas can't env())
+    var st = 0, sb = 0;
+    var probe = document.getElementById('safe-probe');
+    if (probe) {
+      var cs = getComputedStyle(probe);
+      st = parseFloat(cs.paddingTop) || 0;
+      sb = parseFloat(cs.paddingBottom) || 0;
+    }
+    // centre the fixed SIM world; the RENDER fills the whole viewport (bands
+    // get painted scenery + the screen-anchored HUD, never dead black)
     this.view = {
       cw: cw, ch: ch, dpr: dpr, scale: scale,
       w: cw / scale, h: ch / scale,
       ox: (cw / scale - WORLD_W) / 2, oy: (ch / scale - WORLD_H) / 2,
+      safeT: st / scale, safeB: sb / scale,
     };
   };
   Game.prototype.toWorld = function (cx, cy) {
@@ -1402,8 +1425,24 @@
   // Priority: letterbox reject -> screens -> OPEN MENU -> hero -> towers/pads
   // -> HUD buttons -> start-wave. Interactive elements always beat big rects.
   Game.prototype._handleTap = function (tap) {
-    var w = tap;   // already world-space (converted at capture)
-    if (w.x < 0 || w.x > WORLD_W || w.y < 0 || w.y > WORLD_H) return;   // letterbox
+    var w = tap;   // world-space + .vx/.vy view-space (converted at capture)
+    var v = this.view;
+    var vx = w.vx !== undefined ? w.vx : w.x + v.ox;
+    var vy = w.vy !== undefined ? w.vy : w.y + v.oy;
+
+    // SCREEN-ANCHORED HUD first — it lives in the bands on tall phones
+    if (this.state === 'playing') {
+      var G = this._hudGeom();
+      if (vy >= G.btnY && vy <= G.btnY + 34) {
+        if (vx >= G.spd && vx <= G.spd + 44) { this.speed = this.speed === 1 ? 2 : 1; return; }
+        if (vx >= G.pause && vx <= G.pause + 44) { this.setPaused(true); return; }
+        if (vx >= G.mute && vx <= G.mute + 44) { Sfx.toggle(); return; }
+      }
+      if (!this.waveActive && this.wave < this.totalWaves() &&
+          vx >= G.cx - 92 && vx <= G.cx + 92 && vy >= G.startY && vy <= G.startY + 52) {
+        this.startWave(); return;
+      }
+    }
 
     if (this.state === 'menu') {
       if (w.x > WORLD_W / 2 - 130 && w.x < WORLD_W / 2 + 130) {
@@ -1432,6 +1471,9 @@
       }
       this.setPaused(false); return;
     }
+
+    // world interactions only within the sim world (bands are HUD territory)
+    if (w.x < 0 || w.x > WORLD_W || w.y < 0 || w.y > WORLD_H) return;
 
     // OPEN MENU first — its buttons beat everything else on screen
     if (this.menu) {
@@ -1515,18 +1557,6 @@
       if (pdx * pdx + pdy * pdy < 34 * 34) { this.menu = { padIdx: pI }; return; }
     }
 
-    // HUD buttons (playing only; bounded bands)
-    if (w.y >= 16 && w.y < 50) {
-      if (w.x > WORLD_W - 56 && w.x < WORLD_W - 12) { this.speed = this.speed === 1 ? 2 : 1; return; }
-      if (w.x > WORLD_W - 112 && w.x < WORLD_W - 68) { this.setPaused(true); return; }
-      if (w.x > WORLD_W - 168 && w.x < WORLD_W - 124) { Sfx.toggle(); return; }
-    }
-    // start-wave button, bounded to the drawn rect
-    if (!this.waveActive && this.wave < this.totalWaves() &&
-        w.y > WORLD_H - 78 && w.y < WORLD_H - 26 &&
-        w.x > WORLD_W / 2 - 90 && w.x < WORLD_W / 2 + 90) {
-      this.startWave(); return;
-    }
   };
   Game.prototype._padTower = function (padIdx) {
     for (var t = 0; t < this.towers.length; t++) if (this.towers[t].padIdx === padIdx) return t;
@@ -1634,9 +1664,19 @@
   Game.prototype.draw = function (alpha) {
     var ctx = this.ctx, v = this.view;
     ctx.setTransform(v.dpr * v.scale, 0, 0, v.dpr * v.scale, 0, 0);
-    // letterbox fill
     ctx.fillStyle = '#17100e';
     ctx.fillRect(0, 0, v.w, v.h);
+    // the bands are SCENERY, not dead space: the cavern painting covers the
+    // whole viewport (cover-cropped), dimmed so the sim world reads brighter,
+    // with a soft blend at the world's edges
+    if (ART.images.bg) {
+      var bimg2 = ART.images.bg;
+      var bs2 = Math.max(v.w / bimg2.width, v.h / bimg2.height);
+      var bw2 = bimg2.width * bs2, bh2 = bimg2.height * bs2;
+      ctx.drawImage(bimg2, (v.w - bw2) / 2, (v.h - bh2) / 2, bw2, bh2);
+      ctx.fillStyle = 'rgba(10,6,4,0.45)';
+      ctx.fillRect(0, 0, v.w, v.h);
+    }
     ctx.save();
     // cosmetic screenshake (lane 3 state, applied at render)
     var shx = this.shake > 0 ? (Math.random() - 0.5) * 8 * this.shake : 0;
@@ -1644,17 +1684,19 @@
     ctx.translate(v.ox + shx, v.oy + shy);
 
     this._drawCavern(ctx);
-    this._drawMoundAndKeep(ctx);
+    this._drawMoundAndKeep(ctx);   // mound + halo (keep sprite drawn AFTER the path)
     this._drawPath(ctx);
+    this._drawKeep(ctx);          // the door arch overlaps the road's end
     this._drawPads(ctx);
     this._drawEntities(ctx);
     this._drawParticles(ctx);
-    this._drawHud(ctx);
+    this._drawWorldHints(ctx);
     if (this.menu) this._drawMenus(ctx);
     if (this.state === 'menu') this._drawTitle(ctx);
     if (this.state === 'won' || this.state === 'lost') this._drawResult(ctx);
     if (this.state === 'paused') {
-      ctx.fillStyle = 'rgba(10,6,4,0.55)'; ctx.fillRect(-40, -40, WORLD_W + 80, WORLD_H + 80);
+      ctx.fillStyle = 'rgba(10,6,4,0.55)';
+      ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);   // full view
       ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 40px system-ui, sans-serif'; ctx.textAlign = 'center';
       ctx.fillText('PAUSED', WORLD_W / 2, WORLD_H / 2);
       ctx.font = '16px system-ui, sans-serif'; ctx.fillText('tap to resume', WORLD_W / 2, WORLD_H / 2 + 30);
@@ -1665,6 +1707,22 @@
       ctx.textAlign = 'left';
     }
     ctx.restore();
+
+    // soft seams where the brighter sim world meets the dimmed band scenery
+    if (v.oy > 2) {
+      var gt2 = ctx.createLinearGradient(0, v.oy - 14, 0, v.oy + 10);
+      gt2.addColorStop(0, 'rgba(10,6,4,0.5)');
+      gt2.addColorStop(1, 'rgba(10,6,4,0)');
+      ctx.fillStyle = gt2;
+      ctx.fillRect(0, v.oy - 14, v.w, 24);
+      var gb2 = ctx.createLinearGradient(0, v.oy + WORLD_H - 10, 0, v.oy + WORLD_H + 14);
+      gb2.addColorStop(0, 'rgba(10,6,4,0)');
+      gb2.addColorStop(1, 'rgba(10,6,4,0.5)');
+      ctx.fillStyle = gb2;
+      ctx.fillRect(0, v.oy + WORLD_H - 10, v.w, 24);
+    }
+    // screen-anchored HUD (drawn over everything except the dev overlay)
+    this._drawHudView(ctx);
 
     // dev overlay: LOUD missing-art list (never silent fallbacks)
     if (_dev) {
@@ -1807,6 +1865,10 @@
         ctx.fillRect(sx, sy, 2.5, 2.5);
       }
     }
+  };
+
+  Game.prototype._drawKeep = function (ctx) {
+    var k = MAP.keep;
     if (drawSpriteBottom(ctx, 'keep', k.x, k.y + 40, 158)) { /* sprite */ }
     else {
       // chunky keep: main cylinder + two side turrets, blue conical roofs
@@ -2003,7 +2065,10 @@
       var boss = e.type === 'boss';
       var moving = e.grabT <= 0;
       var ahead = pathPointAt(e.fleeing ? Math.max(0, e.d - 8) : Math.min(PATH.len, e.d + 8));
-      var flip = (ahead.x - p.x) < -0.5 ? -1 : 1;
+      // face the TRAVEL direction: mirror when it opposes the art's native side
+      var native = ENEMY_FACING[e.type] || -1;
+      var flip = (ahead.x - p.x) < -0.5 ? -native : native;
+      if (Math.abs(ahead.x - p.x) <= 0.5) flip = native;   // vertical stretch: hold facing
       var wsp = boss ? 6 : 9 + (e.spd / 42) * 3;          // stride matches speed
       var animKey = e.type === 'looter' ? 'looter' : e.type;   // meta keys match types
       var hasFrames = WALK_FRAMES && ANIM.meta[animKey] && ANIM.images[animKey + '_a'] && ANIM.images[animKey + '_b'];
@@ -2102,7 +2167,10 @@
     }
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.beginPath(); ctx.ellipse(h.x, h.y + 3, 13, 5.5, 0, 0, 6.283); ctx.fill();
-    var himg = ART.images.hero;
+    var hdx2 = h.tx - h.x, hdy2 = h.ty - h.y;
+    var hMoving2 = Math.abs(hdx2) + Math.abs(hdy2) > 3;
+    var goingAway = hMoving2 && hdy2 < -Math.abs(hdx2) * 0.7;   // mostly up-screen
+    var himg = (goingAway && ART.images.hero_back) ? ART.images.hero_back : ART.images.hero;
     if (himg) {
       // hover bob + sway; face the direction he's headed
       var ht = this.worldT;
@@ -2188,74 +2256,97 @@
     ctx.globalAlpha = 1;
   };
 
-  Game.prototype._drawHud = function (ctx) {
-    // top bar
-    ctx.fillStyle = 'rgba(16,10,7,0.72)';
-    rr(ctx, 8, 10, WORLD_W - 16, 46, 12); ctx.fill();
-    // hoard (life)
-    ctx.fillStyle = '#ffd75e';
-    ctx.beginPath(); ctx.arc(32, 33, 9, 0, 6.283); ctx.fill();
-    ctx.strokeStyle = '#8a5a1d'; ctx.lineWidth = 2; ctx.stroke();
-    ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 18px system-ui, sans-serif';
-    ctx.fillText(String(this.hoard), 48, 40);
-    // gold (currency)
-    ctx.fillStyle = '#c9b8ff';
-    ctx.font = 'bold 13px system-ui, sans-serif';
-    ctx.fillText('gold', 100, 28);
-    ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 18px system-ui, sans-serif';
-    ctx.fillText(String(this.gold), 100, 46);
-    // wave
-    ctx.fillStyle = '#c9b8ff'; ctx.font = 'bold 13px system-ui, sans-serif';
-    ctx.fillText('wave', 168, 28);
-    ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 18px system-ui, sans-serif';
-    var tot = this.totalWaves();
-    ctx.fillText((this.waveActive ? this.wave + 1 : Math.min(this.wave + 1, tot === Infinity ? this.wave + 1 : tot)) + (tot === Infinity ? '' : '/' + tot), 168, 46);
-    // pause + speed + mute buttons (playing only — dead buttons are not drawn)
-    if (this.state === 'playing') {
-      ctx.fillStyle = 'rgba(255,233,196,0.14)';
-      rr(ctx, WORLD_W - 168, 16, 44, 34, 9); ctx.fill();
-      rr(ctx, WORLD_W - 112, 16, 44, 34, 9); ctx.fill();
-      rr(ctx, WORLD_W - 56, 16, 44, 34, 9); ctx.fill();
-      drawSpeaker(ctx, WORLD_W - 146, 33, Sfx.isMuted());
-      ctx.fillStyle = '#ffe9c4';
-      ctx.fillRect(WORLD_W - 98, 25, 5, 16); ctx.fillRect(WORLD_W - 89, 25, 5, 16);
-      ctx.font = 'bold 16px system-ui, sans-serif';
-      ctx.fillText(this.speed + 'x', WORLD_W - 46, 38);
-    }
-
-    // first-run tutorial pointers (campaign only; render-lane, no sim state)
-    if (this.state === 'playing' && this.mode === 'campaign' && !Save.data.tut) {
-      ctx.textAlign = 'center';
+  // world-anchored hints only (the pad ring); everything else lives in the
+  // view-anchored HUD so it hugs the REAL screen edges on every device
+  Game.prototype._drawWorldHints = function (ctx) {
+    if (this.state === 'playing' && this.mode === 'campaign' && !Save.data.tut && !this.towers.length) {
       var tpulse = 0.6 + 0.4 * Math.sin(this.worldT * 5);
-      if (!this.towers.length) {
-        var tp2 = MAP.pads[3];
-        ctx.strokeStyle = 'rgba(158,245,143,' + tpulse + ')';
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.ellipse(tp2.x, tp2.y, 32 + tpulse * 6, 20 + tpulse * 4, 0, 0, 6.283); ctx.stroke();
-        ctx.fillStyle = 'rgba(16,10,7,0.8)';
-        rr(ctx, tp2.x - 108, tp2.y - 64, 216, 30, 9); ctx.fill();
-        ctx.fillStyle = '#9ef58f'; ctx.font = 'bold 14px system-ui, sans-serif';
-        ctx.fillText('Tap a stone ring to build a defender', tp2.x, tp2.y - 44);
-      } else if (!this.waveActive && this.wave === 0) {
-        ctx.fillStyle = 'rgba(16,10,7,0.8)';
-        rr(ctx, WORLD_W / 2 - 118, WORLD_H - 122, 236, 30, 9); ctx.fill();
-        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
-        ctx.fillText('Ready? Call the wave — early calls pay gold', WORLD_W / 2, WORLD_H - 102);
-      }
+      var tp2 = MAP.pads[3];
+      ctx.strokeStyle = 'rgba(158,245,143,' + tpulse + ')';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(tp2.x, tp2.y, 32 + tpulse * 6, 20 + tpulse * 4, 0, 0, 6.283); ctx.stroke();
+      ctx.fillStyle = 'rgba(16,10,7,0.8)';
+      rr(ctx, tp2.x - 108, tp2.y - 64, 216, 30, 9); ctx.fill();
+      ctx.fillStyle = '#9ef58f'; ctx.font = 'bold 14px system-ui, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('Tap a stone ring to build a defender', tp2.x, tp2.y - 44);
       ctx.textAlign = 'left';
     }
-    // start-wave button
+  };
+
+  // gold-trimmed slate panel — the art-bible UI language
+  function uiPanel(ctx, x, y, w, h, r) {
+    var g = ctx.createLinearGradient(0, y, 0, y + h);
+    g.addColorStop(0, 'rgba(48,33,22,0.95)');
+    g.addColorStop(1, 'rgba(22,15,12,0.95)');
+    ctx.fillStyle = g;
+    rr(ctx, x, y, w, h, r); ctx.fill();
+    ctx.strokeStyle = 'rgba(212,168,64,0.55)'; ctx.lineWidth = 1.5;
+    rr(ctx, x + 0.75, y + 0.75, w - 1.5, h - 1.5, Math.max(2, r - 1)); ctx.stroke();
+  }
+
+  // VIEW-space HUD: screen-anchored, safe-area aware. Returns nothing; the tap
+  // handler recomputes identical geometry from this.view.
+  Game.prototype._hudGeom = function () {
+    var v = this.view;
+    var topY = Math.max(8, v.safeT + 4);
+    var cx = v.w / 2;
+    return {
+      topY: topY, cx: cx,
+      barX: Math.max(8, v.ox + 8),
+      barW: Math.min(v.w - 16, WORLD_W - 16),
+      btnY: topY + 7,
+      mute: v.w / 2 + WORLD_W / 2 - 168, pause: v.w / 2 + WORLD_W / 2 - 112, spd: v.w / 2 + WORLD_W / 2 - 56,
+      startY: v.h - Math.max(10, v.safeB + 6) - 56,
+    };
+  };
+
+  Game.prototype._drawHudView = function (ctx) {
+    var v = this.view, G = this._hudGeom();
+    // top bar
+    uiPanel(ctx, G.barX, G.topY, G.barW, 48, 13);
+    var lx = G.barX + 14;
+    ctx.fillStyle = '#ffd75e';
+    ctx.beginPath(); ctx.arc(lx + 10, G.topY + 24, 10, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = '#8a5a1d'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 20px Georgia, serif';
+    ctx.fillText(String(this.hoard), lx + 27, G.topY + 31);
+    ctx.fillStyle = '#b9a27f'; ctx.font = 'bold 11px system-ui, sans-serif';
+    ctx.fillText('GOLD', lx + 82, G.topY + 18);
+    ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 19px Georgia, serif';
+    ctx.fillText(String(this.gold), lx + 82, G.topY + 38);
+    ctx.fillStyle = '#b9a27f'; ctx.font = 'bold 11px system-ui, sans-serif';
+    ctx.fillText('WAVE', lx + 152, G.topY + 18);
+    ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 19px Georgia, serif';
+    var tot = this.totalWaves();
+    ctx.fillText((this.waveActive ? this.wave + 1 : Math.min(this.wave + 1, tot === Infinity ? this.wave + 1 : tot)) + (tot === Infinity ? '' : '/' + tot), lx + 152, G.topY + 38);
+    if (this.state === 'playing') {
+      uiPanel(ctx, G.mute, G.btnY, 44, 34, 9);
+      uiPanel(ctx, G.pause, G.btnY, 44, 34, 9);
+      uiPanel(ctx, G.spd, G.btnY, 44, 34, 9);
+      drawSpeaker(ctx, G.mute + 22, G.btnY + 17, Sfx.isMuted());
+      ctx.fillStyle = '#ffe9c4';
+      ctx.fillRect(G.pause + 14, G.btnY + 9, 5, 16); ctx.fillRect(G.pause + 25, G.btnY + 9, 5, 16);
+      ctx.font = 'bold 16px system-ui, sans-serif';
+      ctx.fillText(this.speed + 'x', G.spd + 10, G.btnY + 22);
+    }
+    // bottom: start-wave button + sprite wave preview + hint
     if (this.state === 'playing' && !this.waveActive && this.wave < this.totalWaves()) {
       var pulse = 0.75 + 0.25 * Math.sin(this.worldT * 4);
-      ctx.fillStyle = 'rgba(214,69,69,' + (0.75 + 0.2 * pulse) + ')';
-      rr(ctx, WORLD_W / 2 - 90, WORLD_H - 78, 180, 52, 14); ctx.fill();
+      var bx = G.cx - 92, by = G.startY;
+      var bg2 = ctx.createLinearGradient(0, by, 0, by + 52);
+      bg2.addColorStop(0, 'rgba(226,88,74,' + (0.85 + 0.12 * pulse) + ')');
+      bg2.addColorStop(1, 'rgba(168,48,42,' + (0.85 + 0.12 * pulse) + ')');
+      ctx.fillStyle = bg2;
+      rr(ctx, bx, by, 184, 52, 14); ctx.fill();
       ctx.strokeStyle = '#ffcf6a'; ctx.lineWidth = 2;
-      rr(ctx, WORLD_W / 2 - 90, WORLD_H - 78, 180, 52, 14); ctx.stroke();
+      rr(ctx, bx, by, 184, 52, 14); ctx.stroke();
       ctx.fillStyle = '#fff'; ctx.font = 'bold 19px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(this.wave === 0 ? 'BEGIN THE SIEGE' : 'NEXT WAVE', WORLD_W / 2, WORLD_H - 52);
-      ctx.font = 'bold 12px system-ui, sans-serif'; ctx.fillStyle = '#ffe9c4';
-      if (this.wave > 0) ctx.fillText('auto in ' + Math.ceil(this.countdown) + 's — call early for +gold', WORLD_W / 2, WORLD_H - 36);
-      // next-wave composition preview: colored heads + counts above the button
+      ctx.fillText(this.wave === 0 ? 'BEGIN THE SIEGE' : 'NEXT WAVE', G.cx, by + (this.wave === 0 ? 32 : 24));
+      if (this.wave > 0) {
+        ctx.font = 'bold 11px system-ui, sans-serif'; ctx.fillStyle = '#ffe9c4';
+        ctx.fillText('auto in ' + Math.ceil(this.countdown) + 's — early pays gold', G.cx, by + 42);
+      }
+      // preview: ACTUAL enemy sprites, not ambiguous dots
       var groups = this.mode === 'daily' ? dailyWaveComp(this.wave, this.seed) : WAVE_TABLES[this.levelIdx][this.wave];
       var counts = {}, order = [];
       for (var gi = 0; gi < groups.length; gi++) {
@@ -2263,19 +2354,29 @@
         if (!counts[gt]) { counts[gt] = 0; order.push(gt); }
         counts[gt] += groups[gi].count;
       }
-      var pw = order.length * 54;
+      var cellW = 58, pw = order.length * cellW;
+      var py = by - 24;
+      uiPanel(ctx, G.cx - pw / 2 - 10, py - 18, pw + 20, 36, 10);
       for (var oi = 0; oi < order.length; oi++) {
-        var px = WORLD_W / 2 - pw / 2 + 27 + oi * 54;
-        var py = WORLD_H - 102;
-        ctx.fillStyle = ENEMY_COLORS[order[oi]] || '#fff';
-        ctx.beginPath(); ctx.ellipse(px - 10, py, 8, 9, 0, 0, 6.283); ctx.fill();
-        if (ENEMY_TYPES[order[oi]].flyer) {
-          ctx.fillStyle = 'rgba(200,180,255,0.8)';
-          ctx.beginPath(); ctx.ellipse(px - 19, py - 3, 5, 2.5, 0.5, 0, 6.283); ctx.fill();
-          ctx.beginPath(); ctx.ellipse(px - 1, py - 3, 5, 2.5, -0.5, 0, 6.283); ctx.fill();
+        var px = G.cx - pw / 2 + cellW * oi + 16;
+        var eimg = ART.images['e_' + order[oi]];
+        if (eimg) {
+          var eh = 30, ew = eh * (eimg.width / eimg.height);
+          ctx.drawImage(eimg, px - ew / 2, py - 15, ew, eh);
+        } else {
+          ctx.fillStyle = ENEMY_COLORS[order[oi]] || '#fff';
+          ctx.beginPath(); ctx.ellipse(px, py, 8, 9, 0, 0, 6.283); ctx.fill();
         }
-        ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 13px system-ui, sans-serif';
-        ctx.fillText('×' + counts[order[oi]], px + 12, py + 4);
+        ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 13px system-ui, sans-serif'; ctx.textAlign = 'left';
+        ctx.fillText('×' + counts[order[oi]], px + 12, py + 5);
+      }
+      // second tutorial hint rides above the preview
+      if (this.mode === 'campaign' && !Save.data.tut && this.towers.length && this.wave === 0) {
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(16,10,7,0.85)';
+        rr(ctx, G.cx - 118, py - 52, 236, 28, 9); ctx.fill();
+        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 13px system-ui, sans-serif';
+        ctx.fillText('Ready? Call the wave — early calls pay gold', G.cx, py - 33);
       }
       ctx.textAlign = 'left';
     }

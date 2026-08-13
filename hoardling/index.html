@@ -19,7 +19,11 @@
 </head>
 <body>
   <div id="game-wrap">
-    <canvas id="game-canvas" aria-label="Hoardkeep game area"></canvas>
+    <!-- canvas cannot read env(); this probe div carries the safe-area insets
+         as real pixel paddings the game reads at boot/resize -->
+    <div id="safe-probe" style="position:absolute;visibility:hidden;pointer-events:none;
+         padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);"></div>
+    <canvas id="game-canvas" aria-label="Hoardling game area"></canvas>
     <!-- The whole game is drawn on <canvas>. Any HUD/menus/touch controls you add
          go here as a DOM overlay (see bunny-bus-hop index.html for the pattern):
          position them with top:max(10px, env(safe-area-inset-top)) etc. -->
