@@ -41,6 +41,18 @@
 
   <main class="legal">
     <h1>Privacy Policy</h1>
+    <!-- ⚠️ DEPLOY GATE (added 2026-08-09): the "Photos you attach" section below
+         describes image input, which ships in 1.1. Do NOT deploy this page until
+         the 1.1 build is live, or the policy promises a feature the shipped app
+         does not have. Deploy it WITH 1.1, not before — and note the ASC App
+         Privacy questionnaire must be refiled in the same pass (Photos or Videos
+         becomes a collected type). See anchor-ios/APP_PRIVACY_ASC.md §F.
+         UPDATE 2026-08-10: the "Chain-analysis reflections" section below also
+         ships in 1.1 (and needs storyvault-api deployed with the
+         /v1/dbt/chain-reflection route). Same gate, same release day. The
+         chat-recap paragraph's mention of the chain "next time" plan, however,
+         describes SHIPPING 1.0 behavior and closes a pre-existing disclosure
+         gap — it alone could go live today. -->
     <p class="updated">Last updated: 2026-08-12</p>
 
     <p>Quietoak is a mental-health-adjacent app, so we hold your data to a careful standard: your practice stays on your device by default, there are no ads or third-party trackers on your diary or chat, and we collect as little as we can.</p>
@@ -51,7 +63,7 @@
     <h2>What stays on your device</h2>
     <p>Your <strong>diary card entries, mood and urge logs, chosen companion, and practice history live on your device</strong>, and we keep no copy of your diary on our servers. If you have iCloud Backup enabled, they are included per your iOS settings. Any health conditions or focus areas you choose to share — and how sure you are about each — are also kept on your device, and are optional, editable, and clearable at any time.</p>
 
-    <p><strong>What leaves your device when you chat.</strong> To let your companion respond to how your week has actually gone, each message you send to the companion is accompanied by a short recap of your <strong>most recent 7 logged diary days</strong>. That recap includes your mood and emotion ratings, your <strong>urge ratings — including the 0–5 suicidal-ideation and self-harm ratings</strong> — the skills you practised, and up to the first 120 characters of each day's note. It is sent to our service and included in the prompt to our AI provider so the reply can fit you. If you have completed a chain analysis, the short &ldquo;next time&rdquo; plan from your most recent one is sent alongside that recap. It is used to generate that reply, is not stored as a diary on our servers, and is never sold or used for advertising. If you would rather this did not leave your device, do not use the companion chat — every other part of Quietoak, including the diary, the skills, the trends and the crisis kit, works without it.</p>
+    <p><strong>What leaves your device when you chat.</strong> To let your companion respond to how your week has actually gone, each message can be accompanied by a short recap of your <strong>most recent 7 logged diary days</strong>. That recap includes mood and emotion ratings, <strong>urge ratings — including the 0–5 suicidal-ideation and self-harm ratings</strong>, skills practised, and up to the first 120 characters of each day's note. A "next time" plan from the newest chain and short summaries of up to three recent chains can ride along too. This context is sent to our service and included in the AI-provider prompt so the reply can fit you; it is not stored as a copy of your diary or chains. A <strong>full</strong> chain leaves the device only when you explicitly ask for a reflection. The app asks for permission before the first AI request, and that permission can be withdrawn in Me. Every non-AI part of Quietoak — including the diary, skills, trends, chain editor, and crisis kit — remains available without it.</p>
 
     <h2>What is sent off the device — and why</h2>
 
@@ -61,16 +73,34 @@
     <h3>2. A minimal safety log (so help works when it matters)</h3>
     <p>Quietoak runs an independent safety check on chat messages so it can surface crisis resources reliably. When a message is flagged, we record a <strong>minimal, pseudonymous safety event</strong> tied only to your random device identifier — not your name. This exists to keep the safety system honest and to meet our obligations under California's <strong>SB 243</strong> (companion-chatbot safety law). These events are kept briefly and auto-purged on a short schedule. <strong>Crisis resources are never gated, metered, or paywalled.</strong></p>
 
+    <h3 id="self-harm-protocol">Quietoak's self-harm safety protocol</h3>
+    <p>This is the protocol Quietoak maintains for preventing companion output that encourages suicidal ideation, suicide, or self-harm, and for referring a user to real crisis services:</p>
+    <ul>
+      <li><strong>Check before and after generation.</strong> An independent safety classifier checks user messages, optional photos, and any chain analysis sent for reflection before the companion responds. A separate output guard checks generated companion text while it streams.</li>
+      <li><strong>Do not provide harmful assistance.</strong> The companion is instructed not to encourage self-harm, provide methods or optimization details, romanticize death, agree that the user should die, or impersonate an emergency or clinical professional. If unsafe output is detected, Quietoak stops or replaces it with a safe response.</li>
+      <li><strong>Refer to real people and services.</strong> When a user expresses suicidal ideation or self-harm, Quietoak shows a resource card with crisis-service options. In the United States this includes calling or texting 988 and texting HOME to 741741; other regions receive locally appropriate or general emergency guidance.</li>
+      <li><strong>Escalate proportionately.</strong> Active-method or plan/intent signals open the Crisis Survival Kit instead of leaving the user in an ordinary companion exchange. Passive or ambiguous signals keep the resources visible inline without hiding the conversation. The user can also open <em>Get help now</em> from every app screen.</li>
+      <li><strong>Keep safety access independent.</strong> Crisis resources do not require an account, AI-data-sharing permission, a subscription, or a remaining message allowance. The resource directory is bundled on the device so it can still be found without a data connection, although placing a call or sending a text requires service.</li>
+      <li><strong>Minimize audit data.</strong> A surfaced event records only a pseudonymous device identifier, risk level, and timestamp — not the message, photo, or chain text — and is automatically purged on a short schedule.</li>
+    </ul>
+    <p>Quietoak is not an emergency service and no automated system catches every crisis. If there is immediate danger, contact local emergency services now. Questions or safety reports: <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>.</p>
+
     <h3>3. Purchases</h3>
     <p>If you subscribe to Quietoak Plus, the App Store sends us a signed transaction (JWS) that we verify on our backend. We store only the entitlement state needed to unlock Plus features. The App Store handles billing, refunds, and your Apple ID — we never see your payment method.</p>
 
     <h3>4. Voice dictation (optional)</h3>
     <p>If you tap to dictate a diary entry, the microphone is used only during that recording. The audio is sent to our backend and on to <strong>OpenAI</strong> for transcription, used only to produce the text, and is not stored after transcription.</p>
 
+    <h3>5. Photos you attach (optional)</h3>
+    <p>You can attach a photo or screenshot to a message — most often a conversation you want help replying to. Quietoak removes embedded metadata and downscales the image to at most 1568 pixels on its long edge, then sends it through our backend to <strong>Anthropic</strong> twice: first for an automated safety check and then, only if cleared, to write the reply. <strong>We do not store the image on our servers</strong> — the saved server conversation records that an image was attached, not the pixels. The protected on-device conversation keeps the downscaled JPEG plus a small thumbnail so you can reopen it; both are removed when you delete that conversation or use "Delete all my data". Quietoak receives only the specific photos you pick: it does <strong>not</strong> request broad photo-library access, and there is no in-app camera.</p>
+
+    <h3>6. Chain-analysis reflections (optional)</h3>
+    <p>Your chain analyses live on your device, and finishing one never sends it anywhere. After you finish, you can <strong>ask your companion to write a short reflection</strong> on the walk-through — and only that tap sends it. What is sent: the chain you wrote (the behavior you examined, what sparked it, your vulnerability factors, the thought/feeling/urge links, the consequences, your chosen skills, and your plan for next time), along with the same optional profile context as chat. It is checked by the <strong>same automated crisis classifier</strong> as your messages — if it detects a crisis, the app shows crisis resources first (and records the same minimal, pseudonymous safety event described above; never your text) — and is then forwarded to <strong>Anthropic</strong> to write the reflection. <strong>The chain and the reflection are not stored on our servers</strong>: the reflection is generated, streamed back to you, and saved only on your device with the chain. Reflections are free on a small daily allowance, and Plus raises that allowance; the chain itself always saves regardless.</p>
+
     <h2>What we do not collect</h2>
     <ul>
       <li>Your email or login credentials (the app has no account). <strong>A first name or nickname and pronouns are optional</strong> — if you set them, see "What is sent off the device" below.</li>
-      <li>Your location, contacts, photos, or calendar.</li>
+      <li>Your location, contacts, or calendar. We never read your photo library either &mdash; only a photo you deliberately attach to a message is sent, and that is covered in "What is sent off the device" above.</li>
       <li>Any advertising identifiers. <strong>There are no ad SDKs and no third-party analytics trackers attached to your diary or chat.</strong></li>
       <li>Data from outside Quietoak.</li>
     </ul>
@@ -90,11 +120,14 @@
       <li><strong>Fly.io</strong> — hosts our backend. <a href="https://fly.io/legal/privacy-policy" rel="noopener">fly.io/legal/privacy-policy</a></li>
     </ul>
 
+    <h2>Service protection and abuse controls</h2>
+    <p>For fair-use limits and abuse prevention, our quota service keeps a short-lived SHA-256 value derived from the client IP address, calendar day, and requested resource. It is used to count requests, not to advertise to you or track you across apps or websites. Ordinary hosting infrastructure may also process network metadata needed to deliver and secure the service.</p>
+
     <h2>Your choices &amp; rights</h2>
     <ul>
-      <li><strong>Delete your data:</strong> "Delete all my data" in the app erases your diary, chats, and chains on your device, and asks our backend to delete your saved conversations, mood logs, and safety log tied to your device identifier (subject to minimal retention required by law). Deleting the app removes all on-device data, and you can always email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> with any request.</li>
+      <li><strong>Delete your data:</strong> "Delete all my data" in the app erases your diary, chats, and chains — including any companion reflections, which exist only on your device — and asks our backend to delete your saved conversations, mood logs, and safety log tied to your device identifier (subject to minimal retention required by law). Deleting the app removes all on-device data, and you can always email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> with any request.</li>
       <li><strong>Manage Plus:</strong> iOS Settings → Apple ID → Subscriptions.</li>
-      <li><strong>EU/UK (GDPR) &amp; California (CCPA):</strong> you may request access to or deletion of data tied to your device identifier, and you can object to or withdraw consent for processing at any time. <strong>We do not sell or share your personal information, and we will not discriminate against you for exercising these rights.</strong> The categories we hold are limited to: your random device identifier, your companion messages and saved conversations (which include any optional first name or nickname and pronouns you chose to set), any chat-logged mood notes, minimal pseudonymous safety events, and your Plus entitlement state. Our legal bases (GDPR) are your consent for the AI processing and our legitimate interest in operating and securing the service. Email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> to access or delete any of it.</li>
+      <li><strong>EU/UK (GDPR) &amp; California (CCPA):</strong> you may request access to or deletion of data tied to your device identifier, and you can object to or withdraw consent for processing at any time. <strong>We do not sell or share your personal information, and we will not discriminate against you for exercising these rights.</strong> The categories we hold are limited to: your random device identifier, companion messages and saved conversations (which can include an optional first name, nickname, or pronouns), chat-logged mood notes, minimal pseudonymous safety events, a short-lived IP-derived quota value, and Plus entitlement state. Our legal bases (GDPR) are your consent for the AI processing and our legitimate interest in operating and securing the service. Email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> to access or delete any of it.</li>
     </ul>
 
     <h2>Children</h2>
@@ -116,6 +149,7 @@
     <a href="privacy.html">Privacy</a>
     <a href="terms.html">Terms</a>
     <a href="support.html">Support</a>
+    <a href="safety.html">Safety</a>
     <div style="margin-top: 12px;">© 2026 HyperSage AI Labs LLC</div>
   </footer>
 

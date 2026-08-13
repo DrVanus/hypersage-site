@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Harm Safety Protocol — Quietoak</title>
+  <meta name="description" content="How Quietoak works to prevent AI companion responses that encourage suicide or self-harm and directs people to real crisis support.">
+  <link rel="canonical" href="https://hypersage.ai/quietoak/safety.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Self-Harm Safety Protocol — Quietoak">
+  <meta property="og:description" content="Quietoak's published AI-companion self-harm safety protocol and crisis-referral process.">
+  <meta property="og:url" content="https://hypersage.ai/quietoak/safety.html">
+  <meta property="og:site_name" content="Quietoak">
+  <meta property="og:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260811a">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260811a">
+  <link rel="icon" type="image/png" href="quietoak-icon.png">
+  <link rel="apple-touch-icon" href="quietoak-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="legal.css">
+</head>
+<body>
+
+  <nav class="legal-nav">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <img src="quietoak-icon.png" alt="Quietoak">
+        Quietoak
+      </a>
+      <div class="links">
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="support.html">Support</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="legal">
+    <h1>Self-Harm Safety Protocol</h1>
+    <p class="updated">Published: 2026-08-12</p>
+
+    <div class="crisis-note">
+      <strong>Need help now?</strong> Quietoak is not an emergency service. In the United States, call or text <strong>988</strong> or text <strong>HOME to 741741</strong>. Elsewhere, contact your local crisis line or emergency number. If there is immediate danger, contact emergency services now.
+    </div>
+
+    <p>This page describes the protocol Quietoak maintains to prevent its AI companion from producing content that encourages suicide, suicidal ideation, or self-harm, and to refer a person to real crisis services. It applies independently of subscription status or message limits.</p>
+
+    <h2>1. Check before and after generation</h2>
+    <p>Quietoak runs a safety classifier before an AI-companion response is generated. A separate output guard checks generated text as it streams back. These safeguards operate independently of the companion's personality instructions.</p>
+
+    <h2>2. Do not provide harmful assistance</h2>
+    <p>The companion is instructed not to encourage self-harm, provide methods or optimization details, romanticize death, agree that a person should die, or impersonate an emergency or clinical professional. When the output guard detects unsafe content, Quietoak stops or replaces the response with a safe alternative.</p>
+
+    <h2>3. Refer to real people and services</h2>
+    <p>When a message indicates suicidal ideation or self-harm, Quietoak presents crisis-service options. In the United States these include calling or texting 988 and texting HOME to 741741. Other regions receive locally appropriate resources where available, along with general emergency guidance.</p>
+
+    <h2>4. Escalate proportionately</h2>
+    <p>Signals of an active method, plan, or intent open the Crisis Survival Kit instead of leaving the person in an ordinary companion exchange. Passive or ambiguous signals keep crisis resources visible alongside the conversation. A person can also open <em>Get help now</em> from every main app screen.</p>
+
+    <h2>5. Keep crisis access independent</h2>
+    <p>Crisis resources do not require an account, permission to share data with an AI provider, a subscription, or a remaining message allowance. The resource directory is bundled with the app so it remains available without a data connection, although placing a call or sending a text still requires service.</p>
+
+    <h2>6. Minimize safety audit data</h2>
+    <p>When Quietoak surfaces a safety intervention, its backend records a minimal event containing a pseudonymous device identifier, risk level, and timestamp. It does not store the message text in that safety event, and the event is automatically removed on a short retention schedule. The separate handling of companion conversations is explained in the <a href="privacy.html">Privacy Policy</a>.</p>
+
+    <h2>Limits and review</h2>
+    <p>No automated classifier can identify every crisis or guarantee that every generated response is safe. Quietoak is a self-help tool, not therapy, clinical monitoring, a crisis line, or emergency care. We review the protocol as the product and applicable requirements change; implementation thresholds and anti-evasion details are not published because doing so could weaken the safeguards.</p>
+
+    <h2>Contact</h2>
+    <p>Report a safety concern or ask about this protocol at <a href="mailto:support@hypersage.ai?subject=Quietoak%20safety">support@hypersage.ai</a>.</p>
+  </main>
+
+  <footer class="legal-footer">
+    <a href="index.html">Home</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="support.html">Support</a>
+    <a href="safety.html">Safety</a>
+    <div style="margin-top: 12px;">© 2026 HyperSage AI Labs LLC</div>
+  </footer>
+
+</body>
+</html>
