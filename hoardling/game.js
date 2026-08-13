@@ -680,6 +680,135 @@
     return { data: data, write: write, unlocked: unlocked };
   })();
 
+  // ===== Daily leaderboard — the WADDLETON foundation (fail-soft, lane 3) ==
+  // Hoardling is board 'hoardling_daily' in the proven multi-board Supabase
+  // schema PenguinArcade ships (registry + authenticated-only RPCs +
+  // server-timed single-use tokens + monotonic best). Identity: Supabase
+  // NATIVE ANONYMOUS sign-in (probed live 2026-08-13: mints a session
+  // directly, no relay/captcha). Config via optional lb-config.js
+  // (window.HOARDLING_LB = {url, key, board}); absent config = board off =
+  // every path silently no-ops. NOTHING here touches the seeded stream.
+  var Lb = (function () {
+    var cfg = (typeof window !== 'undefined' && window.HOARDLING_LB) || null;
+    function on() { return !!(cfg && cfg.url && cfg.key && cfg.board); }
+    var sess = null;
+    try { sess = JSON.parse(localStorage.getItem('hoardling.sb') || 'null'); } catch (e) {}
+    function saveSess() { try { localStorage.setItem('hoardling.sb', JSON.stringify(sess)); } catch (e) {} }
+    function hdrs() {
+      return { 'apikey': cfg.key, 'Authorization': 'Bearer ' + (sess && sess.access_token || cfg.key), 'Content-Type': 'application/json' };
+    }
+    // ensureSession(cb): reuse -> refresh -> anonymous signup, all fail-soft
+    function ensureSession(cb) {
+      if (!on()) { cb(false); return; }
+      var now = Date.now() / 1000;
+      if (sess && sess.access_token && sess.expires_at - 60 > now) { cb(true); return; }
+      var doSignup = function () {
+        fetch(cfg.url + '/auth/v1/signup', { method: 'POST', headers: { 'apikey': cfg.key, 'Content-Type': 'application/json' }, body: '{}' })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d && d.access_token) {
+              sess = { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: now + (d.expires_in || 3600) };
+              saveSess(); cb(true);
+            } else cb(false);
+          })
+          .catch(function () { cb(false); });
+      };
+      if (sess && sess.refresh_token) {
+        fetch(cfg.url + '/auth/v1/token?grant_type=refresh_token', {
+          method: 'POST', headers: { 'apikey': cfg.key, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: sess.refresh_token }),
+        }).then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d && d.access_token) {
+              sess = { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: Date.now() / 1000 + (d.expires_in || 3600) };
+              saveSess(); cb(true);
+            } else doSignup();   // refresh rejected: mint a fresh anonymous user
+          })
+          .catch(function () { cb(false); });   // network: not a reason to re-mint
+      } else doSignup();
+    }
+    function tag() {   // WICK-XXXX derived from the stored session — no input UI
+      var s = (sess && sess.refresh_token) || 'wick';
+      var h = 0;
+      for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+      return 'WICK-' + ('0000' + ((h >>> 0) % 65536).toString(16).toUpperCase()).slice(-4);
+    }
+    // strict-pattern render guard (the Gemburrow safeName lesson): any name
+    // that isn't exactly our tag shape paints as WICK-???? — no sanitizer gaps
+    function safeName(s) { return /^WICK-[0-9A-F]{4}$/.test(s) ? s : 'WICK-????'; }
+    var token = null;
+    function beginRun() {
+      token = null;
+      if (!on()) return;
+      ensureSession(function (ok) {
+        if (!ok) return;
+        fetch(cfg.url + '/rest/v1/rpc/waddleton_start_run', {
+          method: 'POST', headers: hdrs(), body: JSON.stringify({ p_board: cfg.board }),
+        }).then(function (r) { return r.json(); })
+          .then(function (t) { if (typeof t === 'string' && t) token = t; })
+          .catch(function () {});
+      });
+    }
+    var VERDICTS = { 'bad-body': 1, 'bad-token': 1, 'too-fast': 1, 'over-rate': 1 };
+    function readQ() { try { return JSON.parse(localStorage.getItem('hoardling.lbq') || '[]'); } catch (e) { return []; } }
+    function writeQ(v) { try { localStorage.setItem('hoardling.lbq', JSON.stringify(v.slice(-10))); } catch (e) {} }
+    var flushing = false;
+    function flush(done) {
+      if (!on() || flushing) { if (done) done(); return; }
+      var list = readQ();
+      if (!list.length) { if (done) done(); return; }
+      flushing = true;
+      ensureSession(function (ok) {
+        if (!ok) { flushing = false; if (done) done(); return; }
+        (function step(i) {
+          if (i >= list.length) {
+            flushing = false;
+            writeQ(list.filter(function (e) { return !e._drop; }));
+            if (done) done(); return;
+          }
+          var e = list[i];
+          fetch(cfg.url + '/rest/v1/rpc/waddleton_submit_run', {
+            method: 'POST', headers: hdrs(),
+            body: JSON.stringify({ p_token: e.token, p_board: cfg.board, p_name: tag(), p_value: e.wave }),
+          }).then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+            .then(function (v) {
+              if (v && (v.ok || VERDICTS[v.error])) e._drop = 1;   // verdicts never retry
+              step(i + 1);
+            })
+            .catch(function () {
+              e.tries = (e.tries || 0) + 1;
+              if (e.tries > 6 || Date.now() - (e.ts || 0) > 36e5) e._drop = 1;
+              flushing = false;
+              writeQ(list.filter(function (x) { return !x._drop; }));
+              if (done) done();
+            });
+        })(0);
+      });
+    }
+    function finishRun(wave, kills, seed, done) {
+      if (!on() || !token || wave < 1) { if (done) done(); return; }
+      var list = readQ(), dup = false;
+      for (var i = 0; i < list.length; i++) if (list[i].token === token) dup = true;
+      if (!dup) { list.push({ token: token, wave: wave, kills: kills, seed: seed, ts: Date.now() }); writeQ(list); }
+      token = null;
+      flush(done);
+    }
+    function top(n, cb) {
+      if (!on()) { cb(null); return; }
+      ensureSession(function (ok) {
+        if (!ok) { cb(null); return; }
+        fetch(cfg.url + '/rest/v1/waddleton_scores?board=eq.' + cfg.board +
+              '&select=display_name,value,updated_at&order=value.desc,updated_at.asc&limit=' + n,
+              { headers: hdrs() })
+          .then(function (r) { return r.json(); })
+          .then(function (rows) { cb(Array.isArray(rows) ? rows : null); })
+          .catch(function () { cb(null); });
+      });
+    }
+    if (typeof window !== 'undefined') window.addEventListener('online', function () { flush(); });
+    return { on: on, beginRun: beginRun, finishRun: finishRun, top: top, tag: tag, safeName: safeName, flush: flush };
+  })();
+
   // Placeholder + preview tint per enemy (shared by the enemy drawer and the
   // next-wave preview so the icons teach the colors before the wave arrives).
   var ENEMY_COLORS = {
@@ -846,6 +975,8 @@
     if (!Save.data.tut && this.mode === 'campaign' && this.towers.length) {
       Save.data.tut = 1; Save.write();       // taught: build, then call the wave
     }
+    // daily: the server-timed run token starts at the FIRST wave call
+    if (this.mode === 'daily' && this.wave === 0) Lb.beginRun();
     Sfx.play('wave');
   };
 
@@ -1235,6 +1366,14 @@
     if (this.mode === 'campaign' && won && stars > Save.data.stars[this.levelIdx]) Save.data.stars[this.levelIdx] = stars;
     if (this.mode === 'daily' && this.wave > Save.data.dailyBestWave) Save.data.dailyBestWave = this.wave;
     Save.write();
+    // daily board: submit this run, then pull today's top — UI-only state
+    if (this.mode === 'daily' && Lb.on()) {
+      var self = this;
+      this.lbRows = 'loading';
+      Lb.finishRun(this.wave, this.kills, this.seed, function () {
+        Lb.top(10, function (rows) { self.lbRows = rows || 'error'; });
+      });
+    } else this.lbRows = null;
     Sfx.play(won ? 'win' : 'lose');
   };
 
@@ -2171,20 +2310,49 @@
     // the story beat this whole game is for
     ctx.font = 'italic 15px Georgia, serif'; ctx.fillStyle = '#ff9a3c';
     if (r.won) {
-      ctx.fillText('Auremma stirs, half-dreaming:', WORLD_W / 2, 540);
-      ctx.fillText('“You kept the warm in, little one.”', WORLD_W / 2, 562);
+      ctx.fillText('Auremma stirs, half-dreaming:', WORLD_W / 2, 528);
+      ctx.fillText('“You kept the warm in, little one.”', WORLD_W / 2, 549);
     } else {
-      ctx.fillText('The cavern grows colder.', WORLD_W / 2, 540);
-      ctx.fillText('Wick will not let it happen twice.', WORLD_W / 2, 562);
+      ctx.fillText('The cavern grows colder.', WORLD_W / 2, 528);
+      ctx.fillText('Wick will not let it happen twice.', WORLD_W / 2, 549);
     }
-    var rimg = ART.images.hero;
-    if (rimg) {
-      var rw = 84, rh = rw * (rimg.height / rimg.width);
-      var rb = Math.sin(this.worldT * 4) * 2;
-      ctx.drawImage(rimg, WORLD_W / 2 - rw / 2, 668 - rh + rb, rw, rh);
+    // daily: the global best-runs ladder (names render through safeName ONLY)
+    if (this.mode === 'daily' && Lb.on()) {
+      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.fillText('— GLOBAL BEST SIEGES —', WORLD_W / 2, 584);
+      if (this.lbRows === 'loading') {
+        ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
+        ctx.fillText('fetching the ladder…', WORLD_W / 2, 610);
+      } else if (this.lbRows === 'error' || !this.lbRows) {
+        ctx.fillStyle = '#8a7f72'; ctx.font = '13px system-ui, sans-serif';
+        ctx.fillText('ladder unreachable — your run is queued', WORLD_W / 2, 610);
+      } else if (!this.lbRows.length) {
+        ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
+        ctx.fillText('no siegers yet — yours could be first', WORLD_W / 2, 610);
+      } else {
+        ctx.font = '13px ui-monospace, Menlo, monospace';
+        var mine = Lb.tag();
+        for (var bi = 0; bi < Math.min(8, this.lbRows.length); bi++) {
+          var row = this.lbRows[bi];
+          var nm = Lb.safeName(String(row.display_name || ''));
+          ctx.fillStyle = nm === mine ? '#9ef58f' : '#ffe9c4';
+          ctx.textAlign = 'left';
+          ctx.fillText((bi + 1) + '.  ' + nm, WORLD_W / 2 - 105, 606 + bi * 17);
+          ctx.textAlign = 'right';
+          ctx.fillText('wave ' + (row.value | 0), WORLD_W / 2 + 105, 606 + bi * 17);
+        }
+        ctx.textAlign = 'center';
+      }
+    } else {
+      var rimg = ART.images.hero;
+      if (rimg) {
+        var rw = 84, rh = rw * (rimg.height / rimg.width);
+        var rb = Math.sin(this.worldT * 4) * 2;
+        ctx.drawImage(rimg, WORLD_W / 2 - rw / 2, 668 - rh + rb, rw, rh);
+      }
     }
     ctx.font = 'bold 15px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
-    ctx.fillText('tap for menu', WORLD_W / 2, 700);
+    ctx.fillText('tap for menu', WORLD_W / 2, 748);
     ctx.textAlign = 'left';
   };
 
