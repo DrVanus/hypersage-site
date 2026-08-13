@@ -11,11 +11,11 @@
   <meta property="og:description" content="How Quietoak handles your data — what stays on your device, what's sent to generate companion replies, and how your mental-health content is protected.">
   <meta property="og:url" content="https://hypersage.ai/quietoak/privacy.html">
   <meta property="og:site_name" content="Quietoak">
-  <meta property="og:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260806b">
+  <meta property="og:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260811a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260806b">
+  <meta name="twitter:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260811a">
   <link rel="icon" type="image/png" href="quietoak-icon.png">
   <link rel="apple-touch-icon" href="quietoak-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,24 +41,12 @@
 
   <main class="legal">
     <h1>Privacy Policy</h1>
-    <!-- ⚠️ DEPLOY GATE (added 2026-08-09): the "Photos you attach" section below
-         describes image input, which ships in 1.1. Do NOT deploy this page until
-         the 1.1 build is live, or the policy promises a feature the shipped app
-         does not have. Deploy it WITH 1.1, not before — and note the ASC App
-         Privacy questionnaire must be refiled in the same pass (Photos or Videos
-         becomes a collected type). See anchor-ios/APP_PRIVACY_ASC.md §F.
-         UPDATE 2026-08-10: the "Chain-analysis reflections" section below also
-         ships in 1.1 (and needs storyvault-api deployed with the
-         /v1/dbt/chain-reflection route). Same gate, same release day. The
-         chat-recap paragraph's mention of the chain "next time" plan, however,
-         describes SHIPPING 1.0 behavior and closes a pre-existing disclosure
-         gap — it alone could go live today. -->
-    <p class="updated">Last updated: 2026-08-12</p>
+    <p class="updated">Last updated: 2026-08-13</p>
 
     <p>Quietoak is a mental-health-adjacent app, so we hold your data to a careful standard: your practice stays on your device by default, there are no ads or third-party trackers on your diary or chat, and we collect as little as we can.</p>
 
     <h2>Who we are</h2>
-    <p>Quietoak is an iOS app published by HyperSage AI Labs. There is <strong>no account and no login</strong> — the app identifies your install with a random, on-device identifier, not your name or email. Contact: <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>.</p>
+    <p>Quietoak is an iOS app published by HyperSage AI Labs LLC. There is <strong>no account and no login</strong> — the app identifies your install with a random, on-device identifier, not your name or email. Contact: <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>.</p>
 
     <h2>What stays on your device</h2>
     <p>Your <strong>diary card entries, mood and urge logs, chosen companion, and practice history live on your device</strong>, and we keep no copy of your diary on our servers. If you have iCloud Backup enabled, they are included per your iOS settings. Any health conditions or focus areas you choose to share — and how sure you are about each — are also kept on your device, and are optional, editable, and clearable at any time.</p>
@@ -71,7 +59,7 @@
     <p>When you chat with your companion, the messages in that conversation are sent to our backend and forwarded to an AI provider to generate a reply. If you've chosen to share any conditions or focus areas — which otherwise stay on your device — that context is included with your messages so the reply can be tailored to you. <strong>If you set an optional first name or nickname and pronouns</strong> (during setup, or later in Me → Edit profile), those are sent with each message too, so your companion can address you the way you asked. They are used only to generate that reply and are never used to identify you: we keep no server-side profile, so they are not stored as account details. If your companion saves something it has learned about you that happens to include your name, that note is stored like any other saved memory and is erased by "Delete all my data". Leave both fields blank and nothing is sent. When you mention a mood in chat, your companion may also save a brief mood note (an emotion and a 0–5 intensity) on our backend, tied to the same random device identifier, so it can keep gentle track with you — this is separate from your on-device diary card. We use <strong>Anthropic (Claude)</strong> as the primary provider and <strong>OpenAI</strong> as a fallback and for optional voice. Under these providers' <strong>current API terms, your content is not used to train their models</strong> — we don't control their policies, so please also see their privacy links below. We don't sell or share your conversations. To power your saved chats and the continuity you'd expect — your companion remembering what you're working on between conversations — your messages are stored on our backend, tied only to a random device identifier (we hold no name, email, or login). You can have them permanently deleted at any time (see "Your choices &amp; rights" below).</p>
 
     <h3>2. A minimal safety log (so help works when it matters)</h3>
-    <p>Quietoak runs an independent safety check on chat messages so it can surface crisis resources reliably. When a message is flagged, we record a <strong>minimal, pseudonymous safety event</strong> tied only to your random device identifier — not your name. This exists to keep the safety system honest and to meet our obligations under California's <strong>SB 243</strong> (companion-chatbot safety law). These events are kept briefly and auto-purged on a short schedule. <strong>Crisis resources are never gated, metered, or paywalled.</strong></p>
+    <p>Quietoak runs an independent safety check on chat messages so it can surface crisis resources reliably. When a message is flagged, we record a <strong>minimal, pseudonymous safety event</strong> tied only to your random device identifier — not your name. This exists to keep the safety system honest and to meet our obligations under California's <strong>SB 243</strong> (companion-chatbot safety law). These events carry a hard retention limit of <strong>90 days</strong> and are purged automatically; there is no indefinite retention. <strong>Crisis resources are never gated, metered, or paywalled.</strong></p>
 
     <h3 id="self-harm-protocol">Quietoak's self-harm safety protocol</h3>
     <p>This is the protocol Quietoak maintains for preventing companion output that encourages suicidal ideation, suicide, or self-harm, and for referring a user to real crisis services:</p>
@@ -100,7 +88,7 @@
     <h2>What we do not collect</h2>
     <ul>
       <li>Your email or login credentials (the app has no account). <strong>A first name or nickname and pronouns are optional</strong> — if you set them, see "What is sent off the device" below.</li>
-      <li>Your location, contacts, or calendar. We never read your photo library either &mdash; only a photo you deliberately attach to a message is sent, and that is covered in "What is sent off the device" above.</li>
+      <li>Your precise or approximate location — there is no GPS and no CoreLocation anywhere in the app. (Your device's two-letter <strong>region setting</strong>, for example "US", is sent with each request so the right crisis lines are shown for where you are.) Your contacts, or your calendar. We never read your photo library either &mdash; only a photo you deliberately attach to a message is sent, and that is covered in "What is sent off the device" above.</li>
       <li>Any advertising identifiers. <strong>There are no ad SDKs and no third-party analytics trackers attached to your diary or chat.</strong></li>
       <li>Data from outside Quietoak.</li>
     </ul>
@@ -121,7 +109,7 @@
     </ul>
 
     <h2>Service protection and abuse controls</h2>
-    <p>For fair-use limits and abuse prevention, our quota service keeps a short-lived SHA-256 value derived from the client IP address, calendar day, and requested resource. It is used to count requests, not to advertise to you or track you across apps or websites. Ordinary hosting infrastructure may also process network metadata needed to deliver and secure the service.</p>
+    <p>For fair-use limits and abuse prevention, our quota service stores a <strong>SHA-256 hash of your IP address</strong> (never the address itself) alongside the calendar day and the feature used, so it can count requests. It is used to count requests, not to advertise to you or track you across apps or websites. Ordinary hosting infrastructure may also process network metadata needed to deliver and secure the service.</p>
 
     <h2>Your choices &amp; rights</h2>
     <ul>

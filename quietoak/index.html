@@ -747,7 +747,7 @@
       "name": "What's free, and what's Plus?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The whole app is free to use: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (5 messages a day). Quietoak Plus ($9.99/month or $59.99/year) raises that to 100 messages a day, on the smartest version of them — and adds a premium companion voice (the on-device voice stays free for everyone) and a clinician-ready PDF of your diary card. Crisis support is never limited and never behind Plus."
+        "text": "The whole app is free to use: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (5 messages a day; a message with a photo attached counts as three, because the image goes through a separate safety check first). Quietoak Plus ($9.99/month or $59.99/year) raises that to 100 messages a day, on the smartest version of them — and adds a premium companion voice (the on-device voice stays free for everyone) and a clinician-ready PDF of your diary card. Crisis support is never limited and never behind Plus."
       }
     },
     {
@@ -1013,10 +1013,22 @@
         <div>
           <div class="section-eyebrow">Knows you better</div>
           <h2>It learns what you're <em>navigating.</em></h2>
-          <p class="lede">Tell your companion what you're working with — what a professional has diagnosed, or just what you think might fit. It uses that to meet you where you are: the skills it reaches for, the words it chooses, what it knows might be hard.</p>
+          <!-- WELLNESS-SAFE COPY (rewritten 2026-08-13). The previous lede read
+               "what a professional has diagnosed … It uses that to meet you where
+               you are: the skills it reaches for" — advertising that wires named
+               clinical diagnoses to what the software then does therapeutically,
+               which is intended-use language under 21 CFR 801.4 and the
+               2026-01-06 General Wellness reissue (which names ADVERTISING and
+               USER INTERFACE as disqualifiers). The same construction was removed
+               from the App Store description that morning; this closes the site
+               half. The FEATURE is unchanged and the screenshot stays — an
+               optional, user-controlled, clearable context field is honest to
+               depict. What changed is that the copy no longer claims diagnosis
+               drives skill selection. Keep "Never a label" FIRST. -->
+          <p class="lede">Tell your companion as much or as little as you like about what you're navigating. It carries that as context — the words it chooses, what it already knows not to ask you twice — so you never have to start from scratch.</p>
           <ul class="spotlight-points">
-            <li><strong>However sure you are.</strong> For each one, mark whether you're just <em>wondering</em>, <em>pretty sure</em>, or it's been <em>diagnosed</em> — all welcome, none required.</li>
-            <li><strong>Never a label.</strong> Quietoak doesn't diagnose or treat. Your companion uses this as context, never to assess you, and always points clinical questions back to your clinician.</li>
+            <li><strong>Never a label.</strong> Quietoak doesn't diagnose, treat, or assess you. Your companion holds what you share as context for how it talks with you, and always points clinical questions back to your clinician.</li>
+            <li><strong>However sure you are.</strong> Mark anything you add as just <em>wondering</em>, <em>pretty sure</em>, or <em>diagnosed</em> — all welcome, none required, and nothing is verified or needed to use the app.</li>
             <!-- The conditions profile is kept on device but rides along with every message
                  (Anchor/Companion/CompanionChatScreen.swift:383-385 sends conditions_diagnosed
                  / _strongly_suspected / _self_suspected); privacy.html:59 says so. -->
@@ -1037,7 +1049,7 @@
           <p class="lede">Tap once and talk — hands-free, like a real conversation. Your companion listens and answers in a warm spoken voice, so on the nights you can't face typing, you don't have to. Switch back to text whenever you want.</p>
           <ul class="spotlight-points">
             <li><strong>Hands-free.</strong> Tap to talk, then just speak — no typing, no menus.</li>
-            <li><strong>A voice that matches your companion.</strong> Each one has its own gentle, distinct voice.</li>
+            <li><strong>A voice that matches your companion.</strong> You'll hear each one's real voice when you choose — and in chat that voice is part of Plus; the on-device voice stays free for everyone.</li>
             <li><strong>Always your choice.</strong> "Type instead" is one tap away, and the crisis kit is never more than a tap from here either.</li>
           </ul>
         </div>
@@ -1158,7 +1170,7 @@
           <div class="screen-label"><strong>In-chat skills</strong>Lessons, right in the chat</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="screenshots/03-skills.jpg?v=20260813a" data-light="screenshots/03-skills.jpg?v=20260813a" data-dark="screenshots/03-skills-dark.jpg?v=20260813a" width="1200" height="2607" alt="Quietoak Skills tab — the four DBT modules" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="screenshots/03-skills.jpg?v=20260813a" data-light="screenshots/03-skills.jpg?v=20260813a" data-dark="screenshots/03-skills-dark.jpg?v=20260813a" width="1200" height="2607" alt="Quietoak Skills tab — a skill picked for you today, 9 of 18 practised, and the ones you reached for most recently" loading="lazy"></div>
           <div class="screen-label"><strong>Skills</strong>Real DBT skills, guided</div>
         </div>
         <div class="screen-card">
@@ -1270,7 +1282,7 @@
           <ul class="spotlight-points">
             <li><strong>Every urge you ride out.</strong> Feeling an urge and <em>not</em> acting on it is the skill working — those count here, not just the hard days.</li>
             <li><strong>A kind streak, never a guilt trip.</strong> See the days you checked in; a missed day is never framed as a broken streak.</li>
-            <li><strong>Patterns over time.</strong> Your mood and skill use show up as calm lines, so you can see what's actually helping.</li>
+            <li><strong>Patterns over time.</strong> Your mood and urge levels show up as calm lines, with the days you reached for a skill counted alongside them, so you can see what's actually helping.</li>
           </ul>
         </div>
         <div class="spotlight-phone">
@@ -1450,7 +1462,7 @@
         </details>
         <details class="faq">
           <summary>What's free, and what's Plus?</summary>
-          <p>The whole app is free to use: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (5 messages a day). Quietoak Plus ($9.99/month or $59.99/year) raises that to 100 messages a day, on the smartest version of them — and adds a premium companion voice (the on-device voice stays free for everyone) and a clinician-ready PDF of your diary card. Crisis support is never limited and never behind Plus.</p>
+          <p>The whole app is free to use: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (5 messages a day; a message with a photo attached counts as three, because the image goes through a separate safety check first). Quietoak Plus ($9.99/month or $59.99/year) raises that to 100 messages a day, on the smartest version of them — and adds a premium companion voice (the on-device voice stays free for everyone) and a clinician-ready PDF of your diary card. Crisis support is never limited and never behind Plus.</p>
         </details>
         <details class="faq">
           <summary>Who is Quietoak for?</summary>
