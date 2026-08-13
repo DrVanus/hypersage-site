@@ -2267,8 +2267,17 @@
     rr(ctx, WORLD_W / 2 - 130, 596, 260, 52, 13); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.font = 'bold 18px system-ui, sans-serif';
     ctx.fillText('DAILY SIEGE', WORLD_W / 2, 629);
+    // ladder peek: the world-best run on the caption line (throttled cosmetic
+    // fetch — render-lane IO, touches nothing in the sim)
+    if (Lb.on() && (!this._lbTopT || Date.now() - this._lbTopT > 300000)) {
+      this._lbTopT = Date.now();
+      var self2 = this;
+      Lb.top(1, function (rows) { self2._lbTop = (rows && rows[0]) || null; });
+    }
     ctx.font = '12px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
-    var dl = 'same siege + map for everyone today';
+    var dl = this._lbTop
+      ? Lb.safeName(String(this._lbTop.display_name || '')) + ' holds wave ' + (this._lbTop.value | 0)
+      : 'same siege + map for everyone today';
     if (Save.data.dailyBestWave > 0) dl += ' — your best: wave ' + Save.data.dailyBestWave;
     ctx.fillText(dl, WORLD_W / 2, 664);
     // sound toggle
