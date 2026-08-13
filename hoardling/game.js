@@ -2606,7 +2606,7 @@
     ctx.fillText('HOARDLING', WORLD_W / 2, 290);
     ctx.fillStyle = '#ff9a3c';
     ctx.font = 'italic 17px Georgia, serif';
-    ctx.fillText('Keep the warm in.', WORLD_W / 2, 322);
+    ctx.fillText('Too young for dragonfire. Built his own.', WORLD_W / 2, 322);
     ctx.fillStyle = '#ffe9c4';
     ctx.font = '14px system-ui, sans-serif';
     ctx.fillText('A dragon too young for dragonfire —', WORLD_W / 2, 356);
