@@ -345,6 +345,15 @@
       box-shadow: 0 16px 40px rgba(33,53,59,0.10);
       background: #fff; transition: transform .3s, box-shadow .3s;
     }
+    /* REQUIRED by the width/height attributes on every <img> (added as a CLS
+       fix). Those attributes give the browser an intrinsic size — 1200x2607 —
+       and without `height: auto` the height attribute WINS: the image renders
+       195px wide and 2607px TALL, a stretched sliver of the status bar. It
+       broke every phone mockup on the page the moment the attributes shipped.
+       `width: 100%` + `height: auto` restores the aspect ratio while keeping
+       the CLS benefit (the browser still reserves the right box from the
+       attribute ratio). Do not remove either half. */
+    .screen-frame img { display: block; width: 100%; height: auto; }
     .screen-card:hover .screen-frame { transform: translateY(-6px); box-shadow: 0 24px 56px rgba(33,53,59,0.16); }
     .screen-card img { width: 100%; display: block; }
     .screen-label { margin-top: 12px; font-size: 0.84rem; color: var(--muted-fg); line-height: 1.4; }
