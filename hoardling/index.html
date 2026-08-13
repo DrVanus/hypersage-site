@@ -9,13 +9,13 @@
   <title>Hoardling</title>
   <meta name="theme-color" content="#17100e">
   <!-- installable PWA: "Add to Home Screen" gives a fullscreen portrait app -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png">
-  <link rel="apple-touch-icon" href="art/icon-180.png">
+  <link rel="manifest" href="manifest.json?v=3bab2bae89">
+  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=3bab2bae89">
+  <link rel="apple-touch-icon" href="art/icon-180.png?v=3bab2bae89">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Hoardling">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3bab2bae89">
 </head>
 <body>
   <div id="game-wrap">
@@ -29,7 +29,8 @@
          position them with top:max(10px, env(safe-area-inset-top)) etc. -->
   </div>
   <!-- optional leaderboard config; a 404 here is fine (board stays off) -->
-  <script src="lb-config.js"></script>
-  <script src="game.js" defer></script>
+  <script>window.__BUILD__="3bab2bae89";</script>
+  <script src="lb-config.js?v=3bab2bae89"></script>
+  <script src="game.js?v=3bab2bae89" defer></script>
 </body>
 </html>

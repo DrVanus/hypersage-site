@@ -164,6 +164,45 @@
       ],
     },
   };
+  // ===== DEPTH KIT — the renderer's half of the 3D read ====================
+  // The art is pre-rendered 3D (the same technique Clash of Clans ships), but
+  // the ENGINE was not finishing the job: shadows were drawn narrower than the
+  // sprites that covered them (so nothing ever touched the ground), sprite
+  // size was constant across a 530-unit depth range on a background painted
+  // with real floor perspective, and the six torches each map declares lit
+  // nothing at all. These four helpers fix that. All render-lane, no sim state.
+  var LIGHT_DX = 0.55, LIGHT_DY = 0.34;      // key light from upper-left, one law for everything
+  function depth01(y) { return clamp((y - 150) / (WORLD_H - 180), 0, 1); }
+  // nearer the camera (down-screen) = bigger. Matches the painted floor.
+  function depthScale(y) { return 0.90 + 0.22 * depth01(y); }
+  // A body sits on the ground when it has BOTH a tight dark contact patch and
+  // a soft cast shadow thrown along the light. One ellipse can't do both.
+  function groundShadow(ctx, x, y, w, lift, strength) {
+    var s = strength === undefined ? 1 : strength;
+    var rise = 1 + (lift || 0) / 46;                     // airborne = bigger, fainter, further
+    ctx.fillStyle = 'rgba(6,4,3,' + (0.34 * s / rise) + ')';
+    ctx.beginPath();
+    ctx.ellipse(x + LIGHT_DX * w * 0.30 * rise, y + 2 + LIGHT_DY * w * 0.12 * rise,
+                w * 0.56 * rise, w * 0.23 * rise, 0, 0, 6.283);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,' + (0.42 * s / (rise * rise)) + ')';   // contact AO
+    ctx.beginPath();
+    ctx.ellipse(x, y + 2, w * 0.31, w * 0.12, 0, 0, 6.283);
+    ctx.fill();
+  }
+  // Torchlight that actually touches a body: warm additive keyed to the
+  // nearest declared light. The maps have always carried these six positions.
+  function torchWarm(x, y) {
+    var t = MAP.torches, best = 0;
+    for (var i = 0; i < t.length; i++) {
+      var dx = x - t[i][0], dy = y - t[i][1];
+      var d2 = dx * dx + dy * dy;
+      var f = 1 - Math.min(1, d2 / (132 * 132));
+      if (f > best) best = f;
+    }
+    return best * best;                       // falls off fast: pools, not a wash
+  }
+
   // The row a tower actually runs on: its level row, or its chosen fork at L3.
   function lvlRow(tw) {
     var tt = TOWER_TYPES[tw.type];
@@ -942,15 +981,21 @@
   // walk-cycle frames (masked-inpaint legs; upper bodies identical to the
   // master plate by construction). Behind a toggle per the animation memory.
   var WALK_FRAMES = !/[?&]frames=0/.test(location.search);
+  // Build stamp, published by build-web.py before this script runs. Art
+  // filenames are stable forever, so WITHOUT this every cache in the chain
+  // (proxy, WKWebView URLCache, PWA store) can serve the original bytes
+  // indefinitely — the "it's all the old art" bug. New build => new URL.
+  var BUILD = (typeof window !== 'undefined' && window.__BUILD__) || '';
+  function assetURL(p) { return BUILD ? p + '?v=' + BUILD : p; }
   var ANIM = { meta: {}, images: {} };
   if (WALK_FRAMES && typeof window !== 'undefined' && window.fetch) {
-    fetch('art/anim/meta.json').then(function (r) { return r.ok ? r.json() : {}; }).then(function (m) {
+    fetch(assetURL('art/anim/meta.json')).then(function (r) { return r.ok ? r.json() : {}; }).then(function (m) {
       ANIM.meta = m || {};
       Object.keys(ANIM.meta).forEach(function (k) {
         ['a', 'b'].forEach(function (tag) {
           var img = new Image();
           img.onload = function () { ANIM.images[k + '_' + tag] = img; };
-          img.src = 'art/anim/' + k + '_' + tag + '.png';
+          img.src = assetURL('art/anim/' + k + '_' + tag + '.png');
         });
       });
     }).catch(function () {});
@@ -988,7 +1033,7 @@
         var img = new Image();
         img.onload = function () { self.images[id] = img; delete self.missing[id]; };
         img.onerror = function () { self.missing[id] = 1; };
-        img.src = self.manifest[id];
+        img.src = assetURL(self.manifest[id]);
       });
     },
   };
@@ -1060,7 +1105,9 @@
     this.particles = []; this.floats = []; this.fxQueue = []; this.shake = 0;
     this.nextId = 1;
     var hs = MAP.heroStart || { x: 210, y: 470 };
-    this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0, breathCd: 6, spd: 85, selected: false, castBreath: false };
+    this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0,
+                  breathCd: 6, spd: 85, selected: false, castBreath: false,
+                  manPad: -1, manned: false };   // manPad: pad INDEX (survives tower splices)
     this.menu = null;                       // { padIdx } build menu | { towerIdx } manage menu
     this.stolenLost = 0; this.kills = 0;
     this.breathUsed = false;                // Mother's Breath spends once per level
@@ -1364,6 +1411,12 @@
       if (odd < ocD) { ocD = odd; ocIdx = oc; }
       this.towers[oc]._oc = false;
     }
+    // MANNED beats mere proximity: Wick at the crank IS the buff, and it is
+    // visible (he is sitting on the machine) instead of an invisible aura.
+    for (var mi = 0; mi < this.towers.length; mi++) {
+      this.towers[mi]._manned = this.hero.manned && this.towers[mi].padIdx === this.hero.manPad;
+      if (this.towers[mi]._manned) { this.towers[mi]._oc = false; if (ocIdx === mi) ocIdx = -1; }
+    }
     if (ocIdx !== -1) {
       this.towers[ocIdx]._oc = true;
       if (!this._ocSeen) {
@@ -1377,7 +1430,7 @@
     for (var t = 0; t < this.towers.length; t++) {
       var tw = this.towers[t];
       var tt = TOWER_TYPES[tw.type], lv = lvlRow(tw);
-      tw.cd -= STEP * (tw._oc ? 1.25 : 1);
+      tw.cd -= STEP * (tw._manned ? 1.7 : tw._oc ? 1.25 : 1);
       if (tw.cd > 0) continue;
       var pad = MAP.pads[tw.padIdx];
       // crystal: pulse-slow everything in range, no target needed.
@@ -1397,7 +1450,7 @@
             ce.slowT = Math.max(ce.slowT, lv.slowDur);
             if (lv.special === 'deepchill') ce.deepT = lv.slowDur;
             if (lv.special === 'resonance') { ce.brittleT = lv.slowDur; ce.brittleMul = lv.brittleMul; }
-            if (lv.dmg) this._damage(ce, lv.dmg * (this.mods.dmgMul || 1), { kind: 'magic', tower: tw });
+            if (lv.dmg) this._damage(ce, lv.dmg * (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1), { kind: 'magic', tower: tw });
             hitAny++;
           }
         }
@@ -1405,7 +1458,7 @@
         tw.cd = hitAny ? 1 / lv.rate : 0.1;   // idle rescan at 6 Hz, not 60
         continue;
       }
-      var mDmg = this.mods.dmgMul || 1, mRng = this.mods.rangeMul || 1;
+      var mDmg = (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1), mRng = this.mods.rangeMul || 1;
       var target = this._pickTarget(pad, lv.range * mRng, tt.hitsAir, tt.airBonus, tw.targeting | 0);
       if (!target) { tw.cd = 0.1; continue; }   // miss: rescan at 6 Hz, not 60
       tw.cd = 1 / lv.rate;
@@ -1452,6 +1505,8 @@
           shieldbreak: lv.special === 'shieldbreak',
           net: lv.special === 'downdraft' ? lv.groundDur : 0, tower: t,
         });
+        // the STRING SNAP: a real crossbow releases, it doesn't just emit
+        this.fxQueue.push({ k: 'snap', x: pad.x, y: pad.y - 26, tx: tp.x, ty: tp.y });
         Sfx.play('shoot');
       }
     }
@@ -1486,6 +1541,21 @@
           }
           Sfx.play('hit');
         }
+      } else if (pr.kind === 'fire') {                      // Wick's fireball
+        var ft = null;
+        for (var fq = 0; fq < this.enemies.length; fq++) if (this.enemies[fq].id === pr.target) { ft = this.enemies[fq]; break; }
+        if (!ft) { this.projectiles.splice(p, 1); continue; }
+        var fdx = ft.px - pr.x, fdy = ft.py - pr.y;
+        var fdist = Math.sqrt(fdx * fdx + fdy * fdy);
+        if (fdist < 11) {
+          this._damage(ft, pr.dmg, { kind: 'hero' });
+          this.fxQueue.push({ k: 'fireburst', x: ft.px, y: ft.py });
+          this.projectiles.splice(p, 1);
+        } else {
+          pr.dx = fdx / fdist; pr.dy = fdy / fdist;
+          pr.x += pr.dx * pr.spd * STEP;
+          pr.y += pr.dy * pr.spd * STEP;
+        }
       } else {                                              // bolt
         var tgt = null;
         for (var q = 0; q < this.enemies.length; q++) if (this.enemies[q].id === pr.target) { tgt = this.enemies[q]; break; }
@@ -1518,9 +1588,26 @@
 
     // -- hero whelp --
     var h = this.hero;
+    // MANNING: if his post is a pad that still holds a machine, walk to it and
+    // mount. The pad index (not a towers[] index) is the key, so selling some
+    // other tower can never silently re-point him at the wrong machine.
+    if (h.manPad >= 0) {
+      if (this._padTower(h.manPad) === -1) { h.manPad = -1; h.manned = false; }   // machine sold
+      else {
+        var mp = MAP.pads[h.manPad];
+        h.tx = mp.x; h.ty = mp.y - 6;
+      }
+    }
     var hdx = h.tx - h.x, hdy = h.ty - h.y;
     var hd = Math.sqrt(hdx * hdx + hdy * hdy);
     if (hd > 2) { h.x += hdx / hd * Math.min(h.spd * STEP, hd); h.y += hdy / hd * Math.min(h.spd * STEP, hd); }
+    var wasManned = h.manned;
+    h.manned = h.manPad >= 0 && hd <= 3;
+    if (h.manned && !wasManned) {
+      var mp2 = MAP.pads[h.manPad];
+      this.fxQueue.push({ k: 'float', x: mp2.x, y: mp2.y - 54, txt: 'MANNING!', c: '#ffcf6a' });
+      this.fxQueue.push({ k: 'place', x: mp2.x, y: mp2.y });
+    }
     h.cd -= STEP; h.breathCd -= STEP;
     var inR = [];
     for (var e2 = 0; e2 < this.enemies.length; e2++) {
@@ -1545,8 +1632,11 @@
       var pick = inR[0];
       for (var pk = 1; pk < inR.length; pk++) if (inR[pk].d > pick.d) pick = inR[pk];
       h.cd = 1 / h.rate;
-      this.fxQueue.push({ k: 'spit', x1: h.x, y1: h.y - 14, x2: pick.px, y2: pick.py });
-      this._damage(pick, h.dmg, { kind: 'hero' });
+      // He spits FIRE, and it looks like fire: a travelling fireball that
+      // bursts on the target (the old tell was a 1px tracer nobody could see).
+      this.projectiles.push({ kind: 'fire', x: h.x, y: h.y - 14, target: pick.id,
+                              spd: 300, dmg: h.dmg, hero: true });
+      this.fxQueue.push({ k: 'muzzle', x: h.x, y: h.y - 14, tx: pick.px, ty: pick.py });
       Sfx.play('shoot');
     }
 
@@ -1730,6 +1820,9 @@
           vx >= G.cx - 92 && vx <= G.cx + 92 && vy >= G.startY && vy <= G.startY + 52) {
         this.startWave(); return;
       }
+      if (vx >= G.breathX && vx <= G.breathX + 62 && vy >= G.breathY && vy <= G.breathY + 62) {
+        this.hero.castBreath = true; return;         // the breath's own button
+      }
     }
 
     if (this.state === 'menu') {
@@ -1842,10 +1935,11 @@
         var tw = this.towers[m.towerIdx];
         if (tw) {
           var pad2 = MAP.pads[tw.padIdx];
-          var btns = [this._menuBtnPos(pad2, 0, 3), this._menuBtnPos(pad2, 1, 3), this._menuBtnPos(pad2, 2, 3)];
+          var btns = [this._menuBtnPos(pad2, 0, 4), this._menuBtnPos(pad2, 1, 4),
+                      this._menuBtnPos(pad2, 2, 4), this._menuBtnPos(pad2, 3, 4)];
           var lvl = lvlRow(tw);
           var bi2 = -1, bd2 = 24 * 24;
-          for (var mb2 = 0; mb2 < 3; mb2++) {
+          for (var mb2 = 0; mb2 < 4; mb2++) {
             var mdx = w.x - btns[mb2].x, mdy = w.y - btns[mb2].y, mdd = mdx * mdx + mdy * mdy;
             if (mdd < bd2) { bd2 = mdd; bi2 = mb2; }
           }
@@ -1864,6 +1958,11 @@
             } else if (bi2 === 1) {                          // cycle aim mode (menu stays open)
               tw.targeting = ((tw.targeting | 0) + 1) % 3;
               Sfx.play('place');
+            } else if (bi2 === 2) {                          // MAN / LEAVE the machine
+              if (this.hero.manPad === tw.padIdx) { this.hero.manPad = -1; this.hero.manned = false; }
+              else { this.hero.manPad = tw.padIdx; }
+              Sfx.play('place');
+              this.menu = null;
             } else {                                         // sell
               this.gold += this._sellValue(tw);
               this.towers.splice(m.towerIdx, 1);
@@ -1883,28 +1982,6 @@
       var kdx = w.x - MAP.keep.x, kdy = w.y - (MAP.keep.y - 20);
       if (kdx * kdx + kdy * kdy < 70 * 70) { this.castMother = true; return; }
     }
-    // hero select / move — a CHARGED Wick casts his breath on tap instead
-    var hh = this.hero;
-    var hdx = w.x - hh.x, hdy = w.y - hh.y;
-    if (hdx * hdx + hdy * hdy < 30 * 30) {
-      if (hh.breathCd <= 0) { hh.castBreath = true; return; }
-      hh.selected = !hh.selected; return;
-    }
-    if (hh.selected) {
-      var tx = clamp(w.x, 20, WORLD_W - 20), ty = clamp(w.y, 120, WORLD_H - 30);
-      // keep Wick OFF the pads so he can never mask a pad's tap target
-      for (var pj = 0; pj < MAP.pads.length; pj++) {
-        var pp = MAP.pads[pj];
-        var pdx2 = tx - pp.x, pdy2 = ty - pp.y;
-        var dist2 = Math.sqrt(pdx2 * pdx2 + pdy2 * pdy2);
-        if (dist2 < 44) {
-          if (dist2 < 0.001) { tx = pp.x + 44; }
-          else { tx = pp.x + pdx2 / dist2 * 44; ty = pp.y + pdy2 / dist2 * 44; }
-        }
-      }
-      hh.tx = clamp(tx, 20, WORLD_W - 20); hh.ty = clamp(ty, 120, WORLD_H - 30);
-      hh.selected = false; return;
-    }
 
     // towers / pads beat the HUD bands and the start-wave rect
     for (var t = 0; t < this.towers.length; t++) {
@@ -1919,6 +1996,22 @@
       if (pdx * pdx + pdy * pdy < 34 * 34) { this.menu = { padIdx: pI }; return; }
     }
 
+    // ANY other world tap WALKS WICK THERE. He used to need selecting first,
+    // and tapping him fired his breath instead of selecting — so once breath
+    // was charged (i.e. nearly always) he could not be moved at all.
+    var hh = this.hero;
+    hh.manPad = -1; hh.manned = false;      // walking off a machine leaves it
+    var tx = clamp(w.x, 20, WORLD_W - 20), ty = clamp(w.y, 120, WORLD_H - 30);
+    for (var pj = 0; pj < MAP.pads.length; pj++) {   // never park ON a pad's tap target
+      var pp = MAP.pads[pj];
+      var pdx2 = tx - pp.x, pdy2 = ty - pp.y;
+      var dist2 = Math.sqrt(pdx2 * pdx2 + pdy2 * pdy2);
+      if (dist2 < 40) {
+        if (dist2 < 0.001) { tx = pp.x + 40; }
+        else { tx = pp.x + pdx2 / dist2 * 40; ty = pp.y + pdy2 / dist2 * 40; }
+      }
+    }
+    hh.tx = clamp(tx, 20, WORLD_W - 20); hh.ty = clamp(ty, 120, WORLD_H - 30);
   };
   Game.prototype._padTower = function (padIdx) {
     for (var t = 0; t < this.towers.length; t++) if (this.towers[t].padIdx === padIdx) return t;
@@ -2023,6 +2116,36 @@
       else if (fx.k === 'heal') this._burst(fx.x, fx.y, '#8fffd0', 6, 50);
       else if (fx.k === 'pulse') this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 10, R: fx.r, life: 0.35, T: 0.35, c: '#a8e6ff' });
       else if (fx.k === 'spit') this.particles.push({ kind: 'tracer', x1: fx.x1, y1: fx.y1, x2: fx.x2, y2: fx.y2, life: 0.1, T: 0.1, c: '#ffb14e' });
+      else if (fx.k === 'snap') {            // crossbow release: dust off the rail
+        var sang = Math.atan2(fx.ty - fx.y, fx.tx - fx.x);
+        this.particles.push({ kind: 'tracer', x1: fx.x, y1: fx.y,
+          x2: fx.x + Math.cos(sang) * 16, y2: fx.y + Math.sin(sang) * 16,
+          life: 0.06, T: 0.06, c: 'rgba(255,240,200,0.9)' });
+        for (var sn = 0; sn < 3; sn++) {
+          var sa2 = sang + Math.PI + (Math.random() - 0.5) * 1.5;
+          this.particles.push({ kind: 'dot', x: fx.x, y: fx.y,
+            vx: Math.cos(sa2) * (18 + Math.random() * 26), vy: Math.sin(sa2) * (18 + Math.random() * 26) - 8,
+            r: 0.8 + Math.random(), life: 0.16, T: 0.16, c: 'rgba(214,196,160,0.8)' });
+        }
+      }
+      else if (fx.k === 'muzzle') {          // the puff of flame leaving his jaws
+        var mang = Math.atan2(fx.ty - fx.y, fx.tx - fx.x);
+        for (var mz = 0; mz < 5; mz++) {
+          var ma = mang + (Math.random() - 0.5) * 0.7;
+          this.particles.push({ kind: 'dot', x: fx.x, y: fx.y, vx: Math.cos(ma) * (40 + Math.random() * 70),
+            vy: Math.sin(ma) * (40 + Math.random() * 70) - 12, r: 1.4 + Math.random() * 1.8,
+            life: 0.16 + Math.random() * 0.1, T: 0.26, c: mz < 2 ? '#fff0b0' : '#ff8a3c' });
+        }
+      }
+      else if (fx.k === 'fireburst') {       // it LANDS as fire, not a dot
+        this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 3, R: 20, life: 0.22, T: 0.22, c: '#ffb14e' });
+        for (var fb = 0; fb < 9; fb++) {
+          var fa = Math.random() * 6.283;
+          this.particles.push({ kind: 'dot', x: fx.x, y: fx.y, vx: Math.cos(fa) * (30 + Math.random() * 80),
+            vy: Math.sin(fa) * (30 + Math.random() * 80) - 30, r: 1.3 + Math.random() * 2.2,
+            life: 0.22 + Math.random() * 0.18, T: 0.4, c: fb < 3 ? '#fff0b0' : fb < 7 ? '#ff8a3c' : '#d64545' });
+        }
+      }
       else if (fx.k === 'float') this.floats.push({ x: fx.x, y: fx.y, txt: fx.txt, c: fx.c, t: 1.6 });
     }
     this.fxQueue.length = 0;
@@ -2374,7 +2497,9 @@
       rec.y = en.py + (en.flyer ? 28 : 0); rec.kind = 'enemy'; rec.ref = en; rec.px = en.px; rec.py = en.py;
     }
     rec = slot(); n++;
-    rec.y = this.hero.y; rec.kind = 'hero'; rec.ref = null;
+    // manning: sort just AFTER his machine so he sits ON it, not behind it
+    rec.y = this.hero.manned ? MAP.pads[this.hero.manPad].y + 1 : this.hero.y;
+    rec.kind = 'hero'; rec.ref = null;
     draws.length = n;
     draws.sort(byY);
     for (i = 0; i < n; i++) {
@@ -2391,12 +2516,42 @@
         ctx.beginPath(); ctx.arc(pr.x, pr.y, 5, 0, 6.283); ctx.fill();
         ctx.fillStyle = 'rgba(255,180,90,0.5)';
         ctx.beginPath(); ctx.arc(pr.x, pr.y, 8, 0, 6.283); ctx.fill();
+      } else if (pr.kind === 'fire') {   // Wick's fireball: a comet with a tail
+        var fdx2 = pr.dx || 1, fdy2 = pr.dy || 0;
+        var flick = 0.75 + 0.25 * Math.sin(this.worldT * 40 + pr.target);
+        for (var tl = 3; tl >= 1; tl--) {
+          ctx.fillStyle = 'rgba(255,110,40,' + (0.13 * tl * flick) + ')';
+          ctx.beginPath(); ctx.arc(pr.x - fdx2 * tl * 6, pr.y - fdy2 * tl * 6, 3 + tl * 1.7, 0, 6.283); ctx.fill();
+        }
+        ctx.fillStyle = 'rgba(255,140,50,0.85)';
+        ctx.beginPath(); ctx.arc(pr.x, pr.y, 6.2 * flick, 0, 6.283); ctx.fill();
+        ctx.fillStyle = '#fff0b0';
+        ctx.beginPath(); ctx.arc(pr.x, pr.y, 3.1 * flick, 0, 6.283); ctx.fill();
       } else {
+        // A REAL ARROW, not a light streak: shaft, iron head, fletching, all
+        // rotated to its heading. This is a crossbow bolt — it should look
+        // like one in flight.
         var tdx = pr.dx || 1, tdy = pr.dy || 0;
-        ctx.strokeStyle = 'rgba(232,217,184,0.35)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(pr.x - tdx * 14, pr.y - tdy * 14); ctx.lineTo(pr.x, pr.y); ctx.stroke();
-        ctx.strokeStyle = '#e8d9b8'; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.moveTo(pr.x - tdx * 5, pr.y - tdy * 5); ctx.lineTo(pr.x, pr.y); ctx.stroke();
+        var ang = Math.atan2(tdy, tdx);
+        var isPierce = pr.hops > 0;
+        ctx.save();
+        ctx.translate(pr.x, pr.y);
+        ctx.rotate(ang);
+        ctx.strokeStyle = 'rgba(255,220,150,0.22)'; ctx.lineWidth = 3.5;   // motion smear
+        ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(-6, 0); ctx.stroke();
+        ctx.strokeStyle = '#6b4a26'; ctx.lineWidth = 2.2;                   // wooden shaft
+        ctx.beginPath(); ctx.moveTo(-11, 0); ctx.lineTo(4, 0); ctx.stroke();
+        ctx.fillStyle = isPierce ? '#dfe6ee' : '#cfd6de';                   // iron head
+        ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(2.5, -2.9); ctx.lineTo(3.6, 0); ctx.lineTo(2.5, 2.9);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#c2503f';                                          // fletching
+        ctx.beginPath(); ctx.moveTo(-11, 0); ctx.lineTo(-16.5, -3.4); ctx.lineTo(-12.5, 0); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-11, 0); ctx.lineTo(-16.5, 3.4); ctx.lineTo(-12.5, 0); ctx.closePath(); ctx.fill();
+        if (pr.crit) {                                                      // an overwound bolt glows
+          ctx.strokeStyle = 'rgba(255,154,60,0.75)'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(9, 0); ctx.stroke();
+        }
+        ctx.restore();
       }
     }
   };
@@ -2449,13 +2604,16 @@
       ctx.strokeStyle = 'rgba(255,215,94,0.45)'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(p.x, p.y, rr3, 0, 6.283); ctx.stroke();
     }
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 22, 10, 0, 0, 6.283); ctx.fill();
-    if (tw._oc) {   // Wick is at the crank: brass ring + hurry
-      var ocp2 = 0.6 + 0.4 * Math.sin(this.worldT * 8);
-      ctx.strokeStyle = 'rgba(212,168,64,' + ocp2 + ')';
-      ctx.lineWidth = 2.5;
+    groundShadow(ctx, p.x, p.y + 2, 54 * (1 + lvl * 0.06), 0, 1.05);   // machines sit on the floor too
+    if (tw._oc || tw._manned) {   // Wick nearby (thin ring) or ON it (hot ring)
+      var ocp2 = 0.6 + 0.4 * Math.sin(this.worldT * (tw._manned ? 11 : 8));
+      ctx.strokeStyle = tw._manned ? 'rgba(255,180,64,' + ocp2 + ')' : 'rgba(212,168,64,' + ocp2 + ')';
+      ctx.lineWidth = tw._manned ? 4 : 2.5;
       ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 26 + ocp2 * 3, 12 + ocp2 * 2, 0, 0, 6.283); ctx.stroke();
+      if (tw._manned) {
+        ctx.strokeStyle = 'rgba(255,120,40,' + (ocp2 * 0.5) + ')'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 33 + ocp2 * 4, 16 + ocp2 * 3, 0, 0, 6.283); ctx.stroke();
+      }
     }
     var timg = ART.images[spriteId];
     if (timg) {
@@ -2601,10 +2759,15 @@
     // BEAT 1a — the shadow REACHES as he closes on the hoard: it darkens,
     // widens and flattens over the last 70 units. Zero extra draw calls.
     var near = e.fleeing ? 0 : Math.max(0, 1 - (PATH.len - e.d) / 70);
-    var srx = (e.type === 'boss' ? 20 : 10) * (1 + 0.55 * near);
-    var sry = (e.type === 'boss' ? 8 : 4.5) * (1 - 0.20 * near);
-    ctx.fillStyle = 'rgba(0,0,0,' + (0.30 + 0.28 * near) + ')';
-    ctx.beginPath(); ctx.ellipse(p.x, p.y + 3, srx, sry, 0, 0, 6.283); ctx.fill();
+    // depth: units grow toward the camera, matching the painted floor
+    var dsc = depthScale(p.y);
+    var baseW = (e.type === 'boss' ? 62 : e.type === 'brute' ? 46 : 36) * dsc;
+    // A REAL contact shadow, sized off the body and thrown along the key light
+    // (measured upper-left across the sprite set). The old one was 20u wide
+    // under a 36u body and centred ABOVE the feet, so it read as an ankle
+    // smudge. BEAT 1a is preserved: `near` still widens and darkens it as he
+    // closes on the hoard.
+    groundShadow(ctx, p.x, p.y, baseW * (1 + 0.22 * near), eFly(e) ? 26 : 0, 1 + 0.45 * near);
     var sid = 'e_' + e.type;
     var img = ART.images[sid];
     if (img) {
@@ -2673,13 +2836,24 @@
           hop -= 2.4 * aw;
         }
       }
-      var w0 = boss ? 62 : e.type === 'brute' ? 46 : 36;
+      var w0 = baseW;                       // depth-scaled above
       var hh2 = w0 * (img.height / img.width);
       ctx.save();
       ctx.translate(p.x, p.y + 6 + fy + hop);
       ctx.rotate(waddle + lean);
       ctx.scale(face * (2 - squash), squash);
       ctx.drawImage(img, -w0 / 2, -hh2, w0, hh2);
+      // TORCHLIGHT: the six lights each map declares used to illuminate
+      // nothing — they were painted before the entities. Now a body that
+      // walks past a torch actually catches its warmth.
+      var tw2 = torchWarm(p.x, p.y);
+      if (tw2 > 0.02) {
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = 0.30 * tw2;
+        ctx.drawImage(img, -w0 / 2, -hh2, w0, hh2);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
       if (e.flashT > 0) {                       // white-flash: re-draw lighter
         ctx.globalCompositeOperation = 'lighter';
         ctx.globalAlpha = Math.min(1, e.flashT * 9);
@@ -2768,8 +2942,10 @@
       ctx.fillStyle = 'rgba(158,245,143,0.08)';
       ctx.beginPath(); ctx.arc(h.x, h.y, h.range, 0, 6.283); ctx.fill();
     }
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.beginPath(); ctx.ellipse(h.x, h.y + 3, 13, 5.5, 0, 0, 6.283); ctx.fill();
+    // MANNED: he is perched ON the machine, so lift him and drop the ground
+    // shadow (he is not standing on the floor any more).
+    var lift = h.manned ? 26 : 0;
+    if (!h.manned) groundShadow(ctx, h.x, h.y, 44 * depthScale(h.y), 0, 1);
     var hdx2 = h.tx - h.x, hdy2 = h.ty - h.y;
     var hMoving2 = Math.abs(hdx2) + Math.abs(hdy2) > 3;
     var goingAway = hMoving2 && hdy2 < -Math.abs(hdx2) * 0.7;   // mostly up-screen
@@ -2782,7 +2958,7 @@
       var hsq = 1 + Math.sin(ht * (hmoving ? 9 : 5)) * (hmoving ? 0.05 : 0.035);
       var hw0 = 44, hh0 = hw0 * (himg.height / himg.width);
       ctx.save();
-      ctx.translate(h.x, h.y + 5 + Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5));
+      ctx.translate(h.x, h.y + 5 - lift + Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5));
       ctx.rotate(Math.sin(ht * 3) * 0.04 + (hmoving ? -hflip * 0.07 : 0));
       ctx.scale(hflip * (2 - hsq), hsq);
       ctx.drawImage(himg, -hw0 / 2, -hh0, hw0, hh0);
@@ -2909,6 +3085,10 @@
       btnY: topY + 7,
       mute: v.w / 2 + WORLD_W / 2 - 168, pause: v.w / 2 + WORLD_W / 2 - 112, spd: v.w / 2 + WORLD_W / 2 - 56,
       startY: v.h - Math.max(10, v.safeB + 6) - 56,
+      // Wick's breath lives on its own button. It used to fire when you tapped
+      // HIM, which ate the tap that was supposed to pick him up and move him.
+      breathX: v.w / 2 - WORLD_W / 2 + 10,
+      breathY: v.h - Math.max(10, v.safeB + 6) - 58,
     };
   };
 
@@ -2936,6 +3116,27 @@
       ctx.fillText('TRIAL: ' + TRIALS[this.trial].name.toUpperCase(), lx + 27, G.topY + 50);
     }
     if (this.state === 'playing') {
+      // BREATH button — charged is loud, cooling is a shrinking dark wedge
+      var bReady = this.hero.breathCd <= 0;
+      var bFrac = bReady ? 1 : 1 - this.hero.breathCd / (this.mods.breathCd || 14);
+      var bcx = G.breathX + 31, bcy = G.breathY + 31;
+      ctx.fillStyle = bReady ? 'rgba(90,40,14,0.95)' : 'rgba(34,26,22,0.9)';
+      ctx.beginPath(); ctx.arc(bcx, bcy, 28, 0, 6.283); ctx.fill();
+      if (!bReady) {
+        ctx.fillStyle = 'rgba(255,138,60,0.30)';
+        ctx.beginPath(); ctx.moveTo(bcx, bcy);
+        ctx.arc(bcx, bcy, 28, -1.5708, -1.5708 + 6.283 * bFrac); ctx.closePath(); ctx.fill();
+      }
+      var bpul = bReady ? 0.72 + 0.28 * Math.sin(this.worldT * 5) : 0.3;
+      ctx.strokeStyle = 'rgba(255,150,60,' + bpul + ')'; ctx.lineWidth = bReady ? 3 : 1.5;
+      ctx.beginPath(); ctx.arc(bcx, bcy, 28, 0, 6.283); ctx.stroke();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = bReady ? '#ffcf6a' : '#8a7f72';
+      ctx.font = 'bold 20px system-ui, sans-serif';
+      ctx.fillText('🔥', bcx, bcy + 3);
+      ctx.font = 'bold 9px system-ui, sans-serif';
+      ctx.fillText(bReady ? 'BREATH' : Math.ceil(this.hero.breathCd) + 's', bcx, bcy + 19);
+      ctx.textAlign = 'left';
       uiPanel(ctx, G.mute, G.btnY, 44, 34, 9);
       uiPanel(ctx, G.pause, G.btnY, 44, 34, 9);
       uiPanel(ctx, G.spd, G.btnY, 44, 34, 9);
@@ -3080,7 +3281,18 @@
       if (!tw) return;
       var pad2 = MAP.pads[tw.padIdx];
       var lvl = lvlRow(tw);
-      var up = this._menuBtnPos(pad2, 0, 3), aim = this._menuBtnPos(pad2, 1, 3), sell = this._menuBtnPos(pad2, 2, 3);
+      var up = this._menuBtnPos(pad2, 0, 4), aim = this._menuBtnPos(pad2, 1, 4),
+          man = this._menuBtnPos(pad2, 2, 4), sell = this._menuBtnPos(pad2, 3, 4);
+      var isManned = this.hero.manPad === tw.padIdx;
+      ctx.fillStyle = isManned ? 'rgba(70,52,20,0.97)' : 'rgba(38,26,18,0.95)';
+      ctx.beginPath(); ctx.arc(man.x, man.y, 22, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = '#ffcf6a'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(man.x, man.y, 22, 0, 6.283); ctx.stroke();
+      ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 9px system-ui, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(isManned ? 'LEAVE' : 'MAN IT', man.x, man.y - 2);
+      ctx.fillStyle = '#ffcf6a';
+      ctx.fillText(isManned ? '' : '+70%', man.x, man.y + 10);
+      ctx.textAlign = 'left';
       ctx.fillStyle = 'rgba(38,26,18,0.95)';
       ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.fill();
       ctx.strokeStyle = '#a8e6ff'; ctx.lineWidth = 2;
