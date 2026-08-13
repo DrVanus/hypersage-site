@@ -168,6 +168,36 @@
           dmg: 38, rate: 0.9, range: 160, pierce: 4, special: 'downdraft', groundDur: 3, airBonus3: 2 },
       ],
     },
+    // SUPPORT — buffs its neighbours, never fires. Free placement made
+    // clustering possible; this is the first reason to actually want it.
+    bellows: {
+      name: 'Bellows Post', cost: 120, hitsAir: false, support: true,
+      levels: [
+        { rate: 0, range: 96,  auraRate: 0.15, upgradeCost: 90 },
+        { rate: 0, range: 110, auraRate: 0.22, upgradeCost: 150 },
+      ],
+      forks: [
+        { key: 'gale', name: 'Gale Bellows', pitch: 'A wider draught: +32% fire rate to neighbours.',
+          rate: 0, range: 132, auraRate: 0.32, special: 'gale' },
+        { key: 'temper', name: 'Tempering Post', pitch: 'Tempers their strikes: +28% damage instead.',
+          rate: 0, range: 118, auraRate: 0, auraDmg: 0.28, special: 'temper' },
+      ],
+    },
+    // ECONOMY — the Banana-Farm role from the game VANUS likes. Pays at the
+    // END of a wave, so it is a bet on surviving long enough to collect.
+    press: {
+      name: 'Coin Press', cost: 140, hitsAir: false, support: true,
+      levels: [
+        { rate: 0, range: 0, waveGold: 26, upgradeCost: 110 },
+        { rate: 0, range: 0, waveGold: 44, upgradeCost: 170 },
+      ],
+      forks: [
+        { key: 'mint', name: 'Royal Mint', pitch: 'Stamps 78 gold at the end of every wave.',
+          rate: 0, range: 0, waveGold: 78, special: 'mint' },
+        { key: 'tithe', name: 'Tithe Press', pitch: 'Pays 62 a wave, plus 2 gold per raider slain.',
+          rate: 0, range: 0, waveGold: 62, killGold: 2, special: 'tithe' },
+      ],
+    },
   };
   // ===== DEPTH KIT — the renderer's half of the 3D read ====================
   // The art is pre-rendered 3D (the same technique Clash of Clans ships), but
@@ -215,9 +245,16 @@
   }
   // A netted flyer fights as ground troops until the net wears off.
   function eFly(e) { return e.flyer && !(e.groundedT > 0); }
-  var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'brazier']; // cheap -> dear
+  var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'brazier', 'bellows', 'press']; // cheap -> dear
   var PAD_SNAP = 34;          // build within this of a free pad and you snap to it
   var PAD_DISCOUNT = 0.8;     // ...and it costs 20% less: the authored spots still matter
+  // FREE PLACEMENT DELETED THE OLD CAP. With 8 pads you could own 8 machines;
+  // with the whole floor a bot built 32 and 3-starred every level losing 0-2
+  // coins. Rather than cap the count (which takes the freedom away) or stiffen
+  // the waves (which punishes every playstyle), each machine you already own
+  // makes the NEXT one dearer. Placement stays free; hoarding is what costs.
+  var CROWD_STEP = 0.10, CROWD_MAX = 2.3;
+  function crowdMul(n) { return Math.min(CROWD_MAX, 1 + CROWD_STEP * n); }
 
   var ENEMY_TYPES = {
     looter:   { name: 'Scrapling',     hp: 30,   spd: 42, bounty: 4,   steals: 1,  flyer: false },
@@ -1020,6 +1057,8 @@
       t_brazier: 'art/tower_brazier.png',
       t_crystal: 'art/tower_crystal.png',
       t_perch:   'art/tower_perch.png',
+      t_bellows: 'art/tower_bellows.png',
+      t_press:   'art/tower_press.png',
       e_looter:  'art/enemy_looter.png',
       e_scout:   'art/enemy_scout.png',
       e_brute:   'art/enemy_brute.png',
@@ -1420,6 +1459,23 @@
       if (odd < ocD) { ocD = odd; ocIdx = oc; }
       this.towers[oc]._oc = false;
     }
+    // BELLOWS AURA — recomputed each step so selling a post takes its buff
+    // with it. O(towers^2) but towers are a handful, not a crowd.
+    for (var ai = 0; ai < this.towers.length; ai++) {
+      var at = this.towers[ai];
+      at._auraRate = 0; at._auraDmg = 0;
+      if (TOWER_TYPES[at.type].support) continue;
+      for (var aj = 0; aj < this.towers.length; aj++) {
+        var src = this.towers[aj];
+        if (src.type !== 'bellows') continue;
+        var sr = lvlRow(src);
+        var adx2 = at.x - src.x, ady2 = at.y - src.y;
+        if (adx2 * adx2 + ady2 * ady2 > sr.range * sr.range) continue;
+        at._auraRate = Math.max(at._auraRate, sr.auraRate || 0);   // strongest post wins,
+        at._auraDmg = Math.max(at._auraDmg, sr.auraDmg || 0);      // posts do NOT stack
+      }
+    }
+
     // MANNED beats mere proximity: Wick at the crank IS the buff, and it is
     // visible (he is sitting on the machine) instead of an invisible aura.
     for (var mi = 0; mi < this.towers.length; mi++) {
@@ -1439,12 +1495,13 @@
     for (var t = 0; t < this.towers.length; t++) {
       var tw = this.towers[t];
       var tt = TOWER_TYPES[tw.type], lv = lvlRow(tw);
+      if (tt.support) continue;              // bellows/press do their work elsewhere
       // Time since this machine ACTUALLY fired. The recoil used to be driven
       // by the cooldown, but an idle machine rescans every 0.1s, which
       // retriggered the wind-up ~8x a second forever — every contraption on
       // the board vibrated even with nothing to shoot at.
       tw.shotT = (tw.shotT === undefined ? 9 : tw.shotT) + STEP;
-      tw.cd -= STEP * (tw._manned ? 1.7 : tw._oc ? 1.25 : 1);
+      tw.cd -= STEP * (tw._manned ? 1.7 : tw._oc ? 1.25 : 1) * (1 + (tw._auraRate || 0));
       if (tw.cd > 0) continue;
       var pad = tw;
       // crystal: pulse-slow everything in range, no target needed.
@@ -1473,7 +1530,7 @@
         tw.cd = hitAny ? 1 / lv.rate : 0.1;   // idle rescan at 6 Hz, not 60
         continue;
       }
-      var mDmg = (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1), mRng = this.mods.rangeMul || 1;
+      var mDmg = (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1) * (1 + (tw._auraDmg || 0)), mRng = this.mods.rangeMul || 1;
       var target = this._pickTarget(pad, lv.range * mRng, tt.hitsAir, tt.airBonus, tw.targeting | 0);
       if (!target) { tw.cd = 0.1; continue; }   // miss: rescan at 6 Hz, not 60
       tw.cd = 1 / lv.rate;
@@ -1664,6 +1721,17 @@
       this.waveActive = false;
       this.menu = null;                     // no stale menu into the intermission
       this.wave++;
+      // COIN PRESSES pay out at wave end — a bet on surviving to collect
+      var minted = 0;
+      for (var pz = 0; pz < this.towers.length; pz++) {
+        var pt2 = this.towers[pz];
+        if (pt2.type !== 'press') continue;
+        var pr2 = lvlRow(pt2);
+        if (!pr2.waveGold) continue;
+        minted += pr2.waveGold;
+        this.fxQueue.push({ k: 'float', x: pt2.x, y: pt2.y - 40, txt: '+' + pr2.waveGold + 'g', c: '#ffd75e' });
+      }
+      if (minted) { this.gold += minted; Sfx.play('coin'); }
       this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 300, txt: 'Wave ' + this.wave + ' held!', c: '#9ef58f' });
       if (this.wave >= this.totalWaves()) { this._gameOver(true); return; }
       this.countdown = CFG.waveCountdown;
@@ -1740,6 +1808,10 @@
     // NULL-check, not ||: One Good Purse sets bountyMul to 0 and zero must hold
     var bMul = this.mods.bountyMul != null ? this.mods.bountyMul : 1;
     var bounty = Math.round((greed ? base.bounty * 1.5 : base.bounty) * bMul);
+    for (var kp = 0; kp < this.towers.length; kp++) {     // Tithe Press takes its cut
+      var kt = this.towers[kp];
+      if (kt.level >= 2 && kt.type === 'press') { var kr = lvlRow(kt); if (kr.killGold) bounty += kr.killGold; }
+    }
     this.gold += bounty;
     this.kills++;
     var p = { x: e.px, y: e.py };
@@ -2009,7 +2081,7 @@
         this.fxQueue.push({ k: 'float', x: w.x, y: w.y - 18, txt: chk.why, c: '#ff9a9a' });
         return;                                   // stay armed: let them try again
       }
-      var cost = Math.round(TOWER_TYPES[stid].cost * (chk.discount ? PAD_DISCOUNT : 1));
+      var cost = Math.round(TOWER_TYPES[stid].cost * (chk.discount ? PAD_DISCOUNT : 1) * crowdMul(this.towers.length));
       if (this.gold < cost) {
         this.fxQueue.push({ k: 'float', x: w.x, y: w.y - 18, txt: 'not enough gold', c: '#ff9a9a' });
         return;
@@ -3170,7 +3242,7 @@
       breathY: v.h - Math.max(10, v.safeB + 6) - 58,
       shopY: v.h - Math.max(10, v.safeB + 6) - 122,
       shopX: v.w / 2 - WORLD_W / 2 + 12,
-      shopW: 72, shopStep: 79,
+      shopW: 52, shopStep: 56,
     };
   };
 
@@ -3224,7 +3296,8 @@
         var sid2 = TOWER_ORDER[sc2], stt = TOWER_TYPES[sid2];
         var sxx = G.shopX + sc2 * G.shopStep, syy = G.shopY;
         var picked = this.shopPick === sc2;
-        var can = this.gold >= Math.round(stt.cost * PAD_DISCOUNT);
+        var chipCost = Math.round(stt.cost * crowdMul(this.towers.length));
+        var can = this.gold >= Math.round(chipCost * PAD_DISCOUNT);
         ctx.fillStyle = picked ? 'rgba(96,66,22,0.97)' : can ? 'rgba(30,22,16,0.92)' : 'rgba(24,18,15,0.8)';
         rr(ctx, sxx, syy, G.shopW, 54, 10); ctx.fill();
         ctx.strokeStyle = picked ? '#ffd75e' : can ? 'rgba(255,215,94,0.45)' : 'rgba(120,105,90,0.35)';
@@ -3240,7 +3313,7 @@
         ctx.textAlign = 'center';
         ctx.fillStyle = can ? '#ffd75e' : '#8a7f72';
         ctx.font = 'bold 11px system-ui, sans-serif';
-        ctx.fillText(stt.cost + 'g', sxx + G.shopW / 2, syy + 46);
+        ctx.fillText(chipCost + 'g', sxx + G.shopW / 2, syy + 46);
         ctx.textAlign = 'left';
       }
       if (this.shopPick >= 0) {
