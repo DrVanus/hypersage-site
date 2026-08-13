@@ -1015,7 +1015,7 @@
           spd: base.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0, bleedT: 0,
           blinkT: base.blinkEvery || 0, healT: 1, grabT: 0, auraF: 1,
           stolen: 0, fleeing: false, flyer: !!base.flyer, summoned: false, shieldBroken: false,
-          px: PATH.pts[0][0], py: PATH.pts[0][1],
+          flashT: 0, px: PATH.pts[0][0], py: PATH.pts[0][1],
         });
       }
     }
@@ -1025,7 +1025,7 @@
     if (!this.breathUsed && this.hoard <= CFG.breathAt) {
       this.breathUsed = true;
       for (var mb = 0; mb < this.enemies.length; mb++) this.enemies[mb].hp -= 60;
-      this.hitstopT = 0.35;
+      this.hitstopT = 0.12;   // ultimate beat, just inside the hitch ceiling
       this.fxQueue.push({ k: 'mother' });
       Sfx.play('breath');
     }
@@ -1056,7 +1056,7 @@
             spd: lb.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0,
             bleedT: 0, blinkT: 0, healT: 1, grabT: 0, auraF: 1,
             stolen: 0, fleeing: false, flyer: false, summoned: false, shieldBroken: false,
-            px: sp2.x, py: sp2.y,
+            flashT: 0, px: sp2.x, py: sp2.y,
           });
         }
         this.fxQueue.push({ k: 'float', x: bossE.px, y: bossE.py - 30, txt: 'ROAR!', c: '#ff7b7b' });
@@ -1073,6 +1073,7 @@
       if (e.slowT > 0) { e.slowT -= STEP; if (e.slowT <= 0) e.slowF = 1; }
       if (e.burnT > 0) { e.burnT -= STEP; e.hp -= e.burnDps * STEP; if (e.burnT <= 0) e.burnDps = 0; }
       if (e.bleedT > 0) { e.bleedT -= STEP; e.hp -= 3 * STEP; }
+      if (e.flashT > 0) e.flashT -= STEP;
       // THE death check — BEFORE any movement. A corpse (DOT tick above,
       // Mother's Breath, or a pulse from last step) must never march, steal,
       // or escape; killing a carrier is the game's core promise.
@@ -1239,8 +1240,9 @@
           }
           this.projectiles.splice(p, 1);
         } else {
-          pr.x += pdx / dist * pr.spd * STEP;
-          pr.y += pdy / dist * pr.spd * STEP;
+          pr.dx = pdx / dist; pr.dy = pdy / dist;   // renderer draws the trail along this
+          pr.x += pr.dx * pr.spd * STEP;
+          pr.y += pr.dy * pr.spd * STEP;
         }
       }
     }
@@ -1334,6 +1336,7 @@
     // magic (Gemsinger pulse) and breath ignore armor
     if (base.armor && opts.kind !== 'breath' && opts.kind !== 'magic') dmg = Math.max(1, dmg - base.armor);
     e.hp -= dmg;
+    e.flashT = 0.1;                       // white-flash + pop, read by the renderer only
     if (e.hp <= 0 && !e._counted) {
       e._counted = true;
       var idx = this.enemies.indexOf(e);
@@ -1352,7 +1355,7 @@
       this.fxQueue.push({ k: 'recover', x: p.x, y: p.y, n: e.stolen });
       Sfx.play('recover');
     }
-    if (e.type === 'boss') this.hitstopT = 0.25;
+    if (e.type === 'boss') this.hitstopT = 0.09;   // ~5 frames; >120ms reads as a hitch
     this.fxQueue.push({ k: 'death', x: p.x, y: p.y, g: bounty, boss: e.type === 'boss' });
     Sfx.play('coin');
     this.enemies.splice(i, 1);
@@ -1529,13 +1532,29 @@
   // ---- COSMETIC lane. Per-frame, variable dt, Math.random. ----------------
   Game.prototype._cosmetic = function (dtRaw) {
     // spend the fx queue emitted by the deterministic sim
+    // note: handlers may push follow-up events (coinfly); the loop length is
+    // re-read each pass so chained events spend in the same frame
     for (var q = 0; q < this.fxQueue.length; q++) {
       var fx = this.fxQueue[q];
       if (fx.k === 'hit' || fx.k === 'bite') this._burst(fx.x, fx.y, fx.c || '#ffb14e', 5, 60);
-      else if (fx.k === 'death') { this._burst(fx.x, fx.y, '#ffd75e', fx.boss ? 26 : 9, 90); this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.g, c: '#ffd75e', t: 1 }); if (fx.boss) this.shake = Math.min(1, this.shake + 0.7); }
+      else if (fx.k === 'coinfly') {
+        for (var cf = 0; cf < fx.n; cf++) {
+          this.particles.push({
+            kind: 'coin', x: fx.x + (Math.random() - 0.5) * 14, y: fx.y + (Math.random() - 0.5) * 8,
+            tx: fx.tx, ty: fx.ty, arc: 30 + Math.random() * 40,
+            life: 0.5 + Math.random() * 0.2, T: 0.7,
+          });
+        }
+      }
+      else if (fx.k === 'death') {
+        this._burst(fx.x, fx.y, '#ffd75e', fx.boss ? 26 : 9, 90);
+        this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.g, c: '#ffd75e', t: 1 });
+        this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, tx: 100, ty: 40, n: fx.boss ? 6 : 2 });
+        if (fx.boss) this.shake = Math.min(1, this.shake + 0.7);
+      }
       else if (fx.k === 'boom') { this._burst(fx.x, fx.y, '#ff8a3c', 14, 110); this.shake = Math.min(1, this.shake + 0.25); }
       else if (fx.k === 'steal') { this._burst(fx.x, fx.y, '#ff5b5b', 12, 100); this.floats.push({ x: fx.x, y: fx.y, txt: '-' + fx.n + ' treasure!', c: '#ff7b7b', t: 1.4 }); this.shake = Math.min(1, this.shake + 0.45); }
-      else if (fx.k === 'recover') { this._burst(fx.x, fx.y, '#9ef58f', 10, 90); this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.n + ' recovered!', c: '#9ef58f', t: 1.4 }); }
+      else if (fx.k === 'recover') { this._burst(fx.x, fx.y, '#9ef58f', 10, 90); this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.n + ' recovered!', c: '#9ef58f', t: 1.4 }); this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, tx: MAP.mound.x, ty: MAP.mound.y, n: Math.min(5, fx.n) }); }
       else if (fx.k === 'escape') { this.floats.push({ x: fx.x + 30, y: fx.y - 20, txt: 'stolen!', c: '#ff5b5b', t: 1.2 }); this.shake = Math.min(1, this.shake + 0.3); }
       else if (fx.k === 'breath') { this._burst(fx.x, fx.y, '#ff9a3c', 30, 140); this.shake = Math.min(1, this.shake + 0.35); }
       else if (fx.k === 'mother') {
@@ -1559,12 +1578,28 @@
       var pa = this.particles[i];
       pa.life -= dtRaw;
       if (pa.kind === 'dot') { pa.x += pa.vx * dtRaw; pa.y += pa.vy * dtRaw; pa.vy += 160 * dtRaw; }
+      else if (pa.kind === 'coin') {
+        var ct = 1 - Math.max(0, pa.life / pa.T);          // 0 -> 1 over flight
+        pa.cx = pa.x + (pa.tx - pa.x) * ct;
+        pa.cy = pa.y + (pa.ty - pa.y) * ct - Math.sin(ct * Math.PI) * pa.arc;
+      }
       if (pa.life <= 0) this.particles.splice(i, 1);
     }
     for (var f = this.floats.length - 1; f >= 0; f--) {
       var fl = this.floats[f];
       fl.t -= dtRaw; fl.y -= 26 * dtRaw;
       if (fl.t <= 0) this.floats.splice(f, 1);
+    }
+    // heavy footfalls kick dust; laden thieves drip gold sparks (cosmetic scan)
+    for (var ci = 0; ci < this.enemies.length; ci++) {
+      var ce2 = this.enemies[ci];
+      if (ce2.hp <= 0) continue;
+      if (!ce2.flyer && (ce2.type === 'brute' || ce2.type === 'boss') && ce2.grabT <= 0 && Math.random() < dtRaw * 5) {
+        this.particles.push({ kind: 'dot', x: ce2.px + (Math.random() - 0.5) * 10, y: ce2.py + 2, vx: (Math.random() - 0.5) * 30, vy: -10 - Math.random() * 18, r: 1.5 + Math.random() * 2, life: 0.3 + Math.random() * 0.2, T: 0.5, c: 'rgba(120,100,80,0.5)' });
+      }
+      if (ce2.fleeing && ce2.stolen > 0 && Math.random() < dtRaw * 7) {
+        this.particles.push({ kind: 'dot', x: ce2.px, y: ce2.py - 8, vx: (Math.random() - 0.5) * 16, vy: 12 + Math.random() * 14, r: 1.2 + Math.random() * 1.4, life: 0.35, T: 0.35, c: '#ffd75e' });
+      }
     }
     this.shake = Math.max(0, this.shake - dtRaw * 2.2);
     // music intensity follows the battle (cosmetic lane)
@@ -1828,8 +1863,11 @@
         ctx.fillStyle = 'rgba(255,180,90,0.5)';
         ctx.beginPath(); ctx.arc(pr.x, pr.y, 8, 0, 6.283); ctx.fill();
       } else {
+        var tdx = pr.dx || 1, tdy = pr.dy || 0;
+        ctx.strokeStyle = 'rgba(232,217,184,0.35)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(pr.x - tdx * 14, pr.y - tdy * 14); ctx.lineTo(pr.x, pr.y); ctx.stroke();
         ctx.strokeStyle = '#e8d9b8'; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.moveTo(pr.x - 4, pr.y); ctx.lineTo(pr.x + 4, pr.y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(pr.x - tdx * 5, pr.y - tdy * 5); ctx.lineTo(pr.x, pr.y); ctx.stroke();
       }
     }
   };
@@ -1854,7 +1892,8 @@
       var tlv = TOWER_TYPES[tw.type].levels[lvl];
       var re = Math.max(0, Math.min(1, tw.cd * tlv.rate));
       var press = re > 0.7 ? (re - 0.7) / 0.3 : 0;
-      var tsq = 1 - 0.09 * press + Math.sin(this.worldT * 3 + tw.padIdx) * 0.015;
+      var windup = (re > 0 && re < 0.18) ? (0.18 - re) / 0.18 : 0;   // pre-shot rise
+      var tsq = 1 - 0.09 * press + windup * 0.05 + Math.sin(this.worldT * 3 + tw.padIdx) * 0.015;
       var tw0 = 54 * (1 + lvl * 0.12);
       var th0 = tw0 * (timg.height / timg.width);
       ctx.save();
@@ -1931,6 +1970,7 @@
       if (e.grabT > 0) squash = 1 + Math.sin(t * 26 + ph) * 0.12;     // digging!
       else if (e.flyer) squash = 1 + Math.sin(t * 16 + ph) * 0.06;    // wing-beat
       else squash = 1 + Math.abs(Math.sin(t * wsp + ph)) * (boss ? 0.05 : 0.08);
+      if (e.flashT > 0) squash *= 1 + e.flashT * 0.9;                 // impact pop
       var hop = (moving && !e.flyer) ? -Math.abs(Math.sin(t * wsp + ph)) * (boss ? 1.5 : 2.5) : 0;
       var w0 = boss ? 62 : e.type === 'brute' ? 46 : 36;
       var hh2 = w0 * (img.height / img.width);
@@ -1939,6 +1979,13 @@
       ctx.rotate(waddle);
       ctx.scale(flip * (2 - squash), squash);
       ctx.drawImage(img, -w0 / 2, -hh2, w0, hh2);
+      if (e.flashT > 0) {                       // white-flash: re-draw lighter
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = Math.min(1, e.flashT * 9);
+        ctx.drawImage(img, -w0 / 2, -hh2, w0, hh2);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
       ctx.restore();
       if (e.fleeing) { // carrying OUR gold: warm loot glint underfoot
         ctx.fillStyle = 'rgba(255,120,90,0.35)';
@@ -2011,11 +2058,12 @@
       // hover bob + sway; face the direction he's headed
       var ht = this.worldT;
       var hflip = (h.tx - h.x) > 0.5 ? -1 : 1;   // sprite faces left natively
-      var hsq = 1 + Math.sin(ht * 5) * 0.035;
+      var hmoving = Math.abs(h.tx - h.x) + Math.abs(h.ty - h.y) > 3;
+      var hsq = 1 + Math.sin(ht * (hmoving ? 9 : 5)) * (hmoving ? 0.05 : 0.035);
       var hw0 = 44, hh0 = hw0 * (himg.height / himg.width);
       ctx.save();
-      ctx.translate(h.x, h.y + 5 + Math.sin(ht * 4) * 1.5);
-      ctx.rotate(Math.sin(ht * 3) * 0.04);
+      ctx.translate(h.x, h.y + 5 + Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5));
+      ctx.rotate(Math.sin(ht * 3) * 0.04 + (hmoving ? -hflip * 0.07 : 0));
       ctx.scale(hflip * (2 - hsq), hsq);
       ctx.drawImage(himg, -hw0 / 2, -hh0, hw0, hh0);
       ctx.restore();
@@ -2062,6 +2110,11 @@
         ctx.globalAlpha = a * 0.4;
         ctx.fillStyle = '#ff9a3c';
         ctx.fillRect(-40, -40, WORLD_W + 80, WORLD_H + 80);
+      } else if (pa.kind === 'coin') {
+        ctx.globalAlpha = Math.min(1, a * 2);
+        ctx.fillStyle = '#ffd75e';
+        ctx.beginPath(); ctx.arc(pa.cx || pa.x, pa.cy || pa.y, 4, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = '#8a5a1d'; ctx.lineWidth = 1; ctx.stroke();
       } else if (pa.kind === 'ring') {
         ctx.globalAlpha = a * 0.7;
         ctx.strokeStyle = pa.c; ctx.lineWidth = 2;
