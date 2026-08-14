@@ -115,7 +115,8 @@
   // Every special is DETERMINISTIC — counters and flags, no rolls at all.
   var TOWER_TYPES = {
     mimic: {
-      name: 'Latch Mimic', cost: 80, hitsAir: false,
+      name: 'Latch Mimic', cost: 80,
+      short: 'MIMIC', hitsAir: false,
       aims: true,
       // RANGE 40 MADE THIS MACHINE UNBUILDABLE, not merely weak. Measured pad
       // distance to the road centreline: level 1 has 2 of 8 pads inside 40,
@@ -146,7 +147,8 @@
       ],
     },
     ballista: {
-      name: 'Kobold Crossbow', cost: 70, hitsAir: true,
+      name: 'Kobold Crossbow', cost: 70,
+      short: 'CROSSBOW', hitsAir: true,
       aims: true,
       levels: [
         { dmg: 12, rate: 1.2, range: 105, upgradeCost: 60 },
@@ -160,7 +162,8 @@
       ],
     },
     brazier: {
-      name: 'Soot Brazier', cost: 100, hitsAir: false,
+      name: 'Soot Brazier', cost: 100,
+      short: 'BRAZIER', hitsAir: false,
       levels: [
         { dmg: 9,  rate: 0.8, range: 92,  splash: 38, upgradeCost: 90 },
         { dmg: 15, rate: 0.9, range: 101, splash: 38, upgradeCost: 160, burn: 4 },
@@ -174,7 +177,8 @@
       ],
     },
     crystal: {
-      name: 'Gemsinger', cost: 50, hitsAir: true,
+      name: 'Gemsinger', cost: 50,
+      short: 'GEMSINGER', hitsAir: true,
       levels: [
         { dmg: 3, rate: 1.0, range: 92,  slow: 0.30, slowDur: 1.5, upgradeCost: 50 },
         { dmg: 5, rate: 1.1, range: 105, slow: 0.40, slowDur: 2.0, upgradeCost: 90 },
@@ -187,7 +191,8 @@
       ],
     },
     perch: {
-      name: 'Gargoyle Roost', cost: 90, hitsAir: true, airBonus: 1.5,
+      name: 'Gargoyle Roost', cost: 90,
+      short: 'ROOST', hitsAir: true, airBonus: 1.5,
       aims: true,
       levels: [
         { dmg: 18, rate: 0.6, range: 134, pierce: 2, upgradeCost: 80 },
@@ -203,7 +208,8 @@
     // SUPPORT — buffs its neighbours, never fires. Free placement made
     // clustering possible; this is the first reason to actually want it.
     bellows: {
-      name: 'Bellows Post', cost: 120, hitsAir: false, support: true,
+      name: 'Bellows Post', cost: 120,
+      short: 'BELLOWS', hitsAir: false, support: true,
       // Wick at the crank drives the bellows harder. A support machine used to
       // offer MAN IT (+70%) and deliver NOTHING — the tower loop bails on
       // supports before any manning flag is read. This is the effect that
@@ -223,7 +229,8 @@
     // ECONOMY — the Banana-Farm role from the game VANUS likes. Pays at the
     // END of a wave, so it is a bet on surviving long enough to collect.
     press: {
-      name: 'Coin Press', cost: 140, hitsAir: false, support: true,
+      name: 'Coin Press', cost: 140,
+      short: 'PRESS', hitsAir: false, support: true,
       mannedGold: 1.5,   // see Bellows Post: MAN IT on a press paid nothing at all
       levels: [
         { rate: 0, range: 0, waveGold: 26, upgradeCost: 110 },
@@ -1261,22 +1268,58 @@
   // rival by wave 2-5 while map 2 (the long switchback, where machines get far
   // more shots per raider) left the mid rivals on a full 60 for twelve waves.
   // Calibrating the opening per arena is what makes them the same contest.
+  // MAP 0 IS NOT A DUEL ARENA. Measured twice, at two different openings: the
+  // Long Sleep is the short beginner keep, and under the shared seeded ramp it
+  // cannot hold past about wave 8 — every rival on every map-0 arena finished
+  // on 0, which makes the duel trivially won by surviving at all. Not every
+  // map makes a versus map; that is true of every game with a versus mode, and
+  // it is cheaper to say so than to re-tune a road authored for a hand-built
+  // campaign. The Undergallery and the Coldroot Stair take three arenas each.
+  // Because a map is now stated rather than derived, a seed is free to appear
+  // on whichever road suits it.
+  // Interleaved m1/m2 ON PURPOSE: tonight's arena is (day + rivalIdx) %% 6,
+  // so four consecutive indices are what the picker shows at once. Grouped
+  // by map, that put three of the four rivals on the same road every night.
+  // NOTE: the curve columns in RIVAL_CURVES are indexed by ARENA — reordering
+  // this list without permuting them identically silently pairs every rival
+  // with the wrong recording.
   var DUEL_ARENAS = [
-    { seed: 0x5eed1a3f, map: 0, at: 2 },
-    { seed: 0xd00dfeed, map: 1, at: 6 },
-    { seed: 0x7a11ba5e, map: 2, at: 10 },
-    { seed: 0x0dd1e5ec, map: 0, at: 2 },
-    { seed: 0x1ceb00da, map: 1, at: 5 },
+    { seed: 0xd00dfeed, map: 1, at: 5 },
+    { seed: 0x7a11ba5e, map: 2, at: 9 },
+    { seed: 0x1ceb00da, map: 1, at: 6 },
     { seed: 0xa11ecafe, map: 2, at: 10 },
+    { seed: 0x5eed1a3f, map: 1, at: 7 },
+    { seed: 0x0dd1e5ec, map: 2, at: 8 },     // 11 measured DEAD: all four wiped
   ];
+  // THE LADDER IS THE PURSE, NOT THE POLICY. The first cut ranked rivals by
+  // the bot's build policy and the bake disproved it outright: 'balanced'
+  // BEAT 'depth' on the long switchback arenas, so the mid rival outscored
+  // both rivals ranked above it and every rank label was a lie. The policies
+  // are strategies with map-dependent strengths, not skill tiers.
+  // So policy stays as CHARACTER — how a rival plays, visible in their board —
+  // and `purse` is the difficulty: how much of the arena's opening gold they
+  // salvaged. A weaker hoardling brought less. That is monotonic by
+  // construction, it is honest (the bot really plays with exactly that money),
+  // and it is stated on their card rather than hidden in a fudge factor.
+  // The PLAYER always gets the full purse.
+  // Ranks and pips are MEASURED, not asserted. Two rounds of handicap tuning
+  // failed to make the roster monotonic, and the bake explained why: on the
+  // long switchback (map 2) breadth beats depth decisively, because coverage
+  // is what that road rewards and the depth policy caps its footprint around
+  // six machines — so the "higher" tier lost to the lower one on two arenas no
+  // matter how the purses were set. Rather than keep fudging numbers until a
+  // false ladder appeared, the roster now says what is true: Tallow is the
+  // floor, Cinder is the ceiling, and Flint and Ember are the SAME tier with
+  // opposite strengths — Flint owns the open switchbacks, Ember owns the
+  // chokepoints. That is a better matchup than a straight line anyway.
   var RIVALS = [
-    { id: 'tallow', name: 'Tallow', rank: 'APPRENTICE', policy: 'spam', wick: false,
-      blurb: 'Builds wide and cheap. Never upgrades anything.' },
-    { id: 'flint', name: 'Flint', rank: 'JOURNEYMAN', policy: 'balanced', wick: false,
-      blurb: 'Spreads his brass evenly and calls it craft.' },
-    { id: 'ember', name: 'Ember', rank: 'ARTIFICER', policy: 'depth', wick: false,
-      blurb: 'Few machines. All of them monsters.' },
-    { id: 'cinder', name: 'Cinder', rank: 'DRAKE', policy: 'depth', wick: true,
+    { id: 'tallow', name: 'Tallow', rank: 'APPRENTICE', pips: 1, policy: 'spam', wick: false, purse: 0.85,
+      blurb: 'Builds wide and cheap. Never upgrades a thing.' },
+    { id: 'flint', name: 'Flint', rank: 'BROAD HAND', pips: 2, policy: 'balanced', wick: false, purse: 0.75,
+      blurb: 'Spreads his brass thin and wide. Loves a long road.' },
+    { id: 'ember', name: 'Ember', rank: 'DEEP HAND', pips: 2, policy: 'depth', wick: false, purse: 0.95,
+      blurb: 'Few machines, all of them monsters. Wants a chokepoint.' },
+    { id: 'cinder', name: 'Cinder', rank: 'DRAKE', pips: 3, policy: 'depth', wick: true, purse: 1.15,
       blurb: 'Works the cavern floor herself. Good luck.' },
   ];
   var RIVAL_ORDER = ['tallow', 'flint', 'ember', 'cinder'];
@@ -1284,7 +1327,16 @@
   // (index 0 = the starting hoard, index W = after wave W resolved). A rival
   // whose hoard reaches 0 has been sacked and the duel ends early.
   // BAKED — regenerate with: node tools/bake-rivals.js  (writes this block)
-  var RIVAL_CURVES = {};                  // filled by the baked table below
+  // BAKED 2026-08-14 by tools/bot.js bakeAll() through __game.duelBake —
+  // real runs, real economy, real injected taps. Regenerate after ANY change
+  // to DUEL_ARENAS, DUEL_WAVES, duelStartGold, the wave generator, or tower
+  // balance: a stale curve is a rival fighting a game that no longer exists.
+  var RIVAL_CURVES = {
+    tallow: [[60,60,60,60,58,33,33,21,21,0,0,0,0], [60,35,35,35,35,35,35,30,0,0,0,0,0], [60,60,60,60,35,31,0,0,0,0,0,0,0], [60,60,60,28,0,0,0,0,0,0,0,0,0], [60,44,42,5,0,0,0,0,0,0,0,0,0], [60,60,35,35,35,7,0,0,0,0,0,0,0]],
+    flint: [[60,60,60,60,60,60,60,60,60,50,50,50,45], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,35,35,35,25,0,0,0,0,0], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,48,48,23,23,23,0,0,0,0,0,0,0], [60,60,60,60,60,44,44,44,44,44,44,44,44]],
+    ember: [[60,60,60,60,60,60,60,60,60,56,56,56,56], [60,60,60,60,60,60,60,60,60,60,36,0,0], [60,60,60,60,60,60,60,60,60,60,46,46,0], [60,60,60,60,60,60,60,60,60,60,60,60,46], [60,60,60,60,60,60,60,60,60,60,52,42,42], [60,60,60,60,60,60,60,60,60,60,44,44,0]],
+    cinder: [[60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,48], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,34]],
+  };
   // A rival's arena for today. Pure function of the day and the rival, so both
   // sides of a duel are the same fight and tomorrow is computable today (which
   // is how the curves get baked ahead of time).
@@ -4502,11 +4554,40 @@
   };
 
   Game.prototype._drawPads = function (ctx) {
+    // WHERE YOU MAY BUILD, shown only while a machine is actually in hand.
+    // placeHint was scaffolded and never populated or drawn — but this is a
+    // touch game with no hover, so a cursor ghost cannot work. What the player
+    // actually needed was the INVISIBLE RULE made visible: a no-build corridor
+    // hugs the whole road and nothing ever said so, so a tap near the road just
+    // silently did nothing and read as an unresponsive game.
+    if (this.shopPick >= 0 && this.state === 'playing') {
+      ctx.save();
+      var lim = MAP.pathW * 0.5 + 16;
+      ctx.strokeStyle = 'rgba(255,90,80,0.16)';
+      ctx.lineWidth = lim * 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (var rd = 0; rd <= PATH.len; rd += 14) {
+        var rp = pathPointAt(rd);
+        if (rd === 0) ctx.moveTo(rp.x, rp.y); else ctx.lineTo(rp.x, rp.y);
+      }
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,90,80,0.14)';
+      ctx.beginPath(); ctx.arc(MAP.keep.x, MAP.keep.y, 96, 0, 6.283); ctx.fill();
+      for (var ez = 0; ez < this.towers.length; ez++) {
+        ctx.beginPath(); ctx.arc(this.towers[ez].x, this.towers[ez].y, 46, 0, 6.283); ctx.fill();
+      }
+      ctx.restore();
+    }
     for (var i = 0; i < MAP.pads.length; i++) {
       if (this._padTower(i) !== -1) continue;
       var p = MAP.pads[i];
-      var afford = this.gold >= 60;
-      var pulse = afford ? 0.6 + 0.4 * Math.sin(this.worldT * 3 + i) : 0.35;
+      // A pad is a DISCOUNT, not a target — tap-to-build on a pad was removed
+      // when the shop took over building. Eight rings pulsing like buttons when
+      // nothing is in hand is the most button-like thing on the map promising
+      // something that does not happen, so they only wake up while armed.
+      var armed = this.shopPick >= 0;
+      var afford = armed && this.gold >= 115;   // was `>= 60`: no machine costs 60
+      var pulse = afford ? 0.6 + 0.4 * Math.sin(this.worldT * 3 + i) : (armed ? 0.35 : 0.16);
       if (ART.images.pad) { ctx.globalAlpha = 0.6 + pulse * 0.4; ctx.drawImage(ART.images.pad, p.x - 26, p.y - 18, 52, 36); ctx.globalAlpha = 1; }
       else {
         ctx.strokeStyle = 'rgba(255,215,94,' + pulse + ')';
@@ -5571,7 +5652,12 @@
         var sxx = G.shopX + sc2 * G.shopStep, syy = G.shopY;
         var picked = this.shopPick === sc2;
         var chipCost = Math.round(stt.cost * crowdMul(this.towers.length));
-        var can = this.gold >= Math.round(chipCost * PAD_DISCOUNT);
+        // AFFORDABILITY MUST MATCH THE NUMBER ON THE CARD. This tested against
+        // the PAD-discounted price while printing and charging the full one, so
+        // a card lit up as buyable, you placed it off a pad, and the build
+        // silently refused. A discount is a pleasant surprise, never a promise
+        // the shelf makes and the floor breaks.
+        var can = this.gold >= chipCost;
         forgePlate(ctx, { x: sxx, y: syy, w: G.shopW, h: G.shopH }, picked ? 'brasslit' : 'util');
         if (picked) {
           ctx.strokeStyle = '#ffd75e'; ctx.lineWidth = 2.5;
@@ -5592,6 +5678,13 @@
           ctx.globalAlpha = 1;
         }
         ctx.textAlign = 'center';
+        // SEVEN AUTHORED MACHINE NAMES WERE RENDERED NOWHERE IN THE GAME. The
+        // shelf was seven silhouettes and seven prices, so 'which one is the
+        // crossbow' was a question the game refused to answer. 52px of card
+        // cannot hold 'Kobold Crossbow', hence the short: field.
+        ctx.font = 'bold 7px system-ui, sans-serif';
+        inkText(ctx, stt.short || '', sxx + G.shopW / 2, syy + G.shopH - 19,
+                can ? '#e8dcc8' : '#7d7266', 3, 1);
         ctx.font = 'bold 11px system-ui, sans-serif';
         inkText(ctx, chipCost + 'g', sxx + G.shopW / 2, syy + G.shopH - 8,
                 can ? '#ffd75e' : '#8a7f72', 3, 1);
@@ -6149,11 +6242,14 @@
     forgePlate(ctx, DU, 'cold');
     ctx.font = 'bold 16px system-ui, sans-serif';
     inkText(ctx, 'DUEL', ducx, DU.y + 33, '#ffd9c4', 5, 2);
-    // crossed-wrench mark: this is the one mode with somebody on the other side
-    ctx.strokeStyle = 'rgba(255,190,150,0.85)'; ctx.lineWidth = 2;
+    // Crossed-wrench mark: this is the one mode with somebody on the other
+    // side. Parked against the plate's left edge — at ducx-30 it printed
+    // straight through the D of DUEL.
+    ctx.strokeStyle = 'rgba(255,190,150,0.8)'; ctx.lineWidth = 1.8;
+    var mkx = DU.x + 15, mky = DU.y + 27;
     ctx.beginPath();
-    ctx.moveTo(ducx - 30, DU.y + 20); ctx.lineTo(ducx - 20, DU.y + 30);
-    ctx.moveTo(ducx - 20, DU.y + 20); ctx.lineTo(ducx - 30, DU.y + 30);
+    ctx.moveTo(mkx - 5, mky - 5); ctx.lineTo(mkx + 5, mky + 5);
+    ctx.moveTo(mkx + 5, mky - 5); ctx.lineTo(mkx - 5, mky + 5);
     ctx.stroke();
     var beaten = 0;
     for (var rvi = 0; rvi < RIVAL_ORDER.length; rvi++) {
@@ -6276,7 +6372,17 @@
       ctx.fillText(rv.name, DG.x + 14, ry + 24);
       ctx.fillStyle = ready ? 'rgba(255,190,150,0.75)' : 'rgba(140,124,110,0.7)';
       ctx.font = 'bold 9px system-ui, sans-serif';
-      ctx.fillText(rv.rank, DG.x + 14 + ctx.measureText(rv.name).width + 46, ry + 23);
+      var rankX = DG.x + 14 + ctx.measureText(rv.name).width + 46;
+      ctx.fillText(rv.rank, rankX, ry + 23);
+      // Difficulty pips, MEASURED (see RIVALS): three flames is the ceiling and
+      // the two mid rivals genuinely share a rung, so two of them show two.
+      var pipX = rankX + ctx.measureText(rv.rank).width + 10;
+      for (var pp = 0; pp < 3; pp++) {
+        var lit = pp < (rv.pips | 0);
+        ctx.fillStyle = lit ? (ready ? 'rgba(255,150,60,0.95)' : 'rgba(120,104,90,0.8)')
+                            : 'rgba(255,255,255,0.13)';
+        ctx.beginPath(); ctx.arc(pipX + pp * 9, ry + 19, 3, 0, 6.283); ctx.fill();
+      }
       ctx.fillStyle = ready ? 'rgba(232,203,180,0.8)' : 'rgba(122,106,92,0.8)';
       ctx.font = '11px system-ui, sans-serif';
       ctx.fillText(rv.blurb, DG.x + 14, ry + 42);
