@@ -361,8 +361,13 @@
         [120, 560], [232, 540], [322, 506], [346, 452], [300, 402],
         [200, 386], [110, 360], [88, 302], [130, 262], [196, 238], [176, 232],
       ],
+      // The first two pads used to sit at y 758 and 736 — UNDER the shop shelf
+      // on a 375-wide phone, where the shop's hit test returns before the world
+      // ever sees the tap. They were not merely hard to see, they could not be
+      // built on at all. Lifted clear of the shelf (world y <= 688) onto ground
+      // that passes _placeCheck and keeps >70u from every neighbour.
       pads: [
-        { x: 300, y: 758 }, { x: 168, y: 736 }, { x: 56, y: 684 },
+        { x: 328, y: 686 }, { x: 248, y: 672 }, { x: 56, y: 684 },
         { x: 192, y: 612 }, { x: 332, y: 574 }, { x: 252, y: 448 },
         { x: 58, y: 424 }, { x: 158, y: 312 },
       ],
@@ -381,9 +386,9 @@
         [362, 362], [300, 302], [190, 292], [122, 252], [176, 232],
       ],
       pads: [
-        { x: 218, y: 646 }, { x: 78, y: 674 }, { x: 356, y: 724 },
+        { x: 218, y: 646 }, { x: 78, y: 674 }, { x: 296, y: 664 },
         { x: 226, y: 486 }, { x: 138, y: 328 }, { x: 356, y: 262 },
-        { x: 44, y: 348 }, { x: 288, y: 356 }, { x: 168, y: 770 },
+        { x: 44, y: 348 }, { x: 288, y: 356 }, { x: 140, y: 630 },
       ],
       torches: [[40, 690], [368, 580], [40, 480], [330, 250], [230, 726], [368, 420]],
       heroStart: { x: 150, y: 600 },
