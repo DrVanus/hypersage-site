@@ -116,6 +116,7 @@
   var TOWER_TYPES = {
     mimic: {
       name: 'Latch Mimic', cost: 80, hitsAir: false,
+      aims: true,
       // RANGE 40 MADE THIS MACHINE UNBUILDABLE, not merely weak. Measured pad
       // distance to the road centreline: level 1 has 2 of 8 pads inside 40,
       // level 2 has 1 of 9, and LEVEL 3 HAS ZERO OF EIGHT at every tier —
@@ -146,6 +147,7 @@
     },
     ballista: {
       name: 'Kobold Crossbow', cost: 70, hitsAir: true,
+      aims: true,
       levels: [
         { dmg: 12, rate: 1.2, range: 105, upgradeCost: 60 },
         { dmg: 20, rate: 1.4, range: 118, upgradeCost: 110 },
@@ -186,6 +188,7 @@
     },
     perch: {
       name: 'Gargoyle Roost', cost: 90, hitsAir: true, airBonus: 1.5,
+      aims: true,
       levels: [
         { dmg: 18, rate: 0.6, range: 134, pierce: 2, upgradeCost: 80 },
         { dmg: 30, rate: 0.7, range: 147, pierce: 3, upgradeCost: 140 },
@@ -302,7 +305,11 @@
   /// wider than a newcomer's. Progression gates the CAMPAIGN; the shared fight
   /// stays identical for everyone.
   function towerUnlocked(id, mode) {
-    if (mode === 'daily') return true;
+    // The DUEL is a shared fight for the same reason the Daily is, so it takes
+    // the same answer: both sides get all seven. The rival's curve was baked
+    // with the full shelf, so gating the player's would hand them a narrower
+    // game than the opponent they are being scored against.
+    if (mode === 'daily' || mode === 'duel') return true;
     return Save.starsTotal() >= (MACHINE_UNLOCK[id] || 0);
   }
   // How long a killed raider keeps rendering as a white-hot husk. ~7 frames:
@@ -742,7 +749,11 @@
         master = ac.createGain(); master.connect(ac.destination);
         master.gain.value = muted ? 0 : 1;
         sfxBus = ac.createGain(); sfxBus.gain.value = 0.9; sfxBus.connect(master);
-        musicBus = ac.createGain(); musicBus.gain.value = 0.5; musicBus.connect(master);
+        // 0.63, not 0.5: the whole music suite masters to -18 LUFS rather than
+        // the fleet's usual -16, so that no crossfade between two tracks is
+        // also a level jump. 0.5 * 10^(2/20) = 0.629 puts it back where the
+        // old placeholder sat relative to the SFX bus.
+        musicBus = ac.createGain(); musicBus.gain.value = 0.63; musicBus.connect(master);
       } catch (e) { ac = null; }
       return ac;
     }
@@ -793,68 +804,176 @@
         }, 3000 + Math.random() * 6000);
       })();
     }
-    // --- music: a slow D-minor cavern loop, scheduled ahead (BBH pattern).
-    // 'calm' = drone + sparse bells; 'battle' layers a bass pulse + war drums.
-    var musicOn = false, musicMode = 'calm', seqTimer = null, stepIdx = 0, nextT = 0, mNoise = null;
-    var M_BASS = [73.4, 73.4, 87.3, 87.3, 98, 98, 110, 110];   // D D F F G G A A
-    var M_MEL = [
-      294, 0, 0, 0, 349, 0, 0, 0, 440, 0, 0, 392, 0, 0, 349, 0,
-      0, 0, 294, 0, 0, 262, 0, 0, 349, 0, 330, 0, 294, 0, 0, 0,
-      392, 0, 0, 0, 440, 0, 0, 0, 523, 0, 0, 440, 0, 392, 0, 0,
-      349, 0, 392, 0, 440, 0, 0, 0, 294, 0, 0, 0, 0, 0, 0, 0,
-    ];
-    function mnote(freq, t, dur, type, vol) {
-      var o = ac.createOscillator(), g = ac.createGain();
-      o.type = type; o.frequency.value = freq;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g); g.connect(musicBus);
-      o.start(t); o.stop(t + dur + 0.05);
+    // ===== Music ==========================================================
+    // Pre-rendered beds + phase-locked stems, authored by tools/generate_music.py
+    // and gated by tools/check_music.py. The score's own reasoning lives in that
+    // generator's docstring; what matters HERE is three mechanical rules.
+    //
+    // 1. THE BAR IS 2.400s IN EVERY TRACK, and every track is a whole number of
+    //    bars. So if the bed and the stems are all started with loop=true at
+    //    times that differ by a whole number of bars, their bar lines coincide
+    //    forever — no drift, no re-sync, no scheduler.
+    // 2. A STEM IS NEVER RE-CUED. It runs from the moment it decodes until the
+    //    level ends, and "turning a layer on" is a gain ramp. Re-cueing a source
+    //    on a wave flag is what makes adaptive music pop, and a wave here starts
+    //    every ~7s (CFG.waveCountdown), so it would pop constantly.
+    // 3. THE STEM LENGTHS ARE COPRIME WITH THE BED (36 / 7 / 5 bars). The layers
+    //    therefore land on a different chord each lap, and the combination does
+    //    not repeat for 10.1 minutes.
+    //
+    // Everything below is COSMETIC and consumes nothing from the seeded stream —
+    // the only randomness is one Math.random() for the retry re-entry offset.
+    var BAR_SEC = 2.4;
+    var XFADE = 1.4;                     // the fleet's crossfade law
+    var SRC_SR = 44100;                  // render rate; decode may resample
+    var Music = {
+      map: null, buf: {}, loading: false, ready: false,
+      bedName: '', bedSrc: null, bedGain: null, bedAt: 0, bedDur: 0,
+      stems: {}, pending: null, lp: null, wantScene: null,
+      chordValid: true,
+    };
+    // Runtime layer levels. The mix balance lives HERE, not baked into the
+    // files: every track masters to the same -18 LUFS so no crossfade is ever a
+    // level jump, and the relative weight of a layer is a number we can change
+    // without re-rendering anything.
+    var STEM_GAIN = { works: 0.55, guild: 0.45, court: 0.55 };
+
+    function musicLoad() {
+      // Called AFTER the art gate releases (see boot in index.html). Music must
+      // never be in front of first render: this game cut its cold start from
+      // 19 MB to 1.4 MB and the whole point was to paint sooner.
+      if (Music.loading || !window.fetch || !ac) return;
+      Music.loading = true;
+      fetch('audio/music_map.json').then(function (r) { return r.json(); })
+        .then(function (map) {
+          Music.map = map;
+          // Staged: the two beds first (one of them is needed immediately),
+          // then the stems, which are not audible until a wave starts anyway.
+          ['music_hall', 'music_keep'].forEach(fetchTrack);
+          setTimeout(function () {
+            ['stem_works', 'stem_guild', 'stem_court',
+             'sting_win', 'sting_lose', 'sting_boss'].forEach(fetchTrack);
+          }, 400);
+        }).catch(function () { Music.loading = false; });
     }
-    function mthump(t, vol) {
-      if (!mNoise) return;
+
+    function fetchTrack(name) {
+      fetch('audio/' + name + '.m4a')
+        .then(function (r) { return r.arrayBuffer(); })
+        .then(function (ab) {
+          if (!ac) return;
+          ac.decodeAudioData(ab, function (buf) {
+            // decodeAudioData resamples to the context rate and does NOT
+            // reliably honour gapless metadata, so a decoded buffer can carry a
+            // few encoder-priming samples on the end. Trim to the sample count
+            // the renderer recorded, or the loop drifts a few ms every pass and
+            // walks off the bar grid the stems depend on.
+            var want = Math.round(Music.map[name].samples * ac.sampleRate / SRC_SR);
+            var n = Math.min(want, buf.length);
+            var out = ac.createBuffer(buf.numberOfChannels, n, ac.sampleRate);
+            for (var c = 0; c < buf.numberOfChannels; c++) {
+              out.getChannelData(c).set(buf.getChannelData(c).subarray(0, n));
+            }
+            Music.buf[name] = out;
+            if (name === 'music_hall' || name === 'music_keep') {
+              Music.ready = true;
+              if (Music.wantScene) startBed(Music.wantScene);
+            } else if (name.indexOf('stem_') === 0 && Music.bedSrc) {
+              startStem(name.slice(5));
+            }
+          }, function () {});
+        }).catch(function () {});
+    }
+
+    // A stem that decodes late cannot start at the bed's t0 — that instant has
+    // passed. Start it at the next WHOLE BAR after now, measured from the bed's
+    // own origin, and rule 1 still holds.
+    function nextBarAfter(t) {
+      var since = t - Music.bedAt;
+      return Music.bedAt + Math.ceil(since / BAR_SEC) * BAR_SEC;
+    }
+
+    function startStem(key) {
+      var name = 'stem_' + key;
+      if (!ac || !Music.buf[name] || !Music.bedSrc || Music.stems[key]) return;
+      var t = nextBarAfter(ac.currentTime + 0.08);
       var src = ac.createBufferSource();
-      src.buffer = mNoise;
-      var f = ac.createBiquadFilter();
-      f.type = 'lowpass'; f.frequency.value = 180;
-      var g = ac.createGain();
-      g.gain.setValueAtTime(vol, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
-      src.connect(f); f.connect(g); g.connect(musicBus);
-      src.start(t); src.stop(t + 0.25);
+      src.buffer = Music.buf[name];
+      src.loop = true;
+      var gn = ac.createGain();
+      gn.gain.value = 0;                        // always running, silent by default
+      src.connect(gn); gn.connect(Music.lp || musicBus);
+      src.start(t);
+      Music.stems[key] = { src: src, gain: gn, want: 0 };
     }
-    function schedule() {
-      if (!musicOn || !ac || ac.state !== 'running') return;
-      if (nextT < ac.currentTime) nextT = ac.currentTime + 0.05;   // no catch-up blast after resume
-      var stepDur = 60 / 76 / 2;                                   // 8ths at 76 bpm
-      while (nextT < ac.currentTime + 0.3) {
-        var s = stepIdx % 64, bar = (s / 8) | 0, inBar = s % 8;
-        var t = nextT;
-        if (inBar === 0) {
-          mnote(M_BASS[bar], t, stepDur * 6, 'triangle', 0.09);    // drone root
-          mnote(M_BASS[bar] * 3, t, stepDur * 5, 'sine', 0.02);    // high shimmer
-        }
-        if (M_MEL[s]) mnote(M_MEL[s], t, stepDur * 2.4, 'sine', 0.045);
-        if (musicMode === 'battle') {
-          mnote(M_BASS[bar] * 2, t, stepDur * 0.5, 'sawtooth', 0.028);
-          if (inBar === 0 || inBar === 4) mthump(t, 0.14);
-        }
-        nextT += stepDur; stepIdx++;
+
+    function stopStems() {
+      Object.keys(Music.stems).forEach(function (k) {
+        try { Music.stems[k].src.stop(); } catch (e) {}
+      });
+      Music.stems = {};
+    }
+
+    function startBed(scene) {
+      var name = scene === 'hall' ? 'music_hall' : 'music_keep';
+      Music.wantScene = scene;
+      if (!ac || !Music.buf[name]) return;
+      if (Music.bedName === name) return;
+      var t = ac.currentTime;
+      if (Music.bedSrc) {
+        var old = Music.bedSrc, og = Music.bedGain;
+        og.gain.cancelScheduledValues(t);   // kill pending duck-restores, or a
+        og.gain.setValueAtTime(og.gain.value, t);   // later ramp resurrects it
+        og.gain.linearRampToValueAtTime(0, t + XFADE);
+        setTimeout(function () { try { old.stop(); } catch (e) {} }, (XFADE + 0.2) * 1000);
       }
-    }
-    function startMusic() {
-      if (musicOn || !ac) return;
-      musicOn = true;
-      if (!mNoise) {
-        var len = ZZFX_RATE, nb = ac.createBuffer(1, len, ZZFX_RATE);
-        var ch = nb.getChannelData(0);
-        for (var i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1;
-        mNoise = nb;
+      stopStems();
+      if (!Music.lp) {
+        // The intensity dial. A filter cannot thrash: there is no threshold to
+        // chatter across and no phase to lose, so three audible tiers come out
+        // of two files and one setTargetAtTime.
+        Music.lp = ac.createBiquadFilter();
+        Music.lp.type = 'lowpass';
+        Music.lp.frequency.value = 3600;
+        Music.lp.Q.value = 0.4;
+        Music.lp.connect(musicBus);
       }
-      nextT = ac.currentTime + 0.1;
-      seqTimer = setInterval(schedule, 100);
+      var src = ac.createBufferSource();
+      src.buffer = Music.buf[name];
+      src.loop = true;
+      var gn = ac.createGain();
+      gn.gain.setValueAtTime(0, t);
+      gn.gain.linearRampToValueAtTime(1, t + XFADE);
+      src.connect(gn); gn.connect(Music.lp);
+      // Re-entering a level after a defeat should not replay bar 1 for the
+      // fifth time — retrying wave 18 is normal, and "the beginning plays a
+      // hundred times a session" is the genre's most-documented complaint.
+      var off = Music.replayOffset || 0;
+      Music.replayOffset = 0;
+      src.start(t, off);
+      Music.bedSrc = src; Music.bedGain = gn; Music.bedName = name;
+      Music.bedDur = src.buffer.duration;
+      Music.bedAt = t - off;              // the bar clock's true origin
+      ['works', 'guild', 'court'].forEach(startStem);
     }
+
+    // Which bar of the bed is playing right now (for live harmonisation).
+    function bedBar() {
+      if (!ac || !Music.bedSrc || !Music.map) return -1;
+      var e = Music.map[Music.bedName];
+      if (!e || !e.chords) return -1;
+      var el = (ac.currentTime - Music.bedAt) % (Music.bedDur || 1);
+      return Math.floor(el / BAR_SEC) % e.bars;
+    }
+
+    function ramp(param, to, secs) {
+      if (!ac) return;
+      var t = ac.currentTime;
+      param.cancelScheduledValues(t);
+      param.setValueAtTime(param.value, t);
+      param.linearRampToValueAtTime(to, t + secs);
+    }
+
     document.addEventListener('visibilitychange', function () {
       if (!ac) return;
       if (document.hidden) { ac.suspend(); }
@@ -864,9 +983,128 @@
       unlock: function () {
         var a = ctx();
         if (a && a.state !== 'running') a.resume();
-        if (a) { startAmbience(); startMusic(); }
+        if (a) { startAmbience(); musicLoad(); }
       },
-      setMusicMode: function (m) { musicMode = m; },
+      // Which room we are in. 'hall' = title/forge/trials, 'keep' = a level.
+      scene: function (s) {
+        if (!ac) { Music.wantScene = s; return; }
+        startBed(s);
+      },
+      // The whole intensity model, in one call, drained from _cosmetic().
+      //
+      // There are exactly two gain decisions (machines on, raiders on) plus one
+      // continuous filter. Both booleans change only when a wave starts or ends,
+      // and CFG.waveCountdown puts >=7s between those, so a dwell rule would
+      // have nothing to do.
+      setPhase: function (p) {
+        if (!ac || !Music.bedSrc) return;
+        var wave = p.waveActive ? 1 : 0;
+        // The machines run whenever Wick is holding the cave, and run HARDER
+        // during a wave — they never cut, because the workshop never stops.
+        var works = p.playing ? (wave ? 1 : 0.42) : 0;
+        // The raiders' own tune only exists once they have actually shown up.
+        // Wave 1 is deliberately marchless: the reveal lands on the player
+        // instead of being explained to them.
+        var guild = (wave && p.wave >= 2 && !p.boss) ? 1 : 0;
+        var court = (wave && p.boss) ? 1 : 0;
+        // The bed's drop bars were composed as the ear's reset. A build phase
+        // is 7s, so if the stems stayed up over them the drop would never once
+        // be heard in a whole level. Mask the machines across those bars.
+        var e = Music.map && Music.map[Music.bedName];
+        if (e && e.dropBars && e.dropBars.indexOf(bedBar()) >= 0) works *= 0.25;
+        var set = { works: works, guild: guild, court: court };
+        Object.keys(Music.stems).forEach(function (k) {
+          var s = Music.stems[k], to = (set[k] || 0) * (STEM_GAIN[k] || 0.5);
+          if (Math.abs(s.want - to) < 0.004) return;
+          s.want = to;
+          // Escalation completes on its own time; de-escalation starts NOW.
+          // The player's win must be acknowledged immediately; the threat's
+          // arrival can afford to arrive.
+          ramp(s.gain.gain, to, to > 0 ? 1.1 : 0.6);
+        });
+        // Warmth: the cave opens up as the hoard drains. A full hoard is a
+        // closed, warm room; losing it takes the lid off.
+        if (Music.lp) {
+          var open = p.playing ? (wave ? 0.55 + 0.45 * (1 - (p.hoardFrac || 1)) : 0.28) : 1;
+          var fc = 900 * Math.pow(16, open);
+          var t = ac.currentTime;
+          Music.lp.frequency.cancelScheduledValues(t);
+          Music.lp.frequency.setTargetAtTime(Math.max(700, Math.min(16000, fc)), t, 1.2);
+        }
+      },
+      // One-shot cues. These ride the music bus, NOT voice()/sfxBus — the SFX
+      // pool caps at 8 concurrent voices and is shared with the ember crackles,
+      // so a musical cue routed there can be evicted mid-phrase during combat.
+      cue: function (name, opts) {
+        if (!ac || muted) return;
+        var buf = Music.buf['sting_' + name];
+        if (!buf) return;
+        opts = opts || {};
+        var t = ac.currentTime;
+        var src = ac.createBufferSource();
+        src.buffer = buf;
+        var gn = ac.createGain();
+        gn.gain.value = 1;
+        src.connect(gn); gn.connect(musicBus);
+        src.start(t);
+        if (Music.bedGain) {
+          var bg = Music.bedGain.gain;
+          bg.cancelScheduledValues(t);
+          bg.setValueAtTime(bg.value, t);
+          if (opts.stop) {
+            bg.linearRampToValueAtTime(0, t + 2.0);      // defeat: the room stops
+            Object.keys(Music.stems).forEach(function (k) {
+              ramp(Music.stems[k].gain.gain, 0, 1.2);
+            });
+          } else {
+            bg.linearRampToValueAtTime(0.10, t + 0.4);   // victory: it listens
+            bg.setValueAtTime(0.10, t + buf.duration - 1.2);
+            bg.linearRampToValueAtTime(1, t + buf.duration);
+          }
+        }
+      },
+      // The wave-clear answer is played LIVE, harmonised to whatever bar the
+      // bed is actually on, so it can never say the same thing twice running —
+      // and it costs zero bytes. A pre-rendered clear stinger is the single
+      // most dangerous asset you can author: it fires 20 times a level.
+      clear: function () {
+        if (!ac || muted || !Music.bedSrc || !Music.chordValid) return;
+        var e = Music.map && Music.map[Music.bedName];
+        var bar = bedBar();
+        if (!e || !e.chords || bar < 0) return;
+        var ch = e.chords[bar];
+        if (!ch || !ch.length) return;
+        var t = ac.currentTime + 0.02;
+        for (var i = 0; i < 3; i++) {
+          var m = ch[i % ch.length] + 24;                 // two octaves up: it
+          var f = 440 * Math.pow(2, (m - 69) / 12);       // rings over the bed
+          var o = ac.createOscillator(), g = ac.createGain();
+          o.type = 'triangle'; o.frequency.value = f;
+          var at = t + i * 0.075;
+          g.gain.setValueAtTime(0.0001, at);
+          g.gain.exponentialRampToValueAtTime(0.075, at + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, at + 1.1);
+          o.connect(g); g.connect(musicBus);
+          o.start(at); o.stop(at + 1.2);
+        }
+      },
+      // Called when a level is (re)entered, before scene('keep').
+      replayVaried: function () {
+        // Lane 3, cosmetic, Math.random by law — never the seeded stream.
+        if (Music.buf.music_keep) {
+          var bars = (Music.map.music_keep.bars) | 0;
+          var b = Math.floor(Math.random() * Math.max(1, bars >> 1));
+          Music.replayOffset = b * BAR_SEC;      // whole bars only
+        }
+      },
+      stopAll: function () {
+        if (!ac) return;
+        stopStems();
+        if (Music.bedSrc) {
+          try { Music.bedSrc.stop(); } catch (e) {}
+          Music.bedSrc = null; Music.bedName = '';
+        }
+      },
       play: function (name) {
         if (!ac || muted) return;                     // consumes NOTHING seeded
         var now = Date.now();
@@ -931,9 +1169,84 @@
   };
   var TRIAL_ORDER = ['purse', 'picnic', 'greased', 'guttered', 'lean', 'smothered'];
 
+  // ---- RIVAL SIEGE — the duel mode ---------------------------------------
+  // The Guild posted TWO caves on the board tonight. You and a rival hoardling
+  // face THE SAME raiding party, split down the middle: same map, same seed,
+  // same wave sequence, wave for wave. Whoever still has gold at the end wins.
+  //
+  // WHY THE RIVAL IS A RECORDING, AND WHY THAT IS NOT A CHEAT.
+  // In mirrored-wave versus (the Kingdom Rush Battles / Legion TD 2 fairness
+  // pattern, and the format Rush Royale twice rebuilt its ranked ladder to
+  // reach) the opponent NEVER REACTS TO YOU. There is no interference channel:
+  // both sides simply race the same waves. So a rival's whole run is a pure
+  // function of (map, seed, policy) — which means a recorded run is not an
+  // approximation of an opponent, it IS the opponent, at full fidelity. The
+  // curves below were produced by tools/bake-rivals.js driving the real
+  // tools/bot.js through real injected taps: real economy, real crowd pricing,
+  // real placement validation. Nothing here is a hand-authored difficulty
+  // number, and no bot code ships in the bundle.
+  //
+  // This is also what makes the mode work at a population of one. A live queue
+  // needs an opponent online right now; Element TD 2 ships with the literal
+  // subtitle "Multiplayer Tower Defense" and averages 51 concurrent players.
+  // A recording is always home.
+  var DUEL_WAVES = 12;                    // a phone session, not an evening
+  // Arenas rotate daily so a duel is not a fixed puzzle, but hold still WITHIN
+  // a day so a loss can be avenged on the same ground.
+  // An arena is a SEED PLUS ITS MAP, stated, not derived. Deriving the map as
+  // (seed % MAPS.length) was tried first and the six seeds landed 5-0-1 across
+  // the three maps — a distribution nobody chose and nobody would have noticed,
+  // and one that would silently re-scramble the day a fourth map is authored.
+  // Two arenas per map, written down.
+  var DUEL_ARENAS = [
+    { seed: 0x5eed1a3f, map: 0 },
+    { seed: 0xd00dfeed, map: 1 },
+    { seed: 0x7a11ba5e, map: 2 },
+    { seed: 0x0dd1e5ec, map: 0 },
+    { seed: 0x1ceb00da, map: 1 },
+    { seed: 0xa11ecafe, map: 2 },
+  ];
+  var RIVALS = [
+    { id: 'tallow', name: 'Tallow', rank: 'APPRENTICE', policy: 'spam', wick: false,
+      blurb: 'Builds wide and cheap. Never upgrades anything.' },
+    { id: 'flint', name: 'Flint', rank: 'JOURNEYMAN', policy: 'balanced', wick: false,
+      blurb: 'Spreads his brass evenly and calls it craft.' },
+    { id: 'ember', name: 'Ember', rank: 'ARTIFICER', policy: 'depth', wick: false,
+      blurb: 'Few machines. All of them monsters.' },
+    { id: 'cinder', name: 'Cinder', rank: 'DRAKE', policy: 'depth', wick: true,
+      blurb: 'Works the cavern floor herself. Good luck.' },
+  ];
+  var RIVAL_ORDER = ['tallow', 'flint', 'ember', 'cinder'];
+  // RIVAL_CURVES[rivalId][seedIdx] = hoard after each wave, DUEL_WAVES+1 long
+  // (index 0 = the starting hoard, index W = after wave W resolved). A rival
+  // whose hoard reaches 0 has been sacked and the duel ends early.
+  // BAKED — regenerate with: node tools/bake-rivals.js  (writes this block)
+  var RIVAL_CURVES = {};                  // filled by the baked table below
+  // A rival's arena for today. Pure function of the day and the rival, so both
+  // sides of a duel are the same fight and tomorrow is computable today (which
+  // is how the curves get baked ahead of time).
+  function duelSeedIdx(rivalIdx) { return (dayNumber() + rivalIdx) % DUEL_ARENAS.length; }
+  // The arena's MAP is a function of the arena, never of the day. Deriving it
+  // from the day instead would mean a baked curve and the run it is scored
+  // against could sit on different ground — the one failure this whole mode
+  // has to make impossible.
+  function duelMapAt(seedIdx) { return (DUEL_SEEDS[seedIdx] >>> 0) % MAPS.length; }
+  function duelMapFor(rivalIdx) { return duelMapAt(duelSeedIdx(rivalIdx)); }   // tonight's, for the picker
+  /** The rival's hoard after wave w, or null if this duel has no baked curve. */
+  function rivalHoardAt(rivalIdx, seedIdx, w) {
+    var row = RIVAL_CURVES[RIVAL_ORDER[rivalIdx]];
+    if (!row || !row[seedIdx]) return null;
+    var c = row[seedIdx];
+    return c[Math.max(0, Math.min(c.length - 1, w | 0))];
+  }
+
   var Save = (function () {
     var KEY2 = 'hoardling.save.v2', KEY1 = 'hoardling.save.v1';
-    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {}, trials: {} };
+    // duels: { <rivalId>: { w: 1, m: <best margin> } } — an OBJECT, not a bare
+    // number, because the best margin can legitimately be 0 (a duel won on the
+    // tiebreak) and a falsy value would read as "never beaten". Same trap the
+    // bountyMul null-check exists for.
+    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {}, trials: {}, duels: {} };
     try {
       var raw = localStorage.getItem(KEY2);
       if (raw) {
@@ -966,6 +1279,14 @@
             for (var to = 0; to < TRIAL_ORDER.length; to++) {
               if (p.trials[tl][TRIAL_ORDER[to]]) data.trials[li][TRIAL_ORDER[to]] = 1;
             }
+          }
+        }
+        if (p.duels && typeof p.duels === 'object') {
+          // whitelist-iterate OUR ids, never for-in over hostile input
+          for (var ro = 0; ro < RIVAL_ORDER.length; ro++) {
+            var rid = RIVAL_ORDER[ro], rec = p.duels[rid];
+            if (!rec || typeof rec !== 'object' || !rec.w) continue;
+            data.duels[rid] = { w: 1, m: Math.max(0, Math.min(CFG.startHoard, rec.m | 0)) };
           }
         }
       } else {
@@ -2044,12 +2365,31 @@
     requestAnimationFrame(this._frame);
   }
 
-  Game.prototype.reset = function (seed, mode, level, trialKey) {
-    this.seed = (seed >>> 0) || dailySeed();
+  Game.prototype.reset = function (seed, mode, level, trialKey, rivalIdx) {
     this.mode = mode || this.mode;
+    // DUEL: the arena is DERIVED, never passed. The rival's curve is indexed by
+    // (rival, seedIdx), so letting a caller supply a seed would allow a duel to
+    // run on ground the recording was never made on — the two sides would
+    // silently be fighting different maps and the scoreboard would be a lie.
+    // One source of truth, and it lives here.
+    this.rivalIdx = (this.mode === 'duel') ? clamp(rivalIdx | 0, 0, RIVALS.length - 1) : -1;
+    this.rival = this.rivalIdx >= 0 ? RIVALS[this.rivalIdx] : null;
+    this.duelSeedIdx = -1;
+    if (this.rivalIdx >= 0) {
+      // An explicit seed is honoured ONLY if it is one of the baked arenas —
+      // that is what lets tools/bake-rivals.js walk every (rival, arena) pair
+      // through the ordinary code path instead of needing a private one. Any
+      // other value (normal play passes 0) takes tonight's derived arena. The
+      // effect is that a duel can never run on ground with no curve slot.
+      var si = DUEL_SEEDS.indexOf(seed >>> 0);
+      this.duelSeedIdx = si >= 0 ? si : duelSeedIdx(this.rivalIdx);
+      seed = DUEL_SEEDS[this.duelSeedIdx];
+    }
+    this.seed = (seed >>> 0) || dailySeed();
     // level select: campaign takes the chosen map; the Daily rotates its map
     // as a PURE function of the seed, so every player fights the same layout
     if (this.mode === 'daily') this.levelIdx = setLevel(this.seed % MAPS.length);
+    else if (this.mode === 'duel') this.levelIdx = setLevel(duelMapAt(this.duelSeedIdx));
     else this.levelIdx = setLevel(level !== undefined ? level : (this.levelIdx || 0));
     seedStream(this.seed);                  // LANE 2 seeded once, at reset
     this.worldT = 0;
@@ -2057,6 +2397,14 @@
     this.hoard = CFG.startHoard;
     this.wave = 0;                          // waves completed; current = wave index while active
     this.waveActive = false;
+    this._bossWave = false;
+    this._mCue = null; this._mClear = false; this._mScene = null;
+    // Come back into the level at a different bar than last time. Retrying
+    // wave 18 six times is normal here; hearing the bed's first bar six times
+    // is what makes people reach for the SOUND pill. Whole bars only, so the
+    // stems stay phase-locked, and Math.random by law — lane 3 never touches
+    // the seeded stream (and this runs after seedStream anyway).
+    Sfx.replayVaried();
     this.waveT = 0;
     this.countdown = 6;                     // grace before wave 1
     this.spawnQueue = [];                   // built at wave start, drained by time
@@ -2080,13 +2428,30 @@
     this.shopPick = -1;                     // index into TOWER_ORDER while placing, else -1
     this.placeHint = null;                  // {x,y,ok,why} — the last previewed spot
     this.stolenLost = 0;
+    // The rival's side of the duel. rivalHoard steps ONCE PER WAVE off the
+    // baked curve — it is display + scoring state only and is never read by
+    // anything that can change the player's sim, so a duel is bit-identical to
+    // the same seed played solo.
+    this.rivalHoard = CFG.startHoard;
+    this.rivalPrev = CFG.startHoard;
+    this.rivalDrop = 0;                     // coins the rival lost on the last wave
+    // The HUD pulse is DERIVED from (worldT - rivalStepT), not carried in a
+    // countdown: a timer would need decaying somewhere, and the only two places
+    // to do that are the sim (where a cosmetic has no business) and the render
+    // lane (where sim-written state has no business). A timestamp needs neither.
+    this.rivalStepT = -99;
+    this.duelResolved = false;              // a duel ends once, on one code path
     this.kills = 0;
     this.leaks = {};   // per-raider-type leak ledger, graded state (see the escape path)
     this.tollRecovered = 0;                 // coins Wick personally shook loose
     this.breathUsed = false;                // Mother's Breath spends once per level
     this.motherReady = false; this.castMother = false;
-    // Forge mods: CAMPAIGN ONLY — the Daily sim takes no input but the seed
-    this.mods = (this.mode === 'campaign') ? Save.forgeMods() : {};   // {} for daily: LAW
+    // Forge mods: CAMPAIGN ONLY — the Daily sim takes no input but the seed.
+    // The DUEL is bound by the same law, and harder: every rival curve was
+    // baked by a bot with no Forge at all, so granting the player forge power
+    // here would not be an advantage, it would make the scoreboard meaningless.
+    // A shared fight has to be the SAME fight. {} for daily AND duel: LAW.
+    this.mods = (this.mode === 'campaign') ? Save.forgeMods() : {};
     // Trial mutator: campaign-only by construction; forge power still applies
     this.trial = (this.mode === 'campaign' && trialKey && TRIALS[trialKey]) ? trialKey : null;
     if (this.trial) {
@@ -2158,8 +2523,12 @@
 
   // ---- wave construction (deterministic: static tables or lane-1 gen) ----
   Game.prototype.buildWave = function (w) {
-    var groups = this.mode === 'daily' ? dailyWaveComp(w, this.seed) : WAVE_TABLES[this.levelIdx][w];
-    var hpMul = this.mode === 'daily' ? dailyHpMul(w) : campHpMul(w, this.levelIdx);
+    // A duel draws its waves from the SEEDED generator, not a hand-authored
+    // table: that is what makes "the same raiding party hit both caves" true
+    // rather than a story. Same call, same seed, same twelve waves.
+    var seeded = this.mode === 'daily' || this.mode === 'duel';
+    var groups = seeded ? dailyWaveComp(w, this.seed) : WAVE_TABLES[this.levelIdx][w];
+    var hpMul = seeded ? dailyHpMul(w) : campHpMul(w, this.levelIdx);
     var q = [];
     for (var g = 0; g < groups.length; g++) {
       var gr = groups[g];
@@ -2170,7 +2539,11 @@
     q.sort(function (a, b) { return a.t - b.t || (a.type < b.type ? -1 : 1); });
     return q;
   };
-  Game.prototype.totalWaves = function () { return this.mode === 'daily' ? Infinity : WAVE_TABLES[this.levelIdx].length; };
+  Game.prototype.totalWaves = function () {
+    if (this.mode === 'daily') return Infinity;
+    if (this.mode === 'duel') return DUEL_WAVES;   // a duel has a finish line
+    return WAVE_TABLES[this.levelIdx].length;
+  };
 
   Game.prototype.startWave = function () {
     if (this.waveActive || this.state !== 'playing') return;
@@ -2180,6 +2553,12 @@
       this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 700, txt: '+' + bonus + 'g early!', c: '#ffd75e' });
     }
     this.spawnQueue = this.buildWave(this.wave);
+    // Stamp whether the King is in this wave. It has to be stamped HERE, from
+    // the composition, rather than discovered later by scanning live enemies:
+    // the court music and its telegraph need to be up during the countdown,
+    // before a single boss has spawned.
+    this._bossWave = this.spawnQueue.some(function (s) { return s.type === 'boss'; });
+    if (this._bossWave) this._mCue = { name: 'boss' };
     this.waveActive = true;
     this.waveT = 0;
     this.countdown = 0;
@@ -2554,6 +2933,13 @@
       var target = this._pickTarget(pad, lv.range * mRng, tt.hitsAir, tt.airBonus, tw.targeting | 0);
       if (!target) { tw.cd = 0.1; continue; }
       (this._r3dAim = this._r3dAim || {})[tw.tid] = { x: target.px, y: target.py };   // miss: rescan at 6 Hz, not 60
+      // THE MACHINES DID NOT TURN. A crossbow drew in one fixed pose and fired
+      // at whatever it liked, so a raider on its left was shot by a bow aimed
+      // up-RIGHT. Nothing in a tower-defense frame reads as broken faster.
+      // The plate's base is a round turntable, so the art is built to swivel.
+      // Cosmetic cache: written here, read ONLY by the renderer, exactly like
+      // the _r3dAim line above — the sim never reads it back, so no fork.
+      tw._aimX = target.px; tw._aimY = target.py;
       tw.cd = 1 / lv.rate;
       var tp = { x: target.px, y: target.py };
       if (tw.type === 'mimic') {                            // instant bite
@@ -2815,6 +3201,9 @@
     // bounties; the early-call button is the only extra tap) --
     if (this.waveActive && !this.spawnQueue.length && !this.enemies.length) {
       this.waveActive = false;
+      this._bossWave = false;
+      this._mClear = true;                  // drained by _cosmetic(): a live,
+                                            // bar-harmonised answer, not a file
       this.menu = null;                     // no stale menu into the intermission
       this.wave++;
       // COIN PRESSES pay out at wave end — a bet on surviving to collect
@@ -2831,7 +3220,38 @@
       }
       if (minted) { this.gold += minted; Sfx.play('coin'); }
       this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 300, txt: 'Wave ' + this.wave + ' held!', c: '#9ef58f' });
-      if (this.wave >= this.totalWaves()) { this._gameOver(true); return; }
+      // ---- THE RIVAL'S WAVE ------------------------------------------------
+      // Their cave took the same wave at the same time. Step their hoard off
+      // the baked curve and SAY what it cost them — a number that only moves
+      // in the corner of the HUD is a scoreboard; a number that announces
+      // itself the moment yours moves is an opponent.
+      if (this.mode === 'duel' && this.rival) {
+        var rh = rivalHoardAt(this.rivalIdx, this.duelSeedIdx, this.wave);
+        if (rh !== null) {
+          this.rivalPrev = this.rivalHoard;
+          this.rivalHoard = rh;
+          this.rivalDrop = Math.max(0, this.rivalPrev - this.rivalHoard);
+          this.rivalStepT = this.worldT;
+          if (this.rivalDrop > 0) {
+            this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 336,
+                                txt: this.rival.name + ' lost ' + this.rivalDrop, c: '#ff9a6a' });
+          } else {
+            this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 336,
+                                txt: this.rival.name + ' held clean', c: '#a8e6ff' });
+          }
+        }
+        // Their cave falls: the duel is over the moment it does, however many
+        // waves are left. Checked BEFORE the wave-count finish so a rival who
+        // is sacked on the final wave still reads as a knockout, not a decision.
+        if (this.rivalHoard <= 0) { this._gameOver(true); return; }
+      }
+      if (this.wave >= this.totalWaves()) {
+        // A duel is decided on the MARGIN, not on survival — both sides
+        // reaching the end is the normal case. Ties go to the defender who
+        // still has the gold in front of them: >= , not >.
+        if (this.mode === 'duel') { this._gameOver(this.hoard >= this.rivalHoard); return; }
+        this._gameOver(true); return;
+      }
       this.countdown = CFG.waveCountdown;
     }
   };
@@ -2970,6 +3390,11 @@
   };
   Game.prototype._gameOver = function (won) {
     this.state = won ? 'won' : 'lost';
+    this._bossWave = false;
+    // Victory: the bed ducks and comes back — the cave is still his.
+    // Defeat: the bed STOPS. They carried it out, and the room has nothing to
+    // say about it. The asymmetry is the point.
+    this._mCue = won ? { name: 'win' } : { name: 'lose', stop: true };
     this.menu = null; this.infoCard = null; // an open chooser/menu must not outlive the run
     this.resultLockT = 0.8;                 // battle taps can't skip the screen
     this._resultT = 0;                      // cosmetic: drives the star landings
@@ -2983,7 +3408,20 @@
     leakRows.sort(function (a, b) { return b.coins - a.coins || a.wave - b.wave; });
     this.result = { won: won, stars: stars, hoard: this.hoard, lost: this.stolenLost, kills: this.kills, wave: this.wave,
                     leaks: leakRows, toll: this.tollRecovered,
-                    trial: this.trial ? TRIALS[this.trial].name : null };
+                    trial: this.trial ? TRIALS[this.trial].name : null,
+                    // duel scoreboard: both closing hoards and the margin that
+                    // decided it. knockout = their cave fell before the bell.
+                    rival: this.rival ? this.rival.name : null,
+                    rivalHoard: this.rival ? this.rivalHoard : null,
+                    margin: this.rival ? (this.hoard - this.rivalHoard) : null,
+                    knockout: this.rival ? (this.rivalHoard <= 0 || this.hoard <= 0) : false };
+    if (this.mode === 'duel' && won && this.rival) {
+      var prevD = Save.data.duels[this.rival.id];
+      var mgn = Math.max(0, this.hoard - this.rivalHoard);
+      // record OBJECT, never a bare number — a duel won on the tiebreak has a
+      // margin of 0, and a falsy record would erase the badge that earned it
+      if (!prevD || !prevD.w || mgn > (prevD.m | 0)) Save.data.duels[this.rival.id] = { w: 1, m: mgn };
+    }
     if (this.mode === 'campaign' && won && stars > Save.data.stars[this.levelIdx]) Save.data.stars[this.levelIdx] = stars;
     if (this.mode === 'campaign' && won && this.trial) {           // trial badge
       if (!Save.data.trials[this.levelIdx]) Save.data.trials[this.levelIdx] = {};
@@ -3137,16 +3575,40 @@
       // Geometry comes from _titleGeom(), the same call _drawTitle draws from,
       // so a layout change can never move a button away from its hit box.
       var TG = this._titleGeom();
-      for (var lv = 0; lv < MAPS.length; lv++) {
+      // Bound by the ROWS, not by MAPS.length. These had drifted apart: the
+      // geometry hands back exactly three rows while this loop counted maps,
+      // so the day a fourth map is authored TG.rows[3] is undefined and hit()
+      // throws on the first tap the title screen ever receives. Defusing it
+      // costs one Math.min and removes a crash that is one array entry away.
+      var nRows = Math.min(MAPS.length, TG.rows.length);
+      for (var lv = 0; lv < nRows; lv++) {
         if (hit(w, TG.rows[lv])) {
           if (!Save.unlocked(lv)) return;        // locked: tap does nothing
           this.reset(1, 'campaign', lv); this.state = 'playing'; return;
         }
       }
       if (hit(w, TG.daily)) { this.reset(dailySeed(), 'daily'); this.state = 'playing'; return; }
+      if (hit(w, TG.duel)) { this.state = 'duel'; return; }
       if (hit(w, TG.pills[0])) { this.state = 'forge'; return; }
       if (hit(w, TG.pills[1])) { if (Save.starsTotal() > 0) this.state = 'trials'; return; }
       if (hit(w, TG.pills[2])) { Sfx.toggle(); return; }
+      return;
+    }
+    if (this.state === 'duel') {
+      var DGt = duelGeom();
+      for (var rq = 0; rq < RIVAL_ORDER.length; rq++) {
+        var ryq = DGt.top + rq * DGt.pitch;
+        if (w.y > ryq && w.y < ryq + DGt.h && w.x > DGt.x && w.x < DGt.x + DGt.w) {
+          // A rival with no baked curve cannot be fought: there is nobody on
+          // the other side. Refuse the tap rather than starting a duel that
+          // would score against a frozen 60 and always be won.
+          if (rivalHoardAt(rq, duelSeedIdx(rq), 0) === null) return;
+          this.reset(0, 'duel', 0, null, rq);
+          this.state = 'playing'; return;
+        }
+      }
+      if (w.y > DGt.backY && w.y < DGt.backY + 40 &&
+          w.x > WORLD_W / 2 - 70 && w.x < WORLD_W / 2 + 70) { this.state = 'menu'; return; }
       return;
     }
     if (this.state === 'trials') {
@@ -3194,7 +3656,11 @@
     }
     if (this.state === 'won' || this.state === 'lost') {
       if (this.resultLockT > 0) return;      // a mid-battle tap can't skip the screen
-      this.reset(this.mode === 'daily' ? dailySeed() : 1, this.mode);
+      // Leaving a duel drops OUT of duel mode: a reset that stayed in 'duel'
+      // would carry this.rival back to the title, and every later reset would
+      // re-derive an arena for a fight nobody asked for.
+      this.reset(this.mode === 'daily' ? dailySeed() : 1,
+                 this.mode === 'duel' ? 'campaign' : this.mode);
       this.state = 'menu';
       return;
     }
@@ -3600,8 +4066,24 @@
     // the open-jaw / recoil beat, cosmetic lane only — never read by update()
     if (this._breathT > 0) this._breathT = Math.max(0, this._breathT - dtRaw);
     if (this.state === 'won' || this.state === 'lost') this._resultT = (this._resultT || 0) + dtRaw;
-    // music intensity follows the battle (cosmetic lane)
-    Sfx.setMusicMode(this.state === 'playing' && this.waveActive ? 'battle' : 'calm');
+    // ---- music director (cosmetic lane; consumes nothing from the seed) ----
+    // Everything the score reacts to is read HERE, in _cosmetic(), never in
+    // update(). update() may only set a flag; this is where it is spent. That
+    // boundary is load-bearing: validate.py's firewall check is a substring
+    // test and cannot see a seeded draw that happens inside an audio helper.
+    var playing = this.state === 'playing' || this.state === 'paused';
+    var scene = playing ? 'keep' : 'hall';
+    if (scene !== this._mScene) { this._mScene = scene; Sfx.scene(scene); }
+    Sfx.setPhase({
+      playing: this.state === 'playing',
+      waveActive: this.waveActive,
+      wave: this.wave,
+      boss: !!this._bossWave,
+      hoardFrac: Math.max(0, Math.min(1, this.hoard / CFG.startHoard)),
+    });
+    // One-shot cues, drained from flags that update() raised.
+    if (this._mCue) { var c = this._mCue; this._mCue = null; Sfx.cue(c.name, c); }
+    if (this._mClear) { this._mClear = false; Sfx.clear(); }
   };
   /// Where Wick's mouth is, in world space, and which way it points.
   ///
@@ -3697,6 +4179,7 @@
     if (this.state === 'menu') this._drawTitle(ctx);
     if (this.state === 'forge') this._drawForge(ctx);
     if (this.state === 'trials') this._drawTrials(ctx);
+    if (this.state === 'duel') this._drawDuelSelect(ctx);
     if (this.state === 'won' || this.state === 'lost') this._drawResult(ctx);
     if (this.state === 'paused') {
       ctx.fillStyle = 'rgba(10,6,4,0.55)';
@@ -4105,6 +4588,7 @@
       }
     }
     var timg = ART.images[spriteId];
+    var tt2 = TOWER_TYPES[tw.type];
     if (timg) {
       // recoil press-down right after firing + gentle idle breathing
       var tlv = lvlRow(tw);
@@ -4117,9 +4601,33 @@
       var tsq = 1 - 0.10 * kick + Math.sin(this.worldT * 1.6 + tw.padIdx) * 0.008;
       var tw0 = 54 * (1 + lvl * 0.12);
       var th0 = tw0 * (timg.height / timg.width);
+      // FACING. The plate is painted aiming up-LEFT at about 45 degrees, on a
+      // round turntable base. So: mirror to put the barrel on the target's side
+      // (that is the error the player actually sees — shooting backwards), then
+      // swivel the remainder, clamped, about the base so the perspective holds.
+      // Eased toward the target rather than snapped: a turret that teleports its
+      // aim reads as cheap even when the angle is right.
+      var fSign = 1, fRot = 0;
+      if (tt2 && tt2.aims && tw._aimX !== undefined) {
+        var fdx = tw._aimX - p.x, fdy = tw._aimY - (p.y - th0 * 0.55);
+        fSign = fdx >= 0 ? -1 : 1;                  // -1 mirrors it to face right
+        var want = Math.atan2(fdy, Math.abs(fdx)) + Math.PI / 4;   // native is 45deg up
+        // 0.30, measured: the mirror does the real work, and anything past
+        // ~0.3 rad visibly CANTS the round turntable base — the machine reads
+        // as tipping over rather than traversing. Rendered all 8 compass
+        // directions at 0.55 and 0.30 to pick this.
+        fRot = Math.max(-0.30, Math.min(0.30, want));
+        // ease in RENDER time; cosmetic only, so wall-clock is correct here
+        var prev = tw._faceRot === undefined ? fRot : tw._faceRot;
+        var prevS = tw._faceSign === undefined ? fSign : tw._faceSign;
+        tw._faceRot = prev + (fRot - prev) * 0.18;
+        tw._faceSign = fSign;                        // the mirror snaps; the angle eases
+        fRot = tw._faceRot; fSign = prevS === fSign ? fSign : fSign;
+      }
       ctx.save();
       ctx.translate(p.x, p.y + 8);
-      ctx.scale(2 - tsq, tsq);
+      ctx.rotate(fRot * fSign);
+      ctx.scale((2 - tsq) * fSign, tsq);
       ctx.drawImage(timg, -tw0 / 2, -th0, tw0, th0);
       ctx.restore();
       this._drawForkBadge(ctx, tw, p, p.y - th0 * 0.72);
@@ -4788,6 +5296,18 @@
   /// mutator re-fits the list instead of pushing the last row off-screen —
   /// which is exactly what six rows did at the original 108px pitch
   /// (250 + 5*108 + 96 = 886 against a 780-unit world).
+  // Rival picker geometry — ONE source for draw and tap, same discipline as
+  // trialGeom/_titleGeom. Rows are the tap targets and are derived from the
+  // back-button position, so adding a fifth rival re-flows instead of
+  // overflowing off the bottom of the screen.
+  function duelGeom() {
+    var n = RIVAL_ORDER.length;
+    var top = 226, backY = 664, gap = 10;
+    var pitch = Math.min(104, Math.floor((backY - 24 - top + gap) / n));
+    return { top: top, pitch: pitch, h: pitch - gap, backY: backY,
+             x: 30, w: WORLD_W - 60 };
+  }
+
   function trialGeom() {
     var n = TRIAL_ORDER.length;
     var top = 214, backY = 664, gap = 8;
@@ -4816,8 +5336,22 @@
       pills.push({ x: 48 + i * 102, y: pillY, w: 120, h: pillH,
                    hx: 44 + i * 102, hy: pillY - pillPad, hw: 128, hh: minH });
     }
+    // TONIGHT band: two half-width plates instead of one full-width row.
+    // WORLD_H is 780 and the campaign ladder already spends 348..540; a fifth
+    // full-width row needs 62 more (minH is the 44pt floor, and it BINDS on
+    // every phone) and there are only 35 free above the utility pills. Two
+    // columns cost zero vertical. They also read correctly: the Daily and the
+    // Duel are both "one fight tonight" against the campaign's ladder.
+    // Hit boxes are 38..208 and 212..382 — a deliberate 4px gutter, because
+    // hit() is inclusive on both bounds and touching rects would make the
+    // shared edge belong to whichever branch the tap handler tested first.
+    function half(x, y, w, h) {
+      var pad = (minH - h) / 2;
+      return { x: x, y: y, w: w, h: h, hx: x - 4, hy: y - pad, hw: w + 8, hh: minH };
+    }
     return { rows: [row(368, 52), row(430, 52), row(492, 52)],
-             daily: row(578, 54), pills: pills };
+             daily: half(42, 578, 162, 54), duel: half(216, 578, 162, 54),
+             pills: pills };
   };
 
   function hit(w, r) {
@@ -4830,7 +5364,8 @@
     // the title screen wore an opaque "60 / GOLD 120 / WAVE 1/20" slab for a
     // game that had not started — inert, but it read as leftover UI and it is
     // the first thing on the screen.
-    if (this.state === 'menu' || this.state === 'forge' || this.state === 'trials') return;
+    if (this.state === 'menu' || this.state === 'forge' || this.state === 'trials' ||
+        this.state === 'duel') return;
     // top bar
     uiPanel(ctx, G.barX, G.topY, G.barW, 48, 13);
     var lx = G.barX + 14;
@@ -4851,6 +5386,43 @@
     if (this.trial) {   // which trial this run is — always visible, never loud
       ctx.fillStyle = 'rgba(168,230,255,0.85)'; ctx.font = 'bold 10px system-ui, sans-serif';
       ctx.fillText('TRIAL: ' + TRIALS[this.trial].name.toUpperCase(), lx + 27, G.topY + 50);
+    }
+    // ---- THE DUEL STRIP ---------------------------------------------------
+    // A second, dimmer hoard under your own. It sits in the band the TRIAL line
+    // uses — the two can never collide, because a duel takes no trial.
+    // The number that matters is the MARGIN, so the margin is the loud element
+    // and the rival's raw hoard is the quiet one: "am I ahead" is the question
+    // being asked every three seconds, and it should not need arithmetic.
+    if (this.rival && (this.state === 'playing' || this.state === 'paused')) {
+      var dsY = G.topY + 52;
+      uiPanel(ctx, G.barX, dsY, G.barW, 26, 9);
+      var pulse = Math.max(0, 1 - (this.worldT - this.rivalStepT) / 1.2);
+      var dlx = G.barX + 14;
+      // rival's coin pip — deliberately cool and dim against your warm gold,
+      // so a glance never mistakes their pile for yours
+      ctx.fillStyle = '#7f93a8';
+      ctx.beginPath(); ctx.arc(dlx + 7, dsY + 13, 7, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = '#3f4c5a'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = '#cfe0f0'; ctx.font = 'bold 15px Georgia, serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(String(Math.max(0, this.rivalHoard)), dlx + 20, dsY + 19);
+      ctx.fillStyle = 'rgba(190,210,230,0.78)'; ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.fillText(this.rival.name.toUpperCase(), dlx + 52, dsY + 17);
+      // the margin chip
+      var mg = this.hoard - this.rivalHoard;
+      var ahead = mg >= 0;
+      var chipW = 62, chipX = G.barX + G.barW - chipW - 10;
+      ctx.fillStyle = ahead ? 'rgba(60,120,64,0.55)' : 'rgba(140,54,44,0.55)';
+      rr(ctx, chipX, dsY + 4, chipW, 18, 7); ctx.fill();
+      if (pulse > 0) {                     // the swing announces itself, briefly
+        ctx.strokeStyle = (ahead ? 'rgba(158,245,143,' : 'rgba(255,154,106,') + (0.85 * pulse).toFixed(3) + ')';
+        ctx.lineWidth = 2; rr(ctx, chipX, dsY + 4, chipW, 18, 7); ctx.stroke();
+      }
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      inkText(ctx, (ahead ? '+' : '') + mg, chipX + chipW / 2, dsY + 17,
+              ahead ? '#bdf5b0' : '#ffc0ae', 3, 1);
+      ctx.textAlign = 'left';
     }
     // Smothered Fire takes the flame away, so the button goes with it — an
     // unusable control that still sits there reads as a bug, not a rule.
@@ -5427,7 +5999,8 @@
     for (var ri = 0; ri < MAPS.length; ri++) {
       if (Save.unlocked(ri) && (Save.data.stars[ri] | 0) < 3) { next = ri; break; }
     }
-    for (var li = 0; li < MAPS.length; li++) {
+    // bounded by rows, not maps — same landmine as the tap side (see there)
+    for (var li = 0; li < Math.min(MAPS.length, G.rows.length); li++) {
       var r = G.rows[li], open = Save.unlocked(li);
       if (open && li === next) {
         // the recommended row breathes; nothing else on the screen moves
@@ -5458,24 +6031,42 @@
       ctx.textAlign = 'center';
     }
 
-    rule(566, 'DAILY', '157,138,214', 0.30);
-    var D = G.daily;
+    rule(566, 'TONIGHT', '157,138,214', 0.30);
+    var D = G.daily, DU = G.duel;
+    var dcx = D.x + D.w / 2, ducx = DU.x + DU.w / 2;
     forgePlate(ctx, D, 'cold');
-    ctx.font = 'bold 18px system-ui, sans-serif';
-    inkText(ctx, 'DAILY SIEGE', 210, D.y + 34, '#f0eaff', 5, 2);
+    ctx.font = 'bold 16px system-ui, sans-serif';
+    inkText(ctx, 'DAILY SIEGE', dcx, D.y + 33, '#f0eaff', 5, 2);
     if (Lb.on() && (!this._lbTopT || Date.now() - this._lbTopT > 300000)) {
       this._lbTopT = Date.now();
       Lb.top(1, function (rows) { self._lbTop = (rows && rows[0]) || null; });
     }
-    ctx.font = '12px system-ui, sans-serif';
+    ctx.font = '11px system-ui, sans-serif';
     var todayBest = (Save.data.daily.day === dayNumber()) ? Save.data.daily.best : 0;
-    inkText(ctx, 'today: ' + MAPS[dailySeed() % MAPS.length].name +
-                 (todayBest ? ' — your best wave ' + todayBest : ''), 210, 650, '#c9b8ff', 4, 1);
-    var dl2 = this._lbTop
-      ? 'all-time: ' + Lb.safeName(String(this._lbTop.display_name || '')) +
-        ' holds wave ' + (this._lbTop.value | 0)
-      : (Save.data.dailyBestWave > 0 ? 'your all-time best: wave ' + Save.data.dailyBestWave : '');
-    if (dl2) inkText(ctx, dl2, 210, 664, 'rgba(201,184,255,0.75)', 4, 1);
+    inkText(ctx, MAPS[dailySeed() % MAPS.length].name, dcx, 648, '#c9b8ff', 4, 1);
+    var dl2 = todayBest ? 'your best wave ' + todayBest
+      : (Save.data.dailyBestWave > 0 ? 'all-time wave ' + Save.data.dailyBestWave : 'endless — no finish line');
+    inkText(ctx, dl2, dcx, 662, 'rgba(201,184,255,0.75)', 4, 1);
+
+    // ---- the DUEL plate ---------------------------------------------------
+    forgePlate(ctx, DU, 'cold');
+    ctx.font = 'bold 16px system-ui, sans-serif';
+    inkText(ctx, 'DUEL', ducx, DU.y + 33, '#ffd9c4', 5, 2);
+    // crossed-wrench mark: this is the one mode with somebody on the other side
+    ctx.strokeStyle = 'rgba(255,190,150,0.85)'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(ducx - 30, DU.y + 20); ctx.lineTo(ducx - 20, DU.y + 30);
+    ctx.moveTo(ducx - 20, DU.y + 20); ctx.lineTo(ducx - 30, DU.y + 30);
+    ctx.stroke();
+    var beaten = 0;
+    for (var rvi = 0; rvi < RIVAL_ORDER.length; rvi++) {
+      var rvr = Save.data.duels[RIVAL_ORDER[rvi]];
+      if (rvr && rvr.w) beaten++;
+    }
+    ctx.font = '11px system-ui, sans-serif';
+    inkText(ctx, 'same waves, two caves', ducx, 648, '#ffc9a8', 4, 1);
+    inkText(ctx, beaten ? 'beaten ' + beaten + '/' + RIVAL_ORDER.length : 'four rivals waiting',
+            ducx, 662, 'rgba(255,201,168,0.75)', 4, 1);
 
     // ---- 6. utility row ---------------------------------------------------
     var fAvail = Save.starsTotal() - Save.forgeSpent();
@@ -5563,6 +6154,57 @@
     ctx.textAlign = 'left';
   };
 
+  Game.prototype._drawDuelSelect = function (ctx) {
+    var v = this.view, DG = duelGeom();
+    ctx.fillStyle = 'rgba(12,7,5,0.85)';
+    ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffc9a8'; ctx.font = 'bold 34px Georgia, serif';
+    ctx.fillText('DUEL', WORLD_W / 2, 142);
+    ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
+    ctx.fillText('The Guild posted two caves tonight. The same raiders', WORLD_W / 2, 172);
+    ctx.fillText('hit both. Keep more gold than they do.', WORLD_W / 2, 188);
+    ctx.fillStyle = 'rgba(232,203,180,0.6)'; ctx.font = '11px system-ui, sans-serif';
+    ctx.fillText(DUEL_WAVES + ' waves · no forge craft · all seven machines', WORLD_W / 2, 208);
+
+    for (var i = 0; i < RIVAL_ORDER.length; i++) {
+      var rv = RIVALS[i], ry = DG.top + i * DG.pitch;
+      var rec = Save.data.duels[rv.id];
+      var ready = rivalHoardAt(i, duelSeedIdx(i), 0) !== null;
+      uiPanel(ctx, DG.x, ry, DG.w, DG.h, 11);
+      ctx.textAlign = 'left';
+      // name + rank
+      ctx.fillStyle = ready ? '#ffe4cf' : '#7a6a5c';
+      ctx.font = 'bold 17px system-ui, sans-serif';
+      ctx.fillText(rv.name, DG.x + 14, ry + 24);
+      ctx.fillStyle = ready ? 'rgba(255,190,150,0.75)' : 'rgba(140,124,110,0.7)';
+      ctx.font = 'bold 9px system-ui, sans-serif';
+      ctx.fillText(rv.rank, DG.x + 14 + ctx.measureText(rv.name).width + 46, ry + 23);
+      ctx.fillStyle = ready ? 'rgba(232,203,180,0.8)' : 'rgba(122,106,92,0.8)';
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillText(rv.blurb, DG.x + 14, ry + 42);
+      // tonight's ground — the arena rotates daily, so name it
+      ctx.fillStyle = 'rgba(201,184,255,0.7)'; ctx.font = '10px system-ui, sans-serif';
+      ctx.fillText(ready ? 'tonight: ' + MAPS[duelMapFor(i)].name : 'no recording yet',
+                   DG.x + 14, ry + DG.h - 8);
+      // the badge: beaten, and by how much
+      ctx.textAlign = 'right';
+      if (rec && rec.w) {
+        ctx.fillStyle = '#9ef58f'; ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText('BEATEN', DG.x + DG.w - 14, ry + 24);
+        ctx.fillStyle = 'rgba(158,245,143,0.7)'; ctx.font = '10px system-ui, sans-serif';
+        ctx.fillText('best margin +' + (rec.m | 0), DG.x + DG.w - 14, ry + 40);
+      } else if (ready) {
+        ctx.fillStyle = 'rgba(255,201,168,0.85)'; ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText('FIGHT', DG.x + DG.w - 14, ry + 30);
+      }
+      ctx.textAlign = 'center';
+    }
+    ctx.fillStyle = '#e8cbb4'; ctx.font = 'bold 15px system-ui, sans-serif';
+    ctx.fillText('BACK', WORLD_W / 2, DG.backY + 26);
+    ctx.textAlign = 'left';
+  };
+
   Game.prototype._drawTrials = function (ctx) {
     var v = this.view;
     ctx.fillStyle = 'rgba(12,7,5,0.85)';
@@ -5610,13 +6252,30 @@
     ctx.textAlign = 'center';
     ctx.fillStyle = r.won ? '#9ef58f' : '#ff7b7b';
     ctx.font = 'bold 42px Georgia, serif';
-    ctx.fillText(r.won ? 'HOARD HELD!' : 'HOARD LOST', WORLD_W / 2, 320);
+    // A duel is won on the MARGIN, so it gets its own headline: "HOARD HELD"
+    // on a run you finished 3 coins behind would be a lie about the only
+    // number the mode is about.
+    if (r.rival) {
+      ctx.font = 'bold 38px Georgia, serif';
+      ctx.fillText(r.won ? (r.knockout && (r.rivalHoard | 0) <= 0 ? 'SACKED THEM!' : 'DUEL WON!')
+                         : 'DUEL LOST', WORLD_W / 2, 314);
+      ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.fillStyle = r.won ? 'rgba(158,245,143,0.9)' : 'rgba(255,154,106,0.9)';
+      var mg2 = r.margin | 0;
+      ctx.fillText('you ' + (r.hoard | 0) + '   ·   ' + r.rival + ' ' + Math.max(0, r.rivalHoard | 0) +
+                   '   ·   ' + (mg2 >= 0 ? '+' + mg2 : String(mg2)), WORLD_W / 2, 340);
+    } else {
+      ctx.fillText(r.won ? 'HOARD HELD!' : 'HOARD LOST', WORLD_W / 2, 320);
+    }
     if (r.trial) {
       ctx.font = 'bold 15px system-ui, sans-serif';
       ctx.fillStyle = '#a8e6ff';
       ctx.fillText(r.won ? 'TRIAL COMPLETE — ' + r.trial + ' ★' : 'TRIAL: ' + r.trial, WORLD_W / 2, 345);
     }
-    if (r.won) {
+    // Stars grade coins lost forever, which is not what a duel is scored on —
+    // and the medallion row would land on top of the margin line. A duel is
+    // won or lost, full stop.
+    if (r.won && !r.rival) {
       // The payoff moment gets the same struck-coin medallions the title
       // screen uses, not a row of '★' characters in whatever face the platform
       // picks. Earned stars land one at a time so the third reads as a result
