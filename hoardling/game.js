@@ -3122,8 +3122,6 @@
           dmg += tw.ramp;
         }
         tw.shotT = 0;
-        this.fxQueue.push({ k: 'twang', x: mz0.x, y: mz0.y, tx: tp.x, ty: tp.y,
-                            c: tw.type === 'perch' ? '#cfd6e0' : '#e8cf9a' });
         this.projectiles.push({
           kind: 'bolt', x: mz0.x, y: mz0.y, target: target.id, spd: 340,
           dmg: dmg, crit: crit, hops: lv.pierce || 0,
@@ -3131,7 +3129,10 @@
           net: lv.special === 'downdraft' ? lv.groundDur : 0, tower: t,
         });
         // the STRING SNAP: a real crossbow releases, it doesn't just emit
-        this.fxQueue.push({ k: 'snap', x: pad.x, y: pad.y - 26, tx: tp.x, ty: tp.y });
+        // AT THE MUZZLE. This fired at (pad.x, pad.y-26) — the machine's middle —
+        // so after shots moved to the bow the release flashed ~25px away from
+        // where the bolt actually left. My own residue, caught by the audit.
+        this.fxQueue.push({ k: 'snap', x: mz0.x, y: mz0.y, tx: tp.x, ty: tp.y });
         Sfx.play('shoot');
       }
     }
@@ -3190,7 +3191,12 @@
         var dist = Math.sqrt(pdx * pdx + pdy * pdy);
         if (dist < 10) {
           this._damage(tgt, pr.dmg, { kind: 'bolt', tower: this.towers[pr.tower], shieldbreak: pr.shieldbreak });
-          this.fxQueue.push({ k: 'hit', x: gp.x, y: gp.y, c: pr.crit ? '#ff9a3c' : '#ffd75e' });
+          // Carry the bolt's HEADING into the impact so the sparks spray off the
+          // hit instead of puffing symmetrically — the direction was always right
+          // there in the projectile and the effect threw it away.
+          this.fxQueue.push({ k: 'hit', x: gp.x, y: gp.y, c: pr.crit ? '#ff9a3c' : '#ffd75e',
+                              dx: pr.dx || 0, dy: pr.dy || 0, big: pr.crit ? 1 : 0 });
+          Sfx.play(pr.crit ? 'upg' : 'hit');   // it landed in TOTAL SILENCE before
           if (pr.crit) this.fxQueue.push({ k: 'float', x: gp.x, y: gp.y - 14, txt: 'OVERWOUND!', c: '#ff9a3c' });
           // Netcaster: a netted flyer crashes low and fights as ground troops
           if (pr.net && tgt.flyer && !(tgt.groundedT > 0) && tgt.hp > 0) {
@@ -4053,7 +4059,31 @@
       var fx = this.fxQueue[q];
       // R3D taps the same event stream (cosmetic -> cosmetic, sim untouched)
       if (R3D.on && R3D.ready) R3D.event(fx);
-      if (fx.k === 'hit' || fx.k === 'bite') this._burst(fx.x, fx.y, fx.c || '#ffb14e', 5, 60);
+      if (fx.k === 'hit' || fx.k === 'bite') {
+        // FIVE DIRECTIONLESS DOTS was the whole impact effect, on the beat this
+        // game repeats more than any other. An arrow that buries itself in a
+        // raider should throw spray FORWARD off the hit and a couple of chips
+        // back along the shaft — the heading was always available on the
+        // projectile and the effect simply discarded it.
+        var hn = Math.sqrt((fx.dx || 0) * (fx.dx || 0) + (fx.dy || 0) * (fx.dy || 0));
+        if (hn > 0.001) {
+          var hang = Math.atan2(fx.dy, fx.dx);
+          var hcount = fx.big ? 11 : 7;
+          for (var hi = 0; hi < hcount; hi++) {
+            // most of it sprays on THROUGH the target, a few chips kick back
+            var back = hi >= hcount - 2;
+            var ha = hang + (back ? Math.PI : 0) + (Math.random() - 0.5) * (back ? 1.6 : 1.1);
+            var hsp = (back ? 40 : 95 + (fx.big ? 70 : 0)) * (0.55 + Math.random() * 0.9);
+            this.particles.push({ kind: 'dot', x: fx.x, y: fx.y,
+              vx: Math.cos(ha) * hsp, vy: Math.sin(ha) * hsp - 22,
+              r: 0.9 + Math.random() * (fx.big ? 2.4 : 1.5),
+              life: 0.16 + Math.random() * 0.16, T: 0.34,
+              c: hi < 2 ? '#fff4d0' : (fx.c || '#ffb14e') });
+          }
+          if (fx.big) this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 3, R: 26,
+                                            life: 0.20, T: 0.20, c: '#ffcf6a' });
+        } else this._burst(fx.x, fx.y, fx.c || '#ffb14e', 5, 60);
+      }
       else if (fx.k === 'coinfly') {
         for (var cf = 0; cf < fx.n; cf++) {
           this.particles.push({
@@ -4161,25 +4191,6 @@
           this.particles.push({ kind: 'dot', x: fx.x, y: fx.y, vx: Math.cos(ma) * (40 + Math.random() * 70),
             vy: Math.sin(ma) * (40 + Math.random() * 70) - 12, r: 1.4 + Math.random() * 1.8,
             life: 0.16 + Math.random() * 0.1, T: 0.26, c: mz < 2 ? '#fff0b0' : '#ff8a3c' });
-        }
-      }
-      else if (fx.k === 'twang') {
-        // A MACHINE FIRING WAS COMPLETELY UNMARKED — the bolt simply existed,
-        // mid-air, one frame after nothing. The hero had a muzzle puff and the
-        // machines that do 90% of the shooting had none at all. A crossbow does
-        // not breathe flame, so this is the string's snap: a hot streak down the
-        // aim line and a flick of kicked dust. Cosmetic lane (Math.random) — a
-        // per-shot particle count drawn from the seeded stream would fork a daily.
-        var ta = Math.atan2(fx.ty - fx.y, fx.tx - fx.x);
-        this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 2, R: 11, life: 0.10, T: 0.10,
-                              c: fx.c || '#ffe6a8' });
-        for (var tw3 = 0; tw3 < 4; tw3++) {
-          var tang = ta + (Math.random() - 0.5) * 0.45;
-          var tsp = 90 + Math.random() * 120;
-          this.particles.push({ kind: 'dot', x: fx.x, y: fx.y,
-            vx: Math.cos(tang) * tsp, vy: Math.sin(tang) * tsp - 10,
-            r: 0.9 + Math.random() * 1.3, life: 0.10 + Math.random() * 0.08, T: 0.18,
-            c: tw3 < 2 ? '#fff6d8' : (fx.c || '#d8c49a') });
         }
       }
       else if (fx.k === 'fireburst') {       // it LANDS as fire, not a dot
