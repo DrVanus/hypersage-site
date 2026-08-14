@@ -1,0 +1,56 @@
+/* Gemburrow — DOM overlay stylesheet. The world is on <canvas>; everything
+   here is chrome. Consume the safe-area insets on every edge-anchored element. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #1c2751;
+  font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  /* stops the browser from stealing hops as scroll/zoom gestures */
+  touch-action: none;
+}
+
+#game-wrap { position: fixed; inset: 0; }
+
+#game-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  /* iOS Safari ignores user-scalable=no on double-tap; this is the real fix. */
+  touch-action: none;
+}
+
+/* Example HUD anchor — Android targetSdk 35+ FORCES edge-to-edge, so content at
+   y=0 hides under the status bar/notch. The WEB layer must pay the inset back.
+   Copy this max(px, env(...)) idiom for every edge-anchored overlay element. */
+.hud-top-left {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+}
+.hud-bottom {
+  position: absolute;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  left: max(14px, env(safe-area-inset-left));
+  right: max(14px, env(safe-area-inset-right));
+}
+
+/* invisible probes: JS reads their offsets to learn the insets in CSS px.
+   TWO of them — the bottom one anchors the shop counter to the physical floor
+   instead of to the authoring constant VIEW_H. */
+#safe-probe {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0; width: 0; height: 0;
+  visibility: hidden;
+}
+#safe-probe-bottom {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: 0; width: 0; height: 0;
+  visibility: hidden;
+}

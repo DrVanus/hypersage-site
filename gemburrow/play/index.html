@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport-fit=cover is REQUIRED for env(safe-area-inset-*) to resolve on
+       notched phones and under Android's forced edge-to-edge (targetSdk 35+). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="Gemburrow — dig gems out of a physics-packed jar, fill the orders on the line, and decide what your dragon keeps.">
+  <title>Gemburrow</title>
+  <!-- The play build is linked from /gemburrow/, which IS in the sitemap, so a
+       crawler will find it. A canvas page has no indexable text, earns nothing
+       in search, and would dilute the marketing page's canonical. Hoardling
+       needs no such tag only because nothing links it at all. -->
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1c2751">
+
+  <!-- INSTALLABLE PWA. `display:standalone` alone does NOT give iOS a
+       chrome-less launch — apple-mobile-web-app-capable is the one that does.
+       `orientation:portrait` is honoured on Android and ignored by iOS Safari;
+       portrait on iOS comes from the game's own letterbox math, not from here. -->
+  <link rel="manifest" href="manifest.json?v=3b7ed85490">
+  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=3b7ed85490">
+  <link rel="apple-touch-icon" href="art/icon-180.png?v=3b7ed85490">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gemburrow">
+
+  <!-- THE SPLASH IS INLINE AND ABOVE THE STYLESHEET LINK, deliberately, so it
+       paints on the very first frame with no extra round-trip. The game starts
+       its loop immediately but draws procedural fallback shapes until the art
+       has decoded — flat circles where the painted gems go — and players read
+       that as broken. This covers exactly that window; game.js's sprite loader
+       drives #boot-fill and removes #boot when the last sprite lands. -->
+  <style>
+    html,body{margin:0;height:100%;background:#1c2751;overflow:hidden}
+    #boot{position:fixed;inset:0;z-index:9;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:18px;
+      background:radial-gradient(120% 80% at 50% 40%,#2b2016 0%,#1a120c 58%,#0d0906 100%);
+      font-family:Georgia,"Times New Roman",serif;text-align:center;
+      padding:0 24px;transition:opacity .38s ease}
+    #boot.gone{opacity:0;pointer-events:none}
+    #boot-mark{font-size:clamp(32px,10vw,52px);font-weight:700;letter-spacing:.02em;
+      color:#ffd75e;text-shadow:0 2px 0 #6b4718,0 0 34px rgba(255,180,60,.32)}
+    #boot-sub{font-style:italic;font-size:clamp(13px,4vw,17px);color:#e8a53c;opacity:.92}
+    #boot-track{width:min(220px,56vw);height:5px;border-radius:3px;
+      background:rgba(255,233,196,.13);overflow:hidden}
+    #boot-fill{height:100%;width:0;border-radius:3px;
+      background:linear-gradient(90deg,#e8a53c,#ffd75e);
+      box-shadow:0 0 12px rgba(255,190,80,.6);transition:width .22s ease-out}
+    #boot-note{font-family:system-ui,sans-serif;font-size:12px;letter-spacing:.10em;
+      text-transform:uppercase;color:rgba(255,233,196,.44)}
+    @media (prefers-reduced-motion:reduce){
+      #boot-fill{transition:none}#boot{transition:none}}
+  </style>
+  <link rel="stylesheet" href="style.css?v=3b7ed85490">
+</head>
+<body>
+  <div id="game-wrap">
+    <div id="safe-probe"></div>
+    <div id="safe-probe-bottom"></div>
+    <canvas id="game-canvas" aria-label="Gemburrow game area"></canvas>
+    <!-- The whole game is drawn on <canvas>. Any HUD/menus/touch controls you add
+         go here as a DOM overlay (see bunny-bus-hop index.html for the pattern):
+         position them with top:max(10px, env(safe-area-inset-top)) etc. -->
+  </div>
+  <div id="boot" role="status" aria-live="polite">
+    <div id="boot-mark">Gemburrow</div>
+    <div id="boot-sub">dig gems &middot; fill orders &middot; feed the dragon</div>
+    <div id="boot-track"><div id="boot-fill"></div></div>
+    <div id="boot-note">lighting the lanterns</div>
+  </div>
+  <script>window.__BUILD__="3b7ed85490";window.__ART_EXT__="webp";</script>
+  <script src="game.js?v=3b7ed85490" defer></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "Gemburrow",
+  "short_name": "Gemburrow",
+  "description": "Dig gems out of a physics-packed jar, fill the orders on the line, and decide what your dragon keeps.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1c2751",
+  "theme_color": "#1c2751",
+  "icons": [
+    {
+      "src": "art/icon-192.png?v=3b7ed85490",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "art/icon-512.png?v=3b7ed85490",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
