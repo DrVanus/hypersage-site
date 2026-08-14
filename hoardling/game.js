@@ -154,7 +154,16 @@
       // Split there so only the TOP turns: rotating the whole plate tipped the
       // barrel and made every machine look like it was falling over.
       turret: { cut: 0.68, pvx: 0.50, pvy: 0.66 },
-      muzzle: { fwd: 21, up: 40 },   // the bow tip, not the middle of the barrel
+      // NATIVE FACING, measured off the plate: the bolt's iron head sits at
+      // ~0.60 of the width with the fletching lower-LEFT, so this machine is
+      // painted aiming up-RIGHT. Every other aiming plate (gargoyle snout,
+      // mimic maw) is painted facing LEFT, and the drawer assumed left for all
+      // of them — so the crossbow, the machine on screen most, was mirrored
+      // exactly backwards and fired out of the BACK of its own bow. The engine
+      // already solved this on the other lane with ENEMY_FACING; towers never
+      // got the table.
+      face: 1,
+      muzzle: { fwd: 7, up: 52 },    // measured to the bolt head at (0.60w, 0.12h)
       levels: [
         { dmg: 12, rate: 1.2, range: 105, upgradeCost: 60 },
         { dmg: 20, rate: 1.4, range: 118, upgradeCost: 110 },
@@ -168,6 +177,7 @@
     },
     brazier: {
       name: 'Soot Brazier', cost: 100,
+      muzzle: { fwd: 0, up: 34 },    // the pot's mouth; it lobs straight up, so no side offset
       short: 'BRAZIER', hitsAir: false,
       levels: [
         { dmg: 9,  rate: 0.8, range: 92,  splash: 38, upgradeCost: 90 },
@@ -200,7 +210,7 @@
       short: 'ROOST', hitsAir: true, airBonus: 1.5,
       aims: true,
       turret: { cut: 0.46, pvx: 0.50, pvy: 0.46 },   // gargoyle turns, plinth does not
-      muzzle: { fwd: 13, up: 47 },   // the gargoyle's mouth, atop the plinth
+      muzzle: { fwd: 15, up: 63 },   // measured to the gargoyle's snout (0.22w, 0.21h)
       levels: [
         { dmg: 18, rate: 0.6, range: 134, pierce: 2, upgradeCost: 80 },
         { dmg: 30, rate: 0.7, range: 147, pierce: 3, upgradeCost: 140 },
@@ -4790,8 +4800,14 @@
   Game.prototype._muzzleOf = function (tw, tx, ty) {
     var m = TOWER_TYPES[tw.type].muzzle;
     if (!m) return { x: tw.x, y: tw.y - 26 };
-    var f = (tx - tw.x) >= 0 ? 1 : -1;          // same mirror rule as the drawer
-    return { x: tw.x + f * m.fwd, y: tw.y - m.up };
+    var f = (tx - tw.x) >= 0 ? 1 : -1;          // which side the machine faces
+    // THE PLATE GROWS WITH LEVEL AND THE OFFSET DID NOT. The drawer scales by
+    // (1 + level*0.12), so a fixed world constant slid further down inside the
+    // chassis on every upgrade — an L3 Roost, the most expensive ranged machine
+    // in the game, fired out of the middle of its own pillar again, which is the
+    // exact defect the muzzle work set out to fix.
+    var ms = 1 + tw.level * 0.12;               // tw.level is sim state, no RNG
+    return { x: tw.x + f * m.fwd * ms, y: tw.y - m.up * ms };
   };
 
   Game.prototype._turretFor = function (spriteId, tt) {
@@ -4873,7 +4889,11 @@
       var fSign = 1, fRot = 0;
       if (tt2 && tt2.aims && tw._aimX !== undefined) {
         var fdx = tw._aimX - p.x, fdy = tw._aimY - (p.y - th0 * 0.55);
-        fSign = fdx >= 0 ? -1 : 1;                  // -1 mirrors it to face right
+        // face: +1 = plate painted facing RIGHT, -1 (default) = facing LEFT.
+        // For nat = -1 this is identical to the old expression, so the perch
+        // and mimic are byte-identical; only the crossbow flips.
+        var nat = (tt2.face || -1);
+        fSign = (fdx >= 0 ? -1 : 1) * -nat;
         // SCREEN-Y IS DEPTH HERE, NOT HEIGHT. The first version used
         // atan2(dy, |dx|) as if a raider further down the screen were BELOW the
         // machine, which swung the bow through huge angles for a target that is
@@ -4891,7 +4911,7 @@
         var prevS = tw._faceSign === undefined ? fSign : tw._faceSign;
         tw._faceRot = prev + (fRot - prev) * 0.18;
         tw._faceSign = fSign;                        // the mirror snaps; the angle eases
-        fRot = tw._faceRot; fSign = prevS === fSign ? fSign : fSign;
+        fRot = tw._faceRot;
       }
       var split = this._turretFor(spriteId, tt2);
       ctx.save();
