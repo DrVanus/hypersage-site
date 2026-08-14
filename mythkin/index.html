@@ -514,9 +514,18 @@ and the app says so on every screen where you talk to them.</p>
 
 <h2>Pricing</h2>
 <p>Free to use, with a message limit and one character of your own. <strong>Mythkin
-Plus</strong> removes the limit, keeps memory uncapped, and raises the number of
-characters you can make and borrow. Prices are shown in the app, in your own
-currency, by your app store.</p>
+Plus</strong> raises the message limit a long way — it is a higher ceiling, not
+an unlimited plan — keeps memory uncapped, and raises the number of characters
+you can make and borrow. Prices are shown in the app, in your own currency, by
+your app store.</p>
+<!-- "REMOVES THE LIMIT" WAS FALSE, and falsifiable in one tap: Plus is metered
+     at plus_window_messages=200 per plus_window_hours=24 (mythkin-api/app/
+     config.py), and the paywall says so. A reviewer opening the app could have
+     contradicted this page from the product itself. The honest sentence is
+     also the more useful one — the number that matters to a buyer is that the
+     free window is a few dozen and the Plus one is a few hundred. Keep any
+     future edit here downstream of /v1/plans, which is already the one place
+     the app's own allowances are rendered from. -->
 <!-- TRUE AS OF 2026-08-06: Mythkin has NO voice feature — no speech synthesis, no
      TTS route, nothing in mythkin-app/*.js. ("voice" in mock-data.js is a writing-
      style label, not audio.) mythkin-app/plus.js:24 lists voice as an aspiration
