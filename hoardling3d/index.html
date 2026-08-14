@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport-fit=cover is REQUIRED for env(safe-area-inset-*) to resolve on
+       notched phones and under Android's forced edge-to-edge (targetSdk 35+). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="Hoardling — defend the sleeping dragon's hoard. Hold the chokepoints, recover every stolen coin.">
+  <title>Hoardling 3D</title>
+  <meta name="theme-color" content="#17100e">
+  <!-- installable PWA: "Add to Home Screen" gives a fullscreen portrait app -->
+  <link rel="manifest" href="manifest.json?v=bbf77104ed">
+  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=bbf77104ed">
+  <link rel="apple-touch-icon" href="art/icon-180.png?v=bbf77104ed">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hoardling">
+  <!-- The splash is INLINE, above the stylesheet link, because it has to paint
+       on the very first frame. The game used to show its chunky procedural
+       fallback shapes for the whole download — a flat blue-roofed box where the
+       painted keep goes — and players read that as broken/old art. Nothing is
+       drawn now until the art is decoded, so this is what fills the gap. -->
+  <style>
+    html,body{margin:0;height:100%;background:#17100e;overflow:hidden}
+    #boot{position:fixed;inset:0;z-index:9;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:18px;
+      background:radial-gradient(120% 80% at 50% 38%,#2a1710 0%,#17100e 55%,#0c0705 100%);
+      font-family:Georgia,"Times New Roman",serif;text-align:center;
+      padding:0 24px;transition:opacity .38s ease}
+    #boot.gone{opacity:0;pointer-events:none}
+    #boot-mark{font-size:clamp(34px,11vw,54px);font-weight:700;letter-spacing:.02em;
+      color:#ffd75e;text-shadow:0 2px 0 #7a4a12,0 0 34px rgba(255,180,60,.34)}
+    #boot-sub{font-style:italic;font-size:clamp(13px,4vw,17px);color:#ff9a3c;opacity:.92}
+    #boot-track{width:min(220px,56vw);height:5px;border-radius:3px;
+      background:rgba(255,233,196,.13);overflow:hidden}
+    #boot-fill{height:100%;width:0;border-radius:3px;
+      background:linear-gradient(90deg,#ff9a3c,#ffd75e);
+      box-shadow:0 0 12px rgba(255,190,80,.65);transition:width .22s ease-out}
+    #boot-note{font-family:system-ui,sans-serif;font-size:12px;letter-spacing:.10em;
+      text-transform:uppercase;color:rgba(255,233,196,.46)}
+    /* An ember drifting up behind the wordmark: proof of life while the bytes
+       land, and it costs one compositor-only animation. */
+    #boot-ember{position:absolute;width:5px;height:5px;border-radius:50%;
+      background:#ffb43c;filter:blur(1px);opacity:0;
+      animation:emb 3.4s ease-in-out infinite}
+    @keyframes emb{0%{transform:translate(0,60px) scale(.5);opacity:0}
+      22%{opacity:.85}100%{transform:translate(16px,-150px) scale(1.1);opacity:0}}
+    @media (prefers-reduced-motion:reduce){
+      #boot-ember{display:none}#boot-fill{transition:none}#boot{transition:none}}
+  </style>
+  <link rel="stylesheet" href="style.css?v=bbf77104ed">
+</head>
+<body>
+  <div id="game-wrap">
+    <!-- canvas cannot read env(); this probe div carries the safe-area insets
+         as real pixel paddings the game reads at boot/resize -->
+    <div id="safe-probe" style="position:absolute;visibility:hidden;pointer-events:none;
+         padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);"></div>
+    <canvas id="game-canvas" aria-label="Hoardling game area"></canvas>
+    <!-- The whole game is drawn on <canvas>. Any HUD/menus/touch controls you add
+         go here as a DOM overlay (see bunny-bus-hop index.html for the pattern):
+         position them with top:max(10px, env(safe-area-inset-top)) etc. -->
+  </div>
+  <div id="boot" role="status" aria-live="polite">
+    <div id="boot-ember"></div>
+    <div id="boot-mark">HOARDLING</div>
+    <div id="boot-sub">Too young for dragonfire. Built his own.</div>
+    <div id="boot-track"><div id="boot-fill"></div></div>
+    <div id="boot-note">stoking the forge</div>
+  </div>
+  <!-- optional leaderboard config; a 404 here is fine (board stays off) -->
+  <script>window.__BUILD__="bbf77104ed";window.__ART_EXT__="webp";</script>
+  <script src="lb-config.js?v=bbf77104ed"></script>
+  <script src="game.js?v=bbf77104ed" defer></script>
+</body>
+</html>

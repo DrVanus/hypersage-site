@@ -1,0 +1,17 @@
+{
+ "looter": {
+  "wMul": 1.0
+ },
+ "scout": {
+  "wMul": 1.0
+ },
+ "brute": {
+  "wMul": 1.0
+ },
+ "blinker": {
+  "wMul": 1.0
+ },
+ "boss": {
+  "wMul": 1.0
+ }
+}
