@@ -614,6 +614,11 @@
       place:  [0.9, , 270, 0.01, 0.06, 0.15, 1, 1.6, , , 220, 0.04],
       upg:    [0.9, , 523, 0.02, 0.15, 0.30, 1, 1.8, , , 262, 0.06, 0.08],
       sell:   [0.8, , 330, 0.01, 0.08, 0.20, 1, 1.4, -4],
+      // a machine going silent should SOUND like it: a metal clank that dies
+      // fast, distinct from 'sell' so you know a Pry-Hand reached something
+      jam:    [1.0, , 190, 0.01, 0.06, 0.22, 3, 0.9, -12, , , , , 0.8],
+      // and a keg cracking apart: a low pop with a wooden splinter tail
+      split:  [1.0, , 110, 0.02, 0.10, 0.28, 4, 1.1, -3, , , , , 1.2],
       shoot:  [0.5, , 880, , 0.02, 0.06, 1, 1.8, , , , , , 0.1],
       lob:    [0.7, , 160, 0.02, 0.08, 0.25, 4, 1.2, 6, , , , , 0.6],
       bite:   [0.9, , 130, 0.01, 0.05, 0.18, 3, 1.5, -6, , , , , 0.4],
@@ -2209,7 +2214,7 @@
             this.fxQueue.push({ k: 'float', x: this.towers[sBest].x, y: this.towers[sBest].y - 46,
                                 txt: 'JAMMED!', c: '#ff9a9a' });
             this.fxQueue.push({ k: 'hit', x: this.towers[sBest].x, y: this.towers[sBest].y - 20, c: '#ff9a9a' });
-            Sfx.play('sell');
+            Sfx.play('jam');
           } else e.sapT = 0.35;                          // nothing in reach: rescan
         }
       }
@@ -2657,6 +2662,7 @@
       }
       this.fxQueue.push({ k: 'float', x: p.x, y: p.y - 30, txt: 'IT SPLITS!', c: '#a8e6ff' });
       this.fxQueue.push({ k: 'boom', x: p.x, y: p.y, r: 26 });
+      Sfx.play('split');
     }
     if (e.type === 'boss') this.hitstopT = 0.09;   // ~5 frames; >120ms reads as a hitch
     this.fxQueue.push({ k: 'death', x: p.x, y: p.y, g: bounty, boss: e.type === 'boss' });
