@@ -27,7 +27,10 @@
     heroRegen: 9,        // per second, once nothing has been near him for a beat
     heroSafeAfter: 2.0,  // seconds clear of raiders before he starts recovering
     heroDownTime: 9,     // seconds out of the fight after he drops
-    tollRange: 26,       // body-block reach for shaking a fleeing carrier
+    tollRange: 34,       // body-block reach. 26 was narrower than Wick's own
+                         // sprite (44 wide) and the toll never once fired in
+                         // bot play — a mechanic that cannot be reached is not
+                         // a mechanic. Still demands real contact.
     tollEvery: 0.30,     // seconds between coins shaken loose
     startGold: 120,
     startHoard: 60,      // treasure coins = the life bar
@@ -480,7 +483,7 @@
         { x: 44, y: 348 }, { x: 288, y: 356 }, { x: 140, y: 630 },
       ],
       torches: [[40, 690], [368, 580], [40, 480], [330, 250], [230, 726], [368, 420]],
-      heroStart: { x: 150, y: 600 },
+      heroStart: { x: 124, y: 636 },   // was (150,600): 18u from the road, inside the toll reach
       pathW: 34,
     },
     { // Level 3 — "The Coldroot Stair": five switchback rungs; centre pads
@@ -500,7 +503,7 @@
         { x: 62, y: 384 }, { x: 300, y: 282 },
       ],
       torches: [[46, 730], [380, 660], [46, 530], [380, 410], [60, 300], [250, 750]],
-      heroStart: { x: 300, y: 610 },
+      heroStart: { x: 385, y: 675 },   // was (300,610): 2.8u from the road — standing ON it
       pathW: 32,
     },
   ];
@@ -5214,6 +5217,41 @@
         ctx.globalAlpha = ti ? 0.72 : 1;
         ctx.drawImage(torch, tx, tbase - th, tw, th);
         ctx.globalAlpha = 1;
+        // ---- ALIVE ------------------------------------------------------
+        // The braziers were a static blit under a slow glow: a painted torch,
+        // not a burning one. Three cheap additions, all pure functions of the
+        // world clock so nothing touches the seeded stream.
+        var fx0 = tx + tw / 2, fy0 = tbase - th * 0.80;   // the flame's mouth
+        // 1. the fire's own core, breathing on two irrational frequencies so
+        //    it never visibly repeats
+        var lick = 0.55 + 0.28 * Math.sin(t * 7.3 + phz) + 0.17 * Math.sin(t * 11.9 + phz);
+        ctx.globalCompositeOperation = 'lighter';
+        var core = ctx.createRadialGradient(fx0, fy0, 0, fx0, fy0, (ti ? 15 : 21) * lick);
+        core.addColorStop(0, 'rgba(255,244,206,' + (0.50 * amp).toFixed(3) + ')');
+        core.addColorStop(0.45, 'rgba(255,166,60,' + (0.30 * amp).toFixed(3) + ')');
+        core.addColorStop(1, 'rgba(255,120,30,0)');
+        ctx.fillStyle = core;
+        ctx.beginPath(); ctx.arc(fx0, fy0, (ti ? 15 : 21) * lick, 0, 6.283); ctx.fill();
+        // 2. sparks climbing out of the bowl and dying — the thing that reads
+        //    as "burning" rather than "lit"
+        for (var sk = 0; sk < (ti ? 3 : 5); sk++) {
+          var sf = (sk * 0.6180339887) % 1;
+          var sp4 = (t * (0.30 + 0.22 * sf) + sf) % 1;
+          var sa = Math.sin(sp4 * Math.PI); sa *= sa * 0.75 * amp;
+          var sx4 = fx0 + Math.sin(t * (1.3 + sf) + sk * 2.1) * (5 + 9 * sf);
+          var sy4 = fy0 - sp4 * (ti ? 52 : 74);
+          ctx.fillStyle = 'rgba(255,' + (170 + ((60 * sf) | 0)) + ',90,' + sa.toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(sx4, sy4, 1.1 + 1.5 * sf, 0, 6.283); ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+        // 3. the light it throws on its own stone, so the brazier is lit BY
+        //    its fire instead of merely standing near a glow
+        var pool = ctx.createRadialGradient(fx0, tbase - 4, 2, fx0, tbase - 4, tw * 0.95);
+        pool.addColorStop(0, 'rgba(255,150,60,' + (0.20 * amp * lick).toFixed(3) + ')');
+        pool.addColorStop(1, 'rgba(255,150,60,0)');
+        ctx.fillStyle = pool;
+        ctx.save(); ctx.translate(fx0, tbase - 4); ctx.scale(1, 0.30);
+        ctx.beginPath(); ctx.arc(0, 0, tw * 0.95, 0, 6.283); ctx.fill(); ctx.restore();
       }
     }
     var mound = ART.images.mound;
@@ -5228,16 +5266,53 @@
       // restores its own domed silhouette — there is no cut to see, because
       // there is no cut. The peak tucks behind Wick's chest, which is what the
       // crop was clumsily trying to achieve in the first place.
-      ctx.globalAlpha = 0.88;
-      ctx.drawImage(mound, 0, 0, mound.width, mound.height,
-                    45, 150, 330, 150);
+      // ASPECT. The whole pile was being squeezed into 330x150 — an aspect of
+      // 2.20 against the master's true 1.443 — so everything in it was
+      // squashed 34% vertically. VANUS spotted it on the goblet, which is the
+      // one object in the art with a silhouette you can check by eye.
+      //
+      // Fixing it means cropping rather than scaling, because the master is a
+      // tall dome and this needs a low wide bank. Cropping alone was tried
+      // before and left a razor-straight top edge running out either side of
+      // Wick — a "guillotine" through the pile. So: crop at the CORRECT aspect
+      // and then feather the cut, which is the half the earlier attempt was
+      // missing. No straight edge, no squash.
+      // NO CROP AT ALL. Cropping for aspect and feathering the cut was tried
+      // and was worse than the squash: the feather read as a black slab laid
+      // across the coins and the cut line still showed. The pile is drawn
+      // WHOLE, at its true 1.443 aspect, sized so it fits between the hanging
+      // sign and the tagline — 190 units of headroom gives 274 wide. Nothing
+      // is sliced, so there is no edge to hide, and a 274-wide hoard behind a
+      // 150-wide dragon reads as a bank he is sitting in.
+      var mBaseY = 300, mH = 190, mW = mH * (mound.width / mound.height);
+      var mX = 210 - mW / 2;
+      ctx.globalAlpha = 0.94;
+      ctx.drawImage(mound, mX, mBaseY - mH, mW, mH);
       ctx.globalAlpha = 1;
     }
-    var cg2 = ctx.createRadialGradient(210, 264, 4, 210, 264, 58);
-    cg2.addColorStop(0, 'rgba(6,3,2,0.5)'); cg2.addColorStop(1, 'rgba(6,3,2,0)');
-    ctx.fillStyle = cg2;
-    ctx.save(); ctx.translate(210, 264); ctx.scale(1, 0.18);
-    ctx.beginPath(); ctx.arc(0, 0, 58, 0, 6.283); ctx.fill(); ctx.restore();
+    // WICK'S GROUNDING. He read as pasted onto the gold rather than sitting in
+    // it: one faint ellipse under a 168-unit character. Three passes now — a
+    // tight dark contact patch where he actually meets the coins, a wider soft
+    // cast shadow, and a warm bounce of gold light thrown back up onto him.
+    ctx.save();
+    ctx.translate(210, 262);
+    ctx.scale(1, 0.20);
+    var cgA = ctx.createRadialGradient(0, 0, 2, 0, 0, 40);
+    cgA.addColorStop(0, 'rgba(4,2,1,0.72)'); cgA.addColorStop(1, 'rgba(4,2,1,0)');
+    ctx.fillStyle = cgA; ctx.beginPath(); ctx.arc(0, 0, 40, 0, 6.283); ctx.fill();
+    var cgB = ctx.createRadialGradient(6, 0, 8, 6, 0, 84);
+    cgB.addColorStop(0, 'rgba(6,3,2,0.42)'); cgB.addColorStop(1, 'rgba(6,3,2,0)');
+    ctx.fillStyle = cgB; ctx.beginPath(); ctx.arc(6, 0, 84, 0, 6.283); ctx.fill();
+    ctx.restore();
+    // gold bounce — the hoard is a light source, so it should light him back
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    var bnc = ctx.createRadialGradient(210, 252, 6, 210, 252, 96);
+    bnc.addColorStop(0, 'rgba(255,196,86,' + (0.20 + 0.05 * Math.sin(t * 1.6)).toFixed(3) + ')');
+    bnc.addColorStop(1, 'rgba(255,170,60,0)');
+    ctx.fillStyle = bnc;
+    ctx.beginPath(); ctx.arc(210, 252, 96, 0, 6.283); ctx.fill();
+    ctx.restore();
     var wick = ART.images.hero_title || ART.images.hero;
     if (wick) {
       // 150 world px, not the 78px corner sticker that used to cover 59% of
@@ -5247,8 +5322,11 @@
       ctx.drawImage(wick, 210 - ww / 2, 264 - wh + bob, ww, wh);
     }
     if (mound) {
-      ctx.drawImage(mound, 0, mound.height * 0.80, mound.width, mound.height * 0.20,
-                    60, 259, 300, 41);
+      // the front lip is the SAME asset at the SAME x/width/baseline, so the
+      // two halves cannot misregister — it must track the sizing above
+      var lH = 190, lW = lH * (mound.width / mound.height), lX = 210 - lW / 2;
+      ctx.drawImage(mound, 0, mound.height * 0.78, mound.width, mound.height * 0.22,
+                    lX, 300 - lH * 0.22, lW, lH * 0.22);
     }
     embers(ctx, t, 18, 22, 1.4, 0.70);         // near-field parallax layer
 
