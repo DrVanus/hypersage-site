@@ -793,11 +793,19 @@
   // item at roughly L38. `npm test` gates BOTH sides of that (see the econ gate
   // in sweep_career.cjs): the shop must be affordable eventually, and must not
   // be covered three-quarters of the way up.
+  // `note` is the line under the name. Every locked row used to read the same
+  // three words — "keep digging" — six times down the screen, which reads as
+  // placeholder text nobody came back to write. A seam should say what it is
+  // like to dig in it; that is the whole reason to want one.
   var WALL_SKINS = [
-    { id: 'clay',     name: 'Burrow Clay',  price: 0,    tint: null },
-    { id: 'amber',    name: 'Amber Seam',   price: 600,  tint: '#c98a2e', amt: 0.55 },
-    { id: 'frost',    name: 'Frost Vein',   price: 1200, tint: '#6fa8c9', amt: 0.55 },
-    { id: 'malach',   name: 'Malachite',    price: 2200, tint: '#3f9e6b', amt: 0.55 },
+    { id: 'clay',     name: 'Burrow Clay',  price: 0,    tint: null,
+      note: 'plain worked earth · where everyone starts' },
+    { id: 'amber',    name: 'Amber Seam',   price: 600,  tint: '#c98a2e', amt: 0.55,
+      note: 'warm ochre · the lantern likes it' },
+    { id: 'frost',    name: 'Frost Vein',   price: 1200, tint: '#6fa8c9', amt: 0.55,
+      note: 'cold blue · gems read brightest' },
+    { id: 'malach',   name: 'Malachite',    price: 2200, tint: '#3f9e6b', amt: 0.55,
+      note: 'green copper · deep and quiet' },
     // Re-priced when crusted rocks started feeding the satchel. That change
     // raised a full career's income 14,178c -> 19,012c, which put the ENTIRE
     // shop inside the first 30 levels and tripped sweep_career's econ gate:
@@ -807,8 +815,10 @@
     // stock is 16,600c, which sits ~2.6k above the floor and ~2.4k below the
     // ceiling. Prices — not more ROWS: shopRowY(i) is 250 + i*64 and the view
     // is 720 tall, so a seventh row would draw its bottom edge at 754.
-    { id: 'rose',     name: 'Rose Quartz',  price: 5000, tint: '#c96f8a', amt: 0.50 },
-    { id: 'basalt',   name: 'Deep Basalt',  price: 7600, tint: '#5a4a7a', amt: 0.60, dark: 0.22 },
+    { id: 'rose',     name: 'Rose Quartz',  price: 5000, tint: '#c96f8a', amt: 0.50,
+      note: 'pink shot through with white' },
+    { id: 'basalt',   name: 'Deep Basalt',  price: 7600, tint: '#5a4a7a', amt: 0.60, dark: 0.22,
+      note: 'darkest seam · everything glows' },
   ];
 
   // Node/test export of the PURE surface (determinism prover requires this).
@@ -1142,13 +1152,19 @@
     return tintCutout(base, pickSkinById(id), _pickCache, id);
   }
   var _wallCache = {};
-  function wallImage() {
+  // ONE grader, keyed by id, because the shop has to be able to show you the
+  // wall you are actually buying. The shop used to paint a flat #6b5a45 square
+  // with the tint over it — a paint chip, not a wall — while the real seam is a
+  // painted 1024x2400 rock face. The two could never agree, and the cheaper one
+  // was the one on the price tag. Now the row draws THIS, so a preview that
+  // disagrees with the dig is not a bug that can occur.
+  function gradedWall(id) {
     var base = SPR.bg_dig_wall;
     if (!base) return null;
-    var id = equippedWallId();
     if (id === 'clay') return base;
     if (_wallCache[id]) return _wallCache[id];
     var sk = skinById(id);
+    if (!sk || !sk.tint) return base;
     try {
       var c = document.createElement('canvas');
       c.width = base.width; c.height = base.height;
@@ -1171,6 +1187,7 @@
       return c;
     } catch (e) { return base; }
   }
+  function wallImage() { return gradedWall(equippedWallId()); }
   // Where a body's PAINT ends, as a multiple of r — the HUG baked into SPR_FIT.
   // Halos and selection rings must be placed against THIS, not against r: the
   // collision radius is not what the player sees. When the fit changed, rings
@@ -1201,7 +1218,13 @@
                  coins: 0, owned: {}, equipped: {},
                  stats: { shifts: 0, gems: 0, crusts: 0, hearts: 0,
                           bestCombo: 0, days: 0, streak: 0, bestStreak: 0,
-                          lastDay: 0 } };
+                          lastDay: 0, earned: 0 },
+                 // Declared here AND repaired lazily in contractsDone(). The
+                 // merge below is SHALLOW, so a save written before this field
+                 // existed keeps whatever it had and gains this default — but
+                 // a save written with a corrupted value would keep the
+                 // corruption, which is what the lazy guard is for.
+                 contracts: {} };
     var hadLocal = false;
     try {
       var s = localStorage.getItem(K);
@@ -1954,6 +1977,8 @@
     // milestone 12 widens the bag on FREE digs only — daily AND career stay
     // 7 for everyone (shared seeds must be fair)
     this.bagCap = (this.mode === 'free' && Meta.data.hoardTotal >= 12) ? CFG.bagCap + 1 : CFG.bagCap;
+    this.shiftCrusts = 0; this.shiftHearts = 0; this.shiftCombo = 0;
+    this.contractsWon = null;
     seedStream(this.seed);               // LANE 2 seeded once, at reset
     var wildHeart = noise01(1, (this.seed ^ 0x4EA48) >>> 0) < 0.35;   // lane-1
     // FREE AND DAILY GET THE VERBS TOO. Lodestone and shale were gated behind
@@ -2374,6 +2399,7 @@
           }
         }
         bump('crusts');
+        this.shiftCrusts = (this.shiftCrusts || 0) + 1;
         this.hitStop = 0.06;
         this.shakeT = Math.max(this.shakeT, 0.18);
         Hap.medium();
@@ -2458,6 +2484,7 @@
     this.bag.push(key);
     this.combo++;
     if (this.combo > stats().bestCombo) stats().bestCombo = this.combo;
+    if (this.combo > (this.shiftCombo || 0)) this.shiftCombo = this.combo;
     if (this.tutStep === 0) this.tutStep = 1;
     this._fly(b, 'bag', this.bag.length - 1);
     Snd.fill(this.combo);                // ladder climbs the LIVE music chord
@@ -2567,6 +2594,7 @@
     this._choiceTapped = false;
     if (c.key === 'heartstone') {
       bump('hearts');
+      this.shiftHearts = (this.shiftHearts || 0) + 1;
       var hFrom = { x: VIEW_MIN_W / 2, y: JAR.top + 48, r: 34, key: 'gem_prism_big' };
       // career banks no coins, so an untouched timeout must not "sell" the
       // colossus into nothing — the dragon takes it
@@ -2645,6 +2673,42 @@
     this.orders[o.slot] = this._makeOrder(o.slot);
   };
 
+  // Evaluate every unclaimed contract against this shift and the lifetime
+  // counters. One-shot: a contract that fires is recorded and never pays
+  // again. Deliberately runs AFTER the lifetime stats are updated so a
+  // contract like "work 10 shifts" can close on the shift that reaches 10.
+  Game.prototype._checkContracts = function () {
+    var done = contractsDone(), L = stats(), won = [];
+    var ctx = {
+      L: L, M: Meta.data,
+      s: {
+        coins: this.coins,
+        done: this.ordersDone,
+        goal: this.goalOrders,
+        left: Math.max(0, this.swings),
+        crusts: this.shiftCrusts || 0,
+        hearts: this.shiftHearts || 0,
+        combo: this.shiftCombo || 0,
+        stars: (this.careerResult && this.careerResult.stars) || 0,
+      },
+    };
+    for (var i = 0; i < CONTRACTS.length; i++) {
+      var c = CONTRACTS[i];
+      if (done[c.id]) continue;
+      var ok = false;
+      try { ok = !!c.t(ctx); } catch (e) { ok = false; }
+      if (!ok) continue;
+      done[c.id] = 1;
+      Meta.data.hoardTotal = (Meta.data.hoardTotal || 0) + c.h;
+      this.hoard += c.h;
+      won.push(c);
+    }
+    if (won.length) {
+      Meta.save();
+      this.contractsWon = won;          // the results screen names them
+    }
+  };
+
   Game.prototype._endShift = function () {
     if (this.state !== 'playing' || this._ending) return;
     // A prism or Heartstone dug on the LAST swing opens its hover-choice on the
@@ -2670,6 +2734,19 @@
     // which is correct: that really is a missed day.
     var st = stats();
     st.shifts = (st.shifts || 0) + 1;
+
+    // CONTRACTS ARE CHECKED HERE, AND NOT ON THE DAILY.
+    //
+    // The daily's board is a date-derived character, so a RUSH DAY makes any
+    // timed-card contract free and the shared jar becomes the farm route — the
+    // whole board could be cleared on the right Tuesday. Contracts tick in
+    // FREE and CAREER only; the daily still feeds every lifetime stat, so a
+    // daily run still moves the counters those contracts read, it just cannot
+    // be the thing that closes one. (Balatro's rule: meta-progression is off
+    // inside a warped run.)
+    //
+    // Archive runs are daily runs and are excluded by the same test.
+    if (!this.isDaily) this._checkContracts();
     var d = dayNumber();
     if (d > (st.lastDay || 0)) {
       st.days = (st.days || 0) + 1;
@@ -3171,11 +3248,11 @@
     if (this.state === 'paused' && !this.showSettings) {
       ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(-v.ox, -v.uiTop, v.w, v.h + v.uiTop);
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 34px system-ui, sans-serif';
+      ctx.fillStyle = '#fff'; ctx.font = fD(34);
       // 'PAUSED — tap to resume' at 40px measures ~480 units against a 420-unit
       // world: it ran off both edges. Two lines, and it fits.
       ctx.fillText('PAUSED', VIEW_MIN_W / 2, v.h / 2 - 40);
-      ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = '15px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = fT(15);
       ctx.fillText('tap to resume', VIEW_MIN_W / 2, v.h / 2 + 4);
       ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     }
@@ -3530,7 +3607,7 @@
       ctx.lineWidth = o.cls === 'timed' ? 2 : 1.5;
       rr(ctx, x, ORDER_Y, ORDER_W, ORDER_H, 9); ctx.stroke();
       ctx.fillStyle = o.cls === 'timed' ? '#b0552a' : '#6b5d49';
-      ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.font = fT(10, 'bold');
       ctx.textBaseline = 'top';
       // RUSH cards give up the centre: the countdown dial sits on the right
       if (o.cls === 'timed') {
@@ -3556,7 +3633,7 @@
         }
         var n = o.need[key];
         var cov = Math.min(this._bagCount(key), n);
-        ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.font = fT(12, 'bold');
         ctx.textAlign = 'left';
         if (cov >= n) {
           ctx.fillStyle = '#3f8f4f';
@@ -3566,7 +3643,7 @@
           ctx.fillText(cov + '/' + n, x + 30, gy);
         }
       }
-      ctx.fillStyle = '#8a7b62'; ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.fillStyle = '#8a7b62'; ctx.font = fT(11, 'bold');
       ctx.textAlign = 'center';
       ctx.fillText(o.pay + 'c', x + ORDER_W / 2, ORDER_Y + ORDER_H - 16);
       // THE RUSH CLOCK. This is the game's only clock, and it used to be a
@@ -3600,7 +3677,7 @@
         ctx.stroke();
         ctx.lineCap = 'butt';
         ctx.fillStyle = kcol;
-        ctx.font = 'bold 10px system-ui, sans-serif';
+        ctx.font = fT(10, 'bold');
         ctx.textBaseline = 'middle';
         ctx.fillText(String(Math.ceil(remain)), kx, ky + 0.5);
         ctx.textBaseline = 'top';
@@ -3659,7 +3736,7 @@
         }
       }
     }
-    ctx.font = 'bold 10px system-ui, sans-serif'; ctx.textBaseline = 'top';
+    ctx.font = fT(10, 'bold'); ctx.textBaseline = 'top';
     if (this.bag.length >= this.bagCap) {
       ctx.fillStyle = '#f0a090'; ctx.textAlign = 'center';
       ctx.fillText('BAG FULL — tap a gem to toss it', VIEW_MIN_W / 2, BAG_Y + BAG_SLOT + 4);
@@ -3675,7 +3752,7 @@
     ctx.textBaseline = 'top';
     // coins (rollup display) with a drawn coin
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 20px system-ui, sans-serif';
+    ctx.fillStyle = '#ffd75e'; ctx.font = fD(20);
     ctx.fillText(String(Math.round(this.displayCoins)), VIEW_MIN_W - 40, 4);
     ctx.fillStyle = '#e8a53c';
     ctx.beginPath(); ctx.arc(VIEW_MIN_W - 25, 15, 9, 0, 6.283); ctx.fill();
@@ -3684,13 +3761,13 @@
     ctx.strokeStyle = 'rgba(255,240,200,0.7)'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(VIEW_MIN_W - 25, 15, 5.5, 0, 6.283); ctx.stroke();
     // shift progress
-    ctx.fillStyle = '#e8dcc8'; ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.fillStyle = '#e8dcc8'; ctx.font = fT(13, 'bold');
     ctx.textAlign = 'left';
     ctx.fillText((this.career ? 'LV ' + this.career.level + ' · ' : '') +
                  'orders ' + this.ordersDone + '/' + this.goalOrders, 15, 1, 150);
     if (this.isDaily) {
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fT(11, 'bold');
       ctx.fillText('DAILY DIG', VIEW_MIN_W / 2, 6);
       ctx.textAlign = 'left';
     }
@@ -3723,7 +3800,7 @@
       ctx.textAlign = 'center';
       ctx.fillStyle = 'rgba(20,14,10,0.72)';
       rr(ctx, VIEW_MIN_W / 2 - 172, bandY - 34, 344, 28, 8); ctx.fill();
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 16px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fD(16);
       ctx.textBaseline = 'middle';
       ctx.fillText(this.toast.text, VIEW_MIN_W / 2, bandY - 20, 330);
       ctx.textBaseline = 'top';
@@ -3733,7 +3810,7 @@
       ctx.textAlign = 'center';
       ctx.fillStyle = 'rgba(20,14,10,0.82)';
       rr(ctx, VIEW_MIN_W / 2 - 168, bandY - 34, 336, 28, 8); ctx.fill();
-      ctx.fillStyle = '#ffe9a8'; ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillStyle = '#ffe9a8'; ctx.font = fT(12, 'bold');
       ctx.textBaseline = 'middle';
       // "skip the rest" taught the player to ignore every rock — including
       // the crusted ones, which are the single best swing in the game. The
@@ -3754,7 +3831,7 @@
     // the rope and through the pins above cards 1 and 2. Nothing in this row
     // may extend past y=28.
     var sfrac = Math.max(0, this.swings) / this.shiftSwings;
-    ctx.font = '13px system-ui, sans-serif';
+    ctx.font = fT(13);
     ctx.fillStyle = 'rgba(232,220,200,0.9)';
     ctx.fillText('\u26cf', 15, 15);
     ctx.fillStyle = 'rgba(20,12,6,0.6)';
@@ -3764,7 +3841,7 @@
     ctx.strokeStyle = 'rgba(201,168,106,0.5)'; ctx.lineWidth = 1;
     rr(ctx, 33, 18, 104, 9, 4.5); ctx.stroke();
     ctx.fillStyle = this.swings <= 5 ? '#f0a090' : 'rgba(232,220,200,0.85)';
-    ctx.font = 'bold 12px system-ui, sans-serif';
+    ctx.font = fT(12, 'bold');
     ctx.fillText(String(Math.max(0, this.swings)), 143, 15);
     ctx.textBaseline = 'alphabetic';
   };
@@ -3865,10 +3942,10 @@
     ctx.fillStyle = 'rgba(20,12,6,0.55)';
     rr(ctx, dx + ds - 6, base - ds * 0.30 - 11, 46, 22, 8); ctx.fill();
     ctx.fillStyle = '#e8c9ff';
-    ctx.font = 'bold ' + tw + 'px system-ui, sans-serif';
+    ctx.font = fD(tw);
     ctx.fillText('×' + total, dx + ds + 17, base - ds * 0.30);
     if (this.hoard) {
-      ctx.fillStyle = '#8fd08a'; ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.fillStyle = '#8fd08a'; ctx.font = fT(11, 'bold');
       ctx.fillText('+' + this.hoard, dx + ds + 17, base - ds * 0.30 + 18);
     }
   };
@@ -3888,15 +3965,15 @@
     var cy = c.y + (c.compact ? c.h / 2 : c.h * 0.42);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = 'rgba(232,220,200,0.45)';
-    ctx.font = 'bold 9px system-ui, sans-serif';
+    ctx.font = fT(9, 'bold');
     ctx.fillText('PACE', cx, cy - (c.compact ? 11 : 15));
     ctx.fillStyle = col;
-    ctx.font = 'bold ' + (c.compact ? 15 : 19) + 'px system-ui, sans-serif';
+    ctx.font = fD((c.compact ? 15 : 19));
     ctx.fillText(left === 0 ? 'ALL FILLED'
                : this.swings + ' swings · ' + left + ' left', cx, cy + 2);
     if (!c.compact) {
       ctx.fillStyle = 'rgba(232,220,200,0.5)';
-      ctx.font = '11px system-ui, sans-serif';
+      ctx.font = fT(11);
       ctx.fillText(left === 0 ? 'cash out the leftovers'
                  : ok ? 'comfortably ahead' : tight ? 'on the line' : 'behind — pick your gems',
                  cx, cy + 20);
@@ -4008,7 +4085,7 @@
     ctx.strokeStyle = 'rgba(201,168,106,0.8)'; ctx.lineWidth = 2;
     rr(ctx, p.x, p.y, p.w, p.h, 18); ctx.stroke();
 
-    ctx.fillStyle = '#ffe9a8'; ctx.font = 'bold 24px Georgia, serif';
+    ctx.fillStyle = '#ffe9a8'; ctx.font = fD(24);
     ctx.fillText('SETTINGS', p.x + p.w / 2, p.y + 16);
     ctx.strokeStyle = 'rgba(201,168,106,0.3)'; ctx.lineWidth = 1;
     ctx.beginPath();
@@ -4016,7 +4093,7 @@
     ctx.stroke();
 
     // ✕ — the explicit way out, for anyone who does not try the scrim
-    ctx.fillStyle = 'rgba(232,220,200,0.65)'; ctx.font = 'bold 20px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,220,200,0.65)'; ctx.font = fD(20);
     ctx.fillText('✕', R.close.x + R.close.w / 2, R.close.y + 10);
 
     for (var i = 0; i < R.rows.length; i++) {
@@ -4028,7 +4105,7 @@
         ctx.strokeStyle = 'rgba(201,168,106,0.35)'; ctx.lineWidth = 1.5;
         rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.stroke();
         ctx.textAlign = 'left';
-        ctx.fillStyle = '#e8dcc8'; ctx.font = 'bold 17px system-ui, sans-serif';
+        ctx.fillStyle = '#e8dcc8'; ctx.font = fD(17);
         ctx.fillText(r.id === 'music' ? 'Music' : 'Sound effects', r.x + 16, r.y + 17);
         // a switch that shows its state in COLOUR as well as in words, so it
         // still reads without the label
@@ -4040,7 +4117,7 @@
         ctx.arc(on ? sw.x + sw.w - 15 : sw.x + 15, sw.y + 15, 11, 0, 6.283); ctx.fill();
         ctx.textAlign = 'center';
         ctx.fillStyle = on ? '#dfeecb' : 'rgba(200,186,166,0.65)';
-        ctx.font = 'bold 10px system-ui, sans-serif';
+        ctx.font = fT(10, 'bold');
         ctx.fillText(on ? 'ON' : 'OFF', on ? sw.x + 19 : sw.x + 42, sw.y + 10);
       } else {
         // QUIT is two-step. It sits one row from RESUME in a uniform stack and
@@ -4054,7 +4131,7 @@
       }
     }
 
-    ctx.fillStyle = 'rgba(232,220,200,0.42)'; ctx.font = '11px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,220,200,0.42)'; ctx.font = fT(11);
     ctx.fillText('tap outside to close', p.x + p.w / 2, p.y + p.h - 22, p.w - 40);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
   };
@@ -4123,7 +4200,7 @@
     ctx.arc(cx, cy, 34, -1.5708, -1.5708 + 6.28318 * frac);
     ctx.stroke();
     if (spr) ctx.drawImage(spr, cx - d / 2, cy - d / 2, d, d);
-    ctx.font = 'bold 12px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.font = fT(12, 'bold'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     // Career used to bank NO coins, which made "SELL 200c" a dominated choice
     // dressed up with a fanfare, and the label said so. The wallet changed
     // that: a FIRST clear banks its payout, so on a level you have not cleared
@@ -4290,16 +4367,16 @@
     rr(ctx, 16, 20, 112, 46, 12); ctx.fill();
     ctx.strokeStyle = 'rgba(255,215,94,0.45)'; ctx.lineWidth = 1.5;
     rr(ctx, 16, 20, 112, 46, 12); ctx.stroke();
-    ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = '10px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fT(10);
     ctx.fillText('COINS', 72, 26);
-    ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 20px system-ui, sans-serif';
+    ctx.fillStyle = '#ffd75e'; ctx.font = fD(20);
     ctx.fillText(coins + 'c', 72, 39, 96);
     var sb = MENU.shop;
     ctx.fillStyle = 'rgba(20,12,6,0.62)';
     rr(ctx, sb.x, sb.y, sb.w, sb.h, 12); ctx.fill();
     ctx.strokeStyle = 'rgba(255,215,94,0.45)'; ctx.lineWidth = 1.5;
     rr(ctx, sb.x, sb.y, sb.w, sb.h, 12); ctx.stroke();
-    ctx.fillStyle = '#ffe9a8'; ctx.font = 'bold 15px system-ui, sans-serif';
+    ctx.fillStyle = '#ffe9a8'; ctx.font = fT(15, 'bold');
     ctx.fillText('SHOP', sb.x + sb.w / 2, sb.y + 15);
     this._drawGearAt(MENU.gear);
 
@@ -4326,12 +4403,12 @@
     ctx.fillStyle = tg;
     ctx.fillRect(-v.ox, 58, v.w, 118);
 
-    ctx.font = 'bold 40px Georgia, serif';
+    ctx.font = fD(40);
     ctx.fillStyle = 'rgba(20,12,6,0.8)';
     ctx.fillText('GEMBURROW', cx + 2, 80 + 3, VIEW_MIN_W - 48);
     ctx.fillStyle = '#ffd75e';
     ctx.fillText('GEMBURROW', cx, 80, VIEW_MIN_W - 48);
-    ctx.fillStyle = '#e8dcc8'; ctx.font = 'italic 14px Georgia, serif';
+    ctx.fillStyle = '#e8dcc8'; ctx.font = fD(14, 'italic');
     ctx.fillText('dig gems · fill orders · feed the dragon', cx, 130, VIEW_MIN_W - 40);
     // letterpress rule with a gem for a diamond — the ornament the title lost
     ctx.strokeStyle = 'rgba(201,168,106,0.45)'; ctx.lineWidth = 1;
@@ -4393,7 +4470,7 @@
       ctx.beginPath(); ctx.arc(nx, 400, isCur ? 13 : 10, 0, 6.283); ctx.fill();
       if (ln % 5 === 0 && SPR.gem_prism) ctx.drawImage(SPR.gem_prism, nx - 8, 392, 16, 16);
       ctx.fillStyle = done2 || isCur ? '#3a2a18' : 'rgba(232,220,200,0.55)';
-      ctx.font = 'bold 11px system-ui, sans-serif'; ctx.textBaseline = 'middle';
+      ctx.font = fT(11, 'bold'); ctx.textBaseline = 'middle';
       if (ln % 5 !== 0) ctx.fillText(String(ln), nx, 401);
       ctx.textBaseline = 'top';
       var st2 = (Meta.data.careerStars || {})[ln] || 0;
@@ -4401,7 +4478,7 @@
     }
     // the chevron does the "this opens something" work a label would, without
     // the 12 vertical units a label would cost between the mole and the card
-    ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = 'bold 16px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fD(16);
     ctx.textBaseline = 'middle';
     ctx.fillText('›', sbx.x + sbx.w - 13, sbx.y + sbx.h / 2);
     ctx.textBaseline = 'top';
@@ -4413,7 +4490,7 @@
     rr(ctx, cx - 132, 440, 264, 46, 12); ctx.fill();
     ctx.strokeStyle = 'rgba(201,168,106,0.5)'; ctx.lineWidth = 1.5;
     rr(ctx, cx - 132, 440, 264, 46, 12); ctx.stroke();
-    ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.fillStyle = '#ffd75e'; ctx.font = fT(13, 'bold');
     // The card carries TWO text lines, a dragon AND a records chevron, so the
     // text column is narrowed and re-centred to leave the right third free.
     // At 196 wide centred on cx-14 the lines run to cx+84, which put the hoard
@@ -4421,7 +4498,7 @@
     // dragon — invisible at a high hoard, where the rank line is short, and
     // obvious the moment a save is FRESH and the line reads "hoard: 0 gems".
     ctx.fillText(best > 0 ? ("today's daily best: " + best + 'c') : "today's daily dig awaits", cx - 44, 448, 130);
-    ctx.fillStyle = '#e8c9ff'; ctx.font = '12px system-ui, sans-serif';
+    ctx.fillStyle = '#e8c9ff'; ctx.font = fT(12);
     // Show the RANK once the named milestones run out, with the next threshold
     // beside it — otherwise the hoard readout is a number that stopped meaning
     // anything at 20. maxWidth 196 is already enforced by fillText, and the
@@ -4436,9 +4513,9 @@
     if (mdrag) ctx.drawImage(mdrag, cx + 32, 447, 32, 32);
     // The card is the door to RECORDS, and says so. A tappable region with no
     // mark reads as a missing feature, not as a secret.
-    ctx.fillStyle = 'rgba(232,201,255,0.7)'; ctx.font = 'bold 9px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,201,255,0.7)'; ctx.font = fT(9, 'bold');
     ctx.fillText('RECORDS', cx + 100, 452, 44);
-    ctx.fillStyle = 'rgba(255,215,94,0.8)'; ctx.font = 'bold 14px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,215,94,0.8)'; ctx.font = fT(14, 'bold');
     ctx.fillText('\u203A', cx + 100, 464);
 
     // --- the three ways to play ---------------------------------------------
@@ -4464,7 +4541,7 @@
     // three.
     var firstRun = !Meta.data.tutorialDone;
     this._menuBtn(done ? 'CAREER · COMPLETE' : 'CAREER · LEVEL ' + lvl, MENU.career.y, {
-      w: MENU.career.w, h: MENU.career.h,
+      w: MENU.career.w, h: MENU.career.h, tone: 'career', icon: 'gem_ruby',
       sub: firstRun ? 'START HERE · the mole shows you the ropes'
          : done ? 'every level cleared · replay the finale'
                 : 'the mole’s job ladder · ★ ' + totalStars + '/' + (CAREER_MAX * 3),
@@ -4473,13 +4550,13 @@
     // invisible system, and this project has shipped enough of those.
     var todayChar = dailyCharacter(dayNumber());
     this._menuBtn('DAILY DIG', MENU.daily.y, {
-      w: MENU.daily.w, h: MENU.daily.h,
+      w: MENU.daily.w, h: MENU.daily.h, tone: 'daily', icon: 'gem_sapphire',
       quiet: firstRun,
       sub: firstRun ? 'one shared jar · after your first shift'
                     : 'today: ' + todayChar.name + ' · same jar for everyone',
     });
     this._menuBtn('FREE DIG', MENU.free.y, {
-      w: MENU.free.w, h: MENU.free.h,
+      w: MENU.free.w, h: MENU.free.h, tone: 'free', icon: 'gem_emerald',
       quiet: firstRun,
       // NOT "practice · no stakes". Free banks coins EVERY shift while career
       // banks first-clear only, so ~33 free digs out-earn the entire 40-level
@@ -4555,10 +4632,13 @@
   // 96 world units is ~89pt on a 390pt phone — comfortably past the 44pt
   // floor even at four across. Labels are short BECAUSE the row is: this was
   // measured before the tab was added, not after it overflowed.
-  var REC_TAB_Y = 78, REC_TAB_H = 34, REC_TAB_W = 96, REC_TAB_GAP = 4;
+  // FIVE tabs. 5x76 + 4 gaps = 396 in a 420 view; 76 world units is ~71pt on
+  // a 390pt phone, still well past the 44pt floor. Measured before the tab was
+  // added, as with the fourth.
+  var REC_TAB_Y = 78, REC_TAB_H = 34, REC_TAB_W = 76, REC_TAB_GAP = 4;
   Game.prototype.recordsRects = function () {
     var cx = VIEW_MIN_W / 2, W = REC_TAB_W, G = REC_TAB_GAP;
-    var x0 = cx - (W * 2 + G * 1.5);
+    var x0 = cx - (W * 2.5 + G * 2);
     return {
       backY: RECORDS_BACK_Y,
       card: { x: cx - 132, y: 440, w: 264, h: 46 },
@@ -4566,6 +4646,7 @@
       tabBoard:  { x: x0 + (W + G),       y: REC_TAB_Y, w: W, h: REC_TAB_H },
       tabLeague: { x: x0 + (W + G) * 2,   y: REC_TAB_Y, w: W, h: REC_TAB_H },
       tabPast:   { x: x0 + (W + G) * 3,   y: REC_TAB_Y, w: W, h: REC_TAB_H },
+      tabJobs:   { x: x0 + (W + G) * 4,   y: REC_TAB_Y, w: W, h: REC_TAB_H },
     };
   };
 
@@ -4632,7 +4713,7 @@
     }
     var st = stats();
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillStyle = '#ffe9a8'; ctx.font = 'bold 28px Georgia, serif';
+    ctx.fillStyle = '#ffe9a8'; ctx.font = fD(28);
     ctx.fillText('RECORDS', cx, 34);
 
     // --- tabs ---------------------------------------------------------------
@@ -4641,7 +4722,8 @@
     [[R.tabStats, 'YOU', tab === 'stats'],
      [R.tabBoard, 'TODAY', tab === 'board'],
      [R.tabLeague, 'LEAGUE', tab === 'league'],
-     [R.tabPast, 'PAST', tab === 'past']]
+     [R.tabPast, 'PAST', tab === 'past'],
+     [R.tabJobs, 'JOBS', tab === 'jobs']]
       .forEach(function (t) {
         var box = t[0], on = t[2];
         ctx.fillStyle = on ? 'rgba(90,70,50,0.95)' : 'rgba(20,12,6,0.45)';
@@ -4650,19 +4732,20 @@
         ctx.lineWidth = on ? 2 : 1;
         rr(ctx, box.x, box.y, box.w, box.h, 9); ctx.stroke();
         ctx.fillStyle = on ? '#ffd75e' : 'rgba(232,220,200,0.6)';
-        ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.font = fT(12, 'bold');
         ctx.fillText(t[1], box.x + box.w / 2, box.y + 11, box.w - 12);
       });
 
     if (tab === 'board') { this._drawBoardTab(); this._menuBtn('BACK', RECORDS_BACK_Y); return; }
     if (tab === 'league') { this._drawLeagueTab(); this._menuBtn('BACK', RECORDS_BACK_Y); return; }
     if (tab === 'past') { this._drawPastTab(); this._menuBtn('BACK', RECORDS_BACK_Y); return; }
+    if (tab === 'jobs') { this._drawJobsTab(); this._menuBtn('BACK', RECORDS_BACK_Y); return; }
 
     // the hoard rank is the headline — it is the one number that never stops
     var hrk = hoardRank(Meta.data.hoardTotal);
-    ctx.fillStyle = '#e8c9ff'; ctx.font = 'bold 17px system-ui, sans-serif';
+    ctx.fillStyle = '#e8c9ff'; ctx.font = fD(17);
     ctx.fillText(hrk ? hrk.name : 'Keeper of ' + Meta.data.hoardTotal, cx, 126);
-    ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = '12px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = fT(12);
     ctx.fillText(hrk ? Meta.data.hoardTotal + ' hoarded · next rank at ' + hrk.next
                      : Meta.data.hoardTotal + ' gems hoarded', cx, 148);
 
@@ -4711,10 +4794,10 @@
       ctx.fillStyle = i % 2 ? 'rgba(20,12,6,0.30)' : 'rgba(20,12,6,0.48)';
       rr(ctx, cx - 150, y, 300, H - 4, 8); ctx.fill();
       ctx.textAlign = 'left';
-      ctx.fillStyle = 'rgba(240,226,200,0.82)'; ctx.font = '13px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(240,226,200,0.82)'; ctx.font = fT(13);
       ctx.fillText(rows[i][0], cx - 138, y + 9, 180);
       ctx.textAlign = 'right';
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fT(14, 'bold');
       ctx.fillText(String(rows[i][1]), cx + 138, y + 8, 130);
       y += H;
     }
@@ -4735,10 +4818,63 @@
     return out;
   };
 
+  // THE CONTRACT BOARD. Scrolls by page rather than by drag — a canvas drag
+  // scroller is a whole input surface and this list is 27 entries.
+  var JOBS_PER_PAGE = 13;
+  Game.prototype._drawJobsTab = function () {
+    var ctx = this.ctx, cx = VIEW_MIN_W / 2;
+    var done = contractsDone();
+    var nDone = 0, hEarned = 0, hTotal = 0;
+    for (var i = 0; i < CONTRACTS.length; i++) {
+      hTotal += CONTRACTS[i].h;
+      if (done[CONTRACTS[i].id]) { nDone++; hEarned += CONTRACTS[i].h; }
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillStyle = '#ffd75e'; ctx.font = fT(13, 'bold');
+    ctx.fillText(nDone + ' of ' + CONTRACTS.length + ' contracts · ' +
+                 hEarned + '/' + hTotal + ' hoard', cx, 118, 300);
+    ctx.fillStyle = 'rgba(232,201,255,0.6)'; ctx.font = fT(10);
+    ctx.fillText('free digs and career only · no clock, they keep', cx, 136, 300);
+
+    var page = this.jobsPage || 0;
+    var pages = Math.ceil(CONTRACTS.length / JOBS_PER_PAGE);
+    var from = page * JOBS_PER_PAGE;
+    var y = 154, H = 33;
+    for (var j = from; j < Math.min(from + JOBS_PER_PAGE, CONTRACTS.length); j++) {
+      var c = CONTRACTS[j], got = !!done[c.id];
+      ctx.fillStyle = got ? 'rgba(70,60,34,0.72)'
+                          : (j % 2 ? 'rgba(20,12,6,0.30)' : 'rgba(20,12,6,0.48)');
+      rr(ctx, cx - 150, y, 300, H - 4, 8); ctx.fill();
+      ctx.textAlign = 'left';
+      ctx.fillStyle = got ? '#ffd75e' : 'rgba(240,226,200,0.35)';
+      ctx.font = fT(12, 'bold');
+      ctx.fillText(got ? '\u2714' : '\u25CB', cx - 141, y + 8, 14);
+      ctx.fillStyle = got ? '#f0e2c8' : 'rgba(240,226,200,0.8)';
+      ctx.font = (got ? 'bold ' : '') + fT(11);
+      ctx.fillText(c.name, cx - 122, y + 3, 128);
+      ctx.fillStyle = 'rgba(240,226,200,0.45)'; ctx.font = fT(9);
+      ctx.fillText(c.desc, cx - 122, y + 16, 160);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = got ? 'rgba(232,201,255,0.8)' : 'rgba(232,201,255,0.45)';
+      ctx.font = fT(11, 'bold');
+      ctx.fillText('+' + c.h, cx + 140, y + 9, 40);
+      ctx.textAlign = 'center';
+      y += H;
+    }
+    if (pages > 1) {
+      ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = fT(11, 'bold');
+      ctx.fillText('\u2039  page ' + (page + 1) + ' of ' + pages + '  \u203A', cx, y + 8, 200);
+    }
+  };
+
+  Game.prototype.jobsPageRect = function () {
+    return { x: VIEW_MIN_W / 2 - 100, y: 154 + JOBS_PER_PAGE * 33 + 2, w: 200, h: 26 };
+  };
+
   Game.prototype._drawPastTab = function () {
     var ctx = this.ctx, cx = VIEW_MIN_W / 2;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = '11px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = fT(11);
     ctx.fillText('every past jar, still diggable · no coins, no board', cx, 118, 300);
 
     var rows = this.archiveRows(), y = 138, H = 33;
@@ -4747,17 +4883,17 @@
       ctx.fillStyle = i % 2 ? 'rgba(20,12,6,0.30)' : 'rgba(20,12,6,0.48)';
       rr(ctx, cx - 150, y, 300, H - 4, 8); ctx.fill();
       ctx.textAlign = 'left';
-      ctx.fillStyle = 'rgba(240,226,200,0.55)'; ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(240,226,200,0.55)'; ctx.font = fT(11);
       ctx.fillText(r.ago === 1 ? 'yesterday' : r.ago + ' days ago', cx - 140, y + 8, 74);
       ctx.fillStyle = dug ? 'rgba(240,226,200,0.9)' : 'rgba(240,226,200,0.5)';
-      ctx.font = '11px system-ui, sans-serif';
+      ctx.font = fT(11);
       ctx.fillText(r.ch.name, cx - 62, y + 8, 118);
       ctx.textAlign = 'right';
       if (dug) {
-        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillStyle = '#ffd75e'; ctx.font = fT(12, 'bold');
         ctx.fillText(r.best + 'c', cx + 140, y + 7, 70);
       } else {
-        ctx.fillStyle = 'rgba(201,168,106,0.75)'; ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(201,168,106,0.75)'; ctx.font = fT(11, 'bold');
         ctx.fillText('dig it', cx + 140, y + 8, 70);
       }
       ctx.textAlign = 'center';
@@ -4770,7 +4906,7 @@
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
 
     if (!b || b.state === 'loading') {
-      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = '13px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('counting the fortnight…', cx, 300);
       return;
     }
@@ -4778,29 +4914,29 @@
       // The view is not published yet. Say something TRUE and unalarming
       // rather than an error — this is the expected state before
       // tools/leaderboard-league.sql is run.
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fT(14, 'bold');
       ctx.fillText('the league opens soon', cx, 288);
-      ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = '12px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fT(12);
       ctx.fillText('your daily digs are already being counted', cx, 314);
       return;
     }
     if (b.state === 'error') {
-      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = '13px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('the league is out of reach right now', cx, 292);
-      ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = fT(11);
       ctx.fillText('tap the tab again to retry', cx, 314);
       return;
     }
     var rows = b.rows || [];
     if (!rows.length) {
-      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = '13px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('no digs in the last fortnight', cx, 292);
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 13px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fT(13, 'bold');
       ctx.fillText('a daily dig starts your run', cx, 316);
       return;
     }
 
-    ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = '11px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = fT(11);
     ctx.fillText('every daily dig of the last 14 days, added up', cx, 118, 300);
 
     var me = Meta.data.playerName, mine = -1;
@@ -4817,21 +4953,21 @@
       }
       ctx.textAlign = 'left';
       ctx.fillStyle = i < 3 ? '#ffd75e' : 'rgba(240,226,200,0.55)';
-      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.font = fT(12, 'bold');
       ctx.fillText(String(i + 1), cx - 140, y + 8, 22);
       // safeName at the point of PAINT, same as the daily board
       ctx.fillStyle = isMe ? '#ffe9a8' : 'rgba(240,226,200,0.9)';
-      ctx.font = (isMe ? 'bold ' : '') + '12px system-ui, sans-serif';
+      ctx.font = (isMe ? 'bold ' : '') + fT(12);
       ctx.fillText(safeName(rows[i].player), cx - 114, y + 8, 118);
-      ctx.fillStyle = 'rgba(232,201,255,0.6)'; ctx.font = '10px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,201,255,0.6)'; ctx.font = fT(10);
       ctx.fillText((rows[i].days | 0) + 'd', cx + 12, y + 9, 30);
       ctx.textAlign = 'right';
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 13px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fT(13, 'bold');
       ctx.fillText((rows[i].total | 0) + 'c', cx + 140, y + 8, 78);
       y += H;
     }
     ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(232,201,255,0.8)'; ctx.font = '12px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,201,255,0.8)'; ctx.font = fT(12);
     ctx.fillText(mine >= 0 ? 'you are ' + (mine + 1) + ' of ' + rows.length + ' this fortnight'
                            : 'dig the daily to enter the league', cx, y + 8, 290);
   };
@@ -4842,22 +4978,22 @@
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
 
     if (!b || b.state === 'loading') {
-      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = '13px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('reading the board…', cx, 300);
       return;
     }
     if (b.state === 'error') {
-      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = '13px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('the board is out of reach right now', cx, 292);
-      ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = fT(11);
       ctx.fillText('tap the tab again to retry', cx, 314);
       return;
     }
     var rows = b.rows || [];
     if (!rows.length) {
-      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = '13px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('nobody has dug today yet', cx, 292);
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 13px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fT(13, 'bold');
       ctx.fillText('be first — the daily jar is the same for everyone', cx, 316);
       return;
     }
@@ -4876,17 +5012,17 @@
       }
       ctx.textAlign = 'left';
       ctx.fillStyle = i < 3 ? '#ffd75e' : 'rgba(240,226,200,0.55)';
-      ctx.font = 'bold 13px system-ui, sans-serif';
+      ctx.font = fT(13, 'bold');
       ctx.fillText(String(i + 1), cx - 140, y + 8, 24);
       // ALWAYS through safeName. `player` is written by the RPC, which refuses
       // anything that is not a minted MOLE-XXXX — but this is a 4+ game and
       // the column is the one field a caller supplies, so it is sanitised at
       // the point of PAINT too rather than trusting the write path alone.
       ctx.fillStyle = isMe ? '#ffe9a8' : 'rgba(240,226,200,0.9)';
-      ctx.font = (isMe ? 'bold ' : '') + '13px system-ui, sans-serif';
+      ctx.font = (isMe ? 'bold ' : '') + fT(13);
       ctx.fillText(safeName(rows[i].player), cx - 112, y + 8, 150);
       ctx.textAlign = 'right';
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fT(14, 'bold');
       ctx.fillText((rows[i].coins | 0) + 'c', cx + 140, y + 7, 80);
       y += H;
     }
@@ -4895,7 +5031,7 @@
     // Your own standing, when you are not in the visible top ten — otherwise
     // the board is just other people and says nothing about you.
     var best = Meta.data.bestDaily[dayNumber()] || 0;
-    ctx.fillStyle = 'rgba(232,201,255,0.8)'; ctx.font = '12px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,201,255,0.8)'; ctx.font = fT(12);
     var line;
     if (mine >= 0) {
       line = 'you are ' + (mine + 1) + ' of ' + rows.length + ' today';
@@ -4920,7 +5056,7 @@
     var ctx = this.ctx, cx = VIEW_MIN_W / 2;
     var eq = equippedPickId(), have = starTotal();
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillStyle = 'rgba(255,215,94,0.85)'; ctx.font = '12px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,215,94,0.85)'; ctx.font = fT(12);
     ctx.fillText('\u2605 ' + have + ' of ' + (CAREER_MAX * 3) + ' career stars', cx, 258, 300);
 
     var base = SPR.prop_pickaxe;
@@ -4942,10 +5078,10 @@
       }
       ctx.textAlign = 'left';
       ctx.fillStyle = open ? '#f0e2c8' : 'rgba(200,186,166,0.45)';
-      ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.font = fT(14, 'bold');
       ctx.fillText(sk.name, x0 + 58, y + 10, 150);
       ctx.textAlign = 'right';
-      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.font = fT(12, 'bold');
       if (isEq) { ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN', x0 + 290, y + 13, 90); }
       else if (open) { ctx.fillStyle = 'rgba(201,168,106,0.9)'; ctx.fillText('wear', x0 + 290, y + 13, 90); }
       else { ctx.fillStyle = 'rgba(200,186,166,0.5)';
@@ -4960,7 +5096,7 @@
     var eq = equippedDragonId();
     var rk = hoardRank(Meta.data.hoardTotal);
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillStyle = 'rgba(232,201,255,0.85)'; ctx.font = '12px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,201,255,0.85)'; ctx.font = fT(12);
     ctx.fillText(rk ? rk.name + ' · hoard ' + Meta.data.hoardTotal
                     : 'hoard ' + Meta.data.hoardTotal + ' · first skin at 20',
                  cx, 258, 300);
@@ -4987,10 +5123,10 @@
       }
       ctx.textAlign = 'left';
       ctx.fillStyle = open ? '#f0e2c8' : 'rgba(200,186,166,0.45)';
-      ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.font = fT(14, 'bold');
       ctx.fillText(sk.name, x0 + 58, y + 10, 150);
       ctx.textAlign = 'right';
-      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.font = fT(12, 'bold');
       if (isEq) {
         ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN', x0 + 290, y + 13, 90);
       } else if (open) {
@@ -5016,9 +5152,9 @@
       ctx.globalAlpha = 1;
     }
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillStyle = '#ffe9a8'; ctx.font = 'bold 28px Georgia, serif';
+    ctx.fillStyle = '#ffe9a8'; ctx.font = fD(28);
     ctx.fillText("THE MOLE'S SHOP", VIEW_MIN_W / 2, 96);
-    ctx.fillStyle = 'rgba(232,220,200,0.75)'; ctx.font = '13px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,220,200,0.75)'; ctx.font = fT(13);
     // Tab-aware: the wardrobe is unlocked by HOARD, so telling the player
     // their gems pay for it is simply false on that tab.
     ctx.fillText(this.shopTab === 'dragon' ? 'what you hoard, the Hoardling wears'
@@ -5033,7 +5169,7 @@
       rr(ctx, VIEW_MIN_W / 2 - 78, 168, 156, 40, 12); ctx.fill();
       ctx.strokeStyle = 'rgba(255,215,94,0.5)'; ctx.lineWidth = 1.5;
       rr(ctx, VIEW_MIN_W / 2 - 78, 168, 156, 40, 12); ctx.stroke();
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 22px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fD(22);
       ctx.fillText((Meta.data.coins || 0) + 'c', VIEW_MIN_W / 2, 178);
     }
 
@@ -5050,7 +5186,7 @@
         ctx.lineWidth = on ? 2 : 1;
         rr(ctx, box.x, box.y, box.w, box.h, 9); ctx.stroke();
         ctx.fillStyle = on ? '#ffd75e' : 'rgba(232,220,200,0.6)';
-        ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.font = fT(12, 'bold');
         ctx.fillText(t[1], box.x + box.w / 2, box.y + 11, box.w - 12);
       });
     if (st === 'dragon') { this._drawDragonTab(); return; }
@@ -5072,36 +5208,67 @@
       ctx.lineWidth = isEq ? 2.5 : 1.5;
       rr(ctx, x0, y, 300, SHOP_ROW_H, 12); ctx.stroke();
 
-      // swatch: the actual graded colour, so the row shows what you buy
+      // THE THUMBNAIL IS THE ACTUAL WALL. gradedWall() is the same function the
+      // dig renders through, cropped to a tall slice of the seam, so what is on
+      // the price tag is what you get \u2014 the old flat #6b5a45 swatch was a paint
+      // chip standing in for a painting, and it is most of why this screen read
+      // as cheap. Cached per id by gradedWall, so this costs one drawImage.
+      var tw = 44, th = SHOP_ROW_H - 16, tX = x0 + 10, tY = y + 8;
       ctx.save();
-      ctx.beginPath(); rr(ctx, x0 + 10, y + 10, 36, 36, 8); ctx.clip();
-      ctx.fillStyle = '#6b5a45';
-      ctx.fillRect(x0 + 10, y + 10, 36, 36);
-      if (sk.tint) {
-        if (sk.dark) { ctx.fillStyle = 'rgba(0,0,0,' + sk.dark + ')'; ctx.fillRect(x0 + 10, y + 10, 36, 36); }
-        ctx.globalAlpha = sk.amt; ctx.fillStyle = sk.tint;
-        ctx.fillRect(x0 + 10, y + 10, 36, 36); ctx.globalAlpha = 1;
+      ctx.beginPath(); rr(ctx, tX, tY, tw, th, 8); ctx.clip();
+      var wimg = gradedWall(sk.id);
+      if (wimg) {
+        // A centred slice of the seam at roughly the on-screen scale of the dig.
+        var sw = Math.min(wimg.width, Math.round(wimg.width * 0.42));
+        var sh = Math.round(sw * th / tw);
+        ctx.drawImage(wimg, (wimg.width - sw) / 2, (wimg.height - sh) / 2, sw, sh, tX, tY, tw, th);
+      } else {
+        ctx.fillStyle = '#6b5a45'; ctx.fillRect(tX, tY, tw, th);
       }
+      if (!owned && !afford) { ctx.fillStyle = 'rgba(12,8,5,0.42)'; ctx.fillRect(tX, tY, tw, th); }
       ctx.restore();
-      ctx.strokeStyle = 'rgba(255,240,200,0.25)'; ctx.lineWidth = 1;
-      rr(ctx, x0 + 10, y + 10, 36, 36, 8); ctx.stroke();
+      ctx.strokeStyle = isEq ? 'rgba(255,215,94,0.85)' : 'rgba(255,240,200,0.22)';
+      ctx.lineWidth = isEq ? 2 : 1;
+      rr(ctx, tX, tY, tw, th, 8); ctx.stroke();
 
+      var tx0 = x0 + 66;
       ctx.textAlign = 'left';
-      ctx.fillStyle = owned ? '#ffe9a8' : (afford ? '#e8dcc8' : 'rgba(200,186,166,0.5)');
-      ctx.font = 'bold 16px system-ui, sans-serif';
-      ctx.fillText(sk.name, x0 + 58, y + 12);
-      ctx.font = '12px system-ui, sans-serif';
-      ctx.fillStyle = isEq ? '#ffd75e' : 'rgba(232,220,200,0.6)';
-      ctx.fillText(isEq ? 'WORN' : (owned ? 'tap to wear' : (afford ? 'tap to buy' : 'keep digging')),
-                   x0 + 58, y + 33);
+      ctx.fillStyle = owned ? '#ffe9a8' : (afford ? '#e8dcc8' : 'rgba(200,186,166,0.55)');
+      ctx.font = fD(16);
+      ctx.fillText(sk.name, tx0, y + 9, 150);
+      ctx.font = fT(11);
+      ctx.fillStyle = 'rgba(232,220,200,0.5)';
+      ctx.fillText(sk.note || '', tx0, y + 29, 168);
+
+      // THE THIRD LINE ANSWERS "CAN I HAVE IT YET".
+      // 600c and 7,600c looked identical while holding 0c: the screen priced
+      // everything and told you nothing about your own distance to it.
+      ctx.font = fT(11, 'bold');
+      if (isEq) {
+        ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN IN EVERY DIG', tx0, y + 45);
+      } else if (owned) {
+        ctx.fillStyle = 'rgba(255,233,168,0.75)'; ctx.fillText('TAP TO WEAR', tx0, y + 45);
+      } else if (afford) {
+        ctx.fillStyle = '#8fd08a'; ctx.fillText('YOU CAN AFFORD THIS \u00b7 TAP TO BUY', tx0, y + 45);
+      } else {
+        var have = Meta.data.coins || 0, short = sk.price - have;
+        ctx.fillStyle = 'rgba(232,200,150,0.62)';
+        ctx.fillText(short.toLocaleString() + 'c to go', tx0, y + 45);
+        // and the same number as a bar, because a distance is easier to feel
+        // than to read
+        var bx = tx0 + 92, bw2 = 76, byy = y + 49;
+        ctx.fillStyle = 'rgba(0,0,0,0.35)'; rr(ctx, bx, byy, bw2, 4, 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,215,94,0.55)';
+        rr(ctx, bx, byy, Math.max(2, bw2 * Math.min(1, have / sk.price)), 4, 2); ctx.fill();
+      }
 
       ctx.textAlign = 'right';
       if (!owned) {
         ctx.fillStyle = afford ? '#ffd75e' : 'rgba(200,186,166,0.45)';
-        ctx.font = 'bold 16px system-ui, sans-serif';
-        ctx.fillText(sk.price + 'c', x0 + 288, y + 20);
+        ctx.font = fD(17);
+        ctx.fillText(sk.price.toLocaleString() + 'c', x0 + 288, y + 14);
       } else if (isEq) {
-        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 18px system-ui, sans-serif';
+        ctx.fillStyle = '#ffd75e'; ctx.font = fD(18);
         ctx.fillText('\u2713', x0 + 288, y + 18);
       }
       ctx.textAlign = 'center';
@@ -5134,17 +5301,17 @@
       ctx.globalAlpha = 1;
     }
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillStyle = '#ffe9a8'; ctx.font = 'bold 26px Georgia, serif';
+    ctx.fillStyle = '#ffe9a8'; ctx.font = fD(26);
     ctx.fillText('THE JOB LADDER', cx, 92, VIEW_MIN_W - 48);
     this._drawGearAt(SHOP_GEAR);
 
     var stars = Meta.data.careerStars || {};
     var total = 0, key;
     for (key in stars) total += stars[key];
-    ctx.fillStyle = 'rgba(232,220,200,0.75)'; ctx.font = '13px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(232,220,200,0.75)'; ctx.font = fT(13);
     ctx.fillText('replay any level for a better score · stars keep the best', cx, 124, VIEW_MIN_W - 40);
     drawStar(ctx, cx - 30, 150, 8, '#ffd75e');
-    ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 15px system-ui, sans-serif';
+    ctx.fillStyle = '#ffd75e'; ctx.font = fT(15, 'bold');
     ctx.textAlign = 'left';
     ctx.fillText(total + ' / ' + (CAREER_MAX * 3), cx - 18, 142);
     ctx.textAlign = 'center';
@@ -5164,7 +5331,7 @@
       ctx.lineWidth = cur ? 2.5 : 1.5;
       rr(ctx, b.x, b.y, b.w, b.h, 11); ctx.stroke();
       ctx.fillStyle = !open ? 'rgba(200,186,166,0.35)' : got > 0 ? '#ffe9a8' : '#fff';
-      ctx.font = 'bold 17px system-ui, sans-serif';
+      ctx.font = fD(17);
       ctx.fillText(String(lv), b.x + b.w / 2, b.y + 8);
       if (open) {
         for (var s = 0; s < 3; s++) {
@@ -5181,41 +5348,88 @@
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
   };
 
+  // THE BUTTON MATERIAL. Every plate in the game comes out of here.
+  //
+  // What it replaced: a flat rounded rect in one brown, so CAREER, DAILY DIG
+  // and FREE DIG were the same 244x60 slab differing only by their words —
+  // three primary actions with no way to tell them apart at a glance — and
+  // every label was drawn in `system-ui` over oil-painted art.
+  //
+  // Three things do the work now. A LIT EDGE: a vertical gradient plus a bright
+  // top bevel and a dark under-edge, so the plate reads as a carved object
+  // catching the lantern rather than a rectangle pasted on the wallpaper. A
+  // TONE per mode (opt.tone), pulled toward the burrow rather than toward
+  // saturated primaries — the point is "distinguishable", not "neon". And a
+  // GEM MEDALLION (opt.icon), which is the fastest possible read: you know
+  // which button you want before you have finished the first word.
+  //
+  // Geometry is byte-for-byte what it was — same x, same w/h, same radius — so
+  // every existing hit test stays correct. This is a pure-cosmetic change.
   Game.prototype._menuBtn = function (label, y, opt) {
     var ctx = this.ctx;
     opt = opt || {};
     var bw = opt.w || 220, bh = opt.h || 56;
     var dim = !!opt.disabled;
+    var t = BTN_TONE[opt.tone] || BTN_TONE.wood;
     var x = VIEW_MIN_W / 2 - bw / 2;
-    ctx.fillStyle = 'rgba(0,0,0,' + (dim ? 0.18 : 0.35) + ')';
-    rr(ctx, x + 2, y + 4, bw, bh, 14); ctx.fill();           // soft shadow
-    ctx.fillStyle = dim ? '#3a2f26' : opt.quiet ? '#48372a' : '#5a4632';
+
+    ctx.fillStyle = 'rgba(0,0,0,' + (dim ? 0.18 : 0.38) + ')';
+    rr(ctx, x + 2, y + 5, bw, bh, 14); ctx.fill();           // cast shadow
+
+    if (dim) {
+      ctx.fillStyle = '#3a2f26';
+    } else {
+      var g = ctx.createLinearGradient(0, y, 0, y + bh);
+      g.addColorStop(0, opt.quiet ? '#4e3c2d' : t.top);
+      g.addColorStop(1, opt.quiet ? '#3a2c21' : t.bot);
+      ctx.fillStyle = g;
+    }
     rr(ctx, x, y, bw, bh, 14); ctx.fill();
-    ctx.fillStyle = dim ? '#332a22' : opt.quiet ? '#3c2e23' : '#4a3a28';
-    rr(ctx, x, y + bh * 0.46, bw, bh * 0.54, 14); ctx.fill(); // lower tone
+
+    if (!dim) {
+      // Under-edge: the plate has thickness, and thickness is what stops a
+      // shape reading as a sticker.
+      ctx.fillStyle = 'rgba(0,0,0,0.22)';
+      rr(ctx, x, y + bh - 7, bw, 7, 14); ctx.fill();
+    }
+
     ctx.strokeStyle = dim ? 'rgba(150,132,110,0.28)'
-                          : opt.quiet ? 'rgba(201,168,106,0.55)' : 'rgba(255,215,94,0.9)';
+                          : opt.quiet ? 'rgba(201,168,106,0.55)' : t.rim;
     ctx.lineWidth = dim ? 1.5 : 2;
     rr(ctx, x, y, bw, bh, 14); ctx.stroke();
     if (!dim) {
-      ctx.strokeStyle = 'rgba(255,240,200,0.25)'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(x + 14, y + 4); ctx.lineTo(x + bw - 14, y + 4); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,246,220,0.32)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x + 15, y + 4); ctx.lineTo(x + bw - 15, y + 4); ctx.stroke();
     }
-    ctx.fillStyle = dim ? 'rgba(200,186,166,0.42)' : opt.quiet ? '#e8dcc8' : '#ffe9a8';
+
+    // The medallion: a sunken disc with the mode's gem sitting in it.
+    var tx = VIEW_MIN_W / 2, avail = bw - 26;
+    var spr = opt.icon && SPR[opt.icon];
+    if (spr && !dim) {
+      var cx = x + 30, cy = y + bh / 2, rad = 16;
+      ctx.fillStyle = 'rgba(0,0,0,0.30)';
+      ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,240,200,0.22)'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 6.283); ctx.stroke();
+      ctx.drawImage(spr, cx - 14, cy - 14, 28, 28);
+      tx += 20; avail -= 46;                 // label recentres out of the disc
+    }
+
+    ctx.fillStyle = dim ? 'rgba(200,186,166,0.42)' : opt.quiet ? '#e8dcc8' : t.ink;
     // maxWidth on every fillText: a caption that outgrows its button bleeds
     // past both edges onto the wallpaper and reads as a layout bug, which is
     // exactly what 'the same jar for everyone · new at midnight UTC' did at
     // 11px in a 244-unit button. Canvas condenses instead. It is also the only
     // thing standing between this screen and a longer translation.
     if (opt.sub) {
-      ctx.font = 'bold 20px system-ui, sans-serif';
-      ctx.fillText(label, VIEW_MIN_W / 2, y + 11, bw - 26);
-      ctx.fillStyle = 'rgba(232,220,200,0.7)';
-      ctx.font = '11px system-ui, sans-serif';
-      ctx.fillText(opt.sub, VIEW_MIN_W / 2, y + 38, bw - 26);
+      ctx.font = fD(21);
+      ctx.fillText(label, tx, y + 10, avail);
+      ctx.fillStyle = dim ? 'rgba(200,186,166,0.34)' : 'rgba(240,228,206,0.72)';
+      ctx.font = fT(11.5);
+      ctx.fillText(opt.sub, tx, y + 38, avail);
     } else {
-      ctx.font = 'bold ' + (opt.quiet ? 17 : 20) + 'px system-ui, sans-serif';
-      ctx.fillText(label, VIEW_MIN_W / 2, y + (bh - 20) / 2, bw - 26);
+      ctx.font = fD(opt.quiet ? 18 : 21);
+      ctx.fillText(label, tx, y + (bh - 21) / 2, avail);
     }
   };
 
@@ -5265,7 +5479,7 @@
     if (this.career) {
       var cr = this.careerResult || { won: false, stars: 0 };
       ctx.fillStyle = cr.won ? '#ffd75e' : '#f0a090';
-      ctx.font = 'bold 32px system-ui, sans-serif';
+      ctx.font = fD(32);
       ctx.fillText(cr.won ? 'LEVEL ' + this.career.level + ' CLEARED!'
                           : 'THE PICK GAVE OUT', VIEW_MIN_W / 2, 180, 304);
       for (var st = 0; st < 3; st++) {
@@ -5276,26 +5490,26 @@
       // FIRST clear only (the level seed is fixed, so paying replays would be
       // farmable) — so the payout is shown as a secondary line, and only when
       // it actually paid.
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 22px system-ui, sans-serif';
+      ctx.fillStyle = '#fff'; ctx.font = fD(22);
       ctx.fillText(cr.won ? (cr.stars === 3 ? 'A FLAWLESS SHIFT' : 'THE ORDERS ARE FILLED')
                           : this.ordersDone + '/' + this.goalOrders + ' orders filled',
                    VIEW_MIN_W / 2, 300);
-      ctx.fillStyle = 'rgba(232,220,200,0.75)'; ctx.font = '14px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.75)'; ctx.font = fT(14);
       ctx.fillText(cr.won ? 'swings left at the bell: ' + Math.max(0, this.swingsAtGoal)
                           : 'plan the dig — every swing counts', VIEW_MIN_W / 2, 334);
       if (cr.banked > 0) {
-        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 15px system-ui, sans-serif';
+        ctx.fillStyle = '#ffd75e'; ctx.font = fT(15, 'bold');
         ctx.fillText('+' + cr.banked + 'c banked  ·  first clear', VIEW_MIN_W / 2, 356);
       }
       if (this.hoard) {
-        ctx.fillStyle = '#e8c9ff'; ctx.font = 'bold 14px system-ui, sans-serif';
+        ctx.fillStyle = '#e8c9ff'; ctx.font = fT(14, 'bold');
         ctx.fillText('+' + this.hoard + ' to the hoard (kept)', VIEW_MIN_W / 2, cr.banked > 0 ? 378 : 358);
       }
       var last = this.careerFinale();
       if (last) {
-        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 15px system-ui, sans-serif';
+        ctx.fillStyle = '#ffd75e'; ctx.font = fT(15, 'bold');
         ctx.fillText('END OF THE SHAFT — for now.', VIEW_MIN_W / 2, 392);
-        ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = '13px system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = fT(13);
         ctx.fillText('The daily dig is where the diggers are.', VIEW_MIN_W / 2, 414);
       }
       // THE OUT. A career seed is FIXED, so a stuck player was retrying the
@@ -5305,12 +5519,12 @@
       if (!cr.won) {
         var canAfford = (Meta.data.coins || 0) >= DEEPER_PICK_COST;
         ctx.fillStyle = canAfford ? '#ffd75e' : 'rgba(200,186,166,0.45)';
-        ctx.font = 'bold 14px system-ui, sans-serif';
+        ctx.font = fT(14, 'bold');
         ctx.fillText(canAfford ? 'RETRY WITH A DEEPER PICK  ·  ' + DEEPER_PICK_COST + 'c'
                                : 'a deeper pick costs ' + DEEPER_PICK_COST + 'c  ·  you have '
                                  + (Meta.data.coins || 0) + 'c',
                      VIEW_MIN_W / 2, 450);
-        ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = '12px system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(12);
         ctx.fillText('+' + DEEPER_PICK_SWINGS + ' swings on the next attempt  ·  stars still scored on 55',
                      VIEW_MIN_W / 2, 470, 300);
         // Drawn DISABLED when it cannot be bought. It used to render at full
@@ -5331,29 +5545,44 @@
     // failing was even possible (Pillar 2: never celebrate a net loss).
     var won = this.ordersDone >= this.goalOrders;
     ctx.fillStyle = won ? '#ffd75e' : '#f0a090';
-    ctx.font = 'bold 34px system-ui, sans-serif';
+    ctx.font = fD(34);
     ctx.fillText(won ? 'SHIFT COMPLETE' : 'THE PICK GAVE OUT', VIEW_MIN_W / 2, 180);
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 26px system-ui, sans-serif';
+    ctx.fillStyle = '#fff'; ctx.font = fD(26);
     ctx.fillText(this.coins + ' coins', VIEW_MIN_W / 2, 250);
     ctx.fillStyle = won ? '#e8dcc8' : '#f0a090';
-    ctx.font = won ? '16px system-ui, sans-serif' : 'bold 17px system-ui, sans-serif';
+    ctx.font = won ? fD(16, 'normal') : fD(17);
     ctx.fillText(this.ordersDone + '/' + this.goalOrders + ' orders · ' + this.pops + ' swings · hoard +' + this.hoard, VIEW_MIN_W / 2, 295);
+    // NAME THE CONTRACTS JUST CLOSED. A reward the player cannot see is the
+    // mistake this project has made with almost every system it added — the
+    // crusted rock, the skins, the ranks. At most two are listed; the rest are
+    // counted, because the results screen has ~40 units here before the
+    // personal-best line at 320.
+    if (this.contractsWon && this.contractsWon.length) {
+      var cw = this.contractsWon;
+      ctx.fillStyle = '#e8c9ff'; ctx.font = fT(13, 'bold');
+      var label = cw.length === 1 ? 'CONTRACT: ' + cw[0].name
+                : cw.length === 2 ? 'CONTRACTS: ' + cw[0].name + ' · ' + cw[1].name
+                : cw.length + ' CONTRACTS CLOSED';
+      var hsum = 0;
+      for (var ci = 0; ci < cw.length; ci++) hsum += cw[ci].h;
+      ctx.fillText(label + '  +' + hsum + ' hoard', VIEW_MIN_W / 2, 313, 320);
+    }
     var best = this.isDaily ? (Meta.data.bestDaily[this.day] || 0) : Meta.data.bestFree;
     if (this.coins >= best && this.coins > 0) {
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.fillStyle = '#ffd75e'; ctx.font = fT(15, 'bold');
       ctx.fillText(this.isDaily ? 'BEST DAILY DIG TODAY!' : 'BEST FREE DIG EVER!', VIEW_MIN_W / 2, 328);
     } else {
-      ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = '14px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = fT(14);
       ctx.fillText((this.isDaily ? "today's best: " : 'best: ') + best, VIEW_MIN_W / 2, 328);
     }
     if (this.isDaily && this.board && this.board.length) {
-      ctx.fillStyle = '#c9a86a'; ctx.font = 'bold 13px system-ui, sans-serif';
+      ctx.fillStyle = '#c9a86a'; ctx.font = fT(13, 'bold');
       ctx.fillText("TODAY'S DIGGERS", VIEW_MIN_W / 2, 362);
       for (var bi = 0; bi < this.board.length && bi < 8; bi++) {
         var row = this.board[bi];
         var mine = row.player === Meta.data.playerName;
         ctx.fillStyle = mine ? '#ffd75e' : '#e8dcc8';
-        ctx.font = (mine ? 'bold ' : '') + '13px system-ui, sans-serif';
+        ctx.font = (mine ? 'bold ' : '') + fT(13);
         ctx.textAlign = 'left';
         ctx.fillText((bi + 1) + '.  ' + safeName(row.player), VIEW_MIN_W / 2 - 110, 386 + bi * 19);
         ctx.textAlign = 'right';
@@ -5403,6 +5632,43 @@
     }
     this._cosmetic(dtRaw);
     this.draw(this.state === 'playing' ? this._acc / STEP : 0);
+  };
+
+  // ---- TYPE. One definition, because there were 101 of them. ----------------
+  //
+  // 94% of this game's `ctx.font` sites said `system-ui, sans-serif` — the
+  // operating system's own UI face, set over hand-painted oil art. That single
+  // fact is most of why the interface read as cheap next to the mole: the art
+  // was authored and the words were not. Two places already used Georgia (the
+  // title, the shop sign) and they were the best-looking type in the build, so
+  // the fix is to make the good thing the system rather than invent a new one.
+  //
+  // WHY A SYSTEM FACE AND NOT A WEBFONT. Canvas `ctx.font` silently falls back
+  // when the family has not finished loading, and there is no event that tells
+  // you it happened — you just ship a frame in Helvetica. Gating first paint on
+  // `document.fonts.ready` fixes that but adds a load step that a cold WKWebView
+  // boot can stall on. Georgia ships with iOS, macOS, Windows and Android's
+  // fallback chain, so it cannot fail, cannot flash, and costs zero bytes. If we
+  // later want the marketing site's Baloo 2 in here, it arrives as a bundled
+  // woff2 + a FontFace().load() gate — a deliberate change, not a stack tweak.
+  var F_DISP = 'Georgia, "Iowan Old Style", "Times New Roman", serif';
+  var F_TEXT = '"Avenir Next", "Segoe UI", Roboto, system-ui, sans-serif';
+  function fD(px, w) { return (w || 'bold') + ' ' + px + 'px ' + F_DISP; }   // display
+  function fT(px, w) { return (w ? w + ' ' : '') + px + 'px ' + F_TEXT; }    // text/UI
+
+  // ---- BUTTON TONES. One row per mode, so three identical slabs become three
+  // recognisable objects. Deliberately pulled toward the burrow: these are lit
+  // garnet / lapis / moss in lamplight, not saturated red/blue/green, because
+  // the job is "tell them apart", not "look like every other mobile game".
+  // Every tone keeps a brown floor and a warm rim: these are stones lit by ONE
+  // lantern, so nothing may read as its own light source. The first pass used
+  // brighter cooler rims and the blue and green plates floated off the wall
+  // like plastic — the hue carries the identity, the warmth keeps them in the room.
+  var BTN_TONE = {
+    career: { top: '#5e332c', bot: '#3a1f1a', rim: 'rgba(226,150,112,0.62)', ink: '#f7dccd' },
+    daily:  { top: '#2e405e', bot: '#1b2739', rim: 'rgba(190,178,150,0.58)', ink: '#dde5f2' },
+    free:   { top: '#375138', bot: '#213221', rim: 'rgba(196,190,130,0.58)', ink: '#dfeadb' },
+    wood:   { top: '#5a4632', bot: '#3f3123', rim: 'rgba(255,215,94,0.85)',  ink: '#ffe9a8' },
   };
 
   // ---- tiny draw helpers ----
@@ -5480,6 +5746,18 @@
       var RR = game.recordsRects();
       if (inRect(w, RR.tabStats)) { uiTick(); game.recTab = 'stats'; return; }
       if (inRect(w, RR.tabPast)) { uiTick(); game.recTab = 'past'; return; }
+      if (inRect(w, RR.tabJobs)) { uiTick(); game.recTab = 'jobs'; return; }
+      if (game.recTab === 'jobs') {
+        var pr = game.jobsPageRect();
+        if (inRect(w, pr)) {
+          uiTick();
+          var pgs = Math.ceil(CONTRACTS.length / JOBS_PER_PAGE);
+          // left half pages back, right half pages forward — the chevrons say so
+          var dir = w.x < pr.x + pr.w / 2 ? -1 : 1;
+          game.jobsPage = ((game.jobsPage || 0) + dir + pgs) % pgs;
+          return;
+        }
+      }
       if (game.recTab === 'past') {
         // tap a day to dig it. dailyCharacter and seedForDay are both pure
         // functions of the day number, so the jar rebuilds exactly.
