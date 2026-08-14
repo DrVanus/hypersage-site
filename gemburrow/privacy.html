@@ -147,10 +147,21 @@
     <p>
       This page and the rest of <a href="index.html">hypersage.ai/gemburrow</a>
       are static files served by GitHub Pages. There is no analytics script, no
-      cookie set by us, no advertising pixel and no form. The playable jar on the
-      home page runs entirely in your browser and sends nothing anywhere; it
-      keeps no state between visits. Web fonts are requested from Google Fonts,
-      which receives the request as any font host would.
+      cookie set by us, no advertising pixel and no form. Web fonts are requested
+      from Google Fonts, which receives the request as any font host would, and
+      the game's own files are served by GitHub Pages, which sees those requests
+      the same way any host would.
+    </p>
+    <p>
+      There are two playable things here, and they do not behave the same way.
+      The small <strong>jar demo</strong> on the home page runs entirely in your
+      browser, sends nothing anywhere, and keeps no state between visits. The
+      <strong>full game</strong> at <a href="play/">hypersage.ai/gemburrow/play/</a>
+      behaves exactly like the app described above: it saves your progress in your
+      own browser's local storage, and if you play the Daily Dig it sends that one
+      score — a number, a day, and a generated name like MOLE-4A7F — to the
+      leaderboard. Nothing else leaves the page, and clearing your browser's data
+      for this site erases the save.
     </p>
 
     <h2>Changes to this policy</h2>

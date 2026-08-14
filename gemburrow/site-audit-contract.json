@@ -53,7 +53,7 @@
       "evidence": [
         "Career and Free digs make no network calls, so they are fully playable offline — same evidence as local_only (the isDaily branch at game.js:1776).",
         "The Daily Dig is playable offline too, and the site says only that POSTING the score and drawing the board need a connection: an unsent score is kept in Meta.data.pendingScore (game.js:1780) and cleared only once a submission is acknowledged (game.js:1785), so it is retried on a later launch.",
-        "The bundled music and art are files inside the app package (fetch of audio/*.m4a at game.js:939-942 is same-origin to the WebView's bundle), so nothing about presentation needs the network either."
+        "SCOPE (2026-08-14): this claim covers the iPHONE APP, where the music and art are files inside the app package (the audio/*.m4a fetch is same-origin to the WebView's bundle), so nothing about presentation needs the network. It does NOT cover the browser build at /gemburrow/play/, which ships no service worker and therefore fetches its assets over the network on first load. The site must not describe the browser build as playable offline."
       ]
     }
   }
