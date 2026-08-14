@@ -116,15 +116,32 @@
   var TOWER_TYPES = {
     mimic: {
       name: 'Latch Mimic', cost: 80, hitsAir: false,
+      // RANGE 40 MADE THIS MACHINE UNBUILDABLE, not merely weak. Measured pad
+      // distance to the road centreline: level 1 has 2 of 8 pads inside 40,
+      // level 2 has 1 of 9, and LEVEL 3 HAS ZERO OF EIGHT at every tier —
+      // its nearest pad is 49.4 out and both L3 forks only reached 44/48.
+      // So the third machine a new player can buy costs more than the Crossbow
+      // (which reaches the road from every pad on every level) and, on the last
+      // map, could not hit anything at all from anywhere it was allowed to sit.
+      // It stays the SHORT-range brawler — it just has to be able to reach.
       levels: [
-        { dmg: 8,  rate: 1.0, range: 40, upgradeCost: 70 },
-        { dmg: 14, rate: 1.1, range: 40, upgradeCost: 120 },
+        // ...and range was only half the problem. Measured against the Kobold
+        // Crossbow it was dominated on EVERY axis: cost 80 vs 70, dps 8.0 vs
+        // 14.4 then 15.4 vs 28.0, range 72 vs 105. Nothing it did was better,
+        // so there was never a reason to buy it. It now WINS on damage — a real
+        // trade of reach for punch, which is what a short-range brawler is for.
+        { dmg: 18, rate: 1.0, range: 72, upgradeCost: 70 },
+        { dmg: 32, rate: 1.1, range: 80, upgradeCost: 120 },
       ],
       forks: [
         { key: 'rend', name: 'Gearjaw', pitch: 'Grinding gears rend 4/s — armor can\'t shave it.',
-          dmg: 22, rate: 1.2, range: 44, special: 'rend', rendDps: 4, rendDur: 2.5 },
+          dmg: 44, rate: 1.2, range: 84, special: 'rend', rendDps: 4, rendDur: 2.5 },
         { key: 'coinback', name: 'Magnet Jaws', pitch: 'Bites shake stolen coins loose — they fly home.',
-          dmg: 16, rate: 1.5, range: 48, special: 'coinback', coinCap: 2 },
+          // The forks were tuned against the OLD level-2 damage of 14. Raising
+          // L2 to 32 without them made the L3 upgrade a DOWNGRADE (22 and 16),
+          // which is also why the first bot run showed no change at all: it
+          // upgrades on sight, so both runs were really measuring the forks.
+          dmg: 34, rate: 1.5, range: 88, special: 'coinback', coinCap: 2 },
       ],
     },
     ballista: {
@@ -2443,6 +2460,7 @@
         if (adx2 * adx2 + ady2 * ady2 > sr.range * sr.range) continue;
         // Read the hero directly: the _manned flags are stamped BELOW this loop,
         // so src._manned would be a frame stale and the buff would lag the art.
+        if (src.jamT > 0) continue;            // a jammed post buffs nothing
         var sMan = this.hero.manned && this.hero.manTid === src.tid;
         var sBoost = sMan ? (TOWER_TYPES.bellows.mannedAura || 1) : 1;
         at._auraRate = Math.max(at._auraRate, (sr.auraRate || 0) * sBoost);  // strongest post wins,
@@ -2469,7 +2487,12 @@
     for (var t = 0; t < this.towers.length; t++) {
       var tw = this.towers[t];
       var tt = TOWER_TYPES[tw.type], lv = lvlRow(tw);
-      if (tt.support) continue;              // bellows/press do their work elsewhere
+      // JAM FIRST, THEN THE SUPPORT BAIL. This was the other way round, so a
+      // sapper could jam a Bellows or Press and the countdown -- the only place
+      // jamT is ever decremented -- sat below the bail and never ran. The jam
+      // did nothing AND never expired, which then made that machine permanently
+      // immune to sapping (the scan skips anything with jamT > 0). A red
+      // 'JAMMED!' float landed on a machine that went on buffing and minting.
       if (tw.jamT > 0) {
         // WICK CLEARS THE JAM. A Pry-Hand silences a machine for 2.6s and there
         // was nothing anyone could do but wait — which is the whole problem
@@ -2492,6 +2515,7 @@
         }
         continue;
       }
+      if (tt.support) continue;              // bellows/press do their work elsewhere
       // Time since this machine ACTUALLY fired. The recoil used to be driven
       // by the cooldown, but an idle machine rescans every 0.1s, which
       // retriggered the wind-up ~8x a second forever — every contraption on
@@ -2799,7 +2823,7 @@
         var pt2 = this.towers[pz];
         if (pt2.type !== 'press') continue;
         var pr2 = lvlRow(pt2);
-        if (!pr2.waveGold) continue;
+        if (!pr2.waveGold || pt2.jamT > 0) continue;   // a jammed press mints nothing
         var pMan = this.hero.manned && this.hero.manTid === pt2.tid;
         var pay = Math.round(pr2.waveGold * (pMan ? (TOWER_TYPES.press.mannedGold || 1) : 1));
         minted += pay;
