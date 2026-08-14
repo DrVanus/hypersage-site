@@ -830,7 +830,7 @@
       map: null, buf: {}, loading: false, ready: false,
       bedName: '', bedSrc: null, bedGain: null, bedAt: 0, bedDur: 0,
       stems: {}, pending: null, lp: null, wantScene: null,
-      chordValid: true,
+      chordValid: true, rival: null,
     };
     // Runtime layer levels. The mix balance lives HERE, not baked into the
     // files: every track masters to the same -18 LUFS so no crossfade is ever a
@@ -907,7 +907,40 @@
       Music.stems[key] = { src: src, gain: gn, want: 0 };
     }
 
+    // THE RIVAL'S WORKSHOP — a duel, for zero extra bytes.
+    //
+    // A duel is two builders in two caverns working the SAME seven machines, so
+    // the rival's workshop is not new music: it is `stem_works` heard through
+    // the rock. Same buffer, started three bars out of phase so it reads as
+    // another room rather than a doubling of your own layer, and lowpassed hard
+    // because that is what a wall does to a workshop.
+    //
+    // Its level is the scoreboard. `rivalHoard` steps once per wave off the
+    // baked curve, so the deficit between the two hoards is known every wave —
+    // and when they pull ahead you hear them getting louder through the wall
+    // before you look at the number.
+    function startRival() {
+      var buf = Music.buf['stem_works'];
+      if (!ac || !buf || !Music.bedSrc || Music.rival) return;
+      var t = nextBarAfter(ac.currentTime + 0.08);
+      var src = ac.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+      var lp = ac.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 470; lp.Q.value = 0.7;
+      var gn = ac.createGain();
+      gn.gain.value = 0;
+      src.connect(lp); lp.connect(gn); gn.connect(musicBus);
+      // Whole bars only, or the offset unlocks it from the shared bar grid.
+      src.start(t, (3 * BAR_SEC) % buf.duration);
+      Music.rival = { src: src, gain: gn, want: 0 };
+    }
+
     function stopStems() {
+      if (Music.rival) {
+        try { Music.rival.src.stop(); } catch (e) {}
+        Music.rival = null;
+      }
       Object.keys(Music.stems).forEach(function (k) {
         try { Music.stems[k].src.stop(); } catch (e) {}
       });
@@ -1022,6 +1055,19 @@
           // arrival can afford to arrive.
           ramp(s.gain.gain, to, to > 0 ? 1.1 : 0.6);
         });
+        // The rival, if this is a duel. Deficit is how far AHEAD they are as a
+        // fraction of a full hoard, so a dead-level duel still leaves them
+        // faintly audible — they are always in there working — and falling a
+        // hoard behind makes their machines the loudest thing in the cave.
+        if (p.duel) startRival();
+        if (Music.rival) {
+          var d = Math.max(0, Math.min(1, p.deficit || 0));
+          var rTo = (p.duel && p.playing) ? 0.08 + 0.34 * d : 0;
+          if (Math.abs(Music.rival.want - rTo) >= 0.004) {
+            Music.rival.want = rTo;
+            ramp(Music.rival.gain.gain, rTo, rTo > 0 ? 1.6 : 0.6);
+          }
+        }
         // Warmth: the cave opens up as the hoard drains. A full hoard is a
         // closed, warm room; losing it takes the lid off.
         if (Music.lp) {
@@ -1191,6 +1237,15 @@
   // subtitle "Multiplayer Tower Defense" and averages 51 concurrent players.
   // A recording is always home.
   var DUEL_WAVES = 12;                    // a phone session, not an evening
+  // ...but starting at wave 7 of the seeded ramp. See _waveGroups: a duel that
+  // began at wave 1 spent nine waves with both hoards untouched and the margin
+  // chip reading +0, which is not a duel, it is a countdown.
+  // The opening purse has to track the opening wave: a duel that starts at
+  // wave 11 with a wave-3 purse is an empty floor against veterans. Measured
+  // at the calibration point — the bot's board plus gold in hand at the end of
+  // wave 6 was ~850 across the arenas — and made linear in the offset from
+  // there, which is how a siege's income actually accrues.
+  function duelStartGold(at) { return 100 + 125 * (at | 0); }
   // Arenas rotate daily so a duel is not a fixed puzzle, but hold still WITHIN
   // a day so a loss can be avenged on the same ground.
   // An arena is a SEED PLUS ITS MAP, stated, not derived. Deriving the map as
@@ -1198,13 +1253,21 @@
   // the three maps — a distribution nobody chose and nobody would have noticed,
   // and one that would silently re-scramble the day a fourth map is authored.
   // Two arenas per map, written down.
+  // `at` is the wave of the seeded ramp this arena OPENS on, and it is per
+  // arena because the bake showed arena difficulty is dominated by the MAP,
+  // not by the seed: the three maps were authored around hand-tuned campaign
+  // waves, so under one shared ramp they are not remotely equivalent. At a
+  // flat opening of wave 7, map 0 (the short beginner keep) sacked every
+  // rival by wave 2-5 while map 2 (the long switchback, where machines get far
+  // more shots per raider) left the mid rivals on a full 60 for twelve waves.
+  // Calibrating the opening per arena is what makes them the same contest.
   var DUEL_ARENAS = [
-    { seed: 0x5eed1a3f, map: 0 },
-    { seed: 0xd00dfeed, map: 1 },
-    { seed: 0x7a11ba5e, map: 2 },
-    { seed: 0x0dd1e5ec, map: 0 },
-    { seed: 0x1ceb00da, map: 1 },
-    { seed: 0xa11ecafe, map: 2 },
+    { seed: 0x5eed1a3f, map: 0, at: 2 },
+    { seed: 0xd00dfeed, map: 1, at: 6 },
+    { seed: 0x7a11ba5e, map: 2, at: 10 },
+    { seed: 0x0dd1e5ec, map: 0, at: 2 },
+    { seed: 0x1ceb00da, map: 1, at: 5 },
+    { seed: 0xa11ecafe, map: 2, at: 10 },
   ];
   var RIVALS = [
     { id: 'tallow', name: 'Tallow', rank: 'APPRENTICE', policy: 'spam', wick: false,
@@ -1230,7 +1293,7 @@
   // from the day instead would mean a baked curve and the run it is scored
   // against could sit on different ground — the one failure this whole mode
   // has to make impossible.
-  function duelMapAt(seedIdx) { return (DUEL_SEEDS[seedIdx] >>> 0) % MAPS.length; }
+  function duelMapAt(seedIdx) { return Math.min(MAPS.length - 1, DUEL_ARENAS[seedIdx].map | 0); }
   function duelMapFor(rivalIdx) { return duelMapAt(duelSeedIdx(rivalIdx)); }   // tonight's, for the picker
   /** The rival's hoard after wave w, or null if this duel has no baked curve. */
   function rivalHoardAt(rivalIdx, seedIdx, w) {
@@ -2381,9 +2444,10 @@
       // through the ordinary code path instead of needing a private one. Any
       // other value (normal play passes 0) takes tonight's derived arena. The
       // effect is that a duel can never run on ground with no curve slot.
-      var si = DUEL_SEEDS.indexOf(seed >>> 0);
+      var si = -1, sw = seed >>> 0;
+      for (var ai = 0; ai < DUEL_ARENAS.length; ai++) if ((DUEL_ARENAS[ai].seed >>> 0) === sw) { si = ai; break; }
       this.duelSeedIdx = si >= 0 ? si : duelSeedIdx(this.rivalIdx);
-      seed = DUEL_SEEDS[this.duelSeedIdx];
+      seed = DUEL_ARENAS[this.duelSeedIdx].seed;
     }
     this.seed = (seed >>> 0) || dailySeed();
     // level select: campaign takes the chosen map; the Daily rotates its map
@@ -2478,6 +2542,14 @@
     // added on top, or 'Almost nothing to start' hands you MORE than a normal run.
     if (this.mods.startGoldSet != null) this.gold = this.mods.startGoldSet;
     if (this.mods.startGold) this.gold += this.mods.startGold;
+    // A duel opens at wave 7 of the ramp, so it must open with the purse a
+    // siege would have BUILT by then — otherwise it is an empty floor against
+    // veterans, which is not hard, it is impossible. Measured, not guessed:
+    // the bot's board at the end of wave 6 across the six arenas is 4-5
+    // machines with mixed tiers plus ~130 in hand, ~850 of total income.
+    // This is a MODE RULE, not forge power — the rival curves were baked
+    // through this same line, so both caves open with the same money.
+    if (this.mode === 'duel') this.gold = duelStartGold(DUEL_ARENAS[this.duelSeedIdx].at);
     this.hitstopT = 0;
     this.resultLockT = 0;
     this._ocSeen = false;
@@ -2527,8 +2599,15 @@
     // table: that is what makes "the same raiding party hit both caves" true
     // rather than a story. Same call, same seed, same twelve waves.
     var seeded = this.mode === 'daily' || this.mode === 'duel';
-    var groups = seeded ? dailyWaveComp(w, this.seed) : WAVE_TABLES[this.levelIdx][w];
-    var hpMul = seeded ? dailyHpMul(w) : campHpMul(w, this.levelIdx);
+    // A DUEL IS THE BACK HALF OF A SIEGE. Measured: baked flat at wave 12 with
+    // three of six arenas ending 60-60 because the ramp had not bitten, and
+    // stretching to 18 just bought nine more waves of nothing before the same
+    // cliff. Offsetting the generator starts the fight already under pressure —
+    // the Guild sent its veterans to both caves — so twelve waves are twelve
+    // waves of actual contest instead of a countdown to one.
+    var gw = (this.mode === 'duel') ? w + (DUEL_ARENAS[this.duelSeedIdx].at | 0) : w;
+    var groups = seeded ? dailyWaveComp(gw, this.seed) : WAVE_TABLES[this.levelIdx][w];
+    var hpMul = seeded ? dailyHpMul(gw) : campHpMul(w, this.levelIdx);
     var q = [];
     for (var g = 0; g < groups.length; g++) {
       var gr = groups[g];
@@ -2560,6 +2639,7 @@
     this._bossWave = this.spawnQueue.some(function (s) { return s.type === 'boss'; });
     if (this._bossWave) this._mCue = { name: 'boss' };
     this.waveActive = true;
+    this._waveStartHoard = this.hoard;   // cosmetic: lets the clear grade itself
     this.waveT = 0;
     this.countdown = 0;
     if (!Save.data.tut && this.mode === 'campaign' && this.towers.length) {
@@ -3219,7 +3299,19 @@
         this.fxQueue.push({ k: 'float', x: pt2.x, y: pt2.y - 40, txt: '+' + pay + 'g', c: '#ffd75e' });
       }
       if (minted) { this.gold += minted; Sfx.play('coin'); }
-      this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 300, txt: 'Wave ' + this.wave + ' held!', c: '#9ef58f' });
+      // WAVE CLEAR IS THE HEARTBEAT OF THIS MODE — 20 times a level — and it
+      // used to be one green word and silence. It now lands, and it CARRIES
+      // INFORMATION: a wave where nothing reached the hoard is the thing the
+      // whole game is about, and the player was never told they had done it.
+      // Deliberately restrained (no hitstop, no big shake): a beat you feel 20
+      // times a level must never become something you brace for.
+      var clean = this._waveStartHoard !== undefined && this.hoard >= this._waveStartHoard;
+      this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 300,
+                          txt: clean ? 'WAVE ' + this.wave + ' — NOT A COIN!' : 'Wave ' + this.wave + ' held!',
+                          c: clean ? '#ffd75e' : '#9ef58f' });
+      this.fxQueue.push({ k: 'pulse', x: WORLD_W / 2, y: 330, r: clean ? 118 : 84, n: 1 });
+      if (clean) this.shake = Math.min(1, this.shake + 0.12);
+      Sfx.play(clean ? 'upg' : 'wave');
       // ---- THE RIVAL'S WAVE ------------------------------------------------
       // Their cave took the same wave at the same time. Step their hoard off
       // the baked curve and SAY what it cost them — a number that only moves
@@ -4080,6 +4172,11 @@
       wave: this.wave,
       boss: !!this._bossWave,
       hoardFrac: Math.max(0, Math.min(1, this.hoard / CFG.startHoard)),
+      // A duel is scored against a rival hoard that steps once per wave, so
+      // "how badly am I losing" is a number the music can read directly.
+      duel: this.mode === 'duel',
+      deficit: this.mode === 'duel'
+        ? (this.rivalHoard - this.hoard) / CFG.startHoard : 0,
     });
     // One-shot cues, drained from flags that update() raised.
     if (this._mCue) { var c = this._mCue; this._mCue = null; Sfx.cue(c.name, c); }
