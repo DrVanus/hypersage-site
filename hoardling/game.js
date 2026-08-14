@@ -246,6 +246,10 @@
   // A netted flyer fights as ground troops until the net wears off.
   function eFly(e) { return e.flyer && !(e.groundedT > 0); }
   var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'brazier', 'bellows', 'press']; // cheap -> dear
+  // How long a killed raider keeps rendering as a white-hot husk. ~7 frames:
+  // long enough to read as a hit landing, short enough that a wave of kills
+  // does not leave a queue of corpses standing on the road.
+  var HUSK_T = 0.12;
   var PAD_SNAP = 34;          // build within this of a free pad and you snap to it
   var PAD_DISCOUNT = 0.8;     // ...and it costs 20% less: the authored spots still matter
   // FREE PLACEMENT DELETED THE OLD CAP. With 8 pads you could own 8 machines;
@@ -1946,7 +1950,7 @@
     this.ctx = canvas.getContext('2d');
     this.view = { cw: 1, ch: 1, dpr: 1, scale: 1, w: VIEW_MIN_W, h: VIEW_H, ox: 0, oy: 0 };
     this._last = 0; this._acc = 0;
-    this.particles = []; this.floats = []; this.shake = 0;
+    this.particles = []; this.floats = []; this.husks = []; this.shake = 0;
     this.fxQueue = [];                      // update() emits events; _cosmetic() spends them
     this.mode = 'campaign';                 // 'campaign' | 'daily'
     this.state = 'menu';                    // 'menu' | 'playing' | 'won' | 'lost' | 'paused'
@@ -1985,7 +1989,7 @@
     this.tar = [];                          // Tar Boiler slag patches {d,w,dps,until,tw}
     // cosmetic state must die with the run — a quit-to-title mid-battle must
     // not spray the LAST run's celebration into the next one (caught on film)
-    this.particles = []; this.floats = []; this.fxQueue = []; this.shake = 0;
+    this.particles = []; this.floats = []; this.husks = []; this.fxQueue = []; this.shake = 0;
     this._breathT = 0; this._heroFace = 1; this._resultT = 0;
     this.nextId = 1;
     var hs = MAP.heroStart || { x: 210, y: 470 };
@@ -2732,6 +2736,16 @@
     }
     this.fxQueue.push({ k: 'death', x: p.x, y: p.y, g: bounty, boss: e.type === 'boss' });
     Sfx.play('coin');
+    // THE KILL WAS THE ONE HIT IN THE GAME THAT RENDERED NO IMPACT FRAME.
+    // _damage sets e.flashT for the white re-draw, then removes a lethally hit
+    // raider in the SAME sim step — so the flash was written onto an object that
+    // never reached another draw(). Every glancing blow flashed; the kill, the
+    // beat the whole tower is FOR, just blinked out under a gold puff.
+    // The husk is that missing frame: the corpse keeps rendering for ~7 frames,
+    // white-hot and fading, while the sim has already forgotten it. Cosmetic
+    // only — the sim never reads this list, so removal timing is untouched and
+    // determinism holds.
+    this.husks.push({ e: e, x: p.x, y: p.y, t: HUSK_T, T: HUSK_T });
     this.enemies.splice(i, 1);
   };
   Game.prototype._gameOver = function (won) {
@@ -3280,6 +3294,11 @@
       fl.t -= dtRaw; fl.y -= 26 * dtRaw;
       if (fl.t <= 0) this.floats.splice(f, 1);
     }
+    for (var hk = this.husks.length - 1; hk >= 0; hk--) {
+      var hu = this.husks[hk];
+      hu.t -= dtRaw;
+      if (hu.t <= 0) this.husks.splice(hk, 1);
+    }
     // overclocked machine throws brass sparks (cosmetic)
     for (var os = 0; os < this.towers.length; os++) {
       if (this.towers[os]._oc && Math.random() < dtRaw * 5) {
@@ -3657,6 +3676,12 @@
       rec = slot(); n++;
       rec.y = en.py + (en.flyer ? 28 : 0); rec.kind = 'enemy'; rec.ref = en; rec.px = en.px; rec.py = en.py;
     }
+    for (i = 0; i < this.husks.length; i++) {
+      var hs = this.husks[i];
+      rec = slot(); n++;
+      rec.y = hs.y + (hs.e.flyer ? 28 : 0); rec.kind = 'husk'; rec.ref = hs;
+      rec.px = hs.x; rec.py = hs.y;
+    }
     rec = slot(); n++;
     // manning: sort just AFTER his machine so he sits ON it, not behind it
     var mtw2 = this.hero.manned ? this._towerByTid(this.hero.manTid) : null;
@@ -3668,6 +3693,19 @@
       var d = draws[i];
       if (d.kind === 'tower') this._drawTower(ctx, d.ref);
       else if (d.kind === 'enemy') this._drawEnemy(ctx, d.ref, { x: d.px, y: d.py });
+      else if (d.kind === 'husk') {
+        // Replay the raider's own sprite, white-hot and fading. Driving it
+        // through flashT means the corpse inherits the SAME white re-draw and
+        // squash pop a non-lethal hit gets — the kill stops being the one
+        // impact the renderer never showed.
+        var hv = d.ref, hr = Math.max(0, hv.t / hv.T);
+        hv.e.flashT = 0.11 * hr;
+        ctx.save();
+        ctx.globalAlpha = hr;
+        this._drawEnemy(ctx, hv.e, { x: d.px, y: d.py });
+        ctx.restore();
+        ctx.globalAlpha = 1;
+      }
       else this._drawHero(ctx);
     }
     // projectiles on top
