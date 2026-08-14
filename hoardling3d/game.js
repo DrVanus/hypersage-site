@@ -1564,77 +1564,56 @@
         crown: new T.CylinderGeometry(5.2, 5.6, 3.2, 6),
       });
     },
-    raiderRig: function (type) {
-      var T = this.T, m = this._mats, G = this.rigGeo(), g = new T.Group();
-      var big = type === 'boss' ? 1.55 : type === 'brute' ? 1.22 : 1;
-      var cloth = type === 'warlock' ? m.purple : type === 'blinker' ? m.brass :
-                  type === 'bat' ? m.purple : type === 'shield' ? m.iron : m.red;
-      var leather = m.wood, steel = m.iron;
-      var put = function (geo, mm, x, y, z) {
-        var o = new T.Mesh(geo, mm); o.position.set(x, y, z); o.castShadow = true; g.add(o); return o;
-      };
-      put(G.hips, leather, 0, 9.8, 0);
-      var legL = put(G.leg, leather, -2.2, 5.5, 0), legR = put(G.leg, leather, 2.2, 5.5, 0);
-      put(G.boot, m.stoneD, -2.2, 1.3, 0.6); put(G.boot, m.stoneD, 2.2, 1.3, 0.6);
-      put(G.torso, cloth, 0, 19.2, 0);
-      put(G.pauld, steel, -6.0, 22.4, 0); put(G.pauld, steel, 6.0, 22.4, 0);
-      var armL = put(G.arm, cloth, -6.0, 18.2, 0.4), armR = put(G.arm, cloth, 6.0, 18.2, 0.4);
-      put(G.head, m.skin, 0, 27.2, 0.2);
-      if (type === 'boss') put(G.crown, m.gold, 0, 30.4, 0);
-      else if (type === 'warlock') put(G.plume, m.purple, 0, 31, 0);
-      else { put(G.helm, steel, 0, 29.2, 0); put(G.brim, steel, 0, 28.0, 0); }
-      // per-type weapon: the outline break that says WHICH raider this is
-      if (type === 'brute' || type === 'boss') {
-        var club = put(G.club, m.wood, 8.5, 20, 1); club.rotation.z = 0.5;
-      } else if (type === 'warlock') {
-        put(G.staff, m.wood, 7.5, 17, 1); put(G.orb, m.teal, 7.5, 31, 1);
-      } else if (type === 'shield') {
-        put(G.pav, m.pale, -7.5, 17, 1);
-        var sw2 = put(G.blade, steel, 7.4, 22, 1); sw2.rotation.z = -0.35;
-      } else if (type === 'bat') {
-        for (var w3 = -1; w3 <= 1; w3 += 2) {
-          var wg = put(G.wing, m.purple, w3 * 8, 22, -1); wg.rotation.z = w3 * 0.4;
-          g.userData['wing' + w3] = wg;
-        }
-      } else {
-        put(G.hilt, m.wood, 7.2, 19, 1.2);
-        var bl = put(G.blade, steel, 7.2, 26, 1.2); bl.rotation.z = -0.12;
+    // PAINTED CHARACTERS IN A 3D WORLD. Wick is a painted character — goggles,
+    // matte scales, an expression that took six art rounds. No arrangement of
+    // boxes and spheres will ever be him, and chasing that was the wrong
+    // problem. So the world stays real 3D and the CAST is our actual artwork,
+    // standing in it on camera-facing planes. Same technique Don't Starve and
+    // Paper Mario use, and it means every future art pass on the 2D sprites
+    // improves this project for free.
+    billboard: function (artId, worldW) {
+      var T = this.T;
+      var img = ART.images[artId];
+      if (!img) return null;
+      var key = 'bb_' + artId;
+      var tex = (this._tex = this._tex || {})[key];
+      if (!tex) {
+        tex = new T.Texture(img);
+        tex.colorSpace = T.SRGBColorSpace;
+        tex.magFilter = T.LinearFilter; tex.minFilter = T.LinearMipmapLinearFilter;
+        tex.generateMipmaps = true; tex.needsUpdate = true;
+        this._tex[key] = tex;
       }
-      var sack = put(G.sack, m.wood2, -1.2, 21.6, -4.6);
-      sack.scale.set(1, 0.86, 0.9); sack.visible = false;
-      g.userData.sack = sack;
-      g.userData.legL = legL; g.userData.legR = legR;
-      g.userData.armL = armL; g.userData.armR = armR;
-      g.scale.set(big, big, big);
+      var mat = new T.MeshBasicMaterial({ map: tex, transparent: true,
+                                          alphaTest: 0.35, side: T.DoubleSide,
+                                          depthWrite: true });
+      var h = worldW * (img.height / img.width);
+      var pl = new T.Mesh(new T.PlaneGeometry(worldW, h), mat);
+      pl.position.y = h * 0.5;                 // stand it ON the ground
+      var g = new T.Group();
+      g.add(pl); g.userData.plate = pl; g.userData.h = h;
+      // a real contact shadow so it is planted, not floating
+      var sh = new T.Mesh(new T.CircleGeometry(worldW * 0.34, 12),
+        new T.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.34 }));
+      sh.rotation.x = -Math.PI / 2; sh.position.y = 0.6;
+      g.add(sh);
+      return g;
+    },
+    raiderRig: function (type) {
+      var g = this.billboard('e_' + type, type === 'boss' ? 70 : type === 'brute' ? 52 : 40);
+      if (g) { g.userData.billboard = true; return g; }
+      return this.fallbackRig(type);           // art missing: LOUD, never silent
+    },
+    fallbackRig: function (type) {
+      var T = this.T, m = this._mats, g = new T.Group();
+      var box = new T.Mesh(new T.BoxGeometry(14, 26, 10), m.red);
+      box.position.y = 13; box.castShadow = true; g.add(box);
       return g;
     },
     heroRig: function () {
-      var T = this.T, m = this._mats, g = new T.Group();
-      g.scale.set(1.18, 1.18, 1.18);
-      var body = new T.Mesh(new T.CapsuleGeometry(9, 12, 4, 8), m.dragon);
-      body.position.y = 15; body.rotation.x = 0.2; body.castShadow = true; g.add(body);
-      var bel = new T.Mesh(new T.CapsuleGeometry(6.4, 8, 3, 7), m.belly);
-      bel.position.set(0, 13.5, 4); bel.rotation.x = 0.2; g.add(bel);
-      var head = new T.Mesh(new T.SphereGeometry(7.6, 9, 7), m.dragon);
-      head.position.set(0, 28, 4); head.castShadow = true; g.add(head);
-      g.userData.head = head;
-      var snout = new T.Mesh(new T.BoxGeometry(6.4, 5, 8), m.dragon);
-      snout.position.set(0, 26.5, 11); g.add(snout);
-      g.userData.snout = snout;
-      var jaw = new T.Mesh(new T.BoxGeometry(5.6, 2.2, 6.4), m.belly);
-      jaw.position.set(0, 24.2, 10.4); g.add(jaw);
-      g.userData.jaw = jaw;
-      for (var s = -1; s <= 1; s += 2) {
-        var horn = new T.Mesh(new T.ConeGeometry(1.8, 6.6, 5), m.belly);
-        horn.position.set(3.7 * s, 34, 1.6); horn.rotation.z = 0.3 * s; g.add(horn);
-        var wing = new T.Mesh(new T.BoxGeometry(1.2, 13, 18), m.dragon);
-        wing.position.set(9.4 * s, 19, -3); wing.rotation.z = 0.45 * s;
-        wing.castShadow = true; g.add(wing);
-        g.userData['wing' + s] = wing;
-      }
-      var tail = new T.Mesh(new T.ConeGeometry(4.8, 22, 6), m.dragon);
-      tail.position.set(0, 11, -14.5); tail.rotation.x = 1.35; tail.castShadow = true; g.add(tail);
-      return g;
+      var g = this.billboard('hero', 52);
+      if (g) { g.userData.billboard = true; return g; }
+      return this.fallbackRig('hero');
     },
     fx: [],
     event: function (fx) {
@@ -1749,38 +1728,22 @@
         var fly = en.flyer && !(en.groundedT > 0);
         var walk = Math.abs(Math.sin(now * 9 + en.id * 1.3));
         r.position.set(EP.x, (fly ? 30 : 0) + (en.grabT > 0 ? Math.abs(Math.sin(now * 22)) * 3 : walk * 3), EP.z);
-        var ahead = pathPointAt(en.fleeing ? Math.max(0, en.d - 8) : Math.min(PATH.len, en.d + 8));
-        r.rotation.y = Math.atan2(ahead.x - en.px, ahead.y - en.py);
-        r.rotation.z = Math.sin(now * 9 + en.id) * 0.06;
-        if (r.userData.sack) r.userData.sack.visible = en.stolen > 0;
-        // MARCH: counter-swinging limbs. Static limbs on a moving body read as
-        // a statue sliding along the floor — this is most of the "alive".
-        if (r.userData.legL && en.grabT <= 0) {
-          if (fly) {
-            // AIRBORNE: legs tuck, arms trail, wings beat, body banks with the
-            // turn. Marching limbs on a flyer read as a man walking on air.
-            var beat = Math.sin(now * 15 + en.id);
-            r.userData.legL.rotation.x = -0.75; r.userData.legR.rotation.x = -0.6;
-            r.userData.armL.rotation.x = -0.5; r.userData.armR.rotation.x = -0.5;
-            if (r.userData['wing-1']) {
-              r.userData['wing-1'].rotation.z = -0.4 - beat * 0.5;
-              r.userData['wing1'].rotation.z = 0.4 + beat * 0.5;
-            }
-            r.rotation.z = Math.sin(now * 2 + en.id) * 0.12;
-          } else {
-            var sw3 = Math.sin(now * 9 + en.id * 1.3);
-            r.userData.legL.rotation.x = sw3 * 0.55;
-            r.userData.legR.rotation.x = -sw3 * 0.55;
-            r.userData.armL.rotation.x = -sw3 * 0.40;
-            r.userData.armR.rotation.x = sw3 * 0.40;
-          }
+        if (r.userData.billboard) {
+          // face the camera, and MIRROR by travel direction so a fleeing
+          // raider faces the way he runs (the sprites are left-native)
+          var ahead2 = pathPointAt(en.fleeing ? Math.max(0, en.d - 8) : Math.min(PATH.len, en.d + 8));
+          r.rotation.y = Math.atan2(this.cam.position.x - EP.x, this.cam.position.z - EP.z);
+          var faceR = (ahead2.x - en.px) > 0.5;
+          var nat = (ENEMY_FACING[en.type] || -1);
+          var sgn = faceR ? -nat : nat;
+          if (r.userData.plate) r.userData.plate.scale.x = sgn;
+          var pop = en.flashT > 0 ? 1.14 : 1;
+          r.scale.set(pop, pop, pop);
+          if (r.userData.sack) r.userData.sack.visible = en.stolen > 0;
+        } else {
+          var ahead = pathPointAt(en.fleeing ? Math.max(0, en.d - 8) : Math.min(PATH.len, en.d + 8));
+          r.rotation.y = Math.atan2(ahead.x - en.px, ahead.y - en.py);
         }
-        if (r.userData['wing-1']) {
-          r.userData['wing-1'].rotation.z = -0.4 - Math.sin(now * 16) * 0.35;
-          r.userData['wing1'].rotation.z = 0.4 + Math.sin(now * 16) * 0.35;
-        }
-        var flash = en.flashT > 0 ? 1.12 : 1;
-        r.scale.set(flash, flash * (en.slowT > 0 ? 0.94 : 1), flash);
         seen.enemy[eid] = 1;
       }
       // projectiles: bolts are ARROWS, lobs are embers, fire is a comet
@@ -1836,13 +1799,38 @@
       var HP = this.W(hh.x, hh.y);
       var hMoving = Math.abs(hh.tx - hh.x) + Math.abs(hh.ty - hh.y) > 3;
       this.hero.position.set(HP.x, (hh.manned ? 34 : 0) + (hMoving ? Math.abs(Math.sin(now * 9)) * 3.5 : Math.sin(now * 2.2) * 1.2), HP.z);
-      if (hMoving) this.hero.rotation.y = Math.atan2(hh.tx - hh.x, hh.ty - hh.y);
-      this.hero.userData['wing-1'].rotation.z = -0.45 - Math.sin(now * 7) * 0.18;
-      this.hero.userData['wing1'].rotation.z = 0.45 + Math.sin(now * 7) * 0.18;
+      if (this.hero.userData.billboard) {
+        this.hero.rotation.y = Math.atan2(this.cam.position.x - HP.x, this.cam.position.z - HP.z);
+        // walking up-screen shows the painted BACK view, same rule as 2D
+        var goAway = hMoving && (hh.ty - hh.y) < -Math.abs(hh.tx - hh.x) * 0.7;
+        var wantId = goAway ? 'hero_back' : 'hero';
+        if (this.hero.userData.artId !== wantId && ART.images[wantId]) {
+          var t2 = this._tex && this._tex['bb_' + wantId];
+          if (!t2) {
+            t2 = new this.T.Texture(ART.images[wantId]);
+            t2.colorSpace = this.T.SRGBColorSpace;
+            t2.magFilter = this.T.LinearFilter; t2.minFilter = this.T.LinearMipmapLinearFilter;
+            t2.generateMipmaps = true; t2.needsUpdate = true;
+            (this._tex = this._tex || {})['bb_' + wantId] = t2;
+          }
+          this.hero.userData.plate.material.map = t2;
+          this.hero.userData.plate.material.needsUpdate = true;
+          this.hero.userData.artId = wantId;
+        }
+        if (this.hero.userData.plate) {
+          this.hero.userData.plate.scale.x = (hh.tx - hh.x) > 0.5 ? -1 : 1;
+        }
+      } else if (hMoving) {
+        this.hero.rotation.y = Math.atan2(hh.tx - hh.x, hh.ty - hh.y);
+      }
+      if (this.hero.userData['wing-1']) {      // built rig only; the painted
+        this.hero.userData['wing-1'].rotation.z = -0.45 - Math.sin(now * 7) * 0.18;
+        this.hero.userData['wing1'].rotation.z = 0.45 + Math.sin(now * 7) * 0.18;
+      }
       // MOUTH-ORIGIN FIRE, 3D half: same beat clock as the 2D jaw
       // (game._breathT 0.42 -> 0), so both renderers fire from one moment
       var bt = game._breathT || 0;
-      if (this.hero.userData.jaw) {
+      if (this.hero.userData.jaw) {   // built rig only
         var open = bt > 0 ? Math.sin((bt / 0.42) * Math.PI) : 0;
         this.hero.userData.jaw.rotation.x = open * 0.85;           // jaw drops
         this.hero.userData.jaw.position.y = 24.2 - open * 2.6;
