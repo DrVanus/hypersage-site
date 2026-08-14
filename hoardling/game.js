@@ -181,6 +181,11 @@
     // clustering possible; this is the first reason to actually want it.
     bellows: {
       name: 'Bellows Post', cost: 120, hitsAir: false, support: true,
+      // Wick at the crank drives the bellows harder. A support machine used to
+      // offer MAN IT (+70%) and deliver NOTHING — the tower loop bails on
+      // supports before any manning flag is read. This is the effect that
+      // button was always promising.
+      mannedAura: 1.6,
       levels: [
         { rate: 0, range: 96,  auraRate: 0.15, upgradeCost: 90 },
         { rate: 0, range: 110, auraRate: 0.22, upgradeCost: 150 },
@@ -196,6 +201,7 @@
     // END of a wave, so it is a bet on surviving long enough to collect.
     press: {
       name: 'Coin Press', cost: 140, hitsAir: false, support: true,
+      mannedGold: 1.5,   // see Bellows Post: MAN IT on a press paid nothing at all
       levels: [
         { rate: 0, range: 0, waveGold: 26, upgradeCost: 110 },
         { rate: 0, range: 0, waveGold: 44, upgradeCost: 170 },
@@ -2050,6 +2056,7 @@
     this.stolenLost = 0;
     this.kills = 0;
     this.leaks = {};   // per-raider-type leak ledger, graded state (see the escape path)
+    this.tollRecovered = 0;                 // coins Wick personally shook loose
     this.breathUsed = false;                // Mother's Breath spends once per level
     this.motherReady = false; this.castMother = false;
     // Forge mods: CAMPAIGN ONLY — the Daily sim takes no input but the seed
@@ -2410,8 +2417,12 @@
         var sr = lvlRow(src);
         var adx2 = at.x - src.x, ady2 = at.y - src.y;
         if (adx2 * adx2 + ady2 * ady2 > sr.range * sr.range) continue;
-        at._auraRate = Math.max(at._auraRate, sr.auraRate || 0);   // strongest post wins,
-        at._auraDmg = Math.max(at._auraDmg, sr.auraDmg || 0);      // posts do NOT stack
+        // Read the hero directly: the _manned flags are stamped BELOW this loop,
+        // so src._manned would be a frame stale and the buff would lag the art.
+        var sMan = this.hero.manned && this.hero.manTid === src.tid;
+        var sBoost = sMan ? (TOWER_TYPES.bellows.mannedAura || 1) : 1;
+        at._auraRate = Math.max(at._auraRate, (sr.auraRate || 0) * sBoost);  // strongest post wins,
+        at._auraDmg = Math.max(at._auraDmg, (sr.auraDmg || 0) * sBoost);     // posts do NOT stack
       }
     }
 
@@ -2683,10 +2694,18 @@
         // THE TOLL — body-block a thief and shake the hoard back out of him.
         // Only Wick can do this; a machine can only kill. It is his job in
         // every single wave, because every wave produces carriers.
-        if (hz2 <= toll2 && h.tollCd <= 0 && hz_e.stolen > 0) {
+        // PER-CARRIER cooldown, not a global one. A single timer on Wick
+        // capped him at 3.3 coins a second no matter how many thieves he was
+        // standing in, which made a perfectly-placed interception worth the
+        // same as bumping into one straggler — it punished the exact skill the
+        // mechanic exists to reward. Now each carrier is shaken on its own
+        // clock, so standing in the stream pays for standing in the stream.
+        if (hz_e.tollT > 0) hz_e.tollT -= STEP;
+        if (hz2 <= toll2 && (hz_e.tollT || 0) <= 0 && hz_e.stolen > 0) {
           hz_e.stolen--;
           this.hoard++;
-          h.tollCd = CFG.tollEvery;
+          this.tollRecovered++;
+          hz_e.tollT = CFG.tollEvery;
           this.fxQueue.push({ k: 'recover', x: hz_e.px, y: hz_e.py, n: 1 });
           Sfx.play('recover');
         }
@@ -2756,8 +2775,10 @@
         if (pt2.type !== 'press') continue;
         var pr2 = lvlRow(pt2);
         if (!pr2.waveGold) continue;
-        minted += pr2.waveGold;
-        this.fxQueue.push({ k: 'float', x: pt2.x, y: pt2.y - 40, txt: '+' + pr2.waveGold + 'g', c: '#ffd75e' });
+        var pMan = this.hero.manned && this.hero.manTid === pt2.tid;
+        var pay = Math.round(pr2.waveGold * (pMan ? (TOWER_TYPES.press.mannedGold || 1) : 1));
+        minted += pay;
+        this.fxQueue.push({ k: 'float', x: pt2.x, y: pt2.y - 40, txt: '+' + pay + 'g', c: '#ffd75e' });
       }
       if (minted) { this.gold += minted; Sfx.play('coin'); }
       this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 300, txt: 'Wave ' + this.wave + ' held!', c: '#9ef58f' });
@@ -2838,7 +2859,13 @@
     var bounty = Math.round((greed ? base.bounty * 1.5 : base.bounty) * bMul);
     for (var kp = 0; kp < this.towers.length; kp++) {     // Tithe Press takes its cut
       var kt = this.towers[kp];
-      if (kt.level >= 2 && kt.type === 'press') { var kr = lvlRow(kt); if (kr.killGold) bounty += kr.killGold; }
+      if (kt.level >= 2 && kt.type === 'press') {
+        var kr = lvlRow(kt);
+        if (kr.killGold) {
+          var kMan = this.hero.manned && this.hero.manTid === kt.tid;
+          bounty += Math.round(kr.killGold * (kMan ? (TOWER_TYPES.press.mannedGold || 1) : 1));
+        }
+      }
     }
     this.gold += bounty;
     this.kills++;
@@ -2906,7 +2933,7 @@
                                                runs: this.leaks[lt].runs, wave: this.leaks[lt].firstWave });
     leakRows.sort(function (a, b) { return b.coins - a.coins || a.wave - b.wave; });
     this.result = { won: won, stars: stars, hoard: this.hoard, lost: this.stolenLost, kills: this.kills, wave: this.wave,
-                    leaks: leakRows,
+                    leaks: leakRows, toll: this.tollRecovered,
                     trial: this.trial ? TRIALS[this.trial].name : null };
     if (this.mode === 'campaign' && won && stars > Save.data.stars[this.levelIdx]) Save.data.stars[this.levelIdx] = stars;
     if (this.mode === 'campaign' && won && this.trial) {           // trial badge
@@ -3125,11 +3152,16 @@
         if (tw) {
           var pad2 = tw;
           pad2 = this._uiAnchor(pad2);
-          var btns = [this._menuBtnPos(pad2, 0, 4), this._menuBtnPos(pad2, 1, 4),
-                      this._menuBtnPos(pad2, 2, 4), this._menuBtnPos(pad2, 3, 4)];
+          // MUST mirror the draw: supports have no AIM, so they have 3 buttons.
+          // If these two ever disagree, a tap sells the machine the player meant
+          // to man. Derived from the same predicate, deliberately.
+          var isSup2 = !!TOWER_TYPES[tw.type].support;
+          var nb2 = isSup2 ? 3 : 4;
+          var btns = [];
+          for (var qb = 0; qb < nb2; qb++) btns.push(this._menuBtnPos(pad2, qb, nb2));
           var lvl = lvlRow(tw);
           var bi2 = -1, bd2 = 24 * 24;
-          for (var mb2 = 0; mb2 < 4; mb2++) {
+          for (var mb2 = 0; mb2 < btns.length; mb2++) {
             var mdx = wl.x - btns[mb2].x, mdy = wl.y - btns[mb2].y, mdd = mdx * mdx + mdy * mdy;
             if (mdd < bd2) { bd2 = mdd; bi2 = mb2; }
           }
@@ -3145,10 +3177,10 @@
                 this.menu = { forkFor: m.towerIdx };
                 Sfx.play('place');
               }
-            } else if (bi2 === 1) {                          // cycle aim mode (menu stays open)
+            } else if (!isSup2 && bi2 === 1) {               // cycle aim mode (menu stays open)
               tw.targeting = ((tw.targeting | 0) + 1) % 3;
               Sfx.play('place');
-            } else if (bi2 === 2) {                          // MAN / LEAVE the machine
+            } else if (bi2 === (isSup2 ? 1 : 2)) {           // MAN / LEAVE the machine
               if (this.hero.manTid === tw.tid) { this.hero.manTid = -1; this.hero.manned = false; }
               else { this.hero.manTid = tw.tid; }
               Sfx.play('place');
@@ -3349,6 +3381,11 @@
         this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.g, c: '#ffd75e', t: 1 });
         this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, tx: 100, ty: 40, n: fx.boss ? 6 : 2 });
         if (fx.boss) this.shake = Math.min(1, this.shake + 0.7);
+      }
+      else if (fx.k === 'herodown') {
+        this._burst(fx.x, fx.y - 12, '#ff7b7b', 18, 120);
+        this.floats.push({ x: fx.x, y: fx.y - 40, txt: 'WICK IS DOWN!', c: '#ff7b7b', t: 1.8 });
+        this.shake = Math.min(1, this.shake + 0.5);
       }
       else if (fx.k === 'boom') { this._burst(fx.x, fx.y, '#ff8a3c', 14, 110); this.shake = Math.min(1, this.shake + 0.25); }
       else if (fx.k === 'steal') {
@@ -4333,6 +4370,36 @@
     // Falls back to the old lifted sprite for any machine whose manned plate
     // has not loaded or does not exist, so manning never has a frame with no
     // dragon in it.
+    // DOWNED — he is not on the field. Drawing him greyed out in place would
+    // read as "still there but sad"; a scorch mark and a countdown reads as
+    // gone, which is what the sim means.
+    if (h.downT > 0) {
+      var dz = 1 - h.downT / CFG.heroDownTime;
+      ctx.save();
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = 'rgba(20,12,8,0.8)';
+      ctx.beginPath(); ctx.ellipse(h.x, h.y, 20, 8, 0, 0, 6.283); ctx.fill();
+      ctx.globalCompositeOperation = 'lighter';
+      for (var sm = 0; sm < 3; sm++) {
+        var sp3 = (this.worldT * 0.6 + sm * 0.33) % 1;
+        ctx.fillStyle = 'rgba(150,130,120,' + (0.30 * (1 - sp3)).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(h.x + Math.sin(sp3 * 6 + sm) * 7, h.y - 10 - sp3 * 34, 4 + sp3 * 8, 0, 6.283);
+        ctx.fill();
+      }
+      ctx.restore();
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      inkText(ctx, Math.ceil(h.downT) + 's', h.x, h.y - 34, '#ff9a9a', 4, 1);
+      ctx.font = 'bold 9px system-ui, sans-serif';
+      inkText(ctx, 'WICK IS DOWN', h.x, h.y - 20, 'rgba(255,170,170,0.85)', 3, 1);
+      // a thin ring closing as he recovers
+      ctx.strokeStyle = 'rgba(158,245,143,0.75)'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(h.x, h.y, 22, -1.5708, -1.5708 + 6.283 * dz); ctx.stroke();
+      ctx.textAlign = 'left';
+      return;
+    }
+
     var inPlate = false;
     if (h.manned) {
       var mtw = this._towerByTid(h.manTid);
@@ -4472,6 +4539,13 @@
       ctx.beginPath(); ctx.arc(h.x, h.y - 14, 24 + rp * 4, 0, 6.283); ctx.stroke();
       ctx.fillStyle = 'rgba(255,207,106,' + (0.7 + rp * 0.3) + ')';
       ctx.beginPath(); ctx.ellipse(h.x, h.y - 46, 4, 7 + rp * 2, 0, 0, 6.283); ctx.fill();
+    }
+    // HEALTH — shown only when hurt, so a healthy Wick keeps a clean silhouette
+    if (h.hp < h.maxHp) {
+      var hpf = Math.max(0, h.hp / h.maxHp);
+      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(h.x - 16, h.y - 50, 32, 4);
+      ctx.fillStyle = hpf > 0.5 ? '#9ef58f' : hpf > 0.25 ? '#ffd75e' : '#ff5b5b';
+      ctx.fillRect(h.x - 16, h.y - 50, 32 * hpf, 4);
     }
     // breath meter
     if (h.breathCd > 0 && h.breathCd < 14) {
@@ -4936,8 +5010,17 @@
       var pad2 = tw;
       var lvl = lvlRow(tw);
       pad2 = this._uiAnchor(pad2);
-      var up = this._menuBtnPos(pad2, 0, 4), aim = this._menuBtnPos(pad2, 1, 4),
-          man = this._menuBtnPos(pad2, 2, 4), sell = this._menuBtnPos(pad2, 3, 4);
+      // A SUPPORT MACHINE NEVER TARGETS ANYTHING, so AIM was three taps of
+      // visible state change and zero behaviour. It is gone for supports, and
+      // the button COUNT changes with it — the draw and the tap handler derive
+      // their indices from the same two lines so they cannot disagree about
+      // which circle is under the finger.
+      var isSup = !!TOWER_TYPES[tw.type].support;
+      var nb = isSup ? 3 : 4;
+      var up = this._menuBtnPos(pad2, 0, nb);
+      var aim = isSup ? null : this._menuBtnPos(pad2, 1, nb);
+      var man = this._menuBtnPos(pad2, isSup ? 1 : 2, nb);
+      var sell = this._menuBtnPos(pad2, isSup ? 2 : 3, nb);
       var isManned = this.hero.manTid === tw.tid;
       ctx.fillStyle = isManned ? 'rgba(70,52,20,0.97)' : 'rgba(38,26,18,0.95)';
       ctx.beginPath(); ctx.arc(man.x, man.y, 22, 0, 6.283); ctx.fill();
@@ -4946,17 +5029,26 @@
       ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 9px system-ui, sans-serif'; ctx.textAlign = 'center';
       ctx.fillText(isManned ? 'LEAVE' : 'MAN IT', man.x, man.y - 2);
       ctx.fillStyle = '#ffcf6a';
-      ctx.fillText(isManned ? '' : '+70%', man.x, man.y + 10);
+      // '+70%' is the ATTACK machine's fire-rate bonus. On a support it was a
+      // flat lie: the number described a code path supports never reach.
+      var manLbl = tw.type === 'bellows' ? '+60% AURA'
+                 : tw.type === 'press'   ? '+50% GOLD'
+                 : '+70%';
+      if (isSup) ctx.font = 'bold 7px system-ui, sans-serif';
+      ctx.fillText(isManned ? '' : manLbl, man.x, man.y + 10);
+      ctx.font = 'bold 9px system-ui, sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillStyle = 'rgba(38,26,18,0.95)';
-      ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.fill();
-      ctx.strokeStyle = '#a8e6ff'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.stroke();
-      ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 9px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('AIM', aim.x, aim.y - 3);
-      ctx.fillStyle = '#a8e6ff';
-      ctx.fillText(AIM_MODES[tw.targeting | 0], aim.x, aim.y + 9);
-      ctx.textAlign = 'left';
+      if (aim) {
+        ctx.fillStyle = 'rgba(38,26,18,0.95)';
+        ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = '#a8e6ff'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.stroke();
+        ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 9px system-ui, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('AIM', aim.x, aim.y - 3);
+        ctx.fillStyle = '#a8e6ff';
+        ctx.fillText(AIM_MODES[tw.targeting | 0], aim.x, aim.y + 9);
+        ctx.textAlign = 'left';
+      }
       var canUp = tw.level < 2, affordUp = canUp && this.gold >= lvl.upgradeCost;
       ctx.fillStyle = affordUp ? 'rgba(38,26,18,0.95)' : 'rgba(28,20,16,0.7)';
       ctx.beginPath(); ctx.arc(up.x, up.y, 22, 0, 6.283); ctx.fill();
@@ -5389,6 +5481,11 @@
     ctx.fillText('treasure kept: ' + (r.hoard | 0) + ' / ' + CFG.startHoard, WORLD_W / 2, 420);
     ctx.fillText('coins carried off: ' + (r.lost | 0), WORLD_W / 2, 446);
     ctx.fillText('raiders slain: ' + (r.kills | 0), WORLD_W / 2, 472);
+    if (r.toll > 0) {
+      ctx.fillStyle = '#9ef58f';
+      ctx.fillText('Wick shook loose: ' + (r.toll | 0), WORLD_W / 2, 472 + 26);
+      ctx.fillStyle = '#ffe9c4';
+    }
     // WHO TOOK IT. "coins carried off: 25" told the player they had failed and
     // nothing about why. The top three thieves, with the wave they first got
     // through, turn a loss into a next attempt: the answer to a Gloomwing is a
@@ -5396,7 +5493,7 @@
     // previously tell which one had beaten them.
     // The block is only drawn when something LEAKED, so a clean run keeps the
     // old tight layout and the story beat stays where it was.
-    var leakTop = (this.mode === 'daily' ? 522 : 496);
+    var leakTop = (this.mode === 'daily' ? 522 : 496) + (r.toll > 0 ? 26 : 0);
     var storyY = 528;
     if (r.leaks && r.leaks.length) {
       storyY = leakTop + 18 + Math.min(3, r.leaks.length) * 19 + 14;
