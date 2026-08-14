@@ -1319,20 +1319,64 @@
       m.road.side = T.DoubleSide;
       var roadMesh = new T.Mesh(road, m.road);
       roadMesh.receiveShadow = true; g.add(roadMesh);
-      // keep + gold mound at the top of the road
+      // THE KEEP — the painted one is a battlemented castle with a dragon
+      // crest, lit windows and torches at the door. The first 3D pass was a
+      // box with three cones, and it sits in the top third of every frame, so
+      // it did more damage to the "unfinished" read than anything else.
       var keep = new T.Group();
-      var body = new T.Mesh(new T.BoxGeometry(120, 90, 92), m.stone);
-      body.position.y = 45; body.castShadow = body.receiveShadow = true; keep.add(body);
-      for (var t2 = 0; t2 < 2; t2++) {
-        var tw2 = new T.Mesh(new T.CylinderGeometry(22, 26, 120, 8), m.stone);
-        tw2.position.set(t2 ? 62 : -62, 60, 8); tw2.castShadow = true; keep.add(tw2);
-        var cap = new T.Mesh(new T.ConeGeometry(30, 40, 8), m.roofBlue);
-        cap.position.set(t2 ? 62 : -62, 140, 8); cap.castShadow = true; keep.add(cap);
+      var body = new T.Mesh(new T.BoxGeometry(120, 84, 92), m.stone);
+      body.position.y = 42; body.castShadow = body.receiveShadow = true; keep.add(body);
+      // battlements: alternating merlons along the front and sides
+      for (var mr = 0; mr < 7; mr++) {
+        var me = new T.Mesh(new T.BoxGeometry(11, 12, 11), m.stoneD);
+        me.position.set(-54 + mr * 18, 90, 40); me.castShadow = true; keep.add(me);
+        var me2 = new T.Mesh(new T.BoxGeometry(11, 12, 11), m.stoneD);
+        me2.position.set(-54 + mr * 18, 90, -40); keep.add(me2);
       }
-      var mainCap = new T.Mesh(new T.ConeGeometry(46, 60, 8), m.roofBlue);
-      mainCap.position.y = 120; mainCap.castShadow = true; keep.add(mainCap);
-      var door = new T.Mesh(new T.BoxGeometry(34, 46, 6), m.wood);
-      door.position.set(0, 23, 47); keep.add(door);
+      // a course line to break the flat wall + lit windows
+      var course = new T.Mesh(new T.BoxGeometry(122, 5, 94), m.stoneD);
+      course.position.y = 56; keep.add(course);
+      for (var wn = -1; wn <= 1; wn += 2) {
+        var win = new T.Mesh(new T.BoxGeometry(11, 17, 3), m.flame);
+        win.position.set(wn * 30, 64, 47); keep.add(win);
+      }
+      for (var t2 = 0; t2 < 2; t2++) {
+        var sx2 = t2 ? 62 : -62;
+        var tw2 = new T.Mesh(new T.CylinderGeometry(21, 25, 118, 9), m.stone);
+        tw2.position.set(sx2, 59, 8); tw2.castShadow = true; keep.add(tw2);
+        var ring2 = new T.Mesh(new T.CylinderGeometry(27, 27, 7, 9), m.stoneD);
+        ring2.position.set(sx2, 116, 8); ring2.castShadow = true; keep.add(ring2);
+        var cap = new T.Mesh(new T.ConeGeometry(29, 44, 9), m.roofBlue);
+        cap.position.set(sx2, 142, 8); cap.castShadow = true; keep.add(cap);
+        var fin = new T.Mesh(new T.SphereGeometry(4, 6, 5), m.gold);
+        fin.position.set(sx2, 166, 8); keep.add(fin);
+        var twin = new T.Mesh(new T.BoxGeometry(7, 12, 3), m.flame);
+        twin.position.set(sx2, 78, 33); keep.add(twin);
+      }
+      var mainRing = new T.Mesh(new T.CylinderGeometry(50, 50, 8, 10), m.stoneD);
+      mainRing.position.y = 96; mainRing.castShadow = true; keep.add(mainRing);
+      var mainCap = new T.Mesh(new T.ConeGeometry(48, 62, 10), m.roofBlue);
+      mainCap.position.y = 130; mainCap.castShadow = true; keep.add(mainCap);
+      var spire = new T.Mesh(new T.CylinderGeometry(1.6, 1.6, 26, 5), m.brass);
+      spire.position.y = 172; keep.add(spire);
+      var flag = new T.Mesh(new T.BoxGeometry(26, 12, 1), m.red);
+      flag.position.set(13, 180, 0); keep.add(flag);
+      this._flag = flag;
+      // the arched door with its dragon crest, and a torch either side
+      var arch = new T.Mesh(new T.CylinderGeometry(19, 19, 7, 10, 1, false, 0, Math.PI), m.stoneD);
+      arch.position.set(0, 44, 47); arch.rotation.x = Math.PI / 2; keep.add(arch);
+      var door = new T.Mesh(new T.BoxGeometry(34, 44, 6), m.wood);
+      door.position.set(0, 22, 47); keep.add(door);
+      for (var bb = -1; bb <= 1; bb += 2) {
+        var bandD = new T.Mesh(new T.BoxGeometry(36, 4, 7), m.brass);
+        bandD.position.set(0, 22 + bb * 13, 47.4); keep.add(bandD);
+        var kt = new T.Mesh(new T.SphereGeometry(4.4, 6, 5), m.flame);
+        kt.position.set(bb * 30, 40, 50); keep.add(kt);
+        var ktp = new T.PointLight(0xff9a3c, 2.2, 130, 1.8);
+        ktp.position.set(bb * 30, 40, 56); keep.add(ktp);
+      }
+      var crest = new T.Mesh(new T.OctahedronGeometry(9, 0), m.gold);
+      crest.position.set(0, 52, 49); keep.add(crest);
       var kp = this.W(MAP.keep.x, MAP.keep.y); keep.position.set(kp.x, 0, kp.z - 26);
       g.add(keep); this._keep = keep;
       var mound = new T.Group();
@@ -1873,7 +1917,7 @@
     // cosmetic state must die with the run — a quit-to-title mid-battle must
     // not spray the LAST run's celebration into the next one (caught on film)
     this.particles = []; this.floats = []; this.fxQueue = []; this.shake = 0;
-    this._breathT = 0; this._heroFace = 1;
+    this._breathT = 0; this._heroFace = 1; this._resultT = 0;
     this.nextId = 1;
     var hs = MAP.heroStart || { x: 210, y: 470 };
     this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0,
@@ -2556,6 +2600,7 @@
     this.state = won ? 'won' : 'lost';
     this.menu = null; this.infoCard = null; // an open chooser/menu must not outlive the run
     this.resultLockT = 0.8;                 // battle taps can't skip the screen
+    this._resultT = 0;                      // cosmetic: drives the star landings
     // stars grade COINS LOST FOREVER (escaped carriers), not the closing balance
     var stars = this.stolenLost <= 5 ? 3 : this.stolenLost <= 20 ? 2 : 1;
     this.result = { won: won, stars: stars, hoard: this.hoard, lost: this.stolenLost, kills: this.kills, wave: this.wave,
@@ -3099,6 +3144,7 @@
     this.shake = Math.max(0, this.shake - dtRaw * 2.2);
     // the open-jaw / recoil beat, cosmetic lane only — never read by update()
     if (this._breathT > 0) this._breathT = Math.max(0, this._breathT - dtRaw);
+    if (this.state === 'won' || this.state === 'lost') this._resultT = (this._resultT || 0) + dtRaw;
     // music intensity follows the battle (cosmetic lane)
     Sfx.setMusicMode(this.state === 'playing' && this.waveActive ? 'battle' : 'calm');
   };
@@ -4802,8 +4848,13 @@
     ctx.fillText('Campaign stars buy lasting craft. Campaign only —', WORLD_W / 2, 182);
     ctx.fillText('the Daily Siege is the same fair fight for everyone.', WORLD_W / 2, 198);
     var avail = Save.starsTotal() - Save.forgeSpent();
-    ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 17px Georgia, serif';
-    ctx.fillText('★ ' + avail + ' to spend', WORLD_W / 2, 228);
+    ctx.font = 'bold 17px Georgia, serif';
+    var spendTxt = avail + ' to spend';
+    var spendW = ctx.measureText(spendTxt).width;
+    starCoin(ctx, WORLD_W / 2 - spendW / 2 - 13, 222, 11, avail > 0);
+    ctx.textAlign = 'left';
+    inkText(ctx, spendTxt, WORLD_W / 2 - spendW / 2 + 4, 228, '#fff2d8', 4, 1);
+    ctx.textAlign = 'center';
     for (var i = 0; i < FORGE_NODES.length; i++) {
       var node = FORGE_NODES[i], ry = 250 + i * 74;
       var cur = Save.data.forge[node.id] | 0;
@@ -4889,11 +4940,20 @@
       ctx.fillText(r.won ? 'TRIAL COMPLETE — ' + r.trial + ' ★' : 'TRIAL: ' + r.trial, WORLD_W / 2, 345);
     }
     if (r.won) {
-      ctx.font = '34px system-ui, sans-serif';
-      var stars = '';
-      for (var s = 0; s < 3; s++) stars += s < r.stars ? '★ ' : '☆ ';
-      ctx.fillStyle = '#ffd75e';
-      ctx.fillText(stars.trim(), WORLD_W / 2, 370);
+      // The payoff moment gets the same struck-coin medallions the title
+      // screen uses, not a row of '★' characters in whatever face the platform
+      // picks. Earned stars land one at a time so the third reads as a result
+      // rather than as decoration that was always there.
+      for (var s = 0; s < 3; s++) {
+        var earned = s < r.stars;
+        var pop = 1;
+        if (earned && !RM) {
+          var since = (this._resultT || 0) - (0.22 + s * 0.26);
+          if (since <= 0) continue;                       // not landed yet
+          pop = 1 + 0.55 * Math.exp(-since * 9) * Math.cos(since * 22);
+        }
+        starCoin(ctx, WORLD_W / 2 - 46 + s * 46, 360, 19 * pop, earned);
+      }
     }
     ctx.fillStyle = '#ffe9c4'; ctx.font = '17px system-ui, sans-serif';
     ctx.fillText('treasure kept: ' + (r.hoard | 0) + ' / ' + CFG.startHoard, WORLD_W / 2, 420);
