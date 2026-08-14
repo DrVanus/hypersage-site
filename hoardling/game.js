@@ -246,6 +246,30 @@
   // A netted flyer fights as ground troops until the net wears off.
   function eFly(e) { return e.flyer && !(e.groundedT > 0); }
   var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'brazier', 'bellows', 'press']; // cheap -> dear
+
+  // MACHINE UNLOCKS — campaign stars needed before a machine appears on the
+  // shelf. Every one of the seven used to be affordable on wave 0 of level 1
+  // (the dearest costs 112 on a pad against 120 starting gold), so the game
+  // handed over its entire vocabulary in the first minute and had no new toy
+  // to give for the remaining fifty-nine waves. A drip is the progression.
+  //
+  // KEYED ON STARS, NOT ON LEVEL, so the Forge and the campaign share one
+  // currency and a player who three-stars level 1 is rewarded with a machine
+  // rather than only with Forge points.
+  var MACHINE_UNLOCK = { crystal: 0, ballista: 0, mimic: 0, perch: 1, brazier: 2, bellows: 4, press: 6 };
+
+  /// The Daily ALWAYS offers all seven.
+  ///
+  /// This is the load-bearing half. The Daily is the one fight every player
+  /// shares — same seed, same layout, one leaderboard — so if the shelf were
+  /// gated by campaign progress there, two players would be running different
+  /// games against the same scoreboard, and a veteran's board would simply be
+  /// wider than a newcomer's. Progression gates the CAMPAIGN; the shared fight
+  /// stays identical for everyone.
+  function towerUnlocked(id, mode) {
+    if (mode === 'daily') return true;
+    return Save.starsTotal() >= (MACHINE_UNLOCK[id] || 0);
+  }
   // How long a killed raider keeps rendering as a white-hot husk. ~7 frames:
   // long enough to read as a hit landing, short enough that a wave of kills
   // does not leave a queue of corpses standing on the road.
@@ -853,8 +877,18 @@
                mods: { bannedTower: 'ballista' } },
     greased: { name: 'Greased Boots',  pitch: 'Slick soles: the getaway is a sprint. Hold the door.',
                mods: { fleeMul: 1.5 } },
+    // Three more, because a mutator is the cheapest content this game can make:
+    // it multiplies the three authored maps instead of asking for a fourth. Each
+    // changes the PLAN, not the numbers — a run you have to solve differently is
+    // content; a run that is the same run with bigger health bars is not.
+    guttered:  { name: 'Guttered Torches', pitch: 'The lights are low. Every machine sees less — build close.',
+                 mods: { rangeMul: 0.72 } },
+    lean:      { name: 'Lean Season',      pitch: 'Almost nothing to start. The raiders pay for everything.',
+                 mods: { startGold: 60, bountyMul: 1.6 } },
+    smothered: { name: 'Smothered Fire',   pitch: "Wick's flame is out. The machines answer alone.",
+                 mods: { breathCd: 9999 } },
   };
-  var TRIAL_ORDER = ['purse', 'picnic', 'greased'];
+  var TRIAL_ORDER = ['purse', 'picnic', 'greased', 'guttered', 'lean', 'smothered'];
 
   var Save = (function () {
     var KEY2 = 'hoardling.save.v2', KEY1 = 'hoardling.save.v1';
@@ -1999,7 +2033,9 @@
     this.menu = null;                       // { padIdx } build menu | { towerIdx } manage menu
     this.shopPick = -1;                     // index into TOWER_ORDER while placing, else -1
     this.placeHint = null;                  // {x,y,ok,why} — the last previewed spot
-    this.stolenLost = 0; this.kills = 0;
+    this.stolenLost = 0;
+    this.kills = 0;
+    this.leaks = {};   // per-raider-type leak ledger, graded state (see the escape path)
     this.breathUsed = false;                // Mother's Breath spends once per level
     this.motherReady = false; this.castMother = false;
     // Forge mods: CAMPAIGN ONLY — the Daily sim takes no input but the seed
@@ -2304,6 +2340,13 @@
         e.d -= v * fleeMul;
         if (e.d <= 0) {                                    // escaped with treasure
           this.stolenLost += e.stolen;
+          // THE LEAK LEDGER — who actually took the hoard, and when.
+          // A player could previously only tell that "stuff got through": the
+          // result screen reported a total and nothing else, so a loss carried
+          // no information about what to do differently. Sim-side (not
+          // cosmetic) because it is graded state and must be replay-identical.
+          var lk = this.leaks[e.type] || (this.leaks[e.type] = { coins: 0, runs: 0, firstWave: this.wave + 1 });
+          lk.coins += e.stolen; lk.runs++;
           this.enemies.splice(i, 1);
           // n is an ADDITIVE cosmetic payload on an event that already exists
           // to feed the render lane: reads e.stolen, writes nothing
@@ -2378,7 +2421,28 @@
       var tw = this.towers[t];
       var tt = TOWER_TYPES[tw.type], lv = lvlRow(tw);
       if (tt.support) continue;              // bellows/press do their work elsewhere
-      if (tw.jamT > 0) { tw.jamT -= STEP; continue; }   // Pry-Hand has it silenced
+      if (tw.jamT > 0) {
+        // WICK CLEARS THE JAM. A Pry-Hand silences a machine for 2.6s and there
+        // was nothing anyone could do but wait — which is the whole problem
+        // with this game's real-time layer in one line. A playtest bot won 45
+        // of 45 runs without ever moving Wick, breathing, or manning anything,
+        // because none of it was load-bearing.
+        //
+        // Now he is the answer to a jam: standing on the machine clears it
+        // ~5x faster, standing next to it ~2.5x. That is a real-time decision
+        // with a real cost — the seconds he spends unjamming are seconds he is
+        // not manning his best machine — and it gives the Pry-Hand a counter
+        // that is a PLAYER ACTION rather than a different purchase.
+        var jdx = this.hero.x - tw.x, jdy = this.hero.y - tw.y;
+        var jd2 = jdx * jdx + jdy * jdy;
+        var pry = (this.hero.manned && this.hero.manTid === tw.tid) ? 5
+                : jd2 < 52 * 52 ? 2.5 : 1;
+        tw.jamT -= STEP * pry;
+        if (tw.jamT <= 0 && pry > 1) {
+          this.fxQueue.push({ k: 'float', x: tw.x, y: tw.y - 46, txt: 'UNJAMMED!', c: '#9ef58f' });
+        }
+        continue;
+      }
       // Time since this machine ACTUALLY fired. The recoil used to be driven
       // by the cooldown, but an idle machine rescans every 0.1s, which
       // retriggered the wind-up ~8x a second forever — every contraption on
@@ -2755,7 +2819,14 @@
     this._resultT = 0;                      // cosmetic: drives the star landings
     // stars grade COINS LOST FOREVER (escaped carriers), not the closing balance
     var stars = this.stolenLost <= 5 ? 3 : this.stolenLost <= 20 ? 2 : 1;
+    // leaks ride along, worst first — the result screen's only job beyond the
+    // score is telling the player what to do differently next time.
+    var leakRows = [];
+    for (var lt in this.leaks) leakRows.push({ type: lt, coins: this.leaks[lt].coins,
+                                               runs: this.leaks[lt].runs, wave: this.leaks[lt].firstWave });
+    leakRows.sort(function (a, b) { return b.coins - a.coins || a.wave - b.wave; });
     this.result = { won: won, stars: stars, hoard: this.hoard, lost: this.stolenLost, kills: this.kills, wave: this.wave,
+                    leaks: leakRows,
                     trial: this.trial ? TRIALS[this.trial].name : null };
     if (this.mode === 'campaign' && won && stars > Save.data.stars[this.levelIdx]) Save.data.stars[this.levelIdx] = stars;
     if (this.mode === 'campaign' && won && this.trial) {           // trial badge
@@ -2876,7 +2947,8 @@
       // instead of building. Now only the cards themselves consume a tap and
       // everything between and around them falls through to the world.
       if (vy >= G.shopY && vy <= G.shopY + G.shopH) {
-        for (var sc = 0; sc < TOWER_ORDER.length; sc++) {
+        var shelfT = this._shelf();
+        for (var sc = 0; sc < shelfT.length; sc++) {
           var sxp = G.shopX + sc * G.shopStep;
           if (vx >= sxp && vx <= sxp + G.shopW) {
             this.shopPick = this.shopPick === sc ? -1 : sc;
@@ -2905,12 +2977,13 @@
       return;
     }
     if (this.state === 'trials') {
+      var TGt = trialGeom();
       for (var tr = 0; tr < TRIAL_ORDER.length; tr++) {
-        var try2 = 250 + tr * 108;
-        if (w.y > try2 && w.y < try2 + 96) {
+        var try2 = TGt.top + tr * TGt.pitch;
+        if (w.y > try2 && w.y < try2 + TGt.h) {
           for (var tlv = 0; tlv < MAPS.length; tlv++) {
             var chx = WORLD_W - 168 + tlv * 46;
-            if (w.x > chx && w.x < chx + 40 && w.y > try2 + 50 && w.y < try2 + 88) {
+            if (w.x > chx && w.x < chx + 40 && w.y > try2 + TGt.chipY && w.y < try2 + TGt.chipY + TGt.chipH) {
               if (!(Save.data.stars[tlv] > 0)) return;       // trial needs the level won first
               this.reset(1, 'campaign', tlv, TRIAL_ORDER[tr]);
               this.state = 'playing'; return;
@@ -3031,7 +3104,8 @@
 
     // PLACING a machine from the shop: this tap is the placement.
     if (this.shopPick >= 0) {
-      var stid = TOWER_ORDER[this.shopPick];
+      var stid = this._shelf()[this.shopPick];
+      if (!stid) { this.shopPick = -1; return; }
       var chk = this._placeCheck(w.x, w.y);
       if (!chk.ok) {
         this.fxQueue.push({ k: 'float', x: w.x, y: w.y - 18, txt: chk.why, c: '#ff9a9a' });
@@ -3092,6 +3166,17 @@
     }
     return best;
   };
+  /// The machines currently on the shelf, in shelf order. shopPick indexes
+  /// THIS, not TOWER_ORDER — the draw loop and both tap sites must agree or a
+  /// tap buys a different machine from the one under the finger.
+  Game.prototype._shelf = function () {
+    var out = [], mode = this.mode;
+    for (var i = 0; i < TOWER_ORDER.length; i++) {
+      if (towerUnlocked(TOWER_ORDER[i], mode)) out.push(TOWER_ORDER[i]);
+    }
+    return out;
+  };
+
   Game.prototype._placeCheck = function (x, y) {
     // An authored pad is ALWAYS valid ground — it was placed by hand and may
     // sit outside the free-build bounds (several are below WORLD_H - 34, and
@@ -3336,18 +3421,24 @@
   // the feet, and how far forward of centre. Measured against the plate, and
   // shared by _muzzle() (world space, for particles) and the jaw drawn inside
   // the sprite's own transform — if these two disagree the fire leaves his face.
-  var MUZZLE_UP = 0.62, MUZZLE_FWD = 0.26;
+  // Re-measured 2026-08-14 against the REBUILT plate (the old one had 45% of
+  // its height sliced flat off the right edge — see art/hero_whelp_CLIPPED_backup.png).
+  // HERO_H drives the sprite instead of a fixed WIDTH: front and back plates have
+  // different aspects, so a fixed width made him CHANGE HEIGHT when he turned away.
+  var HERO_H = 57.2;
+  var MUZZLE_UP = 0.685, MUZZLE_FWD = 0.321;
   Game.prototype._muzzle = function () {
     var h = this.hero;
     var img = ART.images.hero_whelp || ART.images.hero;
-    var hh = 44 * (img ? img.height / img.width : 1.3);
+    var hh = HERO_H;
+    var mw2 = HERO_H * (img ? img.width / img.height : 0.77);
     // Facing is derived from hero state with the SAME expression the drawer
     // uses (hflip = (tx-x) > 0.5 ? -1 : 1, sprite faces left natively, so world
     // facing is its negation). Reading the drawer's stored value instead would
     // lag by a frame — _cosmetic() spends the fx queue BEFORE draw() runs — so
     // a breath cast in the same frame he turns would leave his mouth.
     var f = (h.tx - h.x) > 0.5 ? 1 : -1;
-    return { x: h.x + f * (44 * MUZZLE_FWD), y: h.y + 5 - hh * MUZZLE_UP, f: f };
+    return { x: h.x + f * (mw2 * MUZZLE_FWD), y: h.y + 5 - hh * MUZZLE_UP, f: f };
   };
 
   Game.prototype._burst = function (x, y, c, n, v) {
@@ -4180,7 +4271,7 @@
       var hflip = (h.tx - h.x) > 0.5 ? -1 : 1;   // sprite faces left natively
       var hmoving = Math.abs(h.tx - h.x) + Math.abs(h.ty - h.y) > 3;
       var hsq = 1 + Math.sin(ht * (hmoving ? 9 : 5)) * (hmoving ? 0.05 : 0.035);
-      var hw0 = 44, hh0 = hw0 * (himg.height / himg.width);
+      var hh0 = HERO_H, hw0 = hh0 * (himg.width / himg.height);
       // the sprite is drawn facing LEFT natively, so world-facing is -hflip.
       // _muzzle() reads this to put the breath where his mouth is.
       this._heroFace = -hflip;
@@ -4464,6 +4555,24 @@
   // so every target clears Apple's 44pt minimum BY CONSTRUCTION rather than on
   // the devices someone happened to test. The old bottom row was 36 world
   // units — 26-37 CSS px — and failed on every device made.
+  /// Trials-screen geometry. Derived, not hardcoded, so adding a seventh
+  /// mutator re-fits the list instead of pushing the last row off-screen —
+  /// which is exactly what six rows did at the original 108px pitch
+  /// (250 + 5*108 + 96 = 886 against a 780-unit world).
+  function trialGeom() {
+    var n = TRIAL_ORDER.length;
+    var top = 214, backY = 664, gap = 8;
+    // last row's BOTTOM is top + n*pitch - gap, and it must clear BACK
+    var pitch = Math.min(108, Math.floor((backY - 24 - top + gap) / n));
+    var h = pitch - gap;
+    // The level chips run the FULL height of the row and are the tap targets,
+    // so a compact row shrinks the text, never the thing you have to hit. At
+    // the old (h - 46) they collapsed to 14 units on a six-trial list — about
+    // 14 CSS px, a third of the 44pt minimum.
+    return { top: top, pitch: pitch, h: h, chipY: 8, chipH: Math.max(30, h - 16),
+             backY: backY };
+  }
+
   Game.prototype._titleGeom = function () {
     var s = this.view.scale || 1;
     var minH = Math.max(62, 44 / s);
@@ -4556,8 +4665,9 @@
       }
       ctx.textAlign = 'left';
       // THE SHOP — pick a machine, then tap the cavern floor to place it
-      for (var sc2 = 0; sc2 < TOWER_ORDER.length; sc2++) {
-        var sid2 = TOWER_ORDER[sc2], stt = TOWER_TYPES[sid2];
+      var shelf = this._shelf();
+      for (var sc2 = 0; sc2 < shelf.length; sc2++) {
+        var sid2 = shelf[sc2], stt = TOWER_TYPES[sid2];
         var sxx = G.shopX + sc2 * G.shopStep, syy = G.shopY;
         var picked = this.shopPick === sc2;
         var chipCost = Math.round(stt.cost * crowdMul(this.towers.length));
@@ -4929,9 +5039,17 @@
     if (mound) {
       // the SAME asset twice, same x / width / baseline, so the two halves can
       // never misregister: back bank behind Wick, front lip in front of him
+      //
+      // THE BACK BANK USED TO BE A CROP FROM 45% DOWN, and that crop line was a
+      // GUILLOTINE: it sliced the pile across its widest point, so the hoard had
+      // a razor-straight horizontal top edge running out either side of Wick and
+      // read as a flat slab rather than a heap of coins. Drawing the WHOLE pile
+      // restores its own domed silhouette — there is no cut to see, because
+      // there is no cut. The peak tucks behind Wick's chest, which is what the
+      // crop was clumsily trying to achieve in the first place.
       ctx.globalAlpha = 0.88;
-      ctx.drawImage(mound, 0, mound.height * 0.45, mound.width, mound.height * 0.55,
-                    60, 186, 300, 114);
+      ctx.drawImage(mound, 0, 0, mound.width, mound.height,
+                    45, 150, 330, 150);
       ctx.globalAlpha = 1;
     }
     var cg2 = ctx.createRadialGradient(210, 264, 4, 210, 264, 58);
@@ -5120,22 +5238,24 @@
     ctx.fillText('Wick sets himself a challenge on a keep he has held.', WORLD_W / 2, 182);
     ctx.fillText('Win the level first; forge craft still counts.', WORLD_W / 2, 198);
     for (var i = 0; i < TRIAL_ORDER.length; i++) {
-      var key = TRIAL_ORDER[i], tr = TRIALS[key], ry = 250 + i * 108;
-      uiPanel(ctx, 26, ry, WORLD_W - 52, 96, 11);
+      var TG = trialGeom();
+      var key = TRIAL_ORDER[i], tr = TRIALS[key], ry = TG.top + i * TG.pitch;
+      uiPanel(ctx, 26, ry, WORLD_W - 52, TG.h, 11);
       ctx.textAlign = 'left';
       ctx.fillStyle = '#d9f2ff'; ctx.font = 'bold 15px system-ui, sans-serif';
-      ctx.fillText(tr.name, 42, ry + 24);
+      var textW = (WORLD_W - 168) - 42 - 10;   // stop before the L1 chip
+      ctx.fillText(fitText(ctx, tr.name, textW), 42, ry + 24);
       ctx.fillStyle = '#b9a27f'; ctx.font = '11px system-ui, sans-serif';
-      ctx.fillText(tr.pitch, 42, ry + 42);
+      ctx.fillText(fitText(ctx, tr.pitch, textW), 42, ry + 42);
       for (var lv2 = 0; lv2 < MAPS.length; lv2++) {
         var chx = WORLD_W - 168 + lv2 * 46;
         var wonLv = Save.data.stars[lv2] > 0;
         var badge = wonLv && Save.data.trials[lv2] && Save.data.trials[lv2][key];
         ctx.fillStyle = badge ? 'rgba(255,215,94,0.9)' : wonLv ? 'rgba(214,69,69,0.85)' : 'rgba(70,52,44,0.6)';
-        rr(ctx, chx, ry + 50, 40, 38, 8); ctx.fill();
+        rr(ctx, chx, ry + TG.chipY, 40, TG.chipH, 8); ctx.fill();
         ctx.fillStyle = badge ? '#3a2c14' : wonLv ? '#fff' : '#8a7f72';
         ctx.font = 'bold 12px system-ui, sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(badge ? '★' : 'L' + (lv2 + 1), chx + 20, ry + 73);
+        ctx.fillText(badge ? '\u2605' : 'L' + (lv2 + 1), chx + 20, ry + TG.chipY + TG.chipH * 0.66);
         ctx.textAlign = 'left';
       }
     }
@@ -5180,15 +5300,52 @@
     ctx.fillText('treasure kept: ' + (r.hoard | 0) + ' / ' + CFG.startHoard, WORLD_W / 2, 420);
     ctx.fillText('coins carried off: ' + (r.lost | 0), WORLD_W / 2, 446);
     ctx.fillText('raiders slain: ' + (r.kills | 0), WORLD_W / 2, 472);
+    // WHO TOOK IT. "coins carried off: 25" told the player they had failed and
+    // nothing about why. The top three thieves, with the wave they first got
+    // through, turn a loss into a next attempt: the answer to a Gloomwing is a
+    // different machine from the answer to a Bulwark, and the player could not
+    // previously tell which one had beaten them.
+    // The block is only drawn when something LEAKED, so a clean run keeps the
+    // old tight layout and the story beat stays where it was.
+    var leakTop = (this.mode === 'daily' ? 522 : 496);
+    var storyY = 528;
+    if (r.leaks && r.leaks.length) {
+      storyY = leakTop + 18 + Math.min(3, r.leaks.length) * 19 + 14;
+      ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.fillStyle = '#c9b8a8';
+      ctx.fillText('WHO GOT THROUGH', WORLD_W / 2, 496);
+      for (var lz = 0; lz < Math.min(3, r.leaks.length); lz++) {
+        var lr = r.leaks[lz], ly = leakTop + 18 + lz * 19;
+        var card = ENEMY_CARDS[lr.type];
+        var lname = card ? card[0] : lr.type.toUpperCase();
+        var li2 = ART.images['e_' + lr.type];
+        if (li2) {
+          var lih = 17, liw = lih * (li2.width / li2.height);
+          ctx.drawImage(li2, WORLD_W / 2 - 104 - liw, ly - 13, liw, lih);
+        }
+        ctx.textAlign = 'left';
+        ctx.fillStyle = ENEMY_COLORS[lr.type] || '#ffe9c4';
+        ctx.font = 'bold 13px system-ui, sans-serif';
+        ctx.fillText(lname, WORLD_W / 2 - 98, ly);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#ff7b7b';
+        ctx.fillText('-' + lr.coins, WORLD_W / 2 + 28, ly);
+        ctx.fillStyle = 'rgba(201,184,168,0.85)';
+        ctx.font = '11px system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('from wave ' + lr.wave, WORLD_W / 2 + 40, ly);
+        ctx.textAlign = 'center';
+      }
+    }
     if (this.mode === 'daily') ctx.fillText('waves survived: ' + (r.wave | 0), WORLD_W / 2, 498);
     // the story beat this whole game is for
     ctx.font = 'italic 15px Georgia, serif'; ctx.fillStyle = '#ff9a3c';
     if (r.won) {
-      ctx.fillText('Auremma stirs, half-dreaming:', WORLD_W / 2, 528);
-      ctx.fillText('“You kept the warm in, little one.”', WORLD_W / 2, 549);
+      ctx.fillText('Auremma stirs, half-dreaming:', WORLD_W / 2, storyY);
+      ctx.fillText('“You kept the warm in, little one.”', WORLD_W / 2, storyY + 21);
     } else {
-      ctx.fillText('The cavern grows colder.', WORLD_W / 2, 528);
-      ctx.fillText('Wick will not let it happen twice.', WORLD_W / 2, 549);
+      ctx.fillText('The cavern grows colder.', WORLD_W / 2, storyY);
+      ctx.fillText('Wick will not let it happen twice.', WORLD_W / 2, storyY + 21);
     }
     // daily: the global best-runs ladder (names render through safeName ONLY)
     if (this.mode === 'daily' && Lb.on()) {
@@ -5220,7 +5377,10 @@
     } else {
       var rimg = ART.images.hero;
       if (rimg) {
-        var rw = 84, rh = rw * (rimg.height / rimg.width);
+        // HEIGHT-first, like _drawHero: the plate's aspect is not a constant of
+        // the universe (it changed the day the clipped tail was restored), so
+        // sizing off WIDTH silently rescaled him on this screen.
+        var rh = 109.3, rw = rh * (rimg.width / rimg.height);
         var rb = Math.sin(this.worldT * 4) * 2;
         ctx.drawImage(rimg, WORLD_W / 2 - rw / 2, 668 - rh + rb, rw, rh);
       }
@@ -5410,6 +5570,20 @@
       }
     }
     ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /// Truncate to fit a width, with an ellipsis. ctx.fillText's own maxWidth
+  /// SQUEEZES the glyphs instead of cutting them, which looks broken; the
+  /// trials list needs the pitch line to stop before the level chips rather
+  /// than run underneath them.
+  function fitText(ctx, txt, maxW) {
+    if (ctx.measureText(txt).width <= maxW) return txt;
+    var lo = 0, hi = txt.length;
+    while (lo < hi) {
+      var mid = (lo + hi + 1) >> 1;
+      if (ctx.measureText(txt.slice(0, mid) + '\u2026').width <= maxW) lo = mid; else hi = mid - 1;
+    }
+    return txt.slice(0, lo).replace(/[ ,.;:]+$/, '') + '\u2026';
   }
 
   /// Wick's flame, drawn. The breath button used to render the '🔥' CHARACTER,

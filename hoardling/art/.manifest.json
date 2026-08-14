@@ -179,11 +179,11 @@
    "as_drawn_psnr": 39.6
   },
   "hero_whelp.png": {
-   "size": "535->333px",
-   "kb": 37.1,
+   "size": "693->333px",
+   "kb": 25.2,
    "q": 84,
-   "codec_psnr": 36.6,
-   "as_drawn_psnr": 38.5
+   "codec_psnr": 37.0,
+   "as_drawn_psnr": 38.7
   },
   "icon-180.png": {
    "size": "png (icon)",
