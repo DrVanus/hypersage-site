@@ -150,6 +150,10 @@
       name: 'Kobold Crossbow', cost: 70,
       short: 'CROSSBOW', hitsAir: true,
       aims: true,
+      // The crossbow assembly and its gunner sit ON a round wooden turntable.
+      // Split there so only the TOP turns: rotating the whole plate tipped the
+      // barrel and made every machine look like it was falling over.
+      turret: { cut: 0.68, pvx: 0.50, pvy: 0.66 },
       levels: [
         { dmg: 12, rate: 1.2, range: 105, upgradeCost: 60 },
         { dmg: 20, rate: 1.4, range: 118, upgradeCost: 110 },
@@ -194,6 +198,7 @@
       name: 'Gargoyle Roost', cost: 90,
       short: 'ROOST', hitsAir: true, airBonus: 1.5,
       aims: true,
+      turret: { cut: 0.46, pvx: 0.50, pvy: 0.46 },   // gargoyle turns, plinth does not
       levels: [
         { dmg: 18, rate: 0.6, range: 134, pierce: 2, upgradeCost: 80 },
         { dmg: 30, rate: 0.7, range: 147, pierce: 3, upgradeCost: 140 },
@@ -4736,6 +4741,37 @@
       }
     }
   };
+  /// Split a machine plate into a fixed BASE and a rotating TURRET, once.
+  /// Built from the shipped art at runtime — no new files, no pipeline run, and
+  /// the manned plates (which have Wick painted in) split at the same line.
+  /// The seam is feathered so the join never shows as a cut edge.
+  Game.prototype._turretFor = function (spriteId, tt) {
+    if (!tt || !tt.turret) return null;
+    this._turretCache = this._turretCache || {};
+    if (this._turretCache[spriteId] !== undefined) return this._turretCache[spriteId];
+    var img = ART.images[spriteId];
+    if (!img || !img.width) return (this._turretCache[spriteId] = null);
+    var w = img.width, h = img.height;
+    var cut = Math.round(h * tt.turret.cut), F = Math.max(2, Math.round(h * 0.012));
+    function half(keepTop) {
+      var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      var x = cv.getContext('2d');
+      x.drawImage(img, 0, 0);
+      x.globalCompositeOperation = 'destination-out';
+      var g = x.createLinearGradient(0, cut - F, 0, cut + F);
+      g.addColorStop(0, keepTop ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,1)');
+      g.addColorStop(1, keepTop ? 'rgba(0,0,0,1)' : 'rgba(0,0,0,0)');
+      x.fillStyle = g; x.fillRect(0, cut - F, w, 2 * F);
+      x.fillStyle = '#000';
+      if (keepTop) x.fillRect(0, cut + F, w, h - cut - F);
+      else x.fillRect(0, 0, w, cut - F);
+      x.globalCompositeOperation = 'source-over';
+      return cv;
+    }
+    return (this._turretCache[spriteId] = {
+      top: half(true), base: half(false), pvx: tt.turret.pvx, pvy: tt.turret.pvy });
+  };
+
   Game.prototype._drawTower = function (ctx, tw) {
     var p = tw;
     var lvl = tw.level;
@@ -4789,12 +4825,18 @@
       if (tt2 && tt2.aims && tw._aimX !== undefined) {
         var fdx = tw._aimX - p.x, fdy = tw._aimY - (p.y - th0 * 0.55);
         fSign = fdx >= 0 ? -1 : 1;                  // -1 mirrors it to face right
-        var want = Math.atan2(fdy, Math.abs(fdx)) + Math.PI / 4;   // native is 45deg up
-        // 0.30, measured: the mirror does the real work, and anything past
-        // ~0.3 rad visibly CANTS the round turntable base — the machine reads
-        // as tipping over rather than traversing. Rendered all 8 compass
-        // directions at 0.55 and 0.30 to pick this.
-        fRot = Math.max(-0.30, Math.min(0.30, want));
+        // SCREEN-Y IS DEPTH HERE, NOT HEIGHT. The first version used
+        // atan2(dy, |dx|) as if a raider further down the screen were BELOW the
+        // machine, which swung the bow through huge angles for a target that is
+        // really only closer to the camera. In a three-quarter view that axis is
+        // foreshortened, so the turn is proportional to the depth component and
+        // stays small: level for a target across from it, a gentle tilt for one
+        // up-road or down-road. Rendered all 8 compass directions to pick 0.30.
+        var fn = Math.max(1, Math.sqrt(fdx * fdx + fdy * fdy));
+        var want = 0.30 * (fdy / fn);
+        // Only a machine with a SEPARATED turret may turn at all — its base
+        // stays planted. The Mimic is a chest: it mirrors, nothing rotates.
+        fRot = tt2.turret ? Math.max(-0.35, Math.min(0.35, want)) : 0;
         // ease in RENDER time; cosmetic only, so wall-clock is correct here
         var prev = tw._faceRot === undefined ? fRot : tw._faceRot;
         var prevS = tw._faceSign === undefined ? fSign : tw._faceSign;
@@ -4802,11 +4844,24 @@
         tw._faceSign = fSign;                        // the mirror snaps; the angle eases
         fRot = tw._faceRot; fSign = prevS === fSign ? fSign : fSign;
       }
+      var split = this._turretFor(spriteId, tt2);
       ctx.save();
       ctx.translate(p.x, p.y + 8);
-      ctx.rotate(fRot * fSign);
       ctx.scale((2 - tsq) * fSign, tsq);
-      ctx.drawImage(timg, -tw0 / 2, -th0, tw0, th0);
+      if (split) {
+        // THE BASE NEVER MOVES. This is the whole fix: the previous version
+        // rotated the entire plate, so a barrel-based machine visibly leaned
+        // and read as broken. Now the barrel stays planted on the floor and
+        // only the weapon on top of it swings, which is what the art depicts.
+        ctx.drawImage(split.base, -tw0 / 2, -th0, tw0, th0);
+        var pvX = -tw0 / 2 + tw0 * split.pvx, pvY = -th0 + th0 * split.pvy;
+        ctx.translate(pvX, pvY);
+        ctx.rotate(fRot * fSign);
+        ctx.translate(-pvX, -pvY);
+        ctx.drawImage(split.top, -tw0 / 2, -th0, tw0, th0);
+      } else {
+        ctx.drawImage(timg, -tw0 / 2, -th0, tw0, th0);
+      }
       ctx.restore();
       this._drawForkBadge(ctx, tw, p, p.y - th0 * 0.72);
     }
