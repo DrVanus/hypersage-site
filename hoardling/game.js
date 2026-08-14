@@ -253,8 +253,40 @@
   // coins. Rather than cap the count (which takes the freedom away) or stiffen
   // the waves (which punishes every playstyle), each machine you already own
   // makes the NEXT one dearer. Placement stays free; hoarding is what costs.
-  var CROWD_STEP = 0.10, CROWD_MAX = 2.3;
-  function crowdMul(n) { return Math.min(CROWD_MAX, 1 + CROWD_STEP * n); }
+  // The two campaign difficulty levers, in one place so tools/bot.js can sweep
+  // them without a reload. Mutating TUNE is dev-only (see the debug surface);
+  // shipped play always uses the numbers written here.
+  var TUNE = {
+    // Crowding tax: each machine owned made the NEXT one dearer. It was added
+    // to stop a bot that built 32 machines and 3-starred everything — but the
+    // strategy it taxes LOSES on merit once measured (spam 1-stars level 1;
+    // upgrading 3-stars every level with 6 machines), so it was punishing the
+    // weaker playstyle and doing it invisibly: prices climbed 56, 62, 67, 73...
+    // with nothing on screen to explain why. Off.
+    crowdStep: 0,
+    crowdMax: 2.3,
+    // Campaign HP ramp, PER LEVEL. The campaign had NO failure mode — 45 of 45
+    // bot runs across 3 levels x 3 strategies x 5 seeds won, including a
+    // deliberately stupid never-upgrade policy. Raiders in the back half of a
+    // level now toughen, so a run has somewhere to go wrong.
+    //
+    // Per level, not global, because the two requirements pull apart: any
+    // single ramp steep enough to punish never-upgrading (>=0.22, measured)
+    // also makes LEVEL ONE unwinnable for a beginner doing exactly what a
+    // beginner does. The first keep stays forgiving and teaches; the Coldroot
+    // Stair is where the same mistake costs the hoard.
+    campRampByLevel: [0.10, 0.20, 0.32],
+    campRampFrom: 8,
+  };
+  function crowdMul(n) { return Math.min(TUNE.crowdMax, 1 + TUNE.crowdStep * n); }
+  /** Campaign-only HP multiplier for wave w on level `li`. The Daily has its
+   *  own curve (dailyHpMul) and must never be touched from here — it is the
+   *  one fight every player shares. */
+  function campHpMul(w, li) {
+    var r = TUNE.campRampByLevel[li | 0];
+    if (r === undefined) r = TUNE.campRampByLevel[TUNE.campRampByLevel.length - 1];
+    return 1 + r * Math.max(0, w - TUNE.campRampFrom);
+  }
 
   var ENEMY_TYPES = {
     looter:   { name: 'Scrapling',     hp: 30,   spd: 42, bounty: 4,   steals: 1,  flyer: false },
@@ -1109,6 +1141,14 @@
       t_perch:   'art/tower_perch.png',
       t_bellows: 'art/tower_bellows.png',
       t_press:   'art/tower_press.png',
+      // Wick painted ONTO each machine, swapped in whole while he mans it.
+      t_mimic_manned:    'art/tower_mimic_manned.png',
+      t_ballista_manned: 'art/tower_ballista_manned.png',
+      t_brazier_manned:  'art/tower_brazier_manned.png',
+      t_crystal_manned:  'art/tower_crystal_manned.png',
+      t_perch_manned:    'art/tower_perch_manned.png',
+      t_bellows_manned:  'art/tower_bellows_manned.png',
+      t_press_manned:    'art/tower_press_manned.png',
       e_looter:  'art/enemy_looter.png',
       e_scout:   'art/enemy_scout.png',
       e_brute:   'art/enemy_brute.png',
@@ -2017,7 +2057,7 @@
   // ---- wave construction (deterministic: static tables or lane-1 gen) ----
   Game.prototype.buildWave = function (w) {
     var groups = this.mode === 'daily' ? dailyWaveComp(w, this.seed) : WAVE_TABLES[this.levelIdx][w];
-    var hpMul = this.mode === 'daily' ? dailyHpMul(w) : 1;
+    var hpMul = this.mode === 'daily' ? dailyHpMul(w) : campHpMul(w, this.levelIdx);
     var q = [];
     for (var g = 0; g < groups.length; g++) {
       var gr = groups[g];
@@ -2124,6 +2164,10 @@
         if (ally === bossE) continue;
         var adx = ally.px - bossE.px, ady = ally.py - bossE.py;
         if (ally.deepT > 0) continue;         // Deepchill Coil: deaf to the war drum
+        // NO enrage bonus here: the King is INSIDE HIS OWN AURA, so a '+0.25
+        // to his court' was secretly a 21% speed buff to HIM. He then reached
+        // the hoard on every run and one boss theft (25 coins) blew the 5-coin
+        // 3-star budget — every level silently collapsed to 1 star.
         if (adx * adx + ady * ady <= bossB.auraR * bossB.auraR) ally.auraF = bossB.auraSpd;
       }
       // at half HP the King roars in reinforcements, once
@@ -2145,7 +2189,15 @@
             flashT: 0, px: sp2.x, py: sp2.y,
           });
         }
-        this.fxQueue.push({ k: 'float', x: bossE.px, y: bossE.py - 30, txt: 'ROAR!', c: '#ff7b7b' });
+        // ENRAGE is the fight's turning point — make it land. Hitstop just
+        // under the hitch ceiling, a hard shake, a ring at his feet, and he
+        // genuinely speeds up so the player FEELS the fight change, not just
+        // reads a word.
+        bossE.enraged = true;
+        this.hitstopT = 0.11;
+        this.fxQueue.push({ k: 'float', x: bossE.px, y: bossE.py - 34, txt: 'THE KING ROARS!', c: '#ff7b7b' });
+        this.fxQueue.push({ k: 'pulse', x: bossE.px, y: bossE.py, r: 120, n: 1 });
+        this.fxQueue.push({ k: 'boom', x: bossE.px, y: bossE.py, r: 70 });
         Sfx.play('wave');
       }
     }
@@ -2236,6 +2288,10 @@
         continue;
       }
       // march / flee
+      // NO speed change on enrage. Measured: it made the King reach the hoard
+      // on EVERY run, and one boss theft is 25 coins against a 5-coin 3-star
+      // budget — every level collapsed to 1 star. The enrage is a BEAT (roar,
+      // hitstop, shake, his court driven harder), not a speed buff.
       var v = e.spd * e.slowF * e.auraF * STEP;
       if (e.fleeing) {
         // loot-weight rule: the more they carry, the slower they run.
@@ -2664,7 +2720,16 @@
       this.fxQueue.push({ k: 'boom', x: p.x, y: p.y, r: 26 });
       Sfx.play('split');
     }
-    if (e.type === 'boss') this.hitstopT = 0.09;   // ~5 frames; >120ms reads as a hitch
+    if (e.type === 'boss') {
+      // the payoff of a 20-wave level: freeze, shake, and a gold burst worth
+      // the wait. Still inside the hitch ceiling (>120ms reads as a stutter).
+      this.hitstopT = 0.12;
+      this.fxQueue.push({ k: 'float', x: p.x, y: p.y - 40, txt: 'THE KING FALLS!', c: '#ffd75e' });
+      this.fxQueue.push({ k: 'pulse', x: p.x, y: p.y, r: 150, n: 1 });
+      for (var bd = 0; bd < 3; bd++) {
+        this.fxQueue.push({ k: 'boom', x: p.x + (bd - 1) * 26, y: p.y + (bd % 2 ? 14 : -10), r: 54 });
+      }
+    }
     this.fxQueue.push({ k: 'death', x: p.x, y: p.y, g: bounty, boss: e.type === 'boss' });
     Sfx.play('coin');
     this.enemies.splice(i, 1);
@@ -3692,7 +3757,13 @@
   Game.prototype._drawTower = function (ctx, tw) {
     var p = tw;
     var lvl = tw.level;
+    // MANNED machines swap to a combined plate with Wick painted onto them.
+    // He used to be the standing sprite drawn 26px higher, which read as a
+    // decal hovering over the machine rather than a dragon working it — and
+    // manning is worth +70% fire rate and +30% damage, so it deserves to look
+    // like something. _drawHero skips him entirely while this plate is up.
     var spriteId = 't_' + tw.type;
+    if (tw._manned && ART.images[spriteId + '_manned']) spriteId += '_manned';
     // range ring while its menu is open
     if (this.menu && this.menu.towerIdx !== undefined && this.towers[this.menu.towerIdx] === tw) {
       var rr3 = lvlRow(tw).range;
@@ -4036,6 +4107,19 @@
 
   Game.prototype._drawHero = function (ctx) {
     var h = this.hero;
+    // While a manned plate is up, Wick is PAINTED INTO the machine sprite, so
+    // his own sprite must not be drawn or there are two of him on one machine.
+    // Only the BODY is skipped — the selection ring, the charged-breath ring
+    // and the breath meter are his UI and stay anchored to him.
+    //
+    // Falls back to the old lifted sprite for any machine whose manned plate
+    // has not loaded or does not exist, so manning never has a frame with no
+    // dragon in it.
+    var inPlate = false;
+    if (h.manned) {
+      var mtw = this._towerByTid(h.manTid);
+      inPlate = !!(mtw && ART.images['t_' + mtw.type + '_manned']);
+    }
     if (h.selected) {
       ctx.strokeStyle = 'rgba(158,245,143,0.8)'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.beginPath(); ctx.arc(h.x, h.y, 26, 0, 6.283); ctx.stroke(); ctx.setLineDash([]);
@@ -4049,7 +4133,9 @@
     var hdx2 = h.tx - h.x, hdy2 = h.ty - h.y;
     var hMoving2 = Math.abs(hdx2) + Math.abs(hdy2) > 3;
     var goingAway = hMoving2 && hdy2 < -Math.abs(hdx2) * 0.7;   // mostly up-screen
-    var himg = (goingAway && ART.images.hero_back) ? ART.images.hero_back : ART.images.hero;
+    // inPlate: his body lives in the machine's own sprite this frame
+    var himg = inPlate ? null
+             : (goingAway && ART.images.hero_back) ? ART.images.hero_back : ART.images.hero;
     if (himg) {
       // hover bob + sway; face the direction he's headed
       var ht = this.worldT;
@@ -4134,7 +4220,10 @@
       }
       ctx.restore();
     }
-    else {
+    else if (!inPlate) {
+      // procedural fallback ONLY when he genuinely has no sprite. Guarded on
+      // inPlate too, or a manned machine would get a chunky drawn dragon
+      // stacked on top of the painted one.
       var bob = Math.sin(this.worldT * 4) * 1.5;
       // ember the whelp: round ruby dragonling
       ctx.fillStyle = '#d64545';
