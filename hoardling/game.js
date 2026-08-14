@@ -265,6 +265,20 @@
     warlock:  { name: 'Greed Hexer',   hp: 80,   spd: 34, bounty: 16,  steals: 2,  flyer: false, heals: 10, healR: 63 },
     blinker:  { name: 'Blinker',       hp: 60,   spd: 46, bounty: 14,  steals: 3,  flyer: false, blink: 84, blinkEvery: 4 },
     boss:     { name: 'The Hoard King', hp: 3000, spd: 19, bounty: 150, steals: 25, flyer: false, auraR: 84, auraSpd: 1.2, summonAtHalf: 6 },
+    // SAPPER — the first raider that threatens the MACHINES. Until now every
+    // tower was untouchable, so a built board was a solved board; a raider who
+    // can silence your best gun forces you to defend the defences.
+    sapper:   { name: 'Pry-Hand',      hp: 70,   spd: 44, bounty: 15,  steals: 2,  flyer: false,
+                // 76 measured against the real geometry: pads and free-build
+                // spots sit 35-308 units off the road, so this reaches the
+                // road-hugging band (wide coverage, now vulnerable) and leaves
+                // machines set further back safe. That IS the trade-off.
+                sapR: 76, sapEvery: 3.2, sapStun: 2.6 },
+    // SPLITTER — dies into two Scraplings. Punishes single-target builds and
+    // rewards splash, which is the Bloons lesson VANUS liked: one kill can
+    // make your problem WORSE if you brought the wrong tool.
+    splitter: { name: 'Cracked Keg',   hp: 130,  spd: 33, bounty: 14,  steals: 3,  flyer: false,
+                splitInto: 'looter', splitCount: 2, splitHp: 0.55 },
   };
 
   // Campaign level 1 — the design-studio 20-wave table, with its deliberate
@@ -304,11 +318,11 @@
     [{ type: 'brute',  count: 2,  gap: 7.0, delay: 0 }, { type: 'scout', count: 8, gap: 0.8, delay: 2 }],
     [{ type: 'shield', count: 4,  gap: 2.2, delay: 0 }, { type: 'bat', count: 4, gap: 1.5, delay: 3 }],
     [{ type: 'looter', count: 18, gap: 0.6, delay: 0 }, { type: 'scout', count: 6, gap: 1.0, delay: 3 }],
-    [{ type: 'blinker', count: 4, gap: 2.2, delay: 0 }, { type: 'looter', count: 10, gap: 0.9, delay: 1 }],
+    [{ type: 'blinker', count: 4, gap: 2.2, delay: 0 }, { type: 'looter', count: 10, gap: 0.9, delay: 1 }, { type: 'sapper', count: 1, gap: 1, delay: 8 }],
     [{ type: 'bat',    count: 8,  gap: 1.1, delay: 0 }, { type: 'shield', count: 4, gap: 2.0, delay: 2 }],
     [{ type: 'brute',  count: 4,  gap: 3.5, delay: 0 }, { type: 'warlock', count: 2, gap: 7.0, delay: 3 }, { type: 'scout', count: 8, gap: 0.8, delay: 6 }],
     [{ type: 'scout',  count: 14, gap: 0.5, delay: 0 }, { type: 'bat', count: 6, gap: 1.2, delay: 4 }],
-    [{ type: 'shield', count: 6,  gap: 1.8, delay: 0 }, { type: 'blinker', count: 4, gap: 2.0, delay: 3 }],
+    [{ type: 'shield', count: 6,  gap: 1.8, delay: 0 }, { type: 'blinker', count: 4, gap: 2.0, delay: 3 }, { type: 'sapper', count: 2, gap: 4, delay: 6 }],
     [{ type: 'brute',  count: 5,  gap: 2.6, delay: 0 }, { type: 'bat', count: 6, gap: 1.2, delay: 4 }, { type: 'warlock', count: 1, gap: 1, delay: 8 }],
     [{ type: 'looter', count: 24, gap: 0.45, delay: 0 }, { type: 'scout', count: 8, gap: 0.8, delay: 3 }],
     [{ type: 'blinker', count: 6, gap: 1.6, delay: 0 }, { type: 'shield', count: 6, gap: 1.6, delay: 2 }, { type: 'warlock', count: 2, gap: 5.0, delay: 6 }],
@@ -327,10 +341,10 @@
     [{ type: 'shield', count: 3,  gap: 2.5, delay: 0 }, { type: 'looter', count: 12, gap: 0.8, delay: 1 }],
     [{ type: 'bat',    count: 6,  gap: 1.3, delay: 0 }, { type: 'scout', count: 6, gap: 0.9, delay: 2 }],
     [{ type: 'brute',  count: 3,  gap: 5.0, delay: 0 }, { type: 'looter', count: 12, gap: 0.8, delay: 1 }],
-    [{ type: 'blinker', count: 5, gap: 1.8, delay: 0 }, { type: 'shield', count: 4, gap: 2.0, delay: 2 }],
+    [{ type: 'blinker', count: 5, gap: 1.8, delay: 0 }, { type: 'shield', count: 4, gap: 2.0, delay: 2 }, { type: 'splitter', count: 3, gap: 3.5, delay: 5 }],
     [{ type: 'warlock', count: 2, gap: 6.0, delay: 0 }, { type: 'brute', count: 3, gap: 3.5, delay: 1 }, { type: 'looter', count: 10, gap: 0.8, delay: 4 }],
     [{ type: 'bat',    count: 10, gap: 0.9, delay: 0 }, { type: 'scout', count: 8, gap: 0.8, delay: 3 }],
-    [{ type: 'looter', count: 30, gap: 0.35, delay: 0 }, { type: 'blinker', count: 5, gap: 1.6, delay: 4 }],
+    [{ type: 'looter', count: 30, gap: 0.35, delay: 0 }, { type: 'blinker', count: 5, gap: 1.6, delay: 4 }, { type: 'splitter', count: 2, gap: 5, delay: 2 }],
     [{ type: 'boss',   count: 1,  gap: 1.0, delay: 0, hpMul: 0.45 }, { type: 'warlock', count: 3, gap: 4.0, delay: 2 }],
     [{ type: 'shield', count: 8,  gap: 1.3, delay: 0 }, { type: 'bat', count: 9, gap: 1.0, delay: 3 }],
     [{ type: 'brute',  count: 7,  gap: 2.0, delay: 0 }, { type: 'warlock', count: 3, gap: 4.0, delay: 4 }],
@@ -468,7 +482,7 @@
   // ===== DAILY SIEGE wave gen — LANE 1, pure fn of (waveIdx, seed) =========
   // Every draw is keyed positionally on (waveIdx, slot) so wave 7 is the same
   // for every player regardless of how or when they got there.
-  var DAILY_ROSTER = ['looter', 'scout', 'brute', 'shield', 'bat', 'warlock', 'blinker'];
+  var DAILY_ROSTER = ['looter', 'scout', 'brute', 'shield', 'bat', 'warlock', 'blinker', 'sapper', 'splitter'];
   function dailyWaveComp(w, seed) {
     var groups = [];
     if ((w + 1) % 10 === 0) {
@@ -1011,16 +1025,19 @@
     warlock: ['GREED HEXER', 'Heals the whole pack around him. Drop him first.'],
     blinker: ['BLINKER', 'Teleports up the road. A chilled rogue cannot blink.'],
     boss:    ['THE HOARD KING', 'War drums drive his court. At half health he calls more.'],
+    sapper:  ['PRY-HAND', 'Jams your machines silent. Kill him BEFORE he reaches them.'],
+    splitter:['CRACKED KEG', 'Breaks into two Scraplings. Bring splash, not a sniper.'],
   };
 
   var ENEMY_FACING = {
     looter: -1, scout: -1, brute: -1, shield: -1,
-    bat: -1, warlock: -1, blinker: -1, boss: -1,
+    bat: -1, warlock: -1, blinker: -1, boss: -1, sapper: -1, splitter: -1,
   };
 
   var ENEMY_COLORS = {
     looter: '#6fae52', scout: '#4fc978', brute: '#4a8a3a', shield: '#9aa2ad',
     bat: '#8a6ad6', warlock: '#7b3fa0', blinker: '#d6a64f', boss: '#c9b8a8',
+    sapper: '#8a7a4a', splitter: '#5f8f96',
   };
 
   // ===== ART registry — the seam the art pipeline fills ===================
@@ -1095,6 +1112,8 @@
       e_warlock: 'art/enemy_warlock.png',
       e_blinker: 'art/enemy_blinker.png',
       e_boss:    'art/enemy_boss.png',
+      e_sapper:  'art/enemy_sapper.png',
+      e_splitter:'art/enemy_splitter.png',
       pad:       'art/build_pad.png',
       torch:     'art/torch.png',
       bg:        'art/cavern_bg.png',
@@ -2063,7 +2082,7 @@
           id: this.nextId++, type: sp.type, d: 0,
           hp: Math.round(base.hp * sp.hpMul), maxHp: Math.round(base.hp * sp.hpMul),
           spd: base.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0, bleedT: 0, bleedDps: 0,
-          scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0,
+          scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0, sapT: 0,
           blinkT: base.blinkEvery || 0, healT: 1, grabT: 0, auraF: 1,
           stolen: 0, fleeing: false, flyer: !!base.flyer, summoned: false, shieldBroken: false,
           flashT: 0, px: PATH.pts[0][0], py: PATH.pts[0][1],
@@ -2115,7 +2134,7 @@
             id: this.nextId++, type: 'looter', d: sd,
             hp: Math.round(lb.hp * sMul), maxHp: Math.round(lb.hp * sMul),
             spd: lb.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0, bleedT: 0, bleedDps: 0,
-            scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0,
+            scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0, sapT: 0,
             blinkT: 0, healT: 1, grabT: 0, auraF: 1,
             stolen: 0, fleeing: false, flyer: false, summoned: false, shieldBroken: false,
             flashT: 0, px: sp2.x, py: sp2.y,
@@ -2169,6 +2188,29 @@
             }
           }
           this.fxQueue.push({ k: 'heal', x: e.px, y: e.py });
+        }
+      }
+      // SAPPER — jams the nearest machine silent for a few seconds. The first
+      // threat to the towers themselves: a built board is no longer a solved
+      // board. Deterministic (a timer and a distance), never a roll.
+      if (base2.sapR && !e.fleeing) {
+        e.sapT -= STEP;
+        if (e.sapT <= 0) {
+          var sBest = -1, sD = base2.sapR * base2.sapR;
+          for (var sj = 0; sj < this.towers.length; sj++) {
+            var stw = this.towers[sj];
+            if (stw.jamT > 0) continue;                 // already silenced
+            var sdx = stw.x - e.px, sdy = stw.y - e.py, sdd = sdx * sdx + sdy * sdy;
+            if (sdd < sD) { sD = sdd; sBest = sj; }
+          }
+          if (sBest >= 0) {
+            e.sapT = base2.sapEvery;
+            this.towers[sBest].jamT = base2.sapStun;
+            this.fxQueue.push({ k: 'float', x: this.towers[sBest].x, y: this.towers[sBest].y - 46,
+                                txt: 'JAMMED!', c: '#ff9a9a' });
+            this.fxQueue.push({ k: 'hit', x: this.towers[sBest].x, y: this.towers[sBest].y - 20, c: '#ff9a9a' });
+            Sfx.play('sell');
+          } else e.sapT = 0.35;                          // nothing in reach: rescan
         }
       }
       // blink — a chilled rogue cannot blink (Gemsinger's hard counter)
@@ -2271,6 +2313,7 @@
       var tw = this.towers[t];
       var tt = TOWER_TYPES[tw.type], lv = lvlRow(tw);
       if (tt.support) continue;              // bellows/press do their work elsewhere
+      if (tw.jamT > 0) { tw.jamT -= STEP; continue; }   // Pry-Hand has it silenced
       // Time since this machine ACTUALLY fired. The recoil used to be driven
       // by the cooldown, but an idle machine rescans every 0.1s, which
       // retriggered the wind-up ~8x a second forever — every contraption on
@@ -2596,6 +2639,25 @@
       this.fxQueue.push({ k: 'recover', x: p.x, y: p.y, n: e.stolen });
       Sfx.play('recover');
     }
+    // SPLITTER — breaks into two smaller raiders where it fell. Queued as a
+    // spawn so the halves enter through the same path the sim already owns.
+    if (base.splitInto && !e.summoned) {
+      var sb = ENEMY_TYPES[base.splitInto];
+      for (var sp2 = 0; sp2 < base.splitCount; sp2++) {
+        this.enemies.push({
+          id: this.nextId++, type: base.splitInto,
+          d: Math.max(0, Math.min(PATH.len - 1, e.d + (sp2 ? 9 : -9))),
+          hp: Math.round(sb.hp * base.splitHp), maxHp: Math.round(sb.hp * base.splitHp),
+          spd: sb.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0, bleedT: 0, bleedDps: 0,
+          scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0, sapT: 0,
+          blinkT: 0, healT: 1, grabT: 0, auraF: 1,
+          stolen: 0, fleeing: e.fleeing, flyer: false, summoned: true, shieldBroken: false,
+          flashT: 0, px: e.px, py: e.py,
+        });
+      }
+      this.fxQueue.push({ k: 'float', x: p.x, y: p.y - 30, txt: 'IT SPLITS!', c: '#a8e6ff' });
+      this.fxQueue.push({ k: 'boom', x: p.x, y: p.y, r: 26 });
+    }
     if (e.type === 'boss') this.hitstopT = 0.09;   // ~5 frames; >120ms reads as a hitch
     this.fxQueue.push({ k: 'death', x: p.x, y: p.y, g: bounty, boss: e.type === 'boss' });
     Sfx.play('coin');
@@ -2693,12 +2755,33 @@
         if (vx >= G.pause && vx <= G.pause + 44) { this.setPaused(true); return; }
         if (vx >= G.mute && vx <= G.mute + 44) { Sfx.toggle(); return; }
       }
-      if (!this.waveActive && this.wave < this.totalWaves() &&
-          vx >= G.cx - 92 && vx <= G.cx + 92 && vy >= G.startY && vy <= G.startY + 52) {
-        this.startWave(); return;
-      }
-      if (vx >= G.breathX && vx <= G.breathX + 62 && vy >= G.breathY && vy <= G.breathY + 62) {
-        this.hero.castBreath = true; return;         // the breath's own button
+      // A MACHINE IN HAND MEANS THE NEXT TAP ON LEGAL GROUND IS A BUILD.
+      //
+      // The action row sits over the bottom of the cavern floor, so without
+      // this the START WAVE and BREATH buttons eat taps aimed at the ground
+      // beneath them. Measured against the engine's own _placeCheck: 680
+      // buildable positions sit under START WAVE and 460 under BREATH. A
+      // player aiming at any of them with a machine in hand loses their whole
+      // build phase to a button they were not pressing.
+      //
+      // fb78c1a separately lifted the authored pads clear of the shelf, which
+      // fixed the worst case (a pad you could not build on). It does not fix
+      // this one: free placement means the whole floor is a build target, so
+      // the ~1,140 positions above are still live without this guard.
+      //
+      // Deliberately narrow: it only defers a HUD button when a machine is
+      // armed AND the ground under the finger is actually buildable. Armed
+      // over illegal ground still starts the wave, so the button never goes
+      // dead and needs no second tap to reach.
+      var armedOverGround = this.shopPick >= 0 && this._placeCheck(w.x, w.y).ok;
+      if (!armedOverGround) {
+        if (!this.waveActive && this.wave < this.totalWaves() &&
+            vx >= G.cx - 92 && vx <= G.cx + 92 && vy >= G.startY && vy <= G.startY + 52) {
+          this.startWave(); return;
+        }
+        if (vx >= G.breathX && vx <= G.breathX + 62 && vy >= G.breathY && vy <= G.breathY + 62) {
+          this.hero.castBreath = true; return;       // the breath's own button
+        }
       }
       // THE SHOP: pick a machine, then tap the cavern to place it.
       // The card test is EXACT — it used to claim the whole width of the band

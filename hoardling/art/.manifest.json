@@ -122,6 +122,13 @@
    "codec_psnr": 34.2,
    "as_drawn_psnr": 36.0
   },
+  "enemy_sapper.png": {
+   "size": "512px",
+   "kb": 69.3,
+   "q": 84,
+   "codec_psnr": 36.0,
+   "as_drawn_psnr": 36.0
+  },
   "enemy_scout.png": {
    "size": "700->183px",
    "kb": 11.9,
@@ -135,6 +142,13 @@
    "q": 92,
    "codec_psnr": 33.1,
    "as_drawn_psnr": 35.5
+  },
+  "enemy_splitter.png": {
+   "size": "439px",
+   "kb": 52.9,
+   "q": 84,
+   "codec_psnr": 37.7,
+   "as_drawn_psnr": 37.7
   },
   "enemy_warlock.png": {
    "size": "497->160px",
