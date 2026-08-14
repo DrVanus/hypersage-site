@@ -154,6 +154,7 @@
       // Split there so only the TOP turns: rotating the whole plate tipped the
       // barrel and made every machine look like it was falling over.
       turret: { cut: 0.68, pvx: 0.50, pvy: 0.66 },
+      muzzle: { fwd: 21, up: 40 },   // the bow tip, not the middle of the barrel
       levels: [
         { dmg: 12, rate: 1.2, range: 105, upgradeCost: 60 },
         { dmg: 20, rate: 1.4, range: 118, upgradeCost: 110 },
@@ -199,6 +200,7 @@
       short: 'ROOST', hitsAir: true, airBonus: 1.5,
       aims: true,
       turret: { cut: 0.46, pvx: 0.50, pvy: 0.46 },   // gargoyle turns, plinth does not
+      muzzle: { fwd: 13, up: 47 },   // the gargoyle's mouth, atop the plinth
       levels: [
         { dmg: 18, rate: 0.6, range: 134, pierce: 2, upgradeCost: 80 },
         { dmg: 30, rate: 0.7, range: 147, pierce: 3, upgradeCost: 140 },
@@ -3079,6 +3081,7 @@
       tw._aimX = target.px; tw._aimY = target.py;
       tw.cd = 1 / lv.rate;
       var tp = { x: target.px, y: target.py };
+      var mz0 = this._muzzleOf(tw, tp.x, tp.y);
       if (tw.type === 'mimic') {                            // instant bite
         tw.shotT = 0;
         this._damage(target, lv.dmg * mDmg, { kind: 'melee', tower: tw });
@@ -3094,8 +3097,9 @@
         Sfx.play('bite');
       } else if (tw.type === 'brazier') {                   // lobbed splash
         tw.shotT = 0;
+        this.fxQueue.push({ k: 'muzzle', x: mz0.x, y: mz0.y, tx: tp.x, ty: tp.y });
         this.projectiles.push({
-          kind: 'lob', x: pad.x, y: pad.y - 26, sx: pad.x, sy: pad.y - 26, tx: tp.x, ty: tp.y,
+          kind: 'lob', x: mz0.x, y: mz0.y, sx: mz0.x, sy: mz0.y, tx: tp.x, ty: tp.y,
           t: 0, dur: 0.55, dmg: lv.dmg * mDmg, splash: lv.splash, burn: lv.burn || 0, tower: t,
           scald: lv.special === 'scald' ? lv.scaldDur : 0,
           // Tar Boiler: the patch lands at the TARGET's path distance at fire
@@ -3118,8 +3122,10 @@
           dmg += tw.ramp;
         }
         tw.shotT = 0;
+        this.fxQueue.push({ k: 'twang', x: mz0.x, y: mz0.y, tx: tp.x, ty: tp.y,
+                            c: tw.type === 'perch' ? '#cfd6e0' : '#e8cf9a' });
         this.projectiles.push({
-          kind: 'bolt', x: pad.x, y: pad.y - 30, target: target.id, spd: 340,
+          kind: 'bolt', x: mz0.x, y: mz0.y, target: target.id, spd: 340,
           dmg: dmg, crit: crit, hops: lv.pierce || 0,
           shieldbreak: lv.special === 'shieldbreak',
           net: lv.special === 'downdraft' ? lv.groundDur : 0, tower: t,
@@ -4157,6 +4163,25 @@
             life: 0.16 + Math.random() * 0.1, T: 0.26, c: mz < 2 ? '#fff0b0' : '#ff8a3c' });
         }
       }
+      else if (fx.k === 'twang') {
+        // A MACHINE FIRING WAS COMPLETELY UNMARKED — the bolt simply existed,
+        // mid-air, one frame after nothing. The hero had a muzzle puff and the
+        // machines that do 90% of the shooting had none at all. A crossbow does
+        // not breathe flame, so this is the string's snap: a hot streak down the
+        // aim line and a flick of kicked dust. Cosmetic lane (Math.random) — a
+        // per-shot particle count drawn from the seeded stream would fork a daily.
+        var ta = Math.atan2(fx.ty - fx.y, fx.tx - fx.x);
+        this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 2, R: 11, life: 0.10, T: 0.10,
+                              c: fx.c || '#ffe6a8' });
+        for (var tw3 = 0; tw3 < 4; tw3++) {
+          var tang = ta + (Math.random() - 0.5) * 0.45;
+          var tsp = 90 + Math.random() * 120;
+          this.particles.push({ kind: 'dot', x: fx.x, y: fx.y,
+            vx: Math.cos(tang) * tsp, vy: Math.sin(tang) * tsp - 10,
+            r: 0.9 + Math.random() * 1.3, life: 0.10 + Math.random() * 0.08, T: 0.18,
+            c: tw3 < 2 ? '#fff6d8' : (fx.c || '#d8c49a') });
+        }
+      }
       else if (fx.k === 'fireburst') {       // it LANDS as fire, not a dot
         this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 3, R: 20, life: 0.22, T: 0.22, c: '#ffb14e' });
         for (var fb = 0; fb < 9; fb++) {
@@ -4745,6 +4770,19 @@
   /// Built from the shipped art at runtime — no new files, no pipeline run, and
   /// the manned plates (which have Wick painted in) split at the same line.
   /// The seam is feathered so the join never shows as a cut edge.
+  /// Where a machine's shot actually LEAVES it, in world space.
+  /// Bolts used to spawn at (pad.x, pad.y - 30) — the middle of the machine —
+  /// so a crossbow's arrow appeared out of the barrel it was mounted on rather
+  /// than off the bow, and nothing marked the moment of firing at all.
+  /// SIM LANE: derived from the target, never from the renderer's _faceSign,
+  /// which is draw-time state the sim must not read. No RNG, so no fork.
+  Game.prototype._muzzleOf = function (tw, tx, ty) {
+    var m = TOWER_TYPES[tw.type].muzzle;
+    if (!m) return { x: tw.x, y: tw.y - 26 };
+    var f = (tx - tw.x) >= 0 ? 1 : -1;          // same mirror rule as the drawer
+    return { x: tw.x + f * m.fwd, y: tw.y - m.up };
+  };
+
   Game.prototype._turretFor = function (spriteId, tt) {
     if (!tt || !tt.turret) return null;
     this._turretCache = this._turretCache || {};
