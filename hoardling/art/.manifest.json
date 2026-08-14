@@ -234,12 +234,26 @@
    "codec_psnr": 34.4,
    "as_drawn_psnr": 36.4
   },
+  "tower_ballista_manned.png": {
+   "size": "803->291px",
+   "kb": 35.9,
+   "q": 88,
+   "codec_psnr": 34.4,
+   "as_drawn_psnr": 36.2
+  },
   "tower_bellows.png": {
    "size": "601->291px",
    "kb": 26.9,
    "q": 84,
    "codec_psnr": 35.7,
    "as_drawn_psnr": 37.6
+  },
+  "tower_bellows_manned.png": {
+   "size": "821->302px",
+   "kb": 29.8,
+   "q": 84,
+   "codec_psnr": 34.8,
+   "as_drawn_psnr": 36.6
   },
   "tower_brazier.png": {
    "size": "588->291px",
@@ -248,12 +262,26 @@
    "codec_psnr": 34.1,
    "as_drawn_psnr": 26.8
   },
+  "tower_brazier_manned.png": {
+   "size": "851->312px",
+   "kb": 32.3,
+   "q": 88,
+   "codec_psnr": 34.6,
+   "as_drawn_psnr": 36.6
+  },
   "tower_crystal.png": {
    "size": "303->291px",
    "kb": 54.9,
    "q": 88,
    "codec_psnr": 34.0,
    "as_drawn_psnr": 35.5
+  },
+  "tower_crystal_manned.png": {
+   "size": "534->291px",
+   "kb": 51.8,
+   "q": 92,
+   "codec_psnr": 33.2,
+   "as_drawn_psnr": 35.0
   },
   "tower_mimic.png": {
    "size": "503->291px",
@@ -262,6 +290,13 @@
    "codec_psnr": 34.3,
    "as_drawn_psnr": 36.3
   },
+  "tower_mimic_manned.png": {
+   "size": "573->291px",
+   "kb": 57.8,
+   "q": 92,
+   "codec_psnr": 34.1,
+   "as_drawn_psnr": 36.1
+  },
   "tower_perch.png": {
    "size": "418->291px",
    "kb": 30.7,
@@ -269,12 +304,26 @@
    "codec_psnr": 35.7,
    "as_drawn_psnr": 37.6
   },
+  "tower_perch_manned.png": {
+   "size": "593->291px",
+   "kb": 34.3,
+   "q": 84,
+   "codec_psnr": 34.3,
+   "as_drawn_psnr": 36.3
+  },
   "tower_press.png": {
    "size": "546->291px",
    "kb": 34.7,
    "q": 88,
    "codec_psnr": 34.4,
    "as_drawn_psnr": 36.6
+  },
+  "tower_press_manned.png": {
+   "size": "660->291px",
+   "kb": 40.3,
+   "q": 88,
+   "codec_psnr": 34.1,
+   "as_drawn_psnr": 36.1
   }
  }
 }
