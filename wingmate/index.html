@@ -1195,9 +1195,11 @@
   <!-- ===== FAQ ===== -->
   <!-- Claims discipline (verified against ~/Developer/DrVanus/Wingmate + wingmate-api
        2026-08-10): Plus buys EXACTLY ONE thing — a higher daily message allowance
-       (rateLimit.js:70,91). Never print the allowance numbers here: the shipping caps
-       are 10/150 while store/listing.md still says 200/1,000 — both are server settings
-       that move, so the app is the only honest surface for them. No prices exist
+       (rateLimit.js). Never print the allowance numbers here — they are server settings
+       that move, so the app is the only surface that is honest by construction. (This
+       page has stayed correct through two resizings for exactly that reason; the
+       support page, which does print them, went stale twice. Numbers deployed today:
+       10/150, pinned in fly.toml [env]; the next release flips to 3/60.) No prices exist
        anywhere (no ASC products yet). Backend is a stateless relay — no DB, no
        conversation storage (package.json, chat.js has no write path); user data lives
        on-device (GirlStore/OpenerStore/TranscriptCache). No account (Keychain UUID
