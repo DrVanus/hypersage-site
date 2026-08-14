@@ -799,13 +799,13 @@
   // like to dig in it; that is the whole reason to want one.
   var WALL_SKINS = [
     { id: 'clay',     name: 'Burrow Clay',  price: 0,    tint: null,
-      note: 'plain worked earth · where everyone starts' },
+      note: 'plain worked earth' },
     { id: 'amber',    name: 'Amber Seam',   price: 600,  tint: '#c98a2e', amt: 0.55,
-      note: 'warm ochre · the lantern likes it' },
+      note: 'warm ochre, lantern-lit' },
     { id: 'frost',    name: 'Frost Vein',   price: 1200, tint: '#6fa8c9', amt: 0.55,
-      note: 'cold blue · gems read brightest' },
+      note: 'cold blue, gems pop' },
     { id: 'malach',   name: 'Malachite',    price: 2200, tint: '#3f9e6b', amt: 0.55,
-      note: 'green copper · deep and quiet' },
+      note: 'green copper, deep quiet' },
     // Re-priced when crusted rocks started feeding the satchel. That change
     // raised a full career's income 14,178c -> 19,012c, which put the ENTIRE
     // shop inside the first 30 levels and tripped sweep_career's econ gate:
@@ -816,9 +816,9 @@
     // ceiling. Prices — not more ROWS: shopRowY(i) is 250 + i*64 and the view
     // is 720 tall, so a seventh row would draw its bottom edge at 754.
     { id: 'rose',     name: 'Rose Quartz',  price: 5000, tint: '#c96f8a', amt: 0.50,
-      note: 'pink shot through with white' },
+      note: 'pink shot with white' },
     { id: 'basalt',   name: 'Deep Basalt',  price: 7600, tint: '#5a4a7a', amt: 0.60, dark: 0.22,
-      note: 'darkest seam · everything glows' },
+      note: 'darkest seam, all aglow' },
   ];
 
   // Node/test export of the PURE surface (determinism prover requires this).
@@ -3379,13 +3379,15 @@
     }
     if (b.key === 'heartstone') {
       var hs = SPR.gem_heartstone || SPR.gem_prism;
-      // A STATIC glow, not a pulsing one. The radius used to breathe on
-      // sin(worldT*2.2) and, together with the amber ready-ring below, made
-      // the biggest object in the jar wear two throbbing circles — pure UI
-      // chrome on the one body that needs no help being noticed. Light is
-      // fine; an indicator is not.
-      this.ctx.fillStyle = 'rgba(255,255,255,0.09)';
-      this.ctx.beginPath(); this.ctx.arc(x, y, inkR(b) * 1.15, 0, 6.283); this.ctx.fill();
+      // NOTHING BEHIND IT. This carried a pulsing amber ready-ring and a white
+      // halo; the ring went when Vanus asked why the colossus had a circle
+      // that breathed, and the halo goes now that he has spotted the disc left
+      // behind. Both were the same error the dragon's aura made: a flat arc
+      // fill at a solid alpha draws a hard EDGE, so it reads as a UI badge
+      // rather than as light — and the one body in the jar at r56 against
+      // r15-29 never needed help being seen. Its own art is luminous opal and
+      // the shadow model already says whether it can be dug.
+      //
       // same ink-to-circle fit as every other body; falls back to the prism's
       // multiplier when the dedicated heartstone art is missing
       var hd = b.r * sprFit(SPR.gem_heartstone ? 'gem_heartstone' : 'gem_prism');
@@ -3543,9 +3545,35 @@
       }
     }
     ctx.restore();
+    // THE MOMENT OF CONTACT. This used to draw a five-pointed cartoon STAR at
+    // the impact point — a sticker sitting on top of four effects that already
+    // sell the hit: the swung pick itself, the extraction ring, the rock chips
+    // and the hit-stop plus shake. It read as clip-art rather than as force,
+    // and it was the one thing on screen nobody could explain.
+    //
+    // What replaces it says "struck": a hard white core that dies in ~0.07s,
+    // and four short streaks thrown back along the swing. A heavy hit (rock)
+    // throws them further than a gem, so the effect carries information the
+    // star never did.
     if (pk.t > 0.38 && pk.t < 0.62) {
-      ctx.fillStyle = 'rgba(255,240,200,' + ((0.62 - pk.t) * 3).toFixed(2) + ')';
-      drawStar(ctx, pk.x, pk.y - 4, 9, 'rgba(255,240,200,0.9)');
+      var im = (0.62 - pk.t) * 4;                 // 1 -> 0 across the window
+      var reach = (pk.heavy ? 15 : 10) * (1.25 - im * 0.5);
+      ctx.save();
+      ctx.translate(pk.x, pk.y - 4);
+      ctx.strokeStyle = 'rgba(255,244,214,' + Math.min(0.85, im).toFixed(2) + ')';
+      ctx.lineWidth = pk.heavy ? 2.2 : 1.6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (var sk2 = 0; sk2 < 4; sk2++) {
+        // fanned back along the pick's arc, not a symmetric asterisk
+        var a2 = -2.5 + sk2 * 0.55;
+        ctx.moveTo(Math.cos(a2) * reach * 0.35, Math.sin(a2) * reach * 0.35);
+        ctx.lineTo(Math.cos(a2) * reach, Math.sin(a2) * reach);
+      }
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,252,238,' + Math.min(0.9, im * 1.1).toFixed(2) + ')';
+      ctx.beginPath(); ctx.arc(0, 0, (pk.heavy ? 4.2 : 3.2) * im, 0, 6.283); ctx.fill();
+      ctx.restore();
     }
   };
 
@@ -3830,7 +3858,11 @@
     // budget \u2014 the single most important number in the game \u2014 straight THROUGH
     // the rope and through the pins above cards 1 and 2. Nothing in this row
     // may extend past y=28.
-    var sfrac = Math.max(0, this.swings) / this.shiftSwings;
+    // Clamped at 1: the fill is `104 * sfrac` with no bound, so any state where
+    // swings exceeds the shift budget draws the bar straight out of its track
+    // and under the order cards. Not reachable today — but the cost of the
+    // clamp is one call and the cost of being wrong is a bar across the HUD.
+    var sfrac = Math.min(1, Math.max(0, this.swings) / this.shiftSwings);
     ctx.font = fT(13);
     ctx.fillStyle = 'rgba(232,220,200,0.9)';
     ctx.fillText('\u26cf', 15, 15);
@@ -3840,9 +3872,20 @@
     if (sfrac > 0) { rr(ctx, 33, 18, Math.max(6, 104 * sfrac), 9, 4.5); ctx.fill(); }
     ctx.strokeStyle = 'rgba(201,168,106,0.5)'; ctx.lineWidth = 1;
     rr(ctx, 33, 18, 104, 9, 4.5); ctx.stroke();
+    // LEFT-ALIGNED, and it has to be. textAlign is still 'center' from the
+    // tutorial line above, so this number was centred on x=143 — a two-digit
+    // count spanned 136..150 against a bar whose right edge is 137, and it
+    // drew straight through it. Three digits (the deeper pick can push the
+    // budget past 99) would have been worse. Centred vertically on the bar
+    // rather than sharing its 'top' baseline, so the pair reads as one gauge;
+    // digits have no descender, so 12px on the bar's midline stays inside the
+    // y<=28 ceiling the comment above defends.
     ctx.fillStyle = this.swings <= 5 ? '#f0a090' : 'rgba(232,220,200,0.85)';
     ctx.font = fT(12, 'bold');
-    ctx.fillText(String(Math.max(0, this.swings)), 143, 15);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(Math.max(0, this.swings)), 143, 22.5);
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
   };
 
@@ -3917,11 +3960,21 @@
     var base = c.y + c.h - (c.compact ? 4 : 10);         // where he sits
     var dx = c.l + 10;
     if (total >= 20) {
-      // the aura brightens with RANK instead of being a binary at 20
+      // LAMPLIGHT ON GOLD, not a yellow disc. This was a flat arc fill at a
+      // solid alpha, so it drew a hard-edged circle behind the dragon that
+      // read as a UI badge nobody could explain — Vanus asked what it was.
+      // A radial gradient falling to zero reads as the hoard catching light,
+      // which is what it was always meant to be. Brightness still climbs with
+      // rank; it just stops announcing itself as a shape.
       var arank = hoardRank(total);
-      var aa = Math.min(0.34, 0.16 + (arank ? arank.idx : 0) * 0.03);
-      ctx.fillStyle = 'rgba(255,215,94,' + aa.toFixed(2) + ')';
-      ctx.beginPath(); ctx.arc(dx + ds / 2, base - ds / 2, ds * 0.62, 0, 6.283); ctx.fill();
+      var aa = Math.min(0.30, 0.14 + (arank ? arank.idx : 0) * 0.028);
+      var acx = dx + ds / 2, acy = base - ds * 0.42, ar = ds * 0.72;
+      var ag = ctx.createRadialGradient(acx, acy, ds * 0.12, acx, acy, ar);
+      ag.addColorStop(0, 'rgba(255,222,120,' + aa.toFixed(2) + ')');
+      ag.addColorStop(0.55, 'rgba(255,215,94,' + (aa * 0.45).toFixed(2) + ')');
+      ag.addColorStop(1, 'rgba(255,215,94,0)');
+      ctx.fillStyle = ag;
+      ctx.beginPath(); ctx.arc(acx, acy, ar, 0, 6.283); ctx.fill();
     }
     var n = Math.min(total, 24);          // the pile deepens past 16 too
     for (var hi = 0; hi < n; hi++) {
@@ -4327,6 +4380,23 @@
     var slack = (this.view.floorY || VIEW_H) - MENU_BOTTOM;
     return Math.max(0, Math.min(72, Math.round(slack / 2)));
   };
+  // WHERE THE SHOP'S BACK BUTTON SITS. One definition, read by the draw AND by
+  // the pointer handler, because this file has shipped a drifting pair before.
+  //
+  // The shop is authored against VIEW_H=720, which is the GUARANTEED budget —
+  // the walls and pickaxe tabs end at 696, so on a short device the layout is
+  // already full. A 430x932 phone resolves ~910 units, and the extra 190 landed
+  // as blurred backdrop under a BACK button floating mid-screen with a void
+  // beneath it. That is what read as an unfinished panel.
+  //
+  // So BACK drops toward the floor and becomes a footer, the way the shop
+  // counter under the jar already does. `authoredY` is the floor of the value:
+  // on a device with no slack nothing moves at all, and the button can never
+  // ride UP into the last row.
+  Game.prototype._shopBackY = function (authoredY) {
+    var floor = this.view.floorY || VIEW_H;
+    return Math.max(authoredY, Math.round(floor - 78));
+  };
   Game.prototype.menuRect = function (id) {
     var b = MENU[id];
     if (MENU_CHROME[id]) return b;
@@ -4369,8 +4439,8 @@
     rr(ctx, 16, 20, 112, 46, 12); ctx.stroke();
     ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fT(10);
     ctx.fillText('COINS', 72, 26);
-    ctx.fillStyle = '#ffd75e'; ctx.font = fD(20);
-    ctx.fillText(coins + 'c', 72, 39, 96);
+    ctx.fillStyle = '#ffd75e'; ctx.font = fN(20);
+    fitText(ctx, coins.toLocaleString() + 'c', 72, 38, 96, fN, 20);
     var sb = MENU.shop;
     ctx.fillStyle = 'rgba(20,12,6,0.62)';
     rr(ctx, sb.x, sb.y, sb.w, sb.h, 12); ctx.fill();
@@ -4497,16 +4567,17 @@
     // line straight under the RECORDS label and the chevron on top of the
     // dragon — invisible at a high hoard, where the rank line is short, and
     // obvious the moment a save is FRESH and the line reads "hoard: 0 gems".
-    ctx.fillText(best > 0 ? ("today's daily best: " + best + 'c') : "today's daily dig awaits", cx - 44, 448, 130);
+    fitT(ctx, best > 0 ? ("today's best: " + best.toLocaleString() + 'c') : "today's daily dig awaits",
+         cx - 44, 448, 130, 13, 'bold');
     ctx.fillStyle = '#e8c9ff'; ctx.font = fT(12);
     // Show the RANK once the named milestones run out, with the next threshold
     // beside it — otherwise the hoard readout is a number that stopped meaning
     // anything at 20. maxWidth 196 is already enforced by fillText, and the
     // rank line is deliberately the shorter of the two forms.
     var hrk = hoardRank(Meta.data.hoardTotal);
-    ctx.fillText(hrk
+    fitT(ctx, hrk
       ? hrk.name + ' · ' + Meta.data.hoardTotal + '/' + hrk.next
-      : 'hoard: ' + Meta.data.hoardTotal + ' gems', cx - 44, 466, 130);
+      : 'hoard: ' + Meta.data.hoardTotal + ' gems', cx - 44, 466, 130, 12);
     // dragon, then the records affordance, both in the right third the text
     // column above now leaves clear
     var mdrag = dragonImage();
@@ -4553,7 +4624,7 @@
       w: MENU.daily.w, h: MENU.daily.h, tone: 'daily', icon: 'gem_sapphire',
       quiet: firstRun,
       sub: firstRun ? 'one shared jar · after your first shift'
-                    : 'today: ' + todayChar.name + ' · same jar for everyone',
+                    : todayChar.name + ' · one jar, everyone',
     });
     this._menuBtn('FREE DIG', MENU.free.y, {
       w: MENU.free.w, h: MENU.free.h, tone: 'free', icon: 'gem_emerald',
@@ -4562,7 +4633,7 @@
       // banks first-clear only, so ~33 free digs out-earn the entire 40-level
       // ladder — the mode carrying the economy was labelled as the one that
       // does not count.
-      sub: 'a fresh random jar · banks coins every shift',
+      sub: 'a fresh jar · banks coins every shift',
     });
     ctx.restore();
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
@@ -5088,7 +5159,7 @@
              ctx.fillText('\u2605 ' + sk.stars, x0 + 290, y + 13, 90); }
       ctx.textAlign = 'center';
     }
-    this._menuBtn('BACK', dragonRowY(PICK_SKINS.length) + 6);
+    this._menuBtn('BACK', this._shopBackY(dragonRowY(PICK_SKINS.length) + 6));
   };
 
   Game.prototype._drawDragonTab = function () {
@@ -5137,7 +5208,7 @@
       }
       ctx.textAlign = 'center';
     }
-    this._menuBtn('BACK', dragonRowY(DRAGON_SKINS.length) + 6);
+    this._menuBtn('BACK', this._shopBackY(dragonRowY(DRAGON_SKINS.length) + 6));
   };
 
   Game.prototype._drawShop = function () {
@@ -5169,8 +5240,8 @@
       rr(ctx, VIEW_MIN_W / 2 - 78, 168, 156, 40, 12); ctx.fill();
       ctx.strokeStyle = 'rgba(255,215,94,0.5)'; ctx.lineWidth = 1.5;
       rr(ctx, VIEW_MIN_W / 2 - 78, 168, 156, 40, 12); ctx.stroke();
-      ctx.fillStyle = '#ffd75e'; ctx.font = fD(22);
-      ctx.fillText((Meta.data.coins || 0) + 'c', VIEW_MIN_W / 2, 178);
+      ctx.fillStyle = '#ffd75e'; ctx.font = fN(22);
+      ctx.fillText((Meta.data.coins || 0).toLocaleString() + 'c', VIEW_MIN_W / 2, 178);
     }
 
     // --- tabs ---------------------------------------------------------------
@@ -5231,49 +5302,61 @@
       ctx.lineWidth = isEq ? 2 : 1;
       rr(ctx, tX, tY, tw, th, 8); ctx.stroke();
 
-      var tx0 = x0 + 66;
+      // TWO LINES OF TEXT, NOT THREE. The third line sat at y+45 in a 56-tall
+      // row and crossed the bottom border on every unowned item \u2014 and it said
+      // "YOU CAN AFFORD THIS \u00b7 TAP TO BUY" four times down one screen, which is
+      // repetition, not a system. Affordability now rides on the PRICE, where
+      // the player is already looking, and costs no vertical space at all:
+      //
+      //   affordable   gold price + a gold rail down the left edge of the row
+      //   too dear     dim price + a slim bar under it showing how close
+      //   owned        WEAR
+      //   worn         \u2713 WORN
+      var tx0 = x0 + 66, rightX = x0 + 288, textRoom = 150;
       ctx.textAlign = 'left';
-      ctx.fillStyle = owned ? '#ffe9a8' : (afford ? '#e8dcc8' : 'rgba(200,186,166,0.55)');
-      ctx.font = fD(16);
-      ctx.fillText(sk.name, tx0, y + 9, 150);
-      ctx.font = fT(11);
+      ctx.fillStyle = owned ? '#ffe9a8' : (afford ? '#f0e3cc' : 'rgba(200,186,166,0.55)');
+      fitD(ctx, sk.name, tx0, y + 11, textRoom, 17);
+      // 144, not textRoom+18. The note sits at y+33 and the "how close" bar at
+      // y+38 spanning x 274..348; at 168 the note reached 294 and ran straight
+      // through the bar on Deep Basalt. 144 stops it at 270, four units clear
+      // of the price column — the same lane the name already respects.
       ctx.fillStyle = 'rgba(232,220,200,0.5)';
-      ctx.fillText(sk.note || '', tx0, y + 29, 168);
+      fitT(ctx, sk.note || '', tx0, y + 33, 144, 11.5);
 
-      // THE THIRD LINE ANSWERS "CAN I HAVE IT YET".
-      // 600c and 7,600c looked identical while holding 0c: the screen priced
-      // everything and told you nothing about your own distance to it.
-      ctx.font = fT(11, 'bold');
-      if (isEq) {
-        ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN IN EVERY DIG', tx0, y + 45);
-      } else if (owned) {
-        ctx.fillStyle = 'rgba(255,233,168,0.75)'; ctx.fillText('TAP TO WEAR', tx0, y + 45);
-      } else if (afford) {
-        ctx.fillStyle = '#8fd08a'; ctx.fillText('YOU CAN AFFORD THIS \u00b7 TAP TO BUY', tx0, y + 45);
-      } else {
-        var have = Meta.data.coins || 0, short = sk.price - have;
-        ctx.fillStyle = 'rgba(232,200,150,0.62)';
-        ctx.fillText(short.toLocaleString() + 'c to go', tx0, y + 45);
-        // and the same number as a bar, because a distance is easier to feel
-        // than to read
-        var bx = tx0 + 92, bw2 = 76, byy = y + 49;
-        ctx.fillStyle = 'rgba(0,0,0,0.35)'; rr(ctx, bx, byy, bw2, 4, 2); ctx.fill();
-        ctx.fillStyle = 'rgba(255,215,94,0.55)';
-        rr(ctx, bx, byy, Math.max(2, bw2 * Math.min(1, have / sk.price)), 4, 2); ctx.fill();
+      // The "available now" mark: a gold rail on the row's leading edge. Silent,
+      // scannable, and it costs no words.
+      if (!owned && afford) {
+        ctx.fillStyle = 'rgba(255,215,94,0.85)';
+        rr(ctx, x0 + 2, y + 12, 3, SHOP_ROW_H - 24, 1.5); ctx.fill();
       }
 
       ctx.textAlign = 'right';
-      if (!owned) {
-        ctx.fillStyle = afford ? '#ffd75e' : 'rgba(200,186,166,0.45)';
-        ctx.font = fD(17);
-        ctx.fillText(sk.price.toLocaleString() + 'c', x0 + 288, y + 14);
-      } else if (isEq) {
-        ctx.fillStyle = '#ffd75e'; ctx.font = fD(18);
-        ctx.fillText('\u2713', x0 + 288, y + 18);
+      if (isEq) {
+        ctx.fillStyle = '#ffd75e';
+        ctx.font = fT(12, 'bold');
+        ctx.fillText('\u2713 WORN', rightX, y + 22);
+      } else if (owned) {
+        ctx.fillStyle = 'rgba(255,233,168,0.8)';
+        ctx.font = fT(12, 'bold');
+        ctx.fillText('WEAR', rightX, y + 22);
+      } else {
+        // fN: lining figures. Georgia's old-style numerals made the price
+        // column ripple \u2014 5 and 7 dropping below the baseline next to an
+        // x-height 0 \u2014 which read as broken rather than as a typeface.
+        ctx.fillStyle = afford ? '#ffd75e' : 'rgba(200,186,166,0.5)';
+        ctx.font = fN(afford ? 18 : 17);
+        ctx.fillText(sk.price.toLocaleString() + 'c', rightX, afford ? y + 20 : y + 13);
+        if (!afford) {
+          var have = Meta.data.coins || 0;
+          var bw2 = 74, bx = rightX - bw2, byy = y + 38;
+          ctx.fillStyle = 'rgba(0,0,0,0.38)'; rr(ctx, bx, byy, bw2, 4, 2); ctx.fill();
+          ctx.fillStyle = 'rgba(255,215,94,0.5)';
+          rr(ctx, bx, byy, Math.max(2, bw2 * Math.min(1, have / sk.price)), 4, 2); ctx.fill();
+        }
       }
       ctx.textAlign = 'center';
     }
-    this._menuBtn('BACK', shopRowY(WALL_SKINS.length) + 6);
+    this._menuBtn('BACK', this._shopBackY(shopRowY(WALL_SKINS.length) + 6));
     ctx.textBaseline = 'alphabetic';
   };
 
@@ -5403,16 +5486,20 @@
     }
 
     // The medallion: a sunken disc with the mode's gem sitting in it.
-    var tx = VIEW_MIN_W / 2, avail = bw - 26;
+    var tx = VIEW_MIN_W / 2, avail = bw - 24;
     var spr = opt.icon && SPR[opt.icon];
     if (spr && !dim) {
-      var cx = x + 30, cy = y + bh / 2, rad = 16;
+      // Tucked into the corner rather than centred in a left gutter: the first
+      // version sat at x+30 with r=16 and charged the label 46 units, which is
+      // what pushed 'today: … · same jar for everyone' into visible condensing.
+      // At x+25/r=14 it costs 34 and reads the same at arm's length.
+      var cx = x + 25, cy = y + bh / 2, rad = 14;
       ctx.fillStyle = 'rgba(0,0,0,0.30)';
       ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 6.283); ctx.fill();
       ctx.strokeStyle = 'rgba(255,240,200,0.22)'; ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 6.283); ctx.stroke();
-      ctx.drawImage(spr, cx - 14, cy - 14, 28, 28);
-      tx += 20; avail -= 46;                 // label recentres out of the disc
+      ctx.drawImage(spr, cx - 12.5, cy - 12.5, 25, 25);
+      tx += 14; avail -= 34;                 // label recentres out of the disc
     }
 
     ctx.fillStyle = dim ? 'rgba(200,186,166,0.42)' : opt.quiet ? '#e8dcc8' : t.ink;
@@ -5421,15 +5508,14 @@
     // exactly what 'the same jar for everyone · new at midnight UTC' did at
     // 11px in a 244-unit button. Canvas condenses instead. It is also the only
     // thing standing between this screen and a longer translation.
+    // fitText, never a raw maxWidth — see its definition. These are the lines
+    // that read as squished on Vanus's phone.
     if (opt.sub) {
-      ctx.font = fD(21);
-      ctx.fillText(label, tx, y + 10, avail);
+      fitD(ctx, label, tx, y + 9, avail, 21);
       ctx.fillStyle = dim ? 'rgba(200,186,166,0.34)' : 'rgba(240,228,206,0.72)';
-      ctx.font = fT(11.5);
-      ctx.fillText(opt.sub, tx, y + 38, avail);
+      fitT(ctx, opt.sub, tx, y + 37, avail, 12);
     } else {
-      ctx.font = fD(opt.quiet ? 18 : 21);
-      ctx.fillText(label, tx, y + (bh - 21) / 2, avail);
+      fitD(ctx, label, tx, y + (bh - 21) / 2, avail, opt.quiet ? 18 : 21);
     }
   };
 
@@ -5479,9 +5565,8 @@
     if (this.career) {
       var cr = this.careerResult || { won: false, stars: 0 };
       ctx.fillStyle = cr.won ? '#ffd75e' : '#f0a090';
-      ctx.font = fD(32);
-      ctx.fillText(cr.won ? 'LEVEL ' + this.career.level + ' CLEARED!'
-                          : 'THE PICK GAVE OUT', VIEW_MIN_W / 2, 180, 304);
+      fitD(ctx, cr.won ? 'LEVEL ' + this.career.level + ' CLEARED!'
+                       : 'THE PICK GAVE OUT', VIEW_MIN_W / 2, 180, 304, 32);
       for (var st = 0; st < 3; st++) {
         var sx = VIEW_MIN_W / 2 + (st - 1) * 54;
         drawStar(ctx, sx, 258, 22, st < cr.stars ? '#ffd75e' : 'rgba(255,255,255,0.18)');
@@ -5524,9 +5609,9 @@
                                : 'a deeper pick costs ' + DEEPER_PICK_COST + 'c  ·  you have '
                                  + (Meta.data.coins || 0) + 'c',
                      VIEW_MIN_W / 2, 450);
-        ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(12);
-        ctx.fillText('+' + DEEPER_PICK_SWINGS + ' swings on the next attempt  ·  stars still scored on 55',
-                     VIEW_MIN_W / 2, 470, 300);
+        ctx.fillStyle = 'rgba(232,220,200,0.6)';
+        fitT(ctx, '+' + DEEPER_PICK_SWINGS + ' swings next attempt · stars still scored on 55',
+             VIEW_MIN_W / 2, 470, 300, 12);
         // Drawn DISABLED when it cannot be bought. It used to render at full
         // gold strength either way, so a broke player tapped a live-looking
         // button and got a thunk — and this is the button hit-tested BEFORE
@@ -5655,6 +5740,43 @@
   var F_TEXT = '"Avenir Next", "Segoe UI", Roboto, system-ui, sans-serif';
   function fD(px, w) { return (w || 'bold') + ' ' + px + 'px ' + F_DISP; }   // display
   function fT(px, w) { return (w ? w + ' ' : '') + px + 'px ' + F_TEXT; }    // text/UI
+
+  // NUMBERS USE THE TEXT FACE, ALWAYS. Georgia's numerals are OLD-STYLE: 3,4,5,7,9
+  // descend below the baseline and 0,1,2 sit at x-height. In a display heading
+  // that is elegant; in a data readout it looks broken, and "5670c" in the coin
+  // pill was the first thing Vanus called out as "not right". F_TEXT has lining
+  // figures — equal height, sitting on the baseline — which is what a counter,
+  // a price, a score or a timer needs.
+  function fN(px, w) { return (w || 'bold') + ' ' + px + 'px ' + F_TEXT; }   // numeric
+
+  // TEXT THAT FITS BY GETTING SMALLER, NOT NARROWER.
+  //
+  // fillText's 4th argument CONDENSES glyphs horizontally — it does not scale
+  // them — so a string 20% too long is drawn at 80% width with full-height
+  // letterforms. That is exactly the "squished" look, and this file passed a
+  // maxWidth at 36 sites. Adding the gem medallion to _menuBtn cut the label
+  // budget by 46 units and pushed several menu subtitles well past the point
+  // where the distortion is visible.
+  //
+  // This measures first and scales the SIZE, preserving letterforms. Condensing
+  // is kept only as the last resort below FIT_MIN, where an unreadably small
+  // line would be worse than a slightly narrow one.
+  var FIT_MIN = 9;
+  function fitText(ctx, text, x, y, maxW, mk, px) {
+    ctx.font = mk(px);
+    var w = ctx.measureText(text).width;
+    if (w <= maxW) { ctx.fillText(text, x, y); return; }
+    var scaled = Math.max(FIT_MIN, Math.floor(px * (maxW / w) * 10) / 10);
+    ctx.font = mk(scaled);
+    if (ctx.measureText(text).width > maxW) ctx.fillText(text, x, y, maxW);
+    else ctx.fillText(text, x, y);
+  }
+  function fitD(ctx, t, x, y, maxW, px, w) {
+    fitText(ctx, t, x, y, maxW, function (p) { return fD(p, w); }, px);
+  }
+  function fitT(ctx, t, x, y, maxW, px, w) {
+    fitText(ctx, t, x, y, maxW, function (p) { return fT(p, w); }, px);
+  }
 
   // ---- BUTTON TONES. One row per mode, so three identical slabs become three
   // recognisable objects. Deliberately pulled toward the burrow: these are lit
@@ -5813,7 +5935,7 @@
             return;
           }
         }
-        if (hitBtn(w, dragonRowY(PICK_SKINS.length) + 6)) {
+        if (hitBtn(w, game._shopBackY(dragonRowY(PICK_SKINS.length) + 6))) {
           uiTick(); game.state = 'menu'; Snd.scene('shop'); return;
         }
         return;
@@ -5835,12 +5957,12 @@
             return;
           }
         }
-        if (hitBtn(w, dragonRowY(DRAGON_SKINS.length) + 6)) {
+        if (hitBtn(w, game._shopBackY(dragonRowY(DRAGON_SKINS.length) + 6))) {
           uiTick(); game.state = 'menu'; Snd.scene('shop'); return;
         }
         return;
       }
-      var backY = shopRowY(WALL_SKINS.length) + 6;
+      var backY = game._shopBackY(shopRowY(WALL_SKINS.length) + 6);
       if (hitBtn(w, backY)) { uiTick(); game.state = 'menu'; Snd.scene('shop'); return; }
       for (var si = 0; si < WALL_SKINS.length; si++) {
         // shopRowY/SHOP_ROW_H, not the literals they expand to today — the
