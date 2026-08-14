@@ -902,9 +902,15 @@
     guttered:  { name: 'Guttered Torches', pitch: 'The lights are low. Every machine sees less — build close.',
                  mods: { rangeMul: 0.72 } },
     lean:      { name: 'Lean Season',      pitch: 'Almost nothing to start. The raiders pay for everything.',
-                 mods: { startGold: 60, bountyMul: 1.6 } },
+                 // startGold was ADDITIVE and landed on top of the Forge's purse,
+                 // so the harshest-sounding trial started you richer than normal
+                 // AND paid 1.6x bounties — the softest run in the game.
+                 mods: { startGoldSet: 60, bountyMul: 1.6 } },
     smothered: { name: 'Smothered Fire',   pitch: "Wick's flame is out. The machines answer alone.",
-                 mods: { breathCd: 9999 } },
+                 // NOT breathCd: 9999 — the hero inits breathCd 6, so that still
+                 // granted one free breath, and two meters hardcode 14 and would
+                 // have drawn a permanently full bar. An off switch is honest.
+                 mods: { breathOff: true } },
   };
   var TRIAL_ORDER = ['purse', 'picnic', 'greased', 'guttered', 'lean', 'smothered'];
 
@@ -2067,13 +2073,28 @@
     // Trial mutator: campaign-only by construction; forge power still applies
     this.trial = (this.mode === 'campaign' && trialKey && TRIALS[trialKey]) ? trialKey : null;
     if (this.trial) {
+      // THIS WAS A HAND-MAINTAINED WHITELIST AND IT SILENTLY DROPPED KEYS.
+      // rangeMul (Guttered Torches) and breathCd (Smothered Fire) were declared
+      // in TRIALS and copied by nothing, so both trials were a label on an
+      // unmodified run — and the win stamped the badge anyway. bannedTower had
+      // already been found dead the same way; fixing that ONE key instead of the
+      // mechanism is why two more were still broken hours later.
+      // Copy by RULE now, and validate.py asserts every declared key is handled.
       var tm = TRIALS[this.trial].mods;
-      if (tm.startGold) this.mods.startGold = (this.mods.startGold | 0) + tm.startGold;
+      // absolutes: the trial's number wins outright
+      if (tm.startGoldSet != null) this.mods.startGoldSet = tm.startGoldSet;
       if (tm.sellRefund != null) this.mods.sellRefund = Math.max(this.mods.sellRefund || 0, tm.sellRefund);
       if (tm.bountyMul != null) this.mods.bountyMul = tm.bountyMul;   // 0 is meaningful — never || it
       if (tm.bannedTower) this.mods.bannedTower = tm.bannedTower;
       if (tm.fleeMul) this.mods.fleeMul = tm.fleeMul;
+      if (tm.breathOff) this.mods.breathOff = true;
+      // multiplicative: STACKS with forge power instead of clobbering it
+      if (tm.rangeMul != null) this.mods.rangeMul = (this.mods.rangeMul || 1) * tm.rangeMul;
+      if (tm.startGold) this.mods.startGold = (this.mods.startGold | 0) + tm.startGold;
     }
+    // A trial that SETS the purse replaces it; the Forge's +25/rank must not be
+    // added on top, or 'Almost nothing to start' hands you MORE than a normal run.
+    if (this.mods.startGoldSet != null) this.gold = this.mods.startGoldSet;
     if (this.mods.startGold) this.gold += this.mods.startGold;
     this.hitstopT = 0;
     this.resultLockT = 0;
@@ -2741,6 +2762,7 @@
       var ndx = en2.px - h.x, ndy = en2.py - h.y;
       if (ndx * ndx + ndy * ndy <= h.range * h.range) inR.push(en2);
     }
+    if (h.castBreath && this.mods.breathOff) h.castBreath = false;   // Smothered Fire
     if (h.castBreath) {
       h.castBreath = false;
       if (h.breathCd <= 0 && inR.length) {          // player-cast; needs a target
@@ -3040,13 +3062,30 @@
       // over illegal ground still starts the wave, so the button never goes
       // dead and needs no second tap to reach.
       var armedOverGround = this.shopPick >= 0 && this._placeCheck(w.x, w.y).ok;
-      if (!armedOverGround) {
+      // ...and it did NOT cover the management direction, which is the common
+      // one. Once a machine STANDS on that ground, _placeCheck returns false
+      // ('too close to another machine'), so armedOverGround goes false and the
+      // button eats the tap forever after. Measured on stock pads: L1 pad (56,684)
+      // sits inside the BREATH rect and L3 pad (224,684) inside START WAVE on
+      // EVERY device tested -- so tapping your own machine fired the breath, or
+      // started the next wave and took the early-call bonus with it.
+      // The file already claims this priority twice ('towers / pads beat the HUD
+      // bands and the start-wave rect'); this makes it true.
+      var twUnder = false;
+      if (this.shopPick < 0) {                    // a machine in hand still places
+        for (var tu = 0; tu < this.towers.length; tu++) {
+          var tud = this.towers[tu], ux = w.x - tud.x, uy = w.y - tud.y;
+          if (ux * ux + uy * uy < 32 * 32) { twUnder = true; break; }
+        }
+      }
+      if (!armedOverGround && !twUnder) {
         if (!this.waveActive && this.wave < this.totalWaves() &&
             vx >= G.cx - 92 && vx <= G.cx + 92 && vy >= G.startY && vy <= G.startY + 52) {
           this.startWave(); return;
         }
         if (vx >= G.breathX && vx <= G.breathX + 62 && vy >= G.breathY && vy <= G.breathY + 62) {
-          this.hero.castBreath = true; return;       // the breath's own button
+          if (!this.mods.breathOff) this.hero.castBreath = true;
+          return;                                  // the breath's own button
         }
       }
       // THE SHOP: pick a machine, then tap the cavern to place it.
@@ -4789,7 +4828,9 @@
       ctx.fillStyle = 'rgba(168,230,255,0.85)'; ctx.font = 'bold 10px system-ui, sans-serif';
       ctx.fillText('TRIAL: ' + TRIALS[this.trial].name.toUpperCase(), lx + 27, G.topY + 50);
     }
-    if (this.state === 'playing') {
+    // Smothered Fire takes the flame away, so the button goes with it — an
+    // unusable control that still sits there reads as a bug, not a rule.
+    if (this.state === 'playing' && !this.mods.breathOff) {
       // BREATH button — charged is loud, cooling is a shrinking dark wedge
       var bReady = this.hero.breathCd <= 0;
       var bFrac = bReady ? 1 : 1 - this.hero.breathCd / (this.mods.breathCd || 14);
@@ -4940,7 +4981,16 @@
         counts[gt] += groups[gi].count;
       }
       var cellW = 58, pw = order.length * cellW;
-      var py = G.shopY - 30;   // ABOVE the shop bar, not on top of its chips
+      // ABOVE THE START BUTTON, not on top of it. This read shopY-30, whose
+      // panel rect (py-18..py+18 = shopY-48..shopY-12) covered 33 of the START
+      // WAVE plate's 52 units on EVERY viewport: frame one of a new player's
+      // first game rendered 'BEGI[scouts]IEGE', and from wave 2 the only tempo
+      // instruction in the game -- 'auto in Ns, early pays gold' -- was
+      // unreadable, so the early-call bonus was undiscoverable.
+      // The panel is draw-only (no hit test), so raising it cannot strand a tap;
+      // the BUTTON must not move -- startY-40 was measured to land its rect on
+      // level 1's build pad at (248,672).
+      var py = G.startY - 32;
       uiPanel(ctx, G.cx - pw / 2 - 10, py - 18, pw + 20, 36, 10);
       for (var oi = 0; oi < order.length; oi++) {
         var px = G.cx - pw / 2 + cellW * oi + 16;
@@ -5424,7 +5474,10 @@
         rr(ctx, pcx - 8, pcy - 17, 16, 14, 3); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(pcx - 4, pcy - 13); ctx.lineTo(pcx + 4, pcy - 13);
         ctx.moveTo(pcx - 4, pcy - 8); ctx.lineTo(pcx + 4, pcy - 8); ctx.stroke();
-        inkText(ctx, live ? 'TRIALS ' + tDone + '/9' : 'TRIALS', pcx, pcy + 17,
+        // 6 trials x 3 levels = 18 badges. '/9' dated from when there were
+        // three trials and quietly told the player they were twice as done
+        // as they were — and it can never be reached, so it reads as broken.
+        inkText(ctx, live ? 'TRIALS ' + tDone + '/' + (TRIAL_ORDER.length * MAPS.length) : 'TRIALS', pcx, pcy + 17,
                 live ? '#d9f2ff' : '#8a7f72', 3, 1);
       } else {
         drawSpeaker(ctx, pcx - 4, pcy - 9, Sfx.isMuted());
