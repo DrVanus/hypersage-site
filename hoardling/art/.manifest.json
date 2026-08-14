@@ -165,11 +165,11 @@
    "as_drawn_psnr": 30.6
   },
   "hero_back.png": {
-   "size": "547->174px",
-   "kb": 12.5,
+   "size": "565->174px",
+   "kb": 12.2,
    "q": 84,
-   "codec_psnr": 35.7,
-   "as_drawn_psnr": 37.3
+   "codec_psnr": 35.8,
+   "as_drawn_psnr": 37.5
   },
   "hero_title.png": {
    "size": "863->594px",

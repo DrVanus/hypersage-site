@@ -20,6 +20,15 @@
     fleeWeight: 0.05,    // ...but slow by this per coin carried (loot-weight rule)
     fleeMin: 0.9,        // floor on the flee multiplier
     grabTime: 0.5,       // grab animation at the hoard before turning to flee
+    // --- Wick: vulnerability and THE TOLL --------------------------------
+    heroHp: 100,
+    heroContact: 24,     // a raider this close is in melee with him
+    heroDpsTaken: 5,     // per adjacent raider, per second (boss hits far harder)
+    heroRegen: 9,        // per second, once nothing has been near him for a beat
+    heroSafeAfter: 2.0,  // seconds clear of raiders before he starts recovering
+    heroDownTime: 9,     // seconds out of the fight after he drops
+    tollRange: 26,       // body-block reach for shaking a fleeing carrier
+    tollEvery: 0.30,     // seconds between coins shaken loose
     startGold: 120,
     startHoard: 60,      // treasure coins = the life bar
     breathAt: 15,        // hoard level that wakes Mother's Breath (once per level)
@@ -2029,7 +2038,12 @@
     var hs = MAP.heroStart || { x: 210, y: 470 };
     this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0,
                   breathCd: 6, spd: 85, selected: false, castBreath: false,
-                  manTid: -1, manned: false };   // manTid: stable tower id (survives splices)
+                  manTid: -1, manned: false,     // manTid: stable tower id (survives splices)
+                  // Wick has SKIN IN THE GAME now. He could not be hurt, so
+                  // there was never a reason to move him — a bot won 45 of 45
+                  // runs without touching him once. hp/downT are sim state:
+                  // graded, replay-identical, never read from the render lane.
+                  hp: CFG.heroHp, maxHp: CFG.heroHp, downT: 0, safeT: 0, tollCd: 0 };
     this.menu = null;                       // { padIdx } build menu | { towerIdx } manage menu
     this.shopPick = -1;                     // index into TOWER_ORDER while placing, else -1
     this.placeHint = null;                  // {x,y,ok,why} — the last previewed spot
@@ -2632,6 +2646,72 @@
       }
     }
     h.cd -= STEP; h.breathCd -= STEP;
+    if (h.tollCd > 0) h.tollCd -= STEP;
+
+    // ===== DOWNED ==========================================================
+    // Not a run-loss — an ABSENCE. While he is out you lose his manning bonus,
+    // his breath, his jam-clearing and the toll, which is exactly the set of
+    // things that were free before. He comes back at the keep at full health,
+    // so the punishment is tempo, never a dead run.
+    if (h.downT > 0) {
+      h.downT -= STEP;
+      h.manTid = -1; h.manned = false;
+      if (h.downT <= 0) {
+        var rs = MAP.heroStart || { x: 210, y: 470 };
+        h.x = h.tx = rs.x; h.y = h.ty = rs.y;
+        h.hp = h.maxHp; h.safeT = 0;
+        this.fxQueue.push({ k: 'float', x: h.x, y: h.y - 44, txt: 'WICK IS BACK', c: '#9ef58f' });
+      }
+      return;
+    }
+
+    // ===== CONTACT DAMAGE + THE TOLL ======================================
+    // One pass over the raiders near him: the ones marching in HURT him, the
+    // ones fleeing with treasure get SHAKEN. That pairing is the decision —
+    // the coins he can win back are being carried through the pack that is
+    // hurting him, so chasing is a real risk and parking him is a real cost.
+    var contact2 = CFG.heroContact * CFG.heroContact;
+    var toll2 = CFG.tollRange * CFG.tollRange;
+    var taking = 0, nearAny = false;
+    for (var hz = 0; hz < this.enemies.length; hz++) {
+      var hz_e = this.enemies[hz];
+      if (hz_e.hp <= 0) continue;
+      var hzx = hz_e.px - h.x, hzy = hz_e.py - h.y, hz2 = hzx * hzx + hzy * hzy;
+      if (hz2 > 3600) continue;                       // 60u: nothing to do out here
+      nearAny = true;
+      if (hz_e.fleeing) {
+        // THE TOLL — body-block a thief and shake the hoard back out of him.
+        // Only Wick can do this; a machine can only kill. It is his job in
+        // every single wave, because every wave produces carriers.
+        if (hz2 <= toll2 && h.tollCd <= 0 && hz_e.stolen > 0) {
+          hz_e.stolen--;
+          this.hoard++;
+          h.tollCd = CFG.tollEvery;
+          this.fxQueue.push({ k: 'recover', x: hz_e.px, y: hz_e.py, n: 1 });
+          Sfx.play('recover');
+        }
+      } else if (hz2 <= contact2) {
+        var hzBase = ENEMY_TYPES[hz_e.type];
+        taking += hzBase.hp > 500 ? CFG.heroDpsTaken * 4 : hzBase.armor ? CFG.heroDpsTaken * 1.8
+                                                                       : CFG.heroDpsTaken;
+      }
+    }
+    if (taking > 0) {
+      h.hp -= taking * STEP;
+      h.safeT = 0;
+      if (h.hp <= 0) {
+        h.hp = 0;
+        h.downT = CFG.heroDownTime;
+        h.manTid = -1; h.manned = false;
+        this.fxQueue.push({ k: 'herodown', x: h.x, y: h.y });
+        Sfx.play('leak');
+        return;
+      }
+    } else if (!nearAny) {
+      h.safeT += STEP;
+      if (h.safeT >= CFG.heroSafeAfter) h.hp = Math.min(h.maxHp, h.hp + CFG.heroRegen * STEP);
+    }
+
     var inR = [];
     for (var e2 = 0; e2 < this.enemies.length; e2++) {
       var en2 = this.enemies[e2];
@@ -3172,6 +3252,15 @@
   Game.prototype._shelf = function () {
     var out = [], mode = this.mode;
     for (var i = 0; i < TOWER_ORDER.length; i++) {
+      // THE KOBOLD PICNIC TRIAL WAS INERT. Its whole pitch is "Crossbow crews
+      // are picnicking — build without them", and mods.bannedTower was written
+      // by reset() and then read by NOTHING: the shelf offered the crossbow,
+      // the tap armed it, the build placed it, and the win stamped the badge
+      // regardless. A third of the trial content was a normal run wearing a
+      // label, and the star it awarded was for a challenge nobody performed.
+      // Enforcing it HERE is why _shelf exists — one source, so the draw loop
+      // and both tap sites cannot disagree about what is buyable.
+      if (this.mods.bannedTower === TOWER_ORDER[i]) continue;
       if (towerUnlocked(TOWER_ORDER[i], mode)) out.push(TOWER_ORDER[i]);
     }
     return out;
