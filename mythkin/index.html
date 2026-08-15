@@ -510,8 +510,9 @@ and the app says so on every screen where you talk to them.</p>
 <div class="refusals">
   <ul>
     <li>No sexual content — not as a tier, not as an unlock.</li>
-    <li>No characters who are minors, and no real, living people other than
-    yourself — a kin you paint from your own photo stays in your library.</li>
+    <li>No characters who are minors, and no public figures. You may paint a kin
+    from photographs of yourself, of someone who agreed, or of someone who has
+    died — and it stays in your library, never shared.</li>
     <li>No character that pretends to be human, or pretends to be your therapist.</li>
     <li>No guilt, no lost streaks, no "I missed you" notifications. If you go away,
     nothing punishes you for it.</li>
@@ -533,10 +534,21 @@ your app store.</p>
      free window is a few dozen and the Plus one is a few hundred. Keep any
      future edit here downstream of /v1/plans, which is already the one place
      the app's own allowances are rendered from. -->
-<!-- TRUE AS OF 2026-08-06: Mythkin has NO voice feature — no speech synthesis, no
-     TTS route, nothing in mythkin-app/*.js. ("voice" in mock-data.js is a writing-
-     style label, not audio.) mythkin-app/plus.js:24 lists voice as an aspiration
-     only. Plus buys: the free window lifted (config.py free_window_messages/
+<!-- UPDATED 2026-08-15, AND THE CONCLUSION IS UNCHANGED: no voice claim here.
+     What changed is only the reason. There IS now a speech seam in the client
+     (mythkin-app/speech.js) and a TTS route in the API (app/voice/routes.py),
+     so the old "nothing exists" version of this note is no longer true and
+     would mislead whoever read it next. But:
+       * the API route ships DISABLED (config.py voice_runtime_enabled=False)
+         because speaking one reply costs ~2x the model turn that wrote it;
+       * what is being built is a recorded GREETING, one fixed clip per kin,
+         and it is FREE FOR EVERYONE — it is not a Plus feature and must never
+         be sold as one;
+       * no audio has been rendered or shipped in a build yet.
+     So: still nothing to advertise, and nothing about voice belongs in the
+     Plus list even after the greetings ship. ("voice" in mock-data.js remains a
+     writing-style label, not audio.)
+     Plus buys: the free window lifted (config.py free_window_messages/
      free_window_hours), memory uncapped (memory/service.py capacity), created
      characters 1 -> 5 (config.py free_/plus_max_created_characters) and borrowed
      3 -> unlimited (marketplace/routes.py:452). Do not re-add voice here until it
