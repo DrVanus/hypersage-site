@@ -746,6 +746,21 @@
       // and a keg cracking apart: a low pop with a wooden splinter tail
       split:  [1.0, , 110, 0.02, 0.10, 0.28, 4, 1.1, -3, , , , , 1.2],
       shoot:  [0.5, , 880, , 0.02, 0.06, 1, 1.8, , , , , , 0.1],
+      // FIVE FIRING MACHINES SHARED THREE SOUNDS — the crossbow, the gargoyle
+      // roost and Wick's fireball were literally the same 80ms sample, and the
+      // Gemsinger made no sound at all. A board of mixed machines sounded like
+      // one machine. These are number literals, not art: each firing type now
+      // has its own voice, routed through FIRE_SFX.
+      bow:    [0.95, , 150, 0.01, 0.03, 0.11, 3, 2.4, -9, , , , , 1.1, , 0.08],
+      stone:  [0.9, , 70, 0.02, 0.05, 0.20, 4, 1.6, -4, , , , , 0.5, , 0.15, 0.05],
+      flame:  [0.85, , 220, 0.01, 0.06, 0.22, 4, 1.3, -6, , , , , 1.3],
+      chime:  [0.6, , 1320, 0.02, 0.06, 0.35, 1, 1.9, , , 660, 0.04, , , , , , 0.4],
+      // ...and the BACK half of the lifecycle was silent. A bolt landing made no
+      // sound at all; only the lob had an impact. A crit was indistinguishable
+      // from a graze, and a shield deflect from a clean hit.
+      thud:   [0.85, , 110, 0.01, 0.04, 0.14, 4, 1.5, -8, , , , , 0.9, , 0.15],
+      crunch: [1.0, , 90, 0.01, 0.06, 0.26, 4, 1.2, -10, , , , , 1.2, , 0.2],
+      clang:  [0.9, , 340, 0.01, 0.03, 0.13, 3, 1.1, -14, , , , , 0.6],
       lob:    [0.7, , 160, 0.02, 0.08, 0.25, 4, 1.2, 6, , , , , 0.6],
       bite:   [0.9, , 130, 0.01, 0.05, 0.18, 3, 1.5, -6, , , , , 0.4],
       hit:    [0.8, , 150, 0.01, 0.03, 0.16, 4, 1.4, -6, , , , , 0.7, , 0.2],
@@ -1175,11 +1190,17 @@
           Music.bedSrc = null; Music.bedName = '';
         }
       },
-      play: function (name) {
+      play: function (name, key) {
         if (!ac || muted) return;                     // consumes NOTHING seeded
         var now = Date.now();
-        if (RATE_MS[name] && lastPlay[name] && now - lastPlay[name] < RATE_MS[name]) return;
-        lastPlay[name] = now;
+        // KEYED ON THE EMITTER, NOT THE NAME. This was one timestamp per sound
+        // NAME, so five machines firing together played ONE voice and the other
+        // four were dropped — and at 2x speed the game got QUIETER, because the
+        // same wall-clock window swallowed twice as many shots. A machine still
+        // cannot machine-gun itself; five machines are now five voices.
+        var gk = key === undefined ? name : name + '#' + key;
+        if (RATE_MS[name] && lastPlay[gk] && now - lastPlay[gk] < RATE_MS[name]) return;
+        lastPlay[gk] = now;
         var buf = buffer(name);
         if (!buf) return;
         // per-play pitch jitter — ZzFX's own flavour, NEVER the gameplay seed
@@ -3074,7 +3095,15 @@
           }
         }
         if (hitAny) tw.shotT = 0;
-        if (hitAny) this.fxQueue.push({ k: 'pulse', x: pad.x, y: pad.y, r: lv.range, n: hitAny });
+        // A WHOLE MACHINE WITH NO SOUND AT ANY BEAT. The Gemsinger is the
+        // cheapest tower in the game and fires ~1/s, so it is very likely the
+        // most-built thing on the board — and it made no noise at all. The
+        // chime brightens with the number of raiders the pulse actually
+        // caught, so a wide catch RINGS and a single tick does not.
+        if (hitAny) {
+          this.fxQueue.push({ k: 'pulse', x: pad.x, y: pad.y, r: lv.range, n: hitAny });
+          Sfx.play('chime', tw.tid);
+        }
         tw.cd = hitAny ? 1 / lv.rate : 0.1;   // idle rescan at 6 Hz, not 60
         continue;
       }
@@ -3104,7 +3133,7 @@
           this.fxQueue.push({ k: 'recover', x: tp.x, y: tp.y, n: 1 });
         }
         this.fxQueue.push({ k: 'bite', x: tp.x, y: tp.y });
-        Sfx.play('bite');
+        Sfx.play('bite', tw.tid);
       } else if (tw.type === 'brazier') {                   // lobbed splash
         tw.shotT = 0;
         this.fxQueue.push({ k: 'muzzle', x: mz0.x, y: mz0.y, tx: tp.x, ty: tp.y });
@@ -3117,7 +3146,7 @@
           // Keyed by PAD, not array index: a sell splices the towers array.
           tar: lv.special === 'tarpatch' ? { d: target.d, w: lv.tarWidth, dps: lv.tarDps, dur: lv.tarDur, max: lv.maxPatches, tid: tw.tid } : null,
         });
-        Sfx.play('lob');
+        Sfx.play('lob', tw.tid);
       } else {                                              // homing bolt (crossbow / roost)
         var dmg = lv.dmg * mDmg;
         if (tw.type === 'perch' && eFly(target)) dmg *= (lv.airBonus3 || tt.airBonus || 1);
@@ -3143,7 +3172,7 @@
         // so after shots moved to the bow the release flashed ~25px away from
         // where the bolt actually left. My own residue, caught by the audit.
         this.fxQueue.push({ k: 'snap', x: mz0.x, y: mz0.y, tx: tp.x, ty: tp.y });
-        Sfx.play('shoot');
+        Sfx.play(tw.type === 'perch' ? 'stone' : 'bow', tw.tid);
       }
     }
 
@@ -3201,6 +3230,11 @@
         var dist = Math.sqrt(pdx * pdx + pdy * pdy);
         if (dist < 10) {
           this._damage(tgt, pr.dmg, { kind: 'bolt', tower: this.towers[pr.tower], shieldbreak: pr.shieldbreak });
+          // THE BACK HALF OF THE LIFECYCLE WAS SILENT. A bolt crossing the cave
+          // and connecting made no sound whatsoever, so the shot had a beginning
+          // and no end. A crit now lands differently from a graze, which is the
+          // whole point of a countable crit nobody could hear.
+          Sfx.play(pr.crit ? 'crunch' : 'thud', pr.target);
           // Carry the bolt's HEADING into the impact so the sparks spray off the
           // hit instead of puffing symmetrically — the direction was always right
           // there in the projectile and the effect threw it away.
@@ -3353,7 +3387,7 @@
       this.projectiles.push({ kind: 'fire', x: h.x, y: h.y - 14, target: pick.id,
                               spd: 300, dmg: h.dmg, hero: true });
       this.fxQueue.push({ k: 'muzzle', x: h.x, y: h.y - 14, tx: pick.px, ty: pick.py });
-      Sfx.play('shoot');
+      Sfx.play('flame');
     }
 
     // -- wave clear (no flat gold bonus: the balance table's income = start +
@@ -3476,7 +3510,9 @@
     // Shellback pavise halves bolt damage — unless a Roost L3 has broken it
     if (base.pavise && opts.kind === 'bolt' && !e.shieldBroken) {
       if (opts.shieldbreak) { e.shieldBroken = true; this.fxQueue.push({ k: 'float', x: pathPointAt(e.d).x, y: pathPointAt(e.d).y - 16, txt: 'shield broken!', c: '#c9d2dd' }); }
-      else dmg *= 0.5;
+      // A DEFLECT SOUNDED EXACTLY LIKE A CLEAN HIT, so the one raider that
+      // punishes bolt spam gave the player no audible reason to switch.
+      else { dmg *= 0.5; Sfx.play('clang', e.id); }
     }
     // Tuning Fork: a brittle (chill-rung) raider takes +25% from EVERY tower
     if (e.brittleT > 0) dmg *= e.brittleMul;
