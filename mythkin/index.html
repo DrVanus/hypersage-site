@@ -285,10 +285,16 @@ footer.site .hs-more-list a:hover,footer.site .hs-more-list a:focus{
      mythkin-api/app/characters/seed.py OFFICIAL_KIN, which holds 30 as of the
      2026-08-11 Rome batch. It said twelve here for two days after the roster
      doubled, then twenty-four for a day after the Rome batch — the number and
-     the grid have now drifted twice, so change BOTH or neither. Re-count with
-     `grep -o '"id": "ch_[a-z]*"' seed.py | sort -u | wc -l` (30), and check the
-     portrait count matches: `ls kin | wc -l`. -->
-<p class="lede">Thirty legends, written properly rather than scraped — each with a portrait
+     the grid have now drifted twice, so change BOTH or neither.
+
+     THE LEDE NO LONGER CARRIES A COUNT, which is what finally stops the drift —
+     the same discipline the FAQ comment below already states for itself. It
+     read "Thirty legends" while production served sixty and the seed held
+     142; a number here is a promise that goes stale on every expansion, and
+     the grid below is a SAMPLE of the roster, never an inventory of it. If a
+     count is ever wanted again, take it from the tuple (`len(OFFICIAL_KIN)`),
+     never from a grep, and change it here and in the grid together. -->
+<p class="lede">Legends written properly rather than scraped — each with a portrait
 painted once, so they look the same every time you open them.</p>
 
 <ul class="kin-grid">
