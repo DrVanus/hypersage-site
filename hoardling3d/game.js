@@ -797,7 +797,14 @@
   var TRIAL_ORDER = ['purse', 'picnic', 'greased'];
 
   var Save = (function () {
-    var KEY2 = 'hoardling.save.v2', KEY1 = 'hoardling.save.v1';
+    // NAMESPACED to this experiment. Published to hypersage.ai/hoardling3d/,
+    // the SAME ORIGIN as the shipping /hoardling/ build — so a shared
+    // localStorage key is a shared SAVE FILE, and the two builds write
+    // divergent shapes. Opening /hoardling3d/ once irreversibly overwrote the
+    // shipping game's progress for anyone who found the URL. 3D shipped and was
+    // reverted to ?r3d=1 on the main build; nothing links here now. Never share
+    // a storage key with a sibling build on one origin.
+    var KEY2 = 'hoardling3d.save.v2', KEY1 = 'hoardling3d.save.v1';
     var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {}, trials: {} };
     try {
       var raw = localStorage.getItem(KEY2);
@@ -935,8 +942,8 @@
       });
     }
     var VERDICTS = { 'bad-body': 1, 'bad-token': 1, 'too-fast': 1, 'over-rate': 1 };
-    function readQ() { try { return JSON.parse(localStorage.getItem('hoardling.lbq') || '[]'); } catch (e) { return []; } }
-    function writeQ(v) { try { localStorage.setItem('hoardling.lbq', JSON.stringify(v.slice(-10))); } catch (e) {} }
+    function readQ() { try { return JSON.parse(localStorage.getItem('hoardling3d.lbq') || '[]'); } catch (e) { return []; } }
+    function writeQ(v) { try { localStorage.setItem('hoardling3d.lbq', JSON.stringify(v.slice(-10))); } catch (e) {} }
     var flushing = false;
     function flush(done) {
       if (!on() || flushing) { if (done) done(); return; }
@@ -1190,6 +1197,12 @@
         gl.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
         gl.shadowMap.enabled = true;
         gl.shadowMap.type = T.PCFSoftShadowMap;
+        // FILMIC RESPONSE. Raw linear output clips every highlight to white and
+        // flattens colour — the "student project" look. ACES rolls highlights
+        // off on a film curve, which is most of the gap to a shipped game.
+        gl.toneMapping = T.ACESFilmicToneMapping;
+        gl.toneMappingExposure = 1.35;
+        gl.outputColorSpace = T.SRGBColorSpace;
         gl.domElement.style.cssText = 'position:absolute;inset:0;z-index:0;';
         var wrap = document.getElementById('game-wrap');
         wrap.insertBefore(gl.domElement, wrap.firstChild);
@@ -1215,13 +1228,31 @@
         scene.add(new T.HemisphereLight(0x8fb4f0, 0x5a3f26, 1.05));
         scene.add(new T.AmbientLight(0x38455e, 0.22));
         var M = function (c, r) { return new T.MeshStandardMaterial({ color: c, roughness: r === undefined ? 0.95 : r, flatShading: true }); };
+        // TILING SURFACE DETAIL. Flat-coloured geometry is the loudest "cheap"
+        // tell in low-poly; real surfaces have grain the key light can find.
+        var TL = new T.TextureLoader();
+        var tile = function (file, rep) {
+          var tx = TL.load(assetURL('art/tex/' + file));
+          tx.wrapS = tx.wrapT = T.RepeatWrapping;
+          tx.repeat.set(rep, rep);
+          tx.colorSpace = T.SRGBColorSpace;
+          tx.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
+          return tx;
+        };
+        self._texFloor = tile('tex_cavern_floor.jpg', 26);
+        self._texRoad = tile('tex_road_cobble.jpg', 7);
+        self._texRock = tile('tex_rock_wall.jpg', 1.4);
         self._mats = {
           floor: M(0x3d3126), road: M(0xa08a6e), roadEdge: M(0x231b15),
           rock: M(0x6d5a48), wood: M(0xa96c33), wood2: M(0xd08f4c),
           stone: M(0xb9b2a4), stoneD: M(0x857c6e), iron: M(0x9aa3b2, 0.45),
-          brass: M(0xe0aa3e, 0.3), gold: M(0xf0b429, 0.4), red: M(0xc0392b),
+          brass: new T.MeshStandardMaterial({ color: 0xe0aa3e, roughness: 0.3, metalness: 0.55, flatShading: true }),
+          gold: new T.MeshStandardMaterial({ color: 0xf0b429, roughness: 0.28, metalness: 0.7,
+                                             emissive: 0x3a2400, flatShading: true }),
+          red: M(0xc0392b),
           dragon: M(0xe85535), belly: M(0xf0cc84), teal: M(0x4fc3d0, 0.5),
-          roofBlue: M(0x3f7fd8), flame: new T.MeshBasicMaterial({ color: 0xffb352 }),
+          roofBlue: M(0x3f7fd8),
+          flame: new T.MeshBasicMaterial({ color: 0xffd08a, toneMapped: false }),
           tar: M(0x1a120c, 0.99), purple: M(0x7b3fa0), pale: M(0xd8cdb8),
           green: M(0x6a8a4a), skin: M(0xe8c8a0),
         };
@@ -1319,11 +1350,15 @@
         fpos.setZ(vi, bump);
         var tint = 0.82 + (Math.sin(vx2 * 0.02) * Math.cos(vy2 * 0.017)) * 0.14 +
                    Math.sin(vx2 * 0.05 + vy2 * 0.043) * 0.05;
-        fcol.push(0.26 * tint, 0.205 * tint, 0.155 * tint);   // deep earth, subtly varied
+        // the TEXTURE now carries the earth colour, so these vertex values are
+        // a subtle tint ONLY — leaving them dark multiplies dark x dark and
+        // the ground goes black.
+        fcol.push(0.92 * tint, 0.88 * tint, 0.82 * tint);
       }
       floorGeo.setAttribute('color', new T.Float32BufferAttribute(fcol, 3));
       floorGeo.computeVertexNormals();
-      var floorMat = new T.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true });
+      var floorMat = new T.MeshStandardMaterial({ vertexColors: true, roughness: 1,
+        map: this._texFloor });
       var floor = new T.Mesh(floorGeo, floorMat);
       floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; g.add(floor);
       // the road: a flat ribbon sampled off the real path (same arc length
@@ -1345,6 +1380,7 @@
       road.setAttribute('position', new T.Float32BufferAttribute(verts, 3));
       road.computeVertexNormals();
       m.road.side = T.DoubleSide;
+      if (this._texRoad) { m.road.map = this._texRoad; m.road.color.set(0xffffff); m.road.flatShading = false; m.road.needsUpdate = true; }
       var roadMesh = new T.Mesh(road, m.road);
       roadMesh.receiveShadow = true; g.add(roadMesh);
       // THE KEEP — the painted one is a battlemented castle with a dragon
@@ -1437,6 +1473,7 @@
       }
       // cavern dressing: rocks OUTSIDE the play rect (x beyond ±230 or z
       // beyond the ends), never on the floor the raiders walk
+      if (this._texRock && !m.rock.map) { m.rock.map = this._texRock; m.rock.flatShading = false; m.rock.needsUpdate = true; }
       for (var ri = 0; ri < 34; ri++) {
         var ra = ri / 34 * 6.283, rr3 = 395 + Math.sin(ri * 2.7) * 55;
         var rx = Math.cos(ra) * rr3, rz = Math.sin(ra) * rr3 * 1.15 - 40;
@@ -5339,6 +5376,64 @@
       bootDev();
     });
 
-  
+  // DEV-HARNESS-COMPILE-TIME-BEGIN — everything from here to the matching END
+  // sentinel is stripped from a store build by tools/build-web.py.
+  // game-sim-harness drives these. Installed from boot, once `game` exists.
+  bootDev = function () {
+    if (!_dev) return;
+    window.__game.game = game;
+    window.__game.state = function () {
+      return {
+        state: game.state, mode: game.mode, seed: game.seed, level: game.levelIdx, wave: game.wave,
+        waveActive: game.waveActive, gold: game.gold, hoard: game.hoard,
+        enemies: game.enemies.length, towers: game.towers.map(function (t) { return t.type + ':' + t.level; }),
+        kills: game.kills, worldT: Math.round(game.worldT * 100) / 100,
+        hero: { x: Math.round(game.hero.x), y: Math.round(game.hero.y) },
+      };
+    };
+    window.__game.seed = function (s, mode, level, trial) { game.reset(s >>> 0, mode || game.mode, level, trial); game.state = 'playing'; };
+    window.__game.injectTap = function (wx, wy) { var vv = game.view; Input.inject(wx, wy, wx + vv.ox, wy + vv.oy); };  // WORLD coords
+    window.__game.gold = function (n) { game.gold = n | 0; };
+    window.__game.skipTo = function (w) {
+      game.wave = Math.max(0, w | 0); game.waveActive = false; game.countdown = 3;
+      game.enemies.length = 0; game.projectiles.length = 0; game.spawnQueue.length = 0;
+    };
+    window.__game.speed = function (n) { game.speed = clamp(n | 0, 1, 8); };
+    // Pump the fixed-step sim directly — rAF stops in a hidden tab, and the
+    // sim harness must not depend on the compositor. First call FREEZES the
+    // rAF update pump so the two can never double-step one sim; freeze(false)
+    // hands the sim back to the compositor.
+    window.__game.step = function (n) {
+      game._freeze = true;
+      var STEP = 1 / CFG.stepHz;
+      n = Math.max(1, n | 0);
+      for (var i = 0; i < n && game.state === 'playing'; i++) game.update(STEP);
+      game._cosmetic(0.016);
+      return window.__game.state();
+    };
+    window.__game.freeze = function (v) { game._freeze = !!v; game._acc = 0; };
+    window.__game.build = function (padIdx, type) {
+      padIdx = padIdx | 0;
+      if (padIdx < 0 || padIdx >= MAP.pads.length) return false;   // no ghost pads
+      if (game._padTower(padIdx) !== -1 || !TOWER_TYPES[type]) return false;
+      var bp = MAP.pads[padIdx];
+      game.towers.push({ tid: game.nextId++, type: type, level: 0, fork: 0,
+                         x: bp.x, y: bp.y, padIdx: padIdx, cd: 0, targeting: 0, shotT: 9 });
+      return true;
+    };
+    window.__game.upgrade = function (towerIdx, fork) {   // mirrors the real path, no gold
+      var tw = game.towers[towerIdx | 0];
+      if (!tw || tw.level >= 2) return false;
+      var f = fork | 0;
+      if (tw.level === 1 && (f < 0 || f > 1)) return false;   // reject, don't mask (build() idiom)
+      tw.level++;
+      if (tw.level === 2) tw.fork = f;
+      return true;
+    };
+    window.__game.padCount = function () { return MAP.pads.length; };
+    window.__game.pads = function () { return MAP.pads.map(function (p) { return { x: p.x, y: p.y }; }); };
+    window.__game.startWave = function () { game.startWave(); };
+  };
+  // DEV-HARNESS-COMPILE-TIME-END
 
 })();
