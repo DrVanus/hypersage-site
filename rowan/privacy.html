@@ -1,4 +1,31 @@
 <!DOCTYPE html>
+<!-- =====================================================================
+     THIS PAGE EXISTS IN TWO TREES. ONE OF THEM IS THE MIRROR.
+
+       LIVE   hypersage-site/rowan/privacy.html
+              -> published under /rowan/ on the hypersage.ai origin
+              This is the copy the App Store listing links to
+              (rowan-app/store/listing.md) and the copy the app opens
+              from Settings > Health data policy (rowan-app/links.js
+              BASE). If it is wrong, the wrong thing is public.
+
+       MIRROR rowan-site/privacy.html
+              rowan-site DOES NOT PUBLISH ITSELF. Editing only this
+              copy changes nothing a user can read. That exact failure
+              happened on 2026-08-01: a correction sat committed in
+              rowan-site while the live page still carried the false
+              sentence.
+
+     The two files are byte-identical apart from self-referencing URLs
+     (canonical, og:url, og:image, twitter:image), which the deploy
+     form rewrites. EDIT BOTH, with the same words, in the same change,
+     and prove it with:
+
+         python3 rowan-site/tools/check_deploy_parity.py
+
+     Do NOT rsync the trees: a blind sync re-adds rowan/robots.txt,
+     which the origin-root robots.txt forbids.
+     ===================================================================== -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -41,10 +68,48 @@
   </nav>
 
   <main class="legal" id="main">
-    <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 2026-08-01</p>
+    <!-- ============================================================
+         DEPLOY GATE — DO NOT PUBLISH THIS FILE YET (added 2026-08-09)
+         ============================================================
+         The "4. Voice" section below now describes VOICE INPUT: a mic
+         button in the composer, the recording going to OpenAI to be
+         turned into text, and the text landing in the message box for
+         the person to read and send.
 
-    <p>Rowan holds health information, which is about the most sensitive data a phone can carry. So this policy is written to be checkable rather than reassuring: every statement below about the app and its backend was checked against the code on the date above. Where a statement describes what a third party does with data we send them, it reports their published terms, which we do not control. Where something leaves your device, we say so plainly instead of burying it. Two are easy to miss, so they are stated here rather than buried: your <strong>recent conversation history</strong> — up to about 14,000 characters of it — is re-sent to the AI provider with each new message so the reply follows the thread; and asking Rowan to read a reply aloud sends your device identifier and that message's id to our backend, though no text goes with it.</p>
+         That build is NOT live yet. Publishing this page before it is
+         makes the policy promise a feature the app does not have —
+         which is the same FTC HBNR problem as hiding one it does. An
+         inaccurate statement about health-data practices is itself the
+         violation, in EITHER direction; over-disclosure is not the
+         safe side of the line.
+
+         PUBLISH ONLY WHEN ALL FOUR ARE TRUE:
+           1. rowan-api ships POST /v1/companion/transcribe and
+              `transcribe_enabled` is defined in app/config.py.
+           2. rowan-app's shared composer (chatui.js attachComposer)
+              actually renders the mic button, on BOTH chat surfaces.
+           3. ios/App/App/Info.plist carries NSMicrophoneUsageDescription
+              and PrivacyInfo.xcprivacy declares AudioData — otherwise
+              the app is terminated by iOS on the first recording and
+              this page describes a feature nobody can reach.
+           4. The App Store Connect App Privacy questionnaire has the
+              Audio Data row (web-only flow, a hard submission gate).
+
+         `rowan-site/tools/claims_audit.py` pins this section to
+         `transcribe_enabled` in rowan-api/app/config.py, so the gate
+         goes RED until (1) lands. That red is this comment, in code.
+         Do not "fix" it by deleting the pin.
+
+         If the voice-input build is abandoned, REVERT this whole file
+         rather than trimming it — the old §4 sentence ("there is no
+         recording path in the app or the backend") is registered in
+         claims_audit.py's FORBIDDEN list and cannot simply be typed
+         back in.
+         ============================================================ -->
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: 2026-08-09</p>
+
+    <p>Rowan holds health information, which is about the most sensitive data a phone can carry. So this policy is written to be checkable rather than reassuring: every statement below about the app and its backend was checked against the code on the date above. Where a statement describes what a third party does with data we send them, it reports their published terms, which we do not control. Where something leaves your device, we say so plainly instead of burying it. Three are easy to miss, so they are stated here rather than buried: your <strong>recent conversation history</strong> — up to about 14,000 characters of it — is re-sent to the AI provider with each new message so the reply follows the thread; asking Rowan to read a reply aloud sends your device identifier and that message's id to our backend, though no text goes with it; and if you use the <strong>microphone button</strong> to speak instead of typing, that recording is sent to <strong>OpenAI</strong> to be turned into text.</p>
 
     <h2>Who we are</h2>
     <p>Rowan is an iOS app from HyperSage AI Labs, built by an independent developer. There is <strong>no account and no login</strong> — your install is identified by a random identifier generated on your device, not by your name or email. Contact: <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>.</p>
@@ -54,6 +119,7 @@
       <li>No account, no email, no password. The only name Rowan has is the one you choose to tell it, sent with each message so replies sound like they are for you. We keep no name column in our database — though anything you type in a message is stored as part of that message, a name included.</li>
       <li><strong>No advertising SDKs and no third-party analytics</strong> touching your health content. We do not sell or share your data.</li>
       <li>Your messages <strong>do</strong> leave your device — they go to our backend and on to an AI provider so Rowan can reply. Today that is <strong>Anthropic</strong>, or <strong>OpenAI</strong> when Anthropic is unavailable.</li>
+      <li>If you tap the <strong>microphone</strong> instead of typing, that recording leaves your device too: it goes to <strong>OpenAI</strong> to be turned into text, the text lands in the message box for you to read and send, and <strong>the audio is not stored by us or by your phone</strong>. Nothing is recorded unless you tap it.</li>
       <li>Your conversations and symptom logs are <strong>stored on our server</strong>, keyed to that random device identifier. <strong>The notes Rowan keeps about you are never filed on our server</strong> — your phone is the record of truth for them. They are still <strong>sent with every message</strong> so Rowan can remember you, and so reach the AI provider like the rest of your context; see "What we store on our own server" below.</li>
       <li>Everything has a retention limit, and one tap in the app deletes it.</li>
     </ul>
@@ -80,14 +146,20 @@
     <h3>3. A content-free safety log</h3>
     <p>Rowan runs an independent safety check on messages so it can surface emergency resources reliably. When a check fires, we record a <strong>content-free event</strong>: a hashed form of your device identifier, your tier, which route was involved, which layer of the check produced the verdict, the kind of event it was, a short reason code, and the time. Every one of those is a bounded code or a hash — none of them is text you wrote. It never contains your message text, your symptoms, or your conditions. This exists to keep the safety system honest and auditable. <strong>Safety and emergency turns are never metered and never paywalled</strong> — the daily cap and any subscription stop applying the moment the safety check fires. One narrower limit is worth naming: the per-minute flood limiter runs before that full check, so it can only waive what a fast first-pass scan recognises.</p>
 
-    <h3>4. Voice (no text is sent for it today)</h3>
+    <h3>4. Voice — Rowan reading aloud, and you speaking to Rowan</h3>
+    <p>These are two different things with two different answers, so they are stated separately. <strong>Rowan reading a reply aloud</strong> sends no text anywhere. <strong>You speaking to Rowan</strong> does send a recording of your voice off your device, and only ever when you tap the microphone.</p>
     <p>When Rowan reads a reply aloud, the voice is <strong>your device's own speech synthesis</strong> — no text leaves your phone to produce it. One thing does go out first: for a reply that came from our server, the app asks our backend whether a cloud voice is available, and that ask carries <strong>your device identifier and that message's id</strong> and nothing else. The backend declines every such request today (see below), and your phone then speaks the reply itself — which is also why read-aloud still works with no signal.</p>
-    <p>There is also a cloud text-to-speech route on our backend that would use <strong>OpenAI</strong>. It is <strong>switched off</strong>, and the switch is <strong>ours, not yours</strong> — there is no setting in the app that turns it on, and the route refuses every request while it is off. We are not describing a control you have; we are telling you a capability exists and is disabled. It stays disabled until this policy and the consent screen name OpenAI as a recipient of Rowan's <em>spoken</em> replies specifically. The consent screen names OpenAI today, but only as the failover that generates reply <em>text</em> when Anthropic is unavailable — that is a different permission, and it does not unlock this one. If that changes we will say so here first. Speaking <em>to</em> Rowan by voice is not implemented at all — there is no recording path in the app or the backend.</p>
+    <p>There is also a cloud text-to-speech route on our backend that would use <strong>OpenAI</strong>. It is <strong>switched off</strong>, and the switch is <strong>ours, not yours</strong> — there is no setting in the app that turns it on, and the route refuses every request while it is off. We are not describing a control you have; we are telling you a capability exists and is disabled. It stays disabled until this policy and the consent screen name OpenAI as a recipient of Rowan's <em>spoken</em> replies specifically. The consent screen names OpenAI today, but only as the failover that generates reply <em>text</em> when Anthropic is unavailable — that is a different permission, and it does not unlock this one. If that changes we will say so here first.</p>
+    <p><strong>Speaking to Rowan</strong> works the other way round, and this is the one place in the app where a recording of you leaves your device. There is a <strong>microphone button next to the message box</strong>. Nothing is recorded until you tap it, nothing is recorded after you tap it again to stop, and iOS asks for microphone permission the first time — you can refuse, or withdraw it later in iOS Settings, and Rowan keeps working exactly as before by typing. There is no always-listening mode, no wake word, and no background recording; if a recording is running, iOS shows its own orange indicator whether we like it or not.</p>
+    <p>When you stop, that clip is sent to our backend and straight on to <strong>OpenAI</strong>, whose transcription service turns it into text. Be clear-eyed about what that means: OpenAI already receives your message text on some turns as the failover, and this is a <em>third</em> route to them — the first one that carries <strong>your voice</strong> rather than your typing. Nothing else rides along with the clip: your conditions, medications, allergies, notes and symptom history are <strong>not</strong> attached to a transcription request. What travels with it is the recording, your random device identifier, and the same App Store subscription identifiers every other request to our backend already carries — no health context, and none of your typed history.</p>
+    <p><strong>The recording is not stored — not by us, and not on your phone.</strong> It is held in memory for the length of that one request and written to no database, no log, and no file; there is no audio column anywhere in our database and no audio file anywhere in the app. Our error reporting cannot pick it up either, because request bodies are dropped before an event is sent (see "Crash reporting"). We do not keep it to improve accuracy, and OpenAI's API terms say your content is not used to train their models. When the request ends, the clip is gone.</p>
+    <p><strong>The text comes back to the message box, not to Rowan.</strong> It is typed into the box for you, and that is where it stops: you read it, fix anything it misheard, and press send yourself. Rowan itself is never given the words until you send them: the transcript is handed straight back to your phone, not into a conversation, and nothing about it is stored on the way past. This is deliberate and it is the point of the design — a mis-transcription in a health app becomes a symptom record, so the words that end up in your record are words you actually looked at. Once you send it, it is an ordinary message and is treated exactly like one you typed: it runs through the same safety check, and it is stored and deleted on the same terms as everything else in "What we store on our own server". A recording you never send leaves no trace at all. A single recording is also capped at about a minute, so the mic is for a sentence or two rather than a monologue.</p>
 
     <h2>What we do not collect</h2>
     <ul>
       <li>Your name, email, or login credentials — the app has no account.</li>
       <li>Your location, contacts, photos, or calendar.</li>
+      <li><strong>Any audio you did not deliberately record.</strong> Rowan never listens in the background, has no wake word, and cannot start the microphone on its own. Tapping the mic button records until you stop it — that clip is sent to be turned into text and then discarded, and it is the one item on this list with an exception, described in full in "4. Voice" above.</li>
       <li>Any advertising identifier. <strong>There are no ad SDKs and no third-party analytics attached to your health content.</strong></li>
       <li>Your Apple Health data or your iPhone medication list. <strong>Rowan does not read them</strong> — everything it knows is something you told it.</li>
       <li>Data about you from anywhere outside Rowan.</li>
@@ -105,12 +177,12 @@
     </ul>
 
     <h2>Consumer health data</h2>
-    <p>Some U.S. states — Washington's My Health My Data Act, Nevada's SB 370, and Connecticut's health-data amendments among them — treat consumer health data as its own category with its own consent requirements. Rowan is built to that standard: collection begins only after you affirmatively consent during onboarding, having been told in that step that your messages and health context are sent to Anthropic to generate replies, and to OpenAI when Anthropic is unavailable. <strong>We do not sell your consumer health data, and we do not share it for anyone else's purposes.</strong> You can view what Rowan remembers, remove any single note or clear the whole list, export what's on your phone, and delete everything — on the device and on our server — from inside the app.</p>
+    <p>Some U.S. states — Washington's My Health My Data Act, Nevada's SB 370, and Connecticut's health-data amendments among them — treat consumer health data as its own category with its own consent requirements. Rowan is built to that standard: collection begins only after you affirmatively consent during onboarding, having been told in that step that your messages and health context are sent to Anthropic to generate replies, and to OpenAI when Anthropic is unavailable. <strong>Recording your voice is a separate choice, taken separately.</strong> The onboarding screen tells you before you ever reach the app that the microphone sends a recording to OpenAI to be turned into text; nothing is recorded until you tap the mic button; iOS asks its own permission the first time you do; and refusing or later revoking it in iOS Settings leaves the rest of Rowan working. We do not treat your agreement to AI replies as agreement to be recorded. <strong>We do not sell your consumer health data, and we do not share it for anyone else's purposes.</strong> You can view what Rowan remembers, remove any single note or clear the whole list, export what's on your phone, and delete everything — on the device and on our server — from inside the app.</p>
 
     <h2>Third parties</h2>
     <ul>
       <li><strong>Anthropic</strong> — primary AI provider for Rowan's replies. <a href="https://www.anthropic.com/legal/privacy" rel="noopener">anthropic.com/legal/privacy</a></li>
-      <li><strong>OpenAI</strong> — AI failover provider, enabled by default. It can receive your content by <strong>two</strong> separate routes: as the reply failover described above, and as the failover for the independent safety check, which sends the recent transcript to a model of its own. Its text-to-speech route exists in our backend but is switched off, so nothing is sent to it for speech today. <a href="https://openai.com/policies/privacy-policy" rel="noopener">openai.com/policies/privacy-policy</a></li>
+      <li><strong>OpenAI</strong> — AI failover provider and transcription provider. It can receive your content by <strong>three</strong> separate routes: as the reply failover described above, enabled by default; as the failover for the independent safety check, which sends the recent transcript to a model of its own; and — only when you tap the microphone — as the <strong>transcription</strong> service that turns your recording into text. That third route is the only one that carries <strong>audio</strong> rather than text, and the recording is not stored by us before or after it (see "4. Voice"). Its text-to-speech route exists in our backend but is switched off, so nothing is sent to it for Rowan to <em>speak</em> today. <a href="https://openai.com/policies/privacy-policy" rel="noopener">openai.com/policies/privacy-policy</a></li>
       <li><strong>Fly.io</strong> — hosts our backend and database. <a href="https://fly.io/legal/privacy-policy" rel="noopener">fly.io/legal/privacy-policy</a></li>
       <li><strong>Sentry</strong> — backend error reporting, with PII disabled. <a href="https://sentry.io/privacy/" rel="noopener">sentry.io/privacy</a></li>
       <li><strong>Apple App Store</strong> — app distribution. <a href="https://www.apple.com/legal/privacy/en-ww/" rel="noopener">apple.com/legal/privacy</a></li>
@@ -121,7 +193,7 @@
       <li><strong>See what Rowan knows:</strong> the app shows a plain list of everything it remembers about you, lets you remove any single note, and clears the whole list on request.</li>
       <li><strong>Export:</strong> the app's Export button writes a JSON file of what is <strong>on your phone</strong> — your entries, your conversations, and the notes Rowan keeps about you. It also pulls the rows we hold on our server under your device identifier, so one tap gives you both halves. If our server cannot be reached, the file says so and contains your device's copy alone.</li>
       <li><strong>Delete:</strong> "Delete all my data" erases your on-device record and asks our backend to purge your conversations, messages, symptom logs, safety events, and usage counters in a single transaction — plus the reserved memory table, which is empty — returning a per-table receipt. One honest exception: a rate-limiting row keyed to your network address, which contains no health content and expires on its own, is not covered by that purge. Deleting the app removes everything held on the device.</li>
-      <li><strong>EU/UK (GDPR) &amp; California (CCPA/CPRA):</strong> you can exercise these rights <strong>from inside the app, without asking us</strong>: Export downloads everything tied to your device identifier including the rows on our server, Delete erases it here and there, and Settings &rsaquo; Withdraw consent stops the processing until you agree again. You can still write to us if you would rather. <strong>We do not sell or share your personal information, and we will not discriminate against you for exercising these rights.</strong> The categories we hold on our server are: your random device identifier; your messages and conversations, each thread titled with the first few words of the message that started it; your symptom logs; content-free safety events; your own daily usage counters; and rate-limiting counters keyed to a one-way hash of your network address. Rowan's notes about you are stored on your device rather than by us, though your phone transmits them to us and on to the AI provider with each message (see "Your messages to Rowan" above). Our legal basis (GDPR) for processing your health information — which is special-category data under Article 9 — is your <strong>explicit consent</strong>, given during onboarding. We rely on legitimate interest only for the limited, health-content-free processing needed to operate and secure the service, such as rate limiting and error monitoring.</li>
+      <li><strong>EU/UK (GDPR) &amp; California (CCPA/CPRA):</strong> you can exercise these rights <strong>from inside the app, without asking us</strong>: Export downloads everything tied to your device identifier including the rows on our server, Delete erases it here and there, and Settings &rsaquo; Withdraw consent stops the processing until you agree again. You can still write to us if you would rather. <strong>We do not sell or share your personal information, and we will not discriminate against you for exercising these rights.</strong> The categories we hold on our server are: your random device identifier; your messages and conversations, each thread titled with the first few words of the message that started it; your symptom logs; content-free safety events; your own daily usage counters; and rate-limiting counters keyed to a one-way hash of your network address. <strong>No recording of your voice appears in that list, because we keep none</strong> — a clip you dictate is transcribed and discarded within the one request, and what is stored afterwards is the message text you chose to send. Rowan's notes about you are stored on your device rather than by us, though your phone transmits them to us and on to the AI provider with each message (see "Your messages to Rowan" above). Our legal basis (GDPR) for processing your health information — which is special-category data under Article 9 — is your <strong>explicit consent</strong>, given during onboarding. We rely on legitimate interest only for the limited, health-content-free processing needed to operate and secure the service, such as rate limiting and error monitoring.</li>
       <li>Email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> with any request.</li>
     </ul>
 
