@@ -3,9 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#FBF6EC" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#140B26" media="(prefers-color-scheme: dark)">
 <title>Safety &amp; crisis protocol — Mythkin</title>
 <meta name="description" content="How Mythkin handles conversations about self-harm and suicide, the resources it surfaces, and the limits of what an AI character can do.">
 <link rel="canonical" href="https://hypersage.ai/mythkin/safety.html">
@@ -14,19 +11,36 @@
 <meta property="og:url" content="https://hypersage.ai/mythkin/safety.html">
 <meta property="og:type" content="article">
 <link rel="icon" type="image/png" href="mythkin-icon.png">
-<link rel="stylesheet" href="style.css">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FBF6EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#170F0C" media="(prefers-color-scheme: dark)">
+<!-- BLOCKING and in <head>: a deferred script runs after first paint, so a
+     reader who chose Light watches a dark page render and flip. Same key the
+     landing page writes, so one choice covers the whole site. -->
+<script>
+(function(){try{var t=localStorage.getItem('mythkin.theme');
+if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();
+</script>
+<link rel="stylesheet" href="style.css?v=20260816-ember">
 </head>
 <body>
-<div class="wrap">
-<header class="site">
-  <a class="brand" href="index.html">Mythkin</a>
-  <nav>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+  <a class="brand" href="index.html">
+    <img src="mythkin-icon.png" width="256" height="256" alt=""><span>Mythkin</span></a>
+  <nav aria-label="Pages">
     <a href="safety.html">Safety</a>
     <a href="privacy.html">Privacy</a>
     <a href="terms.html">Terms</a>
     <a href="support.html">Support</a>
   </nav>
-</header>
+  <div class="themepick" id="themepick" role="group" aria-label="Colour theme">
+    <button type="button" data-theme-set="system" aria-pressed="true">Auto</button>
+    <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+  </div>
+</div></header>
+<main id="main"><div class="wrap doc">
 
 <h1>Safety and crisis protocol</h1>
 <p class="lede">This page is published because it should be, and because California
@@ -65,14 +79,23 @@ doctor, or a therapist, that is a bug — please
   We do not cut the conversation off, refuse to reply, or hand back a wall of
   boilerplate — abandoning someone mid-sentence is its own harm. The character
   stays present and names an actual crisis service.</li>
-  <li><strong>That turn is never metered.</strong> A safety conversation is exempt
-  from the free-tier limit, and the exemption is applied before we check whether
-  you are a subscriber. Nobody is ever asked to pay to keep talking at that
-  moment.</li>
+  <li><strong>You are never asked to pay to keep talking at that moment.</strong>
+  Safety turns skip the free-tier limit, and the exemption is applied before we
+  check whether you are a subscriber. It is bounded rather than infinite — the
+  first five safety turns in a window are free of charge against your allowance,
+  and past that they draw on it like any other message. We bound it because the
+  exemption is granted by a pattern match on text the sender wrote, so an
+  unlimited version is an unlimited supply of free replies to anyone who appends
+  the right word. <strong>What is never bounded is the help:</strong> the crisis
+  resources and the AI disclosure are emitted on every such turn, including after
+  a spent allowance, and a spent allowance returns the referral rather than a
+  payment prompt.</li>
   <li><strong>We count the referral, and nothing else.</strong> We record that a
-  referral happened, with the date and a pseudonymous device identifier. We do
-  not record what was said. These counts are what we report annually to the
-  California Office of Suicide Prevention beginning July&nbsp;1,&nbsp;2027.</li>
+  referral happened, with the date, a pseudonymous device identifier, and a salted
+  hash of the network it came from — never an address, and never what was said.
+  The network hash exists only to keep the exemption above from being farmed with
+  fresh device IDs. These counts are what we report annually to the California
+  Office of Suicide Prevention beginning July&nbsp;1,&nbsp;2027.</li>
 </ol>
 
 <h2>Design choices we made on purpose</h2>
@@ -85,7 +108,10 @@ doctor, or a therapist, that is a bug — please
 <div class="card">
   <h3>Adults only</h3>
   <p>Mythkin asks you to confirm you are 18 or older before any character is
-  reachable, and the app is rated accordingly on both stores.</p>
+  reachable. The answer is recorded and enforced on our server as well as in the
+  app, so it is not a screen you can skip past — a device that has not confirmed
+  cannot reach a character at all, and answering "no" is permanent rather than
+  re-rollable.</p>
 </div>
 <div class="card">
   <h3>You are told you are talking to an AI</h3>
@@ -96,11 +122,15 @@ doctor, or a therapist, that is a bug — please
   <h3>No sexual content, no exceptions</h3>
   <p>Not as a tier, not as an unlock, not for verified adults. Characters cannot
   be created as minors.</p>
-  <p>A kin cannot be made to portray a <strong>public figure</strong> — not a
-  celebrity, not a politician, not a streamer. You <em>can</em> paint a kin from
-  photographs of yourself, of someone you know personally who has agreed to it,
-  or of someone who has died. People make one of a parent or a friend they have
-  lost, and that is a use Mythkin supports.</p>
+  <p>A kin cannot be made to portray a <strong>living public figure</strong>, or
+  anyone who <strong>died in 1950 or later</strong>. The line is a date rather than
+  a judgement: a film star who died in 1962 is refused, because the estate and the
+  right of publicity outlive the person. Anyone who died before 1950 is allowed and
+  is most of what is already here — Cleopatra, Socrates, the American founders,
+  Marie Curie. Architects of genocide or mass atrocity are refused whatever their
+  dates. You <em>can</em> paint a kin from photographs of yourself, of someone you
+  know personally who has agreed to it, or of someone who has died. People make one
+  of a parent or a friend they have lost, and that is a use Mythkin supports.</p>
   <p>Two rules hold it in place. If a living person has not agreed, do not do it,
   and if they ask you to take the kin down, you must. And a kin painted from a
   photograph stays in your own library — it can never be shared, borrowed or
@@ -128,13 +158,38 @@ miss something serious, and it can react to a figure of speech. It is a safety
 net, not a monitor — please do not rely on an app to notice that you are
 struggling. Reach a person.</p>
 
-<footer class="site">
+</div></main>
+
+<footer class="site"><div class="wrap">
   <span>Mythkin</span>
   <a href="privacy.html">Privacy</a>
   <a href="terms.html">Terms</a>
   <a href="support.html">Support</a>
   <span class="meta">Last updated 2026-08-15</span>
-</footer>
-</div>
+</div></footer>
+<script>
+(function(){
+  var r=document.documentElement;
+  function paint(v){
+    var bs=document.querySelectorAll('#themepick button');
+    for(var i=0;i<bs.length;i++)
+      bs[i].setAttribute('aria-pressed',String(bs[i].dataset.themeSet===v));
+  }
+  var cur=null; try{cur=localStorage.getItem('mythkin.theme')}catch(e){}
+  paint(cur==='light'||cur==='dark'?cur:'system');
+  document.addEventListener('click',function(ev){
+    var b=ev.target.closest?ev.target.closest('#themepick button'):null;
+    if(!b)return;
+    var v=b.dataset.themeSet;
+    /* System REMOVES the key rather than storing a third value, so the page
+       goes back to following the OS — including when it flips at sunset. */
+    if(v==='system'){delete r.dataset.theme;
+      try{localStorage.removeItem('mythkin.theme')}catch(e){}}
+    else {r.dataset.theme=v;
+      try{localStorage.setItem('mythkin.theme',v)}catch(e){}}
+    paint(v);
+  });
+})();
+</script>
 </body>
 </html>

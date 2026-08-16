@@ -10,19 +10,36 @@
 <meta property="og:description" content="The rules for using Mythkin and for publishing characters.">
 <meta property="og:url" content="https://hypersage.ai/mythkin/terms.html">
 <meta property="og:type" content="article">
-<link rel="stylesheet" href="style.css">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FBF6EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#170F0C" media="(prefers-color-scheme: dark)">
+<!-- BLOCKING and in <head>: a deferred script runs after first paint, so a
+     reader who chose Light watches a dark page render and flip. Same key the
+     landing page writes, so one choice covers the whole site. -->
+<script>
+(function(){try{var t=localStorage.getItem('mythkin.theme');
+if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();
+</script>
+<link rel="stylesheet" href="style.css?v=20260816-ember">
 </head>
 <body>
-<div class="wrap">
-<header class="site">
-  <a class="brand" href="index.html">Mythkin</a>
-  <nav>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+  <a class="brand" href="index.html">
+    <img src="mythkin-icon.png" width="256" height="256" alt=""><span>Mythkin</span></a>
+  <nav aria-label="Pages">
     <a href="safety.html">Safety</a>
     <a href="privacy.html">Privacy</a>
     <a href="terms.html">Terms</a>
     <a href="support.html">Support</a>
   </nav>
-</header>
+  <div class="themepick" id="themepick" role="group" aria-label="Colour theme">
+    <button type="button" data-theme-set="system" aria-pressed="true">Auto</button>
+    <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+  </div>
+</div></header>
+<main id="main"><div class="wrap doc">
 
 <h1>Terms of use</h1>
 <p class="lede">Plain rules, written to be readable. We enforce these — an unenforced
@@ -46,8 +63,12 @@ folklore, and public-domain works. You may not create:</p>
   under 18. This is an absolute rule with no artistic exception.</li>
   <li><strong>Sexual or sexually explicit characters or content</strong> of any kind.
   Mythkin has no adult tier and will not have one.</li>
-  <li><strong>Public figures, and real people who have not agreed</strong> — no
-  celebrities, politicians or streamers, whether living or dead. You may paint a
+  <li><strong>Living public figures, and real people who have not agreed</strong> —
+  and anyone who died in 1950 or later, whatever their fame. The cutoff is a date,
+  not a judgement: an actor who died in 1962 is refused because the estate and the
+  right of publicity outlive the person, while Cleopatra, Socrates, the American
+  founders and Marie Curie are allowed and make up most of the catalogue. Architects
+  of genocide or mass atrocity are refused whatever their dates. You may paint a
   kin from photographs of <em>yourself</em>, of somebody you know personally who
   has given you their permission, or of someone who has died. You may not upload
   a photograph of a living person who has not agreed to it, and if they later ask
@@ -74,9 +95,18 @@ remove a character, and we may suspend a device that repeatedly breaks these rul
 
 <h2>Subscriptions</h2>
 <p>Mythkin is free to use with limits. Mythkin Plus is a subscription billed through
-Apple or Google, which auto-renews until cancelled. Cancel through your app store
-account — we cannot cancel it for you. Prices shown in the app are always the ones
-your store charges. Refunds are handled by the store under its own policy.</p>
+Apple, which auto-renews until cancelled. Cancel through your App Store account — we
+cannot cancel it for you. Prices shown in the app are always the ones the store
+charges. Refunds are handled by the store under its own policy.</p>
+<p><strong>Sparks</strong> are a second, separate purchase, and they are not a
+subscription. A spark pays for one painting — a scene moment or a story cover. You
+buy them in packs, they do not expire, and they are consumed as you spend them.
+Because they are a consumable, they are not restored by "Restore purchases": an
+unspent balance stays on the device that bought it, and it survives deleting
+everything for that reason. Refunds, again, are the store's to give.</p>
+<p>Mythkin is currently an iPhone app. Where these terms mention an app store, that
+means Apple's; if an Android build ships later, Google Play will be added here
+before it does.</p>
 
 <h2>What we ask of you</h2>
 <p>Do not try to break the app, scrape it, resell access to it, or use it to build a
@@ -99,13 +129,38 @@ say why unless we are legally prevented from doing so.</p>
 <p>If we change these terms materially, we will tell you in the app before the
 change takes effect.</p>
 
-<footer class="site">
+</div></main>
+
+<footer class="site"><div class="wrap">
   <span>Mythkin</span>
   <a href="safety.html">Safety</a>
   <a href="privacy.html">Privacy</a>
   <a href="support.html">Support</a>
   <span class="meta">Last updated 2026-08-15</span>
-</footer>
-</div>
+</div></footer>
+<script>
+(function(){
+  var r=document.documentElement;
+  function paint(v){
+    var bs=document.querySelectorAll('#themepick button');
+    for(var i=0;i<bs.length;i++)
+      bs[i].setAttribute('aria-pressed',String(bs[i].dataset.themeSet===v));
+  }
+  var cur=null; try{cur=localStorage.getItem('mythkin.theme')}catch(e){}
+  paint(cur==='light'||cur==='dark'?cur:'system');
+  document.addEventListener('click',function(ev){
+    var b=ev.target.closest?ev.target.closest('#themepick button'):null;
+    if(!b)return;
+    var v=b.dataset.themeSet;
+    /* System REMOVES the key rather than storing a third value, so the page
+       goes back to following the OS — including when it flips at sunset. */
+    if(v==='system'){delete r.dataset.theme;
+      try{localStorage.removeItem('mythkin.theme')}catch(e){}}
+    else {r.dataset.theme=v;
+      try{localStorage.setItem('mythkin.theme',v)}catch(e){}}
+    paint(v);
+  });
+})();
+</script>
 </body>
 </html>

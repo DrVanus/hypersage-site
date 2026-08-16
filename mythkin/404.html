@@ -10,16 +10,23 @@
 <link rel="stylesheet" href="/mythkin/style.css">
 </head>
 <body>
-<div class="wrap">
-  <header class="site">
-    <a class="brand" href="/mythkin/">Mythkin</a>
-    <nav>
-      <a href="/mythkin/safety.html">Safety</a>
-      <a href="/mythkin/privacy.html">Privacy</a>
-      <a href="/mythkin/terms.html">Terms</a>
-      <a href="/mythkin/support.html">Support</a>
-    </nav>
-  </header>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+  <a class="brand" href="index.html">
+    <img src="mythkin-icon.png" width="256" height="256" alt=""><span>Mythkin</span></a>
+  <nav aria-label="Pages">
+    <a href="safety.html">Safety</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="support.html">Support</a>
+  </nav>
+  <div class="themepick" id="themepick" role="group" aria-label="Colour theme">
+    <button type="button" data-theme-set="system" aria-pressed="true">Auto</button>
+    <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+  </div>
+</div></header>
+<main id="main"><div class="wrap doc">
   <p class="meta">Error 404</p>
   <h1>That page isn't here.</h1>
   <p class="lede">The link may be old, or we may have moved it. Everything Mythkin has is
@@ -31,6 +38,30 @@
     <li><a href="/mythkin/terms.html">Terms</a></li>
     <li><a href="/mythkin/support.html">Support</a></li>
   </ul>
-</div>
+</div></main>
+<script>
+(function(){
+  var r=document.documentElement;
+  function paint(v){
+    var bs=document.querySelectorAll('#themepick button');
+    for(var i=0;i<bs.length;i++)
+      bs[i].setAttribute('aria-pressed',String(bs[i].dataset.themeSet===v));
+  }
+  var cur=null; try{cur=localStorage.getItem('mythkin.theme')}catch(e){}
+  paint(cur==='light'||cur==='dark'?cur:'system');
+  document.addEventListener('click',function(ev){
+    var b=ev.target.closest?ev.target.closest('#themepick button'):null;
+    if(!b)return;
+    var v=b.dataset.themeSet;
+    /* System REMOVES the key rather than storing a third value, so the page
+       goes back to following the OS — including when it flips at sunset. */
+    if(v==='system'){delete r.dataset.theme;
+      try{localStorage.removeItem('mythkin.theme')}catch(e){}}
+    else {r.dataset.theme=v;
+      try{localStorage.setItem('mythkin.theme',v)}catch(e){}}
+    paint(v);
+  });
+})();
+</script>
 </body>
 </html>
