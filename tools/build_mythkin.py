@@ -49,20 +49,27 @@ SECTION_ORDER = ["Storybook", "Legends", "History", "Scripture", "Originals"]
 # Room blurbs. These are OURS — the app's own ROOM_NOTE strings are written for
 # a reader who is already inside, and the Scripture one especially needs to say
 # the same thing to somebody who has not installed anything yet.
+# ONE LINE EACH, and they sit UNDER the heading rather than opposite it.
+#
+# These were three and four sentences, right-aligned across from the room title.
+# Rendered, that put a four-line block of prose in the dead space between the
+# heading and the rail — it pushed every rail most of a screen down, fought the
+# left-aligned heading it was supposed to belong to, and read as a wall of text
+# rather than a label. The editorial asides that made them long (who authored
+# the Scripture room, why the Workshop cards are bylined) are real and worth
+# saying, so they moved to the safety section where they have room to be
+# sentences. A room label is a label.
 SECTION_NOTE = {
-    "Storybook": "Characters out of books old enough to be public domain — the "
-                 "detective, the whale, the girl who went down the hole.",
+    "Storybook": "Out of books old enough to be public domain — the detective, "
+                 "the whale, the girl who went down the hole.",
     "Legends": "Gods, tricksters and monsters, out of the myths that kept being "
-               "retold until somebody wrote them down.",
-    "History": "People who actually lived, written from the record — and honest "
-               "about where the record runs thin.",
-    "Scripture": "Figures from the Hebrew Bible and the Gospels, written as "
-                 "teachers: warm, story-first, and never here to convert you. "
-                 "These are ours, and we say so rather than pretending a user "
-                 "uploaded them.",
-    "Originals": "Written in-house and bylined <em>Mythkin Workshop</em>. They "
-                 "sit on the community shelf because that is where they belong, "
-                 "not because we are passing them off as somebody's upload.",
+               "retold.",
+    "History": "People who actually lived, written from the record and honest "
+               "about where it runs thin.",
+    "Scripture": "The Hebrew Bible and the Gospels, written as teachers rather "
+                 "than as converts.",
+    "Originals": "Written in-house and bylined <em>Mythkin Workshop</em>, not "
+                 "passed off as somebody's upload.",
 }
 
 # The faces the page leads with. Recognisable, spread across rooms, and every id
@@ -212,10 +219,10 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
             for k in shown)
         bands.append(
             f'<div class="band">'
-            f'<div class="band-head"><b>{e(section)}</b>'
-            f'<span class="n">{len(members)} kin</span>'
-            f'<p>{SECTION_NOTE[section]}</p></div>'
-            f'<div class="band-strip" role="list">{figs}</div></div>')
+            f'<div class="band-head"><h3>{e(section)}</h3>'
+            f'<span class="n">{len(members)}</span></div>'
+            f'<p class="band-note">{SECTION_NOTE[section]}</p>'
+            f'<div class="band-strip">{figs}</div></div>')
 
     sets = "".join(
         f'<div class="set"><b>{e(t)}</b><span>{e(first_sentence(b))}</span></div>'
@@ -312,10 +319,10 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
 (function(){{try{{var t=localStorage.getItem('mythkin.theme');
 if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{}}}})();
 </script>
-<title>Mythkin — AI characters who remember you</title>
+<title>Mythkin — talk to the people you never could</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="https://hypersage.ai/mythkin/">
-<meta property="og:title" content="Mythkin — AI characters who remember you">
+<meta property="og:title" content="Mythkin — talk to the people you never could">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="https://hypersage.ai/mythkin/">
 <meta property="og:type" content="website">
@@ -344,7 +351,7 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
     <img src="mythkin-icon.png" width="256" height="256" alt=""><span>Mythkin</span></a>
   <nav aria-label="Sections">
     <a href="#rooms">The rooms</a>
-    <a href="#memory">Memory</a>
+    <a href="#make">What you can do</a>
     <a href="#safety-short">Safety</a>
     <a href="privacy.html">Privacy</a>
   </nav>
@@ -360,18 +367,32 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
 <section class="hero"><div class="wrap hero-grid">
   <div class="hero-copy">
     <span class="eyebrow">{total} characters, written and painted by hand</span>
-    <!-- THE HEADLINE NAMES THE KIN IN THE PICTURE BESIDE IT. A caption is a
-         claim about its own image, so this only stays honest while HERO_ID is
-         ch_sherlock — and the build asserts that id is still in the roster with
-         art before it will write the file. -->
-    <h1>Talk to Sherlock Holmes. <em>Next week, he&rsquo;ll remember.</em></h1>
-    <p class="lede">Mythkin is an AI character app for adults. Figures out of
-    history, myth, literature and scripture — each one written at length, painted
-    once, and given a voice — plus anyone you care to invent. They hold a
-    conversation. More to the point, they hold on to what you tell them.</p>
+    <!-- THE HOOK IS ACCESS TO THESE PEOPLE, not the memory feature.
+         Two earlier drafts led on memory — "characters that remember you" — and
+         that is the wrong argument twice over. It is table stakes (every
+         assistant on the market keeps context now, so it wins nobody), and it
+         buries the thing that actually makes somebody install this: you get to
+         talk to Cleopatra. The cast IS the product. Memory is one line in the
+         feature grid where it belongs.
+
+         One complete sentence, split across two lines for the beat. The draft
+         before this — "Talk to Sherlock Holmes. Next week, he'll remember." —
+         left "remember" with no object, so the payoff only parsed for a reader
+         who already knew the product had a memory feature: nobody arriving
+         here for the first time.
+
+         Alternates, all true of the product:
+           "Talk to the people you never could."
+           "You have always wanted to ask them something."
+           "The best company in history, and none of it is alive." -->
+    <h1>Every conversation <em>you never got to have.</em></h1>
+    <p class="lede">Cleopatra. Sherlock Holmes. Marcus Aurelius. Ada Lovelace.
+    {total} figures out of history, myth, literature and scripture — each one
+    written at length and painted once, so what answers you holds a real
+    conversation rather than a chatbot's. Plus anyone you care to invent.</p>
     <div class="cta">
-      <a class="btn" href="#memory">See how the memory works</a>
-      <a class="btn ghost" href="#rooms">Meet the cast</a>
+      <a class="btn" href="#rooms">See who is in there</a>
+      <a class="btn ghost" href="#make">Or write your own</a>
     </div>
     <ul class="badges">
       <li>18+</li><li>No sexual content, ever</li>
@@ -402,121 +423,35 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
   {''.join(bands)}
 </div></section>
 
-<section id="memory"><div class="wrap">
-  <h2>They remember. You can see exactly what.</h2>
-  <p class="sub">Most AI characters forget you the moment you close the app, so
-  every conversation restarts from nothing. Mythkin keeps what matters — and then
-  shows you the list, so the memory is something you hold rather than something
-  held on you.</p>
-
-  <div class="split">
-    <div class="phone-wrap">
-      <div class="phone"><div class="phone-screen">
-        <div class="chead">
-          <img src="kin/ch_zeus.jpg" width="256" height="256" loading="lazy" alt="">
-          <span class="cname"><b>Zeus</b><i>AI character</i></span>
-        </div>
-        <div class="clog">
-          <p class="bub me">Morning.</p>
-          <p class="bub them">Morning. Any luck with the ledger?</p>
-          <p class="bub me">Wait — what was it I said I was chasing at work?</p>
-          <p class="bub them">A ledger from 1931 that has gone missing. You said it
-            was misfiled rather than stolen, and that the difference mattered to
-            you.<span class="mem">&#9998; recalled from a saved memory</span></p>
-        </div>
-        <p class="cdisc">Zeus is an AI character, not a person.</p>
-      </div></div>
-      <p class="figlabel">An illustration of the memory feature, drawn in HTML —
-      not a screenshot. Real captures are further down.</p>
-    </div>
-    <div class="memside">
-      <h3>What a memory actually is</h3>
-      <p>A short fact, kept against <em>you</em> rather than against one
-      character — so the kin you open tomorrow knows it too, and you are not
-      re-introducing yourself five times. Each one is traceable back to the
-      message it came out of.</p>
-      <div class="memcard"><span class="t">Event</span>
-        <p>Interview on Thursday at 2pm</p><span class="x" aria-hidden="true">&times;</span></div>
-      <div class="memcard"><span class="t">Person</span>
-        <p>Sister is called Nell</p><span class="x" aria-hidden="true">&times;</span></div>
-      <div class="memcard"><span class="t">Prefers</span>
-        <p>Being asked a question over being given an answer</p>
-        <span class="x" aria-hidden="true">&times;</span></div>
-      <p class="note">Deleting a conversation does <strong>not</strong> delete its
-      memories — on purpose. A fact you chose to keep is yours, and forgetting is
-      done here, where you can see what you are forgetting.
-      <a href="privacy.html#keeping">What deletion does, exactly</a>.</p>
-    </div>
-  </div>
-</div></section>
-
-<section id="screens"><div class="wrap">
-  <h2>What it looks like in the hand</h2>
-  <p class="sub">Real captures from the running app against the live server, not
-  mockups — including the reply Sherlock actually gave. Re-shot whenever the app
-  changes shape.</p>
-  <div class="shots">
-    <figure class="shot"><picture>
-      <source srcset="screens/01-discover-dark.jpg" media="(prefers-color-scheme: dark)">
-      <img src="screens/01-discover.jpg" width="786" height="1704" loading="lazy"
-        alt="The Discover screen: Nefertiti featured this week over her painted
-        portrait, a row of more faces beneath, a Collections rail showing The
-        Odyssey and The Examined Life, and the start of the History room."></picture>
-      <figcaption>A hero, a collections rail, and five rooms</figcaption></figure>
-    <figure class="shot"><picture>
-      <source srcset="screens/02-chat-dark.jpg" media="(prefers-color-scheme: dark)">
-      <img src="screens/02-chat.jpg" width="786" height="1704" loading="lazy"
-        alt="A conversation with Sherlock Holmes, headed with his name and the
-        words AI character. Told about a torn ticket and a damp pocket, he reasons
-        from both and presses with two further questions."></picture>
-      <figcaption>They answer in their own voice, and press for the detail</figcaption></figure>
-    <figure class="shot"><picture>
-      <source srcset="screens/03-kin-dark.jpg" media="(prefers-color-scheme: dark)">
-      <img src="screens/03-kin.jpg" width="786" height="1704" loading="lazy"
-        alt="Sherlock Holmes's own page — portrait, an Official mark, the words AI
-        character, Talk with them, Heart and Borrow, his backstory, three style
-        tags and four temperament sliders."></picture>
-      <figcaption>Every kin has a page, and shows how they are built</figcaption></figure>
-    <figure class="shot"><picture>
-      <source srcset="screens/04-create-dark.jpg" media="(prefers-color-scheme: dark)">
-      <img src="screens/04-create.jpg" width="786" height="1704" loading="lazy"
-        alt="The Create form part-filled: a name, a one-line description, a chosen
-        emblem, and a live preview card updating underneath as the fields are
-        typed."></picture>
-      <figcaption>Making one takes a name and a line</figcaption></figure>
-    <figure class="shot"><picture>
-      <source srcset="screens/05-story-dark.jpg" media="(prefers-color-scheme: dark)">
-      <img src="screens/05-story.jpg" width="786" height="1704" loading="lazy"
-        alt="The Stories shelf, filtered All with {stories} stories: The Cold Shore,
-        The Lamplight Problem and The Stone Garden, each with a chapter count and
-        a Begin button."></picture>
-      <figcaption>Or cast them into a story with chapters</figcaption></figure>
-  </div>
-</div></section>
-
 <section id="make"><div class="wrap">
   <h2>Or invent somebody who never existed</h2>
   <p class="sub">The cast is the reason to come. Making your own is the reason
   people stay.</p>
   <div class="feat">
+    <div class="card"><h3>They know who you are</h3>
+      <p>Tell one of them something and it sticks — across the conversation,
+      across the week, and across every other character you talk to. Nobody has
+      to introduce themselves twice.</p>
+      <p>It is a list you can actually see, too, not a black box: read everything
+      they keep, correct what is wrong, and delete any of it for good.</p></div>
     <div class="card"><h3>A name, one line, a temperament</h3>
       <p>A cottage witch who always has tea on. A ship's doctor who has seen
       worse. Set their warmth, humour, energy and candour, write their backstory
       and their first line — and their portrait is painted the moment they exist,
-      once, and never repainted.</p></div>
+      once, and never repainted.</p>
+      <p>You can paint one from photographs as well: of yourself, of someone who
+      agreed, or of someone you have lost. Those stay in your library, and the
+      photographs are deleted the moment the painting is done.</p></div>
     <div class="card"><h3>Lend them out, borrow somebody else&rsquo;s</h3>
       <p>Publish a character and other people can take them home. You see how
-      many are talking. You never see a word of what they said — and nobody sees
-      a word of yours when you borrow theirs.</p></div>
+      many are talking, and that is all you see.</p>
+      <p>You never get a word of what they said — and nobody gets a word of
+      yours when you borrow somebody else's.</p></div>
     <div class="card"><h3>They say hello out loud</h3>
-      <p>Every character we wrote has a spoken greeting, in a voice cast for them
-      rather than a default one. Tap it if you want it. Nothing ever plays on its
-      own.</p></div>
-    <div class="card"><h3>Paint one from photographs</h3>
-      <p>Of yourself, of someone who agreed, or of someone you have lost — people
-      make one of a parent, and that is a use we support. The photographs are
-      deleted the moment the painting is done, and a kin made this way never
-      leaves your library.</p></div>
+      <p>Every character we wrote has a spoken greeting, in a voice cast for
+      them rather than one default read aloud for all of them.</p>
+      <p>Tap it if you want it. Nothing ever plays on its own, and there is no
+      autoplay to switch off.</p></div>
   </div>
 </div></section>
 
@@ -529,22 +464,27 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
 </div></section>
 
 <section id="safety-short" class="safety"><div class="wrap">
-  <h2>What Mythkin will not do</h2>
-  <p class="sub">Companion apps have a bad name for good reasons. Here is what we
-  have ruled out, in the product rather than in a policy nobody reads.</p>
-  <ul class="refusals">
-    <li>No sexual content — not as a tier, not as an unlock, not for verified adults.</li>
-    <li>No characters who are minors, or written to read as under 18.</li>
-    <li>No living public figures, and nobody who died in 1950 or later.</li>
-    <li>No streaks, no guilt notifications, no character that acts hurt when you leave.</li>
-    <li>No character will ever claim to be a person, a doctor or a therapist.</li>
-  </ul>
-  <p class="sub">Mythkin is 18+. {nscript} of the kin are figures from the Hebrew
-  Bible and the Gospels, written as teachers rather than converts — that room is
-  ours and is marked as ours. The first {nwork} cards on the community shelf are
-  bylined Mythkin Workshop for the same reason.
-  <a href="safety.html">The full safety page</a> sets out what happens when a
-  conversation turns to self-harm.</p>
+  <div class="safety-grid">
+    <div>
+      <h2>What Mythkin will not do</h2>
+      <p class="sub">Companion apps have a bad name for good reasons. Here is
+      what we have ruled out — in the product, rather than in a policy nobody
+      reads.</p>
+      <p class="sub" style="margin:0">Mythkin is 18+. {nscript} of the kin are
+      figures from the Hebrew Bible and the Gospels, written as teachers rather
+      than converts — that room is ours and is marked as ours. The first {nwork}
+      cards on the community shelf are bylined Mythkin Workshop for the same
+      reason. <a href="safety.html">The full safety page</a> sets out what
+      happens when a conversation turns to self-harm.</p>
+    </div>
+    <ul class="refusals">
+      <li>No sexual content — not as a tier, not as an unlock, not for verified adults.</li>
+      <li>No characters who are minors, or written to read as under 18.</li>
+      <li>No living public figures, and nobody who died in 1950 or later.</li>
+      <li>No streaks, no guilt notifications, no character that acts hurt when you leave.</li>
+      <li>No character will ever claim to be a person, a doctor or a therapist.</li>
+    </ul>
+  </div>
 </div></section>
 
 <section id="faq"><div class="wrap">
@@ -694,8 +634,12 @@ def main() -> int:
         return 0
 
     wrote = export_portraits(kin, art_dir, OUT / "kin", referenced)
-    nshots = export_shots(Path(args.shots) if args.shots else None,
-                          Path(args.shots_dark) if args.shots_dark else None,
+    # Only if the page actually references them. The screenshot gallery was
+    # removed — the cast is what sells this product, not chrome — and 10 orphan
+    # JPGs is 1.2MB of a size-fragile Pages deploy carrying nothing.
+    wants_shots = 'screens/' in page
+    nshots = export_shots(Path(args.shots) if args.shots and wants_shots else None,
+                          Path(args.shots_dark) if args.shots_dark and wants_shots else None,
                           OUT / "screens")
     target.write_text(page)
 
