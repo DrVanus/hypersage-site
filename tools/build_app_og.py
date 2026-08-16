@@ -319,32 +319,47 @@ CARDS = {
     "mythkin": {
         "art": "mythkin-icon.png",
         "css": """
-  /* The page's DEFAULT scheme is the light one: style.css :root is the cream
-     palette and the dark set sits behind prefers-color-scheme. Tokens verbatim —
-     --bg #FBF6EC, --surface #fff, --text #1A1526, --dim #6B6478,
-     --tint #6B3FA0, --gold #9A7B22. */
+  /* EMBER, NOT PLUM. Every value below was the pre-Ember purple brand and had
+     to be re-copied: the card was still rendering --tint #6B3FA0 and --text
+     #1A1526 long after the site and the app moved to the hearth palette, so a
+     link shared into iMessage showed a purple card for a terracotta product,
+     under a headline the page had already stopped using. Tokens verbatim from
+     mythkin/style.css :root — --bg #FBF6EC, --surface #FFFFFF, --text #1F1512,
+     --dim #6E6058, --tint #8C3A2B, --goldText #7E6010.
+
+     The page's own hero sits on a warm radial in the tint; this is that wash,
+     which is also what stops a cream card reading as a blank rectangle at
+     message-bubble size. */
   .og { background:
-        radial-gradient(circle at 78% 48%, rgba(107,63,160,0.16), transparent 56%),
-        linear-gradient(160deg, #FFFFFF 0%, #FBF6EC 42%); }
-  .kicker { color: #9A7B22; }
+        radial-gradient(circle at 78% 48%, rgba(140,58,43,0.17), transparent 56%),
+        radial-gradient(ellipse 70% 60% at 12% 8%, rgba(180,97,28,0.10), transparent 62%),
+        linear-gradient(160deg, #FFFFFF 0%, #FBF6EC 44%); }
+  .kicker { color: #7E6010; }
   h1 { font-family: 'New York', 'Iowan Old Style', Georgia, serif; font-weight: 700; font-size: 56px;
-       background-image: linear-gradient(178deg, #1A1526 26%, #6B3FA0 116%); }
+       background-image: linear-gradient(178deg, #1F1512 26%, #8C3A2B 116%); }
+  h1 em { font-style: italic; }
   /* Mythkin loads no webfont at all: --serif above and --sans here are its own
      stacks, so the card uses them instead of the shell's Inter. */
   .kicker, .sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .sub { color: #6B6478; }
+  .sub { color: #6E6058; }
   /* 106px is the site's own icon rounding — .mark img is 11px on a 44px tile —
      and the dark painted tile is what carries this otherwise pale card. */
   .art { width: 424px; height: 424px; border-radius: 106px;
-         box-shadow: 0 26px 60px rgba(26,21,38,0.30), 0 0 90px rgba(154,123,34,0.22); }
+         box-shadow: 0 26px 60px rgba(31,21,18,0.30), 0 0 90px rgba(140,58,43,0.20); }
 """,
         # The page's own spark glyph (.bf-glyph--spark, drawn in var(--gold)).
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9z"/></svg>',
         # No "· iOS" here, unlike the other four: the page says Mythkin is not in
         # the app stores yet, so the card must not imply it ships.
+        # The card's copy is the PAGE's copy. Both were rewritten on 2026-08-16
+        # when the site stopped leading on memory — which is table stakes and
+        # sold nobody — and started leading on the cast, which is the reason
+        # anyone installs this. The old card said "Characters made by people,
+        # alive with you" over a subhead ending "and they remember", neither of
+        # which appears on the page any more.
         "kicker": "AI characters · 18+",
-        "h1": "Characters made<br>by people,<br>alive with you.",
-        "sub": "Write a character. Give them a temperament, a history, a first line. Then talk to them — and they remember. Share them, or borrow someone else's.",
+        "h1": "Every conversation<br><em>you never got to have.</em>",
+        "sub": "Cleopatra. Sherlock Holmes. Marcus Aurelius. Ada Lovelace. Hundreds of figures out of history, myth and literature — written at length, painted once, and ready to talk.",
     },
     "gemburrow": {
         "art": "shots/daily.jpg",
@@ -521,6 +536,31 @@ def check(names: list[str]) -> int:
         art = ROOT / name / c["art"]
         if not art.exists():
             problems.append(f'art {c["art"]} does not exist')
+
+        # THE THING THIS GATE IS ABOUT HAS TO EXIST. Everything below compares
+        # the card's INPUTS against the page, which is the interesting check and
+        # was the only one — so deleting og-image.png outright reported `ok`.
+        # A missing card is not a subtle drift: the link unfurls with no image
+        # at all, which is the worst outcome the whole tool exists to prevent,
+        # and it was the one state that passed silently.
+        out = ROOT / name / "og-image.png"
+        if not out.exists():
+            problems.append("og-image.png does not exist — the link unfurls blank")
+        else:
+            size = out.stat().st_size
+            if size < 20_000:
+                problems.append(
+                    f"og-image.png is only {size // 1024}KB — these render at "
+                    "1200x630 and land 200KB+; this is a blank or truncated write")
+            # Facebook and iMessage both reject or letterbox a card that is not
+            # close to 1.91:1, and a wrong-sized PNG here means someone rendered
+            # it by hand rather than with this tool.
+            head = out.read_bytes()[:33]
+            if head[:8] == b"\x89PNG\r\n\x1a\n" and head[12:16] == b"IHDR":
+                w = int.from_bytes(head[16:20], "big")
+                h = int.from_bytes(head[20:24], "big")
+                if (w, h) != (W, H):
+                    problems.append(f"og-image.png is {w}x{h}, not {W}x{H}")
 
         page = _page_text(name)
         copy = " ".join(str(c.get(k, "")) for k in ("kicker", "h1", "sub"))
