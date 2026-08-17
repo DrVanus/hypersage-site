@@ -1193,19 +1193,19 @@
   </section>
 
   <!-- ===== FAQ ===== -->
-  <!-- Claims discipline (verified against ~/Developer/DrVanus/Wingmate + wingmate-api
-       2026-08-10): Plus buys EXACTLY ONE thing — a higher daily message allowance
-       (rateLimit.js). Never print the allowance numbers here — they are server settings
-       that move, so the app is the only surface that is honest by construction. (This
-       page has stayed correct through two resizings for exactly that reason; the
-       support page, which does print them, went stale twice. Numbers deployed today:
-       10/150, pinned in fly.toml [env]; the next release flips to 3/60.) No prices exist
-       anywhere (no ASC products yet). Backend is a stateless relay — no DB, no
-       conversation storage (package.json, chat.js has no write path); user data lives
-       on-device (GirlStore/OpenerStore/TranscriptCache). No account (Keychain UUID
-       only), no push notifications, no third-party SDKs. iPhone-only iOS 17+
-       (project.yml:4-5,44). Not on the App Store — Prepare for Submission. Not
-       affiliated with Tinder/Hinge/Bumble/Instagram (store/listing.md disclaimer). -->
+  <!-- Claims discipline. Plus buys EXACTLY ONE thing: a higher daily message
+       allowance. Never print the allowance numbers on this page — they are server
+       settings that move, and the app is the only surface that is honest by
+       construction. This page has stayed correct through two resizings for exactly
+       that reason. Also true and load-bearing here: no conversation storage, no
+       account, no push, no third-party SDKs, and no affiliation with
+       Tinder/Hinge/Bumble/Instagram.
+
+       The evidence behind each of those, the current numbers, and anything not yet
+       released belong in the app repo — NOT in this file. An HTML comment is served
+       verbatim to anyone who views source, and the version this replaced disclosed
+       local filesystem paths, the backend's rate-limit internals and an unshipped
+       pricing change. -->
   <section class="block panel" id="faq">
     <div class="container">
       <div class="section-head center">
