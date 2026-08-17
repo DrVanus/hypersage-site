@@ -206,9 +206,19 @@ section{padding:3.1rem 0}
 
 .lit{margin:0}
 .lit-frame{position:relative;border-radius:var(--r-l);overflow:hidden;
-  aspect-ratio:1;box-shadow:var(--shadow-lift)}
-.lit-frame>img{width:100%;height:100%;object-fit:cover;display:block}
-.lit-frame::after{content:"";position:absolute;inset:0;pointer-events:none;
+  aspect-ratio:1;box-shadow:var(--shadow-lift);background:var(--surface2)}
+
+/* THE HERO IS A STACK NOW, not one portrait. Every slide is in the DOM and the
+   first one carries `.on` from the builder, so a reader with no JS gets exactly
+   the page that shipped before — one face, fully composed — and hero.js only
+   ever adds the rotation on top. */
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 900ms ease}
+.slide.on{opacity:1}
+.slide>img{width:100%;height:100%;object-fit:cover;display:block}
+/* The scrim moved off .lit-frame and onto the slide. On the frame it painted
+   ABOVE the absolutely-positioned slides — including the caption inside them —
+   and buried the quote it exists to make readable. */
+.slide::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(200deg,transparent 32%,rgba(23,15,12,.82) 90%)}
 .quote{position:absolute;left:1.3rem;right:1.3rem;bottom:1.2rem;z-index:2;
   margin:0;color:#F7EBE3}
@@ -216,23 +226,55 @@ section{padding:3.1rem 0}
   margin:0 0 .5rem;color:#F7EBE3;text-shadow:0 2px 14px rgba(0,0,0,.75)}
 .quote span{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
   color:#E8C06A;font-weight:700}
-.ai-chip{position:absolute;top:.9rem;right:.9rem;z-index:2;font-size:.64rem;
+.quote span b{font-weight:700;color:#F7EBE3}
+/* Was `.ai-chip`, reading "AI CHARACTER" on every slide. The badge row under
+   the headline says "Every reply marked AI" in words a reader can act on; this
+   corner is better spent naming the room the face is actually from, which is a
+   fact about that face and changes with it. */
+.room-chip{position:absolute;top:.9rem;right:.9rem;z-index:2;font-size:.64rem;
   font-weight:800;letter-spacing:.1em;text-transform:uppercase;
   background:rgba(23,15,12,.74);color:#F7EBE3;
   border:1px solid rgba(247,235,227,.28);padding:.28rem .6rem;
   border-radius:var(--r-pill);backdrop-filter:blur(6px)}
 
-/* Marquee — two rows drifting opposite ways. aria-hidden in the markup: it is
-   decoration, and 100 unlabelled faces in the tab order is not navigation. */
+/* WCAG 2.2.2 — anything that moves by itself for more than five seconds needs
+   a stop. Hidden in the markup and unhidden by hero.js, so it never appears as
+   a dead control on a page whose script did not run. */
+.lit-pause{position:absolute;top:.85rem;left:.85rem;z-index:3;
+  width:32px;height:32px;border-radius:50%;padding:0;cursor:pointer;
+  border:1px solid rgba(247,235,227,.28);background:rgba(23,15,12,.74);
+  backdrop-filter:blur(6px);display:grid;place-items:center;
+  opacity:.55;transition:opacity 180ms ease}
+.lit-pause[hidden]{display:none}
+.lit:hover .lit-pause,.lit-pause:focus-visible{opacity:1}
+.lit-pause::before{content:"";display:block;
+  width:9px;height:11px;box-sizing:border-box;
+  border-left:3px solid #F7EBE3;border-right:3px solid #F7EBE3}
+.lit-pause[data-state="paused"]::before{width:0;height:0;border:0;
+  border-left:10px solid #F7EBE3;border-top:6px solid transparent;
+  border-bottom:6px solid transparent;margin-left:2px}
+
+/* Marquee — THREE rows drifting alternate ways, carrying the whole roster.
+   aria-hidden in the markup: it is decoration, and 254 unlabelled faces in the
+   tab order is not navigation. */
 .marquee{overflow:hidden;
   mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
 .mrow{display:flex;gap:.8rem;width:max-content;padding:.4rem 0}
 .mrow img{width:104px;height:104px;border-radius:var(--r-m);object-fit:cover;
   border:1px solid var(--border);background:var(--surface2)}
 @media (prefers-reduced-motion:no-preference){
-  .mrow{animation:drift 78s linear infinite}
+  /* --drift is written per row by the builder from that row's tile count, so
+     the SPEED stays put as the roster grows instead of the duration doing. */
+  .mrow{animation:drift var(--drift,78s) linear infinite}
   .mrow.rev{animation-direction:reverse}
   @keyframes drift{to{transform:translateX(-50%)}}
+  /* HALF SPEED ON A PHONE, and it is a loading fix as much as a taste one.
+     The same px/s churns a 402px window far faster than a 1280px one, and
+     native lazy-loading does not keep up with tiles that arrive by transform:
+     measured 1 blank plate in the 6 fully-visible tiles at 402px versus 0 in 24
+     at 1280px. Slowing the row gives the loader the head start the transform
+     does not. */
+  @media(max-width:820px){.mrow{animation-duration:calc(var(--drift,78s) * 2)}}
 }
 
 /* Room bands ----------------------------------------------------------------
@@ -340,12 +382,48 @@ section{padding:3.1rem 0}
    the author intended was invisible. Only the gap BETWEEN siblings is restored,
    so a single-paragraph card keeps its tight box. */
 .card p + p{margin-top:.72rem}
+
+/* The ember disc. Same shape as the app's own row marks, and the ink is the
+   ON-tint token because the glyph sits ON the tint — brand accent drawn on
+   brand accent measures under 2:1 and reads as a smudge
+   ([[accent-as-ink-on-its-own-tint]]). */
+.card-mark{display:grid;place-items:center;width:36px;height:36px;
+  border-radius:50%;background:var(--tint2);margin-bottom:.85rem}
+.card-mark svg{width:20px;height:20px;fill:none;stroke:var(--onTint);
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
 .setlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:1.4rem 2rem}
+/* THE OTHER 25 ARE NAMES, NOT PARAGRAPHS. All 31 at full length is honest and
+   unreadable — a wall of grey prose at the exact point in the page where the
+   paintings stop. Six carry the argument; the rest carry the number, which is
+   all a reader needs from them. */
+/* The rail's own full stop — same 150px track as a face so the row keeps its
+   rhythm, but a plate rather than a painting so it never reads as a kin. */
+.band-strip figure.band-more{display:grid;place-content:center;text-align:center;
+  height:150px;border-radius:var(--r-m);background:var(--surface2);
+  border:1px dashed var(--border);padding:0 .6rem}
+.band-strip figure.band-more b{font-family:var(--serif);font-size:1.5rem;
+  color:var(--tintText);-webkit-line-clamp:none;display:block}
+.band-strip figure.band-more span{color:var(--dim);-webkit-line-clamp:none;
+  display:block}
+
+.setmore{margin:1.8rem 0 .7rem;color:var(--dim);font-size:.92rem}
+.setchips{display:flex;flex-wrap:wrap;gap:.45rem;padding:0;margin:0;
+  list-style:none}
+.setchips li{font-size:.82rem;color:var(--dim);background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r-pill);
+  padding:.36rem .8rem;font-family:var(--serif)}
 .set{border-left:2px solid var(--gold);padding-left:1rem}
 .set b{font-family:var(--serif);font-size:1.05rem;display:block;margin-bottom:.22rem}
-.set span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  overflow:hidden;color:var(--dim);font-size:.88rem;line-height:1.5;
+/* NO CLAMP AT ALL. The builder stops at a sentence end under a 240 ceiling the
+   longest blurb in the set (202) clears — and then a CSS line-clamp put the
+   ellipsis straight back where no build check can see it. Four lines was still
+   ~140 characters in a 240px column, so "The Nile" went on ending mid-word
+   after the Python side had been fixed. Six items with ragged bottoms is what a
+   grid is for; a truncation nobody can grep for is not. */
+.set span{
+  display:block;color:var(--dim);font-size:.88rem;line-height:1.5;
   min-height:2.7em}
 .safety{background:var(--surface2)}
 /* Two columns on wide screens: the argument on the left, the list on the right.
