@@ -355,10 +355,27 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
         # 16 covers a 1280px row (1280/117 ≈ 11) with buffer; eager, but without
         # fetchpriority, so they queue behind the hero portrait rather than
         # racing the largest element on the page.
+        # NAME THE FACE UNDER THE CURSOR.
+        # Reported: "not interactable if i move my mouse on it to show who it is
+        # etc?" — and that was the whole flaw in the strip. A wall of 314
+        # paintings that will not tell you who any of them are is a screensaver;
+        # the moment it names them it becomes the roster, which is the argument
+        # this page is making. Each tile now carries its name, revealed on hover,
+        # and `.mrow:hover` stops that row so the tile does not slide out from
+        # under the pointer before it can be read — a moving target cannot be
+        # inspected, so the pause is part of the feature, not a nicety.
+        #
+        # The strip stays aria-hidden. 628 tiles is not navigation, and the
+        # rooms below name their kin as real content for every reader; adding
+        # 628 announced labels would make the page WORSE for the people
+        # aria-hidden exists to protect. The name is a pointer affordance on top
+        # of decoration, not the only place the information lives.
         EAGER = 16
         imgs = "".join(
+            f'<span class="mtile">'
             f'<img src="kin/{k["id"]}.jpg" width="256" height="256" '
             f'loading="{"eager" if n < EAGER else "lazy"}" decoding="async" alt="">'
+            f'<b>{e(k["name"])}</b></span>'
             for n, k in enumerate(chunk * 2))
         # THE DURATION HAS TO FOLLOW THE LENGTH. `drift` translates the row by
         # -50%, so a fixed 78s means SPEED is whatever the row happens to be:
@@ -460,10 +477,22 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
     rest = collections_[FEATURED:]
     setrest = ""
     if rest:
+        # BEHIND A DISCLOSURE, AND THAT IS A LENGTH DECISION.
+        # The roster went 31 -> 54 sets, so the flat chip list went from 25 names
+        # to 48 — on a 390pt phone that is ~24 rows of small type, and the
+        # collections section became the tallest thing on the page for the least
+        # reason. A <details> is the right tool and needs no script: closed, the
+        # section is six sets and one line; open, it is all 54, so nothing is
+        # hidden from anyone who wants the proof of depth. Native, keyboard
+        # operable, and announced as an expander without a line of ARIA.
         chips = "".join(f'<li>{e(t)}</li>' for t, _ in rest)
-        setrest = (f'<p class="setmore">…and {len(rest)} more, each a different '
-                   f'cut through the same {total}:</p>'
-                   f'<ul class="setchips">{chips}</ul>')
+        # len(collections_), not ncoll: ncoll is bound eight lines BELOW this,
+        # so naming it here is a NameError that only fires when a roster has
+        # more sets than FEATURED — i.e. always, but silently never in a test
+        # with a short fixture.
+        setrest = (f'<details class="setall"><summary>See all {len(collections_)} sets'
+                   f'<span> — {len(rest)} more cuts through the same {total}</span>'
+                   f'</summary><ul class="setchips">{chips}</ul></details>')
 
     ncoll = len(collections_)
     nscript = len(by_section.get("Scripture", []))
@@ -641,7 +670,23 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
       <a class="btn ghost" href="#make">Or write your own</a>
     </div>
     <ul class="badges">
-      <li>18+</li><li>No sexual content, ever</li>
+      <!-- "No sexual content, ever" used to sit in this slot, directly beside
+           18+, and it raised the question instead of settling it: half the row
+           was what the app refuses, on a page about Cleopatra and Sherlock.
+           The refusal is not softened, only moved to where a reader who cares
+           goes looking — it keeps its full sentence in the safety block below
+           ("not as a tier, not as an unlock, not for verified adults") and its
+           own heading on safety.html.
+           What replaces it is a claim this repo can actually stand behind:
+           `no_account` is an APPROVED absolute claim in
+           mythkin/site-audit-contract.json, evidenced down to the line —
+           identity is a client-minted device UUID in X-Device-Id
+           (mythkin-api/app/deps.py), and the API has no auth routes, no email
+           field and no password anywhere. Deliberately NOT "314 characters,
+           painted by hand", which was the first draft: the eyebrow six lines
+           above already says exactly that, and a badge that repeats the
+           headline is a badge doing nothing. -->
+      <li>18+</li><li>No account, no email</li>
       <li>No streaks, no guilt</li><li>Every reply marked AI</li>
     </ul>
   </div>
@@ -809,6 +854,20 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
       try{{localStorage.setItem('mythkin.theme',v)}}catch(e){{}}}}
     paint(v);
   }});
+}})();
+</script>
+<script>
+/* THE MARQUEE STANDS DOWN WHEN IT IS OFF SCREEN.
+   CSS can pause it on hover but cannot know whether the strip is in view, and
+   three rows of 628 tiles animating behind four screenfuls of other content is
+   battery for nothing. One observer, no per-frame work, and it degrades to the
+   old always-on behaviour if IntersectionObserver is missing. */
+(function(){{
+  var m=document.querySelector('.marquee');
+  if(!m||!('IntersectionObserver' in window))return;
+  new IntersectionObserver(function(es){{
+    es.forEach(function(en){{ m.classList.toggle('idle', !en.isIntersecting); }});
+  }},{{rootMargin:'120px'}}).observe(m);
 }})();
 </script>
 <script>

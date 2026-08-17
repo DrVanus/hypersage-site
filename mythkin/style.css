@@ -260,14 +260,52 @@ section{padding:3.1rem 0}
 .marquee{overflow:hidden;
   mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
 .mrow{display:flex;gap:.8rem;width:max-content;padding:.4rem 0}
+.mtile{position:relative;flex:none;display:block;line-height:0;
+  border-radius:var(--r-m);overflow:hidden}
 .mrow img{width:104px;height:104px;border-radius:var(--r-m);object-fit:cover;
-  border:1px solid var(--border);background:var(--surface2)}
+  border:1px solid var(--border);background:var(--surface2);display:block}
+/* THE NAME, ON THE TILE, ON HOVER.
+   Inside the tile rather than below it, because .marquee is overflow:hidden and
+   a label hanging off the bottom would be clipped by the very box that makes
+   the strip a strip. Scrim under the text: these are paintings, and light
+   shoulders and pale skies are both common, so a bare word is legible on some
+   tiles and gone on others. */
+.mtile b{position:absolute;left:0;right:0;bottom:0;padding:.42rem .4rem .34rem;
+  font-size:.66rem;line-height:1.15;font-weight:700;text-align:center;
+  color:#F7EBE3;letter-spacing:.01em;
+  background:linear-gradient(to top,rgba(23,15,12,.94),rgba(23,15,12,.72) 62%,transparent);
+  opacity:0;transition:opacity 130ms ease;pointer-events:none;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Same guard as the pause: on touch there is no hover, so revealing a name on a
+   synthesised one would show a label the reader cannot dismiss, over a row that
+   is still moving because the pause is (correctly) desktop-only. */
+@media (hover: hover) and (pointer: fine){
+  .mtile:hover b{opacity:1}
+}
 @media (prefers-reduced-motion:no-preference){
   /* --drift is written per row by the builder from that row's tile count, so
      the SPEED stays put as the roster grows instead of the duration doing. */
   .mrow{animation:drift var(--drift,78s) linear infinite}
   .mrow.rev{animation-direction:reverse}
   @keyframes drift{to{transform:translateX(-50%)}}
+  /* POINT AT IT AND IT STOPS. A tile that slides out from under the cursor
+     cannot be read, so pausing is what makes the name usable rather than a
+     flourish. Only the hovered ROW stops — the other two keep going, so the
+     page does not freeze under one pointer.
+
+     GUARDED ON A REAL POINTER. Touch browsers synthesise :hover on tap and then
+     LEAVE IT STUCK until you tap elsewhere — so on a phone, where there is no
+     hover to begin with and no name to reveal, a stray tap would have frozen a
+     row indefinitely and looked like the strip had crashed. `hover: hover` and
+     `pointer: fine` together are the only combination that means "a pointer
+     that can rest on something". */
+  @media (hover: hover) and (pointer: fine){
+    .mrow:hover{animation-play-state:paused}
+  }
+  /* AND IT STOPS WHEN NOBODY IS LOOKING. Three rows of 628 tiles animating
+     while the reader is four sections down is battery spent on a strip that is
+     off screen. Set by an IntersectionObserver at the foot of the page. */
+  .marquee.idle .mrow{animation-play-state:paused}
   /* HALF SPEED ON A PHONE, and it is a loading fix as much as a taste one.
      The same px/s churns a 402px window far faster than a 1280px one, and
      native lazy-loading does not keep up with tiles that arrive by transform:
@@ -408,7 +446,17 @@ section{padding:3.1rem 0}
 .band-strip figure.band-more span{color:var(--dim);-webkit-line-clamp:none;
   display:block}
 
-.setmore{margin:1.8rem 0 .7rem;color:var(--dim);font-size:.92rem}
+.setall{margin-top:1.7rem;border-top:1px solid var(--border);padding-top:1rem}
+.setall summary{cursor:pointer;font-weight:700;list-style:none;
+  display:flex;align-items:center;gap:.5rem;min-height:44px;font-size:.95rem}
+.setall summary::-webkit-details-marker{display:none}
+.setall summary span{font-weight:400;color:var(--dim);font-size:.88rem}
+.setall summary::after{content:'+';margin-left:auto;color:var(--tintText);
+  font-size:1.3rem;line-height:1;flex:0 0 auto}
+@media (prefers-reduced-motion:no-preference){
+  .setall summary::after{transition:transform .2s}}
+.setall[open] summary::after{transform:rotate(45deg)}
+.setall[open] .setchips{margin-top:.9rem}
 .setchips{display:flex;flex-wrap:wrap;gap:.45rem;padding:0;margin:0;
   list-style:none}
 .setchips li{font-size:.82rem;color:var(--dim);background:var(--surface);

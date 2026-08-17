@@ -210,6 +210,99 @@ def main() -> int:
                   f"worst {worst} blank of {least}+ visible over 50s")
             pg.close()
 
+        # ---- the marquee names the face under the pointer, and holds still
+        # Reported: "not interactable if i move my mouse on it to show who it
+        # is". Three things have to hold together or the feature is a tease —
+        # the name exists, hovering reveals it, and the row STOPS so the tile
+        # does not slide out from under the cursor before it can be read.
+        # Playwright's own `hover()` refuses this element ("not stable"), which
+        # is the bug stated as a tool error; a raw mouse move is what a hand
+        # does, and it is what this drives.
+        pg = b.new_page(viewport={"width": 1280, "height": 900})
+        pg.goto(url, wait_until="load")
+        pg.wait_for_timeout(2200)
+        play = lambda i: pg.evaluate(
+            f"() => getComputedStyle(document.querySelectorAll('.mrow')[{i}]).animationPlayState")
+        named = pg.eval_on_selector_all(
+            ".mrow .mtile b", "e => e.filter(x => x.textContent.trim()).length")
+        tiles = pg.eval_on_selector_all(".mrow .mtile", "e => e.length")
+        check(named == tiles and tiles > 0,
+              "every marquee tile carries the name of the kin on it",
+              f"{named} named of {tiles}")
+
+        was = play(0)
+        spot = pg.evaluate("""() => { const r = document.querySelector('.mrow').getBoundingClientRect();
+                                      return {x: r.x + 400, y: r.y + r.height / 2}; }""")
+        pg.mouse.move(spot["x"], spot["y"])
+        pg.wait_for_timeout(400)
+        shown = pg.evaluate("""() => {
+          const t = [...document.querySelectorAll('.mtile')].find(e => e.matches(':hover'));
+          if (!t) return null;
+          const b = t.querySelector('b');
+          return {name: b.textContent.trim(), opacity: +getComputedStyle(b).opacity};
+        }""")
+        check(bool(shown and shown["opacity"] > 0.9 and shown["name"]),
+              "hovering a face shows whose it is", str(shown))
+        check(was == "running" and play(0) == "paused",
+              "and the row it is in stops so the name can be read",
+              f"{was} -> {play(0)}")
+        check(play(2) == "running",
+              "while the other rows carry on", f"row2 {play(2)}")
+        x1 = pg.evaluate("() => [...document.querySelectorAll('.mtile')]"
+                         ".find(e => e.matches(':hover'))?.getBoundingClientRect().x")
+        pg.wait_for_timeout(1400)
+        x2 = pg.evaluate("() => [...document.querySelectorAll('.mtile')]"
+                         ".find(e => e.matches(':hover'))?.getBoundingClientRect().x")
+        drift = abs((x2 or 0) - (x1 or 0))
+        check(drift < 1.0, "the hovered tile really is still, not just slower",
+              f"drifted {drift:.2f}px in 1.4s")
+        pg.mouse.move(4, 4)
+        pg.wait_for_timeout(350)
+        check(play(0) == "running", "and it starts again when the pointer leaves")
+
+        # off-screen it stands down entirely
+        pg.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
+        pg.wait_for_timeout(900)
+        idle_away = pg.evaluate("() => document.querySelector('.marquee').classList.contains('idle')")
+        away = play(0)
+        pg.evaluate("window.scrollTo(0, 0)")
+        pg.wait_for_timeout(900)
+        check(idle_away and away == "paused" and play(0) == "running",
+              "it stops drifting once it is scrolled out of view",
+              f"away idle={idle_away} play={away}; back play={play(0)}")
+        pg.close()
+
+        # ---- and none of that fires on a touch screen, where :hover sticks
+        pg = b.new_page(viewport={"width": 402, "height": 874},
+                        is_mobile=True, has_touch=True)
+        pg.goto(url, wait_until="load")
+        pg.wait_for_timeout(1500)
+        pg.evaluate("() => document.querySelector('.marquee').scrollIntoView()")
+        pg.wait_for_timeout(800)
+        tap = pg.evaluate("""() => { const r = document.querySelector('.mrow .mtile')
+                                       .getBoundingClientRect();
+                                     return {x: r.x + r.width / 2, y: r.y + r.height / 2}; }""")
+        pg.touchscreen.tap(tap["x"], tap["y"])
+        pg.wait_for_timeout(700)
+        # ASSERT THE SYMPTOM, NOT A PROXY FOR IT.
+        # The first version of this check read animationPlayState and demanded
+        # "running" — and went red on a page whose guard was working perfectly.
+        # The tap had scrolled the marquee out of view, so the idle observer
+        # stopped the row exactly as designed, and the check blamed the hover
+        # guard for the scroll pause. play-state has two legitimate causes and
+        # cannot tell them apart.
+        # Sticky :hover has one unambiguous fingerprint — a tile still matching
+        # :hover with no pointer on the page. Measure that.
+        after = pg.evaluate("""() => ({
+          hovered: [...document.querySelectorAll('.mtile')].filter(e => e.matches(':hover')).length,
+          labelled: [...document.querySelectorAll('.mtile b')]
+                      .filter(e => +getComputedStyle(e).opacity > 0.05).length,
+        })""")
+        check(after["hovered"] == 0 and after["labelled"] == 0,
+              "a tap on a phone leaves no stuck :hover and no stranded label",
+              str(after))
+        pg.close()
+
         b.close()
     httpd.shutdown()
 
