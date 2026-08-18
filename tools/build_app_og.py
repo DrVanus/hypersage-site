@@ -414,8 +414,8 @@ CARDS = {
          box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(157,139,255,0.22); }
 """,
         "kicker": "Pok\u00e9mon card scanner + AI companion \u00b7 Coming to iOS",
-        "h1": "Scan free, forever.<br>Prices that show their work.",
-        "sub": "Get a real price with its source named \u2014 sold comps, the cheapest listing, and the middle of the book. Unlimited scanning, and recognition that never leaves your phone.",
+        "h1": "Hound knows your binder \u2014<br>and the market.",
+        "sub": "Ask what you\u2019re missing, what\u2019s worth flipping, or what a card is really worth \u2014 sources named every time. Scanning stays free and unlimited.",
     },
     "hexhunter": {
         "art": "assets/art/cover.jpg",
