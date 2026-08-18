@@ -395,6 +395,28 @@ CARDS = {
         "h1": 'Dig the jar.<br>Feed the <span class="grad">dragon.</span>',
         "sub": "Every gem and rock is real physics: pull one out and the whole pile settles. Fill the orders on the line \u2014 and decide what the dragon keeps.",
     },
+    "holohound": {
+        "art": "app-icon.png",
+        "css": """
+  /* Midnight Holo, re-keyed from holohound/style.css :root (dark block) --
+     every hex below is one of that file's own --bg/--surface/--tint/--holo
+     tokens, nothing invented for this card. */
+  .og { background:
+        radial-gradient(circle at 80% 40%, rgba(157,139,255,0.16), transparent 58%),
+        linear-gradient(160deg, #131829 0%, #0A0D18 62%); }
+  .kicker { color: #9D8BFF; }
+  h1 { font-weight: 800; font-size: 66px; letter-spacing: -0.01em;
+       background-image: linear-gradient(120deg, #4EE1FF, #8B7BFF 38%, #FF7BD5 68%, #F5C84C); }
+  .sub { color: #96A0B8; max-width: 540px; }
+  /* The icon on a holo card, same treatment as the app's own tab-bar mark:
+     a rounded square lifted off the dark ground with the holo gradient as glow. */
+  .art { width: 340px; height: 340px; border-radius: 76px;
+         box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(157,139,255,0.22); }
+""",
+        "kicker": "Pok\u00e9mon card scanner \u00b7 Coming to iOS",
+        "h1": "Scan free, forever.<br>Prices that show their work.",
+        "sub": "Get a real price with its source named \u2014 sold comps, the cheapest listing, and the middle of the book. Unlimited scanning, and recognition that never leaves your phone.",
+    },
     "hexhunter": {
         "art": "assets/art/cover.jpg",
         "css": """

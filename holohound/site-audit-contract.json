@@ -1,0 +1,31 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://hypersage.ai/holohound/",
+  "_why": "Written 2026-08-18, the day the marketing site was rebuilt from a one-section stub. Holohound is pre-launch and its own privacy.html already made no_account/no_tracking/no_ads claims with no contract behind them — this backs those with evidence from the actual app repo (~/Developer/DrVanus/holohound) rather than removing the claims.",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "DESIGN.md's accepted decisions state the app is a cold open with no onboarding sequence: 'no splash, no carousel, no account, no ATT' — camera permission fires in context, account is never required to scan or see your own collection.",
+        "holohound/ios/project.yml declares zero third-party SPM/CocoaPods dependencies for the Holohound target — no auth SDK (Firebase Auth, Sign in with Apple wrapper, etc.) is linked.",
+        "Identity to the Hound backend (holohound-api) is an opaque, install-scoped localStorage id generated client-side (index.html 'HOUND, LIVE' block, deviceId()) — explicitly documented as 'a METERING key, not a credential'. There is no login, password or profile screen anywhere in the 13-screen prototype."
+      ]
+    },
+    "no_tracking": {
+      "approved": true,
+      "evidence": [
+        "holohound/ios/project.yml lists only first-party Swift sources for the Holohound target (HolohoundApp, Haptics, Recognition, Scanner, Grading, PrivacyInfo.xcprivacy) and zero package dependencies — no analytics or attribution SDK (Firebase, Amplitude, Mixpanel, PostHog, AppsFlyer, Adjust) is linked.",
+        "Card recognition is on-device: DESIGN.md and the app's own NSCameraUsageDescription ('Recognition runs entirely on this device') describe a bundled pHash index (tools/build_phash_index.py, 21,775 EN cards) matched locally, with no image or video sent anywhere.",
+        "The only network calls in the prototype are to api.tcgdex.net (public card/price data, no identifier attached — mock-data.js:2221) and, once enabled, to holohound-api for Hound chat, which is metering-only per the no_account evidence above, not tracking."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "Same project.yml dependency list as no_tracking: no ad SDK (Google Mobile Ads/AdMob, AppLovin, Unity Ads, ironSource) is linked anywhere in the iOS shell.",
+        "DESIGN.md's paywall copy law (accepted decisions) rules out ad-supported mechanics entirely: monetisation is a single StoreKit subscription (Holohound Pro, $9.99/mo or $59.99/yr in the mock's PLANS block, mock-data.js:1673-1676), with 'exactly two paywall entry points' and no rewarded-ad or ad-gated surface described anywhere in the design log."
+      ]
+    }
+  },
+  "contract_notes": "Pre-launch — app is a 13-screen HTML/WKWebView prototype running on-device, not yet submitted. Two claims on this site are deliberately present-tense-false and disclosed as such rather than hidden: Hound chat is not wired to its live backend in the current build (privacy.html), and collection backup is not implemented (support.html). Re-verify this contract and delete the 'In development' hero eyebrow the same day the app goes live on the App Store, per the fleet's status-lives-in-one-line convention."
+}

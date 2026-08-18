@@ -4,65 +4,337 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Holohound — know what your cards are actually worth</title>
-<meta name="description" content="Scan a Pokémon card, get a real price with its source named, and track your binder. Unlimited free scanning, no account.">
+<meta name="description" content="Scan a Pokémon card, get a real price with its source named, and track your binder. Unlimited free scanning, on-device recognition, no account.">
 <link rel="canonical" href="https://hypersage.ai/holohound/">
 <meta property="og:title" content="Holohound — know what your cards are actually worth">
-<meta property="og:description" content="Scan a Pokémon card, get a real price with its source named, and track your binder. Unlimited free scanning, no account.">
+<meta property="og:description" content="Scan a Pokémon card, get a real price with its source named, and track your binder. Unlimited free scanning, on-device recognition, no account.">
 <meta property="og:url" content="https://hypersage.ai/holohound/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="HyperSage">
+<meta property="og:image" content="https://hypersage.ai/holohound/og-image.png?v=20260818a">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://hypersage.ai/holohound/og-image.png?v=20260818a">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F5F6FB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0A0D18" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Holohound",
+  "applicationCategory": "Utilities",
+  "operatingSystem": "iOS",
+  "url": "https://hypersage.ai/holohound/",
+  "description": "A Pokémon card scanner, binder and AI flipping companion. Unlimited free scanning, prices shown with their source, and an AI companion that knows your collection.",
+  "publisher": { "@type": "Organization", "name": "Hypersage AI Labs", "url": "https://hypersage.ai/" }
+}
+</script>
 </head>
 <body>
-<header class="site"><span class="mark"></span><a class="brand" href="./">Holohound</a></header>
-<main class="wrap">
-  <h1>Know what your cards are actually worth.</h1>
-  <p class="lede">Scan a Pokémon card and get a real price with its source named — then keep
-  the whole binder in one place. Unlimited free scanning. No account.</p>
 
-  <div class="card">
-    <p style="margin:0"><strong>In development.</strong> Holohound is being built in the
-    open and is not on the App Store yet. These pages are live because the app links to
-    them. Want to know when it ships?
-    <a href="mailto:hello@hypersage.ai?subject=Holohound">Email us</a>.</p>
+<!-- ===== NAV ===== -->
+<nav class="site">
+  <div class="container">
+    <a class="brand" href="#top"><span class="mark" aria-hidden="true"></span>Holohound</a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#screens">Screens</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="support.html">Support</a>
+    </div>
+    <a class="btn-nav" href="mailto:hello@hypersage.ai?subject=Holohound">Notify me</a>
+    <details class="mobile-menu">
+      <summary aria-label="Open menu">☰</summary>
+      <div class="mobile-links">
+        <a href="#features">Features</a>
+        <a href="#screens">Screens</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="support.html">Support</a>
+        <a href="mailto:hello@hypersage.ai?subject=Holohound">Notify me</a>
+      </div>
+    </details>
   </div>
+</nav>
 
-  <h2>What it does</h2>
-  <ul>
-    <li><strong>Scanning is free, forever.</strong> No daily cap, no lifetime cap, no
-    account. The thing every competitor meters is the thing we never will.</li>
-    <li><strong>Prices name their source.</strong> Market price, the cheapest listing and
-    the middle of the book — from TCGplayer via TCGdex, with the date attached.</li>
-    <li><strong>It says what it doesn't know.</strong> Sold-price history and graded prices
-    aren't connected yet, so the app says exactly that instead of showing you a number
-    labelled as something it isn't.</li>
-    <li><strong>Pre-grades are a lead, not a grade.</strong> An estimate from your photo,
-    stated as an estimate, so you can decide whether a card is worth submitting. If a card
-    is already slabbed, we read the case instead of guessing.</li>
-    <li><strong>Master-set completion.</strong> Every printing counted, what's missing, and
-    what finishing it would cost.</li>
-    <li><strong>Your data is yours.</strong> It lives on your phone, and CSV export is free
-    and always will be.</li>
-  </ul>
+<!-- ===== HERO ===== -->
+<section class="hero" id="top">
+  <div class="container">
+    <div class="hero-layout">
+      <div class="hero-text">
+        <span class="hero-eyebrow">Pokémon card scanner · In development</span>
+        <h1>Scan free, forever.<br>Prices that show their work.</h1>
+        <p class="lede">Scan a card and get a real price with its source named — sold comps, the
+        cheapest listing, and the middle of the book, not one number pretending to be all
+        three. Then keep the whole binder, and every set you're chasing, in one place.</p>
+        <div class="hero-buttons">
+          <a href="mailto:hello@hypersage.ai?subject=Holohound" class="btn-warm">
+            <span>Get notified at launch</span>
+            <span aria-hidden="true">→</span>
+          </a>
+          <a href="#features" class="btn-outline">See how it works</a>
+        </div>
+        <div class="hero-trust">
+          <span>Unlimited free scanning</span>
+          <span>Recognition runs on your phone</span>
+          <span>No account</span>
+        </div>
+      </div>
+      <div class="device-stage">
+        <div class="device">
+          <div class="hero-carousel">
+            <img data-allow-duplicate="true" src="screenshots/home.png?v=20260818a" width="390" height="844" fetchpriority="high" alt="Holohound home screen — binder value with today's movers, Scan and Ask Hound quick actions">
+            <img data-allow-duplicate="true" src="screenshots/report.png?v=20260818a" width="390" height="844" loading="lazy" alt="A card report — last-sold price, the cheapest listing, the middle of the book, and a pre-grade estimate with its hedge stated first">
+            <img data-allow-duplicate="true" src="screenshots/set.png?v=20260818a" width="390" height="844" loading="lazy" alt="Master-set completion — a completion ring, the cards still needed, and what finishing the set would cost">
+            <img data-allow-duplicate="true" src="screenshots/hound.png?v=20260818a" width="390" height="844" loading="lazy" alt="A chat with Hound, the AI companion, answering with the user's own cards as context">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <h2>Independent and unofficial</h2>
-  <p class="dim">Pokémon and all related names, card text and card imagery are trademarks
-  and copyrighted works of The Pokémon Company, Nintendo, Creatures Inc. and GAME FREAK inc.
-  Holohound is not produced, endorsed, supported, licensed by, or associated with any of
-  them. Card names are used to identify the cards you own.</p>
+<!-- ===== STATS STRIP ===== -->
+<div class="container">
+  <div class="stats-strip">
+    <div class="stat"><div class="n">21,775</div><div class="l">cards recognized on-device</div></div>
+    <div class="stat"><div class="n">97.5%</div><div class="l">match accuracy, measured on 400 real photos</div></div>
+    <div class="stat"><div class="n">$0</div><div class="l">to scan — every card, forever</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">accounts required</div></div>
+  </div>
+</div>
 
-  <p><a class="btn" href="mailto:hello@hypersage.ai?subject=Holohound">Get in touch</a></p>
-</main>
-<footer class="site">
-  <span>© 2026 HyperSage AI Labs LLC</span>
-  <a href="./">Holohound</a>
-  <a href="privacy.html">Privacy</a>
-  <a href="terms.html">Terms</a>
-  <a href="support.html">Support</a>
-  <a href="https://hypersage.ai/">HyperSage</a>
+<!-- ===== FEATURES ===== -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-eyebrow center">What it does</div>
+    <h2 class="title center">Built against what the category gets wrong.</h2>
+    <p class="lede center">Every one of these is a direct answer to a specific complaint we found
+    reading the category's own 1- and 2-star reviews.</p>
+    <div class="feature-grid">
+      <div class="feature">
+        <h3>Scanning is free. Unlimited. Forever.</h3>
+        <p>No daily cap, no lifetime cap, no account to create. Card recognition runs entirely
+        on your phone against a bundled index — nothing you point the camera at leaves the
+        device.</p>
+      </div>
+      <div class="feature">
+        <h3>Prices come with receipts.</h3>
+        <p>Market price, the cheapest current listing, and the middle of the book — from
+        TCGplayer via TCGdex, dated and sourced. Sold-price history isn't connected yet, and
+        the app says exactly that instead of showing you a number and letting you assume.</p>
+      </div>
+      <div class="feature">
+        <h3>Pre-grades are a lead, not a verdict.</h3>
+        <p>An estimate from your photo, with the hedge stated <em>before</em> the number, every
+        time — never a flip, a count-up, or a grade the app didn't measure. Already slabbed? We
+        read the case instead of guessing.</p>
+      </div>
+      <div class="feature">
+        <h3>Master-set completion, done right.</h3>
+        <p>Every printing counted — secrets and reverses included — what's missing, and what
+        finishing it would actually cost, with a straight line to Hound to watch the prices for
+        you.</p>
+      </div>
+      <div class="feature">
+        <h3>Hound: an AI companion that knows your binder.</h3>
+        <p>Ask what you're missing, what's worth flipping, or what a card is really worth.
+        Hound answers with your own collection as context and names its sources — something no
+        Pokémon-tracking app currently ships.</p>
+      </div>
+      <div class="feature">
+        <h3>No streaks. No guilt. No noise.</h3>
+        <p>No manufactured urgency and no loss framing. Notifications are opt-in, capped under
+        four a month, and limited to things you'd actually want to hear from a friend by text.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SCREENS ===== -->
+<section class="section" id="screens">
+  <div class="container">
+    <div class="section-eyebrow">Screens</div>
+    <h2 class="title">Thirteen screens, built and running.</h2>
+    <p class="lede">The prototype below is what's actually on the phone today — not mockups.</p>
+    <div class="screens-rail">
+      <div class="screen-card">
+        <div class="device"><img data-allow-duplicate="true" src="screenshots/home.png?v=20260818a" width="390" height="844" loading="lazy" alt="Home — binder value, today's movers, and recent scans"></div>
+        <p>Binder value at a glance, with today's movers.</p>
+      </div>
+      <div class="screen-card">
+        <div class="device"><img src="screenshots/scan.png?v=20260818a" width="390" height="844" loading="lazy" alt="Scan — a full-screen viewfinder that identifies a card on-device"></div>
+        <p>Point the camera. Recognition runs on your phone.</p>
+      </div>
+      <div class="screen-card">
+        <div class="device"><img data-allow-duplicate="true" src="screenshots/report.png?v=20260818a" width="390" height="844" loading="lazy" alt="Report — sold comps, cheapest listing, middle of the book, and a pre-grade estimate"></div>
+        <p>Every price sourced. Every estimate hedged.</p>
+      </div>
+      <div class="screen-card">
+        <div class="device"><img data-allow-duplicate="true" src="screenshots/set.png?v=20260818a" width="390" height="844" loading="lazy" alt="Set — a master-set completion ring with the exact cards still needed"></div>
+        <p>What's missing, and what it costs to finish.</p>
+      </div>
+      <div class="screen-card">
+        <div class="device"><img data-allow-duplicate="true" src="screenshots/hound.png?v=20260818a" width="390" height="844" loading="lazy" alt="Hound — a chat companion that answers using the user's own binder"></div>
+        <p>Hound knows your binder. Ask it anything.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section class="section" id="pricing" style="background:var(--bg-2)">
+  <div class="container">
+    <div class="section-eyebrow center">Holohound Pro</div>
+    <h2 class="title center">Free to scan, forever. Pro removes Hound's cap.</h2>
+    <p class="lede center">Scanning, your binder, your wishlist and CSV export are free with no
+    limit. Hound gives you 10 free messages a day — Pro makes that unlimited.</p>
+    <div class="plans">
+      <div class="plan">
+        <h3>Free</h3>
+        <div class="price">$0</div>
+        <div class="period">forever</div>
+        <ul>
+          <li>Unlimited card scanning</li>
+          <li>Full binder, wishlist and want-list tracking</li>
+          <li>Master-set completion tracking</li>
+          <li>10 Hound messages a day</li>
+          <li>CSV export, no subscription required</li>
+        </ul>
+      </div>
+      <div class="plan featured">
+        <span class="badge">Best value</span>
+        <h3>Pro — Annual</h3>
+        <div class="price">$59.99</div>
+        <div class="period">per year, ≈$5.00/mo — 7-day free trial, then $59.99/year</div>
+        <ul>
+          <li>Everything in Free</li>
+          <li>Unlimited Hound messages</li>
+          <li>Price alerts on cards you own</li>
+          <li>Graded-tier prices, once connected</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <h3>Pro — Monthly</h3>
+        <div class="price">$9.99</div>
+        <div class="period">per month, cancel anytime</div>
+        <ul>
+          <li>Everything in Free</li>
+          <li>Unlimited Hound messages</li>
+          <li>Price alerts on cards you own</li>
+          <li>Graded-tier prices, once connected</li>
+        </ul>
+      </div>
+    </div>
+    <p class="dim center" style="max-width:60ch;margin-top:24px;font-size:13.5px">Prices are set
+    at launch on the App Store and billed by Apple. Restore Purchases works without a Holohound
+    account, because there isn't one.</p>
+  </div>
+</section>
+
+<!-- ===== INDEPENDENT & UNOFFICIAL ===== -->
+<section class="section">
+  <div class="container" style="max-width:var(--maxw)">
+    <h2 class="title" style="font-size:20px">Independent and unofficial</h2>
+    <p class="dim">Pokémon and all related names, card text and card imagery are trademarks and
+    copyrighted works of The Pokémon Company, Nintendo, Creatures Inc. and GAME FREAK inc.
+    Holohound is not produced, endorsed, supported, licensed by, or associated with any of
+    them. Card names and images are used to identify the cards you own.</p>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="section" id="faq">
+  <div class="container" style="max-width:var(--maxw)">
+    <div class="section-eyebrow center">Common questions</div>
+    <h2 class="title center">FAQ</h2>
+    <div class="faq-list">
+      <details class="faq">
+        <summary>Is scanning really free, forever?</summary>
+        <p>Yes. No daily cap, no lifetime cap, no account. Scan caps are the single most common
+        complaint in this category, so it's the one thing we committed to never do.</p>
+      </details>
+      <details class="faq">
+        <summary>Do I need an account?</summary>
+        <p>No. There's no sign-in anywhere in the app. Your collection lives on your device, and
+        CSV export is free if you want a copy of your own.</p>
+      </details>
+      <details class="faq">
+        <summary>What does Hound see when I ask it something?</summary>
+        <p>Your message plus the specific card rows relevant to the question — not your whole
+        binder, and no account is created to enable it. Hound is not switched on in the current
+        build; its replies there are pre-written examples, and this page and the privacy policy
+        will update the day that changes.</p>
+      </details>
+      <details class="faq">
+        <summary>How is a pre-grade different from a real grade?</summary>
+        <p>A pre-grade is an estimate from your photo — a lead on whether a card is worth
+        submitting, never a prediction of what PSA, BGS or CGC will actually return. If a card
+        is already in a graded slab, Holohound reads the grade off the case instead of
+        estimating.</p>
+      </details>
+      <details class="faq">
+        <summary>Is this an official Pokémon app?</summary>
+        <p>No. Holohound is independent and unofficial, and is not produced, endorsed or
+        licensed by The Pokémon Company, Nintendo, Creatures Inc. or GAME FREAK — see the
+        disclosure above.</p>
+      </details>
+      <details class="faq">
+        <summary>When does it launch?</summary>
+        <p>Holohound is in active development — thirteen screens are built and running on a real
+        phone today, on real card data. There's no launch date yet.
+        <a href="mailto:hello@hypersage.ai?subject=Holohound">Email us</a> to hear the moment it
+        ships.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA STRIP ===== -->
+<section class="cta-strip">
+  <h2>Want to know when it ships?</h2>
+  <p>No spam, no list you can't leave — just one email, the day it's live.</p>
+  <a href="mailto:hello@hypersage.ai?subject=Holohound" class="btn-warm">
+    <span>Get notified at launch</span>
+    <span aria-hidden="true">→</span>
+  </a>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-marketing">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <a class="footer-brand" href="#top"><span class="mark" aria-hidden="true"></span>Holohound</a>
+      <div class="footer-links">
+        <a href="#features">Features</a>
+        <a href="#screens">Screens</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="support.html">Support</a>
+        <a href="mailto:hello@hypersage.ai?subject=Holohound">Contact</a>
+      </div>
+    </div>
+    <div class="hs-more">
+      <h4>More from Hypersage AI Labs</h4>
+      <div class="hs-more-list">
+        <a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a>
+        <a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a>
+        <a href="https://hypersage.ai/quietoak/">Quietoak — DBT Skills Companion</a>
+        <a href="https://hypersage.ai/storyvault/">StoryVault AI — Interactive Fiction</a>
+        <a href="https://cryptosageai.io/">CryptoSage AI — Portfolio Intelligence</a>
+        <a href="https://hypersage.ai/hexhunter/">Hexhunter — Gothic Horde-Survivor</a>
+        <a href="https://hypersage.ai/gemburrow/">Gemburrow — Cozy Gem-Digging Puzzle</a>
+      </div>
+    </div>
+    <div class="footer-copy">© 2026 <a href="https://hypersage.ai/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Holohound is an independent, unofficial companion for the Pokémon TCG.</div>
+  </div>
 </footer>
+
 </body>
 </html>

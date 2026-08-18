@@ -32,6 +32,10 @@ third-party tracking</strong>. We cannot see your binder.</p>
 <p>Everything you create in the app: the cards in your binder, what you paid, your want
 list, your price watches, your notification choices, and the value history the app records
 over time. This lives in the app's own storage on your phone. Deleting the app deletes it.</p>
+<p>When you scan a card, the app also keeps a rectified photo of it on your device — used to
+show a condition read and, later, as the image you'd share with Hound — capped at your
+newest 40 captures so the library can't grow without bound. These photos are never uploaded
+anywhere; the card-matching step that reads them runs entirely on the phone.</p>
 <p>Because it is only on your phone, <strong>we cannot restore it for you</strong> if you
 lose the device or delete the app. Backup is not implemented in this version.</p>
 
@@ -65,9 +69,10 @@ changes, and the app will say so on the screen where it happens.</p>
 </ul>
 
 <h2>Camera</h2>
-<p>The scanner is not implemented in this version, and the app does not request camera
-access. When scanning ships, the camera will be used only to identify the card in front of
-it, and the app will ask for permission at the moment you first use it.</p>
+<p>The app requests camera access to identify the card in front of it — asked for in
+context, the moment you first tap Scan, never on launch. Recognition runs entirely on your
+phone against an index of card images bundled with the app: nothing the camera sees is
+uploaded, and no image or video ever reaches our servers or anyone else's.</p>
 
 <h2>Children</h2>
 <p>Holohound is a collection tracker for a hobby many children take part in. It collects no
