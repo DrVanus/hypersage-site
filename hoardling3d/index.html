@@ -5,8 +5,20 @@
   <!-- viewport-fit=cover is REQUIRED for env(safe-area-inset-*) to resolve on
        notched phones and under Android's forced edge-to-edge (targetSdk 35+). -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="description" content="Hoardling — defend the sleeping dragon's hoard. Hold the chokepoints, recover every stolen coin.">
+  <meta name="description" content="Hoardling 3D — an experimental real-time 3D preview of Hoardling. Defend the sleeping dragon's hoard, hold the chokepoints, recover every stolen coin.">
   <title>Hoardling 3D</title>
+  <link rel="canonical" href="https://hypersage.ai/hoardling3d/">
+  <meta property="og:title" content="Hoardling 3D">
+  <meta property="og:description" content="An experimental real-time 3D preview of Hoardling. Same rules, same raiders, rendered in three dimensions. Free, no account.">
+  <meta property="og:url" content="https://hypersage.ai/hoardling3d/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="HyperSage">
+  <meta property="og:image" content="https://hypersage.ai/hoardling3d/og-image.png?v=20260818a">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://hypersage.ai/hoardling3d/og-image.png?v=20260818a">
+  <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#17100e">
   <!-- installable PWA: "Add to Home Screen" gives a fullscreen portrait app -->
   <link rel="manifest" href="manifest.json">
@@ -74,6 +86,7 @@
        that shares hoardling.save.v2 with the shipping /hoardling/ build and
        submits to its leaderboard. Without this bump the storage-isolation fix
        below reaches only cold caches. Bump on any change to either file. -->
+  <script>window.__ART_EXT__="webp";</script>
   <script src="lb-config.js?v=20260814-isolate"></script>
   <script src="game.js?v=20260814-isolate" defer></script>
 </body>

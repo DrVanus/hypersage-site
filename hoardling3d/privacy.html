@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy — Hoardling 3D</title>
+<meta name="description" content="What Hoardling 3D stores, what leaves your device, and what we never collect.">
+<link rel="canonical" href="https://hypersage.ai/hoardling3d/privacy.html">
+<meta property="og:title" content="Privacy — Hoardling 3D">
+<meta property="og:description" content="What Hoardling 3D stores, what leaves your device, and what we never collect.">
+<meta property="og:url" content="https://hypersage.ai/hoardling3d/privacy.html">
+<meta property="og:type" content="article">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#17100e">
+<link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png">
+<link rel="stylesheet" href="legal.css">
+</head>
+<body>
+<header class="site"><span class="mark"></span><a class="brand" href="./">Hoardling 3D</a></header>
+<main class="wrap">
+<h1>Privacy</h1>
+<p class="updated">Last updated 18 August 2026</p>
+
+<div class="card">
+<h2 style="margin-top:0">The short version</h2>
+<p>Hoardling 3D has <strong>no accounts, no sign-up form, and no name or email to give us</strong>.
+Your progress is stored on your device, not on our servers. We run <strong>no analytics, no
+advertising, and no third-party trackers</strong>. The only thing that leaves your device is an
+anonymous, auto-created leaderboard identity and the wave number you post to it — never anything
+that identifies you.</p>
+</div>
+
+<h2>What this build is</h2>
+<p>Hoardling 3D is an experimental, in-progress fork of <a
+href="https://hypersage.ai/hoardling/">Hoardling</a> that swaps the finished game's painted 2D
+scene for a real-time 3D one. The rules, the raiders, and your progress are the game's own — only
+the rendering differs, and it's rougher than the main build by design (see the game's own <a
+href="https://hypersage.ai/hoardling/">page</a> for the version we consider finished). Everything
+below applies to this 3D build specifically.</p>
+
+<h2>What stays on your device</h2>
+<p>Everything about your run of the game — campaign stars, your best Daily Siege wave, which Forge
+upgrades you've bought, which trial badges you've earned, which raiders you've met, and your sound
+preference — is written to your browser's local storage. Deleting the site's data (or uninstalling
+the app if you added it to your Home Screen) deletes it. There is no server copy and no backup, so
+<strong>we cannot restore your progress</strong> if you clear your browser or switch devices.</p>
+
+<h2>The leaderboard identity</h2>
+<p>Hoardling 3D has an optional Daily Siege leaderboard, separate from the main game's. The first
+time it needs one, your browser is issued an <strong>anonymous session</strong> by our database
+provider, Supabase — no email, password, or personal detail is asked for or collected. That
+session is used only to post your best Daily Siege wave under a name we generate for you, in the
+fixed shape <code>WICK-XXXX</code> (four characters derived from the session itself). You never
+type a name, and the app never asks you for one.</p>
+<p>Hoardling 3D and the main <a href="https://hypersage.ai/hoardling/">Hoardling</a> are both
+served from hypersage.ai, so browsers treat them as the same site for storage purposes: your
+anonymous session and your sound setting are shared between the two if you play both, the same way
+two tabs of one site would share a login. Your campaign progress is kept completely separate —
+playing one never touches your saved stars or Daily best in the other. Each game also posts to its
+own leaderboard, so a Daily Siege score from one never appears on the other's board.</p>
+<p>If the leaderboard can't be reached — offline, or a slow connection — your pending score is held
+in local storage and retried later, up to six attempts over one hour, then dropped. It never grows
+beyond your ten most recent runs.</p>
+
+<h2>What we never collect</h2>
+<ul>
+  <li>No name, email address, or phone number — there is no sign-up anywhere in the app.</li>
+  <li>No advertising identifiers, no ad SDK, no cross-app or cross-site tracking.</li>
+  <li>No analytics or crash-reporting service is loaded by this build.</li>
+  <li>No camera, microphone, contacts, or location access is requested — Hoardling 3D is a
+  WebGL game with touch/tap controls only.</li>
+</ul>
+
+<h2>What we can't remove</h2>
+<p>A posted Daily Siege score is a row on a public leaderboard, tagged only with your generated
+<code>WICK-XXXX</code> name and a wave number — not your device, browser, or IP address by design.
+Because the tag carries nothing that identifies you, there is currently no way for us to find and
+delete one score out of the board on request; the whole board can be reset. If that changes, this
+page will say so on the day it ships.</p>
+
+<h2>Purchases and ads</h2>
+<p>Hoardling 3D has no in-app purchases, no subscriptions, and no advertising in this build. If
+that ever changes, this page and the app's own screens will be updated on the same day, before the
+change ships.</p>
+
+<h2>Children</h2>
+<p>Hoardling 3D shares its rules and content with the main game, built to a kid-safe standard
+(target age 9+): comic dark-fantasy, no blood or gore, and raider "defeats" play as slapstick, not
+violence. The app collects no personal information from anyone, of any age, and has no chat, no
+messaging, and no way for one player to contact another — the leaderboard is read-only score rows,
+nothing else.</p>
+
+<h2>Changes</h2>
+<p>If what the app does changes, this page changes on the same day. The date at the top is the
+honest one.</p>
+
+<h2>Contact</h2>
+<p><a href="mailto:privacy@hypersage.ai">privacy@hypersage.ai</a></p>
+</main>
+<footer class="site">
+  <span>© 2026 HyperSage AI Labs LLC</span>
+  <a href="./">Hoardling 3D</a>
+  <a href="privacy.html">Privacy</a>
+  <a href="terms.html">Terms</a>
+  <a href="support.html">Support</a>
+  <a href="https://hypersage.ai/">HyperSage</a>
+</footer>
+</body>
+</html>

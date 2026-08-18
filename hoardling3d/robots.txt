@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://hypersage.ai/hoardling3d/sitemap.xml

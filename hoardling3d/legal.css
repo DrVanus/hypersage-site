@@ -1,0 +1,83 @@
+/* Shared stylesheet for Hoardling's legal/support/404 pages — keeps the
+   cavern palette (copied from index.html's boot-splash inline <style>)
+   without duplicating game CSS. Committed dark: this is a single-theme site,
+   like the game itself, so color-scheme is "dark" not "light dark". */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: #17100e;
+  color: #f2e6d4;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.6;
+}
+
+body {
+  min-height: 100%;
+  background: radial-gradient(120% 80% at 50% 0%, #2a1710 0%, #17100e 45%, #0c0705 100%);
+}
+
+a { color: #ffd75e; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+header.site {
+  display: flex; align-items: center; gap: 10px;
+  padding: 22px max(20px, env(safe-area-inset-left)) 10px;
+}
+header.site .mark {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(160deg, #ff9a3c, #ffd75e);
+  box-shadow: 0 0 16px rgba(255, 180, 60, 0.4);
+  display: inline-block;
+}
+header.site .brand {
+  font-weight: 700; font-size: 20px; letter-spacing: 0.02em;
+  color: #ffd75e; text-shadow: 0 2px 0 #7a4a12;
+}
+
+main.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px max(20px, env(safe-area-inset-left)) 80px;
+}
+
+h1 {
+  font-size: clamp(30px, 6vw, 42px);
+  color: #ffd75e;
+  text-shadow: 0 2px 0 #7a4a12;
+  margin-bottom: 8px;
+}
+h2 { font-size: 22px; color: #ffb96a; margin: 34px 0 10px; }
+h3 { font-size: 18px; color: #ffd75e; margin: 22px 0 8px; }
+
+p.updated, p.lede {
+  color: rgba(242, 230, 212, 0.62);
+  font-style: italic;
+  margin-bottom: 22px;
+}
+
+p { margin-bottom: 14px; color: rgba(242, 230, 212, 0.92); }
+ul { margin: 0 0 14px 22px; }
+li { margin-bottom: 8px; }
+
+.card {
+  background: rgba(255, 233, 196, 0.06);
+  border: 1px solid rgba(255, 190, 80, 0.22);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 24px;
+}
+.card h2 { margin-top: 0; }
+
+footer.site {
+  display: flex; flex-wrap: wrap; gap: 14px;
+  padding: 24px max(20px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-bottom));
+  color: rgba(242, 230, 212, 0.5);
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  border-top: 1px solid rgba(255, 190, 80, 0.14);
+}
+footer.site a { color: rgba(242, 230, 212, 0.7); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
