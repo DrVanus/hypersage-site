@@ -42,7 +42,12 @@ nav.site{position:sticky;top:0;z-index:40;background:color-mix(in srgb, var(--bg
 nav.site .container{display:flex;align-items:center;gap:18px;padding:14px 20px}
 nav.site .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;
   font-size:17px;text-decoration:none;color:var(--text);margin-right:auto}
-.mark{width:30px;height:30px;border-radius:9px;background:var(--holo);flex:0 0 30px}
+/* The real app icon. It used to be an empty <span> painted with the --holo
+   gradient — a generic coloured square standing in for a brand that already
+   has a painted icon shipped in this folder. The gradient stays as the
+   backdrop so there is no white flash before the PNG decodes. */
+.mark{width:30px;height:30px;border-radius:9px;background:var(--holo);flex:0 0 30px;
+  object-fit:cover;display:block}
 .nav-links{display:flex;gap:22px;font-size:14.5px;font-weight:600}
 .nav-links a{color:var(--dim);text-decoration:none}
 .nav-links a:hover{color:var(--text)}
@@ -84,15 +89,35 @@ nav.site .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-
 .device{width:240px;aspect-ratio:390/844;border-radius:34px;background:var(--surface);
   border:1px solid var(--border);box-shadow:0 30px 70px rgba(0,0,0,.28);overflow:hidden;position:relative}
 .device img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.hero-carousel img:not(:first-child){opacity:0}
+/* Base state (also what reduced-motion and no-CSS-animation users get):
+   the first screenshot shows, the rest are stacked behind it at zero. */
+.hero-carousel img{opacity:0}
 .hero-carousel img:first-child{opacity:1}
 @media (prefers-reduced-motion:no-preference){
   .hero-carousel img{animation:hh-fade 12s infinite}
-  .hero-carousel img:nth-child(1){animation-delay:0s}
-  .hero-carousel img:nth-child(2){animation-delay:3s}
-  .hero-carousel img:nth-child(3){animation-delay:6s}
-  .hero-carousel img:nth-child(4){animation-delay:9s}
-  @keyframes hh-fade{0%,5%{opacity:1}22%,100%{opacity:0}}
+  /* Every delay is shifted back by the 5% fade-in (0.6s) so the FIRST frame
+     starts already held at full opacity. With a plain 0s delay the animation
+     begins at the 0% stop — opacity 0 — and the phone is visibly empty for the
+     first quarter-second of every page load, which is the one moment the hero
+     has to land. Measured before the shift: 0.007 at t=0. */
+  .hero-carousel img:nth-child(1){animation-delay:-0.6s}
+  .hero-carousel img:nth-child(2){animation-delay:2.4s}
+  .hero-carousel img:nth-child(3){animation-delay:5.4s}
+  .hero-carousel img:nth-child(4){animation-delay:8.4s}
+}
+/* HOLD at full opacity for the WHOLE 1/N slot (4 images -> 25%), then a short
+   crossfade into the next. The first version of this ramped straight from 1 to
+   0 across 5%->22% and sat at zero for the remaining 78%, so the phone frame
+   was empty or near-empty most of the time and read as a broken image — the
+   live page was measured at opacity 0.15/0/0/0. Same shape as storyvault's
+   carousel, which is the proven one; if you add a fifth screenshot, the hold
+   stop and the delays both have to move (100/N, and N evenly across 12s). */
+@keyframes hh-fade{
+  0%   {opacity:0}
+  5%   {opacity:1}
+  25%  {opacity:1}
+  30%  {opacity:0}
+  100% {opacity:0}
 }
 
 /* ===== stats strip ===== */
