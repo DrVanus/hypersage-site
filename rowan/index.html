@@ -752,14 +752,15 @@
 
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h9"/><circle cx="18.5" cy="17" r="2.5"/></svg></div>
-          <!-- The export button serialises the on-device store only (entries,
-               memory, brief additions, transcripts) — `exportServerData()`
-               exists in rowan-app/api.js but is never imported or called, so
-               "a real export … that reaches the server" was not true of the
-               export. The DELETE genuinely does reach the server, so the
-               sentence now attaches that promise only to the half that keeps it. -->
+          <!-- The export button now pulls the server's rows too:
+               exportRow's click handler in rowan-app/app.js dynamically
+               imports exportServerData() (api.js) and merges the result in
+               under server_data. It used to exist with no caller, which is
+               why an earlier version of this sentence limited the claim to
+               the device half — that stopped being true once the button was
+               wired, so the claim matches privacy.html and support.html again. -->
           <h3>You can see what it knows</h3>
-          <p>A plain list of everything Rowan remembers about you, with a remove on every item and a clear-everything underneath — plus an export of what's on your phone, and a delete that reaches the server too.</p>
+          <p>A plain list of everything Rowan remembers about you, with a remove on every item and a clear-everything underneath — plus an export and a delete that both reach the server too.</p>
         </div>
 
 
@@ -828,7 +829,7 @@
         </div>
         <div>
           <div class="section-eyebrow">The hero artifact</div>
-          <h2>Fifteen minutes is not <em>long enough</em> to remember four months.</h2>
+          <h2>Fifteen minutes is not <em>long enough</em> to remember a month.</h2>
           <p style="color: var(--muted-fg); font-size: 1.05rem;">The appointment is short, and the burden of recall is entirely on you — on a day when you may not be at your best. The visit brief exists so you don't walk out remembering the thing you meant to say.</p>
           <ul class="spotlight-points" role="list">
             <li><strong>What changed</strong> — how often each symptom came up and how rough it was, counted from your own entries, not a questionnaire.</li>
