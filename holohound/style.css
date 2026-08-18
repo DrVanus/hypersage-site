@@ -1,0 +1,42 @@
+/* Holohound — Midnight Holo, re-keyed from the app's tokens.json so the site
+   and the product cannot drift apart visually. Dark-first, light fully tokened,
+   because the app is and a marketing page that fights the OS looks broken. */
+:root{
+  --bg:#F5F6FB; --surface:#FFFFFF; --text:#14161F; --dim:#646A7E; --border:#E3E4EF;
+  --tint:#5B47E0; --up:#0B703B;
+  --holo:linear-gradient(120deg,#0E7FA6,#5B47E0 38%,#A83AB0 68%,#9C6410);
+  --radius:16px; --maxw:720px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0A0D18; --surface:#131829; --text:#EEF1FA; --dim:#96A0B8; --border:#232B44;
+  --tint:#9D8BFF; --up:#3DDC97;
+  --holo:linear-gradient(120deg,#4EE1FF,#8B7BFF 38%,#FF7BD5 68%,#F5C84C);
+}}
+:root[data-theme=dark]{
+  --bg:#0A0D18; --surface:#131829; --text:#EEF1FA; --dim:#96A0B8; --border:#232B44;
+  --tint:#9D8BFF; --up:#3DDC97;
+  --holo:linear-gradient(120deg,#4EE1FF,#8B7BFF 38%,#FF7BD5 68%,#F5C84C);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:32px 20px 72px}
+header.site{display:flex;align-items:center;gap:12px;padding:20px;max-width:var(--maxw);margin:0 auto}
+.mark{width:32px;height:32px;border-radius:9px;background:var(--holo);flex:0 0 32px}
+.brand{font-weight:800;letter-spacing:-.02em;font-size:18px;text-decoration:none;color:inherit}
+h1{font-size:30px;line-height:1.2;letter-spacing:-.02em;margin:0 0 6px}
+h2{font-size:19px;margin:34px 0 8px;letter-spacing:-.01em}
+h3{font-size:16px;margin:20px 0 4px}
+p,li{color:var(--text)}
+.lede{font-size:18px;color:var(--dim);margin:0 0 24px}
+.dim{color:var(--dim)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin:18px 0}
+a{color:var(--tint)}
+code{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-size:14px}
+footer.site{border-top:1px solid var(--border);margin-top:48px;padding:22px 20px;max-width:var(--maxw);margin-left:auto;margin-right:auto;
+  display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:14px;color:var(--dim)}
+footer.site a{color:var(--dim)}
+.updated{font-size:14px;color:var(--dim);margin:0 0 26px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;
+  background:var(--holo);color:#fff;text-decoration:none;font-weight:700}
+@media (prefers-color-scheme:light){.btn{color:#fff}}
