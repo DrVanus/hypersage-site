@@ -4,23 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Saffra — AI recipe app that adapts to your pantry</title>
-  <!-- TRUE AS OF 2026-08-06: the recipe pipeline is NOT a panel of trained human
-       chefs. It is (MasterChef/Recipe/RecipeDetailView.swift:3280-3290, the
-       "How Maestro Works" sheet the app itself shows): weighted consensus across
-       tested, editor-vetted sources; ingredients scored CORE / VARIATION /
-       OUTLIER; THREE AI CHEF PERSONAS (Classic, Modern, Foodie) drafting
-       independently from that consensus; then a validation pass for food safety
-       and allergen completeness. Never restore "trained chef-panel", "chef-trained
-       perspectives" or "only the version they all agree on" — there is no
-       agreement gate; the drafts are weighted and MERGED (Step 5), and
-       `panel_agreement_score` is never compared to a threshold anywhere in
-       saffra-api/app/. -->
-  <meta name="description" content="Your personal AI chef. Recipes built from a weighted consensus of tested, editor-vetted sources, then adapted to your pantry, allergies, and time.">
+  <!-- THIRD PASS 2026-08-19 (later same day). The gen-3 replacement below kept a
+       claim gen 2 had smuggled through: "food-safety ... validation pass".
+       A case-insensitive sweep for food.safety across ALL of saffra-api returns
+       ZERO hits — no validation agent, no gate, no column. The app's own
+       first-launch consent screen says the opposite ("Follow USDA food-safety
+       temperatures"). Removed from all five surfaces here. Also removed: the
+       $149.99 Lifetime card (no non-consumable exists — inAppPurchasesV2
+       returns []), two wrong prices, three "consensus-built catalog" strings,
+       the "real chef persona" heading, and "no message limit" (Pro is still
+       bounded by rate_limit_chat_per_day = 300).
+       This is the THIRD generation of this claim. Each fix authored the next
+       one. Do not describe sourcing OR safety-checking unless you can point at
+       the code that does it. -->
+  <!-- CLAIM GUARD, rewritten 2026-08-19. READ THIS BEFORE TOUCHING ANY COPY BELOW.
+       This page has now carried a false sourcing claim in TWO generations:
+         gen 1 (until 2026-08-06) "vetted by a trained chef-panel"
+         gen 2 (until 2026-08-19) "weighted consensus of tested, editor-vetted
+               sources", "a trust weight on every one", CORE/VARIATION/OUTLIER,
+               "three AI chef personas draft independently"
+       Gen 2 was written HERE as the safe replacement for gen 1. It was not safe.
+       Commit saffra-ios 968d2db (2026-08-18) removed it from the app after
+       grepping the whole backend: saffra-api issues NO request to any recipe
+       publication, and the trust weights were never computed. The three named
+       personas appear nowhere in saffra-api; panel_agreement_score / merge_notes
+       / common_mistakes are written only by a backfill from a research workspace,
+       and the iOS app renders none of them.
+
+       THE RULE, not a word list: do not describe where a recipe came from unless
+       the HTTP request that fetches it exists in code. There is no such request.
+       A word list gets routed around by the next rewrite — that is exactly how
+       gen 2 happened. If you cannot point at the call, say nothing about sourcing.
+
+       What this page may claim instead is completeness, measured 2026-08-19 over
+       the shipped catalogue (2,340 recipes / 21,934 ingredients / 15,534 steps):
+       amounts 99.8%, units 97.7%, prep notes 97.2%, equipment lists 100%,
+       sensory finish cues 99.3% — plus real adaptation (adaptation.py rules
+       1/4/5). Gated by saffra-ios store/check_frame_claims.py. Re-measure before
+       requoting. See branding/BRAND_VOICE_AND_NARRATIVE.md (amended 2026-08-19).
+
+       REMOVED 2026-08-19, second pass: the "230,000-recipe semantic search index"
+       (six places, incl. two stat tiles and the JSON-LD FAQ). It does not exist.
+       Production holds 2,323 recipes, ALL of them source='maestro' and all with an
+       embedding — measured against masterchef-api the same day, and independently
+       corroborated by the docstring of saffra-api scripts/audit_hands_on_time.py.
+       The 230,000 was the Food.com CC0 Kaggle set that scripts/seed_foodcom.py CAN
+       load; it was never loaded into production, so zero CC0 rows have ever been
+       searchable. Do not requote it unless `_count_search_eligible` says otherwise.
+
+       AND NOTE THE TWO POPULATIONS, which is why the page now says 2,300+ rather
+       than a precise figure: the bundled catalogue a GUEST sees (DemoFixtures.swift)
+       measures 2,340, while the server a SIGNED-IN user searches holds 2,323. Both
+       are real; they are not the same number, and 2,300+ is true of each. The
+       percentages above were measured over the 2,340 bundle and are left as the
+       record of that measurement — do not lift 2,340 back out into user-facing copy. -->
+  <meta name="description" content="Your personal AI chef. Every recipe arrives complete — measured amounts, prep notes, the equipment you need and a cue for what done looks like — then adapts to your pantry, allergies, and time.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/saffra/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Saffra — Premium Recipes You Can Trust">
-  <meta property="og:description" content="The AI cooking app that doesn't improvise recipes on the fly. Every recipe is built from a weighted consensus of tested, editor-vetted sources. Adapted to your kitchen. Hands-free.">
+  <meta property="og:description" content="The AI cooking app that doesn't improvise recipes on the fly. Every recipe arrives complete — amounts, prep, equipment and a cue for what done looks like. Adapted to your kitchen. Hands-free.">
   <meta property="og:url" content="https://hypersage.ai/saffra/">
   <meta property="og:site_name" content="Saffra">
   <meta property="og:image" content="https://hypersage.ai/saffra/og-image.png?v=20260811a">
@@ -29,7 +72,7 @@
   <meta property="og:image:alt" content="Saffra — your kitchen, understood: Saffra the AI chef">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Saffra — Premium Recipes You Can Trust">
-  <meta name="twitter:description" content="The AI cooking app that doesn't improvise recipes on the fly. Every recipe is built from a weighted consensus of tested, editor-vetted sources. Adapted to your kitchen.">
+  <meta name="twitter:description" content="The AI cooking app that doesn't improvise recipes on the fly. Every recipe arrives complete — amounts, prep, equipment and a cue for what done looks like. Adapted to your kitchen.">
   <meta name="twitter:image" content="https://hypersage.ai/saffra/og-image.png?v=20260811a">
   <meta name="twitter:image:alt" content="Saffra — your kitchen, understood: Saffra the AI chef">
 
@@ -617,12 +660,16 @@
       .adapt-arrow { transform: rotate(90deg); margin: -2px auto; }
     }
 
-    /* Build pipeline — companion to .adapt-flow: the CONSTRUCTION half of
-       "Saffra separates recipe construction from real-time adaptation" (FAQ).
+    /* Completeness track — companion to .adapt-flow: what is already IN a
+       recipe before you ask, as against what adaptation does to it.
        Reuses .adapt-flow / .adapt-card / .adapt-stage-label; only the track,
-       trust-weight bars, chips and fan arrows are new. Labels must keep
-       restating the "catalog built from sources" card + flagship FAQ — and
-       never draw an agreement gate: the three drafts are weighted and MERGED. */
+       .build-w bars, chips and fan arrows are new.
+       REPURPOSED 2026-08-19: these were "trust weight" bars carrying fabricated
+       88/62/40 percentages for a sourcing pipeline that does not exist. The
+       --w values are now REAL measured coverage rates. A drawn bar reads as
+       evidence, so it must never carry a number nobody measured. The old
+       .build-chip.outlier rule below is dead with the CORE/VARIATION/OUTLIER
+       scoring it styled; left in place only because nothing else claims it. */
     .build-track {
       display: grid; grid-template-columns: 1fr 34px 1fr 44px 1.05fr 44px 1.2fr;
       gap: 14px; align-items: center; margin-top: 6px;
@@ -726,9 +773,12 @@
     .step p { font-size: 0.85rem; color: var(--muted-fg); max-width: 240px; margin: 0 auto; line-height: 1.55; }
 
     /* Pricing */
+    /* TWO cards since 2026-08-19 — the Lifetime tier was removed because no
+       non-consumable exists in StoreKit. Was repeat(3, 1fr); leaving it at 3
+       stranded an empty column to the right of Pro. */
     .pricing-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px;
-      align-items: stretch;
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 40px;
+      align-items: stretch; max-width: 760px; margin-left: auto; margin-right: auto;
     }
     .price-card {
       background: rgba(255,255,255,0.02); border: 1px solid var(--border);
@@ -1044,10 +1094,12 @@
     }
   </style>
 <!-- app-schema:start (generated by appdev/tools/app_schema.py — edit apps.json, not this) -->
-<!-- The `description` below was hand-corrected on 2026-08-06 to remove the false
-     "vetted by a trained chef-panel" claim (see the head comment above for the
-     evidence). The generator source — gamedev-harness/appdev/tools/apps.json — was
-     corrected to the same wording on 2026-08-08 (gamedev-harness ef94eac), so
+<!-- The `description` below was corrected AGAIN on 2026-08-19. The 2026-08-06 pass
+     removed the false "vetted by a trained chef-panel" claim and replaced it with
+     "a weighted consensus of tested, editor-vetted sources" — which was ALSO false
+     and shipped here for 13 days (see the head claim guard). It now describes
+     completeness, which is measurable. The generator source —
+     gamedev-harness/appdev/tools/apps.json — was corrected to match on 2026-08-19, so
      regenerating with app_schema.py is now idempotent; keep the two in sync. -->
 <script type="application/ld+json">
 {
@@ -1056,7 +1108,7 @@
   "name": "Saffra",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "iOS",
-  "description": "Saffra is your personal AI chef. Premium recipes you can trust \u2014 each built from a weighted consensus of tested, editor-vetted sources, then adapted to your pantry, allergies, and the time you've got. Hands-free voice cooking. iOS, in beta.",
+  "description": "Saffra is your personal AI chef. Premium recipes you can trust \u2014 every amount measured, every step cued, then adapted to your pantry, allergies, and the time you've got. Hands-free voice cooking. iOS, in beta.",
   "url": "https://hypersage.ai/saffra/",
   "author": {
     "@type": "Organization",
@@ -1078,7 +1130,7 @@
       "name": "How is Saffra different from a recipe site or a general chatbot?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Three differences matter. First: a general model may draft a recipe from model knowledge alone. Saffra's flagship recipes are built before you ask for them: the dish is cross-referenced across tested, editor-vetted sources, three AI chef personas draft from that consensus, and the merged draft receives food-safety and allergen-completeness checks. Second: the assistant works with your pantry, equipment, allergies, skill level, and current cooking step rather than treating each question in isolation. Third: product-specific tools handle catalog search, substitutions, techniques, and hands-free cooking, so the model is one part of a larger cooking system."
+        "text": "Three differences matter. First: a general model drafts a recipe the moment you ask, from model knowledge alone. Saffra's flagship recipes are written in advance and complete enough to cook from — 99.8% of ingredients carry a measured amount, 97.2% say how to prep it, every recipe lists the equipment it needs, and 99.3% name a cue for what done looks like. Second: the assistant works with your pantry, equipment, allergies, skill level, and current cooking step rather than treating each question in isolation. Third: product-specific tools handle catalog search, substitutions, techniques, and hands-free cooking, so the model is one part of a larger cooking system."
       }
     },
     {
@@ -1086,7 +1138,7 @@
       "name": "What's actually powering Saffra?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The core assistant uses a multimodal AI model, with a faster utility model for tasks such as parsing receipt text and folding older conversations into summaries. Recipe search uses vector embeddings over the curated library. Voice synthesis uses a neural TTS voice with content-addressed caching, while speech recognition runs on-device through Apple's Speech framework with an OpenAI Whisper fallback when on-device accuracy is insufficient. Receipt and cookbook OCR runs on-device through Apple's Vision framework; shelf photos are sent to the server for vision analysis and are not stored. The recipe catalog is built ahead of time through a multi-source consensus pipeline with food-safety and allergen checks."
+        "text": "The core assistant uses a multimodal AI model, with a faster utility model for tasks such as parsing receipt text and folding older conversations into summaries. Recipe search uses vector embeddings over the curated library. Voice synthesis uses a neural TTS voice with content-addressed caching, while speech recognition runs on-device through Apple's Speech framework with an OpenAI Whisper fallback when on-device accuracy is insufficient. Receipt and cookbook OCR runs on-device through Apple's Vision framework; shelf photos are sent to the server for vision analysis and are not stored. The recipe catalog is written ahead of time rather than improvised per request, and every recipe carries allergen flags."
       }
     },
     {
@@ -1094,7 +1146,7 @@
       "name": "How accurate is the cooking advice?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Two things keep her grounded. One: when you ask for a specific dish or \"what should I cook?\", she calls a tool that searches our curated recipe library — hand-curated flagship recipes plus 230,000 CC0-licensed recipes — instead of improvising one from memory. So you get a real recipe, adapted for you, not a hallucination. Two: for techniques and substitutions she calls dedicated tools (technique explainer, substitution lookup) rather than guessing. She also won't claim to have personally tasted something — she'll say \"by the numbers, this should read bright and savory\" instead of \"I love this.\" If she's not sure, she says so."
+        "text": "Two things keep her grounded. One: when you ask for a specific dish or \"what should I cook?\", she calls a tool that searches Saffra's own recipe catalog — every recipe in it written in advance — instead of improvising one from memory. So you get a real recipe, adapted for you, not a hallucination. Two: for techniques and substitutions she calls dedicated tools (technique explainer, substitution lookup) rather than guessing. She also won't claim to have personally tasted something — she'll say \"by the numbers, this should read bright and savory\" instead of \"I love this.\" If she's not sure, she says so."
       }
     },
     {
@@ -1147,10 +1199,10 @@
     },
     {
       "@type": "Question",
-      "name": "How are Saffra's flagship recipes built?",
+      "name": "How are Saffra's flagship recipes made?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Saffra separates recipe construction from real-time adaptation. Each flagship dish is cross-referenced across tested, editor-vetted sources with different trust weights. Ingredients supported by the strongest consensus become core; others are classified as variations or rejected as common mistakes. Three AI chef perspectives — authenticity, weeknight ease, and technique — draft from that evidence, the drafts are weighted and merged, and the result receives food-safety and allergen-completeness checks. When you ask for the dish, Saffra starts from that prepared catalog entry and adapts it to your pantry, equipment, allergies, and skill level."
+        "text": "Saffra separates recipe writing from real-time adaptation. The flagship catalog is drafted in advance and reviewed in-house, with allergen flags on every recipe — it is not improvised the moment you ask. What that buys you is completeness: a measured amount on 99.8% of ingredients, a prep note on 97.2%, an equipment list on every recipe, and a sensory cue for the finish on 99.3% (measured 2026-08-19 across the shipped catalog). When you ask for the dish, Saffra starts from that prepared catalog entry and adapts it to your pantry, equipment, allergies, and skill level. The adaptation is generated by an AI model; the catalog entry is not."
       }
     },
     {
@@ -1207,7 +1259,7 @@
       <div class="hero-text">
         <div class="platform-badge">Coming Soon <span>to</span> iOS</div>
         <h1>Your kitchen,<br><span class="italic-anything">understood.</span></h1>
-        <p class="subtitle">Premium recipes you can trust — each one built from a weighted consensus of tested, editor-vetted sources, then rewritten for your pantry, your allergies, and the time you've got. Plus voice-first cooking when your hands are full of dough.</p>
+        <p class="subtitle">Premium recipes you can trust — every amount measured, every step cued, then rewritten for your pantry, your allergies, and the time you've got. Plus voice-first cooking when your hands are full of dough.</p>
         <div class="hero-buttons">
           <a href="#signup" class="btn-warm">Join the waitlist <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
           <a href="#how-it-works" class="btn-outline">See How It Works</a>
@@ -1219,34 +1271,38 @@
                dark captures alternate, but the visitor chooses when to advance. -->
           <div class="hero-phone-frame" id="heroRotator" aria-roledescription="carousel" aria-label="Saffra app walkthrough">
             <img class="hero-phone-img is-active"
-                 src="screenshots-raw/01-chef-tab-light.jpg?v=20260815a"
+                 src="screenshots-raw/01-chef-tab-light.jpg?v=20260818a"
                  width="417" height="900" fetchpriority="high" decoding="async"
                  data-caption="Pantry-aware ways to begin"
+                 data-allow-duplicate="true"
                  alt="Saffra Chef tab in light mode — pantry-aware quick-start prompts">
             <img class="hero-phone-img"
-                 src="screenshots-raw/07-chat-recipe-dark.jpg?v=20260815a"
+                 src="screenshots-raw/07-chat-recipe-dark.jpg?v=20260818a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Answers grounded in the recipe catalog"
+                 data-allow-duplicate="true"
                  alt="Ask Saffra in dark mode — she answers with a recipe pulled from the catalog">
             <img class="hero-phone-img"
-                 src="screenshots-raw/05-recipes-light.jpg?v=20260815a"
+                 src="screenshots-raw/05-recipes-light.jpg?v=20260818a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="A trusted recipe catalog, ready to adapt"
                  alt="Recipes in light mode — the flagship catalog with Saffra's daily pick">
             <img class="hero-phone-img"
-                 src="screenshots-raw/02-cooking-mode-dark.jpg?v=20260815a"
+                 src="screenshots-raw/02-cooking-mode-dark.jpg?v=20260818a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Hands-free guidance while you cook"
                  alt="Cooking Mode in dark mode — hands-free voice with a suggested step timer">
             <img class="hero-phone-img"
-                 src="screenshots-raw/06-search-light.jpg?v=20260815a"
+                 src="screenshots-raw/06-search-light.jpg?v=20260818a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Search by meaning, not just title"
+                 data-allow-duplicate="true"
                  alt="Search in light mode — semantic recipe search across the whole catalog">
             <img class="hero-phone-img"
-                 src="screenshots-raw/10-recipes-dinner-dark.jpg?v=20260815a"
+                 src="screenshots-raw/10-recipes-dinner-dark.jpg?v=20260818a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Suggestions shaped for tonight"
+                 data-allow-duplicate="true"
                  alt="Recipes at dinner time in dark mode — Saffra picks for tonight">
           </div>
           <div class="hero-rotator-controls" role="group" aria-label="Choose a Saffra screen">
@@ -1265,12 +1321,16 @@
 <div class="stats">
   <div class="container">
     <div class="stats-grid">
-      <div class="stat-item"><div class="stat-number gradient-text-warm">230,000+</div><div class="stat-label">Recipes, Semantically Searchable</div></div>
-      <!-- 3 = the three AI chef personas (Classic / Modern / Foodie) that each draft
-           a recipe independently from the consensus data — RecipeDetailView.swift:3287.
-           They are NOT human chefs and they do NOT have to agree: Step 5 weights and
-           MERGES the drafts. Do not restore "Must Agree". -->
-      <div class="stat-item"><div class="stat-number gradient-text-warm">3</div><div class="stat-label">Independent Drafts Per Recipe</div></div>
+      <div class="stat-item"><div class="stat-number gradient-text-warm">2,300+</div><div class="stat-label">Recipes, Every One Searchable</div></div>
+      <!-- REPLACED 2026-08-19. This slot read "3 / Independent Drafts Per Recipe",
+           citing the three AI chef personas at RecipeDetailView.swift:3287. Those
+           personas appear NOWHERE in saffra-api, and the app renders none of the
+           panel fields (common_mistakes / merge_notes / panel_agreement_score), so
+           the number could not be supported. A stat is the most load-bearing kind of
+           claim on a page — it reads as audited. 99.8% is measured over the shipped
+           catalogue (21,894 of 21,934 ingredients, 2026-08-19) and is gated by
+           saffra-ios store/check_frame_claims.py. Re-measure before changing it. -->
+      <div class="stat-item"><div class="stat-number gradient-text-warm">99.8%</div><div class="stat-label">Ingredients With A Measured Amount</div></div>
       <div class="stat-item"><div class="stat-number gradient-text-warm">25+</div><div class="stat-label">Cuisines, Regional Depth</div></div>
       <div class="stat-item"><div class="stat-number gradient-text-warm">100%</div><div class="stat-label">Hands-Free Voice</div></div>
     </div>
@@ -1285,7 +1345,7 @@
     <div class="anim">
       <span class="section-label">How She's Different</span>
       <h2 class="section-title">Your chef.<br><span class="gradient-text-warm">Your kitchen.</span></h2>
-      <p class="section-desc">Every other recipe source has a single point of failure. Cookbook recipes carry one author's bias. Recipes improvised on the fly carry one model's hallucinations. Saffra's catalog is built the other way round — the same dish is cross-referenced across tested, editor-vetted sources, three AI chef personas draft it independently from that consensus, and the merged result is checked for food safety and allergens before it ships. Then she rewrites it for you.</p>
+      <p class="section-desc">Most recipes fail you in the same place: they assume. They say “season to taste” and leave you guessing, “cook until done” and never say what done looks like, or call for a pan you don’t own. Saffra’s catalog is written the other way round — every ingredient with an amount and how to prep it, the kit listed before you start, and a step that tells you what to look for. Then she rewrites it for you.</p>
     </div>
     <div class="concept-grid">
       <div class="concept-features anim">
@@ -1321,10 +1381,10 @@
       <div class="chat-label">Then she rewrites it for you</div>
       <div class="adapt-track">
         <div class="adapt-stage">
-          <div class="adapt-stage-label">One vetted recipe</div>
+          <div class="adapt-stage-label">One complete recipe</div>
           <div class="adapt-card">
             <h3>From the catalog</h3>
-            <p>Cross-referenced across tested, editor-vetted sources, checked for food safety and allergens before it ships.</p>
+            <p>Amounts, prep notes, the equipment you need and a cue for what done looks like — with allergen flags on every recipe.</p>
           </div>
         </div>
         <svg class="adapt-arrow" viewBox="0 0 34 24" aria-hidden="true" focusable="false"><path class="adapt-flow-dash" d="M2 12h22"/><path d="M22 6l6 6-6 6"/></svg>
@@ -1365,7 +1425,7 @@
       <div class="time-card anim anim-d1">
         <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>7:00 AM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/08-recipes-breakfast-light.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/08-recipes-breakfast-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
                alt="Recipes tab in the morning — Saffra's breakfast pick and a Quick breakfast rail">
         </div>
         <h3>Morning</h3>
@@ -1374,7 +1434,7 @@
       <div class="time-card anim anim-d2">
         <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>12:30 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/09-recipes-lunch-light.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/09-recipes-lunch-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
                alt="Recipes tab at midday — Saffra's lunch pick with bowls and salads ranked first">
         </div>
         <h3>Midday</h3>
@@ -1383,7 +1443,7 @@
       <div class="time-card anim anim-d3">
         <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/></svg>6:30 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/10-recipes-dinner-dark.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/10-recipes-dinner-dark.jpg?v=20260818a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
                alt="Recipes tab in the evening — Saffra picks for tonight with a Quick tonight rail">
         </div>
         <h3>Evening</h3>
@@ -1392,7 +1452,7 @@
       <div class="time-card anim anim-d4">
         <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>11:50 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/11-recipes-latenight-dark.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/11-recipes-latenight-dark.jpg?v=20260818a" width="417" height="900" loading="lazy"
                alt="Recipes tab late at night — a late-night pick and a rail of 25-minute dishes">
         </div>
         <h3>Late night</h3>
@@ -1432,7 +1492,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/07-chat-recipe-dark.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/07-chat-recipe-dark.jpg?v=20260818a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
                alt="Ask Saffra — visible tool chips show her checking the pantry and searching recipes before answering with a recipe card">
           <div class="fd-shot-caption">Tool chips = her actually checking, live</div>
         </div>
@@ -1442,19 +1502,19 @@
     <div class="intelligence-grid" style="margin-top:56px">
       <div class="intelligence-card anim anim-d1">
         <div class="icon-box"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg></div>
-        <h3>A real chef persona — not a generic LLM</h3>
+        <h3>A cooking assistant, not a generic chatbot</h3>
         <p>Powered by <strong>advanced AI</strong> — shaped into a real chef. Saffra has a name, a voice, signature moves, and hard safety rules. Her tone calibrates to your skill: beginners get sensory cues ("when oil shimmers, when it smells nutty"), pros get terse technique-first ("hit it with a nappé"). One model, infinite cooks.</p>
       </div>
       <div class="intelligence-card anim anim-d2">
         <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
-        <h3>A catalog built from sources — not improvised at the stove</h3>
+        <h3>A catalog written in advance — not improvised at the stove</h3>
         <!-- ~900 is the real flagship count. Sources: saffra-ios/branding/
              BRAND_VOICE_AND_NARRATIVE.md:110 "~915 flagship recipes";
              saffra-api/app/meal_plans/generator.py:50 "~915"; app/recipes/
              dietary_classifier.py:10 "917 flagship rows". The live chef prompt
              (app/chat/prompts/chef_system.md:92,175) says less still. The old
              "2,100+" here matched nothing on disk. -->
-        <p>No flagship recipe Saffra knows was written in one pass. Each dish is cross-referenced across tested, editor-vetted sources with a trust weight on every one; ingredients are scored <strong>core</strong>, <strong>variation</strong> or <strong>outlier</strong>; three AI chef personas — authenticity, weeknight ease, technique — then draft it independently from that consensus, and the merged draft is run through a food-safety and allergen validation pass before it ships. Saffra's catalog: <strong>~900 flagship recipes</strong> across 25+ cuisines, plus a <strong>230,000-recipe semantic search index</strong> for breadth (vector embeddings). Then she adapts it to your pantry, your skill, your equipment.</p>
+        <p>No Saffra recipe is improvised the moment you ask. The catalog is written in advance and reviewed in-house, with allergen flags on every recipe — and it is written to be cooked from: <strong>99.8%</strong> of ingredients carry a measured amount, <strong>97.2%</strong> say how to prep it, every recipe lists the equipment it needs, and <strong>99.3%</strong> name a cue for what done looks like. Saffra's catalog: <strong>2,300+ recipes</strong> across 25+ cuisines, and <strong>every one of them is semantically searchable</strong> (vector embeddings). Then she adapts it to your pantry, your skill, your equipment.</p>
       </div>
       <div class="intelligence-card anim anim-d3">
         <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
@@ -1478,64 +1538,60 @@
       </div>
     </div>
 
-    <!-- The build pipeline, drawn — the construction half of "Saffra separates
-         recipe construction from real-time adaptation" (FAQ). Every label
-         restates the "catalog built from sources" card above or the flagship
-         FAQ: sources with trust weights → ingredients scored core / variation /
-         outlier → three AI chef personas draft independently → weighted &
-         merged with food-safety and allergen checks. NO agreement gate is
-         drawn (the drafts are MERGED — see the head comment; never add a
-         "must agree" step). Bars and arrows are decorative and aria-hidden. -->
+    <!-- REPLACED 2026-08-19. This diagram used to draw the sourcing pipeline:
+         "Tested, editor-vetted sources" with three weighted bars (88% / 62% /
+         40%) captioned "A trust weight on every one", then CORE/VARIATION/
+         OUTLIER scoring, then "Three AI chef personas draft independently".
+         None of that exists — see the head claim guard. The weights were the
+         worst of it: fabricated numbers rendered as pixel bars, which reads as
+         evidence precisely because it is drawn rather than asserted.
+         The bars below are now REAL measurements over the shipped catalogue
+         (the 2,340-recipe bundle, measured 2026-08-19), and their --w values are the
+         measured rates. If you re-measure and the numbers move, move the bars.
+         Do not draw a stage this site cannot point at in code. -->
     <div class="adapt-flow anim anim-d2">
-      <div class="chat-label">How a flagship recipe is built — before you ever ask</div>
+      <div class="chat-label">What's in every Saffra recipe — before you ever ask</div>
       <div class="build-track">
         <div>
-          <div class="adapt-stage-label">Tested, editor-vetted sources</div>
+          <div class="adapt-stage-label">Every ingredient</div>
           <div class="adapt-card">
             <div aria-hidden="true">
-              <div class="build-src"><span class="build-src-dot"></span><span class="build-w" style="--w:88%"></span></div>
-              <div class="build-src"><span class="build-src-dot"></span><span class="build-w" style="--w:62%"></span></div>
-              <div class="build-src"><span class="build-src-dot"></span><span class="build-w" style="--w:40%"></span></div>
+              <div class="build-src"><span class="build-src-dot"></span><span class="build-w" style="--w:99.8%"></span></div>
+              <div class="build-src"><span class="build-src-dot"></span><span class="build-w" style="--w:97.7%"></span></div>
+              <div class="build-src"><span class="build-src-dot"></span><span class="build-w" style="--w:97.2%"></span></div>
             </div>
-            <p class="build-note">A trust weight on every one</p>
+            <p class="build-note">An amount, a unit, and how to prep it</p>
           </div>
         </div>
         <svg class="adapt-arrow" viewBox="0 0 34 24" aria-hidden="true" focusable="false"><path class="adapt-flow-dash" d="M2 12h22"/><path d="M22 6l6 6-6 6"/></svg>
         <div>
-          <div class="adapt-stage-label">Ingredients scored</div>
+          <div class="adapt-stage-label">Every recipe</div>
           <div class="adapt-card">
             <div class="build-chips">
-              <span class="build-chip core">Core</span>
-              <span class="build-chip">Variation</span>
-              <span class="build-chip outlier">Outlier</span>
+              <span class="build-chip core">Equipment listed</span>
+              <span class="build-chip">Allergens flagged</span>
             </div>
-            <p class="build-note">Strongest consensus becomes core</p>
+            <p class="build-note">The kit you need, before you start</p>
           </div>
         </div>
-        <svg class="build-fan" viewBox="0 0 44 88" aria-hidden="true" focusable="false">
-          <path class="adapt-flow-dash" d="M2 44c14 0 14-30 40-30"/>
-          <path class="adapt-flow-dash" d="M2 44h40"/>
-          <path class="adapt-flow-dash" d="M2 44c14 0 14 30 40 30"/>
-        </svg>
+        <svg class="adapt-arrow" viewBox="0 0 34 24" aria-hidden="true" focusable="false"><path class="adapt-flow-dash" d="M2 12h22"/><path d="M22 6l6 6-6 6"/></svg>
         <div>
-          <div class="adapt-stage-label">Three AI chef personas draft independently</div>
-          <div class="build-chips">
-            <span class="build-chip">Authenticity</span>
-            <span class="build-chip">Weeknight ease</span>
-            <span class="build-chip">Technique</span>
+          <div class="adapt-stage-label">Every finish</div>
+          <div class="adapt-card">
+            <div class="build-chips">
+              <span class="build-chip">Golden</span>
+              <span class="build-chip">Fragrant</span>
+              <span class="build-chip">Pulls away</span>
+            </div>
+            <p class="build-note">What done looks like, not just how long</p>
           </div>
         </div>
-        <svg class="build-fan" viewBox="0 0 44 88" aria-hidden="true" focusable="false">
-          <path class="adapt-flow-dash" d="M2 14c14 0 14 30 34 30"/>
-          <path class="adapt-flow-dash" d="M2 44h34"/>
-          <path class="adapt-flow-dash" d="M2 74c14 0 14-30 34-30"/>
-          <path d="M30 38l6 6-6 6"/>
-        </svg>
+        <svg class="adapt-arrow" viewBox="0 0 34 24" aria-hidden="true" focusable="false"><path class="adapt-flow-dash" d="M2 12h22"/><path d="M22 6l6 6-6 6"/></svg>
         <div>
-          <div class="adapt-stage-label">Weighted &amp; merged</div>
+          <div class="adapt-stage-label">Then adapted to you</div>
           <div class="adapt-card adapt-result">
-            <h3>One flagship recipe</h3>
-            <p>Food-safety &amp; allergen checks before it ships — then she adapts it to your pantry, your skill, your equipment.</p>
+            <h3>One complete recipe</h3>
+            <p>Allergen flags on every recipe — then she rewrites it for your pantry, your skill, your equipment.</p>
           </div>
         </div>
       </div>
@@ -1551,8 +1607,8 @@
         <div class="intel-stat-label">Chef-Specific, Chained</div>
       </div>
       <div class="intel-stat">
-        <div class="intel-stat-num gradient-text-warm">230,000+</div>
-        <div class="intel-stat-label">Recipes, Semantically Searchable</div>
+        <div class="intel-stat-num gradient-text-warm">2,300+</div>
+        <div class="intel-stat-label">Recipes, Every One Searchable</div>
       </div>
     </div>
   </div>
@@ -1592,12 +1648,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/02-cooking-mode-light.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/02-cooking-mode-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
                alt="Cooking Mode step 1 — Saffra reads the step aloud with ingredient chips and a suggested 15-minute timer">
           <div class="fd-shot-caption">Step 1 — she's reading it aloud</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/14-cooking-step2-dark.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/14-cooking-step2-dark.jpg?v=20260818a" width="417" height="900" loading="lazy"
                alt="Cooking Mode mid-recipe — the dish photo on the step card with progress bar and hands-free controls">
           <div class="fd-shot-caption">Mid-recipe, dark mode</div>
         </div>
@@ -1626,7 +1682,7 @@
         <ul class="fd-points">
           <li>
             <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-            <div><h3>Real recipes, not improvised ones</h3><p>"What can I make tonight?" gets a recipe card pulled from the consensus-built catalog — never a list of steps invented on the spot.</p></div>
+            <div><h3>Real recipes, not improvised ones</h3><p>"What can I make tonight?" gets a recipe card pulled from the prepared catalog — never a list of steps invented on the spot.</p></div>
           </li>
           <li>
             <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M16 4l4 4M3 12a9 9 0 0 1 9-9"/></svg></div>
@@ -1640,12 +1696,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/01-chef-tab-light.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/01-chef-tab-light.jpg?v=20260818a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
                alt="The Saffra tab — time-of-day greeting, pantry pills, and quick-start prompts">
           <div class="fd-shot-caption">The greeting knows your kitchen</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/07-chat-recipe-light.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/07-chat-recipe-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
                alt="Ask Saffra answering with a tappable recipe card after checking the pantry">
           <div class="fd-shot-caption">She answers with a real recipe</div>
         </div>
@@ -1692,7 +1748,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/03-pantry-light.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/03-pantry-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
                alt="The pantry — item counts by category with expiring and stale flags, plus photo, receipt, and barcode capture">
           <div class="fd-shot-caption">Grocery, fridge &amp; freshness at a glance</div>
         </div>
@@ -1710,7 +1766,7 @@
       <div class="fd-copy anim">
         <span class="section-label">Search</span>
         <h2>Type a craving,<br><span class="gradient-text-warm">get dinner.</span></h2>
-        <p>Search runs on vector embeddings across 230,000+ recipes — so "cozy noodle soup" and "something bright with lemon" work as well as exact titles. Every result comes back as a photo card with time and cuisine up front, and refinements for time, diet, and cuisine are one tap away.</p>
+        <p>Search runs on vector embeddings across every recipe in the catalog — so "cozy noodle soup" and "something bright with lemon" work as well as exact titles. Every result comes back as a photo card with time and cuisine up front, and refinements for time, diet, and cuisine are one tap away.</p>
         <ul class="fd-points">
           <li>
             <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
@@ -1722,13 +1778,13 @@
           </li>
           <li>
             <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M2 17l10 5 10-5M2 12l10 5 10-5M12 2L2 7l10 5 10-5-10-5z"/></svg></div>
-            <div><h3>Flagship first</h3><p>Flagship recipes from the consensus-built catalog rank above the wider index, so the top results are the ones that went through the full pipeline.</p></div>
+            <div><h3>Flagship first</h3><p>Flagship recipes from the prepared catalog rank above the wider index, so the most complete recipes surface first.</p></div>
           </li>
         </ul>
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/06-search-light.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/06-search-light.jpg?v=20260818a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
                alt="Saffra's search results for &quot;pasta&quot; — 18 matches, with cuisine, time and diet refinements above the list">
           <div class="fd-shot-caption">Refine by cuisine, time and diet</div>
         </div>
@@ -1768,12 +1824,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/04-recipe-detail-light.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/04-recipe-detail-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
                alt="Recipe detail — hero photo with timing, difficulty, servings, and the Let's cook button">
           <div class="fd-shot-caption">The top: vitals + "Let's cook"</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/13-recipe-ingredients-dark.jpg?v=20260815a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/13-recipe-ingredients-dark.jpg?v=20260818a" width="417" height="900" loading="lazy"
                alt="Recipe detail scrolled — the ingredient list checked against your pantry">
           <div class="fd-shot-caption">Below the fold: ingredients &amp; more</div>
         </div>
@@ -1848,7 +1904,7 @@
     </div>
     <div class="steps">
       <div class="step anim"><div class="step-num">1</div><h3>Tell her your kitchen</h3><p>One-minute conversational onboarding. Diet, allergies, equipment, skill, the cuisines you love.</p></div>
-      <div class="step anim"><div class="step-num">2</div><h3>Ask what to cook</h3><p>She pulls from the consensus-built catalog, checks your pantry and your time, and names the dish — confidently, adapted to you.</p></div>
+      <div class="step anim"><div class="step-num">2</div><h3>Ask what to cook</h3><p>She pulls from the prepared catalog, checks your pantry and your time, and names the dish — confidently, adapted to you.</p></div>
       <div class="step anim"><div class="step-num">3</div><h3>Cook hands-free</h3><p>Voice-first Cooking Mode reads you each step. Set timers by voice. Ask "why does this matter?" any time.</p></div>
       <div class="step anim"><div class="step-num">4</div><h3>Save what you loved</h3><p>Rate the result. She remembers. Future suggestions lean into what worked, and quietly skip what didn't.</p></div>
     </div>
@@ -1890,7 +1946,7 @@
           <li>1 recipe adaptation</li>
           <li>Pantry tracking</li>
           <li>Safety disclaimers &amp; allergen flags</li>
-          <li class="off">Unlimited chat</li>
+          <li class="off">Chat past 10 messages</li>
           <li class="off">Voice cooking</li>
           <li class="off">Receipt &amp; barcode scanning</li>
         </ul>
@@ -1899,9 +1955,9 @@
       <div class="price-card featured anim">
         <div class="price-badge" id="proTrialBadge">7-Day Free Trial</div>
         <h3>Pro</h3><p class="price-sub">For everyday cooks</p>
-        <div class="price-amount gradient-text-warm">$4.99</div><div class="price-period">/mo (billed yearly)</div>
+        <div class="price-amount gradient-text-warm">$29.99</div><div class="price-period">/year</div>
         <ul class="price-features">
-          <li>Ask Chef anything — no message limit</li>
+          <li>Ask Chef anything — the 10-message starter cap lifted</li>
           <li>Cook hands-free with Saffra's signature voice</li>
           <li>Every recipe rewritten for you</li>
           <li>Save any URL or cookbook page</li>
@@ -1911,18 +1967,6 @@
           <li id="proTrialLine">7-day free trial · cancel anytime</li>
         </ul>
         <a href="#signup" class="btn-warm">Join the waitlist</a>
-      </div>
-      <div class="price-card anim">
-        <h3>Lifetime</h3><p class="price-sub">Pay once. Yours forever.</p>
-        <div class="price-amount gradient-text-warm">$149.99</div><div class="price-period">one-time</div>
-        <ul class="price-features">
-          <li>Everything in Pro</li>
-          <li>Forever — no renewal</li>
-          <li>All future Pro features included</li>
-          <li>Early access to new cuisines and new flagship recipes</li>
-          <li>Early access to new chef-mode features</li>
-        </ul>
-        <a href="#signup" class="btn-outline">Join the waitlist</a>
       </div>
     </div>
   </div>
@@ -1938,11 +1982,11 @@
       <h2 class="section-title">Common <span class="gradient-text-warm">questions.</span></h2>
     </div>
     <div class="faq-list">
-      <div class="faq-item"><button class="faq-q">How is Saffra different from a recipe site or a general chatbot?<span class="faq-icon">+</span></button><div class="faq-a"><p>Three differences matter. <strong>First:</strong> a general model may draft a recipe from model knowledge alone. Saffra's flagship recipes are built before you ask for them: the dish is cross-referenced across tested, editor-vetted sources, three AI chef personas draft from that consensus, and the merged draft receives food-safety and allergen-completeness checks. <strong>Second:</strong> the assistant works with your pantry, equipment, allergies, skill level, and current cooking step rather than treating each question in isolation. <strong>Third:</strong> product-specific tools handle catalog search, substitutions, techniques, and hands-free cooking, so the model is one part of a larger cooking system.</p></div></div>
+      <div class="faq-item"><button class="faq-q">How is Saffra different from a recipe site or a general chatbot?<span class="faq-icon">+</span></button><div class="faq-a"><p>Three differences matter. <strong>First:</strong> a general model drafts a recipe the moment you ask, from model knowledge alone. Saffra's flagship recipes are written in advance and complete enough to cook from — 99.8% of ingredients carry a measured amount, 97.2% say how to prep it, every recipe lists the equipment it needs, and 99.3% name a cue for what done looks like. <strong>Second:</strong> the assistant works with your pantry, equipment, allergies, skill level, and current cooking step rather than treating each question in isolation. <strong>Third:</strong> product-specific tools handle catalog search, substitutions, techniques, and hands-free cooking, so the model is one part of a larger cooking system.</p></div></div>
 
-      <div class="faq-item"><button class="faq-q">What's actually powering Saffra?<span class="faq-icon">+</span></button><div class="faq-a"><p>The core assistant uses a <strong>multimodal AI model</strong>, with a faster utility model for tasks such as parsing receipt text and folding older conversations into summaries. Recipe search uses <strong>vector embeddings</strong> over the curated library. Voice synthesis uses a neural TTS voice with content-addressed caching, while speech recognition runs on-device through Apple's Speech framework with an OpenAI Whisper fallback when on-device accuracy is insufficient. Receipt and cookbook OCR runs on-device through Apple's Vision framework; shelf photos are sent to the server for vision analysis and are not stored. The recipe catalog is built ahead of time through a multi-source consensus pipeline with food-safety and allergen checks.</p></div></div>
+      <div class="faq-item"><button class="faq-q">What's actually powering Saffra?<span class="faq-icon">+</span></button><div class="faq-a"><p>The core assistant uses a <strong>multimodal AI model</strong>, with a faster utility model for tasks such as parsing receipt text and folding older conversations into summaries. Recipe search uses <strong>vector embeddings</strong> over the curated library. Voice synthesis uses a neural TTS voice with content-addressed caching, while speech recognition runs on-device through Apple's Speech framework with an OpenAI Whisper fallback when on-device accuracy is insufficient. Receipt and cookbook OCR runs on-device through Apple's Vision framework; shelf photos are sent to the server for vision analysis and are not stored. The recipe catalog is written ahead of time rather than improvised per request, and every recipe carries allergen flags.</p></div></div>
 
-      <div class="faq-item"><button class="faq-q">How accurate is the cooking advice?<span class="faq-icon">+</span></button><div class="faq-a"><p>Two things keep her grounded. <strong>One</strong>: when you ask for a specific dish or "what should I cook?", she calls a tool that searches our curated recipe library — hand-curated flagship recipes plus 230,000 CC0-licensed recipes — instead of improvising one from memory. So you get a real recipe, adapted for you, not a hallucination. <strong>Two</strong>: for techniques and substitutions she calls dedicated tools (technique explainer, substitution lookup) rather than guessing. She also won't claim to have personally tasted something — she'll say "by the numbers, this should read bright and savory" instead of "I love this." If she's not sure, she says so.</p></div></div>
+      <div class="faq-item"><button class="faq-q">How accurate is the cooking advice?<span class="faq-icon">+</span></button><div class="faq-a"><p>Two things keep her grounded. <strong>One</strong>: when you ask for a specific dish or "what should I cook?", she calls a tool that searches Saffra's own recipe catalog — every recipe in it written in advance — instead of improvising one from memory. So you get a real recipe, adapted for you, not a hallucination. <strong>Two</strong>: for techniques and substitutions she calls dedicated tools (technique explainer, substitution lookup) rather than guessing. She also won't claim to have personally tasted something — she'll say "by the numbers, this should read bright and savory" instead of "I love this." If she's not sure, she says so.</p></div></div>
 
       <div class="faq-item"><button class="faq-q">How broad is the recipe coverage?<span class="faq-icon">+</span></button><div class="faq-a"><p>Saffra works across cuisines including Thai, Mexican regional, Korean, Vietnamese, French, Italian regional, Chinese regional, West African, Levantine, and Peruvian; dietary needs including vegan, keto, halal, kosher, FODMAP, Whole30, and celiac; skill levels from first-time cooks to technique-focused home cooks; and kitchens ranging from induction-only or no-oven setups to fully equipped spaces. For dishes outside the flagship catalog, it applies regional and technique-specific guidance and states uncertainty when appropriate.</p></div></div>
 
@@ -1956,7 +2000,7 @@
 
       <div class="faq-item"><button class="faq-q">Is the free tier actually usable?<span class="faq-icon">+</span></button><div class="faq-a"><p>Free gives you <strong>10 chef messages in total</strong> — a lifetime allowance, not a daily one — plus full recipe-library browsing, one recipe adaptation, pantry tracking, and the same safety rules. Pro adds unlimited chat, voice cooking, ongoing recipe adaptation, receipt and barcode scanning, recipe import from URLs and cookbook photos, and a personal library that learns from your cooking history.</p></div></div>
 
-      <div class="faq-item"><button class="faq-q">How are Saffra's flagship recipes built?<span class="faq-icon">+</span></button><div class="faq-a"><p>Saffra separates recipe construction from real-time adaptation. Each flagship dish is cross-referenced across tested, editor-vetted sources with different trust weights. Ingredients supported by the strongest consensus become core; others are classified as variations or rejected as common mistakes. Three AI chef perspectives — authenticity, weeknight ease, and technique — draft from that evidence, the drafts are weighted and merged, and the result receives food-safety and allergen-completeness checks. When you ask for the dish, Saffra starts from that prepared catalog entry and adapts it to your pantry, equipment, allergies, and skill level.</p></div></div>
+      <div class="faq-item"><button class="faq-q">How are Saffra's flagship recipes made?<span class="faq-icon">+</span></button><div class="faq-a"><p>Saffra separates recipe writing from real-time adaptation. The flagship catalog is drafted in advance and reviewed in-house, with allergen flags on every recipe — it is not improvised the moment you ask. What that buys you is completeness: a measured amount on 99.8% of ingredients, a prep note on 97.2%, an equipment list on every recipe, and a sensory cue for the finish on 99.3% (measured 2026-08-19 across the shipped catalog). When you ask for the dish, Saffra starts from that prepared catalog entry and adapts it to your pantry, equipment, allergies, and skill level. The adaptation is generated by an AI model; the catalog entry is not.</p></div></div>
 
       <div class="faq-item"><button class="faq-q">When is Saffra launching?<span class="faq-icon">+</span></button><div class="faq-a"><p>Saffra is preparing for TestFlight beta. Join the waitlist above to be notified when invitations open. The first release is focused on iPhone; no timing has been announced for other platforms.</p></div></div>
 
@@ -1971,7 +2015,7 @@
 <section class="cta-section" id="signup">
   <div class="container">
     <h2 class="section-title anim">Ready for recipes you can <span class="gradient-text-warm">actually trust?</span></h2>
-    <p class="section-desc anim" style="margin:16px auto 0;text-align:center">Premium recipes, built from sources that were tested. Adapted to your kitchen. Cooked with you, hands-free. Get notified the moment we open TestFlight. iOS first.</p>
+    <p class="section-desc anim" style="margin:16px auto 0;text-align:center">Premium recipes, complete enough to cook from. Adapted to your kitchen. Cooked with you, hands-free. Get notified the moment we open TestFlight. iOS first.</p>
     <form class="signup-form anim" onsubmit="handleSignup(event)">
       <input type="email" id="signupEmail" placeholder="Enter your email" required>
       <button type="submit" class="btn-warm">Join the waitlist <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
@@ -1994,7 +2038,7 @@
           <div class="logo-mark" style="width:30px;height:30px;border-radius:8px;"><img src="saffra-hat.png" width="576" height="576" loading="lazy" alt="Saffra" style="width:22px;height:22px"></div>
           <span>Saffra</span>
         </a>
-        <p>Your personal AI chef. Premium recipes you can trust — built from a weighted consensus of tested sources, adapted to your kitchen.</p>
+        <p>Your personal AI chef. Premium recipes you can trust — every amount measured, every step cued, adapted to your kitchen.</p>
       </div>
       <div class="footer-col"><h2>Product</h2><ul><li><a href="#concept">Inside the App</a></li><li><a href="#time-aware">Time-Aware Home</a></li><li><a href="#intelligence">The AI</a></li><li><a href="#cooking-mode">Cooking Mode</a></li><li><a href="#pantry">Pantry</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#faq">FAQ</a></li></ul></div>
       <div class="footer-col"><h2>Legal</h2><ul><li><a href="privacy.html">Privacy</a></li><li><a href="terms.html">Terms</a></li><li><a href="support.html">Support</a></li></ul></div>
@@ -2142,11 +2186,15 @@
   }
 
   // Pricing toggle. Yearly is the default — best-value framing for the
-  // featured Pro card. Lifetime price is fixed regardless of toggle.
-  var monthlyPrices = ['$0', '$9.99', '$149.99'];
-  var yearlyPrices = ['$0', '$4.99', '$149.99'];
-  var monthlyPeriods = ['forever', '/month', 'one-time'];
-  var yearlyPeriods = ['forever', '/mo (billed yearly)', 'one-time'];
+  // featured Pro card. VERIFIED against App Store Connect 2026-08-19:
+  // com.vanus.saffra.pro.monthly USA $4.99, com.vanus.saffra.pro.annual USA
+  // $29.99. There is NO lifetime product — /v1/apps/6792760857/inAppPurchasesV2
+  // returns an empty list — so the third card was removed. If a tier is ever
+  // added here, confirm it exists in StoreKit first.
+  var monthlyPrices = ['$0', '$4.99'];
+  var yearlyPrices = ['$0', '$29.99'];
+  var monthlyPeriods = ['forever', '/month'];
+  var yearlyPeriods = ['forever', '/year'];
   function setPricing(mode) {
     var cards = document.querySelectorAll('.price-card');
     var prices = mode === 'yearly' ? yearlyPrices : monthlyPrices;
