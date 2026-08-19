@@ -1,7 +1,7 @@
 {
   "schema": "static-site-audit-contract/v1",
   "canonical_url": "https://hypersage.ai/wingmate/",
-  "_why": "Written 2026-08-08. Wingmate is pre-launch ('Coming to iOS'), so this contract exists to hold its one absolute claim to the code BEFORE the listing goes live rather than after. Verified against /Users/dee/Developer/DrVanus/Wingmate.",
+  "_why": "Written 2026-08-08 while Wingmate was pre-launch, so this contract held its one absolute claim to the code BEFORE the listing went live. Wingmate 1.0 (build 7) RELEASED 2026-08-19; the site was moved off 'Coming to iOS' the same day. Verified against /Users/dee/Developer/DrVanus/Wingmate.",
   "approved_absolute_claims": {
     "no_account": {
       "approved": true,
@@ -19,5 +19,5 @@
       ]
     }
   },
-  "contract_notes": "Pre-launch. Re-run tools/audit_sites.py wingmate at launch and delete the 'coming to iOS' line from support.html and the eyebrow from index.html at the same time (status policy: status lives in one line, behaviour copy stays present-tense). A client-minted device id is an identifier, not an identity — it must never be treated as an authorization or entitlement proof."
+  "contract_notes": "LIVE since 2026-08-19 — App Store id 6792772729. The pre-launch copy is gone: the hero eyebrow, nav, mobile menu, FAQ, closing CTA and FAQPage schema all point at the listing, and support.html's 'isn't on the App Store quite yet' paragraph is deleted. Status policy unchanged: status lives in one line, behaviour copy stays present-tense. A client-minted device id is an identifier, not an identity — it must never be treated as an authorization or entitlement proof."
 }
