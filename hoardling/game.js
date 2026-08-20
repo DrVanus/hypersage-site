@@ -420,8 +420,26 @@
     // also makes LEVEL ONE unwinnable for a beginner doing exactly what a
     // beginner does. The first keep stays forgiving and teaches; the Coldroot
     // Stair is where the same mistake costs the hoard.
-    campRampByLevel: [0.10, 0.20, 0.32],
-    campRampFrom: 8,
+    // MEASURED INERT AT THE OLD MAGNITUDE. Four different settings of this
+    // returned byte-identical bot results, because a board that blankets the
+    // road kills a 2x raider as dead as a 1x one -- the lever only moves boards
+    // already on the edge. It becomes a real lever at roughly twice this, which
+    // is what these are. from 8 -> 4 because 120 starting gold buys ONE machine:
+    // waves 1-3 must stay free while the player learns the shop, and 4-7 are
+    // where a second machine should start to matter and today are flat.
+    // CAMPAIGN ONLY -- the Daily and the Duel take dailyHpMul, so the shared
+    // fight and the leaderboard are untouched.
+    // L1 is 0.16 and not 0.18 because the discrimination there is a CLIFF, not
+    // a slope: measured, at <=0.16 a careless 8-crossbow board scrapes a win
+    // losing 55 of 60 coins (a 1-star it deserves) and a 6-machine board
+    // 3-stars; at 0.18 that careless board LOSES at wave 19 of 20. There is
+    // no setting that both lets a beginner finish and makes 6 machines work
+    // for it. Level one is the teacher -- HANDOFF's own line is that the
+    // first keep stays forgiving and the Coldroot Stair is where the same
+    // mistake costs the hoard -- so L1 takes the forgiving side of the cliff
+    // and L2/L3 do the discriminating.
+    campRampByLevel: [0.16, 0.26, 0.48],
+    campRampFrom: 4,
   };
   function crowdMul(n) { return Math.min(TUNE.crowdMax, 1 + TUNE.crowdStep * n); }
   /** Campaign-only HP multiplier for wave w on level `li`. The Daily has its
@@ -1576,6 +1594,28 @@
   // real runs, real economy, real injected taps. Regenerate after ANY change
   // to DUEL_ARENAS, DUEL_WAVES, duelStartGold, the wave generator, or tower
   // balance: a stale curve is a rival fighting a game that no longer exists.
+  // NOT RE-BAKED THIS PASS, DELIBERATELY, and this is the reasoning so the next
+  // session does not "fix" it mechanically.
+  //
+  // HANDOFF's law is to re-bake after any tower-balance change, and this pass
+  // changed the campaign ramp and the star bands. But a duel is NOT campaign:
+  // buildWave takes dailyHpMul for `seeded = daily || duel`, so neither number
+  // can reach a duel at all. What DID reach it is the tap-deferral fix — an
+  // open manage menu now defers the HUD, so machines built near the shop /
+  // START / breath can finally be upgraded, and the recording bot got much
+  // stronger as a result.
+  //
+  // Running bakeAll now returns every rival holding 60 flat for all 13 waves
+  // (shipped tallow arena0 is [60,60,60,60,58,33,33,21,21,0,0,0,0]; the re-bake
+  // is [60 x13]). A duel is decided on MARGIN, or won outright when the rival's
+  // hoard reaches 0 — so curves that never drop would turn every duel into a
+  // margin contest against a flawless opponent. That is strictly worse than the
+  // known consequence of keeping these: the player is now somewhat stronger
+  // than the rivals they are scored against, so duels are EASIER.
+  //
+  // The duel ladder therefore owes a real rebalance — rivals recorded from a
+  // deliberately weaker policy, or tiered difficulty — not a mechanical
+  // re-bake. Do not paste a bakeAll literal in here without reading this.
   var RIVAL_CURVES = {
     tallow: [[60,60,60,60,58,33,33,21,21,0,0,0,0], [60,35,35,35,35,35,35,30,0,0,0,0,0], [60,60,60,60,35,31,0,0,0,0,0,0,0], [60,60,60,28,0,0,0,0,0,0,0,0,0], [60,44,42,5,0,0,0,0,0,0,0,0,0], [60,60,35,35,35,7,0,0,0,0,0,0,0]],
     flint: [[60,60,60,60,60,60,60,60,60,50,50,50,45], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,35,35,35,25,0,0,0,0,0], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,48,48,23,23,23,0,0,0,0,0,0,0], [60,60,60,60,60,44,44,44,44,44,44,44,44]],
@@ -3914,7 +3954,19 @@
     this.resultLockT = 0.8;                 // battle taps can't skip the screen
     this._resultT = 0;                      // cosmetic: drives the star landings
     // stars grade COINS LOST FOREVER (escaped carriers), not the closing balance
-    var stars = this.stolenLost <= 5 ? 3 : this.stolenLost <= 20 ? 2 : 1;
+    // THE 2-STAR BAND WAS UNREACHABLE. The King steals 25 in a single grab
+    // (ENEMY_TYPES.boss.steals) and every other raider steals 1-5, so a
+    // ceiling of 20 could not separate 'the King got through once' from 'you
+    // were robbed all game' -- across ~110 measured runs not one landed in
+    // the 6-20 band, and grades were only ever 0, 1 or 3. The ceiling has to
+    // clear the single largest theft event or the middle grade is decoration.
+    // Moving the THRESHOLD rather than boss.steals is deliberate: ENEMY_TYPES
+    // is shared with the Daily (a boss every 10th wave), so cutting the steal
+    // would make the shared fight easier and invalidate the leaderboard.
+    //   3* = the King never reached the hoard and nothing else got out
+    //   2* = you held the cave and the King robbed you once
+    //   1* = you were leaking before the finale
+    var stars = this.stolenLost <= 5 ? 3 : this.stolenLost <= 28 ? 2 : 1;
     // leaks ride along, worst first — the result screen's only job beyond the
     // score is telling the player what to do differently next time.
     var leakRows = [];
@@ -4048,8 +4100,15 @@
       // started the next wave and took the early-call bonus with it.
       // The file already claims this priority twice ('towers / pads beat the HUD
       // bands and the start-wave rect'); this makes it true.
-      var twUnder = false;
-      if (this.shopPick < 0) {                    // a machine in hand still places
+      // AN OPEN MENU OWNS THE SCREEN. This only scanned a 32-unit disc around a
+      // tower, but _menuBtnPos lays its buttons on an arc of radius 56 -- so a
+      // machine built near the shop, START WAVE or the breath button had menu
+      // buttons UNDER those rects, and the HUD claimed the tap first. Measured:
+      // 4 authored pads and 7-11% of the free-build floor own machines that
+      // cannot be upgraded, manned, re-aimed or sold. While a menu is open,
+      // every HUD band defers.
+      var twUnder = !!(this.menu && this.menu.towerIdx !== undefined);
+      if (!twUnder && this.shopPick < 0) {        // a machine in hand still places
         for (var tu = 0; tu < this.towers.length; tu++) {
           var tud = this.towers[tu], ux = w.x - tud.x, uy = w.y - tud.y;
           if (ux * ux + uy * uy < 32 * 32) { twUnder = true; break; }
@@ -4085,7 +4144,10 @@
       // so a tap aimed at the ground behind it silently disarmed the shop
       // instead of building. Now only the cards themselves consume a tap and
       // everything between and around them falls through to the world.
-      if (vy >= G.shopY && vy <= G.shopY + G.shopH) {
+      // ...and the shop row needs the same deferral START/BREATH already have:
+      // with a machine armed over buildable ground, the card band was still
+      // claiming the tap and re-arming a different card instead of building.
+      if (!armedOverGround && vy >= G.shopY && vy <= G.shopY + G.shopH) {
         var shelfT = this._shelf();
         for (var sc = 0; sc < shelfT.length; sc++) {
           var sxp = G.shopX + sc * G.shopStep;
