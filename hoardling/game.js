@@ -3371,6 +3371,20 @@
       // the board vibrated even with nothing to shoot at.
       tw.shotT = (tw.shotT === undefined ? 9 : tw.shotT) + STEP;
       tw.cd -= STEP * (tw._manned ? 1.7 : tw._oc ? 1.25 : 1) * (1 + (tw._auraRate || 0));
+      // AIM EVERY STEP, NOT ONLY WHEN IT FIRES. _aimX/_aimY -- the only thing
+      // the renderer turns the barrel by -- were written down in the FIRE path,
+      // below the cooldown gate. So a crossbow updated its aim once every
+      // 1/rate seconds (0.83s at level 1) and spent the gap pointing at where
+      // its target USED to be. Raiders move 42-76 units/s, so the barrel was
+      // routinely aimed at empty road a whole body-length behind the raider it
+      // was shooting -- which is precisely "the crossbows still dont point
+      // towards the enemy". Tracking is a RENDER fact and belongs on every
+      // frame; firing stays on the cooldown.
+      if (tt.aims) {
+        var aimT = this._pickTarget(tw, lvlRow(tw).range * (this.mods.rangeMul || 1),
+                                    tt.hitsAir, tt.airBonus, tw.targeting | 0);
+        if (aimT) { tw._aimX = aimT.px; tw._aimY = aimT.py; }
+      }
       if (tw.cd > 0) continue;
       var pad = tw;
       // crystal: pulse-slow everything in range, no target needed.
@@ -5881,10 +5895,31 @@
       ctx.fillStyle = 'rgba(255,138,60,0.6)';
       ctx.beginPath(); ctx.arc(p.x + Math.sin(this.worldT * 20 + e.id) * 3, p.y - 16 + fy, 3, 0, 6.283); ctx.fill();
     }
-    // slow tint
+    // CHILLED. This was a FILLED 24x26 blue ellipse centred 9 units above the
+    // raider's feet -- i.e. a solid blue blob sitting on their legs and lower
+    // torso, on every slowed raider at once. With a Gemsinger on the board that
+    // is most of the wave, and VANUS read it exactly as it looks: "blue bubbles
+    // that you see on the bottom half of the enemies".
+    //
+    // A status must never be a shape drawn IN FRONT of the thing it describes.
+    // Frost goes on the GROUND they are standing in: a rime ring at the feet
+    // and a few ice flecks, so the raider stays fully readable and the effect
+    // still says cold at a glance.
     if (e.slowT > 0) {
-      ctx.fillStyle = 'rgba(140,200,255,0.25)';
-      ctx.beginPath(); ctx.ellipse(p.x, p.y - 9 + fy, 12, 13, 0, 0, 6.283); ctx.fill();
+      var chT = Math.min(1, e.slowT * 2);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(168,230,255,' + (0.55 * chT).toFixed(3) + ')';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y + 1, 13, 5.2, 0, 0, 6.283); ctx.stroke();
+      ctx.fillStyle = 'rgba(214,244,255,' + (0.7 * chT).toFixed(3) + ')';
+      for (var ic = 0; ic < 3; ic++) {
+        var ia = (e.id * 1.7 + ic * 2.1);            // stable per raider, no RNG
+        ctx.beginPath();
+        ctx.ellipse(p.x + Math.cos(ia) * 12, p.y + 1 + Math.sin(ia) * 4.4,
+                    1.5, 1.1, ia, 0, 6.283);
+        ctx.fill();
+      }
+      ctx.restore();
     }
   };
 
@@ -6128,9 +6163,13 @@
     // ellipse becomes the game's own flameGlyph -- the same drawn flame that
     // button uses, so the mark over his head and the control that spends it
     // are visibly the same thing.
-    if (h.breathCd <= 0 && this.state === 'playing') {
-      flameGlyph(ctx, h.x, anc.y - anc.lift - 46, 0.85, this.worldT, true);
-    }
+    // ...and then VANUS asked what the flame over his head was too: "whats with
+    // the basic looking flame over wicks head? i dont get that". Fair again, and
+    // the answer is that it should not be there at all. The breath BUTTON
+    // already carries this state, with the word BREATH on it, a charged ring
+    // and a cooldown wedge. A second unlabelled marker floating over the dragon
+    // is a third way of saying something already said twice. One control, one
+    // indicator.
     // HEALTH — shown only when hurt, so a healthy Wick keeps a clean silhouette
     if (h.hp < h.maxHp) {
       var hpf = Math.max(0, h.hp / h.maxHp);
