@@ -267,6 +267,39 @@
           rate: 0, range: 118, auraRate: 0, auraDmg: 0.28, special: 'temper' },
       ],
     },
+    // ANTI-AIR AoE — the ONE measured coverage hole in the roster. Nothing else
+    // does area damage to flyers: the Soot Brazier is hitsAir:false AND its
+    // splash loop skips flyers outright, pierce can never chain to a flyer
+    // (_nextBehind excludes them), and the only air-capable radial tick is the
+    // Gemsinger at 9.6 dps. Measured demand on the worst wave (L3 w15, sixteen
+    // Gloomwings under a 2.92x ramp) is ~216 sustained anti-air dps against a
+    // best-single-machine 68.4.
+    //
+    // Engine shape is a CLONE of the crystal branch: targetless radial tick, no
+    // _pickTarget, no projectile, no muzzle. Like that branch it carries no
+    // eFly test, so it cuts ground and air alike. Both specials are counters and
+    // flags -- zero rolls -- so the determinism surface does not grow.
+    //
+    // It does NOT solve the hole alone, and that was checked: radius 74 from a
+    // pad 50 units off the road covers a chord of 2*sqrt(74^2-50^2) = 109 path
+    // units; Gloomwings at gap 0.65 and speed 59 sit 38 apart, so ~2.8 are in
+    // the ring -> ~141 air dps against that 216. PLACEMENT is the dial.
+    rotor: {
+      name: 'Whirlyjack', cost: 110,
+      short: 'ROTOR', hitsAir: true,
+      blurb: 'Spinning blades cut a whole ring. Hits flyers.',
+      mount: { dx: -18, up: 30 },
+      levels: [
+        { dmg: 10, rate: 1.00, range: 56, upgradeCost: 100 },
+        { dmg: 16, rate: 1.15, range: 64, upgradeCost: 120 },
+      ],
+      forks: [
+        { key: 'updraft', name: 'Updraft Rotor', pitch: 'The wash flips couriers — flyers take 75% more.',
+          dmg: 22, rate: 1.2, range: 74, special: 'updraft', airMul: 1.75 },
+        { key: 'thresh', name: 'Threshing Rotor', pitch: 'Every 4th sweep shoves the ring back down the road.',
+          dmg: 20, rate: 1.4, range: 74, special: 'thresh', threshEvery: 4, threshPush: 26 },
+      ],
+    },
     // ECONOMY — the Banana-Farm role from the game VANUS likes. Pays at the
     // END of a wave, so it is a bet on surviving long enough to collect.
     press: {
@@ -353,7 +386,7 @@
   // `up` and `dx` are in DRAWN units at level 0 (tw0 = 54 wide); the drawer
   // scales them with the machine so a level-3 plate does not leave him behind.
   var MAN_SCALE = 0.86;     // perched and working, not standing on the furniture
-  var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'brazier', 'bellows', 'press']; // cheap -> dear
+  var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'rotor', 'brazier', 'bellows', 'press']; // cheap -> dear
 
   // MACHINE UNLOCKS — campaign stars needed before a machine appears on the
   // shelf. Every one of the seven used to be affordable on wave 0 of level 1
@@ -364,7 +397,9 @@
   // KEYED ON STARS, NOT ON LEVEL, so the Forge and the campaign share one
   // currency and a player who three-stars level 1 is rewarded with a machine
   // rather than only with Forge points.
-  var MACHINE_UNLOCK = { crystal: 0, ballista: 0, mimic: 0, perch: 1, brazier: 2, bellows: 4, press: 6 };
+  // slot 3 was free between perch(1)/brazier(2) and bellows(4): the anti-air
+  // answer should arrive BEFORE the flyer-heavy back half, not after it.
+  var MACHINE_UNLOCK = { crystal: 0, ballista: 0, mimic: 0, perch: 1, brazier: 2, rotor: 3, bellows: 4, press: 6 };
 
   /// The Daily ALWAYS offers all seven.
   ///
@@ -903,6 +938,12 @@
       // recorded: bite ~ popBoss measures 0.945, but one is a 240ms machine
       // attack and the other a 643ms boss death; they never share a beat.
       popBoss:  [0.95, 0.05, 120, 0.003, 0.20, 0.40, 1, 1.05, -1.9, , -34, 0.05, , 0.02, , , , 0.80, 0.04],
+      // THE WHIRLYJACK'S SWEEP -- a chopped, repeating blade whirr. repeatTime
+      // 0.022 is what makes it read as BLADES rather than a tone: the envelope
+      // retriggers ~45x a second. Dialled against the whole table with
+      // tools/sfxlab.js: 0 collisions, and the table total stays at the
+      // committed baseline of 23.
+      whirl:    [0.8, 0.05, 460, 0.002, 0.06, 0.13, 3, 1.3, -4, , , , 0.022, 0.25, , , , 0.6, 0.02],
       // GEARJAW'S REND. The fork's whole identity -- 4 dps of armour-proof
       // grind -- had NO renderer and NO sound of its own: bleedT touched five
       // sim sites and zero draw calls, and both mimic forks played the same
@@ -1952,6 +1993,7 @@
       t_perch:   'art/tower_perch.png',
       t_bellows: 'art/tower_bellows.png',
       t_press:   'art/tower_press.png',
+      t_rotor:   'art/tower_rotor.png',
       // the combined manned plates are GONE (see MAN_SCALE) -- Wick
     // is drawn as himself on each machine's own mount point.
       e_looter:  'art/enemy_looter.png',
@@ -3340,6 +3382,45 @@
       // crystal: pulse-slow everything in range, no target needed.
       // BACKWARDS: _damage can kill+splice, and a forward loop would skip
       // the enemy shifted into the vacated slot.
+      if (tw.type === 'rotor') {
+        // THE WHIRLYJACK. Deliberately the crystal's shape: a targetless radial
+        // tick with no _pickTarget, no projectile and no muzzle, and therefore
+        // -- like the crystal -- no eFly test, which is the entire point. It is
+        // the only machine in the game that does AREA damage to flyers.
+        var rHitAny = 0;
+        var rR = lv.range * (this.mods.rangeMul || 1);
+        var rDmg = lv.dmg * (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1)
+                          * (1 + (tw._auraDmg || 0));
+        // every 4th sweep on the Threshing fork shoves the ring back down the
+        // road. A pure counter on the machine, no roll.
+        var rThresh = lv.special === 'thresh' &&
+                      (((tw.sweeps = (tw.sweeps | 0) + 1) % lv.threshEvery) === 0);
+        for (var ro = this.enemies.length - 1; ro >= 0; ro--) {
+          var re2 = this.enemies[ro];
+          if (re2.hp <= 0) continue;
+          var rdx = re2.px - pad.x, rdy = re2.py - pad.y;
+          if (rdx * rdx + rdy * rdy > rR * rR) continue;
+          // airMul keys on e.flyer, NOT eFly(e): eFly is false while a
+          // Netcaster's net holds a flyer down, so keying on it would make the
+          // game's two anti-air answers cancel instead of stack.
+          var rMul = (lv.special === 'updraft' && re2.flyer) ? lv.airMul : 1;
+          this._damage(re2, rDmg * rMul, { kind: 'blade', tower: tw });
+          // NEVER push a fleeing raider: e.d is the path's arc-length address,
+          // so subtracting from a carrier on the way OUT would shove them
+          // toward the cave mouth -- the machine would help them escape.
+          if (rThresh && re2.hp > 0 && !re2.fleeing) {
+            re2.d = Math.max(0, re2.d - lv.threshPush);
+          }
+          rHitAny++;
+        }
+        if (rHitAny) {
+          tw.shotT = 0;
+          this.fxQueue.push({ k: 'pulse', x: pad.x, y: pad.y, r: rR, n: rHitAny, c: '#e8eef5' });
+          Sfx.play('whirl', tw.tid, { gain: Math.min(1, 0.55 + rHitAny * 0.12), pri: 1 });
+        }
+        tw.cd = rHitAny ? 1 / (lv.rate || 1) : 0.1;
+        continue;
+      }
       if (tw.type === 'crystal') {
         var hitAny = 0;
         for (var c = this.enemies.length - 1; c >= 0; c--) {
@@ -4630,7 +4711,10 @@
       else if (fx.k === 'place') this._burst(fx.x, fx.y, '#c9b8ff', 10, 80);
       else if (fx.k === 'blink') { this._burst(fx.x1, fx.y1, '#b39dff', 6, 70); this._burst(fx.x2, fx.y2, '#b39dff', 6, 70); }
       else if (fx.k === 'heal') this._burst(fx.x, fx.y, '#8fffd0', 6, 50);
-      else if (fx.k === 'pulse') this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 10, R: fx.r, life: 0.35, T: 0.35, c: '#a8e6ff' });
+      // c is a PAYLOAD now: this hardcoded the Gemsinger's chill-teal, so the
+      // Whirlyjack's blade sweep drew as a chill pulse -- two machines that do
+      // opposite things (slow vs cut) speaking in one colour.
+      else if (fx.k === 'pulse') this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 10, R: fx.r, life: 0.35, T: 0.35, c: fx.c || '#a8e6ff' });
       else if (fx.k === 'spit') this.particles.push({ kind: 'tracer', x1: fx.x1, y1: fx.y1, x2: fx.x2, y2: fx.y2, life: 0.1, T: 0.1, c: '#ffb14e' });
       else if (fx.k === 'snap') {            // crossbow release: dust off the rail
         var sang = Math.atan2(fx.ty - fx.y, fx.tx - fx.x);

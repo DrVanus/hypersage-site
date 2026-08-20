@@ -282,6 +282,13 @@
    "q": 88,
    "codec_psnr": 34.4,
    "as_drawn_psnr": 36.6
+  },
+  "tower_rotor.png": {
+   "size": "588->291px",
+   "kb": 39.5,
+   "q": 88,
+   "codec_psnr": 34.6,
+   "as_drawn_psnr": 25.3
   }
  }
 }
