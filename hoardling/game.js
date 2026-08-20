@@ -1617,13 +1617,13 @@
   // opposite strengths — Flint owns the open switchbacks, Ember owns the
   // chokepoints. That is a better matchup than a straight line anyway.
   var RIVALS = [
-    { id: 'tallow', name: 'Tallow', rank: 'APPRENTICE', pips: 1, policy: 'spam', wick: false, purse: 0.85,
+    { id: 'tallow', name: 'Tallow', rank: 'APPRENTICE', pips: 1, policy: 'rival_tallow', wick: false, purse: 0.85,
       blurb: 'Builds wide and cheap. Never upgrades a thing.' },
-    { id: 'flint', name: 'Flint', rank: 'BROAD HAND', pips: 2, policy: 'balanced', wick: false, purse: 0.75,
+    { id: 'flint', name: 'Flint', rank: 'BROAD HAND', pips: 2, policy: 'rival_flint', wick: false, purse: 0.75,
       blurb: 'Spreads his brass thin and wide. Loves a long road.' },
-    { id: 'ember', name: 'Ember', rank: 'DEEP HAND', pips: 2, policy: 'depth', wick: false, purse: 0.95,
+    { id: 'ember', name: 'Ember', rank: 'DEEP HAND', pips: 2, policy: 'rival_ember', wick: false, purse: 0.95,
       blurb: 'Few machines, all of them monsters. Wants a chokepoint.' },
-    { id: 'cinder', name: 'Cinder', rank: 'DRAKE', pips: 3, policy: 'depth', wick: true, purse: 1.15,
+    { id: 'cinder', name: 'Cinder', rank: 'DRAKE', pips: 3, policy: 'rival_cinder', wick: true, purse: 1.15,
       blurb: 'Works the cavern floor herself. Good luck.' },
   ];
   var RIVAL_ORDER = ['tallow', 'flint', 'ember', 'cinder'];
@@ -1635,33 +1635,27 @@
   // real runs, real economy, real injected taps. Regenerate after ANY change
   // to DUEL_ARENAS, DUEL_WAVES, duelStartGold, the wave generator, or tower
   // balance: a stale curve is a rival fighting a game that no longer exists.
-  // NOT RE-BAKED THIS PASS, DELIBERATELY, and this is the reasoning so the next
-  // session does not "fix" it mechanically.
+  // RE-BAKED 2026-08-20 from FOUR GRADED BOARDS, not one board with four purse
+  // multipliers. Every rival used to be recorded through the same legacy
+  // policy, which built the same two machines for all of them -- so "Builds
+  // wide and cheap" and "Few machines, all of them monsters" were the same
+  // board wearing different blurbs. Then the tap-deferral fix made that one
+  // board strong enough that every rival held 60 flat for all thirteen waves,
+  // which is a ladder with no rungs.
   //
-  // HANDOFF's law is to re-bake after any tower-balance change, and this pass
-  // changed the campaign ramp and the star bands. But a duel is NOT campaign:
-  // buildWave takes dailyHpMul for `seeded = daily || duel`, so neither number
-  // can reach a duel at all. What DID reach it is the tap-deferral fix — an
-  // open manage menu now defers the HUD, so machines built near the shop /
-  // START / breath can finally be upgraded, and the recording bot got much
-  // stronger as a result.
+  // The four now play differently (PLANS.rival_* in tools/bot.js) and the
+  // curves show it: tallow is sacked on every arena, flint and ember fall
+  // between, and cinder never drops a coin. Ties go to the player
+  // (`hoard >= rivalHoard`), so cinder is "keep all 60" -- demanding but
+  // reachable with a 3-star board, which is the right bar for a 3-pip DRAKE
+  // whose blurb is "Good luck."
   //
-  // Running bakeAll now returns every rival holding 60 flat for all 13 waves
-  // (shipped tallow arena0 is [60,60,60,60,58,33,33,21,21,0,0,0,0]; the re-bake
-  // is [60 x13]). A duel is decided on MARGIN, or won outright when the rival's
-  // hoard reaches 0 — so curves that never drop would turn every duel into a
-  // margin contest against a flawless opponent. That is strictly worse than the
-  // known consequence of keeping these: the player is now somewhat stronger
-  // than the rivals they are scored against, so duels are EASIER.
-  //
-  // The duel ladder therefore owes a real rebalance — rivals recorded from a
-  // deliberately weaker policy, or tiered difficulty — not a mechanical
-  // re-bake. Do not paste a bakeAll literal in here without reading this.
+  // Re-bake with HoardBot.bakeAll().literal and CLEAR Save.data.duels after.
   var RIVAL_CURVES = {
-    tallow: [[60,60,60,60,58,33,33,21,21,0,0,0,0], [60,35,35,35,35,35,35,30,0,0,0,0,0], [60,60,60,60,35,31,0,0,0,0,0,0,0], [60,60,60,28,0,0,0,0,0,0,0,0,0], [60,44,42,5,0,0,0,0,0,0,0,0,0], [60,60,35,35,35,7,0,0,0,0,0,0,0]],
-    flint: [[60,60,60,60,60,60,60,60,60,50,50,50,45], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,35,35,35,25,0,0,0,0,0], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,48,48,23,23,23,0,0,0,0,0,0,0], [60,60,60,60,60,44,44,44,44,44,44,44,44]],
-    ember: [[60,60,60,60,60,60,60,60,60,56,56,56,56], [60,60,60,60,60,60,60,60,60,60,36,0,0], [60,60,60,60,60,60,60,60,60,60,46,46,0], [60,60,60,60,60,60,60,60,60,60,60,60,46], [60,60,60,60,60,60,60,60,60,60,52,42,42], [60,60,60,60,60,60,60,60,60,60,44,44,0]],
-    cinder: [[60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,48], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,34]],
+    tallow: [[60,25,19,0,0,0,0,0,0,0,0,0,0], [60,0,0,0,0,0,0,0,0,0,0,0,0], [60,10,0,0,0,0,0,0,0,0,0,0,0], [60,12,0,0,0,0,0,0,0,0,0,0,0], [60,20,0,0,0,0,0,0,0,0,0,0,0], [60,22,0,0,0,0,0,0,0,0,0,0,0]],
+    flint: [[60,60,60,60,60,35,35,35,35,35,35,0,0], [60,60,60,60,60,60,60,60,27,0,0,0,0], [60,60,60,60,35,35,35,35,25,25,25,25,25], [60,60,60,41,21,21,0,0,0,0,0,0,0], [60,60,60,35,35,35,35,35,35,35,35,35,35], [60,60,60,60,60,30,30,30,30,0,0,0,0]],
+    ember: [[60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,34,0,0], [60,60,60,60,60,60,60,60,60,60,31,31,0], [60,60,60,60,60,60,60,60,60,60,35,35,0], [60,60,60,60,60,60,60,60,60,60,52,35,35], [60,60,60,60,60,60,60,60,60,60,58,58,1]],
+    cinder: [[60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60]],
   };
   // A rival's arena for today. Pure function of the day and the rival, so both
   // sides of a duel are the same fight and tomorrow is computable today (which
@@ -4746,7 +4740,19 @@
             life: 0.22 + Math.random() * 0.18, T: 0.4, c: fb < 3 ? '#fff0b0' : fb < 7 ? '#ff8a3c' : '#d64545' });
         }
       }
-      else if (fx.k === 'float') this.floats.push({ x: fx.x, y: fx.y, txt: fx.txt, c: fx.c, t: 1.6 });
+      else if (fx.k === 'float') {
+        // STACKED LABELS. Manning a machine that is also overclocked fires two
+        // floats at the same point on the same frame, and they drew straight
+        // on top of each other -- "MANNING!" and "OVERCLOCKED!" as one
+        // unreadable smear. Lift a new float clear of any live one it would
+        // land on. Cosmetic lane, cheap: there are rarely more than a few.
+        var fy = fx.y;
+        for (var fq = 0; fq < this.floats.length; fq++) {
+          var of2 = this.floats[fq];
+          if (Math.abs(of2.x - fx.x) < 70 && Math.abs(of2.y - fy) < 15) { fy = of2.y - 16; fq = -1; }
+        }
+        this.floats.push({ x: fx.x, y: fy, txt: fx.txt, c: fx.c, t: 1.6 });
+      }
     }
     this.fxQueue.length = 0;
 
@@ -5244,9 +5250,21 @@
         // squash pop a non-lethal hit gets — the kill stops being the one
         // impact the renderer never showed.
         // ...but BOTH terms were monotone-decreasing, so a kill rendered as a
-        // non-lethal graze whose sprite happens to fade out. A Bloons pop is a
-        // hard frame-0 substitution: the balloon is instantly BIGGER and
-        // BRIGHTER than it was alive, then gone. This is that discontinuity.
+        // non-lethal graze whose sprite happens to fade out.
+        //
+        // THE FIRST FIX FOR THAT WAS WRONG AND VANUS CAUGHT IT: "when enemies
+        // die they get bigger first and enlarge or something. It's a little bit
+        // weird". It was. The husk overshot to 1.34x and held it for THREE FULL
+        // FRAMES at full opacity -- 50ms of a visibly inflating raider. I had
+        // reasoned that a Bloons pop is "instantly BIGGER and brighter", and
+        // that is not what a pop is. The balloon does not grow; it is REPLACED,
+        // and what reads as the pop is the substitution plus the burst. Scaling
+        // a corpse up just animates the corpse.
+        //
+        // So: never above 1.0. Two frames white-hot at full size -- the flash IS
+        // the substitution -- then shrink and fade away fast. The particles and
+        // the kill sound carry the punch; the husk only has to stop looking
+        // like a raider that is still there.
         //
         // Keyed on elapsed time, NOT on hr: _cosmetic ticks the husk before
         // draw() in the same frame, so the first rendered frame is already
@@ -5254,10 +5272,10 @@
         // 60Hz and ZERO at 30Hz.
         var hv = d.ref, hr = Math.max(0, hv.t / hv.T);
         var el = hv.T - hv.t;
-        var pop = el < 0.034 ? 1.34 : 1.34 - 0.82 * ((el - 0.034) / (hv.T - 0.034));
-        hv.e.flashT = el < 0.034 ? 0.5 : 0.11 * hr;
+        var pop = 1 - 0.42 * (el / hv.T);
+        hv.e.flashT = el < 0.034 ? 0.55 : 0.12 * hr;
         ctx.save();
-        ctx.globalAlpha = el < 0.034 ? 1 : Math.pow(hr, 1.4);
+        ctx.globalAlpha = el < 0.034 ? 1 : Math.pow(hr, 1.1);
         ctx.translate(d.px, d.py); ctx.scale(pop, pop); ctx.translate(-d.px, -d.py);
         this._drawEnemy(ctx, hv.e, { x: d.px, y: d.py });
         ctx.restore();
@@ -5412,10 +5430,20 @@
     // an attack tower uses for its KILL range. Going out when the post is
     // jammed is also the only visible tell that machine has.
     if (tw.type === 'bellows' && !(tw.jamT > 0)) {
-      ctx.strokeStyle = 'rgba(255,190,120,0.22)'; ctx.lineWidth = 1.5;
-      ctx.setLineDash([6, 6]);
-      ctx.beginPath(); ctx.arc(p.x, p.y, lvlRow(tw).range, 0, 6.283); ctx.stroke();
-      ctx.setLineDash([]);
+      // A SOFT GLOW, NOT A RING. This was a dashed 1.5px circle at the aura's
+      // full radius, and at 96-132 units that is a hard geometric line drawn
+      // across half the board and straight through whatever raiders happen to
+      // be standing on it. VANUS read it, twice, as the game being broken:
+      // "circles there like in the screenshot so it looks like somethings wrong".
+      // A UI ring says "selection"; warm air on the floor says "aura". Same
+      // information, and it cannot be mistaken for a boundary.
+      var bR = lvlRow(tw).range;
+      var bg = ctx.createRadialGradient(p.x, p.y + 4, bR * 0.25, p.x, p.y + 4, bR);
+      bg.addColorStop(0, 'rgba(255,190,120,0.085)');
+      bg.addColorStop(0.72, 'rgba(255,178,100,0.045)');
+      bg.addColorStop(1, 'rgba(255,170,90,0)');
+      ctx.fillStyle = bg;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, bR, bR * 0.62, 0, 0, 6.283); ctx.fill();
     }
     // range ring while its menu is open
     if (this.menu && this.menu.towerIdx !== undefined && this.towers[this.menu.towerIdx] === tw) {
@@ -5491,10 +5519,22 @@
         // stays small: level for a target across from it, a gentle tilt for one
         // up-road or down-road. Rendered all 8 compass directions to pick 0.30.
         var fn = Math.max(1, Math.sqrt(fdx * fdx + fdy * fdy));
-        var want = 0.30 * (fdy / fn);
+        // IT BARELY TURNED. want maxed at 0.30 rad = 17 degrees, and because it
+        // read ONLY the depth component it was exactly ZERO for a raider level
+        // with the machine -- which is most of them on an S-curve road. So the
+        // crossbow mirrored left/right and otherwise sat still, and VANUS read
+        // it as not tracking what it shoots.
+        //
+        // The horizontal component now contributes too, scaled well down
+        // because screen-y is DEPTH in a three-quarter view and screen-x is not:
+        // a target across from the machine should angle the barrel a little,
+        // not swing it like a top-down turret. Only a machine with a separated
+        // turret rotates at all (the base stays planted), so the plate cannot
+        // tip over.
+        var want = 0.42 * (fdy / fn) + 0.16 * Math.abs(fdx / fn) * (fdy >= 0 ? 1 : -1);
         // Only a machine with a SEPARATED turret may turn at all — its base
         // stays planted. The Mimic is a chest: it mirrors, nothing rotates.
-        fRot = tt2.turret ? Math.max(-0.35, Math.min(0.35, want)) : 0;
+        fRot = tt2.turret ? Math.max(-0.52, Math.min(0.52, want)) : 0;
         // ease in RENDER time; cosmetic only, so wall-clock is correct here
         var prev = tw._faceRot === undefined ? fRot : tw._faceRot;
         var prevS = tw._faceSign === undefined ? fSign : tw._faceSign;
@@ -5904,7 +5944,15 @@
     // MANNED: he is perched ON the machine, so lift him and drop the ground
     // shadow (he is not standing on the floor any more).
     var lift = anc.lift;
-    if (!h.manned) groundShadow(ctx, h.x, h.y, 44 * depthScale(h.y), 0, 1);
+    // The shadow is the ONLY thing that says how high he is. It has to move
+    // with him or the hover reads as the sprite jittering in place.
+    if (!h.manned) {
+      // planted feet cast a STEADY shadow; only a walking step or a hover
+      // moves it. A shadow that pulses under a motionless dragon is the same
+      // floating tell in another channel.
+      var shF = hMoving2 ? 1 - 0.10 * Math.abs(Math.sin(this.worldT * 9.2)) : 1;
+      groundShadow(ctx, h.x, h.y, 44 * depthScale(h.y) * shF, 0, 1 / shF);
+    }
     var hdx2 = h.tx - h.x, hdy2 = h.ty - h.y;
     var hMoving2 = Math.abs(hdx2) + Math.abs(hdy2) > 3;
     var goingAway = hMoving2 && hdy2 < -Math.abs(hdx2) * 0.7;   // mostly up-screen
@@ -5916,8 +5964,47 @@
     if (himg) {
       // hover bob + sway; face the direction he's headed
       var ht = this.worldT;
-      var hflip = (h.tx - h.x) > 0.5 ? -1 : 1;   // sprite faces left natively
+      // FACE THE MACHINE WHILE MANNING IT. hflip is derived from where he is
+      // WALKING to -- and manning sets tx/ty to the machine he is already on, so
+      // (tx - x) is ~0 and he always defaulted to facing LEFT no matter which
+      // side of the machine his mount puts him on. VANUS: "sometimes he's faced
+      // the wrong way". On a mount the sign of mount.dx is the answer: sitting
+      // to the RIGHT of the machine he must look left at it, and vice versa.
+      var hflip;
+      if (mnt) {
+        var mdx0 = (TOWER_TYPES[mtw.type].mount || { dx: 0 }).dx;
+        hflip = mdx0 >= 0 ? 1 : -1;            // dx>0 -> he is right of it -> face LEFT (native)
+      } else {
+        hflip = (h.tx - h.x) > 0.5 ? -1 : 1;   // sprite faces left natively
+      }
       var hmoving = Math.abs(h.tx - h.x) + Math.abs(h.ty - h.y) > 3;
+      // HE STANDS. He is drawn standing in his own art -- the title plate, the
+      // app icon, hero_whelp itself -- and he bobbed anyway, at every moment,
+      // which VANUS read as "even one still he is wobbling and looks like he's
+      // floating a little bit". My first answer was to commit to flight
+      // everywhere; his correction is the right one: "he could walk too cause
+      // he's standing in the original photo of him".
+      //
+      // So THREE distinct states, and only one of them leaves the ground:
+      //   IDLE     planted. ZERO vertical motion -- the thing that read as
+      //            floating was a bob with nothing to justify it. Breathing
+      //            only, on the squash term below.
+      //   WALKING  a STEP bob: he rises on each footfall, so the vertical runs
+      //            at twice the stride and its lowest point is the plant. Small
+      //            amplitude on purpose; a big one is a hop, not a walk.
+      //   MANNING  airborne, wings out, because that is what hero_man depicts
+      //            and what VANUS asked for -- "if you man it you are flying
+      //            next to it using wrench or controls".
+      // The flap only exists in the air. The wings are a static painting, so it
+      // is faked the way a two-frame cycle does it: the span widens on the
+      // downstroke and he RISES on it, i.e. the vertical is 90 degrees out of
+      // phase with the span. In phase it reads as a pulsing balloon.
+      var flapF = mnt ? 6.6 : 9.2;
+      var flap  = mnt ? Math.sin(ht * flapF) : 0;          // wingbeat: AIR ONLY
+      var flapA = mnt ? 0.055 : 0;                         // wing SPAN, x
+      var rise  = mnt ? Math.cos(ht * flapF)               // hover, out of phase
+                      : (hmoving ? -Math.abs(Math.sin(ht * flapF)) : 0);
+      var bobA2 = mnt ? 2.2 : (hmoving ? 1.5 : 0);         // idle is EXACTLY 0
       var hsq = 1 + Math.sin(ht * (hmoving ? 9 : 5)) * (hmoving ? 0.05 : 0.035);
       var hh0 = HERO_H * manS, hw0 = hh0 * (himg.width / himg.height);
       // the sprite is drawn facing LEFT natively, so world-facing is -hflip.
@@ -5928,16 +6015,16 @@
       var kick = b * b;
       ctx.save();
       // manX/manY are the machine's mount when manned, his own feet otherwise.
-      // On a mount he is FLYING, not standing, so the bob goes UP rather than
-      // down: a faster, deeper hover with a slight nose-down lean, which is
-      // what sells "working it from the air" instead of "standing beside it".
-      var bobA = mnt ? 1.7 : 1;
-      var hoverT = mnt ? Math.sin(ht * 6.5) * 2.2 * bobA
-                       : Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5);
+      var hoverT = -rise * bobA2;                // 0 when idle: feet planted
       ctx.translate(manX - (this._heroFace) * kick * 4,
                     manY + 5 - lift - kick * 3 + hoverT);
-      ctx.rotate(Math.sin(ht * 3) * 0.04 + (hmoving ? -hflip * 0.07 : 0) + this._heroFace * kick * 0.22);
-      ctx.scale(hflip * (2 - hsq) * (1 + kick * 0.10), hsq * (1 + kick * 0.06));
+      // banks with the WINGBEAT while flying and leans into the WALK while
+      // moving; standing still it does neither. An idle rotation at its own
+      // unrelated frequency is most of what read as drifting.
+      ctx.rotate(flap * 0.028 + (hmoving && !mnt ? -hflip * 0.055 : 0)
+                 + this._heroFace * kick * 0.22);
+      ctx.scale(hflip * (2 - hsq) * (1 + kick * 0.10) * (1 + flapA * flap),
+                hsq * (1 + kick * 0.06) * (1 - flapA * 0.35 * flap));
       ctx.drawImage(himg, -hw0 / 2, -hh0, hw0, hh0);
       // THE MOUTH OPENS. The painted plate has a closed muzzle and there is no
       // open-mouthed variant, so the jaw is drawn: a dark throat wedge at the
