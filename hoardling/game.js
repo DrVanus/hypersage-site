@@ -386,6 +386,11 @@
   // long enough to read as a hit landing, short enough that a wave of kills
   // does not leave a queue of corpses standing on the road.
   var HUSK_T = 0.12;
+  // How long Wick's breath PERFORMS: the open jaw, the head recoil and the
+  // drawn jet all ease on this. It was written as a literal in the setter and
+  // divided by a SECOND literal in the drawer, so lengthening the beat in one
+  // place would have quietly broken the easing in the other.
+  var BREATH_BEAT = 0.60;
   var PAD_SNAP = 34;          // build within this of a free pad and you snap to it
   var PAD_DISCOUNT = 0.8;     // ...and it costs 20% less: the authored spots still matter
   // FREE PLACEMENT DELETED THE OLD CAP. With 8 pads you could own 8 machines;
@@ -1888,6 +1893,17 @@
       mound:     'art/gold_mound.png',
       hero:      'art/hero_whelp.png',
       hero_back: 'art/hero_back.png',
+      // MANNING POSE -- he HOVERS beside the machine and works it, wings out.
+      // Standing the rest plate next to a machine read as loitering (VANUS:
+      // "manning it doesnt look like anything just standing next to it").
+      // Registered onto hero_whelp by tools/register_frames.py: foot drift
+      // 0.0px, shoulder drift 0.1px, tone gain 0.91, so the swap does not
+      // move him. The two BREATH poses generated alongside it were REJECTED
+      // by that same tool at gain 0.42/0.46 -- and excluding their baked
+      // flame barely moved the number (the fire is 1.7% of pixels), so the
+      // whole dragon was repainted ~40% brighter. They are in
+      // art-src/wick_poses/ and did not ship.
+      hero_man:  'art/hero_man.png',
       hero_title: 'art/hero_title.png',
       t_mimic:   'art/tower_mimic.png',
       t_ballista:'art/tower_ballista.png',
@@ -4517,17 +4533,28 @@
         // floor. The muzzle offset is a RENDER fact (sprite height, facing), so
         // it is computed here in the cosmetic lane and never enters the sim.
         var mz = this._muzzle();
-        this._burst(mz.x, mz.y, '#ff9a3c', 30, 140);
-        // a directed jet on top of the radial burst: the breath has a SOURCE
-        for (var bj = 0; bj < 14; bj++) {
-          var ja = mz.f * (0.15 + Math.random() * 0.55) - 0.35;
-          var js = 90 + Math.random() * 120;
+        // VANUS: "the fire that he makes he doesnt look like hes spitting it".
+        // Three separate reasons, all fixed here:
+        //  1. THE BEAT WAS 0.42s -- a blink. The open jaw, the head recoil and
+        //     the drawn jet all ride _breathT, so the whole performance was over
+        //     before you could look at it.
+        //  2. THE DAMAGE IS RADIAL (everything inside hero.range = 76) and the
+        //     only visual was a thin forward cone, so the AREA never read. The
+        //     Gemsinger already ships a ring particle for exactly this job.
+        //  3. The jet was 14 small dots. It is a gout now: 26, bigger, hotter,
+        //     living longer, and thrown along his facing.
+        this._burst(mz.x, mz.y, '#ff9a3c', 34, 150);
+        this.particles.push({ kind: 'ring', x: mz.x, y: mz.y, r: 12,
+                              R: this.hero.range, life: 0.45, T: 0.45, c: '#ffb14e' });
+        for (var bj = 0; bj < 26; bj++) {
+          var ja = mz.f * (0.10 + Math.random() * 0.70) - 0.40;
+          var js = 110 + Math.random() * 170;
           this.particles.push({ kind: 'dot', x: mz.x, y: mz.y,
-                                vx: Math.cos(ja) * js * mz.f, vy: Math.sin(ja) * js - 30,
-                                r: 2 + Math.random() * 3, life: 0.28 + Math.random() * 0.22,
-                                T: 0.5, c: bj % 3 ? '#ffd75e' : '#fff3cf' });
+                                vx: Math.cos(ja) * js * mz.f, vy: Math.sin(ja) * js - 34,
+                                r: 2.4 + Math.random() * 4.2, life: 0.34 + Math.random() * 0.30,
+                                T: 0.66, c: bj % 3 ? '#ffd75e' : '#fff3cf' });
         }
-        this._breathT = 0.42;                 // drives the open jaw + head recoil
+        this._breathT = BREATH_BEAT;          // drives the open jaw + head recoil
         this.shake = Math.min(1, this.shake + 0.35);
       }
       else if (fx.k === 'mother') {
@@ -5737,7 +5764,8 @@
     var goingAway = hMoving2 && hdy2 < -Math.abs(hdx2) * 0.7;   // mostly up-screen
     // He is always drawn now -- a manned frame with no dragon in it was only
     // ever possible because the plate could be missing.
-    var himg = (goingAway && !h.manned && ART.images.hero_back) ? ART.images.hero_back
+    var himg = (h.manned && ART.images.hero_man) ? ART.images.hero_man
+             : (goingAway && !h.manned && ART.images.hero_back) ? ART.images.hero_back
              : ART.images.hero;
     if (himg) {
       // hover bob + sway; face the direction he's headed
@@ -5750,16 +5778,18 @@
       // _muzzle() reads this to put the breath where his mouth is.
       this._heroFace = -hflip;
       // BREATH RECOIL — a short kick back and up, easing out. b runs 1 -> 0.
-      var b = Math.max(0, (this._breathT || 0) / 0.42);
+      var b = Math.max(0, (this._breathT || 0) / BREATH_BEAT);
       var kick = b * b;
       ctx.save();
       // manX/manY are the machine's mount when manned, his own feet otherwise.
-      // The idle bob is damped on a mount: a dragon braced against a crank does
-      // not hover, and the full-amplitude bob read as him floating off it.
-      var bobA = mnt ? 0.5 : 1;
+      // On a mount he is FLYING, not standing, so the bob goes UP rather than
+      // down: a faster, deeper hover with a slight nose-down lean, which is
+      // what sells "working it from the air" instead of "standing beside it".
+      var bobA = mnt ? 1.7 : 1;
+      var hoverT = mnt ? Math.sin(ht * 6.5) * 2.2 * bobA
+                       : Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5);
       ctx.translate(manX - (this._heroFace) * kick * 4,
-                    manY + 5 - lift - kick * 3
-                      + Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5) * bobA);
+                    manY + 5 - lift - kick * 3 + hoverT);
       ctx.rotate(Math.sin(ht * 3) * 0.04 + (hmoving ? -hflip * 0.07 : 0) + this._heroFace * kick * 0.22);
       ctx.scale(hflip * (2 - hsq) * (1 + kick * 0.10), hsq * (1 + kick * 0.06));
       ctx.drawImage(himg, -hw0 / 2, -hh0, hw0, hh0);
@@ -5854,14 +5884,19 @@
       ctx.beginPath(); ctx.moveTo(h.x - 8, h.y - 26 + bob); ctx.lineTo(h.x - 10, h.y - 33 + bob); ctx.lineTo(h.x - 4, h.y - 28 + bob); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(h.x + 8, h.y - 26 + bob); ctx.lineTo(h.x + 10, h.y - 33 + bob); ctx.lineTo(h.x + 4, h.y - 28 + bob); ctx.closePath(); ctx.fill();
     }
-    // charged: a pulsing flame ring says TAP ME
+    // CHARGED. This was a pulsing orange RING around him plus a pale-gold
+    // ELLIPSE over his head, and VANUS asked what both of them were: "i dont
+    // get what the circle on the dragon is or the coin or whatever above him".
+    // Fair on both counts. They were one message -- "the breath is ready" --
+    // said twice in shapes that name nothing: the ring is a second circle
+    // around a dragon who already gets a dashed circle when SELECTED, and the
+    // "flame" was a bare ellipse, which is a coin. The breath BUTTON already
+    // carries this state with the word BREATH on it, so the ring goes and the
+    // ellipse becomes the game's own flameGlyph -- the same drawn flame that
+    // button uses, so the mark over his head and the control that spends it
+    // are visibly the same thing.
     if (h.breathCd <= 0 && this.state === 'playing') {
-      var rp = 0.6 + 0.4 * Math.sin(this.worldT * 6);
-      ctx.strokeStyle = 'rgba(255,154,60,' + rp + ')';
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(h.x, h.y - 14, 24 + rp * 4, 0, 6.283); ctx.stroke();
-      ctx.fillStyle = 'rgba(255,207,106,' + (0.7 + rp * 0.3) + ')';
-      ctx.beginPath(); ctx.ellipse(h.x, h.y - 46, 4, 7 + rp * 2, 0, 0, 6.283); ctx.fill();
+      flameGlyph(ctx, h.x, anc.y - anc.lift - 46, 0.85, this.worldT, true);
     }
     // HEALTH — shown only when hurt, so a healthy Wick keeps a clean silhouette
     if (h.hp < h.maxHp) {

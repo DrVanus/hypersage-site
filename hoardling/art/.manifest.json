@@ -171,6 +171,13 @@
    "codec_psnr": 35.8,
    "as_drawn_psnr": 37.5
   },
+  "hero_man.png": {
+   "size": "885px",
+   "kb": 140.5,
+   "q": 84,
+   "codec_psnr": 37.2,
+   "as_drawn_psnr": 37.2
+  },
   "hero_title.png": {
    "size": "863->594px",
    "kb": 61.0,
