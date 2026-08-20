@@ -117,6 +117,8 @@
     mimic: {
       name: 'Latch Mimic', cost: 80,
       short: 'MIMIC', hitsAir: false,
+      mount: { dx:  13, up: 40 },
+      blurb: 'Hard bite, short reach. Ground only.',
       aims: true,
       // RANGE 40 MADE THIS MACHINE UNBUILDABLE, not merely weak. Measured pad
       // distance to the road centreline: level 1 has 2 of 8 pads inside 40,
@@ -149,6 +151,8 @@
     ballista: {
       name: 'Kobold Crossbow', cost: 70,
       short: 'CROSSBOW', hitsAir: true,
+      mount: { dx:  16, up: 24 },
+      blurb: 'Fast bolts, long reach. Hits flyers.',
       aims: true,
       // The crossbow assembly and its gunner sit ON a round wooden turntable.
       // Split there so only the TOP turns: rotating the whole plate tipped the
@@ -177,8 +181,12 @@
     },
     brazier: {
       name: 'Soot Brazier', cost: 100,
-      muzzle: { fwd: 0, up: 34 },    // the pot's mouth; it lobs straight up, so no side offset
+      // the flared mouth. The sprite went 54x64 -> 54x74 when the closed pot
+      // became an open-topped boiler, so the mouth moved up with it.
+      muzzle: { fwd: 0, up: 48 },    // it lobs straight up, so no side offset
       short: 'BRAZIER', hitsAir: false,
+      mount: { dx: -20, up: 18 },
+      blurb: 'Lobs fire — splashes a crowd. Ground only.',
       levels: [
         { dmg: 9,  rate: 0.8, range: 92,  splash: 38, upgradeCost: 90 },
         { dmg: 15, rate: 0.9, range: 101, splash: 38, upgradeCost: 160, burn: 4 },
@@ -194,12 +202,19 @@
     crystal: {
       name: 'Gemsinger', cost: 50,
       short: 'GEMSINGER', hitsAir: true,
+      mount: { dx: -20, up: 14 },
+      blurb: 'Chills raiders slow. Hits flyers. Low damage.',
       levels: [
         { dmg: 3, rate: 1.0, range: 92,  slow: 0.30, slowDur: 1.5, upgradeCost: 50 },
         { dmg: 5, rate: 1.1, range: 105, slow: 0.40, slowDur: 2.0, upgradeCost: 90 },
       ],
       forks: [
-        { key: 'deepchill', name: 'Deepchill Coil', pitch: 'Deep chill: no blinking, deaf to the war drum.',
+        // PITCH REWRITTEN TO WHAT IS TRUE. It used to read "no blinking, deaf
+        // to the war drum" -- but blink is gated on `e.slowT <= 0`, so ANY
+        // Gemsinger at ANY level already hard-counters the Blinker, and a 50g
+        // L1 was selling a 190g fork's headline feature. Boss-aura immunity
+        // (deepT) is the one thing only this fork does.
+        { key: 'deepchill', name: 'Deepchill Coil', pitch: 'Deep chill: the war drum cannot reach them.',
           dmg: 8, rate: 1.2, range: 118, slow: 0.55, slowDur: 2.5, special: 'deepchill' },
         { key: 'resonance', name: 'Tuning Fork', pitch: 'Chilled foes ring brittle — all hits do +25%.',
           dmg: 6, rate: 1.2, range: 118, slow: 0.40, slowDur: 2.0, special: 'resonance', brittleMul: 1.25 },
@@ -208,6 +223,13 @@
     perch: {
       name: 'Gargoyle Roost', cost: 90,
       short: 'ROOST', hitsAir: true, airBonus: 1.5,
+      mount: { dx: -25, up: 34 },
+      // "pierces 2. Best vs flyers" put two true clauses side by side and
+      // implied a third that is FALSE: _nextBehind (game.js, the only source of
+      // pierce hops) skips flyers outright, so against a flock of Gloomwings a
+      // Roost's pierce 2/3/6 does literally nothing. It is a single-target
+      // sniper up there, carried by airBonus, not by pierce.
+      blurb: 'Longest reach. Best vs air. Ground pierce only.',
       aims: true,
       turret: { cut: 0.46, pvx: 0.50, pvy: 0.46 },   // gargoyle turns, plinth does not
       muzzle: { fwd: 15, up: 63 },   // measured to the gargoyle's snout (0.22w, 0.21h)
@@ -227,6 +249,8 @@
     bellows: {
       name: 'Bellows Post', cost: 120,
       short: 'BELLOWS', hitsAir: false, support: true,
+      mount: { dx: 18, up: 16 },
+      blurb: 'NOT A WEAPON — machines near it fire +15%.',
       // Wick at the crank drives the bellows harder. A support machine used to
       // offer MAN IT (+70%) and deliver NOTHING — the tower loop bails on
       // supports before any manning flag is read. This is the effect that
@@ -248,6 +272,8 @@
     press: {
       name: 'Coin Press', cost: 140,
       short: 'PRESS', hitsAir: false, support: true,
+      mount: { dx:  15, up: 26 },
+      blurb: 'NOT A WEAPON — mints 26g when a wave ends.',
       mannedGold: 1.5,   // see Bellows Post: MAN IT on a press paid nothing at all
       levels: [
         { rate: 0, range: 0, waveGold: 26, upgradeCost: 110 },
@@ -307,6 +333,26 @@
   }
   // A netted flyer fights as ground troops until the net wears off.
   function eFly(e) { return e.flyer && !(e.groundedT > 0); }
+  // WHERE WICK SITS WHEN HE MANS A MACHINE, and how big he is when he does.
+  //
+  // This replaces seven COMBINED "manned plates" (tower_*_manned.png) that
+  // painted Wick into the machine sprite. They were generated one at a time
+  // with no size law between them, so his scale was different on every single
+  // one -- tiny on the crossbow, brazier, bellows and press; oversized on the
+  // mimic, perch and crystal -- and the machine underneath was repainted by
+  // 20-59% of its pixels, so it visibly morphed the instant he climbed on.
+  // Owner, on the phone: "when the dragon mans stuff it looks weird and dragon
+  // gets much smaller".
+  //
+  // Drawing his OWN sprite at ONE scale on a per-machine mount fixes all of it
+  // by construction: one Wick, always the same size, the machine never changes,
+  // and a machine added later needs a two-number mount rather than a generated
+  // plate. It also drops 289 KB -- about a fifth of the whole art payload -- off
+  // a cold load that the boot work fought to get to 1.4 MB.
+  //
+  // `up` and `dx` are in DRAWN units at level 0 (tw0 = 54 wide); the drawer
+  // scales them with the machine so a level-3 plate does not leave him behind.
+  var MAN_SCALE = 0.86;     // perched and working, not standing on the furniture
   var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'brazier', 'bellows', 'press']; // cheap -> dear
 
   // MACHINE UNLOCKS — campaign stars needed before a machine appears on the
@@ -403,7 +449,7 @@
     // SPLITTER — dies into two Scraplings. Punishes single-target builds and
     // rewards splash, which is the Bloons lesson VANUS liked: one kill can
     // make your problem WORSE if you brought the wrong tool.
-    splitter: { name: 'Cracked Keg',   hp: 130,  spd: 33, bounty: 14,  steals: 3,  flyer: false,
+    splitter: { name: 'Hogshead',       hp: 130,  spd: 33, bounty: 14,  steals: 3,  flyer: false,
                 splitInto: 'looter', splitCount: 2, splitHp: 0.55 },
   };
 
@@ -745,7 +791,6 @@
       jam:    [1.0, , 190, 0.01, 0.06, 0.22, 3, 0.9, -12, , , , , 0.8],
       // and a keg cracking apart: a low pop with a wooden splinter tail
       split:  [1.0, , 110, 0.02, 0.10, 0.28, 4, 1.1, -3, , , , , 1.2],
-      shoot:  [0.5, , 880, , 0.02, 0.06, 1, 1.8, , , , , , 0.1],
       // FIVE FIRING MACHINES SHARED THREE SOUNDS — the crossbow, the gargoyle
       // roost and Wick's fireball were literally the same 80ms sample, and the
       // Gemsinger made no sound at all. A board of mixed machines sounded like
@@ -754,28 +799,136 @@
       bow:    [0.95, , 150, 0.01, 0.03, 0.11, 3, 2.4, -9, , , , , 1.1, , 0.08],
       stone:  [0.9, , 70, 0.02, 0.05, 0.20, 4, 1.6, -4, , , , , 0.5, , 0.15, 0.05],
       flame:  [0.85, , 220, 0.01, 0.06, 0.22, 4, 1.3, -6, , , , , 1.3],
-      chime:  [0.6, , 1320, 0.02, 0.06, 0.35, 1, 1.9, , , 660, 0.04, , , , , , 0.4],
+      // 0.6 measured as rms 0.078: the QUIETEST sound in the whole table, and
+      // it belongs to the 50g machine most boards are built out of.
+      chime:  [0.9, , 1320, 0.02, 0.06, 0.35, 1, 1.9, , , 660, 0.04, , , , , , 0.4],
       // ...and the BACK half of the lifecycle was silent. A bolt landing made no
       // sound at all; only the lob had an impact. A crit was indistinguishable
       // from a graze, and a shield deflect from a clean hit.
       thud:   [0.85, , 110, 0.01, 0.04, 0.14, 4, 1.5, -8, , , , , 0.9, , 0.15],
       crunch: [1.0, , 90, 0.01, 0.06, 0.26, 4, 1.2, -10, , , , , 1.2, , 0.2],
-      clang:  [0.9, , 340, 0.01, 0.03, 0.13, 3, 1.1, -14, , , , , 0.6],
+      // A DEFLECT AND A SABOTAGE MEASURED 0.995 IDENTICAL -- the highest
+      // collision in the game -- and they mean opposite things: 'your bolt
+      // bounced, switch tools' versus 'a Pry-Hand just killed a machine'.
+      // 340Hz light metal was also the wrong object: a Shellback's pavise is
+      // body-length WOOD with an iron rim. 110Hz hollow boom, rim ring 12ms
+      // behind it. Clears bow~clang and thud~clang for free.
+      clang:  [1.25, 0.05, 110, 0.002, 0.05, 0.30, 0, 0.7, -14, , 700, 0.012, , 0.25, , , 0.02, 0.28, 0.05],
       lob:    [0.7, , 160, 0.02, 0.08, 0.25, 4, 1.2, 6, , , , , 0.6],
       bite:   [0.9, , 130, 0.01, 0.05, 0.18, 3, 1.5, -6, , , , , 0.4],
-      hit:    [0.8, , 150, 0.01, 0.03, 0.16, 4, 1.4, -6, , , , , 0.7, , 0.2],
       coin:   [0.7, , 1046, , 0.04, 0.16, 1, 1.9, , , 540, 0.05],
       steal:  [1.0, , 320, 0.02, 0.12, 0.40, 2, 1.3, -4, , -80, 0.10, , 0.2, , , 0.10],
       recover:[0.9, , 660, 0.01, 0.10, 0.30, 1, 1.7, , , 330, 0.06],
       leak:   [1.0, , 110, 0.03, 0.20, 0.60, 2, 1.2, -2, , , , , 0.3, , 0.2, 0.15],
+      // WICK IS DOWN -- nine seconds with no breath, no manning, no jam
+      // clearing. It shared `leak` with a single coin escaping the cave, so a
+      // catastrophe and routine chip damage were one sound.
+      herodown: [1.05, 0.05, 300, 0.004, 0.16, 0.50, 2, 1.6, -16, , -90, 0.10, , 0.08, , 0.08, 0.08, 0.45, 0.05, , 900],
+      // THE HOARD IS NEARLY GONE. Two-tone square an octave apart, repeating:
+      // nothing else in the table is a square wave, so it cuts through a full
+      // wave instead of joining it.
+      alarm:  [0.95, 0.05, 262, 0.01, 0.10, 0.34, 5, 1.0, , , 131, 0.09, 0.16, , , , , 0.6],
+      // A WAVE HELD CLEAN. Was `upg`, the SHOP jingle -- so the game's
+      // proudest beat sounded like a menu confirmation. A rising fifth.
+      clear:  [0.85, 0.05, 523, 0.008, 0.09, 0.34, 0, 1.3, , , 784, 0.06, 0.09, , , , , 0.5],
+      // THE LOB LANDING. 52Hz lowpassed at 420 -- a soot-and-embers fwoomph,
+      // nowhere near the 4.7kHz band that holds every other impact. The
+      // Brazier is the splash machine and its blast was a bolt graze.
+      fwoomph: [0.62, 0.05, 52, 0.005, 0.16, 0.30, 4, 0.6, -2.5, , , , , 0.9, , 0.10, 0.02, 0.85, 0.04, , 420],
+      // Wick's fireball ARRIVING. It had a launch sound and landed in silence.
+      fireimp: [1.0, 0.05, 80, 0.003, 0.09, 0.22, 4, 1.4, -9, , , , , 0.55, , 0.14, 0.03, 0.7, 0.03, , 900],
       wave:   [0.9, , 196, 0.05, 0.30, 0.40, 2, 1.5, 2, , , , 0.12, , , , 0.10],
       breath: [1.1, , 90, 0.02, 0.25, 0.45, 4, 1.3, 3, , , , , 0.8, , 0.3, 0.15],
       win:    [0.9, , 523, 0.04, 0.30, 0.50, 1, 1.7, , , 392, 0.10, 0.15, , , , 0.20],
       lose:   [1.0, , 220, 0.05, 0.25, 0.80, 1, 1.5, -3, , -60, 0.15, , 0.15, , 0.2, 0.20],
       crackle:[0.25, 0.3, 700, , 0.01, 0.08, 4, 2, -20, , , , , 1.5],
+
+      // ===== THE KILL =====================================================
+      // Every death of every one of the ten raider types used to play ONE
+      // sound: `coin`, 200ms, volume 0.70 -- the QUIETEST combat sound in the
+      // table, while every gun that produced it ran 0.85-1.00. The moment the
+      // whole game exists to make was its quietest, shortest, most repeated
+      // noise, and a Scrapling popping was audibly identical to The Hoard King
+      // falling after twenty waves.
+      //
+      // The Bloons property the owner asked for is not gore -- it is:
+      //   1. a fast PITCHED transient (<20ms attack) with a resonant body,
+      //      never a noise wash;
+      //   2. a fundamental that tracks the target's SIZE -- small dies high and
+      //      quick, big dies low and long;
+      //   3. POLYPHONY: five kills at once must be five audible kills.
+      // These five are measured by tools/sfxlab.js, which renders the table and
+      // reports a pairwise distinctness matrix. Their spectral centroids run
+      // 1974 / 848 / 256 Hz across the size ladder and none of them collides
+      // with any pre-existing sound. Re-run that tool after ANY edit here --
+      // dialling a sound by ear into a 25-sound table is how the game ended up
+      // with eleven of them stacked inside one 1.4kHz window.
+      popSmall: [0.95, 0.05, 1350, 0.003, 0.02, 0.075, 1, 1.7, -26, , , , , 0.008],
+      popMid:   [1.0,  0.05, 560,  0.003, 0.03, 0.115, 1, 1.2, -6, , , , , 0.01, , , , 0.6, 0.02],
+      // armour dies METALLIC, not meaty. A struck plate: a triangle that drops
+      // 380Hz in 20ms, which is the two-tone "ka-clunk" of hitting something
+      // hard. Narrow-band on purpose -- the first attempt used tan+modulation
+      // and measured as a WIDE spectrum that collided with eight other sounds
+      // despite a centroid nowhere near them.
+      popArmor: [1.0,  0.05, 1500, 0.002, 0.04, 0.22, 1, 1.1, -8, , -380, 0.02, , 0.005, , , , 0.40, 0.03],
+      // a keg comes apart: a bright knock with a splintery rattle (repeatTime)
+      popWood:  [1.15, 0.05, 760,  0.002, 0.02, 0.17,  2, 1.2, -30, , , , 0.042, 0.02, , , , 0.55, 0.02, 0.45],
+      // the payoff of a twenty-wave level. Long, low, and it falls.
+      // It SWELLED rather than landed: 294ms to peak, and quieter than the
+      // coin chime it replaced. Now it falls like a building -- 4ms transient
+      // at 120Hz, a -34Hz drop at 50ms, a 640ms body. Residual, accepted and
+      // recorded: bite ~ popBoss measures 0.945, but one is a 240ms machine
+      // attack and the other a 643ms boss death; they never share a beat.
+      popBoss:  [0.95, 0.05, 120, 0.003, 0.20, 0.40, 1, 1.05, -1.9, , -34, 0.05, , 0.02, , , , 0.80, 0.04],
+      // GEARJAW'S REND. The fork's whole identity -- 4 dps of armour-proof
+      // grind -- had NO renderer and NO sound of its own: bleedT touched five
+      // sim sites and zero draw calls, and both mimic forks played the same
+      // `bite`. You paid 120g for a differentiator you could not see or hear.
+      // Mechanical, never organic: this is sheared metal and popped rivets, in
+      // a game whose content law is comic and kid-safe.
+      grind:    [0.8, 0.05, 90, 0.003, 0.09, 0.20, 3, 1.4, -6, , , , 0.012, 0.3, , , , 0.7, 0.03],
+      // armour SHAVING a hit. A Bulwark eats 5 flat off every bolt and the
+      // game never said so, so a player watching their crossbows do nothing
+      // had no way to learn to switch. A short metal scrape says it.
+      // Placed at ~7.1kHz deliberately: that region was EMPTY, and the crowded
+      // 3.4-5.1kHz band already holds eleven sounds including every impact.
+      shave:    [0.7,  0.05, 2600, 0.001, 0.012, 0.07, 3, 3.2, -70, , , , , 0.03],
     };
-    var RATE_MS = { shoot: 70, hit: 60, coin: 70, bite: 90, lob: 90 };
-    var MAX_VOICES = 8;
+    // KILL VOICE BY RAIDER. A pure function of e.type -- sim state that is
+    // already deterministic -- so this consumes NOTHING from the seeded stream.
+    var KILL_SFX = {
+      looter:   'popSmall',  // Scrapling  30hp
+      scout:    'popSmall',  // Filcher    22hp
+      bat:      'popMid',    // Gloomwing  45hp, airy
+      blinker:  'popMid',    // Blinker    60hp
+      warlock:  'popMid',    // Greed Hexer 80hp
+      sapper:   'popWood',   // Pry-Hand   70hp, all crowbar and planks
+      // Hogshead 130hp. He was 'Cracked Keg' when this was chosen and the
+      // reason written down was 'it IS a barrel' -- which was never true of
+      // the sprite (a rotund ARMOURED knight, prompted as 'he looks like he
+      // would break into smaller pieces'). popWood still stands, on the real
+      // reason: this is the one raider that COMES APART, and a splintery
+      // knock says that. popArmor is the Bulwark/Shellback voice and a third
+      // sharer would blunt it.
+      splitter: 'popWood',
+      shield:   'popArmor',  // Shellback  90hp, pavise
+      brute:    'popArmor',  // Bulwark    220hp, armor 5
+      boss:     'popBoss',   // The Hoard King 3000hp
+    };
+    // ...and within a voice, bigger raiders die LOWER. Playback rate only, so
+    // one buffer serves the whole family and the table stays readable.
+    function killRate(hp) {
+      // 22hp -> 1.12, 220hp -> 0.90, 3000hp -> 0.78. Deterministic in hp.
+      return clamp(1.30 - 0.115 * Math.log(Math.max(8, hp)), 0.72, 1.18);
+    }
+    // 'shoot' and 'hit' both had ZERO call sites -- the table had never been
+    // reconciled against the code that plays it. Deleted with their limiters.
+    var RATE_MS = { bite: 90, lob: 90 };
+    // 8 was not enough to hear a splash. A Soot Brazier can kill five raiders
+    // in one 16ms step and wave 17 spawns thirty looters at 0.35s; with eight
+    // slots and oldest-wins eviction, the kills were the voices being thrown
+    // away while five machines' FIRING sounds held their slots.
+    var MAX_VOICES = 16;
     var ac = null, master = null, sfxBus = null, musicBus = null;
     var cache = {}, live = [], lastPlay = {}, ambienceOn = false, crackleTimer = null;
     var muted = false;
@@ -805,15 +958,41 @@
       buf.getChannelData(0).set(samples);
       return (cache[name] = buf);
     }
-    function voice(buf, bus, rate) {
-      if (live.length >= MAX_VOICES) { try { live.shift().stop(); } catch (e) {} }
+    // PRIORITY, not just recency. The old rule was "the pool is full, stop the
+    // OLDEST" -- which meant a wave of thirty looters threw away the kill you
+    // just earned to make room for the next crossbow twang, and hard-stopped a
+    // mid-envelope buffer (an audible click). Now a voice will only ever be
+    // evicted by one of EQUAL OR HIGHER priority, the quietest-and-oldest of
+    // the losers goes first, and it is released over 40ms instead of cut.
+    //   2 = a kill, the beat the whole game is for
+    //   1 = an impact / a stinger
+    //   0 = firing, UI, ambience
+    function voice(buf, bus, rate, gain, pri) {
+      pri = pri || 0;
+      if (live.length >= MAX_VOICES) {
+        var worst = -1;
+        for (var i = 0; i < live.length; i++) {
+          if (live[i].pri > pri) continue;                 // never rob a bigger moment
+          if (worst < 0 || live[i].pri < live[worst].pri) worst = i;
+        }
+        if (worst < 0) return;                             // everything live matters more
+        var dead = live[worst];
+        live.splice(worst, 1);
+        try {
+          dead.g.gain.setTargetAtTime(0, ac.currentTime, 0.012);
+          dead.src.stop(ac.currentTime + 0.04);
+        } catch (e) {}
+      }
       var src = ac.createBufferSource();
       src.buffer = buf;
       src.playbackRate.value = rate;
-      src.connect(bus);
-      src.onended = function () { var i = live.indexOf(src); if (i >= 0) live.splice(i, 1); };
+      var g = ac.createGain();
+      g.gain.value = gain === undefined ? 1 : gain;
+      src.connect(g); g.connect(bus);
+      var rec = { src: src, g: g, pri: pri };
+      src.onended = function () { var k = live.indexOf(rec); if (k >= 0) live.splice(k, 1); };
       src.start();
-      live.push(src);
+      live.push(rec);
     }
     function startAmbience() {
       if (ambienceOn || !ac) return;
@@ -1190,8 +1369,16 @@
           Music.bedSrc = null; Music.bedName = '';
         }
       },
-      play: function (name, key) {
+      // opts (all optional): { rate, gain, pri, nolimit }
+      //   rate    playback-rate scalar. MUST be derived from deterministic sim
+      //           state (hp, type) at the call site -- never from Math.random()
+      //           there, which would put a draw on the fixed-step path and trip
+      //           tools/validate.py. The cosmetic jitter is applied HERE, on the
+      //           far side of the call, exactly where it has always been.
+      //   pri     see voice(): 2 = kill, 1 = impact, 0 = firing/UI.
+      play: function (name, key, opts) {
         if (!ac || muted) return;                     // consumes NOTHING seeded
+        opts = opts || {};
         var now = Date.now();
         // KEYED ON THE EMITTER, NOT THE NAME. This was one timestamp per sound
         // NAME, so five machines firing together played ONE voice and the other
@@ -1199,12 +1386,27 @@
         // same wall-clock window swallowed twice as many shots. A machine still
         // cannot machine-gun itself; five machines are now five voices.
         var gk = key === undefined ? name : name + '#' + key;
-        if (RATE_MS[name] && lastPlay[gk] && now - lastPlay[gk] < RATE_MS[name]) return;
-        lastPlay[gk] = now;
+        if (!opts.nolimit && RATE_MS[name] && lastPlay[gk] && now - lastPlay[gk] < RATE_MS[name]) return;
+        // ONLY the rate-limited names need a timestamp. This ran unguarded, so
+        // every keyed play of a sound with no RATE_MS entry -- thud#id,
+        // crunch#id, clang#id, shave#id, and now popX#id for every kill --
+        // wrote one permanent map entry per raider that ever existed, never
+        // pruned, across every level of a session.
+        if (RATE_MS[name]) lastPlay[gk] = now;
         var buf = buffer(name);
         if (!buf) return;
-        // per-play pitch jitter — ZzFX's own flavour, NEVER the gameplay seed
-        voice(buf, sfxBus, 1 + (Math.random() - 0.5) * 0.06);
+        // per-play pitch jitter — ZzFX's own flavour, NEVER the gameplay seed.
+        // Widened from ±3% (inaudible) to ±7%, and multiplied by the caller's
+        // deterministic rate so a heavy raider dies lower than a light one.
+        voice(buf, sfxBus, (opts.rate || 1) * (1 + (Math.random() - 0.5) * 0.14),
+              opts.gain, opts.pri);
+      },
+      /// A raider died. `type` picks the voice, `hp` (its MAX hp, not what is
+      /// left) picks the pitch, `id` keys the rate-limit so simultaneous kills
+      /// are simultaneous SOUNDS. Both inputs are deterministic sim state.
+      kill: function (type, hp, id) {
+        api.play(KILL_SFX[type] || 'popSmall', id,
+                 { rate: killRate(hp), pri: 2, nolimit: true });
       },
       isMuted: function () { return muted; },
       setMuted: function (v) {
@@ -1612,11 +1814,11 @@
     brute:   ['BULWARK', 'Armor shrugs 5 off every hit. Flame and magic ignore it.'],
     shield:  ['SHELLBACK', 'Pavise halves bolts. Roost L3 breaks it; fire does not care.'],
     bat:     ['GLOOMWING', 'Flies over ground defenses. Bolt-thrower and Roost answer.'],
-    warlock: ['GREED HEXER', 'Heals the whole pack around him. Drop him first.'],
+    warlock: ['GREED HEXER', 'Heals the pack. Set a machine to HEXER to hunt him.'],
     blinker: ['BLINKER', 'Teleports up the road. A chilled rogue cannot blink.'],
     boss:    ['THE HOARD KING', 'War drums drive his court. At half health he calls more.'],
     sapper:  ['PRY-HAND', 'Jams your machines silent. Kill him BEFORE he reaches them.'],
-    splitter:['CRACKED KEG', 'Breaks into two Scraplings. Bring splash, not a sniper.'],
+    splitter:['HOGSHEAD', 'Breaks into two Scraplings. Bring splash, not a sniper.'],
   };
 
   var ENEMY_FACING = {
@@ -1694,14 +1896,8 @@
       t_perch:   'art/tower_perch.png',
       t_bellows: 'art/tower_bellows.png',
       t_press:   'art/tower_press.png',
-      // Wick painted ONTO each machine, swapped in whole while he mans it.
-      t_mimic_manned:    'art/tower_mimic_manned.png',
-      t_ballista_manned: 'art/tower_ballista_manned.png',
-      t_brazier_manned:  'art/tower_brazier_manned.png',
-      t_crystal_manned:  'art/tower_crystal_manned.png',
-      t_perch_manned:    'art/tower_perch_manned.png',
-      t_bellows_manned:  'art/tower_bellows_manned.png',
-      t_press_manned:    'art/tower_press_manned.png',
+      // the combined manned plates are GONE (see MAN_SCALE) -- Wick
+    // is drawn as himself on each machine's own mount point.
       e_looter:  'art/enemy_looter.png',
       e_scout:   'art/enemy_scout.png',
       e_brute:   'art/enemy_brute.png',
@@ -2236,11 +2432,19 @@
       // renderer spends. Math.random only — never the seeded stream.
       var T = this.T; if (!T) return;
       var mk = this._mkFx || (this._mkFx = { bursts: [], rings: [] });
-      if (fx.k === 'boom' || fx.k === 'death' || fx.k === 'recover' || fx.k === 'blink' || fx.k === 'steal' || fx.k === 'fireburst') {
-        var col = fx.k === 'recover' || fx.k === 'steal' ? 0xf0b429 :
-                  fx.k === 'blink' ? 0xb39dff : fx.k === 'death' ? 0xc0392b : 0xff9a3c;
+      if (fx.k === 'boom' || fx.k === 'death' || fx.k === 'recover' || fx.k === 'blink' ||
+          fx.k === 'steal' || fx.k === 'fireburst' || fx.k === 'grind') {
+        // DEATH WAS CRIMSON HERE (0xc0392b) while the 2D renderer scatters GOLD
+        // COINS for the same event. Two renderers disagreeing about what a kill
+        // looks like is bad enough; a red burst over a human raider also reads
+        // as blood, and the content law is comic, kid-safe, comedic deaths, no
+        // gore. Gold, like its 2D twin.
+        var col = fx.k === 'recover' || fx.k === 'steal' || fx.k === 'death' ? 0xf0b429 :
+                  fx.k === 'blink' ? 0xb39dff :
+                  fx.k === 'grind' ? 0xe8eef5 :          // sheared steel, not sparks
+                  0xff9a3c;
         this.fx.push({ kind: 'burst', x: fx.x, y: fx.y, t: 0, col: col,
-                       n: fx.k === 'boom' ? 10 : 7, group: null });
+                       n: fx.k === 'boom' ? 10 : fx.k === 'grind' ? 5 : 7, group: null });
       } else if (fx.k === 'breath') {
         this.fx.push({ kind: 'ring', x: fx.x, y: fx.y, t: 0, col: 0xff9a3c, R: 80, group: null });
       } else if (fx.k === 'pulse') {
@@ -2793,7 +2997,9 @@
     if (!this.breathUsed && !this.motherReady && this.hoard <= CFG.breathAt) {
       this.motherReady = true;
       this.fxQueue.push({ k: 'float', x: MAP.keep.x, y: MAP.keep.y + 70, txt: 'MOTHER STIRS — TAP THE KEEP!', c: '#ffcf6a' });
-      Sfx.play('wave');
+      // 'you are one wave from losing the hoard' used the same sound as 'a wave
+      // is starting', which happens twenty times a level.
+      Sfx.play('alarm', undefined, { pri: 2 });
     }
     if (this.castMother && this.motherReady) {
       this.castMother = false;
@@ -2849,7 +3055,9 @@
         this.fxQueue.push({ k: 'float', x: bossE.px, y: bossE.py - 34, txt: 'THE KING ROARS!', c: '#ff7b7b' });
         this.fxQueue.push({ k: 'pulse', x: bossE.px, y: bossE.py, r: 120, n: 1 });
         this.fxQueue.push({ k: 'boom', x: bossE.px, y: bossE.py, r: 70 });
-        Sfx.play('wave');
+        // the King's OWN voice, shorter and higher -- so his enrage and his
+        // death are audibly the same creature. Costs no new buffer.
+        Sfx.play('popBoss', undefined, { rate: 1.5, pri: 1 });
       }
     }
 
@@ -3090,7 +3298,17 @@
             ce.slowT = Math.max(ce.slowT, lv.slowDur);
             if (lv.special === 'deepchill') ce.deepT = lv.slowDur;
             if (lv.special === 'resonance') { ce.brittleT = lv.slowDur; ce.brittleMul = lv.brittleMul; }
-            if (lv.dmg) this._damage(ce, lv.dmg * (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1), { kind: 'magic', tower: tw });
+            // _auraDmg WAS MISSING HERE and present at every other machine's
+            // damage line. The Bellows' RATE aura does reach the crystal (it is
+            // applied to the cooldown above this branch), so the bug was
+            // asymmetric and therefore invisible: a 360g support fork whose
+            // entire pitch is "+28% damage to neighbours" did nothing at all
+            // for the cheapest and most-built tower on the board.
+            // Balance note: this cannot invalidate RIVAL_CURVES -- tools/bot.js
+            // only ever builds ballista/crystal and always takes forks[0], so
+            // the Tempering Post (bellows forks[1]) has never been in a bake.
+            if (lv.dmg) this._damage(ce, lv.dmg * (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1)
+                                         * (1 + (tw._auraDmg || 0)), { kind: 'magic', tower: tw });
             hitAny++;
           }
         }
@@ -3100,9 +3318,15 @@
         // most-built thing on the board — and it made no noise at all. The
         // chime brightens with the number of raiders the pulse actually
         // caught, so a wide catch RINGS and a single tick does not.
+        //
+        // ...which was true of the PARTICLE and false of the SOUND from the day
+        // that sentence was written: hitAny reached `n:` and nothing else, so
+        // every pulse chimed identically. It is a deterministic count of sim
+        // state, so riding gain and pitch on it consumes nothing seeded.
         if (hitAny) {
           this.fxQueue.push({ k: 'pulse', x: pad.x, y: pad.y, r: lv.range, n: hitAny });
-          Sfx.play('chime', tw.tid);
+          Sfx.play('chime', tw.tid, { gain: Math.min(1, 0.6 + hitAny * 0.14),
+                                      rate: 1 + Math.min(4, hitAny) * 0.05, pri: 1 });
         }
         tw.cd = hitAny ? 1 / lv.rate : 0.1;   // idle rescan at 6 Hz, not 60
         continue;
@@ -3133,7 +3357,17 @@
           this.fxQueue.push({ k: 'recover', x: tp.x, y: tp.y, n: 1 });
         }
         this.fxQueue.push({ k: 'bite', x: tp.x, y: tp.y });
-        Sfx.play('bite', tw.tid);
+        // Gearjaw grinds; Magnet Jaws snaps. Both forks used to make the one
+        // sound, so the choice you commit a machine to for the rest of the run
+        // was inaudible. The fx is queued here and SPENT in _cosmetic() -- a
+        // particle spawned beside this line would be a cosmetic draw on the
+        // fixed-step path.
+        if (lv.special === 'rend') {
+          this.fxQueue.push({ k: 'grind', x: tp.x, y: tp.y });
+          Sfx.play('grind', tw.tid, { pri: 1 });
+        } else {
+          Sfx.play('bite', tw.tid);
+        }
       } else if (tw.type === 'brazier') {                   // lobbed splash
         tw.shotT = 0;
         this.fxQueue.push({ k: 'muzzle', x: mz0.x, y: mz0.y, tx: tp.x, ty: tp.y });
@@ -3194,6 +3428,7 @@
             this.tar.push({ d: pr.tar.d, w: pr.tar.w, dps: pr.tar.dps, until: this.worldT + pr.tar.dur, tid: pr.tar.tid });
           }
           // BACKWARDS: _damage can kill+splice mid-loop
+          var caught = 0;
           for (var b = this.enemies.length - 1; b >= 0; b--) {
             var be = this.enemies[b];
             if (eFly(be) || be.hp <= 0) continue;
@@ -3202,9 +3437,17 @@
               this._damage(be, pr.dmg, { kind: 'splash', tower: this.towers[pr.tower] });
               if (pr.burn) { be.burnT = 3; be.burnDps = Math.max(be.burnDps, pr.burn); }
               if (pr.scald) be.scaldT = pr.scald;  // Whistlepot: heal-block rides the burn (duration is DATA)
+              caught++;
             }
           }
-          Sfx.play('hit');
+          // A BLAST THAT CATCHES FIVE MUST SOUND BIGGER THAN ONE THAT CATCHES
+          // ONE. This played `hit` -- a bolt graze, measured 0.98 identical to
+          // `thud` -- once, unkeyed, regardless of the catch. The Soot Brazier
+          // is the splash machine, the one that teaches the Bloons lesson the
+          // Hogshead was built for, and its blast was the least audible
+          // thing on the board. `caught` is a deterministic count of sim state;
+          // the gain rides on the far side of Sfx.play, cosmetic lane.
+          Sfx.play('fwoomph', pr.tower, { gain: Math.min(1, 0.55 + caught * 0.15), pri: 1 });
         }
       } else if (pr.kind === 'fire') {                      // Wick's fireball
         var ft = null;
@@ -3215,6 +3458,7 @@
         if (fdist < 11) {
           this._damage(ft, pr.dmg, { kind: 'hero' });
           this.fxQueue.push({ k: 'fireburst', x: ft.px, y: ft.py });
+          Sfx.play('fireimp', pr.target, { pri: 1 });   // it landed in silence
           this.projectiles.splice(p, 1);
         } else {
           pr.dx = fdx / fdist; pr.dy = fdy / fdist;
@@ -3234,13 +3478,18 @@
           // and connecting made no sound whatsoever, so the shot had a beginning
           // and no end. A crit now lands differently from a graze, which is the
           // whole point of a countable crit nobody could hear.
-          Sfx.play(pr.crit ? 'crunch' : 'thud', pr.target);
+          // ONE impact, one sound. This used to fire TWICE in the same frame:
+          // `crunch`/`thud` here, then `upg`/`hit` six lines below -- so every
+          // graze burned two of the (then eight) voice slots to make one
+          // mushier sound, and a crit played the TOWER-UPGRADE JINGLE, which
+          // taught the player that the game's most skill-adjacent event is a
+          // menu confirmation. The second call is gone; this one carries it.
+          Sfx.play(pr.crit ? 'crunch' : 'thud', pr.target, { pri: 1 });
           // Carry the bolt's HEADING into the impact so the sparks spray off the
           // hit instead of puffing symmetrically — the direction was always right
           // there in the projectile and the effect threw it away.
           this.fxQueue.push({ k: 'hit', x: gp.x, y: gp.y, c: pr.crit ? '#ff9a3c' : '#ffd75e',
                               dx: pr.dx || 0, dy: pr.dy || 0, big: pr.crit ? 1 : 0 });
-          Sfx.play(pr.crit ? 'upg' : 'hit');   // it landed in TOTAL SILENCE before
           if (pr.crit) this.fxQueue.push({ k: 'float', x: gp.x, y: gp.y - 14, txt: 'OVERWOUND!', c: '#ff9a3c' });
           // Netcaster: a netted flyer crashes low and fights as ground troops
           if (pr.net && tgt.flyer && !(tgt.groundedT > 0) && tgt.hp > 0) {
@@ -3350,7 +3599,10 @@
         h.downT = CFG.heroDownTime;
         h.manTid = -1; h.manned = false;
         this.fxQueue.push({ k: 'herodown', x: h.x, y: h.y });
-        Sfx.play('leak');
+        // Nine seconds with no breath, no manning, no jam-clearing -- and it
+        // shared its sound with a single coin leaving the cave. pri 2 on
+        // purpose: losing Wick outranks any crossbow twang in the pool.
+        Sfx.play('herodown', undefined, { pri: 2 });
         return;
       }
     } else if (!nearAny) {
@@ -3424,7 +3676,9 @@
                           c: clean ? '#ffd75e' : '#9ef58f' });
       this.fxQueue.push({ k: 'pulse', x: WORLD_W / 2, y: 330, r: clean ? 118 : 84, n: 1 });
       if (clean) this.shake = Math.min(1, this.shake + 0.12);
-      Sfx.play(clean ? 'upg' : 'wave');
+      // a clean wave played `upg`, the SHOP jingle: the proudest beat in the
+      // game sounded like a menu confirmation.
+      Sfx.play(clean ? 'clear' : 'wave');
       // ---- THE RIVAL'S WAVE ------------------------------------------------
       // Their cave took the same wave at the same time. Step their hoard off
       // the baked curve and SAY what it cost them — a number that only moves
@@ -3461,7 +3715,11 @@
     }
   };
 
-  var AIM_MODES = ['FIRST', 'STRONG', 'LAST'];
+  // HEXER exists because NOTHING could target the healer. The Greed Hexer
+  // restores 10hp inside 63 units and its only counter in the whole roster was
+  // one 350g fork (Whistlepot's scald); STRONG is keyed on hp, so it reliably
+  // picks the Bulwark standing NEXT to the Hexer instead of the Hexer.
+  var AIM_MODES = ['FIRST', 'STRONG', 'LAST', 'HEXER'];
   Game.prototype._pickTarget = function (pad, range, hitsAir, airBonus, mode) {
     // Fleeing thieves ALWAYS lead (they carry OUR gold), closest-to-escaping
     // first. The player-set mode picks the focus among marchers:
@@ -3479,7 +3737,13 @@
       else if (mode === 1) metric = e.hp * 0.001;           // STRONG
       else if (mode === 2) metric = PATH.len - e.d;         // LAST
       else metric = e.d;                                    // FIRST
-      var key = (e.fleeing ? 1e6 : 0) + (eFly(e) && airBonus ? 5e5 : 0) + metric - e.id * 1e-7;
+      // HEALERS FIRST. Weighted 7e5, ABOVE the flyer bonus of 5e5 -- at 2e5 it
+      // would sit below it and a Gloomwing would still outrank the Hexer on
+      // every air-capable machine, which is most of them. Still below the
+      // fleeing-thief lead at 1e6: someone carrying our gold outranks everyone.
+      var hexPref = (mode === 3 && ENEMY_TYPES[e.type].heals) ? 7e5 : 0;
+      var key = (e.fleeing ? 1e6 : 0) + hexPref
+              + (eFly(e) && airBonus ? 5e5 : 0) + metric - e.id * 1e-7;
       if (key > bestKey) { bestKey = key; best = e; }
     }
     return best;
@@ -3509,7 +3773,14 @@
     var base = ENEMY_TYPES[e.type];
     // Shellback pavise halves bolt damage — unless a Roost L3 has broken it
     if (base.pavise && opts.kind === 'bolt' && !e.shieldBroken) {
-      if (opts.shieldbreak) { e.shieldBroken = true; this.fxQueue.push({ k: 'float', x: pathPointAt(e.d).x, y: pathPointAt(e.d).y - 16, txt: 'shield broken!', c: '#c9d2dd' }); }
+      if (opts.shieldbreak) {
+        e.shieldBroken = true;
+        this.fxQueue.push({ k: 'float', x: pathPointAt(e.d).x, y: pathPointAt(e.d).y - 16, txt: 'shield broken!', c: '#c9d2dd' });
+        // Permanent, run-changing, and it made no sound at all. The keg's own
+        // voice dropped low: staves letting go. After this every bolt into this
+        // Shellback lands soft instead of clanging -- that IS the mechanic.
+        Sfx.play('popWood', e.id, { rate: 0.78, pri: 2 });
+      }
       // A DEFLECT SOUNDED EXACTLY LIKE A CLEAN HIT, so the one raider that
       // punishes bolt spam gave the player no audible reason to switch.
       else { dmg *= 0.5; Sfx.play('clang', e.id); }
@@ -3518,7 +3789,17 @@
     if (e.brittleT > 0) dmg *= e.brittleMul;
     // Bulwark armor shaves flat damage off every direct hit (min 1);
     // magic (Gemsinger pulse) and breath ignore armor
-    if (base.armor && opts.kind !== 'breath' && opts.kind !== 'magic') dmg = Math.max(1, dmg - base.armor);
+    if (base.armor && opts.kind !== 'breath' && opts.kind !== 'magic') {
+      var raw = dmg;
+      dmg = Math.max(1, dmg - base.armor);
+      // ARMOUR ATE PART OF THAT HIT, AND THE GAME NEVER SAID SO. A Bulwark
+      // shaves a flat 5 off every direct hit, which is most of a level-1
+      // crossbow bolt (12) -- so a player watching their bolts do nothing had
+      // no signal telling them to bring flame or magic instead, the two kinds
+      // that skip this branch. A short metal scrape is that signal. Keyed on
+      // the raider so a rank of Bulwarks scrapes once each, not once total.
+      if (raw - dmg >= 2) Sfx.play('shave', e.id, { gain: 0.75, pri: 1 });
+    }
     e.hp -= dmg;
     e.flashT = 0.1;                       // white-flash + pop, read by the renderer only
     if (e.hp <= 0 && !e._counted) {
@@ -3582,7 +3863,18 @@
       }
     }
     this.fxQueue.push({ k: 'death', x: p.x, y: p.y, g: bounty, boss: e.type === 'boss' });
-    Sfx.play('coin');
+    // THE KILL. This was `Sfx.play('coin')` -- one 200ms chime, unkeyed, for all
+    // ten raider types and for the boss, sharing its rate-limit bucket with the
+    // Coin Press payout. Three separate faults in one line:
+    //   1. no variety      -- a Scrapling and The Hoard King sounded identical;
+    //   2. no polyphony    -- unkeyed + RATE_MS.coin=70 meant a Brazier splash
+    //                         that killed five raiders in one step played ONE
+    //                         sound and dropped four, so the BIGGER the kill the
+    //                         LESS you heard. Keyed on e.id, five kills are five;
+    //   3. no priority     -- it lost its voice slot to crossbow twangs.
+    // Selection and rate are pure functions of e.type / maxHp -- deterministic
+    // sim state -- so nothing here touches the seeded stream.
+    Sfx.kill(e.type, e.maxHp || ENEMY_TYPES[e.type].hp, e.id);
     // THE KILL WAS THE ONE HIT IN THE GAME THAT RENDERED NO IMPACT FRAME.
     // _damage sets e.flashT for the white re-draw, then removes a lethally hit
     // raider in the SAME sim step — so the flash was written onto an object that
@@ -3752,8 +4044,21 @@
             vx >= G.cx - 92 && vx <= G.cx + 92 && vy >= G.startY && vy <= G.startY + 52) {
           this.startWave(); return;
         }
-        if (vx >= G.breathX && vx <= G.breathX + 62 && vy >= G.breathY && vy <= G.breathY + 62) {
-          if (!this.mods.breathOff) this.hero.castBreath = true;
+        // THE RETURN USED TO BE UNCONDITIONAL while the button is only DRAWN
+        // when !breathOff -- so under the Smothered Fire trial ("Wick's flame is
+        // out. The machines answer alone.") a 62x62-unit patch of buildable
+        // cavern floor swallowed every tap for the whole run, with nothing on
+        // screen to explain it. Gate the hit test on the same predicate that
+        // decides whether the button exists, and the tap falls through to the
+        // world path exactly as it does everywhere else.
+        if (!this.mods.breathOff &&
+            vx >= G.breathX && vx <= G.breathX + 62 && vy >= G.breathY && vy <= G.breathY + 62) {
+          // ...and a tap while it is COOLING used to vanish silently too. Same
+          // idiom as the 'no raiders in reach' refusal: answer, do not swallow.
+          if (this.hero.breathCd > 0) {
+            this.fxQueue.push({ k: 'float', x: this.hero.x, y: this.hero.y - 40,
+                                txt: Math.ceil(this.hero.breathCd) + 's until the flame', c: '#8a7f72' });
+          } else this.hero.castBreath = true;
           return;                                  // the breath's own button
         }
       }
@@ -3917,7 +4222,10 @@
                 Sfx.play('place');
               }
             } else if (!isSup2 && bi2 === 1) {               // cycle aim mode (menu stays open)
-              tw.targeting = ((tw.targeting | 0) + 1) % 3;
+              // % AIM_MODES.length, not a literal: adding HEXER as a fourth mode
+              // with a hardcoded 3 here would have left it unreachable from the
+              // only control that selects it.
+              tw.targeting = ((tw.targeting | 0) + 1) % AIM_MODES.length;
               Sfx.play('place');
             } else if (bi2 === (isSup2 ? 1 : 2)) {           // MAN / LEAVE the machine
               if (this.hero.manTid === tw.tid) { this.hero.manTid = -1; this.hero.manned = false; }
@@ -4105,6 +4413,23 @@
       var fx = this.fxQueue[q];
       // R3D taps the same event stream (cosmetic -> cosmetic, sim untouched)
       if (R3D.on && R3D.ready) R3D.event(fx);
+      // GEARJAW REND -- sheared metal and popped rivets. Cosmetic lane: this is
+      // spent from the queue in _cosmetic(), Math.random only, never the seeded
+      // stream. Mechanical, not organic: the content law is comic and kid-safe,
+      // so this is a machine chewing armour, not a wound.
+      if (fx.k === 'grind') {
+        for (var gi = 0; gi < 9; gi++) {
+          var ga = -Math.PI * 0.5 + (Math.random() - 0.5) * 2.2;
+          var gsp = 55 + Math.random() * 95;
+          this.particles.push({ kind: 'dot', x: fx.x, y: fx.y,
+            vx: Math.cos(ga) * gsp, vy: Math.sin(ga) * gsp - 15,
+            r: 0.7 + Math.random() * 1.5,
+            life: 0.13 + Math.random() * 0.2, T: 0.33,
+            // orange sparks with a couple of bright steel chips among them
+            c: gi < 2 ? '#e8eef5' : (gi < 6 ? '#ffb14e' : '#ff7b2e') });
+        }
+        continue;
+      }
       if (fx.k === 'hit' || fx.k === 'bite') {
         // FIVE DIRECTIONLESS DOTS was the whole impact effect, on the beat this
         // game repeats more than any other. An arrow that buries itself in a
@@ -4337,18 +4662,34 @@
   // different aspects, so a fixed width made him CHANGE HEIGHT when he turned away.
   var HERO_H = 57.2;
   var MUZZLE_UP = 0.685, MUZZLE_FWD = 0.321;
+  /// WHERE WICK IS DRAWN, and how big -- the single source both the drawer and
+  /// _muzzle() read. They used to disagree: the drawer lifted him 26px onto a
+  /// machine and _muzzle() went on reporting his mouth at ground level, so a
+  /// breath cast from a manned machine left from under his feet. Now that the
+  /// lift is per-machine and there is a scale as well, that drift would only
+  /// have got worse. Same idiom as _titleGeom(): one geometry, two readers.
+  Game.prototype._heroAnchor = function () {
+    var h = this.hero;
+    var tw = h.manned ? this._towerByTid(h.manTid) : null;
+    if (!tw) return { x: h.x, y: h.y, s: 1, lift: 0 };
+    var mnt = TOWER_TYPES[tw.type].mount || { dx: 0, up: 32 };
+    var g = 1 + tw.level * 0.12;
+    return { x: tw.x + mnt.dx * g, y: tw.y, s: MAN_SCALE, lift: mnt.up * g };
+  };
+
   Game.prototype._muzzle = function () {
     var h = this.hero;
     var img = ART.images.hero_whelp || ART.images.hero;
-    var hh = HERO_H;
-    var mw2 = HERO_H * (img ? img.width / img.height : 0.77);
+    var a = this._heroAnchor();
+    var hh = HERO_H * a.s;
+    var mw2 = hh * (img ? img.width / img.height : 0.77);
     // Facing is derived from hero state with the SAME expression the drawer
     // uses (hflip = (tx-x) > 0.5 ? -1 : 1, sprite faces left natively, so world
     // facing is its negation). Reading the drawer's stored value instead would
     // lag by a frame — _cosmetic() spends the fx queue BEFORE draw() runs — so
     // a breath cast in the same frame he turns would leave his mouth.
     var f = (h.tx - h.x) > 0.5 ? 1 : -1;
-    return { x: h.x + f * (mw2 * MUZZLE_FWD), y: h.y + 5 - hh * MUZZLE_UP, f: f };
+    return { x: a.x + f * (mw2 * MUZZLE_FWD), y: a.y + 5 - a.lift - hh * MUZZLE_UP, f: f };
   };
 
   Game.prototype._burst = function (x, y, c, n, v) {
@@ -4729,10 +5070,22 @@
         // through flashT means the corpse inherits the SAME white re-draw and
         // squash pop a non-lethal hit gets — the kill stops being the one
         // impact the renderer never showed.
+        // ...but BOTH terms were monotone-decreasing, so a kill rendered as a
+        // non-lethal graze whose sprite happens to fade out. A Bloons pop is a
+        // hard frame-0 substitution: the balloon is instantly BIGGER and
+        // BRIGHTER than it was alive, then gone. This is that discontinuity.
+        //
+        // Keyed on elapsed time, NOT on hr: _cosmetic ticks the husk before
+        // draw() in the same frame, so the first rendered frame is already
+        // hr ~ 0.86 at 60Hz -- an `hr > 0.78` gate would give one frame at
+        // 60Hz and ZERO at 30Hz.
         var hv = d.ref, hr = Math.max(0, hv.t / hv.T);
-        hv.e.flashT = 0.11 * hr;
+        var el = hv.T - hv.t;
+        var pop = el < 0.034 ? 1.34 : 1.34 - 0.82 * ((el - 0.034) / (hv.T - 0.034));
+        hv.e.flashT = el < 0.034 ? 0.5 : 0.11 * hr;
         ctx.save();
-        ctx.globalAlpha = hr;
+        ctx.globalAlpha = el < 0.034 ? 1 : Math.pow(hr, 1.4);
+        ctx.translate(d.px, d.py); ctx.scale(pop, pop); ctx.translate(-d.px, -d.py);
         this._drawEnemy(ctx, hv.e, { x: d.px, y: d.py });
         ctx.restore();
         ctx.globalAlpha = 1;
@@ -4876,22 +5229,46 @@
   Game.prototype._drawTower = function (ctx, tw) {
     var p = tw;
     var lvl = tw.level;
-    // MANNED machines swap to a combined plate with Wick painted onto them.
-    // He used to be the standing sprite drawn 26px higher, which read as a
-    // decal hovering over the machine rather than a dragon working it — and
-    // manning is worth +70% fire rate and +30% damage, so it deserves to look
-    // like something. _drawHero skips him entirely while this plate is up.
+    // NO MANNED-PLATE SWAP. See MAN_SCALE: the machine is always itself, and
+    // _drawHero puts Wick on top of it at his own constant size.
     var spriteId = 't_' + tw.type;
-    if (tw._manned && ART.images[spriteId + '_manned']) spriteId += '_manned';
+    // THE BELLOWS' FOOTPRINT IS ITS PRODUCT, so it is always drawn. _auraRate
+    // and _auraDmg had ZERO draw-lane readers: a buffed machine was pixel-
+    // identical to an unbuffed one, and the only ring the post ever showed was
+    // the generic yellow one, only while its menu was open, in the same colour
+    // an attack tower uses for its KILL range. Going out when the post is
+    // jammed is also the only visible tell that machine has.
+    if (tw.type === 'bellows' && !(tw.jamT > 0)) {
+      ctx.strokeStyle = 'rgba(255,190,120,0.22)'; ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath(); ctx.arc(p.x, p.y, lvlRow(tw).range, 0, 6.283); ctx.stroke();
+      ctx.setLineDash([]);
+    }
     // range ring while its menu is open
     if (this.menu && this.menu.towerIdx !== undefined && this.towers[this.menu.towerIdx] === tw) {
       var rr3 = lvlRow(tw).range;
-      ctx.fillStyle = 'rgba(255,215,94,0.10)';
-      ctx.beginPath(); ctx.arc(p.x, p.y, rr3, 0, 6.283); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,215,94,0.45)'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(p.x, p.y, rr3, 0, 6.283); ctx.stroke();
+      // A Coin Press has range 0 on all four rows, so this drew arc(x, y, 0)
+      // twice a frame -- a fill and a stroke of nothing -- and the player got a
+      // menu that showed them an invisible ring for their 140g.
+      if (rr3 > 0) {
+        ctx.fillStyle = 'rgba(255,215,94,0.10)';
+        ctx.beginPath(); ctx.arc(p.x, p.y, rr3, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,215,94,0.45)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(p.x, p.y, rr3, 0, 6.283); ctx.stroke();
+      }
     }
     groundShadow(ctx, p.x, p.y + 2, 54 * (1 + lvl * 0.06), 0, 1.05);   // machines sit on the floor too
+    // JAMMED. A Pry-Hand silencing a machine changed NOTHING on screen -- and
+    // jamming a Bellows Post silently took _auraRate to 0 on every machine it
+    // was buffing, with zero pixels moving anywhere on the board. The shrinking
+    // arc is the breath button's own cooldown idiom, so it is already-taught
+    // vocabulary, and it makes the player-agency half legible too: standing on
+    // the machine clears it 5x faster and the arc visibly accelerates.
+    if (tw.jamT > 0) {
+      var jf = Math.max(0, Math.min(1, tw.jamT / (ENEMY_TYPES.sapper.sapStun || 2.6)));
+      ctx.strokeStyle = 'rgba(255,120,110,0.85)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(p.x, p.y + 4, 22, -1.5708, -1.5708 + 6.283 * jf); ctx.stroke();
+    }
     if (tw._oc || tw._manned) {   // Wick nearby (thin ring) or ON it (hot ring)
       var ocp2 = 0.6 + 0.4 * Math.sin(this.worldT * (tw._manned ? 11 : 8));
       ctx.strokeStyle = tw._manned ? 'rgba(255,180,64,' + ocp2 + ')' : 'rgba(212,168,64,' + ocp2 + ')';
@@ -4913,7 +5290,10 @@
       var st = tw.shotT === undefined ? 9 : tw.shotT;
       var kick = st < 0.34 ? (1 - st / 0.34) : 0;
       kick *= kick;                                   // sharp attack, soft tail
-      var tsq = 1 - 0.10 * kick + Math.sin(this.worldT * 1.6 + tw.padIdx) * 0.008;
+      // the idle breath STOPS while jammed: a machine that has been silenced
+      // should read as stopped, not as working quietly.
+      var tsq = 1 - 0.10 * kick
+              + Math.sin(this.worldT * 1.6 + tw.padIdx) * 0.008 * (tw.jamT > 0 ? 0 : 1);
       var tw0 = 54 * (1 + lvl * 0.12);
       var th0 = tw0 * (timg.height / timg.width);
       // FACING. The plate is painted aiming up-LEFT at about 45 degrees, on a
@@ -5005,23 +5385,46 @@
         ctx.beginPath(); ctx.ellipse(p.x + 8, p.y - h - 13, 5, 4, 0.3, 0, 6.283); ctx.fill();
         ctx.beginPath(); ctx.moveTo(p.x - 4, p.y - h - 12); ctx.lineTo(p.x - 12, p.y - h - 20); ctx.lineTo(p.x - 2, p.y - h - 16); ctx.closePath(); ctx.fill();
       }
-      // level pips
-      for (var lp = 0; lp <= lvl; lp++) {
-        ctx.fillStyle = '#ffd75e';
-        ctx.beginPath(); ctx.arc(p.x - 8 + lp * 8, p.y + 12, 2.5, 0, 6.283); ctx.fill();
-      }
-      this._drawForkBadge(ctx, tw, p, p.y - h - 14);   // fallback branch keeps the badge too
+      this._drawForkBadge(ctx, tw, p, p.y - h - 14);   // rank + fork, both branches
     }
   };
+  /// RANK on the left, FORK on the right, on the machine's top strip.
+  ///
+  /// The level pips lived ONLY in the no-art fallback branch of _drawTower, and
+  /// every one of the seven sprites loads -- so on 100% of shipped machines the
+  /// player's own upgrade was invisible. A level-1 and a level-3 crossbow were
+  /// distinguishable only by 12% of sprite width, on a board where machines also
+  /// sit at different depths and therefore different scales. This function was
+  /// already called from BOTH branches, so the rank belongs here.
+  ///
+  /// Bars, not dots, and COUNT carries the read -- the rule written four lines
+  /// down, which the hue-only fork dot broke. Top strip rather than under the
+  /// base: _placeCheck allows 30 units between machines and a neighbour that
+  /// close draws its sprite up over anything at p.y+12.
   Game.prototype._drawForkBadge = function (ctx, tw, p, topY) {
+    var rank = (tw.level | 0) + 1;
+    var rh = rank * 4 + 8;
+    ctx.fillStyle = 'rgba(16,10,7,0.72)';
+    rr(ctx, p.x - 30, topY - 4 - rank * 4, 14, rh, 3); ctx.fill();
+    ctx.fillStyle = '#ffd75e';
+    for (var rb = 0; rb < rank; rb++) {
+      ctx.fillRect(p.x - 27, topY - rb * 4, 6, 2.4);
+    }
     if (tw.level < 2) return;              // badge: which mod this machine keeps
+    // TWO COLOURS BECAME TWO SHAPES. This was a 6px dot whose ONLY difference
+    // between the two permanent L3 identities was hue -- gold vs pale blue --
+    // in a cavern lit gold, three lines above the file's own rule that "Count
+    // and LENGTH and SHAPE carry the read, never hue". A disc and a bar survive
+    // greyscale, dark adaptation and the torchlight; the hue stays as
+    // reinforcement rather than as the carrier.
     var bc = tw.fork ? '#a8e6ff' : '#ffd75e';
     ctx.fillStyle = 'rgba(28,20,14,0.9)';
-    ctx.beginPath(); ctx.arc(p.x + 20, topY, 6, 0, 6.283); ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x + 20, topY, 7.5, 0, 6.283); ctx.fill();
     ctx.strokeStyle = bc; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(p.x + 20, topY, 6, 0, 6.283); ctx.stroke();
+    ctx.beginPath(); ctx.arc(p.x + 20, topY, 7.5, 0, 6.283); ctx.stroke();
     ctx.fillStyle = bc;
-    ctx.beginPath(); ctx.arc(p.x + 20, topY, 2.4, 0, 6.283); ctx.fill();
+    if (tw.fork) { rr(ctx, p.x + 14.5, topY - 1.4, 11, 2.8, 1.4); ctx.fill(); }
+    else { ctx.beginPath(); ctx.arc(p.x + 20, topY, 3.2, 0, 6.283); ctx.fill(); }
   };
 
   // THE LOOT LEDGER — the carried amount, baked once into an atlas of 6 cells
@@ -5312,11 +5715,13 @@
       return;
     }
 
-    var inPlate = false;
-    if (h.manned) {
-      var mtw = this._towerByTid(h.manTid);
-      inPlate = !!(mtw && ART.images['t_' + mtw.type + '_manned']);
-    }
+    // MANNED: he rides the machine's own mount point at ONE scale (MAN_SCALE),
+    // drawn as himself. There is no combined plate any more -- see MAN_SCALE for
+    // why seven of them had to go.
+    var mtw = h.manned ? this._towerByTid(h.manTid) : null;
+    var anc = this._heroAnchor();
+    var mnt = mtw ? true : null;
+    var manX = anc.x, manY = anc.y, manS = anc.s;
     if (h.selected) {
       ctx.strokeStyle = 'rgba(158,245,143,0.8)'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.beginPath(); ctx.arc(h.x, h.y, 26, 0, 6.283); ctx.stroke(); ctx.setLineDash([]);
@@ -5325,21 +5730,22 @@
     }
     // MANNED: he is perched ON the machine, so lift him and drop the ground
     // shadow (he is not standing on the floor any more).
-    var lift = h.manned ? 26 : 0;
+    var lift = anc.lift;
     if (!h.manned) groundShadow(ctx, h.x, h.y, 44 * depthScale(h.y), 0, 1);
     var hdx2 = h.tx - h.x, hdy2 = h.ty - h.y;
     var hMoving2 = Math.abs(hdx2) + Math.abs(hdy2) > 3;
     var goingAway = hMoving2 && hdy2 < -Math.abs(hdx2) * 0.7;   // mostly up-screen
-    // inPlate: his body lives in the machine's own sprite this frame
-    var himg = inPlate ? null
-             : (goingAway && ART.images.hero_back) ? ART.images.hero_back : ART.images.hero;
+    // He is always drawn now -- a manned frame with no dragon in it was only
+    // ever possible because the plate could be missing.
+    var himg = (goingAway && !h.manned && ART.images.hero_back) ? ART.images.hero_back
+             : ART.images.hero;
     if (himg) {
       // hover bob + sway; face the direction he's headed
       var ht = this.worldT;
       var hflip = (h.tx - h.x) > 0.5 ? -1 : 1;   // sprite faces left natively
       var hmoving = Math.abs(h.tx - h.x) + Math.abs(h.ty - h.y) > 3;
       var hsq = 1 + Math.sin(ht * (hmoving ? 9 : 5)) * (hmoving ? 0.05 : 0.035);
-      var hh0 = HERO_H, hw0 = hh0 * (himg.width / himg.height);
+      var hh0 = HERO_H * manS, hw0 = hh0 * (himg.width / himg.height);
       // the sprite is drawn facing LEFT natively, so world-facing is -hflip.
       // _muzzle() reads this to put the breath where his mouth is.
       this._heroFace = -hflip;
@@ -5347,8 +5753,13 @@
       var b = Math.max(0, (this._breathT || 0) / 0.42);
       var kick = b * b;
       ctx.save();
-      ctx.translate(h.x - (this._heroFace) * kick * 4,
-                    h.y + 5 - lift - kick * 3 + Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5));
+      // manX/manY are the machine's mount when manned, his own feet otherwise.
+      // The idle bob is damped on a mount: a dragon braced against a crank does
+      // not hover, and the full-amplitude bob read as him floating off it.
+      var bobA = mnt ? 0.5 : 1;
+      ctx.translate(manX - (this._heroFace) * kick * 4,
+                    manY + 5 - lift - kick * 3
+                      + Math.sin(ht * (hmoving ? 8 : 4)) * (hmoving ? 2.2 : 1.5) * bobA);
       ctx.rotate(Math.sin(ht * 3) * 0.04 + (hmoving ? -hflip * 0.07 : 0) + this._heroFace * kick * 0.22);
       ctx.scale(hflip * (2 - hsq) * (1 + kick * 0.10), hsq * (1 + kick * 0.06));
       ctx.drawImage(himg, -hw0 / 2, -hh0, hw0, hh0);
@@ -5586,8 +5997,26 @@
 
   // VIEW-space HUD: screen-anchored, safe-area aware. Returns nothing; the tap
   // handler recomputes identical geometry from this.view.
+  /// Chip width + stride for an n-machine shelf, clamped to the shipped 52/56
+  /// so nothing moves until there are more than seven. Solves
+  ///   shopX + (n-1)*step + w <= WORLD_W - 12,  shopX = 12,  step = w + 4
+  /// for the largest integer w.
+  function shopChip(n) {
+    n = Math.max(1, n | 0);
+    var avail = WORLD_W - 24;                       // 12 in from each world edge
+    var w = Math.floor((avail - (n - 1) * 4) / n);
+    if (w > 52) w = 52;
+    return { w: w, step: w + 4 };
+  }
+
   Game.prototype._hudGeom = function () {
     var v = this.view;
+    // computed ONCE: _hudGeom runs from both draw() and the tap path, and
+    // _shelf() walks TOWER_ORDER. Guarded because _hudGeom can be reached
+    // before mode/mods exist during construction.
+    var nChips = 7;
+    try { if (this._shelf && this.mode) nChips = this._shelf().length; } catch (e) {}
+    var chip = shopChip(nChips);
     var topY = Math.max(8, v.safeT + 4);
     var cx = v.w / 2;
     var bm = Math.max(10, v.safeB + 6);       // bottom margin, safe-area aware
@@ -5612,7 +6041,16 @@
       // change and therefore VANUS's call, not a layout fix.
       shopY: v.h - bm - 56,
       shopX: v.w / 2 - WORLD_W / 2 + 12,
-      shopW: 52, shopStep: 56, shopH: 56,
+      // THE SHELF SIZES ITSELF TO WHAT IS ON IT. These were fixed at 52/56,
+      // which fits exactly seven chips (right edge 400 against a world edge of
+      // 420) and NOT eight: an 8th chip ran to 456, i.e. 36 units past the
+      // world, clipped off-screen rather than merely tight. The roster was one
+      // machine away from a shelf that silently ate its last entry, and nothing
+      // would have failed -- it would just not have been there.
+      // Derived, so adding a machine can never break it again: fit n chips into
+      // (WORLD_W - 24) with a 4-unit gap, capped at the old 52/56 so the
+      // seven-chip shelf is byte-identical to what shipped.
+      shopW: chip.w, shopStep: chip.step, shopH: 56,
       // Wick's breath lives on its own button. It used to fire when you tapped
       // HIM, which ate the tap that was supposed to pick him up and move him.
       breathX: v.w / 2 - WORLD_W / 2 + 10,
@@ -5805,6 +6243,17 @@
         inkText(ctx, 'BURNS ARMOR', bcx, bcy - 36, 'rgba(255,190,120,0.92)', 4, 1);
       }
       ctx.textAlign = 'left';
+    }
+    // THE SHOP AND THE HUD BUTTONS ARE NOT PART OF THE BREATH.
+    // They used to sit INSIDE the block above, which is gated on
+    // `!this.mods.breathOff`. So Smothered Fire — the trial whose pitch is
+    // literally "Wick's flame is out. The machines answer alone." — deleted the
+    // entire machine shelf, the build hint, the first-run tutorial ring AND the
+    // mute/pause/speed row from the screen, while _onTap kept every one of
+    // their hit tests live (it has no breathOff guard). The trial that is about
+    // building machines was the one trial where you had to buy them by tapping
+    // unlabelled black space, and where you could not mute or pause.
+    if (this.state === 'playing') {
       // THE SHOP — pick a machine, then tap the cavern floor to place it
       var shelf = this._shelf();
       for (var sc2 = 0; sc2 < shelf.length; sc2++) {
@@ -5851,10 +6300,51 @@
         ctx.textAlign = 'left';
       }
       if (this.shopPick >= 0) {
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 12px system-ui, sans-serif';
-        inkText(ctx, 'tap the cavern floor to build  ·  pads cost 20% less',
-                G.cx, G.shopY - 8, '#ffe9c4', 4, 1);
+        // WHAT YOU ARE ABOUT TO BUY. The shelf chip is a silhouette, a 7px
+        // short name and a price -- so five of the seven machines were bought
+        // blind, and the two SUPPORTS (Bellows Post, Coin Press) look exactly
+        // like the five guns, never fire, and had nothing anywhere telling the
+        // player that is on purpose rather than broken. The game already ships
+        // a NAME + a sentence + a counter-hint for all ten RAIDERS
+        // (ENEMY_CARDS) -- it explained the enemy and refused to explain the
+        // player's own tools.
+        //
+        // This line is the right home for it: it already fires exactly when the
+        // player is deciding, it is already full-width, and it was spending
+        // itself on the same generic instruction seven times over. The build
+        // instruction moves to the second line, where it is still on screen.
+        // ONE line, at shopY-9. The band above is not free: START WAVE occupies
+        // shopY-67..shopY-15 (G.startY, +52 tall) and the wave-preview pill sits
+        // at startY-32, so a second line would have been drawn straight through
+        // a primary control. Measured every string at bold 11px: the widest
+        // joined line is 345px against 396px of safe width, so name AND blurb
+        // fit on the single line that is actually available.
+        var armT = TOWER_TYPES[this._shelf()[this.shopPick]];
+        ctx.textAlign = 'left';
+        if (armT && armT.blurb) {
+          ctx.font = 'bold 11px system-ui, sans-serif';
+          var nmW = ctx.measureText(armT.name).width;
+          var sepW = ctx.measureText('  ').width;
+          var blW = ctx.measureText(armT.blurb).width;
+          var ax0 = G.cx - (nmW + sepW + blW) / 2;
+          // Its own plate. Measured: START WAVE's box bottom is shopY-15 and an
+          // 11px cap-height reaches ~8px over the baseline, so a baseline at
+          // shopY-9 put the ascenders 2px INSIDE the button. Baseline shopY-5
+          // clears it, and the plate keeps the line readable against whatever
+          // stretch of painted cavern floor happens to sit behind it.
+          ctx.fillStyle = 'rgba(16,10,7,0.82)';
+          rr(ctx, ax0 - 8, G.shopY - 17, nmW + sepW + blW + 16, 16, 7); ctx.fill();
+          inkText(ctx, armT.name, ax0, G.shopY - 5, '#ffd75e', 4, 1);
+          // a support machine speaks in the raiders' cold blue, so "NOT A
+          // WEAPON" does not read as just more gold shop copy
+          inkText(ctx, armT.blurb, ax0 + nmW + sepW, G.shopY - 5,
+                  armT.support ? '#a8e6ff' : '#ffe9c4', 4, 1);
+        } else {
+          ctx.textAlign = 'center';
+          ctx.font = 'bold 12px system-ui, sans-serif';
+          inkText(ctx, 'tap the cavern floor to build  ·  pads cost 20% less',
+                  G.cx, G.shopY - 8, '#ffe9c4', 4, 1);
+        }
         ctx.textAlign = 'left';
       } else if (this.mode === 'campaign' && !Save.data.tut && !this.towers.length) {
         // FIRST RUN, step 1: point at the shelf, which is where building now
@@ -5868,9 +6358,21 @@
         // 777..829), and the button draws after it, so the hint was invisible.
         ctx.textAlign = 'center';
         ctx.fillStyle = 'rgba(16,10,7,0.88)';
-        rr(ctx, G.cx - 118, G.startY - 38, 236, 28, 9); ctx.fill();
+        // ...AND THEN THE WAVE-PREVIEW PANEL BURIED IT ANYWAY. That comment
+        // above is right about START WAVE and missed the panel 18 units higher:
+        // the preview draws at py-18 h36 where py = startY-32, i.e.
+        // [startY-50, startY-14], AFTER this block -- so it covered 24 of this
+        // plate's 28 units including the whole glyph body. Frame one of a new
+        // player's first game read 'Pick a mac[####]ap the floor'. The one
+        // onboarding sentence in the game, painted over by a panel.
+        //
+        // startY-84 is where the SECOND hint already sits (py-52 == startY-84),
+        // and the two are mutually exclusive (!towers.length vs towers.length),
+        // so they now share one y: one law instead of two that can drift apart.
+        // Preview panel top is startY-50, so this clears it by 6 units.
+        rr(ctx, G.cx - 118, G.startY - 84, 236, 28, 9); ctx.fill();
         ctx.font = 'bold 13px system-ui, sans-serif';
-        inkText(ctx, 'Pick a machine, then tap the floor', G.cx, G.startY - 19, '#9ef58f', 4, 1);
+        inkText(ctx, 'Pick a machine, then tap the floor', G.cx, G.startY - 65, '#9ef58f', 4, 1);
         ctx.textAlign = 'left';
       }
       uiPanel(ctx, G.mute, G.btnY, 44, 34, 9);
