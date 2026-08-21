@@ -5735,7 +5735,13 @@
     // under a 36u body and centred ABOVE the feet, so it read as an ankle
     // smudge. BEAT 1a is preserved: `near` still widens and darkens it as he
     // closes on the hoard.
-    groundShadow(ctx, p.x, p.y, baseW * (1 + 0.22 * near), eFly(e) ? 26 : 0, 1 + 0.45 * near);
+    // STRENGTH 0.62..0.90, not 1.00..1.45. groundShadow's own contact term is
+    // alpha 0.42 BEFORE this multiplier, so at 1.45 it painted a 0.61-alpha
+    // black ellipse under every raider, and a road full of raiders became a
+    // road full of dark holes. VANUS: "whats with these shadows under the
+    // enemies? too much?". `near` still darkens as they close on the hoard; it
+    // just starts from a shadow rather than from a hole.
+    groundShadow(ctx, p.x, p.y, baseW * (1 + 0.22 * near), eFly(e) ? 26 : 0, 0.62 + 0.28 * near);
     var sid = 'e_' + e.type;
     var img = ART.images[sid];
     if (img) {
@@ -5884,11 +5890,19 @@
       ctx.restore();
     }
     // hp bar (only when hurt)
+    // ABOVE THE HEAD, not across the waist. p.y - 20 is mid-body on a 36-unit
+    // raider, so a damaged raider wore a bright green line through their legs --
+    // VANUS: "theres a white or yellow line there too that shows up under the
+    // enemies it looks broken". Derived from the drawn sprite height now, so it
+    // clears the head of a Scrapling and of the Hoard King alike.
     if (e.hp < e.maxHp) {
-      var w = e.type === 'boss' ? 36 : 20;
-      ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(p.x - w / 2, p.y - 20 + fy - (e.type === 'boss' ? 14 : 0), w, 3.5);
+      var bw = e.type === 'boss' ? 36 : 20;
+      var bimg = ART.images['e_' + e.type];
+      var bh = baseW * (bimg ? bimg.height / bimg.width : 1.1);
+      var by2 = p.y - bh - 5 + fy;
+      ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(p.x - bw / 2, by2, bw, 3);
       ctx.fillStyle = e.fleeing ? '#ff7b7b' : '#9ef58f';
-      ctx.fillRect(p.x - w / 2, p.y - 20 + fy - (e.type === 'boss' ? 14 : 0), w * Math.max(0, e.hp / e.maxHp), 3.5);
+      ctx.fillRect(p.x - bw / 2, by2, bw * Math.max(0, e.hp / e.maxHp), 3);
     }
     // burn flicker
     if (e.burnT > 0) {
@@ -5908,10 +5922,13 @@
     if (e.slowT > 0) {
       var chT = Math.min(1, e.slowT * 2);
       ctx.save();
-      ctx.strokeStyle = 'rgba(168,230,255,' + (0.55 * chT).toFixed(3) + ')';
-      ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.ellipse(p.x, p.y + 1, 13, 5.2, 0, 0, 6.283); ctx.stroke();
-      ctx.fillStyle = 'rgba(214,244,255,' + (0.7 * chT).toFixed(3) + ')';
+      // faint and small: a dozen chilled raiders means a dozen of these on one
+      // stretch of road, so anything bolder becomes the same visual noise the
+      // blue bubbles were.
+      ctx.strokeStyle = 'rgba(168,230,255,' + (0.30 * chT).toFixed(3) + ')';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y + 1, 10.5, 4.2, 0, 0, 6.283); ctx.stroke();
+      ctx.fillStyle = 'rgba(214,244,255,' + (0.5 * chT).toFixed(3) + ')';
       for (var ic = 0; ic < 3; ic++) {
         var ia = (e.id * 1.7 + ic * 2.1);            // stable per raider, no RNG
         ctx.beginPath();
@@ -6177,11 +6194,12 @@
       ctx.fillStyle = hpf > 0.5 ? '#9ef58f' : hpf > 0.25 ? '#ffd75e' : '#ff5b5b';
       ctx.fillRect(h.x - 16, h.y - 50, 32 * hpf, 4);
     }
-    // breath meter
-    if (h.breathCd > 0 && h.breathCd < 14) {
-      ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(h.x - 12, h.y - 42, 24, 3);
-      ctx.fillStyle = '#ff9a3c'; ctx.fillRect(h.x - 12, h.y - 42, 24 * (1 - h.breathCd / 14), 3);
-    }
+    // THE BREATH METER IS GONE. Wick wore TWO bars stacked over his head and
+    // the lower one duplicated the breath button, which already draws a
+    // shrinking cooldown wedge AND prints the seconds remaining. VANUS: "wick
+    // has 2 bars over his character in game 1 for health 1 for breath but dont
+    // need the breath one". Third time today the same answer: the control that
+    // spends a resource is where that resource is read.
   };
 
   // R3D overlay: the sim UI that used to ride _drawEnemy/_drawParticles,
