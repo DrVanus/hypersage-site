@@ -385,11 +385,11 @@
   //
   // `up` and `dx` are in DRAWN units at level 0 (tw0 = 54 wide); the drawer
   // scales them with the machine so a level-3 plate does not leave him behind.
-  // 0.86 -> 0.8694 when the manned trio was REPACKED (779x730 -> 875x738) to fit
+  // 0.86 -> 0.8694 -> 0.8788 as the manned trio was repacked, first to fit
   // wing frames that are no longer clipped. Same rule as HERO_H: this is a
   // fraction of the CANVAS, so admitting more canvas shrinks the drawn body
   // unless it is carried through.
-  var MAN_SCALE = 0.8694;     // perched and working, not standing on the furniture
+  var MAN_SCALE = 0.8788;     // perched and working, not standing on the furniture
   var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'rotor', 'brazier', 'bellows', 'press']; // cheap -> dear
 
   // MACHINE UNLOCKS — campaign stars needed before a machine appears on the
@@ -717,6 +717,39 @@
       ],
       torches: [[254, 488], [320, 722], [26, 476], [368, 326], [146, 524], [38, 356]],
       heroStart: { x: 212, y: 716 },
+      pathW: 34,
+    },
+    { // Arena C — "The Split Cavern": ONE cave, TWO hoards, a road each.
+      //
+      // THE DUEL FORMAT. VANUS: "the same map but it's not the same map that
+      // I'm on with two different rows and we're both on the same map
+      // together". The earlier duel gave each side its own COPY of a board and
+      // showed the opponent in an inset -- the Bloons Battles shape -- and it
+      // was not what he was describing. This is: one cavern, split down the
+      // middle, your keep on the left and the rival's on the right, one road
+      // each, both of you on screen at the same time. No inset, because the
+      // other dragon is simply THERE.
+      //
+      // FAIRNESS IS GEOMETRIC, not a number: the two roads are mirror images
+      // and measured to the same arc length (615 each), so neither side gets a
+      // longer runway, and the wave builder already alternates raiders lane by
+      // lane so both roads carry the same party.
+      name: 'The Split Cavern',
+      duelShared: true,                 // one cavern, two sides
+      keep: { x: 104, y: 205 },         // lane 0 = YOURS; the single-keep code reads this
+      mound: { x: 104, y: 250, rx: 80, ry: 38 },
+      keeps: [{ x: 104, y: 205 }, { x: 316, y: 205 }],
+      mounds: [{ x: 104, y: 250, rx: 80, ry: 38 }, { x: 316, y: 250, rx: 80, ry: 38 }],
+      paths: [
+        [[54, 748], [92, 676], [46, 602], [92, 528], [150, 470], [96, 396], [70, 316], [104, 250], [104, 232]],
+        [[366, 748], [328, 676], [374, 602], [328, 528], [270, 470], [324, 396], [350, 316], [316, 250], [316, 232]],
+      ],
+      pads: [
+        { x: 110, y: 306 }, { x: 44, y: 276 }, { x: 86, y: 462 }, { x: 98, y: 576 }, { x: 32, y: 666 },
+        { x: 310, y: 306 }, { x: 376, y: 276 }, { x: 328, y: 462 }, { x: 322, y: 576 }, { x: 376, y: 666 },
+      ],
+      torches: [[186, 700], [234, 700], [176, 420], [244, 420], [150, 560], [270, 560]],
+      heroStart: { x: 150, y: 690 },
       pathW: 34,
     },
   ];
