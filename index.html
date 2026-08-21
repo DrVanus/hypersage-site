@@ -576,6 +576,22 @@
     .product ul li { position: relative; padding: 5px 0 5px 20px; font-size: 0.9rem; color: var(--muted); }
     .product ul li::before { content: ''; position: absolute; left: 2px; top: 0.95em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
     .product .foot { margin-top: auto; display: flex; align-items: center; gap: 16px; padding-top: 4px; }
+    .product .btn-store {
+      /* Filled counterpart to .product .link. Deliberately NOT .btn-primary:
+         that hardcodes the global brand gradient and would repaint every card
+         the same teal, erasing the per-card --accent identity. Fills with
+         --accent-text (the tone already guaranteed legible on --panel) so a
+         dark ink is always safe on top. */
+      display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+      padding: 0 18px; border-radius: 999px;
+      font-weight: 700; font-size: 0.9rem; letter-spacing: -0.01em;
+      background: var(--accent-text); color: #0B0E13;
+      box-shadow: 0 8px 22px -12px var(--accent-text);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .product .btn-store:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -12px var(--accent-text); }
+    .product .btn-store:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; }
+    @media (prefers-reduced-motion: reduce) { .product .btn-store { transition: none; } .product .btn-store:hover { transform: none; } }
     .product .link { display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent-text); transition: gap .2s; }
     .product .link:hover { gap: 11px; }
     /* ===== SHARED INTELLIGENCE ===== */
@@ -899,7 +915,7 @@
             <li>Guidance for Tinder, Hinge, Bumble, Instagram, and texting</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Download Wingmate on the App Store" href="https://apps.apple.com/us/app/id6792772729" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="btn-store" aria-label="Download Wingmate on the App Store" href="https://apps.apple.com/us/app/id6792772729" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
             <a class="link" aria-label="Visit the Wingmate site" href="wingmate/">Visit Wingmate <span aria-hidden="true">→</span></a>
           </div>
         </article>
@@ -941,7 +957,7 @@
             <li>Live prices, watchlists, sentiment, and market maps</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Download CryptoSage AI on the App Store" href="https://apps.apple.com/us/app/id6792761331" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="btn-store" aria-label="Download CryptoSage AI on the App Store" href="https://apps.apple.com/us/app/id6792761331" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
             <a class="link" aria-label="Visit the CryptoSage AI site" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
           </div>
         </article>
@@ -979,11 +995,11 @@
           </div>
           <p class="desc">Interactive fiction in which story state and prior choices shape each new page. Explore included classics or build an original world, with optional narration and generated scene art.</p>
           <ul role="list">
-            <li>Dozens of included classics plus open-ended AI adventures</li>
+            <li>80 complete classics plus open-ended AI adventures</li>
             <li>A hand-curated scenario for every included classic</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Download StoryVault AI on the App Store" href="https://apps.apple.com/us/app/id6792759454" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="btn-store" aria-label="Download StoryVault AI on the App Store" href="https://apps.apple.com/us/app/id6792759454" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
             <a class="link" aria-label="Visit the StoryVault AI site" href="storyvault/">Visit StoryVault AI <span aria-hidden="true">→</span></a>
           </div>
         </article>
@@ -1137,7 +1153,7 @@
               <h3>Gemburrow</h3>
               <div class="cat">Cozy Gem-Digging Puzzle</div>
             </div>
-            <span class="status">iOS · Coming soon</span>
+            <span class="status live">Play free on the web</span>
           </div>
           <p class="desc">Dig gems out of a jar where every gem and rock is real physics, assemble full sets in a seven-slot satchel to fill the orders on the line, and decide which rare finds the shop dragon keeps forever.</p>
           <ul role="list">
@@ -1146,6 +1162,7 @@
             <!-- Art is generated; do not describe it as hand-painted or hand-drawn. -->
           </ul>
           <div class="foot">
+            <a class="btn-store" aria-label="Play Gemburrow free in your browser" href="gemburrow/play/">Play free <span aria-hidden="true">↗</span></a>
             <a class="link" aria-label="Visit the Gemburrow site" href="gemburrow/">Visit Gemburrow <span aria-hidden="true">→</span></a>
           </div>
         </article>
