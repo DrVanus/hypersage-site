@@ -262,6 +262,20 @@
    "codec_psnr": 34.4,
    "as_drawn_psnr": 36.4
   },
+  "tower_ballista_base.png": {
+   "size": "554px",
+   "kb": 39.0,
+   "q": 84,
+   "codec_psnr": 38.2,
+   "as_drawn_psnr": 38.2
+  },
+  "tower_ballista_weapon.png": {
+   "size": "723px",
+   "kb": 39.5,
+   "q": 84,
+   "codec_psnr": 39.9,
+   "as_drawn_psnr": 39.9
+  },
   "tower_bellows.png": {
    "size": "700->291px",
    "kb": 35.4,

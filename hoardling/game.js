@@ -157,7 +157,39 @@
       // The crossbow assembly and its gunner sit ON a round wooden turntable.
       // Split there so only the TOP turns: rotating the whole plate tipped the
       // barrel and made every machine look like it was falling over.
-      turret: { cut: 0.68, pvx: 0.50, pvy: 0.66 },
+      // AIM RIG -- replaces `turret` for this machine.
+      //
+      // `turret` split the plate on a HORIZONTAL LINE and rotated the top half.
+      // Measured by compositing the real split and counting pixels that swing
+      // outside the plate's outline / are left uncovered: 6deg clean, 12deg
+      // visible, 19deg = 1,744 over + 7,501 uncovered. The shipped clamp was
+      // 18.9deg and `want` reached ~17 for any raider below the machine, so the
+      // most-built machine in the game was tearing at its own cut in normal
+      // play. And it could not aim anyway: the bow is painted 41.8deg above
+      // horizontal, so +/-18.9 reached 23..61deg and never level or below,
+      // while a raider on the road sits at roughly 0..-30. VANUS: "the crossbow
+      // isnt properly pointed at its enemy."
+      //
+      // So the weapon is its own cutout now -- the REAL painted pixels, lifted
+      // off the original plate with an authored mask, zero model drift -- over a
+      // base whose deck was rebuilt where the weapon used to hide it. Nothing is
+      // split, so there is no seam and no upper bound on the swing but taste.
+      // Every number below is in BASE-PLATE units (the base is still 554x700, so
+      // the machine keeps its exact on-screen size).
+      aimRig: {
+        base: 't_ballista_base', weapon: 't_ballista_weapon',
+        ox: -59 / 554, oy: -39 / 700,      // weapon canvas origin
+        ww:  723 / 554, wh: 743 / 700,     // weapon canvas size
+        px:  305 / 554, py: 350 / 700,     // the trunnion it swings about
+        rest: -0.7296,                     // painted attitude, screen radians (-41.8deg)
+        // RANGE PICKED OFF A RENDERED SWEEP at true draw size (76px), not by
+        // taste: 25deg and 42deg read as a weapon being aimed, 55 starts to tip,
+        // and by 66 the stock's butt is in the air and it reads as falling over.
+        // 0.78 lands the bow ~4deg BELOW level -- which is the case that was
+        // impossible before, and the one a raider on the road actually needs.
+        lo:   -0.25,                       // how far it may raise above rest
+        hi:    0.78,                       // ...and drop below it, to just under level
+      },
       // NATIVE FACING, measured off the plate: the bolt's iron head sits at
       // ~0.60 of the width with the fletching lower-LEFT, so this machine is
       // painted aiming up-RIGHT. Every other aiming plate (gargoyle snout,
@@ -2157,6 +2189,11 @@
       hero_title: 'art/hero_title.png',
       t_mimic:   'art/tower_mimic.png',
       t_ballista:'art/tower_ballista.png',
+      // THE CROSSBOW IS TWO PLATES (see aimRig on TOWER_TYPES.ballista): a
+      // complete base -- barrel, deck, gunner at his winch -- and the weapon as
+      // its own cutout, so it can be rotated to any angle without a seam.
+      t_ballista_base:  'art/tower_ballista_base.png',
+      t_ballista_weapon:'art/tower_ballista_weapon.png',
       t_brazier: 'art/tower_brazier.png',
       t_crystal: 'art/tower_crystal.png',
       t_perch:   'art/tower_perch.png',
@@ -5759,6 +5796,10 @@
   // one canvas (see the repack note above), so they share one number; the manned
   // plates are a different canvas and the drawer already sizes off theirs.
   // tools/validate.py asserts both against the shipped PNGs.
+  // The band of screen angles a raider on the road actually occupies, measured
+  // over a live wave across six machines: 33..88 degrees "below" the machine.
+  // The aim rig maps this onto its rotation range (see aimRig on the ballista).
+  var AIM_BAND_LO = 0.0, AIM_BAND_HI = 1.05;   // radians (0 .. 60 degrees)
   var HERO_ASPECT = 783 / 730;          // hero_whelp.png, hero_breathe.png
   var HERO_MAN_ASPECT = 951 / 746;      // hero_man.png, hero_man_up/_dn.png
   /// WHERE WICK IS DRAWN, and how big -- the single source both the drawer and
@@ -6654,10 +6695,26 @@
         //   3. engine draws bare plate, then the weapon cutout rotated about its
         //      trunnion to any angle. Continuous aim, perfect registration, and
         //      no seam because nothing is split horizontally any more.
-        var want = 0.30 * (fdy / fn) + 0.07 * Math.abs(fdx / fn) * (fdy >= 0 ? 1 : -1);
-        // Only a machine with a SEPARATED turret may turn at all — its base
-        // stays planted. The Mimic is a chest: it mirrors, nothing rotates.
-        fRot = tt2.turret ? Math.max(-0.33, Math.min(0.33, want)) : 0;
+        if (tt2.aimRig) {
+          // POINT AT IT -- but remember SCREEN-Y IS DEPTH in this three-quarter
+          // view, not height. Feeding the raw screen angle straight in saturates:
+          // measured over a live wave, every target sits 33..88deg "below" the
+          // machine, so the bow simply parked at the clamp and stopped tracking,
+          // which is the old complaint in a new costume.
+          //
+          // So the band the road actually occupies is mapped onto the range the
+          // rig can show. The result varies across that band instead of pinning,
+          // and still reaches just under level for the near ones.
+          var tAng = Math.atan2(fdy, Math.abs(fdx));
+          var u = (tAng - AIM_BAND_LO) / (AIM_BAND_HI - AIM_BAND_LO);
+          u = u < 0 ? 0 : u > 1 ? 1 : u;
+          fRot = tt2.aimRig.lo + u * (tt2.aimRig.hi - tt2.aimRig.lo);
+        } else {
+          var want = 0.30 * (fdy / fn) + 0.07 * Math.abs(fdx / fn) * (fdy >= 0 ? 1 : -1);
+          // Only a machine with a SEPARATED turret may turn at all — its base
+          // stays planted. The Mimic is a chest: it mirrors, nothing rotates.
+          fRot = tt2.turret ? Math.max(-0.33, Math.min(0.33, want)) : 0;
+        }
         // ease in RENDER time; cosmetic only, so wall-clock is correct here
         var prev = tw._faceRot === undefined ? fRot : tw._faceRot;
         var prevS = tw._faceSign === undefined ? fSign : tw._faceSign;
@@ -6665,11 +6722,25 @@
         tw._faceSign = fSign;                        // the mirror snaps; the angle eases
         fRot = tw._faceRot;
       }
-      var split = this._turretFor(spriteId, tt2);
+      var rig = tt2.aimRig, rigB = rig && ART.images[rig.base], rigW = rig && ART.images[rig.weapon];
+      var split = (rig && rigB && rigW) ? null : this._turretFor(spriteId, tt2);
       ctx.save();
       ctx.translate(p.x, p.y + 8);
       ctx.scale((2 - tsq) * fSign, tsq);
-      if (split) {
+      if (rig && rigB && rigW) {
+        // BASE, THEN THE WEAPON ON TOP OF IT. The base is the full original
+        // canvas, so it draws exactly where the single plate used to; the weapon
+        // sits on its own padded canvas placed by the same scale, and turns
+        // about the trunnion. Nothing is cut, so nothing can tear.
+        var sc = tw0 / 554;                    // base-plate units -> screen px
+        ctx.drawImage(rigB, -tw0 / 2, -th0, tw0, th0);
+        var rpx = -tw0 / 2 + tw0 * rig.px, rpy = -th0 + th0 * rig.py;
+        ctx.translate(rpx, rpy);
+        ctx.rotate(fRot * fSign);
+        ctx.translate(-rpx, -rpy);
+        ctx.drawImage(rigW, -tw0 / 2 + tw0 * rig.ox, -th0 + th0 * rig.oy,
+                            tw0 * rig.ww, th0 * rig.wh);
+      } else if (split) {
         // THE BASE NEVER MOVES. This is the whole fix: the previous version
         // rotated the entire plate, so a barrel-based machine visibly leaned
         // and read as broken. Now the barrel stays planted on the floor and
