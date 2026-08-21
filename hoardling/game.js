@@ -385,7 +385,11 @@
   //
   // `up` and `dx` are in DRAWN units at level 0 (tw0 = 54 wide); the drawer
   // scales them with the machine so a level-3 plate does not leave him behind.
-  var MAN_SCALE = 0.86;     // perched and working, not standing on the furniture
+  // 0.86 -> 0.8694 when the manned trio was REPACKED (779x730 -> 875x738) to fit
+  // wing frames that are no longer clipped. Same rule as HERO_H: this is a
+  // fraction of the CANVAS, so admitting more canvas shrinks the drawn body
+  // unless it is carried through.
+  var MAN_SCALE = 0.8694;     // perched and working, not standing on the furniture
   var TOWER_ORDER = ['crystal', 'ballista', 'mimic', 'perch', 'rotor', 'brazier', 'bellows', 'press']; // cheap -> dear
 
   // MACHINE UNLOCKS — campaign stars needed before a machine appears on the
@@ -426,6 +430,14 @@
   // divided by a SECOND literal in the drawer, so lengthening the beat in one
   // place would have quietly broken the easing in the other.
   var BREATH_BEAT = 0.60;
+  // THE ORDINARY SHOT OPENS HIS MOUTH TOO. Breath got a real open-jaw frame and
+  // his normal fireball did not, so the attack he uses every 0.8s all game was
+  // the one where nothing on his face moved -- VANUS: "the normal fireball
+  // attack, there's nothing for it, it doesn't even open his mouth". Same plate,
+  // a much shorter beat: a spit, not a roar. No jet is drawn for it (the
+  // fireball IS the payload) and the existing muzzle puff already leaves his
+  // jaws, so this only has to hold the mouth open long enough to read.
+  var SPIT_BEAT = 0.20;
   var PAD_SNAP = 34;          // build within this of a free pad and you snap to it
   var PAD_DISCOUNT = 0.8;     // ...and it costs 20% less: the authored spots still matter
   // FREE PLACEMENT DELETED THE OLD CAP. With 8 pads you could own 8 machines;
@@ -658,7 +670,63 @@
       heroStart: { x: 385, y: 675 },   // was (300,610): 2.8u from the road — standing ON it
       pathW: 32,
     },
+    { // Arena A — "The Twin Throats": two cave mouths, ONE shared climb.
+      // The first map in the game with more than one road. The two throats run
+      // up the outer walls and MERGE at (210,410), so the top third is ground
+      // both raiding columns must cross: 7 of its 10 pads reach both roads and
+      // 3 reach only one. That makes the merge the premium real estate and the
+      // outer mouths the thing you neglect at your peril -- a chokepoint map.
+      // Pads and torches were placed by tools/author_arena.py against the
+      // engine's own _placeCheck rules, not by eye; the level-1 comments record
+      // what placing them by eye cost (two pads shipped under the shop shelf).
+      name: 'The Twin Throats',
+      keep: { x: 175, y: 200 },
+      mound: { x: 180, y: 248, rx: 118, ry: 46 },
+      paths: [
+        [[46, 752], [74, 682], [44, 614], [102, 560], [150, 520], [176, 470], [196, 442],
+         [210, 410], [150, 382], [104, 326], [124, 266], [176, 232]],
+        [[376, 752], [348, 682], [378, 614], [320, 560], [272, 520], [246, 470], [226, 442],
+         [210, 410], [150, 382], [104, 326], [124, 266], [176, 232]],
+      ],
+      pads: [
+        { x: 152, y: 434 }, { x: 212, y: 482 }, { x: 152, y: 302 }, { x: 260, y: 428 },
+        { x: 296, y: 494 }, { x: 314, y: 602 }, { x: 200, y: 368 }, { x: 92, y: 254 },
+        { x: 80, y: 356 }, { x: 122, y: 500 },
+      ],
+      torches: [[266, 596], [266, 380], [290, 710], [170, 308], [86, 494], [344, 500]],
+      heroStart: { x: 212, y: 716 },
+      pathW: 34,
+    },
+    { // Arena B — "The Sunder": two cave mouths and NO shared ground.
+      // The opposite problem to the Twin Throats, deliberately. The roads only
+      // meet at the hoard itself, so 9 of its 10 pads cover exactly one road
+      // and only one covers both: there is no chokepoint to solve the map with
+      // and you have to fund two fronts at once. Wick's own reach is the only
+      // thing that can be in both places, which is the point.
+      name: 'The Sunder',
+      keep: { x: 175, y: 200 },
+      mound: { x: 180, y: 248, rx: 118, ry: 46 },
+      paths: [
+        [[40, 748], [46, 660], [92, 600], [70, 528], [110, 462], [92, 392], [124, 320], [128, 262], [176, 232]],
+        [[384, 748], [372, 656], [326, 596], [352, 524], [310, 460], [330, 390], [286, 318], [248, 262], [176, 232]],
+      ],
+      pads: [
+        { x: 164, y: 296 }, { x: 92, y: 308 }, { x: 68, y: 464 }, { x: 350, y: 440 },
+        { x: 302, y: 518 }, { x: 374, y: 566 }, { x: 110, y: 536 }, { x: 44, y: 578 },
+        { x: 134, y: 374 }, { x: 284, y: 374 },
+      ],
+      torches: [[254, 488], [320, 722], [26, 476], [368, 326], [146, 524], [38, 356]],
+      heroStart: { x: 212, y: 716 },
+      pathW: 34,
+    },
   ];
+  // HOW MANY OF THOSE ARE CAMPAIGN LEVELS. MAPS.length used to answer both
+  // "what ground can be played" and "how many campaign levels are there", and
+  // those stopped being the same number the moment duel-only arenas existed.
+  // Save.data.stars is [0,0,0], the campaign menu has three rows, and the
+  // trials screen lays its chips out at x = W-168 + i*46, which runs off a
+  // 420-wide world at four. Everything that means CAMPAIGN reads this.
+  var CAMPAIGN_MAPS = 3;
   var MAP = MAPS[0];   // switched by setLevel(); every drawer/updater reads MAP
 
   // ===== PATH — pure geometry, built once ==================================
@@ -688,24 +756,48 @@
     }
     return { pts: pts, cum: cum, len: cum[cum.length - 1] };
   }
-  var PATHS = [];
-  for (var _m = 0; _m < MAPS.length; _m++) PATHS.push(buildPathFrom(MAPS[_m].path));
-  var PATH = PATHS[0];
+  // LANES. A map is a LIST of roads, not one road. Every raider carries the
+  // lane it entered on (`e.ln`) and still addresses it by scalar distance, so
+  // the arc-length march, the replay exactness and the order-independence all
+  // survive untouched -- a second road is a second table, not a second rule.
+  //
+  // `paths: [...]` is the multi-lane form; a map with the old `path: [...]`
+  // becomes a one-lane map by construction, which is why levels 1-3 did not
+  // have to be rewritten to add this.
+  function buildLanes(map) {
+    var ctrls = map.paths || [map.path], out = [];
+    for (var c = 0; c < ctrls.length; c++) out.push(buildPathFrom(ctrls[c]));
+    return out;
+  }
+  var PATHS = [];                       // PATHS[mapIdx] = [lane, lane, ...]
+  for (var _m = 0; _m < MAPS.length; _m++) PATHS.push(buildLanes(MAPS[_m]));
+  var LANES = PATHS[0];
+  // PATH stays as lane 0. It is the honest answer for everything that is about
+  // the map rather than about one raider -- the legacy export, the dev hook --
+  // and it means a missed call site degrades to "reads the first road", not to
+  // a crash on undefined.
+  var PATH = LANES[0];
+  function laneOf(ln) { return LANES[ln | 0] || LANES[0]; }
+  function laneLen(ln) { return laneOf(ln).len; }
   // Level switch — called ONLY from reset() (deterministic; never mid-run)
   function setLevel(i) {
     i = Math.max(0, Math.min(MAPS.length - 1, i | 0));
     MAP = MAPS[i];
-    PATH = PATHS[i];
+    LANES = PATHS[i];
+    PATH = LANES[0];
     return i;
   }
-  function buildPath() { return buildPathFrom(MAPS[0].path); }   // legacy export shape
-  function pathPointAt(d) {
-    if (d <= 0) { var a0 = PATH.pts[0]; return { x: a0[0], y: a0[1] }; }
-    if (d >= PATH.len) { var aN = PATH.pts[PATH.pts.length - 1]; return { x: aN[0], y: aN[1] }; }
-    var lo = 0, hi = PATH.cum.length - 1;
-    while (lo + 1 < hi) { var mid = (lo + hi) >> 1; if (PATH.cum[mid] <= d) lo = mid; else hi = mid; }
-    var t = (d - PATH.cum[lo]) / (PATH.cum[hi] - PATH.cum[lo] || 1);
-    var a = PATH.pts[lo], b = PATH.pts[hi];
+  function buildPath() { return buildPathFrom((MAPS[0].paths || [MAPS[0].path])[0]); }   // legacy export shape
+  // ln defaults to lane 0, so every caller that is genuinely about the map and
+  // not about a raider keeps working unchanged.
+  function pathPointAt(d, ln) {
+    var P = laneOf(ln);
+    if (d <= 0) { var a0 = P.pts[0]; return { x: a0[0], y: a0[1] }; }
+    if (d >= P.len) { var aN = P.pts[P.pts.length - 1]; return { x: aN[0], y: aN[1] }; }
+    var lo = 0, hi = P.cum.length - 1;
+    while (lo + 1 < hi) { var mid = (lo + hi) >> 1; if (P.cum[mid] <= d) lo = mid; else hi = mid; }
+    var t = (d - P.cum[lo]) / (P.cum[hi] - P.cum[lo] || 1);
+    var a = P.pts[lo], b = P.pts[hi];
     return { x: a[0] + (b[0] - a[0]) * t, y: a[1] + (b[1] - a[1]) * t };
   }
 
@@ -1556,7 +1648,20 @@
   // at the calibration point — the bot's board plus gold in hand at the end of
   // wave 6 was ~850 across the arenas — and made linear in the offset from
   // there, which is how a siege's income actually accrues.
-  function duelStartGold(at) { return 100 + 125 * (at | 0); }
+  // THE PURSE HAS TO KNOW HOW MANY ROADS IT IS BUYING. 100 + 125*at was
+  // measured against a ONE-ROAD board ("the bot's board plus gold in hand at
+  // the end of wave 6 was ~850"), and on a two-road arena that same purse funds
+  // one front and leaks the other. The sweep showed it plainly and backwards:
+  // at=2 played WORSE than at=4 on both new arenas, because the binding
+  // constraint at a low offset is not the wave ramp, it is the money -- fewer
+  // waves also means a smaller purse, and below ~600g you cannot cover two
+  // roads at all. Scaling per EXTRA road puts the two-road arenas back on the
+  // one-road curve instead of hiding the problem inside a hand-picked offset.
+  var DUEL_LANE_PURSE = 0.60;             // per road beyond the first
+  function duelStartGold(at, mapIdx) {
+    var lanes = (PATHS[mapIdx | 0] || PATHS[0]).length;
+    return Math.round((100 + 125 * (at | 0)) * (1 + DUEL_LANE_PURSE * (lanes - 1)));
+  }
   // Arenas rotate daily so a duel is not a fixed puzzle, but hold still WITHIN
   // a day so a loss can be avenged on the same ground.
   // An arena is a SEED PLUS ITS MAP, stated, not derived. Deriving the map as
@@ -1587,13 +1692,27 @@
   // NOTE: the curve columns in RIVAL_CURVES are indexed by ARENA — reordering
   // this list without permuting them identically silently pairs every rival
   // with the wrong recording.
+  // THE ARENAS ARE NOW THEIR OWN GROUND. Every one of these used to be map 1 or
+  // map 2 -- the two boards the campaign already walks you through -- so a duel
+  // was a level you had played, with a scoreboard. VANUS: "why is our dual game
+  // just the same as any other game and every map is all the same". Maps 3 and
+  // 4 are duel-only and are the first two-road maps in the game: the Twin
+  // Throats merges its roads into one climb (7 of 10 pads reach both, so the
+  // merge is the map) and the Sunder never merges at all (9 of 10 pads reach
+  // exactly one road, so you fund two fronts or lose one).
+  //
+  // Changing the ground INVALIDATES RIVAL_CURVES -- a rival is a recording of
+  // this bot playing THIS arena. They are re-baked below in the same commit.
   var DUEL_ARENAS = [
-    { seed: 0xd00dfeed, map: 1, at: 5 },
-    { seed: 0x7a11ba5e, map: 2, at: 9 },
-    { seed: 0x1ceb00da, map: 1, at: 6 },
-    { seed: 0xa11ecafe, map: 2, at: 10 },
-    { seed: 0x5eed1a3f, map: 1, at: 7 },
-    { seed: 0x0dd1e5ec, map: 2, at: 8 },     // 11 measured DEAD: all four wiped
+    // at 3-4, not the 5-10 the one-road arenas used. Swept: on two roads at>=5
+    // wipes every rival but cinder, which is the DEAD-arena pattern (see the
+    // note on the old arena 11). The purse multiplier above carries the rest.
+    { seed: 0xd00dfeed, map: 3, at: 3 },
+    { seed: 0x7a11ba5e, map: 4, at: 3 },
+    { seed: 0x1ceb00da, map: 3, at: 4 },
+    { seed: 0xa11ecafe, map: 4, at: 5 },
+    { seed: 0x5eed1a3f, map: 3, at: 4 },
+    { seed: 0x0dd1e5ec, map: 4, at: 3 },
   ];
   // THE LADDER IS THE PURSE, NOT THE POLICY. The first cut ranked rivals by
   // the bot's build policy and the bake disproved it outright: 'balanced'
@@ -1652,10 +1771,10 @@
   //
   // Re-bake with HoardBot.bakeAll().literal and CLEAR Save.data.duels after.
   var RIVAL_CURVES = {
-    tallow: [[60,25,19,0,0,0,0,0,0,0,0,0,0], [60,0,0,0,0,0,0,0,0,0,0,0,0], [60,10,0,0,0,0,0,0,0,0,0,0,0], [60,12,0,0,0,0,0,0,0,0,0,0,0], [60,20,0,0,0,0,0,0,0,0,0,0,0], [60,22,0,0,0,0,0,0,0,0,0,0,0]],
-    flint: [[60,60,60,60,60,35,35,35,35,35,35,0,0], [60,60,60,60,60,60,60,60,27,0,0,0,0], [60,60,60,60,35,35,35,35,25,25,25,25,25], [60,60,60,41,21,21,0,0,0,0,0,0,0], [60,60,60,35,35,35,35,35,35,35,35,35,35], [60,60,60,60,60,30,30,30,30,0,0,0,0]],
-    ember: [[60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,34,0,0], [60,60,60,60,60,60,60,60,60,60,31,31,0], [60,60,60,60,60,60,60,60,60,60,35,35,0], [60,60,60,60,60,60,60,60,60,60,52,35,35], [60,60,60,60,60,60,60,60,60,60,58,58,1]],
-    cinder: [[60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60]],
+    tallow: [[60,34,24,19,19,19,19,19,19,19,19,19,19], [60,25,25,25,25,25,25,25,25,25,25,25,25], [60,21,21,21,21,21,21,21,21,21,21,21,21], [60,23,12,12,12,12,12,12,12,12,12,12,12], [60,35,30,30,30,30,30,30,30,30,30,30,30], [60,25,25,25,25,25,25,25,25,25,25,25,25]],
+    flint: [[60,60,60,60,60,60,60,35,35,30,30,0,0], [60,55,55,55,53,53,53,24,18,18,18,18,18], [60,60,60,60,60,60,35,35,28,0,0,0,0], [60,60,60,52,48,12,12,12,12,12,12,12,12], [60,60,60,60,60,60,35,35,35,0,0,0,0], [60,50,50,50,50,50,50,21,0,0,0,0,0]],
+    ember: [[60,60,60,60,60,60,60,35,35,35,35,35,35], [60,60,60,60,60,60,60,35,35,35,35,35,35], [60,60,60,60,60,60,35,35,35,30,30,30,0], [60,60,60,60,60,35,35,35,0,0,0,0,0], [60,60,60,60,60,60,35,35,35,35,30,30,30], [60,60,60,60,60,60,60,35,35,35,35,35,35]],
+    cinder: [[60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,35,35,35,35,35,35]],
   };
   // A rival's arena for today. Pure function of the day and the rival, so both
   // sides of a duel are the same fight and tomorrow is computable today (which
@@ -2220,11 +2339,16 @@
       // the road: a flat ribbon sampled off the real path (same arc length
       // the sim marches, so what you see IS where they walk)
       var half = MAP.pathW * 0.62, pts = [], up = [], dn = [];
-      for (var d = 0; d <= PATH.len; d += 10) {
-        var a = pathPointAt(d), b = pathPointAt(Math.min(PATH.len, d + 10));
-        var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
-        var nx = -dy / L * half, ny = dx / L * half;
-        up.push([a.x + nx, a.y + ny]); dn.push([a.x - nx, a.y - ny]);
+      // one ribbon per lane, laid end to end into the same buffers; the strip
+      // is built per-segment below, so a break between lanes costs one stray
+      // quad, which the degenerate guard drops.
+      for (var rl2 = 0; rl2 < LANES.length; rl2++) {
+        for (var d = 0; d <= LANES[rl2].len; d += 10) {
+          var a = pathPointAt(d, rl2), b = pathPointAt(Math.min(LANES[rl2].len, d + 10), rl2);
+          var dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
+          var nx = -dy / L * half, ny = dx / L * half;
+          up.push([a.x + nx, a.y + ny]); dn.push([a.x - nx, a.y - ny]);
+        }
       }
       var verts = [], road = new T.BufferGeometry();
       for (var i = 0; i < up.length - 1; i++) {
@@ -2648,7 +2772,7 @@
         var fly = en.flyer && !(en.groundedT > 0);
         var walk = Math.abs(Math.sin(now * 9 + en.id * 1.3));
         r.position.set(EP.x, (fly ? 30 : 0) + (en.grabT > 0 ? Math.abs(Math.sin(now * 22)) * 3 : walk * 3), EP.z);
-        var ahead = pathPointAt(en.fleeing ? Math.max(0, en.d - 8) : Math.min(PATH.len, en.d + 8));
+        var ahead = pathPointAt(en.fleeing ? Math.max(0, en.d - 8) : Math.min(laneLen(en.ln), en.d + 8), en.ln);
         r.rotation.y = Math.atan2(ahead.x - en.px, ahead.y - en.py);
         r.rotation.z = Math.sin(now * 9 + en.id) * 0.06;
         if (r.userData.sack) r.userData.sack.visible = en.stolen > 0;
@@ -2722,7 +2846,7 @@
         var tp2 = game.tar[t3], tid2 = 't' + Math.round(tp2.d) + '_' + tp2.tid;
         var to2 = this.pools.tar[tid2];
         if (!to2) {
-          var a2 = pathPointAt(tp2.d), TP = this.W(a2.x, a2.y);
+          var a2 = pathPointAt(tp2.d, tp2.ln), TP = this.W(a2.x, a2.y);
           to2 = new T.Mesh(new T.CylinderGeometry(tp2.w * 0.6, tp2.w * 0.66, 1.6, 9), m.tar);
           to2.position.set(TP.x, 1.4, TP.z);
           scene.add(to2); this.pools.tar[tid2] = to2;
@@ -2851,7 +2975,7 @@
     this.seed = (seed >>> 0) || dailySeed();
     // level select: campaign takes the chosen map; the Daily rotates its map
     // as a PURE function of the seed, so every player fights the same layout
-    if (this.mode === 'daily') this.levelIdx = setLevel(this.seed % MAPS.length);
+    if (this.mode === 'daily') this.levelIdx = setLevel(this.seed % CAMPAIGN_MAPS);
     else if (this.mode === 'duel') this.levelIdx = setLevel(duelMapAt(this.duelSeedIdx));
     else this.levelIdx = setLevel(level !== undefined ? level : (this.levelIdx || 0));
     seedStream(this.seed);                  // LANE 2 seeded once, at reset
@@ -2876,7 +3000,7 @@
     // cosmetic state must die with the run — a quit-to-title mid-battle must
     // not spray the LAST run's celebration into the next one (caught on film)
     this.particles = []; this.floats = []; this.husks = []; this.fxQueue = []; this.shake = 0;
-    this._breathT = 0; this._heroFace = 1; this._resultT = 0;
+    this._breathT = 0; this._spitT = 0; this._heroFace = 1; this._resultT = 0;
     this.nextId = 1;
     var hs = MAP.heroStart || { x: 210, y: 470 };
     this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0,
@@ -2948,7 +3072,7 @@
     // machines with mixed tiers plus ~130 in hand, ~850 of total income.
     // This is a MODE RULE, not forge power — the rival curves were baked
     // through this same line, so both caves open with the same money.
-    if (this.mode === 'duel') this.gold = duelStartGold(DUEL_ARENAS[this.duelSeedIdx].at);
+    if (this.mode === 'duel') this.gold = duelStartGold(DUEL_ARENAS[this.duelSeedIdx].at, duelMapAt(this.duelSeedIdx));
     this.hitstopT = 0;
     this.resultLockT = 0;
     this._ocSeen = false;
@@ -3015,6 +3139,13 @@
       }
     }
     q.sort(function (a, b) { return a.t - b.t || (a.type < b.type ? -1 : 1); });
+    // WHICH ROAD. Strict alternation over the SORTED queue, so it is a pure
+    // function of the wave and needs no draw from any stream -- lane 2 stays
+    // untouched and a duel is still bit-identical on both sides. Alternating
+    // rather than rolling also GUARANTEES both roads carry traffic every wave,
+    // which is the whole point of a second road: a random assignment can hand
+    // a wave entirely to one lane and quietly turn the map back into level 1.
+    for (var k = 0; k < q.length; k++) q[k].ln = LANES.length > 1 ? k % LANES.length : 0;
     return q;
   };
   Game.prototype.totalWaves = function () {
@@ -3090,7 +3221,8 @@
           scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0, sapT: 0,
           blinkT: base.blinkEvery || 0, healT: 1, grabT: 0, auraF: 1,
           stolen: 0, fleeing: false, flyer: !!base.flyer, summoned: false, shieldBroken: false,
-          flashT: 0, px: PATH.pts[0][0], py: PATH.pts[0][1],
+          flashT: 0, ln: sp.ln | 0,
+          px: laneOf(sp.ln).pts[0][0], py: laneOf(sp.ln).pts[0][1],
         });
       }
     }
@@ -3140,7 +3272,7 @@
         for (var sm = 0; sm < bossB.summonAtHalf; sm++) {
           var lb = ENEMY_TYPES.looter;
           var sd = Math.max(0, bossE.d - sm * 14);
-          var sp2 = pathPointAt(sd);
+          var sp2 = pathPointAt(sd, bossE.ln);
           this.enemies.push({
             id: this.nextId++, type: 'looter', d: sd,
             hp: Math.round(lb.hp * sMul), maxHp: Math.round(lb.hp * sMul),
@@ -3148,7 +3280,7 @@
             scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0, sapT: 0,
             blinkT: 0, healT: 1, grabT: 0, auraF: 1,
             stolen: 0, fleeing: false, flyer: false, summoned: false, shieldBroken: false,
-            flashT: 0, px: sp2.x, py: sp2.y,
+            flashT: 0, ln: bossE.ln | 0, px: sp2.x, py: sp2.y,
           });
         }
         // ENRAGE is the fight's turning point — make it land. Hitstop just
@@ -3172,10 +3304,13 @@
     }
 
     // -- enemies --
-    var keepD = PATH.len;
+    // keepD is PER RAIDER now -- two roads are not the same length, so a
+    // single hoisted PATH.len would let a raider on the short lane sack the
+    // keep late and one on the long lane arrive before its road ended.
     for (var i = this.enemies.length - 1; i >= 0; i--) {
       var e = this.enemies[i];
       var base2 = ENEMY_TYPES[e.type];
+      var keepD = laneLen(e.ln);
       // status
       if (e.slowT > 0) { e.slowT -= STEP; if (e.slowT <= 0) e.slowF = 1; }
       if (e.burnT > 0) { e.burnT -= STEP; e.hp -= e.burnDps * STEP; if (e.burnT <= 0) e.burnDps = 0; }
@@ -3187,6 +3322,7 @@
       // Tar Boiler slag: 1D overlap on the path's arc length — both trips pay
       for (var tp2 = 0; tp2 < this.tar.length; tp2++) {
         var tpc = this.tar[tp2];
+        if ((tpc.ln | 0) !== (e.ln | 0)) continue;   // d is per-ROAD; 300 on one is not 300 on the other
         if (!eFly(e) && Math.abs(e.d - tpc.d) < tpc.w * 0.5) e.hp -= tpc.dps * STEP;
       }
       if (e.flashT > 0) e.flashT -= STEP;
@@ -3239,16 +3375,16 @@
         e.blinkT -= STEP;
         if (e.blinkT <= 0) {
           e.blinkT = base2.blinkEvery;
-          var from = pathPointAt(e.d);
+          var from = pathPointAt(e.d, e.ln);
           e.d = Math.min(keepD - 1, e.d + base2.blink);
-          var to = pathPointAt(e.d);
+          var to = pathPointAt(e.d, e.ln);
           this.fxQueue.push({ k: 'blink', x1: from.x, y1: from.y, x2: to.x, y2: to.y });
         }
       }
       // grab pause at the hoard
       if (e.grabT > 0) {
         e.grabT -= STEP;
-        var gp2 = pathPointAt(e.d); e.px = gp2.x; e.py = gp2.y;
+        var gp2 = pathPointAt(e.d, e.ln); e.px = gp2.x; e.py = gp2.y;
         continue;
       }
       // march / flee
@@ -3274,7 +3410,8 @@
           this.enemies.splice(i, 1);
           // n is an ADDITIVE cosmetic payload on an event that already exists
           // to feed the render lane: reads e.stolen, writes nothing
-          this.fxQueue.push({ k: 'escape', x: PATH.pts[0][0], y: PATH.pts[0][1], n: e.stolen });
+          var em = laneOf(e.ln).pts[0];
+          this.fxQueue.push({ k: 'escape', x: em[0], y: em[1], n: e.stolen });
           Sfx.play('leak');
           continue;
         }
@@ -3287,7 +3424,7 @@
           e.fleeing = true;
           e.grabT = CFG.grabTime;
           e.d = keepD - 1;
-          var kp = pathPointAt(keepD);
+          var kp = pathPointAt(keepD, e.ln);
           this.fxQueue.push({ k: 'steal', x: kp.x, y: kp.y, n: take });
           Sfx.play('steal');
           if (this.hoard <= 0) { this._gameOver(false); return; }
@@ -3295,7 +3432,7 @@
       }
       // cache the position ONCE per step — targeting, splash, heal, aura and
       // the renderer all read px/py instead of re-deriving pathPointAt each
-      var pp = pathPointAt(e.d); e.px = pp.x; e.py = pp.y;
+      var pp = pathPointAt(e.d, e.ln); e.px = pp.x; e.py = pp.y;
     }
 
     // -- Overclock: the inventor at his machine. The nearest tower within
@@ -3536,7 +3673,7 @@
           // Tar Boiler: the patch lands at the TARGET's path distance at fire
           // time — 1D arc-length address, deterministic, no inverse projection.
           // Keyed by PAD, not array index: a sell splices the towers array.
-          tar: lv.special === 'tarpatch' ? { d: target.d, w: lv.tarWidth, dps: lv.tarDps, dur: lv.tarDur, max: lv.maxPatches, tid: tw.tid } : null,
+          tar: lv.special === 'tarpatch' ? { d: target.d, ln: target.ln | 0, w: lv.tarWidth, dps: lv.tarDps, dur: lv.tarDur, max: lv.maxPatches, tid: tw.tid } : null,
         });
         Sfx.play('lob', tw.tid);
       } else {                                              // homing bolt (crossbow / roost)
@@ -3583,7 +3720,7 @@
             var mine = [];
             for (var tf = 0; tf < this.tar.length; tf++) if (this.tar[tf].tid === pr.tar.tid) mine.push(tf);
             if (mine.length >= pr.tar.max) this.tar.splice(mine[0], 1);   // evict oldest
-            this.tar.push({ d: pr.tar.d, w: pr.tar.w, dps: pr.tar.dps, until: this.worldT + pr.tar.dur, tid: pr.tar.tid });
+            this.tar.push({ d: pr.tar.d, ln: pr.tar.ln | 0, w: pr.tar.w, dps: pr.tar.dps, until: this.worldT + pr.tar.dur, tid: pr.tar.tid });
           }
           // BACKWARDS: _damage can kill+splice mid-loop
           var caught = 0;
@@ -3796,7 +3933,7 @@
       // bursts on the target (the old tell was a 1px tracer nobody could see).
       this.projectiles.push({ kind: 'fire', x: h.x, y: h.y - 14, target: pick.id,
                               spd: 300, dmg: h.dmg, hero: true });
-      this.fxQueue.push({ k: 'muzzle', x: h.x, y: h.y - 14, tx: pick.px, ty: pick.py });
+      this.fxQueue.push({ k: 'muzzle', x: h.x, y: h.y - 14, tx: pick.px, ty: pick.py, hero: true });
       Sfx.play('flame');
     }
 
@@ -3890,11 +4027,20 @@
       if (eFly(e) && !hitsAir) continue;    // a netted flyer is fair game for anyone
       var dx = e.px - pad.x, dy = e.py - pad.y;
       if (dx * dx + dy * dy > range * range) continue;
+      // LANE-CORRECT METRICS. These order raiders that may be on DIFFERENT
+      // roads, and the roads are not the same length, so a shared PATH.len is
+      // no longer a constant and stops cancelling. Rewritten in the forms that
+      // do not reference any road length at all where possible:
+      //   fleeing / LAST  -- "smallest d" is what both mean; -e.d says it
+      //                      directly and is identical in order to the old
+      //                      PATH.len - e.d on a one-road map (a constant).
+      //   FIRST           -- means CLOSEST TO THE KEEP, which across lanes is
+      //                      least distance REMAINING, not greatest d.
       var metric;
-      if (e.fleeing) metric = PATH.len - e.d;
+      if (e.fleeing) metric = -e.d;
       else if (mode === 1) metric = e.hp * 0.001;           // STRONG
-      else if (mode === 2) metric = PATH.len - e.d;         // LAST
-      else metric = e.d;                                    // FIRST
+      else if (mode === 2) metric = -e.d;                   // LAST
+      else metric = e.d - laneLen(e.ln);                    // FIRST
       // HEALERS FIRST. Weighted 7e5, ABOVE the flyer bonus of 5e5 -- at 2e5 it
       // would sit below it and a Gloomwing would still outrank the Hexer on
       // every air-capable machine, which is most of them. Still below the
@@ -3907,10 +4053,14 @@
     return best;
   };
   Game.prototype._nextBehind = function (tgt) {
+    // SAME ROAD ONLY. "Behind" is a position along a path, and two raiders on
+    // different roads have no ordering -- without this the pierce would jump
+    // the cavern to a raider it never passed through.
     var best = null;
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
       if (e === tgt || e.hp <= 0 || eFly(e)) continue;
+      if ((e.ln | 0) !== (tgt.ln | 0)) continue;
       if (e.d < tgt.d && (!best || e.d > best.d)) best = e;
     }
     return best;
@@ -3933,7 +4083,8 @@
     if (base.pavise && opts.kind === 'bolt' && !e.shieldBroken) {
       if (opts.shieldbreak) {
         e.shieldBroken = true;
-        this.fxQueue.push({ k: 'float', x: pathPointAt(e.d).x, y: pathPointAt(e.d).y - 16, txt: 'shield broken!', c: '#c9d2dd' });
+        var sbp = pathPointAt(e.d, e.ln);
+        this.fxQueue.push({ k: 'float', x: sbp.x, y: sbp.y - 16, txt: 'shield broken!', c: '#c9d2dd' });
         // Permanent, run-changing, and it made no sound at all. The keg's own
         // voice dropped low: staves letting go. After this every bolt into this
         // Shellback lands soft instead of clanging -- that IS the mechanic.
@@ -4003,8 +4154,8 @@
       var sb = ENEMY_TYPES[base.splitInto];
       for (var sp2 = 0; sp2 < base.splitCount; sp2++) {
         this.enemies.push({
-          id: this.nextId++, type: base.splitInto,
-          d: Math.max(0, Math.min(PATH.len - 1, e.d + (sp2 ? 9 : -9))),
+          id: this.nextId++, type: base.splitInto, ln: e.ln | 0,
+          d: Math.max(0, Math.min(laneLen(e.ln) - 1, e.d + (sp2 ? 9 : -9))),
           hp: Math.round(sb.hp * base.splitHp), maxHp: Math.round(sb.hp * base.splitHp),
           spd: sb.spd, slowT: 0, slowF: 1, burnT: 0, burnDps: 0, bleedT: 0, bleedDps: 0,
           scaldT: 0, brittleT: 0, brittleMul: 1, deepT: 0, groundedT: 0, shaken: 0, sapT: 0,
@@ -4279,7 +4430,7 @@
       // so the day a fourth map is authored TG.rows[3] is undefined and hit()
       // throws on the first tap the title screen ever receives. Defusing it
       // costs one Math.min and removes a crash that is one array entry away.
-      var nRows = Math.min(MAPS.length, TG.rows.length);
+      var nRows = Math.min(CAMPAIGN_MAPS, TG.rows.length);
       for (var lv = 0; lv < nRows; lv++) {
         if (hit(w, TG.rows[lv])) {
           if (!Save.unlocked(lv)) return;        // locked: tap does nothing
@@ -4315,7 +4466,7 @@
       for (var tr = 0; tr < TRIAL_ORDER.length; tr++) {
         var try2 = TGt.top + tr * TGt.pitch;
         if (w.y > try2 && w.y < try2 + TGt.h) {
-          for (var tlv = 0; tlv < MAPS.length; tlv++) {
+          for (var tlv = 0; tlv < CAMPAIGN_MAPS; tlv++) {
             var chx = WORLD_W - 168 + tlv * 46;
             if (w.x > chx && w.x < chx + 40 && w.y > try2 + TGt.chipY && w.y < try2 + TGt.chipY + TGt.chipH) {
               if (!(Save.data.stars[tlv] > 0)) return;       // trial needs the level won first
@@ -4550,9 +4701,11 @@
     if (kdx * kdx + kdy * kdy < 96 * 96) return { ok: false, why: 'too close to the hoard' };
     // the road: a machine must not stand in the raiders' way
     var lim = MAP.pathW * 0.5 + 16;
-    for (var d = 0; d <= PATH.len; d += 7) {
-      var pt = pathPointAt(d), rdx = x - pt.x, rdy = y - pt.y;
-      if (rdx * rdx + rdy * rdy < lim * lim) return { ok: false, why: 'on the road' };
+    for (var ln = 0; ln < LANES.length; ln++) {
+      for (var d = 0; d <= LANES[ln].len; d += 7) {
+        var pt = pathPointAt(d, ln), rdx = x - pt.x, rdy = y - pt.y;
+        if (rdx * rdx + rdy * rdy < lim * lim) return { ok: false, why: 'on the road' };
+      }
     }
     for (var t = 0; t < this.towers.length; t++) {
       var tw = this.towers[t], tdx = x - tw.x, tdy = y - tw.y;
@@ -4757,6 +4910,7 @@
         }
       }
       else if (fx.k === 'muzzle') {          // the puff of flame leaving his jaws
+        if (fx.hero) this._spitT = SPIT_BEAT;   // ...and his jaws actually open for it
         var mang = Math.atan2(fx.ty - fx.y, fx.tx - fx.x);
         for (var mz = 0; mz < 5; mz++) {
           var ma = mang + (Math.random() - 0.5) * 0.7;
@@ -4834,6 +4988,7 @@
     this.shake = Math.max(0, this.shake - dtRaw * 2.2);
     // the open-jaw / recoil beat, cosmetic lane only — never read by update()
     if (this._breathT > 0) this._breathT = Math.max(0, this._breathT - dtRaw);
+    if (this._spitT > 0) this._spitT = Math.max(0, this._spitT - dtRaw);
     if (this.state === 'won' || this.state === 'lost') this._resultT = (this._resultT || 0) + dtRaw;
     // ---- music director (cosmetic lane; consumes nothing from the seed) ----
     // Everything the score reacts to is read HERE, in _cosmetic(), never in
@@ -5068,8 +5223,23 @@
     var pc = pv.getContext('2d');
     pc.scale(res, res);
     pc.lineCap = 'round'; pc.lineJoin = 'round';
-    // under-shadow beds the road into the floor either way
-    strokePath(pc, PATH.pts, MAP.pathW + 8, 'rgba(18,10,6,0.55)');
+    // EVERY ROAD, not the first one. This cache is the only thing that paints
+    // the road, so a lane missing from this loop is a lane raiders walk across
+    // bare stone. Beds are laid for all lanes FIRST so a later road's shadow
+    // cannot darken an earlier road's crown where the two cross.
+    var LN = LANES;
+    // the bed is drawn opaque into its own layer and composited ONCE, so where
+    // two roads overlap the shadow does not stack into a dark scar
+    var bd = document.createElement('canvas');
+    bd.width = WORLD_W * res; bd.height = WORLD_H * res;
+    var bc = bd.getContext('2d');
+    bc.scale(res, res); bc.lineCap = 'round'; bc.lineJoin = 'round';
+    for (var b0 = 0; b0 < LN.length; b0++) {
+      strokePath(bc, LN[b0].pts, MAP.pathW + 8, 'rgb(18,10,6)');
+    }
+    pc.globalAlpha = 0.55;
+    pc.drawImage(bd, 0, 0, WORLD_W, WORLD_H);
+    pc.globalAlpha = 1;
     if (ART.images.road) {
       // PAINTED road: tile the cobble texture, then mask it to the path
       // ribbon with a destination-in stroke; edge wear on top.
@@ -5081,29 +5251,44 @@
       for (var ty = 0; ty < WORLD_H; ty += tile)
         for (var tx = 0; tx < WORLD_W; tx += tile)
           rc.drawImage(ART.images.road, tx, ty, tile, tile);
+      // UNION THE MASK, THEN CUT ONCE. Stroking each lane with
+      // destination-in in turn does not add roads together, it INTERSECTS them:
+      // lane 0's cut erases everything outside lane 0, then lane 1's erases
+      // everything outside lane 1, and all that survives is the stretch they
+      // share. On the Twin Throats that shipped as a merged climb in cobble
+      // with both of its branches in bare shadow. The lanes are drawn into one
+      // mask first, and the cut happens a single time.
+      var mk = document.createElement('canvas');
+      mk.width = WORLD_W * res; mk.height = WORLD_H * res;
+      var mc = mk.getContext('2d');
+      mc.scale(res, res); mc.lineCap = 'round'; mc.lineJoin = 'round';
+      for (var m0 = 0; m0 < LN.length; m0++) strokePath(mc, LN[m0].pts, MAP.pathW, 'rgba(0,0,0,1)');
       rc.globalCompositeOperation = 'destination-in';
-      rc.lineCap = 'round'; rc.lineJoin = 'round';
-      strokePath(rc, PATH.pts, MAP.pathW, 'rgba(0,0,0,1)');
+      rc.drawImage(mk, 0, 0, WORLD_W, WORLD_H);
       rc.globalCompositeOperation = 'source-over';
-      strokePath(rc, PATH.pts, MAP.pathW - 4, 'rgba(216,190,149,0.07)');   // lit crown
+      rc.lineCap = 'round'; rc.lineJoin = 'round';
+      for (var m1 = 0; m1 < LN.length; m1++) strokePath(rc, LN[m1].pts, MAP.pathW - 4, 'rgba(216,190,149,0.07)');   // lit crown
       rc.save();
       rc.globalCompositeOperation = 'source-atop';
-      strokePath(rc, PATH.pts, MAP.pathW - 20, 'rgba(20,12,8,0.16)');      // boot-worn centre
+      for (var m2 = 0; m2 < LN.length; m2++) strokePath(rc, LN[m2].pts, MAP.pathW - 20, 'rgba(20,12,8,0.16)');      // boot-worn centre
       rc.restore();
       pc.drawImage(rl, 0, 0, WORLD_W, WORLD_H);
     } else {
       // procedural fallback: warm worn-stone strokes
-      strokePath(pc, PATH.pts, MAP.pathW, '#7b6a55');
-      strokePath(pc, PATH.pts, MAP.pathW - 8, '#8b7a68');
-      strokePath(pc, PATH.pts, MAP.pathW - 20, 'rgba(216,190,149,0.18)');
+      for (var f0 = 0; f0 < LN.length; f0++) strokePath(pc, LN[f0].pts, MAP.pathW, '#7b6a55');
+      for (var f1 = 0; f1 < LN.length; f1++) strokePath(pc, LN[f1].pts, MAP.pathW - 8, '#8b7a68');
+      for (var f2 = 0; f2 < LN.length; f2++) strokePath(pc, LN[f2].pts, MAP.pathW - 20, 'rgba(216,190,149,0.18)');
       pc.save();
       pc.setLineDash([5, 13]);
-      strokePath(pc, PATH.pts, MAP.pathW - 24, 'rgba(30,18,10,0.28)');
+      for (var f3 = 0; f3 < LN.length; f3++) strokePath(pc, LN[f3].pts, MAP.pathW - 24, 'rgba(30,18,10,0.28)');
       pc.restore();
     }
-    var e0 = PATH.pts[0];
-    pc.fillStyle = '#0d0805';
-    pc.beginPath(); pc.ellipse(e0[0] + 8, e0[1], 34, 26, 0.4, 0, 6.283); pc.fill();
+    // a cave mouth per ENTRANCE — every road has to come from somewhere
+    for (var e1 = 0; e1 < LN.length; e1++) {
+      var e0 = LN[e1].pts[0];
+      pc.fillStyle = '#0d0805';
+      pc.beginPath(); pc.ellipse(e0[0] + 8, e0[1], 34, 26, 0.4, 0, 6.283); pc.fill();
+    }
   };
 
   Game.prototype._drawCavern = function (ctx) {
@@ -5223,12 +5408,14 @@
       var lim = MAP.pathW * 0.5 + 16;
       ctx.strokeStyle = 'rgba(255,90,80,0.16)';
       ctx.lineWidth = lim * 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-      ctx.beginPath();
-      for (var rd = 0; rd <= PATH.len; rd += 14) {
-        var rp = pathPointAt(rd);
-        if (rd === 0) ctx.moveTo(rp.x, rp.y); else ctx.lineTo(rp.x, rp.y);
+      for (var cl = 0; cl < LANES.length; cl++) {
+        ctx.beginPath();
+        for (var rd = 0; rd <= LANES[cl].len; rd += 14) {
+          var rp = pathPointAt(rd, cl);
+          if (rd === 0) ctx.moveTo(rp.x, rp.y); else ctx.lineTo(rp.x, rp.y);
+        }
+        ctx.stroke();
       }
-      ctx.stroke();
       ctx.fillStyle = 'rgba(255,90,80,0.14)';
       ctx.beginPath(); ctx.arc(MAP.keep.x, MAP.keep.y, 96, 0, 6.283); ctx.fill();
       for (var ez = 0; ez < this.towers.length; ez++) {
@@ -5388,24 +5575,35 @@
   // coins-lost star grade feel arbitrary. O(1): two path ops per FRAME.
   Game.prototype._drawMouthAlarm = function (ctx) {
     var esc = 0;
+    // PER MOUTH. With two roads a thief escapes by the one it came in on, so
+    // the alarm has to flare there and not at road zero's mouth every time.
+    var escLn = [];
     for (var q = 0; q < this.enemies.length; q++) {
       var c = this.enemies[q];
-      if (c.fleeing && c.stolen > 0) esc = Math.max(esc, 1 - Math.min(1, c.d / 220));
+      if (c.fleeing && c.stolen > 0) {
+        var cl = c.ln | 0, ce = 1 - Math.min(1, c.d / 220);
+        esc = Math.max(esc, ce);
+        escLn[cl] = Math.max(escLn[cl] || 0, ce);
+      }
     }
     if (esc <= 0.02) return;                       // its mere presence is the alarm
-    var m0 = PATH.pts[0];
-    var pul = 0.65 + 0.35 * Math.sin(this.worldT * (4 + 8 * esc));   // rate rises as it closes
-    ctx.fillStyle = 'rgba(255,60,50,' + (0.08 + 0.20 * esc) + ')';
-    ctx.beginPath(); ctx.ellipse(m0[0], m0[1], 34 + 40 * esc, 26 + 30 * esc, 0.4, 0, 6.283); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,123,123,' + (0.20 + 0.65 * esc * pul) + ')';
-    ctx.lineWidth = 1.5 + 5 * esc;
-    ctx.beginPath(); ctx.ellipse(m0[0], m0[1], 34 + 14 * esc, 26 + 11 * esc, 0.4, 0, 6.283); ctx.stroke();
+    for (var al = 0; al < LANES.length; al++) {
+      var ae = escLn[al] || 0;
+      if (ae <= 0.02) continue;
+      var m0 = LANES[al].pts[0];
+      var pul = 0.65 + 0.35 * Math.sin(this.worldT * (4 + 8 * ae));   // rate rises as it closes
+      ctx.fillStyle = 'rgba(255,60,50,' + (0.08 + 0.20 * ae) + ')';
+      ctx.beginPath(); ctx.ellipse(m0[0], m0[1], 34 + 40 * ae, 26 + 30 * ae, 0.4, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,123,123,' + (0.20 + 0.65 * ae * pul) + ')';
+      ctx.lineWidth = 1.5 + 5 * ae;
+      ctx.beginPath(); ctx.ellipse(m0[0], m0[1], 34 + 14 * ae, 26 + 11 * ae, 0.4, 0, 6.283); ctx.stroke();
+    }
   };
   Game.prototype._drawTar = function (ctx) {
     for (var i = 0; i < this.tar.length; i++) {
       var tp = this.tar[i];
       var fade = Math.min(1, (tp.until - this.worldT) / 0.6);   // last 0.6s cools off
-      var a = pathPointAt(tp.d);
+      var a = pathPointAt(tp.d, tp.ln);
       var gl = 0.55 + 0.25 * Math.sin(this.worldT * 5 + tp.d);  // ember shimmer
       ctx.fillStyle = 'rgba(24,14,8,' + (0.75 * fade) + ')';
       ctx.beginPath(); ctx.ellipse(a.x, a.y, tp.w * 0.62, tp.w * 0.30, 0, 0, 6.283); ctx.fill();
@@ -5413,7 +5611,7 @@
       ctx.beginPath(); ctx.ellipse(a.x, a.y, tp.w * 0.45, tp.w * 0.20, 0, 0, 6.283); ctx.fill();
       ctx.fillStyle = 'rgba(255,190,90,' + (0.35 * gl * fade) + ')';
       for (var s = 0; s < 3; s++) {
-        var sa = pathPointAt(tp.d + (s - 1) * tp.w * 0.3);
+        var sa = pathPointAt(tp.d + (s - 1) * tp.w * 0.3, tp.ln);
         ctx.beginPath(); ctx.arc(sa.x + Math.sin(this.worldT * 3 + s * 2.1 + tp.d) * 4, sa.y - 1, 1.6, 0, 6.283); ctx.fill();
       }
     }
@@ -5810,7 +6008,7 @@
     var fy = eFly(e) ? -26 + Math.sin(this.worldT * 4 + e.id) * 4 : 0;
     // BEAT 1a — the shadow REACHES as he closes on the hoard: it darkens,
     // widens and flattens over the last 70 units. Zero extra draw calls.
-    var near = e.fleeing ? 0 : Math.max(0, 1 - (PATH.len - e.d) / 70);
+    var near = e.fleeing ? 0 : Math.max(0, 1 - (laneLen(e.ln) - e.d) / 70);
     // depth: units grow toward the camera, matching the painted floor
     var dsc = depthScale(p.y);
     var baseW = (e.type === 'boss' ? 62 : e.type === 'brute' ? 46 : 36) * dsc;
@@ -5835,7 +6033,7 @@
       var t = this.worldT, ph = e.id * 1.7;
       var boss = e.type === 'boss';
       var moving = e.grabT <= 0;
-      var ahead = pathPointAt(e.fleeing ? Math.max(0, e.d - 8) : Math.min(PATH.len, e.d + 8));
+      var ahead = pathPointAt(e.fleeing ? Math.max(0, e.d - 8) : Math.min(laneLen(e.ln), e.d + 8), e.ln);
       // face the TRAVEL direction: mirror when it opposes the art's native side
       var native = ENEMY_FACING[e.type] || -1;
       var flip = (ahead.x - p.x) < -0.5 ? -native : native;
@@ -5885,7 +6083,7 @@
       // BEAT 1b — the rear-back wind-up over the last 26 units before the hoard
       var lean = 0;
       if (!e.fleeing && e.grabT <= 0) {
-        var toKeep = PATH.len - e.d;
+        var toKeep = laneLen(e.ln) - e.d;
         if (toKeep < 26) {
           var aw = 1 - toKeep / 26;
           // TRAVEL direction, never `flip` (which is relative to each sprite's
@@ -6119,7 +6317,7 @@
            : wph < 3.142 ? ART.images.hero_man
            : wph < 4.712 ? (wup || ART.images.hero_man)
            : ART.images.hero_man;
-    } else if (this._breathT > 0 && ART.images.hero_breathe) {
+    } else if ((this._breathT > 0 || this._spitT > 0) && ART.images.hero_breathe) {
       // THE OPEN JAW IS A FRAME, NOT PAINT. The idle plate has a closed muzzle,
       // and the dark ellipse this used to stamp on it to fake an open mouth
       // reads -- magnified -- as a black bar punched through his cheek. VANUS:
@@ -6401,11 +6599,13 @@
       if (c3.fleeing && c3.stolen > 0) esc = Math.max(esc, 1 - Math.min(1, c3.d / 220));
     }
     if (esc > 0.02) {
-      var m1 = pathPointAt(0), mp3 = R3D.remap(m1.x, m1.y);
       var pul2 = 0.65 + 0.35 * Math.sin(this.worldT * (4 + 8 * esc));
       ctx.strokeStyle = 'rgba(255,123,123,' + (0.2 + 0.6 * esc * pul2) + ')';
       ctx.lineWidth = 2 + 5 * esc;
-      ctx.beginPath(); ctx.ellipse(mp3.x, mp3.y, 40 + 26 * esc, 18 + 12 * esc, 0, 0, 6.283); ctx.stroke();
+      for (var ml = 0; ml < LANES.length; ml++) {
+        var m1 = pathPointAt(0, ml), mp3 = R3D.remap(m1.x, m1.y);
+        ctx.beginPath(); ctx.ellipse(mp3.x, mp3.y, 40 + 26 * esc, 18 + 12 * esc, 0, 0, 6.283); ctx.stroke();
+      }
     }
     // Mother's Breath prompt still needs its tap target visible
     if (this.motherReady) {
@@ -7353,11 +7553,11 @@
 
     // which keep to hold next — the first unlocked level short of 3 stars
     var next = -1;
-    for (var ri = 0; ri < MAPS.length; ri++) {
+    for (var ri = 0; ri < CAMPAIGN_MAPS; ri++) {
       if (Save.unlocked(ri) && (Save.data.stars[ri] | 0) < 3) { next = ri; break; }
     }
     // bounded by rows, not maps — same landmine as the tap side (see there)
-    for (var li = 0; li < Math.min(MAPS.length, G.rows.length); li++) {
+    for (var li = 0; li < Math.min(CAMPAIGN_MAPS, G.rows.length); li++) {
       var r = G.rows[li], open = Save.unlocked(li);
       if (open && li === next) {
         // the recommended row breathes; nothing else on the screen moves
@@ -7400,7 +7600,7 @@
     }
     ctx.font = '11px system-ui, sans-serif';
     var todayBest = (Save.data.daily.day === dayNumber()) ? Save.data.daily.best : 0;
-    inkText(ctx, MAPS[dailySeed() % MAPS.length].name, dcx, 648, '#c9b8ff', 4, 1);
+    inkText(ctx, MAPS[dailySeed() % CAMPAIGN_MAPS].name, dcx, 648, '#c9b8ff', 4, 1);
     var dl2 = todayBest ? 'your best wave ' + todayBest
       : (Save.data.dailyBestWave > 0 ? 'all-time wave ' + Save.data.dailyBestWave : 'endless — no finish line');
     inkText(ctx, dl2, dcx, 662, 'rgba(201,184,255,0.75)', 4, 1);
@@ -7452,7 +7652,7 @@
         // 6 trials x 3 levels = 18 badges. '/9' dated from when there were
         // three trials and quietly told the player they were twice as done
         // as they were — and it can never be reached, so it reads as broken.
-        inkText(ctx, live ? 'TRIALS ' + tDone + '/' + (TRIAL_ORDER.length * MAPS.length) : 'TRIALS', pcx, pcy + 17,
+        inkText(ctx, live ? 'TRIALS ' + tDone + '/' + (TRIAL_ORDER.length * CAMPAIGN_MAPS) : 'TRIALS', pcx, pcy + 17,
                 live ? '#d9f2ff' : '#8a7f72', 3, 1);
       } else {
         drawSpeaker(ctx, pcx - 4, pcy - 9, Sfx.isMuted());
@@ -7595,7 +7795,7 @@
       ctx.fillText(fitText(ctx, tr.name, textW), 42, ry + 24);
       ctx.fillStyle = '#b9a27f'; ctx.font = '11px system-ui, sans-serif';
       ctx.fillText(fitText(ctx, tr.pitch, textW), 42, ry + 42);
-      for (var lv2 = 0; lv2 < MAPS.length; lv2++) {
+      for (var lv2 = 0; lv2 < CAMPAIGN_MAPS; lv2++) {
         var chx = WORLD_W - 168 + lv2 * 46;
         var wonLv = Save.data.stars[lv2] > 0;
         var badge = wonLv && Save.data.trials[lv2] && Save.data.trials[lv2][key];

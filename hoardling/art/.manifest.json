@@ -179,25 +179,25 @@
    "as_drawn_psnr": 39.6
   },
   "hero_man.png": {
-   "size": "779px",
-   "kb": 139.3,
+   "size": "875px",
+   "kb": 140.2,
    "q": 84,
-   "codec_psnr": 36.7,
-   "as_drawn_psnr": 36.7
+   "codec_psnr": 37.3,
+   "as_drawn_psnr": 37.3
   },
   "hero_man_dn.png": {
-   "size": "779px",
-   "kb": 146.1,
+   "size": "875px",
+   "kb": 142.2,
    "q": 84,
-   "codec_psnr": 36.2,
-   "as_drawn_psnr": 36.2
+   "codec_psnr": 37.8,
+   "as_drawn_psnr": 37.8
   },
   "hero_man_up.png": {
-   "size": "779px",
-   "kb": 160.9,
+   "size": "875px",
+   "kb": 146.3,
    "q": 84,
-   "codec_psnr": 35.4,
-   "as_drawn_psnr": 35.4
+   "codec_psnr": 37.0,
+   "as_drawn_psnr": 37.0
   },
   "hero_title.png": {
    "size": "863->594px",
@@ -212,13 +212,6 @@
    "q": 84,
    "codec_psnr": 37.2,
    "as_drawn_psnr": 38.9
-  },
-  "hero_whelp_prepack_backup.png": {
-   "size": "693px",
-   "kb": 67.1,
-   "q": 84,
-   "codec_psnr": 38.5,
-   "as_drawn_psnr": 38.5
   },
   "icon-180.png": {
    "size": "png (icon)",
