@@ -5419,6 +5419,39 @@
     return { x: tw.x + f * m.fwd * ms, y: tw.y - m.up * ms };
   };
 
+  /// A WARM SILHOUETTE, CACHED PER SPRITE, blitted slightly larger behind a
+  /// raider so it never sinks into the floor.
+  ///
+  /// Measured, which is why this exists rather than eight new sprites: the
+  /// cavern floor sits at luminance 42, and the LOWER THIRD of eight of the ten
+  /// raiders sits within 19 points of it -- the Greed Hexer at 46, the Filcher
+  /// at 47, the Shellback 49, the Hoard King 60. Only the Gloomwing (93) and
+  /// the Blinker (142) separate on their own. That is not a boss problem, it is
+  /// the whole cast, and VANUS saw it first on the King: "the bottom half of it
+  /// is getting darker and glitching out... I think for all of them".
+  ///
+  /// It is the style doing it, not a mistake: the art bible asks for shadow
+  /// sides in cool blue-violet, and a blue-violet leg on a blue-violet floor is
+  /// invisible by construction. A rim is the standard answer and it costs one
+  /// cached blit per TYPE, built once, in the same idiom as _turretFor.
+  Game.prototype._rimFor = function (spriteId) {
+    this._rimCache = this._rimCache || {};
+    if (this._rimCache[spriteId] !== undefined) return this._rimCache[spriteId];
+    var img = ART.images[spriteId];
+    if (!img || !img.width) return (this._rimCache[spriteId] = null);
+    var cv = document.createElement('canvas');
+    cv.width = img.width; cv.height = img.height;
+    var x = cv.getContext('2d');
+    x.drawImage(img, 0, 0);
+    // keep the ALPHA, throw away the colour: source-in paints every opaque
+    // pixel one warm tone, so the rim reads the same on a dark leg and a gold
+    // breastplate instead of inheriting whatever it was standing in front of.
+    x.globalCompositeOperation = 'source-in';
+    x.fillStyle = 'rgba(255,196,124,1)';
+    x.fillRect(0, 0, cv.width, cv.height);
+    return (this._rimCache[spriteId] = cv);
+  };
+
   Game.prototype._turretFor = function (spriteId, tt) {
     if (!tt || !tt.turret) return null;
     this._turretCache = this._turretCache || {};
@@ -5845,6 +5878,19 @@
       ctx.translate(p.x, p.y + 6 + fy + hop);
       ctx.rotate(waddle + lean);
       ctx.scale(face * (2 - squash), squash);
+      // SEPARATION RIM, behind the sprite and very slightly larger, so a raider
+      // never disappears into the floor it is standing on. See _rimFor for the
+      // measurement that justifies it: eight of ten raiders have a lower third
+      // within 19 luminance points of the cavern floor. 3.5% larger is a hair
+      // over one screen pixel at true draw size -- enough to catch the eye as an
+      // edge, far too little to read as a halo.
+      var rimc = this._rimFor(sid);
+      if (rimc) {
+        var rk = 1.035;
+        ctx.globalAlpha = 0.5;
+        ctx.drawImage(rimc, -w0 * rk / 2, -hh2 * rk, w0 * rk, hh2 * rk);
+        ctx.globalAlpha = 1;
+      }
       ctx.drawImage(img, -w0 / 2, -hh2, w0, hh2);
       // TORCHLIGHT: the six lights each map declares used to illuminate
       // nothing — they were painted before the entities. Now a body that
