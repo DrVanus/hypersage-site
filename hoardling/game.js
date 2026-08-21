@@ -6580,6 +6580,25 @@
         // by angle, the way hero_man_up/_dn work. Left as-is pending that,
         // because lowering the clamp trades a tear for a bow that never moves
         // and raising it is what VANUS already rejected as broken.
+        //
+        // ATTEMPT 1 FAILED, $0.63, DO NOT REPEAT IT. masked_repair.py over a box
+        // of (10,4)-(544,540) -- everything above the drum -- with a prose prompt
+        // asking for the weapon lowered. All three candidates verified "outside-
+        // mask pixels changed: 0", so the tool did its job; the MODEL re-composed
+        // rather than re-posed. Every candidate came back massively zoomed in,
+        // and the kobold gunner was mangled in one and gone from two. The mask
+        // was 75% of the plate, which is a regeneration wearing a mask -- the
+        // exact failure targeted-art-repair's own gotcha table names.
+        //
+        // The architecture that should work, and costs one generation:
+        //   1. inpaint ONE "bare machine" plate -- drum, deck, gunner, empty
+        //      mount, weapon REMOVED. A removal is a well-posed inpaint task;
+        //      a re-pose of a large rigid object is not.
+        //   2. cut the weapon out of THIS plate with an authored mask, so it is
+        //      the real painted weapon with zero model drift.
+        //   3. engine draws bare plate, then the weapon cutout rotated about its
+        //      trunnion to any angle. Continuous aim, perfect registration, and
+        //      no seam because nothing is split horizontally any more.
         var want = 0.30 * (fdy / fn) + 0.07 * Math.abs(fdx / fn) * (fdy >= 0 ? 1 : -1);
         // Only a machine with a SEPARATED turret may turn at all — its base
         // stays planted. The Mimic is a chest: it mirrors, nothing rotates.
