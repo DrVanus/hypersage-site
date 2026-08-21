@@ -5560,10 +5560,24 @@
         // not swing it like a top-down turret. Only a machine with a separated
         // turret rotates at all (the base stays planted), so the plate cannot
         // tip over.
-        var want = 0.42 * (fdy / fn) + 0.16 * Math.abs(fdx / fn) * (fdy >= 0 ? 1 : -1);
+        // BACK DOWN TO A SEAM-SAFE ANGLE. I raised this to 0.42/0.16 with a
+        // 0.52 clamp to make the tracking visible, and it visibly BROKE the
+        // machine: `turret.cut` splits the plate into a top and a base, and
+        // rotating the top 24-30 degrees swings it off the socket it is drawn
+        // to sit in, so the bow assembly detached from its drum. VANUS: "the
+        // crossbows still arent right either... its broken". The original 0.30
+        // was not timidity -- it is the angle at which a painted three-quarter
+        // plate can be rotated without the cut showing, and its comment says
+        // all eight compass directions were rendered to pick it.
+        //
+        // The real defect was never the angle. It was that `_aimX` only updated
+        // when the machine FIRED, so the barrel pointed at where the raider had
+        // been up to a full cooldown earlier. That is fixed above and it is what
+        // makes the machine read as tracking; this only has to not break.
+        var want = 0.30 * (fdy / fn) + 0.07 * Math.abs(fdx / fn) * (fdy >= 0 ? 1 : -1);
         // Only a machine with a SEPARATED turret may turn at all — its base
         // stays planted. The Mimic is a chest: it mirrors, nothing rotates.
-        fRot = tt2.turret ? Math.max(-0.52, Math.min(0.52, want)) : 0;
+        fRot = tt2.turret ? Math.max(-0.33, Math.min(0.33, want)) : 0;
         // ease in RENDER time; cosmetic only, so wall-clock is correct here
         var prev = tw._faceRot === undefined ? fRot : tw._faceRot;
         var prevS = tw._faceSign === undefined ? fSign : tw._faceSign;
@@ -6084,7 +6098,16 @@
       var rise  = mnt ? Math.cos(ht * flapF)               // hover, out of phase
                       : (hmoving ? -Math.abs(Math.sin(ht * flapF)) : 0);
       var bobA2 = mnt ? 2.2 : (hmoving ? 1.5 : 0);         // idle is EXACTLY 0
-      var hsq = 1 + Math.sin(ht * (hmoving ? 9 : 5)) * (hmoving ? 0.05 : 0.035);
+      // NO IDLE DEFORMATION AT ALL. A standing Wick was still being squashed
+      // and stretched by this breathing term -- (2-hsq) on X against hsq on Y --
+      // which is what VANUS is seeing: "wicks movement even when still looks
+      // like he's bouncing... that doesn't make it life like just cause you
+      // make him bounce. I said to give him other movements... not just making
+      // things stretch". Stretching a painting is not animation. A standing
+      // character should be STILL until it has real frames to be alive with.
+      var hsq = hmoving ? 1 + Math.sin(ht * 9) * 0.05
+              : mnt     ? 1 + Math.sin(ht * 7.4) * 0.018
+              : 1;
       var hh0 = HERO_H * manS, hw0 = hh0 * (himg.width / himg.height);
       // the sprite is drawn facing LEFT natively, so world-facing is -hflip.
       // _muzzle() reads this to put the breath where his mouth is.
