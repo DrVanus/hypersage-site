@@ -731,9 +731,11 @@
       // other dragon is simply THERE.
       //
       // FAIRNESS IS GEOMETRIC, not a number: the two roads are mirror images
-      // and measured to the same arc length (615 each), so neither side gets a
-      // longer runway, and the wave builder already alternates raiders lane by
-      // lane so both roads carry the same party.
+      // measured to the same arc length (615 each), the ten pads are exact
+      // twins at 420 - x, and the duel wave builder sends the SAME party down
+      // both roads rather than splitting one between them. Proven, not
+      // asserted: running one rival's own plan down BOTH sides ends 35-35 with
+      // identical machine counts and identical gold to the coin.
       name: 'The Split Cavern',
       duelShared: true,                 // one cavern, two sides
       keep: { x: 104, y: 205 },         // lane 0 = YOURS; the single-keep code reads this
@@ -744,9 +746,15 @@
         [[54, 748], [92, 676], [46, 602], [92, 528], [150, 470], [96, 396], [70, 316], [104, 250], [104, 232]],
         [[366, 748], [328, 676], [374, 602], [328, 528], [270, 470], [324, 396], [350, 316], [316, 250], [316, 232]],
       ],
+      // EVERY PAD IS ITS TWIN AT 420 - x. Two of them were not: (86,462) faced
+      // (328,462) where the mirror is 334, and (32,666) faced (376,666) where
+      // the mirror is 388. Small, but the whole fairness argument for this map
+      // is GEOMETRIC -- "neither side gets better ground" is a claim you can
+      // only make about an arena that is actually symmetric, and a claim that
+      // is only nearly true is the kind that gets quoted later as if it were.
       pads: [
         { x: 110, y: 306 }, { x: 44, y: 276 }, { x: 86, y: 462 }, { x: 98, y: 576 }, { x: 32, y: 666 },
-        { x: 310, y: 306 }, { x: 376, y: 276 }, { x: 328, y: 462 }, { x: 322, y: 576 }, { x: 376, y: 666 },
+        { x: 310, y: 306 }, { x: 376, y: 276 }, { x: 334, y: 462 }, { x: 322, y: 576 }, { x: 388, y: 666 },
       ],
       torches: [[186, 700], [234, 700], [176, 420], [244, 420], [150, 560], [270, 560]],
       heroStart: { x: 150, y: 690 },
@@ -1717,6 +1725,14 @@
   // one-road curve instead of hiding the problem inside a hand-picked offset.
   var DUEL_LANE_PURSE = 0.60;             // per road beyond the first
   function duelStartGold(at, mapIdx) {
+    var mp = MAPS[mapIdx | 0] || MAPS[0];
+    // A SHARED CAVERN IS A ONE-ROAD DEFENCE. The multiplier exists because on a
+    // two-road arena one purse has to fund two fronts -- but in a duel the
+    // second road is the RIVAL'S, you never defend it, and the duel wave now
+    // sends a full party down each. That is exactly the one-road board
+    // `100 + 125*at` was measured against, so the x1.6 was pure surplus, paid
+    // to both sides (measured: 760 where the calibration says 475).
+    if (mp.duelShared) return Math.round(100 + 125 * (at | 0));
     var lanes = (PATHS[mapIdx | 0] || PATHS[0]).length;
     return Math.round((100 + 125 * (at | 0)) * (1 + DUEL_LANE_PURSE * (lanes - 1)));
   }
@@ -1747,9 +1763,8 @@
   // Interleaved m1/m2 ON PURPOSE: tonight's arena is (day + rivalIdx) %% 6,
   // so four consecutive indices are what the picker shows at once. Grouped
   // by map, that put three of the four rivals on the same road every night.
-  // NOTE: the curve columns in RIVAL_CURVES are indexed by ARENA — reordering
-  // this list without permuting them identically silently pairs every rival
-  // with the wrong recording.
+  // This list is now free to be reordered: nothing is indexed against it any
+  // more, because nothing about a rival is recorded ahead of time.
   // THE ARENAS ARE NOW THEIR OWN GROUND. Every one of these used to be map 1 or
   // map 2 -- the two boards the campaign already walks you through -- so a duel
   // was a level you had played, with a scoreboard. VANUS: "why is our dual game
@@ -1758,9 +1773,6 @@
   // Throats merges its roads into one climb (7 of 10 pads reach both, so the
   // merge is the map) and the Sunder never merges at all (9 of 10 pads reach
   // exactly one road, so you fund two fronts or lose one).
-  //
-  // Changing the ground INVALIDATES RIVAL_CURVES -- a rival is a recording of
-  // this bot playing THIS arena. They are re-baked below in the same commit.
   var DUEL_ARENAS = [
     // at 3-4, not the 5-10 the one-road arenas used. Swept: on two roads at>=5
     // wipes every rival but cinder, which is the DEAD-arena pattern (see the
@@ -1779,10 +1791,11 @@
   // are strategies with map-dependent strengths, not skill tiers.
   // So policy stays as CHARACTER — how a rival plays, visible in their board —
   // and `purse` is the difficulty: how much of the arena's opening gold they
-  // salvaged. A weaker hoardling brought less. That is monotonic by
-  // construction, it is honest (the bot really plays with exactly that money),
-  // and it is stated on their card rather than hidden in a fudge factor.
-  // The PLAYER always gets the full purse.
+  // salvaged, applied to her opening gold AND to what her kills pay her. A
+  // weaker hoardling brought less and earns less. That is monotonic by
+  // construction, it is honest (she really plays with exactly that money, in
+  // this sim, in front of you), and it is stated on her card rather than
+  // hidden in a fudge factor. The PLAYER always gets the full purse.
   // Ranks and pips are MEASURED, not asserted. Two rounds of handicap tuning
   // failed to make the roster monotonic, and the bake explained why: on the
   // long switchback (map 2) breadth beats depth decisively, because coverage
@@ -1804,36 +1817,6 @@
       blurb: 'Works the cavern floor herself. Good luck.' },
   ];
   var RIVAL_ORDER = ['tallow', 'flint', 'ember', 'cinder'];
-  // RIVAL_CURVES[rivalId][seedIdx] = hoard after each wave, DUEL_WAVES+1 long
-  // (index 0 = the starting hoard, index W = after wave W resolved). A rival
-  // whose hoard reaches 0 has been sacked and the duel ends early.
-  // BAKED — regenerate with: node tools/bake-rivals.js  (writes this block)
-  // BAKED 2026-08-14 by tools/bot.js bakeAll() through __game.duelBake —
-  // real runs, real economy, real injected taps. Regenerate after ANY change
-  // to DUEL_ARENAS, DUEL_WAVES, duelStartGold, the wave generator, or tower
-  // balance: a stale curve is a rival fighting a game that no longer exists.
-  // RE-BAKED 2026-08-20 from FOUR GRADED BOARDS, not one board with four purse
-  // multipliers. Every rival used to be recorded through the same legacy
-  // policy, which built the same two machines for all of them -- so "Builds
-  // wide and cheap" and "Few machines, all of them monsters" were the same
-  // board wearing different blurbs. Then the tap-deferral fix made that one
-  // board strong enough that every rival held 60 flat for all thirteen waves,
-  // which is a ladder with no rungs.
-  //
-  // The four now play differently (PLANS.rival_* in tools/bot.js) and the
-  // curves show it: tallow is sacked on every arena, flint and ember fall
-  // between, and cinder never drops a coin. Ties go to the player
-  // (`hoard >= rivalHoard`), so cinder is "keep all 60" -- demanding but
-  // reachable with a 3-star board, which is the right bar for a 3-pip DRAKE
-  // whose blurb is "Good luck."
-  //
-  // Re-bake with HoardBot.bakeAll().literal and CLEAR Save.data.duels after.
-  var RIVAL_CURVES = {
-    tallow: [[60,34,24,19,19,19,19,19,19,19,19,19,19], [60,25,25,25,25,25,25,25,25,25,25,25,25], [60,21,21,21,21,21,21,21,21,21,21,21,21], [60,23,12,12,12,12,12,12,12,12,12,12,12], [60,35,30,30,30,30,30,30,30,30,30,30,30], [60,25,25,25,25,25,25,25,25,25,25,25,25]],
-    flint: [[60,60,60,60,60,60,60,35,35,30,30,0,0], [60,55,55,55,53,53,53,24,18,18,18,18,18], [60,60,60,60,60,60,35,35,28,0,0,0,0], [60,60,60,52,48,12,12,12,12,12,12,12,12], [60,60,60,60,60,60,35,35,35,0,0,0,0], [60,50,50,50,50,50,50,21,0,0,0,0,0]],
-    ember: [[60,60,60,60,60,60,60,35,35,35,35,35,35], [60,60,60,60,60,60,60,35,35,35,35,35,35], [60,60,60,60,60,60,35,35,35,30,30,30,0], [60,60,60,60,60,35,35,35,0,0,0,0,0], [60,60,60,60,60,60,35,35,35,35,30,30,30], [60,60,60,60,60,60,60,35,35,35,35,35,35]],
-    cinder: [[60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,60,60,60,60,60,60], [60,60,60,60,60,60,60,35,35,35,35,35,35]],
-  };
   // A rival's arena for today. Pure function of the day and the rival, so both
   // sides of a duel are the same fight and tomorrow is computable today (which
   // is how the curves get baked ahead of time).
@@ -1844,12 +1827,18 @@
   // has to make impossible.
   function duelMapAt(seedIdx) { return Math.min(MAPS.length - 1, DUEL_ARENAS[seedIdx].map | 0); }
   function duelMapFor(rivalIdx) { return duelMapAt(duelSeedIdx(rivalIdx)); }   // tonight's, for the picker
-  /** The rival's hoard after wave w, or null if this duel has no baked curve. */
-  function rivalHoardAt(rivalIdx, seedIdx, w) {
-    var row = RIVAL_CURVES[RIVAL_ORDER[rivalIdx]];
-    if (!row || !row[seedIdx]) return null;
-    var c = row[seedIdx];
-    return c[Math.max(0, Math.min(c.length - 1, w | 0))];
+  /** Can this rival actually play her half of the cavern?
+   *
+   *  THIS USED TO ASK A DIFFERENT QUESTION. The duel was once a race against
+   *  RIVAL_CURVES -- a baked table of "hoard after wave W", recorded by the bot
+   *  ahead of time -- so the readiness test was "is there a recording of her?"
+   *  She is simulated live now, in the same cavern, off the same waves, so the
+   *  recording was answering a question about a game that no longer exists.
+   *  The honest modern test is whether she has a PLAN to play with; without one
+   *  _rivalTick would silently fall back to Tallow's and the card would lie. */
+  function rivalReady(rivalIdx) {
+    var rv = RIVALS[rivalIdx | 0];
+    return !!(rv && RIVAL_PLANS[rv.id]);
   }
 
   var Save = (function () {
@@ -3027,20 +3016,18 @@
 
   Game.prototype.reset = function (seed, mode, level, trialKey, rivalIdx) {
     this.mode = mode || this.mode;
-    // DUEL: the arena is DERIVED, never passed. The rival's curve is indexed by
-    // (rival, seedIdx), so letting a caller supply a seed would allow a duel to
-    // run on ground the recording was never made on — the two sides would
-    // silently be fighting different maps and the scoreboard would be a lie.
-    // One source of truth, and it lives here.
+    // DUEL: the arena is DERIVED, never passed. Both dragons fight in ONE
+    // cavern, so the arena is the one thing that cannot be allowed to differ
+    // from what the picker showed -- letting a caller supply a seed would put
+    // the fight on ground the card never named. One source of truth, here.
     this.rivalIdx = (this.mode === 'duel') ? clamp(rivalIdx | 0, 0, RIVALS.length - 1) : -1;
     this.rival = this.rivalIdx >= 0 ? RIVALS[this.rivalIdx] : null;
     this.duelSeedIdx = -1;
     if (this.rivalIdx >= 0) {
-      // An explicit seed is honoured ONLY if it is one of the baked arenas —
-      // that is what lets tools/bake-rivals.js walk every (rival, arena) pair
-      // through the ordinary code path instead of needing a private one. Any
-      // other value (normal play passes 0) takes tonight's derived arena. The
-      // effect is that a duel can never run on ground with no curve slot.
+      // An explicit seed is honoured ONLY if it is one of DUEL_ARENAS -- that
+      // is what lets a harness walk every (rival, arena) pair through the
+      // ordinary code path instead of needing a private one. Any other value
+      // (normal play passes 0) takes tonight's derived arena.
       var si = -1, sw = seed >>> 0;
       for (var ai = 0; ai < DUEL_ARENAS.length; ai++) if ((DUEL_ARENAS[ai].seed >>> 0) === sw) { si = ai; break; }
       this.duelSeedIdx = si >= 0 ? si : duelSeedIdx(this.rivalIdx);
@@ -3051,7 +3038,17 @@
     // as a PURE function of the seed, so every player fights the same layout
     if (this.mode === 'daily') this.levelIdx = setLevel(this.seed % CAMPAIGN_MAPS);
     else if (this.mode === 'duel') this.levelIdx = setLevel(duelMapAt(this.duelSeedIdx));
-    else this.levelIdx = setLevel(level !== undefined ? level : (this.levelIdx || 0));
+    else {
+      // CLAMP TO THE CAMPAIGN RANGE. Leaving a duel calls reset(1, 'campaign')
+      // with no level, which fell through to `this.levelIdx || 0` -- and after a
+      // duel that is 5, a duel-only arena with no row in WAVE_TABLES. Both
+      // totalWaves() and draw() threw on it the moment the title screen came up.
+      // The last campaign level is remembered rather than clamped down to 2, so
+      // quitting a duel does not silently move you three levels along.
+      var lv = (level !== undefined) ? level : (this._campaignLevel || 0);
+      this.levelIdx = setLevel(Math.min(lv | 0, CAMPAIGN_MAPS - 1));
+      this._campaignLevel = this.levelIdx;
+    }
     seedStream(this.seed);                  // LANE 2 seeded once, at reset
     this.worldT = 0;
     this.gold = CFG.startGold;
@@ -3158,7 +3155,26 @@
     // and the duel purse is assigned on the line above -- reading it any
     // earlier hands her CFG.startGold (120 against 760) and she can afford one
     // machine all game, which reads as a broken opponent rather than a poor one.
-    this.rivalGold = this.rivalSide ? this.gold : 0;
+    // HER PURSE IS THE LADDER. RIVALS[].purse -- 0.75 to 1.15 -- is what her
+    // rank and her pips on the duel card MEAN: how much of the arena's opening
+    // gold this hoardling salvaged. It used to be applied by the bot that BAKED
+    // her curve, so when the duel became a live simulation the dial silently
+    // stopped existing: every rival played off the player's exact purse, and
+    // APPRENTICE and DRAKE differed only in their build plan. A difficulty
+    // printed on a card and read by nothing is the same lie as a baked curve.
+    this.rivalPurse = (this.rival && this.rival.purse) || 1;
+    this.rivalGold = this.rivalSide ? Math.round(this.gold * this.rivalPurse) : 0;
+    this.rivalManTid = -1;                  // set by _rivalTick; -1 never matches a tid
+    // EVERY PIECE OF HER PER-RUN STATE, cleared here. _aiT survived a reset, so
+    // a duel RETRY inherited the previous run's phase in her 0.5s beat grid and
+    // her first build landed at a different moment -- a replay that is not a
+    // replay. _spotKey is a one-slot cache keyed on (level, rank, side) and
+    // would hand a new arena the previous one's shortlist.
+    this._aiT = 0;
+    this.rivalWick = null;
+    this.rivalPrev = this.rivalHoard;
+    this.rivalDrop = 0;
+    this._spotKey = null; this._spotCache = null;
     this.hitstopT = 0;
     this.resultLockT = 0;
     this._ocSeen = false;
@@ -3227,7 +3243,7 @@
     // the Guild sent its veterans to both caves — so twelve waves are twelve
     // waves of actual contest instead of a countdown to one.
     var gw = (this.mode === 'duel') ? w + (DUEL_ARENAS[this.duelSeedIdx].at | 0) : w;
-    var groups = seeded ? dailyWaveComp(gw, this.seed) : WAVE_TABLES[this.levelIdx][w];
+    var groups = this.waveGroups(w);
     var hpMul = seeded ? dailyHpMul(gw) : campHpMul(w, this.levelIdx);
     var q = [];
     for (var g = 0; g < groups.length; g++) {
@@ -3237,14 +3253,49 @@
       }
     }
     q.sort(function (a, b) { return a.t - b.t || (a.type < b.type ? -1 : 1); });
-    // WHICH ROAD. Strict alternation over the SORTED queue, so it is a pure
-    // function of the wave and needs no draw from any stream -- lane 2 stays
-    // untouched and a duel is still bit-identical on both sides. Alternating
-    // rather than rolling also GUARANTEES both roads carry traffic every wave,
-    // which is the whole point of a second road: a random assignment can hand
-    // a wave entirely to one lane and quietly turn the map back into level 1.
+    // WHICH ROAD.
+    //
+    // A DUEL SENDS THE SAME PARTY DOWN BOTH ROADS. It does NOT split one party
+    // between them, which is what this did, and splitting cannot be made fair:
+    // `k % 2` over a time-sorted queue hands index 0 to lane 0 every time, so
+    // measured over the twelve duel waves the player's road got 128 raiders to
+    // the rival's 121, 5.8% more total HP, the first spawn of EVERY wave, and --
+    // because a boss is a group of ONE -- every boss in the mode. A mirror match
+    // (identical plan, identical machines, both sides) ended 35 to 60, and that
+    // 25-point gap was this line.
+    //
+    // Duplicating makes fairness structural instead of arithmetic: there is no
+    // odd count to round, no single boss to place, and no argument to get wrong
+    // later. It also restores the intended difficulty -- half a wave per side
+    // made a duel road easier than a campaign one.
+    if (this.rivalSide) {
+      var both = [];
+      for (var d2 = 0; d2 < q.length; d2++) {
+        for (var ln2 = 0; ln2 < LANES.length; ln2++) {
+          var c = { t: q[d2].t, type: q[d2].type, hpMul: q[d2].hpMul, ln: ln2 };
+          both.push(c);
+        }
+      }
+      return both;
+    }
+    // A multi-road CAMPAIGN map is one player defending every road, so there
+    // splitting the party is right: it is one wave arriving by two routes.
     for (var k = 0; k < q.length; k++) q[k].ln = LANES.length > 1 ? k % LANES.length : 0;
     return q;
+  };
+  /// WHICH RAIDERS WAVE w BRINGS. One function, because the sim and the wave
+  /// PREVIEW have to agree and they did not: the preview branched on 'daily'
+  /// alone, so in a duel it read WAVE_TABLES[levelIdx] with levelIdx 5 against a
+  /// three-entry table and threw `undefined[wave]` on EVERY frame of EVERY
+  /// intermission. That is the whole draw call, so the duel screen died between
+  /// waves -- shipped, and live on the site and the phone. The sim never saw it
+  /// because the sim had the branch right; only the renderer was wrong.
+  Game.prototype.waveGroups = function (w) {
+    if (this.mode === 'daily') return dailyWaveComp(w, this.seed);
+    if (this.mode === 'duel') {
+      return dailyWaveComp(w + (DUEL_ARENAS[this.duelSeedIdx].at | 0), this.seed);
+    }
+    return WAVE_TABLES[this.levelIdx][w];
   };
   Game.prototype.totalWaves = function () {
     if (this.mode === 'daily') return Infinity;
@@ -3257,6 +3308,12 @@
     if (this.countdown > 0.5 && this.wave > 0) {           // early-call bonus
       var bonus = Math.ceil(this.countdown);
       this.gold += bonus;
+      // ONE SIM, ONE COUNTDOWN: calling the wave starts it for BOTH caves, so
+      // the tempo reward has to reach both purses. It credited only yours, and
+      // in a mode scored on the margin that is up to 77 gold across a duel that
+      // the rival can never earn -- a structural, one-sided income stream. Hers
+      // rides her purse like every other coin she takes in.
+      if (this.rivalSide) this.rivalGold += Math.round(bonus * (this.rivalPurse || 1));
       this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 700, txt: '+' + bonus + 'g early!', c: '#ffd75e' });
     }
     this.spawnQueue = this.buildWave(this.wave);
@@ -3268,6 +3325,7 @@
     if (this._bossWave) this._mCue = { name: 'boss' };
     this.waveActive = true;
     this._waveStartHoard = this.hoard;   // cosmetic: lets the clear grade itself
+    this._waveStartRivalHoard = this.rivalHoard;
     this.waveT = 0;
     this.countdown = 0;
     if (!this.isRival && !Save.data.tut && this.mode === 'campaign' && this.towers.length) {
@@ -3279,6 +3337,75 @@
   };
 
   // ---- FIXED-TIMESTEP SIM. Deterministic. No ctx. No Math.random. --------
+  /// ===== THE DIVIDE =======================================================
+  /// In a shared cavern the two of you stand in ONE room, so almost every
+  /// "for each raider" and "for each machine" loop in the sim can reach across
+  /// the middle. Machine TARGETING was scoped when the duel was built
+  /// (_pickTarget takes a lane), and that made it look solved. It was not:
+  /// eleven other effects still crossed, and every one of them was a way the
+  /// duel could be a lie.
+  ///
+  ///   Wick's toll paid HER carriers' coins into YOUR hoard. Measured: parking
+  ///     him on her road with NO machines anywhere took the player 60 -> 99 --
+  ///     past the hoard's own maximum -- and sacked her to 0. That is the whole
+  ///     duel won by standing still on the other side of the room.
+  ///   his breath, his fire and his contact damage fought her wave for her
+  ///     (and every kill funded her, because a bounty pays the road it died on)
+  ///   the overclock and the Bellows aura buffed whichever machine was nearest,
+  ///     hers included
+  ///   the rotor and the crystal tick radially, with no target to scope
+  ///   a splash blast spilled across the divide
+  ///   the Hoard King's war drum hurried allies on the other road
+  ///   a sapper jammed the nearest machine, which near the middle is hers
+  ///   Mother's Breath cleared BOTH roads
+  ///   a Coin Press paid every press on the board into YOUR purse, and a Tithe
+  ///     Press on either side fattened both sides' bounties
+  ///   the Magnet Jaws fork shook coins into YOUR hoard whoever owned the jaw
+  ///
+  /// ONE predicate, used at every one of them, so the rule is greppable and a
+  /// twelfth site cannot be added without meeting it. Outside a duel it is
+  /// always true -- the campaign path is unchanged by construction, including
+  /// the genuinely two-road maps 3 and 4, where one player owns both roads.
+  Game.prototype._sameSide = function (a, b) {
+    return !this.rivalSide || ((a | 0) === (b | 0));
+  };
+  /// Which machine the dragon on side `own` is crewing, or -1. Yours arrives
+  /// on foot (hero.manned only goes true once he is AT the crank); hers is a
+  /// render, so she is simply there.
+  Game.prototype._mannedTid = function (own) {
+    if (this.rivalSide && (own | 0) === 1) {
+      return this.rivalManTid === undefined ? -1 : this.rivalManTid;
+    }
+    return this.hero.manned ? this.hero.manTid : -1;
+  };
+  /// distance^2 from a point to the nearest sample of the road `side` defends
+  /// (or of ANY road on a map that is not split). Lifted out of _rivalSpots:
+  /// her dragon needs the same measure to find the machine worth crewing.
+  Game.prototype._roadD2 = function (x, y, side) {
+    var best = 1e9;
+    for (var li = 0; li < LANES.length; li++) {
+      if (this.rivalSide && li !== (side | 0)) continue;
+      for (var d = 0; d <= LANES[li].len; d += 12) {
+        var q = pathPointAt(d, li), dx = x - q.x, dy = y - q.y;
+        var v = dx * dx + dy * dy;
+        if (v < best) best = v;
+      }
+    }
+    return best;
+  };
+  /// Index of the nearest machine owned by `own` within Wick's reach, or -1.
+  /// Split out of update() because BOTH dragons run it now.
+  Game.prototype._nearestMachineTo = function (hx, hy, own) {
+    var best = -1, bd = 62 * 62;
+    for (var i = 0; i < this.towers.length; i++) {
+      var t = this.towers[i];
+      if (!this._sameSide(t.own, own)) continue;
+      var dx = t.x - hx, dy = t.y - hy, d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = i; }
+    }
+    return best;
+  };
+
   Game.prototype.update = function (STEP) {
     this.worldT += STEP;
     if (this.infoCard && (this.infoCard.t -= STEP) <= 0) this.infoCard = null;
@@ -3294,14 +3421,18 @@
     }
     if (this.state !== 'playing') return;
 
+    // hit-stop: an event-driven, DETERMINISTIC beat of frozen sim (same for
+    // every replay of the same run -- it lives in the sim, not the renderer)
+    if (this.hitstopT > 0) { this.hitstopT -= STEP; return; }
+
     // THE RIVAL PLAYS HER HALF OF THIS CAVERN. One sim, not two: she builds and
     // upgrades on her side out of her own purse while the same waves march down
     // both roads.
+    // BELOW THE HIT-STOP GATE, not above it. A hit-stop is frozen SIM -- your
+    // raiders, your machines and your dragon all stand still -- and her AI clock
+    // was ticking straight through it, so every big hit on your road quietly
+    // bought her a slice of build time.
     if (this.rivalSide) this._rivalTick(STEP);
-
-    // hit-stop: an event-driven, DETERMINISTIC beat of frozen sim (same for
-    // every replay of the same run — it lives in the sim, not the renderer)
-    if (this.hitstopT > 0) { this.hitstopT -= STEP; return; }
 
     // -- countdown / auto-start --
     if (!this.waveActive) {
@@ -3348,7 +3479,13 @@
       this.castMother = false;
       this.motherReady = false;
       this.breathUsed = true;
-      for (var mb = 0; mb < this.enemies.length; mb++) this.enemies[mb].hp -= 60;
+      // YOUR ROAD ONLY. It wakes on YOUR hoard falling to 15, so in a duel it
+      // used to be a free clearance of the rival's wave at the moment you were
+      // losing -- and every kill it made on her road paid HER purse.
+      for (var mb = 0; mb < this.enemies.length; mb++) {
+        if (!this._sameSide(this.enemies[mb].ln, 0)) continue;
+        this.enemies[mb].hp -= 60;
+      }
       this.hitstopT = 0.12;   // ultimate beat, just inside the hitch ceiling
       this.fxQueue.push({ k: 'mother' });
       Sfx.play('breath');
@@ -3362,6 +3499,7 @@
       for (var aj = 0; aj < this.enemies.length; aj++) {
         var ally = this.enemies[aj];
         if (ally === bossE) continue;
+        if (!this._sameSide(ally.ln, bossE.ln)) continue;   // his court, not hers
         var adx = ally.px - bossE.px, ady = ally.py - bossE.py;
         if (ally.deepT > 0) continue;         // Deepchill Coil: deaf to the war drum
         // NO enrage bonus here: the King is INSIDE HIS OWN AURA, so a '+0.25
@@ -3373,8 +3511,16 @@
       // at half HP the King roars in reinforcements, once
       if (!bossE.summoned && bossE.hp <= bossE.maxHp / 2 && bossB.summonAtHalf) {
         bossE.summoned = true;
-        // summons scale like the spawner's units do (daily HP ramp)
-        var sMul = this.mode === 'daily' ? dailyHpMul(this.wave) : 1;
+        // Summons scale like the spawner's units do. This gated on 'daily'
+        // alone and read the UN-OFFSET wave, so in a duel the King's six
+        // reinforcements arrived at base looter HP (30) while every other
+        // raider in the same wave carried the ramp (x2.00 on the boss wave) --
+        // and the duel now puts a King on BOTH roads, so it was twelve
+        // under-scaled looters on the wave meant to be the fight's peak.
+        // buildWave's own rule, verbatim: duel is seeded, and offset.
+        var sWave = (this.mode === 'duel')
+          ? this.wave + (DUEL_ARENAS[this.duelSeedIdx].at | 0) : this.wave;
+        var sMul = (this.mode === 'daily' || this.mode === 'duel') ? dailyHpMul(sWave) : 1;
         for (var sm = 0; sm < bossB.summonAtHalf; sm++) {
           var lb = ENEMY_TYPES.looter;
           var sd = Math.max(0, bossE.d - sm * 14);
@@ -3444,6 +3590,7 @@
           for (var j = 0; j < this.enemies.length; j++) {
             var o = this.enemies[j];
             if (o === e || o.hp <= 0) continue;
+            if (!this._sameSide(o.ln, e.ln)) continue;   // he mends his own column
             if (o.scaldT > 0) continue;       // Whistlepot: the mend boils off as steam
             var dx = o.px - e.px, dy = o.py - e.py;
             if (dx * dx + dy * dy < base2.healR * base2.healR) {
@@ -3463,6 +3610,7 @@
           for (var sj = 0; sj < this.towers.length; sj++) {
             var stw = this.towers[sj];
             if (stw.jamT > 0) continue;                 // already silenced
+            if (!this._sameSide(e.ln, stw.own)) continue;   // it jams the road it walks
             var sdx = stw.x - e.px, sdy = stw.y - e.py, sdd = sdx * sdx + sdy * sdy;
             if (sdd < sD) { sD = sdd; sBest = sj; }
           }
@@ -3505,20 +3653,30 @@
         var fleeMul = Math.max(CFG.fleeMin, CFG.fleeBase - CFG.fleeWeight * e.stolen) * (this.mods.fleeMul || 1);
         e.d -= v * fleeMul;
         if (e.d <= 0) {                                    // escaped with treasure
-          this.stolenLost += e.stolen;
+          // YOUR LEAK, not the cavern's. stolenLost drives the STAR GRADE
+          // (<=5 = 3 stars) and the "lost N" line on the result screen, so
+          // counting coins that left HER hoard graded you on her defence.
+          if (this._sameSide(e.ln, 0)) this.stolenLost += e.stolen;
           // THE LEAK LEDGER — who actually took the hoard, and when.
           // A player could previously only tell that "stuff got through": the
           // result screen reported a total and nothing else, so a loss carried
           // no information about what to do differently. Sim-side (not
           // cosmetic) because it is graded state and must be replay-identical.
-          var lk = this.leaks[e.type] || (this.leaks[e.type] = { coins: 0, runs: 0, firstWave: this.wave + 1 });
-          lk.coins += e.stolen; lk.runs++;
+          //
+          // YOUR ROAD ONLY, for the same reason stolenLost is. The result
+          // screen's WHO GOT THROUGH table has no rival gate, so a boss theft
+          // on HER side printed as "BOSS -25 at wave 7" against your name.
+          if (this._sameSide(e.ln, 0)) {
+            var lk = this.leaks[e.type] || (this.leaks[e.type] = { coins: 0, runs: 0, firstWave: this.wave + 1 });
+            lk.coins += e.stolen; lk.runs++;
+          }
           this.enemies.splice(i, 1);
           // n is an ADDITIVE cosmetic payload on an event that already exists
           // to feed the render lane: reads e.stolen, writes nothing
           var em = laneOf(e.ln).pts[0];
-          this.fxQueue.push({ k: 'escape', x: em[0], y: em[1], n: e.stolen });
-          Sfx.play('leak');
+          this.fxQueue.push({ k: 'escape', x: em[0], y: em[1], n: e.stolen, ln: e.ln | 0 });
+          // her cave leaking must not sound your leak alarm
+          if (this._sameSide(e.ln, 0)) Sfx.play('leak');
           continue;
         }
       } else {
@@ -3537,7 +3695,7 @@
           e.grabT = CFG.grabTime;
           e.d = keepD - 1;
           var kp = pathPointAt(keepD, e.ln);
-          this.fxQueue.push({ k: 'steal', x: kp.x, y: kp.y, n: take });
+          this.fxQueue.push({ k: 'steal', x: kp.x, y: kp.y, n: take, ln: e.ln | 0 });
           Sfx.play('steal');
           if (mine && this.hoard <= 0) { this._gameOver(false); return; }
           if (!mine && this.rivalHoard <= 0) { this._gameOver(true); return; }
@@ -3550,14 +3708,15 @@
 
     // -- Overclock: the inventor at his machine. The nearest tower within
     // reach of Wick runs 25% faster — positioning is the input (deterministic).
-    var ocIdx = -1, ocD = 62 * 62;
-    for (var oc = 0; oc < this.towers.length; oc++) {
-      var op2 = this.towers[oc];
-      var odx = op2.x - this.hero.x, ody = op2.y - this.hero.y;
-      var odd = odx * odx + ody * ody;
-      if (odd < ocD) { ocD = odd; ocIdx = oc; }
-      this.towers[oc]._oc = false;
-    }
+    // ...ON HIS OWN SIDE. It took the nearest machine of EITHER owner, so
+    // walking Wick to the middle sped up whichever of her machines sat closest.
+    // And it ran for the player only: her dragon was a painting, which made
+    // Cinder's card ("Works the cavern floor herself") a blurb over a hoardling
+    // who did nothing at all. Both dragons work their own floor now.
+    for (var oc0 = 0; oc0 < this.towers.length; oc0++) this.towers[oc0]._oc = false;
+    var ocIdx = this._nearestMachineTo(this.hero.x, this.hero.y, 0);
+    var ocIdxR = (this.rivalSide && this.rivalWick)
+      ? this._nearestMachineTo(this.rivalWick.x, this.rivalWick.y, 1) : -1;
     // BELLOWS AURA — recomputed each step so selling a post takes its buff
     // with it. O(towers^2) but towers are a handful, not a crowd.
     for (var ai = 0; ai < this.towers.length; ai++) {
@@ -3567,13 +3726,14 @@
       for (var aj = 0; aj < this.towers.length; aj++) {
         var src = this.towers[aj];
         if (src.type !== 'bellows') continue;
+        if (!this._sameSide(src.own, at.own)) continue;   // her post buffs her brass
         var sr = lvlRow(src);
         var adx2 = at.x - src.x, ady2 = at.y - src.y;
         if (adx2 * adx2 + ady2 * ady2 > sr.range * sr.range) continue;
         // Read the hero directly: the _manned flags are stamped BELOW this loop,
         // so src._manned would be a frame stale and the buff would lag the art.
         if (src.jamT > 0) continue;            // a jammed post buffs nothing
-        var sMan = this.hero.manned && this.hero.manTid === src.tid;
+        var sMan = this._mannedTid(src.own) === src.tid;
         var sBoost = sMan ? (TOWER_TYPES.bellows.mannedAura || 1) : 1;
         at._auraRate = Math.max(at._auraRate, (sr.auraRate || 0) * sBoost);  // strongest post wins,
         at._auraDmg = Math.max(at._auraDmg, (sr.auraDmg || 0) * sBoost);     // posts do NOT stack
@@ -3583,11 +3743,19 @@
     // MANNED beats mere proximity: Wick at the crank IS the buff, and it is
     // visible (he is sitting on the machine) instead of an invisible aura.
     for (var mi = 0; mi < this.towers.length; mi++) {
-      this.towers[mi]._manned = this.hero.manned && this.towers[mi].tid === this.hero.manTid;
-      if (this.towers[mi]._manned) { this.towers[mi]._oc = false; if (ocIdx === mi) ocIdx = -1; }
+      var mtw2 = this.towers[mi];
+      mtw2._manned = this._mannedTid(mtw2.own) === mtw2.tid;
+      if (mtw2._manned) {
+        mtw2._oc = false;
+        if (ocIdx === mi) ocIdx = -1;
+        if (ocIdxR === mi) ocIdxR = -1;
+      }
     }
+    if (ocIdxR !== -1) this.towers[ocIdxR]._oc = true;
     if (ocIdx !== -1) {
       this.towers[ocIdx]._oc = true;
+      // ONLY YOURS IS ANNOUNCED. Her side floats nothing -- the same rule her
+      // builds already follow: a label over her cave spends your attention.
       if (!this._ocSeen) {
         this._ocSeen = true;
         var ocp = this.towers[ocIdx];
@@ -3617,12 +3785,18 @@
         // with a real cost — the seconds he spends unjamming are seconds he is
         // not manning his best machine — and it gives the Pry-Hand a counter
         // that is a PLAYER ACTION rather than a different purchase.
-        var jdx = this.hero.x - tw.x, jdy = this.hero.y - tw.y;
-        var jd2 = jdx * jdx + jdy * jdy;
-        var pry = (this.hero.manned && this.hero.manTid === tw.tid) ? 5
-                : jd2 < 52 * 52 ? 2.5 : 1;
+        // HER MACHINE, HER DRAGON. This read this.hero for every machine on the
+        // board, so your Wick standing near the divide was clearing HER jams --
+        // the one raider that punishes a built board, countered for her, by you.
+        var jw = (this.rivalSide && (tw.own | 0) === 1) ? this.rivalWick : this.hero;
+        var pry = 1;
+        if (jw) {
+          var jdx = jw.x - tw.x, jdy = jw.y - tw.y;
+          var jd2 = jdx * jdx + jdy * jdy;
+          pry = (this._mannedTid(tw.own) === tw.tid) ? 5 : jd2 < 52 * 52 ? 2.5 : 1;
+        }
         tw.jamT -= STEP * pry;
-        if (tw.jamT <= 0 && pry > 1) {
+        if (tw.jamT <= 0 && pry > 1 && this._sameSide(tw.own, 0)) {
           this.fxQueue.push({ k: 'float', x: tw.x, y: tw.y - 46, txt: 'UNJAMMED!', c: '#9ef58f' });
         }
         continue;
@@ -3670,6 +3844,7 @@
         for (var ro = this.enemies.length - 1; ro >= 0; ro--) {
           var re2 = this.enemies[ro];
           if (re2.hp <= 0) continue;
+          if (!this._sameSide(re2.ln, tw.own)) continue;   // radial: no target to scope it
           var rdx = re2.px - pad.x, rdy = re2.py - pad.y;
           if (rdx * rdx + rdy * rdy > rR * rR) continue;
           // airMul keys on e.flyer, NOT eFly(e): eFly is false while a
@@ -3698,6 +3873,7 @@
         for (var c = this.enemies.length - 1; c >= 0; c--) {
           var ce = this.enemies[c];
           if (ce.hp <= 0) continue;
+          if (!this._sameSide(ce.ln, tw.own)) continue;   // radial: no target to scope it
           var cR = lv.range * (this.mods.rangeMul || 1);
           var cdx = ce.px - pad.x, cdy = ce.py - pad.y;
           if (cdx * cdx + cdy * cdy <= cR * cR) {
@@ -3713,9 +3889,8 @@
             // asymmetric and therefore invisible: a 360g support fork whose
             // entire pitch is "+28% damage to neighbours" did nothing at all
             // for the cheapest and most-built tower on the board.
-            // Balance note: this cannot invalidate RIVAL_CURVES -- tools/bot.js
-            // only ever builds ballista/crystal and always takes forks[0], so
-            // the Tempering Post (bellows forks[1]) has never been in a bake.
+            // Balance note: nothing is baked any more, so a change here retunes
+            // the rival the moment it lands -- she plays this sim, not a table.
             if (lv.dmg) this._damage(ce, lv.dmg * (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1)
                                          * (1 + (tw._auraDmg || 0)), { kind: 'magic', tower: tw });
             hitAny++;
@@ -3763,8 +3938,9 @@
         // makes the thief RUN FASTER — you save the coin, not the bounty.
         if (lv.special === 'coinback' && target.hp > 0 && target.stolen > 0 && target.shaken < lv.coinCap) {
           target.stolen--; target.shaken++;
-          this.hoard++;
-          this.fxQueue.push({ k: 'recover', x: tp.x, y: tp.y, n: 1 });
+          // back to the pile it was taken from, which is not always yours
+          if (this.rivalSide && (tw.own | 0) === 1) this.rivalHoard++; else this.hoard++;
+          this.fxQueue.push({ k: 'recover', x: tp.x, y: tp.y, n: 1, ln: target.ln | 0 });
         }
         this.fxQueue.push({ k: 'bite', x: tp.x, y: tp.y });
         // Gearjaw grinds; Magnet Jaws snaps. Both forks used to make the one
@@ -3784,6 +3960,8 @@
         this.projectiles.push({
           kind: 'lob', x: mz0.x, y: mz0.y, sx: mz0.x, sy: mz0.y, tx: tp.x, ty: tp.y,
           t: 0, dur: 0.55, dmg: lv.dmg * mDmg, splash: lv.splash, burn: lv.burn || 0, tower: t,
+          own: tw.own | 0,          // the blast is scoped by WHO FIRED IT, not by
+                                    // towers[pr.tower] -- that index goes stale on a sell
           scald: lv.special === 'scald' ? lv.scaldDur : 0,
           // Tar Boiler: the patch lands at the TARGET's path distance at fire
           // time — 1D arc-length address, deterministic, no inverse projection.
@@ -3842,6 +4020,7 @@
           for (var b = this.enemies.length - 1; b >= 0; b--) {
             var be = this.enemies[b];
             if (eFly(be) || be.hp <= 0) continue;
+            if (!this._sameSide(be.ln, pr.own)) continue;   // the blast stops at the divide
             var bdx = be.px - pr.tx, bdy = be.py - pr.ty;
             if (bdx * bdx + bdy * bdy <= pr.splash * pr.splash) {
               this._damage(be, pr.dmg, { kind: 'splash', tower: this.towers[pr.tower] });
@@ -3973,6 +4152,7 @@
     for (var hz = 0; hz < this.enemies.length; hz++) {
       var hz_e = this.enemies[hz];
       if (hz_e.hp <= 0) continue;
+      if (!this._sameSide(hz_e.ln, 0)) continue;   // her carriers are not his to shake
       var hzx = hz_e.px - h.x, hzy = hz_e.py - h.y, hz2 = hzx * hzx + hzy * hzy;
       if (hz2 > 3600) continue;                       // 60u: nothing to do out here
       nearAny = true;
@@ -4024,6 +4204,7 @@
     for (var e2 = 0; e2 < this.enemies.length; e2++) {
       var en2 = this.enemies[e2];
       if (en2.hp <= 0) continue;
+      if (!this._sameSide(en2.ln, 0)) continue;   // he defends one road: his
       var ndx = en2.px - h.x, ndy = en2.py - h.y;
       if (ndx * ndx + ndy * ndy <= h.range * h.range) inR.push(en2);
     }
@@ -4062,17 +4243,22 @@
       this.menu = null;                     // no stale menu into the intermission
       this.wave++;
       // COIN PRESSES pay out at wave end — a bet on surviving to collect
-      var minted = 0;
+      // EVERY PRESS ON THE BOARD PAID YOU, hers included. Each press pays the
+      // purse of whoever built it, and hers is silent for the same reason her
+      // builds are: a float over her cave spends your attention.
+      var minted = 0, rMinted = 0;
       for (var pz = 0; pz < this.towers.length; pz++) {
         var pt2 = this.towers[pz];
         if (pt2.type !== 'press') continue;
         var pr2 = lvlRow(pt2);
         if (!pr2.waveGold || pt2.jamT > 0) continue;   // a jammed press mints nothing
-        var pMan = this.hero.manned && this.hero.manTid === pt2.tid;
+        var pMan = this._mannedTid(pt2.own) === pt2.tid;
         var pay = Math.round(pr2.waveGold * (pMan ? (TOWER_TYPES.press.mannedGold || 1) : 1));
+        if (this.rivalSide && (pt2.own | 0) === 1) { rMinted += pay; continue; }
         minted += pay;
         this.fxQueue.push({ k: 'float', x: pt2.x, y: pt2.y - 40, txt: '+' + pay + 'g', c: '#ffd75e' });
       }
+      if (rMinted) this.rivalGold += Math.round(rMinted * (this.rivalPurse || 1));
       if (minted) { this.gold += minted; Sfx.play('coin'); }
       // WAVE CLEAR IS THE HEARTBEAT OF THIS MODE — 20 times a level — and it
       // used to be one green word and silence. It now lands, and it CARRIES
@@ -4095,15 +4281,22 @@
       // in the corner of the HUD is a scoreboard; a number that announces
       // itself the moment yours moves is an opponent.
       if (this.mode === 'duel' && this.rival) {
-        // LIVE, not baked. rivalHoardAt() is kept as the fallback for a rival
-        // whose cave failed to build -- a duel that cannot show an opponent is
-        // still better than a duel that crashes.
-        var rh = this.rivalSide ? Math.round(this.rivalHoard)
-                                : rivalHoardAt(this.rivalIdx, this.duelSeedIdx, this.wave);
+        // LIVE. Every duel arena is the shared cavern, so rivalSide is always
+        // true here and this is simply her hoard -- the branch that read a
+        // baked curve was unreachable before it was deleted.
+        //
+        // MEASURE THE DROP AGAINST THE WAVE'S START. When her hoard came off a
+        // table, `prev` was the previous ROW and the subtraction meant something.
+        // Reading it off the live value one line before overwriting it with the
+        // same number makes the drop identically zero, so the duel announced
+        // "held clean" after every wave of every duel, including the ones that
+        // sacked her. Her own _waveStartRivalHoard is the honest `prev`.
+        var rh = Math.round(this.rivalHoard);
         if (rh !== null) {
-          this.rivalPrev = this.rivalHoard;
+          this.rivalPrev = (this._waveStartRivalHoard === undefined)
+            ? this.rivalHoard : this._waveStartRivalHoard;
           this.rivalHoard = rh;
-          this.rivalDrop = Math.max(0, this.rivalPrev - this.rivalHoard);
+          this.rivalDrop = Math.max(0, Math.round(this.rivalPrev) - rh);
           this.rivalStepT = this.worldT;
           if (this.rivalDrop > 0) {
             this.fxQueue.push({ k: 'float', x: WORLD_W / 2, y: 336,
@@ -4255,12 +4448,16 @@
     // NULL-check, not ||: One Good Purse sets bountyMul to 0 and zero must hold
     var bMul = this.mods.bountyMul != null ? this.mods.bountyMul : 1;
     var bounty = Math.round((greed ? base.bounty * 1.5 : base.bounty) * bMul);
+    // WHOSE ROAD THIS DIED ON decides which presses take a cut. Without it a
+    // Tithe Press on either side fattened both sides' bounties.
+    var kSide = this.rivalSide ? (e.ln | 0) : 0;
     for (var kp = 0; kp < this.towers.length; kp++) {     // Tithe Press takes its cut
       var kt = this.towers[kp];
+      if (!this._sameSide(kt.own, kSide)) continue;
       if (kt.level >= 2 && kt.type === 'press') {
         var kr = lvlRow(kt);
         if (kr.killGold) {
-          var kMan = this.hero.manned && this.hero.manTid === kt.tid;
+          var kMan = this._mannedTid(kt.own) === kt.tid;
           bounty += Math.round(kr.killGold * (kMan ? (TOWER_TYPES.press.mannedGold || 1) : 1));
         }
       }
@@ -4268,15 +4465,22 @@
     // THE BOUNTY GOES TO WHOEVER'S ROAD IT DIED ON. She has to fund her own
     // cave out of her own kills or the duel is not symmetric -- a scripted
     // purse would make her economy a difficulty dial rather than a game.
-    if (this.rivalSide && (e.ln | 0) === 1) this.rivalGold += bounty;
-    else this.gold += bounty;
-    this.kills++;
+    // ...and it scales her EARNINGS too, not just her opening purse. Handicapping
+    // the first purse alone was measured to do nothing: bounty income washes the
+    // difference out by wave three. "Earns less per wave" is a faithful model of
+    // a weaker board rather than a fudge -- her bounties come from her kills.
+    if (this.rivalSide && (e.ln | 0) === 1) {
+      this.rivalGold += Math.round(bounty * (this.rivalPurse || 1));
+    } else this.gold += bounty;
+    // YOUR kill count, not the cavern's. It is printed on the result screen as
+    // something you did.
+    if (this._sameSide(e.ln, 0)) this.kills++;
     var p = { x: e.px, y: e.py };
     if (e.stolen > 0) {                                     // recover the treasure!
       // back to the pile it came out of
       if (this.rivalSide && (e.ln | 0) === 1) this.rivalHoard += e.stolen;
       else this.hoard += e.stolen;
-      this.fxQueue.push({ k: 'recover', x: p.x, y: p.y, n: e.stolen });
+      this.fxQueue.push({ k: 'recover', x: p.x, y: p.y, n: e.stolen, ln: e.ln | 0 });
       Sfx.play('recover');
     }
     // SPLITTER — breaks into two smaller raiders where it fell. Queued as a
@@ -4309,7 +4513,7 @@
         this.fxQueue.push({ k: 'boom', x: p.x + (bd - 1) * 26, y: p.y + (bd % 2 ? 14 : -10), r: 54 });
       }
     }
-    this.fxQueue.push({ k: 'death', x: p.x, y: p.y, g: bounty, boss: e.type === 'boss' });
+    this.fxQueue.push({ k: 'death', x: p.x, y: p.y, g: bounty, boss: e.type === 'boss', ln: e.ln | 0 });
     // THE KILL. This was `Sfx.play('coin')` -- one 200ms chime, unkeyed, for all
     // ten raider types and for the boss, sharing its rate-limit bucket with the
     // Coin Press payout. Three separate faults in one line:
@@ -4506,6 +4710,7 @@
       if (!twUnder && this.shopPick < 0) {        // a machine in hand still places
         for (var tu = 0; tu < this.towers.length; tu++) {
           var tud = this.towers[tu], ux = w.x - tud.x, uy = w.y - tud.y;
+          if (!this._sameSide(tud.own, 0)) continue;   // hers opens no menu to defer for
           if (ux * ux + uy * uy < 32 * 32) { twUnder = true; break; }
         }
       }
@@ -4584,10 +4789,10 @@
       for (var rq = 0; rq < RIVAL_ORDER.length; rq++) {
         var ryq = DGt.top + rq * DGt.pitch;
         if (w.y > ryq && w.y < ryq + DGt.h && w.x > DGt.x && w.x < DGt.x + DGt.w) {
-          // A rival with no baked curve cannot be fought: there is nobody on
-          // the other side. Refuse the tap rather than starting a duel that
-          // would score against a frozen 60 and always be won.
-          if (rivalHoardAt(rq, duelSeedIdx(rq), 0) === null) return;
+          // A rival with no PLAN cannot be fought: there would be nobody on the
+          // other side. Refuse the tap rather than starting a duel against a
+          // cave that never builds and can only be won.
+          if (!rivalReady(rq)) return;
           this.reset(0, 'duel', 0, null, rq);
           this.state = 'playing'; return;
         }
@@ -4666,6 +4871,10 @@
       var m = this.menu;
       if (m.towerIdx !== undefined) {                 // manage menu — nearest-wins
         var tw = this.towers[m.towerIdx];
+        // A SPLICE CAN RE-POINT towerIdx AT HER MACHINE. The menu holds an
+        // array index, and _buyAt/sell mutate the array under it, so the owner
+        // is re-checked here as well as at the tap that opened it.
+        if (tw && !this._sameSide(tw.own, 0)) { this.menu = null; return; }
         if (tw) {
           var pad2 = tw;
           pad2 = this._uiAnchor(pad2);
@@ -4726,8 +4935,14 @@
     }
 
     // towers / pads beat the HUD bands and the start-wave rect
+    // YOURS ONLY. This loop had no owner test, so tapping one of HER machines
+    // opened the full manage menu on it -- and the last button in that menu is
+    // SELL. Measured: one tap sold Cinder's ballista and paid the player 91
+    // gold. Five more taps and the DRAKE has an empty cave and you are 400 gold
+    // up, which is the entire mode decided before wave 2.
     for (var t = 0; t < this.towers.length; t++) {
       var pd = this.towers[t];
+      if (!this._sameSide(pd.own, 0)) continue;
       var tdx = w.x - pd.x, tdy = w.y - pd.y;
       if (tdx * tdx + tdy * tdy < 32 * 32) { this.menu = { towerIdx: t }; return; }
     }
@@ -4766,7 +4981,21 @@
         else { tx = pp.x + pdx2 / dist2 * 40; ty = pp.y + pdy2 / dist2 * 40; }
       }
     }
-    hh.tx = clamp(tx, 20, WORLD_W - 20); hh.ty = clamp(ty, 120, WORLD_H - 30);
+    tx = clamp(tx, 20, WORLD_W - 20); ty = clamp(ty, 120, WORLD_H - 30);
+    // HIS HALF OF THE CAVERN. Everything he does is scoped to his own road now
+    // (see THE DIVIDE), so walking him across would leave a dragon standing
+    // uselessly in someone else's cave with nothing to say why. Bisect toward
+    // the divide instead of refusing the tap: it reads as a wall, and it is
+    // general -- nearest-keep, never a hardcoded midline.
+    if (this.rivalSide && sideAt(tx, ty) !== 0 && sideAt(hh.x, hh.y) === 0) {
+      var ax = hh.x, ay = hh.y;
+      for (var bi = 0; bi < 18; bi++) {
+        var mx = (ax + tx) * 0.5, my = (ay + ty) * 0.5;
+        if (sideAt(mx, my) === 0) { ax = mx; ay = my; } else { tx = mx; ty = my; }
+      }
+      tx = ax; ty = ay;
+    }
+    hh.tx = tx; hh.ty = ty;
   };
   // Where UI anchored to a world object should DRAW: identity in 2D, the
   // 3D projection remapped into overlay coords when the 3D world is live.
@@ -4834,46 +5063,106 @@
   // keeps a duel fair when two players fight "the same" opponent.
   var RIVAL_PLANS = {
     // mix cycles; depth = how far it upgrades; cap = how many machines it will
-    // own; rank = which ground it likes; call = whether it presses START early
-    tallow: { mix: ['ballista'], depth: 0, cap: 5, rank: 'keep', call: 'late', every: 2 },
-    flint:  { mix: ['ballista', 'crystal', 'ballista'], depth: 1, cap: 7, rank: 'road', call: 'late', every: 1 },
-    ember:  { mix: ['ballista', 'perch'], depth: 2, cap: 4, rank: 'road', call: 'early', every: 1 },
+    // own; rank = which ground it likes; every = build on every Nth wave;
+    // wick = she works the floor herself (crews a machine).
+    //
+    // `call: 'early'|'late'` USED TO BE HERE AND NOTHING READ IT. There is one
+    // countdown in a shared cavern and the PLAYER owns it -- she has no path
+    // into startWave at all -- so the field could only ever describe a rival
+    // who does not exist. Removed rather than left to be quoted later.
+    tallow: { mix: ['ballista'], depth: 0, cap: 5, rank: 'keep', every: 2 },
+    flint:  { mix: ['ballista', 'crystal', 'ballista'], depth: 1, cap: 7, rank: 'road', every: 1 },
+    ember:  { mix: ['ballista', 'perch'], depth: 2, cap: 4, rank: 'road', every: 1 },
     cinder: { mix: ['ballista', 'perch', 'rotor', 'brazier', 'ballista'], depth: 2, cap: 9,
-              rank: 'road', call: 'early', every: 1, wick: true },
+              rank: 'road', every: 1, wick: true },
   };
 
   /// Pads ranked for a plan, cached per (map, rank) — a sort per frame for a
   /// board that never moves is pure waste.
-  Game.prototype._rivalSpots = function (rank) {
-    var key = this.levelIdx + ':' + rank;
+  /// Where the rival may build, best first.
+  ///
+  /// THIS RETURNED MAP.pads ONLY, AND THAT WAS THE BIGGEST HOLE IN THE DUEL.
+  /// The player builds by FREE PLACEMENT -- pads are a 20% discount, not a
+  /// requirement -- so on the Split Cavern the player can legally place 35
+  /// machines on their half while the rival, walking a 5-pad list, could never
+  /// place a sixth. Measured: flint (cap 7) and cinder (cap 9) both stalled at
+  /// FIVE, sitting on 440 and 116 unspent gold, which collapsed the four-rival
+  /// ladder into "roughly the same opponent with different paint".
+  ///
+  /// So she gets the same ground the player gets: her pads first (they are
+  /// cheaper, and a builder takes the discount), then open floor ranked by how
+  /// close it is to the road it defends.
+  ///
+  /// Deterministic: a fixed grid walk and a stable sort, no RNG. Cached per
+  /// (level, rank, side) because the board does not move -- the scan is ~500
+  /// points against ~100 road samples and must not run per frame.
+  Game.prototype._rivalSpots = function (rank, side) {
+    side = side | 0;
+    var key = this.levelIdx + ':' + rank + ':' + side;
     if (this._spotKey === key) return this._spotCache;
-    var pads = MAP.pads.slice();
-    if (rank === 'keep') {
-      var kx = MAP.keep.x, ky = MAP.keep.y;
-      pads.sort(function (a, b) {
-        return ((a.x - kx) * (a.x - kx) + (a.y - ky) * (a.y - ky))
-             - ((b.x - kx) * (b.x - kx) + (b.y - ky) * (b.y - ky));
-      });
-    } else {
-      // nearest to ANY road, so a two-road arena is ranked by both of them
-      var self = this;
-      var d2 = function (p) {
-        var best = 1e9;
-        for (var ln = 0; ln < LANES.length; ln++) {
-          for (var d = 0; d <= LANES[ln].len; d += 12) {
-            var q = pathPointAt(d, ln), dx = p.x - q.x, dy = p.y - q.y;
-            var v = dx * dx + dy * dy;
-            if (v < best) best = v;
-          }
-        }
-        return best;
-      };
-      var keyed = pads.map(function (p) { return { p: p, d: d2(p) }; });
-      keyed.sort(function (a, b) { return a.d - b.d; });
-      pads = keyed.map(function (k) { return k.p; });
+
+    var self = this;
+    function roadD2(x, y) { return self._roadD2(x, y, side); }
+    var kp = keepOf(side);
+    function score(x, y) {
+      return rank === 'keep'
+        ? (x - kp.x) * (x - kp.x) + (y - kp.y) * (y - kp.y)
+        : roadD2(x, y);
     }
-    this._spotKey = key; this._spotCache = pads;
-    return pads;
+
+    var out = [];
+    for (var i = 0; i < MAP.pads.length; i++) {                 // pads first: they are discounted
+      var pd = MAP.pads[i];
+      if (this.rivalSide && sideAt(pd.x, pd.y) !== side) continue;
+      out.push({ x: pd.x, y: pd.y, s: score(pd.x, pd.y), pad: 1 });
+    }
+    // OPEN FLOOR, ON A GRID ANCHORED AT THE MIDDLE OF THE WORLD.
+    //
+    // It used to walk x from 30 in steps of 14, which put the right half's
+    // samples two units out of phase with the left's -- 30 + 14k lands on 212,
+    // and 212's mirror (208) is not a sample. So on an arena whose entire
+    // fairness argument is "the two halves are mirror images", the two players
+    // were offered DIFFERENT ground to build on. Anchoring the walk at
+    // WORLD_W / 2 makes the candidate set its own mirror by construction.
+    //
+    // The bounds mirror _placeCheck's free-build box; _placeCheck still runs at
+    // purchase time, so this only has to be a good SHORTLIST.
+    // Offset by HALF A STEP so the walk straddles the divide instead of landing
+    // on it. sideAt breaks an exact tie toward side 0, so a sample at x = 210 is
+    // a column the left half owns and the right half has no twin for -- measured
+    // as 118 candidates against 116, which is the asymmetry this whole walk
+    // exists to remove.
+    var XS = [], HALF = WORLD_W / 2;
+    for (var xh = HALF + 7; xh <= WORLD_W - 30; xh += 14) {
+      XS.push(xh); XS.push(WORLD_W - xh);
+    }
+    XS.sort(function (a, b) { return a - b; });
+    var lim = MAP.pathW * 0.5 + 16, lim2 = lim * lim;
+    for (var y2 = 200; y2 <= WORLD_H - 40; y2 += 14) {
+      for (var xi = 0; xi < XS.length; xi++) {
+        var x2 = XS[xi];
+        if (this.rivalSide && sideAt(x2, y2) !== side) continue;
+        var kdx = x2 - kp.x, kdy = y2 - kp.y;
+        if (kdx * kdx + kdy * kdy < 96 * 96) continue;          // too close to the hoard
+        var rd = roadD2(x2, y2);
+        if (rd < lim2) continue;                                // on the road
+        if (rd > 62 * 62) continue;                             // too far to shoot anything
+        out.push({ x: x2, y: y2, s: score(x2, y2), pad: 0 });
+      }
+    }
+    // Pads before open floor at equal value, then nearest-first. THE TIEBREAK
+    // IS MIRROR-INVARIANT: it was the insertion index, so two equally-good
+    // spots resolved to "the smaller x", which on the left half means further
+    // from the divide and on the right half means nearer it -- the one thing a
+    // tiebreak on a symmetric arena must not do. Distance from the divide, then
+    // y, is a total order within a side (a side fixes the sign of x - HALF) and
+    // reads the same from either end of the room.
+    out.forEach(function (o) { o.mx = Math.abs(o.x - HALF); });
+    out.sort(function (a, b) {
+      return (b.pad - a.pad) || (a.s - b.s) || (b.mx - a.mx) || (a.y - b.y);
+    });
+    this._spotKey = key; this._spotCache = out;
+    return out;
   };
 
   /// One AI beat. She plays HER HALF of this cavern -- same sim, same waves,
@@ -4915,16 +5204,35 @@
     var img = ART.images.hero;
     if (!img) return;
     var w = this.rivalWick || { x: keepOf(1).x, y: keepOf(1).y + 150 };
+    var a = this._wickAnchor(w.x, w.y, this.rivalManTid === undefined ? -1 : this.rivalManTid);
     var plate = this._rivalPlate(img, this.rival.tint || '#b06adf');
-    var hh = HERO_H, hw = hh * (img.width / img.height);
-    var bob = Math.sin(this.worldT * 2.1) * 1.2;
+    var hh = HERO_H * a.s, hw = hh * (img.width / img.height);
+    // A CREWED DRAGON DOES NOT BOB: she is braced against a crank. The idle bob
+    // is for a dragon standing on her own floor.
+    var bob = a.tw ? 0 : Math.sin(this.worldT * 2.1) * 1.2;
+    // FACING. Standing, she looks INTO the cavern -- at you -- which on the
+    // right-hand side is the mirror of the sprite's native left.
+    //
+    // CREWING IS NOT MIRRORED, and that is the trap here. The mount table is
+    // relative to the MACHINE ART, and her machines are drawn in the same
+    // orientation as his -- so her seat is on the same side of her crank as his
+    // is of his (measured: both sit at mount.dx * gain = +17.92 on a level-1
+    // ballista). Mirroring the facing for her therefore turns her AWAY from the
+    // machine she is supposed to be working. Same seat, same rule as his.
+    var flip = -1;
+    if (a.tw) {
+      var mdx = (TOWER_TYPES[a.tw.type].mount || { dx: 0 }).dx;
+      flip = mdx >= 0 ? 1 : -1;          // dx>0 -> she is right of it -> face LEFT (native)
+    }
     ctx.save();
-    ctx.translate(w.x, w.y + bob);
-    ctx.scale(-1, 1);                     // she faces INTO the cavern, at you
-    ctx.globalAlpha = 0.35;               // her contact shadow, same as Wick's
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.ellipse(0, 2, hw * 0.22, hw * 0.09, 0, 0, 6.283); ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.translate(a.x, a.y - a.lift + bob);
+    ctx.scale(flip, 1);
+    if (!a.tw) {                          // a contact shadow needs floor to fall on
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.ellipse(0, 2, hw * 0.22, hw * 0.09, 0, 0, 6.283); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
     ctx.drawImage(plate, -hw / 2, -hh, hw, hh);
     ctx.restore();
   };
@@ -4940,13 +5248,12 @@
 
     // 1. BUILD, cycling the mix, on HER pads only
     if (mine.length < plan.cap && (this.wave % (plan.every || 1)) === 0) {
-      var spots = this._rivalSpots(plan.rank);
+      var spots = this._rivalSpots(plan.rank, 1);      // already her side only
       var want = plan.mix[mine.length % plan.mix.length];
       for (var i = 0; i < spots.length; i++) {
         var sp = spots[i];
-        if (sideAt(sp.x, sp.y) !== 1) continue;              // her ground, not yours
         var pi = this._nearestPad(sp.x, sp.y);
-        if (pi >= 0 && this._padTower(pi) !== -1) continue;   // already occupied
+        if (pi >= 0 && this._padTower(pi) !== -1) continue;   // that pad is taken
         if (this._buyAt(want, sp.x, sp.y, null, 1)) break;
       }
     }
@@ -4965,24 +5272,35 @@
       }
     }
 
-    // 3. Her dragon works her floor. She has no hero entity of her own -- she
-    //    is DRAWN from the same plate in her own colour (see _rivalTint) and
-    //    walks her side; the sim does not need a second hero to make the duel
-    //    work, and inventing one would double every hero rule for a character
-    //    the player cannot control.
-    // EVERY rival stands in her half, not just the one whose plan works the
-    // floor -- the player has to SEE an opponent, and an invisible one is the
-    // problem this mode was rebuilt to fix. plan.wick only decides whether she
-    // walks to her busiest pad or waits by her keep.
-    {
-      var sp2 = null, best = 1e9;
-      for (var q = 0; q < MAP.pads.length; q++) {
-        var pd = MAP.pads[q];
-        if (sideAt(pd.x, pd.y) !== 1) continue;
-        var dd = (pd.x - MAP.keeps[1].x) * (pd.x - MAP.keeps[1].x) + (pd.y - MAP.keeps[1].y) * (pd.y - MAP.keeps[1].y);
-        if (dd < best) { best = dd; sp2 = pd; }
+    // 3. HER DRAGON WORKS HER FLOOR -- or guards her hoard, and that difference
+    //    is her card rather than decoration.
+    //
+    //    She still has no hero ENTITY: no hp, cannot be targeted, cannot be
+    //    fought. Inventing a second hero would double every hero rule for a
+    //    character the player never controls. What she gets is the two things a
+    //    dragon's POSITION buys, because both are pure functions of where she
+    //    stands and cost the sim nothing -- the overclock on her nearest
+    //    machine (update() runs it for both dragons now), and, if her card says
+    //    she works the floor, the crew bonus on the one she is standing on.
+    //
+    //    `plan.wick` was a DEAD FLAG. Cinder's card reads "Works the cavern
+    //    floor herself. Good luck." and it sat over a hoardling who did
+    //    nothing at all -- the same class of lie as a baked curve.
+    var post = null;
+    if (plan.wick) {                       // the machine with the most road on it
+      var bs = 1e9;
+      for (var w2 = 0; w2 < mine.length; w2++) {
+        var mw = mine[w2], ms = this._roadD2(mw.x, mw.y, 1);
+        if (ms < bs || (ms === bs && post && mw.tid < post.tid)) { bs = ms; post = mw; }
       }
-      if (sp2) { this.rivalWick = { x: sp2.x, y: sp2.y + 22 }; }
+    }
+    if (post) {
+      this.rivalWick = { x: post.x, y: post.y - 6, tid: post.tid };
+      this.rivalManTid = post.tid;
+    } else {
+      var rk = keepOf(1);                  // she waits on her hoard
+      this.rivalWick = { x: rk.x, y: rk.y + 150, tid: -1 };
+      this.rivalManTid = -1;
     }
   };
 
@@ -5039,7 +5357,11 @@
       return { ok: true, pad: padFirst, discount: true };
     }
     if (x < 26 || x > WORLD_W - 26 || y < 190 || y > WORLD_H - 34) return { ok: false, why: 'off the cavern floor' };
-    var kdx = x - MAP.keep.x, kdy = y - MAP.keep.y;
+    // THIS SIDE'S hoard. It read MAP.keep, which on the Split Cavern is keeps[0]
+    // -- so the player had a 96u dead zone around their own pile and the rival
+    // had none, and hers was measured against a keep on the far side of the room.
+    var kOwn = keepOf(this.rivalSide ? own : 0);
+    var kdx = x - kOwn.x, kdy = y - kOwn.y;
     if (kdx * kdx + kdy * kdy < 96 * 96) return { ok: false, why: 'too close to the hoard' };
     // the road: a machine must not stand in the raiders' way
     var lim = MAP.pathW * 0.5 + 16;
@@ -5148,8 +5470,16 @@
       }
       else if (fx.k === 'death') {
         this._burst(fx.x, fx.y, '#ffd75e', fx.boss ? 26 : 9, 90);
-        this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.g, c: '#ffd75e', t: 1 });
-        this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, tx: 100, ty: 40, n: fx.boss ? 6 : 2 });
+        // '+N' in the gold colour is a claim about YOUR purse
+        if (this._sameSide(fx.ln, 0)) {
+          this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.g, c: '#ffd75e', t: 1 });
+        }
+        // (100,40) is YOUR gold counter. A kill on her road pays HER purse, so
+        // throwing its coins at your counter -- and floating '+N' in your gold
+        // colour -- claimed income you never got.
+        if (this._sameSide(fx.ln, 0)) {
+          this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, tx: 100, ty: 40, n: fx.boss ? 6 : 2 });
+        }
         if (fx.boss) this.shake = Math.min(1, this.shake + 0.7);
       }
       else if (fx.k === 'herodown') {
@@ -5163,11 +5493,16 @@
         // whole story of this beat; the old outward red burst read as damage
         // at the one moment the game is about a TRANSFER.
         var sn = fx.n || 1, sc = Math.min(8, 2 + Math.round(sn * 0.3));
+        var sm = moundOf(fx.ln | 0);
         for (var sp2 = 0; sp2 < sc; sp2++) {
           this.particles.push({
             kind: 'coin',
-            x: MAP.mound.x + (Math.random() - 0.5) * MAP.mound.rx * 1.4,
-            y: MAP.mound.y + (Math.random() - 0.5) * 14,
+            // OFF THE PILE IT CAME FROM. This read MAP.mound, which on the
+            // Split Cavern is YOURS -- so a raider robbing HER hoard scooped the
+            // coins visibly off your own mound. The direction is the whole story
+            // of this beat, and it was telling the wrong one.
+            x: sm.x + (Math.random() - 0.5) * sm.rx * 1.4,
+            y: sm.y + (Math.random() - 0.5) * 14,
             tx: fx.x, ty: fx.y - 18, arc: 24 + Math.random() * 30,
             life: 0.22 + sp2 * 0.035, T: 0.22 + sp2 * 0.035,
           });
@@ -5182,7 +5517,9 @@
         // on a dark floor — it tells the eye WHERE, the shorter Ledger is WHAT
         this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 8, R: 26, life: 0.25, T: 0.25, c: '#fff8dc' });
         this.floats.push({ x: fx.x, y: fx.y, txt: '+' + fx.n + ' recovered!', c: '#9ef58f', t: 1.4 });
-        this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, tx: MAP.mound.x, ty: MAP.mound.y, n: Math.min(5, fx.n) });
+        // home to the pile it belongs to, not always yours
+        var rm = moundOf(fx.ln | 0);
+        this.fxQueue.push({ k: 'coinfly', x: fx.x, y: fx.y, tx: rm.x, ty: rm.y, n: Math.min(5, fx.n) });
       }
       else if (fx.k === 'escape') {
         var en2 = fx.n || 1;
@@ -5388,13 +5725,20 @@
   /// breath cast from a manned machine left from under his feet. Now that the
   /// lift is per-machine and there is a scale as well, that drift would only
   /// have got worse. Same idiom as _titleGeom(): one geometry, two readers.
-  Game.prototype._heroAnchor = function () {
-    var h = this.hero;
-    var tw = h.manned ? this._towerByTid(h.manTid) : null;
-    if (!tw) return { x: h.x, y: h.y, s: 1, lift: 0 };
+  /// SHARED BY BOTH DRAGONS. The rival crews a machine now, and drawing her at
+  /// full height on top of one is exactly the defect the combined manned plates
+  /// were deleted for -- VANUS: "when the dragon mans stuff it looks weird".
+  /// One anchor, one scale, one mount table, both sides.
+  Game.prototype._wickAnchor = function (x, y, manTid) {
+    var tw = (manTid >= 0) ? this._towerByTid(manTid) : null;
+    if (!tw) return { x: x, y: y, s: 1, lift: 0, tw: null };
     var mnt = TOWER_TYPES[tw.type].mount || { dx: 0, up: 32 };
     var g = 1 + tw.level * 0.12;
-    return { x: tw.x + mnt.dx * g, y: tw.y, s: MAN_SCALE, lift: mnt.up * g };
+    return { x: tw.x + mnt.dx * g, y: tw.y, s: MAN_SCALE, lift: mnt.up * g, tw: tw };
+  };
+  Game.prototype._heroAnchor = function () {
+    var h = this.hero;
+    return this._wickAnchor(h.x, h.y, h.manned ? h.manTid : -1);
   };
 
   // onBreath: the particle burst fires on the SAME frame the breath plate swaps
@@ -5703,7 +6047,10 @@
   Game.prototype._drawKeep = function (ctx, side) {
     side = side | 0;
     var k = keepOf(side);
-    if (this.motherReady) {
+    // ONLY YOUR KEEP. The glow says "tap me", and the tap test (_onTapWorld)
+    // reads MAP.keep -- so on the Split Cavern the rival's hoard was pulsing an
+    // invitation to a control that does not exist on her side.
+    if (this.motherReady && this._sameSide(side, 0)) {
       var mp2 = 0.5 + 0.5 * Math.sin(this.worldT * 7);
       var mg2 = ctx.createRadialGradient(k.x, k.y - 30, 8, k.x, k.y - 30, 120 + mp2 * 24);
       mg2.addColorStop(0, 'rgba(255,190,90,' + (0.30 + mp2 * 0.25) + ')');
@@ -5772,7 +6119,12 @@
         ctx.stroke();
       }
       ctx.fillStyle = 'rgba(255,90,80,0.14)';
-      ctx.beginPath(); ctx.arc(MAP.keep.x, MAP.keep.y, 96, 0, 6.283); ctx.fill();
+      // one ring per hoard: _placeCheck keeps a 96u dead zone around EACH of
+      // them now, and a rule you cannot see is a rule that reads as a bug
+      for (var kz = 0; kz < (MAP.keeps ? MAP.keeps.length : 1); kz++) {
+        var kk = keepOf(kz);
+        ctx.beginPath(); ctx.arc(kk.x, kk.y, 96, 0, 6.283); ctx.fill();
+      }
       for (var ez = 0; ez < this.towers.length; ez++) {
         ctx.beginPath(); ctx.arc(this.towers[ez].x, this.towers[ez].y, 46, 0, 6.283); ctx.fill();
       }
@@ -5781,6 +6133,8 @@
     for (var i = 0; i < MAP.pads.length; i++) {
       if (this._padTower(i) !== -1) continue;
       var p = MAP.pads[i];
+      // her discount ground is not an offer to you: _placeCheck refuses it
+      if (this.rivalSide && sideAt(p.x, p.y) !== 0) continue;
       // A pad is a DISCOUNT, not a target — tap-to-build on a pad was removed
       // when the shop took over building. Eight rings pulsing like buttons when
       // nothing is in hand is the most button-like thing on the map promising
@@ -5829,7 +6183,11 @@
     if (this.rivalSide && this.rival) {
       rec = slot(); n++;
       var rw = this.rivalWick || { x: keepOf(1).x, y: keepOf(1).y + 150 };
-      rec.y = rw.y; rec.kind = 'rivalwick'; rec.ref = null;
+      // same rule as his: crewing sorts just AFTER her machine so she sits ON
+      // it rather than behind it
+      var rmt = (this.rivalManTid >= 0) ? this._towerByTid(this.rivalManTid) : null;
+      rec.y = rmt ? rmt.y + 1 : rw.y;
+      rec.kind = 'rivalwick'; rec.ref = null;
     }
     rec = slot(); n++;
     // manning: sort just AFTER his machine so he sits ON it, not behind it
@@ -6861,10 +7219,18 @@
       }
       ctx.restore();
     }
-    else if (!inPlate) {
-      // procedural fallback ONLY when he genuinely has no sprite. Guarded on
-      // inPlate too, or a manned machine would get a chunky drawn dragon
-      // stacked on top of the painted one.
+    else {
+      // procedural fallback ONLY when he genuinely has no sprite.
+      //
+      // THIS READ `!inPlate`, AND `inPlate` IS DECLARED NOWHERE. It guarded the
+      // combined tower_*_manned plates -- which had Wick baked into them, so the
+      // fallback had to be suppressed on a manned machine -- and those plates
+      // were deleted when he became a sprite on a mount (see MAN_SCALE). The
+      // guard outlived its subject as a bare ReferenceError: harmless only
+      // while the hero sprite loads, and ART.load bails after 12s with a warn
+      // rather than a failure, so one slow or 404'd asset turned every draw()
+      // into a throw that aborted ~38% of the frame -- the whole HUD, the shop,
+      // and every overlay.
       var bob = Math.sin(this.worldT * 4) * 1.5;
       // ember the whelp: round ruby dragonling
       ctx.fillStyle = '#d64545';
@@ -7308,7 +7674,16 @@
         var sid2 = shelf[sc2], stt = TOWER_TYPES[sid2];
         var sxx = G.shopX + sc2 * G.shopStep, syy = G.shopY;
         var picked = this.shopPick === sc2;
-        var chipCost = Math.round(stt.cost * crowdMul(this.towers.length));
+        // YOUR machines, not the board's. crowdMul is a tax on how much brass
+        // YOU own -- _buyAt has always charged it that way -- but the shop card
+        // read this.towers.length, which in a duel includes HERS. Two price
+        // sources, one shown: with her 7 machines up and yours at 0 the chip
+        // quoted a 70% markup on a cost that was never charged.
+        var ownN = 0;
+        for (var oc3 = 0; oc3 < this.towers.length; oc3++) {
+          if (this._sameSide(this.towers[oc3].own, 0)) ownN++;
+        }
+        var chipCost = Math.round(stt.cost * crowdMul(ownN));
         // AFFORDABILITY MUST MATCH THE NUMBER ON THE CARD. This tested against
         // the PAD-discounted price while printing and charging the full one, so
         // a card lit up as buyable, you placed it off a pad, and the build
@@ -7469,7 +7844,9 @@
         ctx.fillText('auto in ' + Math.ceil(this.countdown) + 's — early pays gold', G.cx, by + 42);
       }
       // preview: ACTUAL enemy sprites, not ambiguous dots
-      var groups = this.mode === 'daily' ? dailyWaveComp(this.wave, this.seed) : WAVE_TABLES[this.levelIdx][this.wave];
+      // SAME SOURCE AS THE SIM. See waveGroups(): this line used to branch on
+      // 'daily' only and threw on every duel intermission.
+      var groups = this.waveGroups(this.wave) || [];
       var counts = {}, order = [];
       for (var gi = 0; gi < groups.length; gi++) {
         var gt = groups[gi].type;
@@ -8095,7 +8472,7 @@
     for (var i = 0; i < RIVAL_ORDER.length; i++) {
       var rv = RIVALS[i], ry = DG.top + i * DG.pitch;
       var rec = Save.data.duels[rv.id];
-      var ready = rivalHoardAt(i, duelSeedIdx(i), 0) !== null;
+      var ready = rivalReady(i);
       uiPanel(ctx, DG.x, ry, DG.w, DG.h, 11);
       ctx.textAlign = 'left';
       // name + rank
