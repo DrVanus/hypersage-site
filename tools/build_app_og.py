@@ -59,7 +59,8 @@ CARDS = {
          box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(232,177,92,0.20); }
 """,
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
-        "kicker": "Bedtime stories · Coming to iOS",
+        # Released 2026-08-21; the page links the App Store and no longer says "coming".
+        "kicker": "Bedtime stories · iOS",
         "h1": "Stories to <em>drift&nbsp;off</em>&nbsp;to",
         # "with Nightshelf Pro" is load-bearing and must never be trimmed away:
         # conjuring a story is Pro-only with NO free allowance (the backend hard-402s,
