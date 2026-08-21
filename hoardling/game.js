@@ -1967,6 +1967,7 @@
       keep:      'art/keep.png',
       mound:     'art/gold_mound.png',
       hero:      'art/hero_whelp.png',
+      hero_breathe: 'art/hero_breathe.png',
       hero_back: 'art/hero_back.png',
       // MANNING POSE -- he HOVERS beside the machine and works it, wings out.
       // Standing the rest plate next to a machine read as loitering (VANUS:
@@ -2737,11 +2738,15 @@
       if (hMoving) this.hero.rotation.y = Math.atan2(hh.tx - hh.x, hh.ty - hh.y);
       this.hero.userData['wing-1'].rotation.z = -0.45 - Math.sin(now * 7) * 0.18;
       this.hero.userData['wing1'].rotation.z = 0.45 + Math.sin(now * 7) * 0.18;
-      // MOUTH-ORIGIN FIRE, 3D half: same beat clock as the 2D jaw
-      // (game._breathT 0.42 -> 0), so both renderers fire from one moment
+      // MOUTH-ORIGIN FIRE, 3D half: same beat clock as the 2D jaw, so both
+      // renderers fire from one moment. READ THE CONSTANT — this divided by a
+      // hardcoded 0.42 while BREATH_BEAT is 0.60, so for the first 30% of every
+      // beat sin() was past pi and `open` came back NEGATIVE: the 3D jaw hinged
+      // the WRONG WAY, then snapped through zero. The comment claiming the two
+      // renderers shared a moment is exactly what stopped anyone checking.
       var bt = game._breathT || 0;
       if (this.hero.userData.jaw) {
-        var open = bt > 0 ? Math.sin((bt / 0.42) * Math.PI) : 0;
+        var open = bt > 0 ? Math.sin(Math.min(1, bt / BREATH_BEAT) * Math.PI) : 0;
         this.hero.userData.jaw.rotation.x = open * 0.85;           // jaw drops
         this.hero.userData.jaw.position.y = 24.2 - open * 2.6;
         this.hero.userData.head.rotation.x = -open * 0.30;         // head kicks back
@@ -4698,7 +4703,7 @@
         // the one thing the game is named after looked like it came out of the
         // floor. The muzzle offset is a RENDER fact (sprite height, facing), so
         // it is computed here in the cosmetic lane and never enters the sim.
-        var mz = this._muzzle();
+        var mz = this._muzzle(true);   // the breath plate is what draws this frame
         // VANUS: "the fire that he makes he doesnt look like hes spitting it".
         // Three separate reasons, all fixed here:
         //  1. THE BEAT WAS 0.42s -- a blink. The open jaw, the head recoil and
@@ -4868,8 +4873,18 @@
   // its height sliced flat off the right edge — see art/hero_whelp_CLIPPED_backup.png).
   // HERO_H drives the sprite instead of a fixed WIDTH: front and back plates have
   // different aspects, so a fixed width made him CHANGE HEIGHT when he turned away.
-  var HERO_H = 57.2;
-  var MUZZLE_UP = 0.685, MUZZLE_FWD = 0.321;
+  // 57.2 -> 57.994 and MUZZLE_FWD 0.321 -> 0.285 when hero_whelp was REPACKED
+  // (693x720 -> 783x730) to share a canvas with hero_breathe. Both numbers are
+  // fractions OF THE CANVAS, so growing it to admit a frame changes what they
+  // mean; the height bump holds his drawn body at exactly its old size and the
+  // muzzle was carried through the pack transform, not re-guessed.
+  var HERO_H = 57.994;
+  var MUZZLE_UP = 0.685, MUZZLE_FWD = 0.285;
+  // The BREATH plate is a different pose -- head thrust forward and down, jaws
+  // open -- so his mouth is not where the closed-muzzle plate's is. Measured off
+  // art/hero_breathe.png at the front of the gullet fire. Using the idle numbers
+  // here is how fire ends up leaving his forehead.
+  var MUZZLE_B_UP = 0.616, MUZZLE_B_FWD = 0.263;
   /// WHERE WICK IS DRAWN, and how big -- the single source both the drawer and
   /// _muzzle() read. They used to disagree: the drawer lifted him 26px onto a
   /// machine and _muzzle() went on reporting his mouth at ground level, so a
@@ -4885,9 +4900,14 @@
     return { x: tw.x + mnt.dx * g, y: tw.y, s: MAN_SCALE, lift: mnt.up * g };
   };
 
-  Game.prototype._muzzle = function () {
+  // onBreath: the particle burst fires on the SAME frame the breath plate swaps
+  // in, so it must use that plate's mouth. It is an argument and not a read of
+  // _breathT because _cosmetic() spends the fx queue BEFORE _breathT is set --
+  // reading the flag here would put the first burst on the closed-mouth muzzle
+  // every single time, which is the drift this function was written to end.
+  Game.prototype._muzzle = function (onBreath) {
     var h = this.hero;
-    var img = ART.images.hero_whelp || ART.images.hero;
+    var img = (onBreath && ART.images.hero_breathe) || ART.images.hero;
     var a = this._heroAnchor();
     var hh = HERO_H * a.s;
     var mw2 = hh * (img ? img.width / img.height : 0.77);
@@ -4897,7 +4917,9 @@
     // lag by a frame — _cosmetic() spends the fx queue BEFORE draw() runs — so
     // a breath cast in the same frame he turns would leave his mouth.
     var f = (h.tx - h.x) > 0.5 ? 1 : -1;
-    return { x: a.x + f * (mw2 * MUZZLE_FWD), y: a.y + 5 - a.lift - hh * MUZZLE_UP, f: f };
+    var mf = onBreath ? MUZZLE_B_FWD : MUZZLE_FWD;
+    var mu = onBreath ? MUZZLE_B_UP : MUZZLE_UP;
+    return { x: a.x + f * (mw2 * mf), y: a.y + 5 - a.lift - hh * mu, f: f };
   };
 
   Game.prototype._burst = function (x, y, c, n, v) {
@@ -6097,6 +6119,15 @@
            : wph < 3.142 ? ART.images.hero_man
            : wph < 4.712 ? (wup || ART.images.hero_man)
            : ART.images.hero_man;
+    } else if (this._breathT > 0 && ART.images.hero_breathe) {
+      // THE OPEN JAW IS A FRAME, NOT PAINT. The idle plate has a closed muzzle,
+      // and the dark ellipse this used to stamp on it to fake an open mouth
+      // reads -- magnified -- as a black bar punched through his cheek. VANUS:
+      // "the fire that he makes he doesnt look like hes spitting it". This is
+      // the generated breath pose with its baked plume cut off (tools/
+      // cut_plume.py), registered and packed onto the idle plate's own canvas,
+      // so swapping to it cannot move or resize him.
+      himg = ART.images.hero_breathe;
     } else {
       himg = (goingAway && ART.images.hero_back) ? ART.images.hero_back : ART.images.hero;
     }
@@ -6186,17 +6217,22 @@
       // the sprite's own transform, so the mirror puts it on whichever side he
       // is facing and it can never drift off his face.
       if (b > 0.01) {
-        var mx = -hw0 * MUZZLE_FWD, my = -hh0 * MUZZLE_UP;
+        var onBreathPlate = himg === ART.images.hero_breathe;
+        var mx = -hw0 * (onBreathPlate ? MUZZLE_B_FWD : MUZZLE_FWD);
+        var my = -hh0 * (onBreathPlate ? MUZZLE_B_UP : MUZZLE_UP);
         var open = Math.sin(Math.min(1, b * 1.35) * Math.PI) * 0.9 + 0.1;
         ctx.save();
         ctx.translate(mx, my);
         ctx.scale(1, open);
-        ctx.fillStyle = 'rgba(28,8,4,0.92)';                 // the open throat
-        ctx.beginPath(); ctx.ellipse(0, 0, 5.2, 4.6, 0, 0, 6.283); ctx.fill();
-        ctx.fillStyle = 'rgba(255,120,40,0.85)';             // fire down the gullet
-        ctx.beginPath(); ctx.ellipse(-0.6, 0.6, 3.4, 3.0, 0, 0, 6.283); ctx.fill();
-        ctx.fillStyle = 'rgba(255,240,190,0.9)';
-        ctx.beginPath(); ctx.ellipse(-1.0, 0.8, 1.6, 1.4, 0, 0, 6.283); ctx.fill();
+        // NO DARK CAVITY. The painted plate has a CLOSED muzzle, so a near-black
+        // ellipse stamped on it does not read as an open mouth -- magnified, it
+        // is a black bar punched through his cheek. On a closed snout the only
+        // honest tell is HEAT: the lips glow, the fire leaves, the head kicks.
+        // (The real open jaw is the sprite swap below, not paint.)
+        ctx.fillStyle = 'rgba(255,150,60,0.55)';
+        ctx.beginPath(); ctx.ellipse(-0.6, 0.4, 4.2, 3.8, 0, 0, 6.283); ctx.fill();
+        ctx.fillStyle = 'rgba(255,236,180,0.75)';
+        ctx.beginPath(); ctx.ellipse(-1.2, 0.6, 2.2, 2.0, 0, 0, 6.283); ctx.fill();
         ctx.restore();
         // the jet leaving the mouth, drawn in the sprite's local frame so it
         // always leaves the snout and never the floor
@@ -6207,40 +6243,61 @@
         var jb = Math.sin(Math.min(1, b * 1.25) * Math.PI);
         var jl = 30 + 52 * (1 - b);            // it REACHES as the beat plays out
         var jw = 5 + 17 * (1 - b);             // and spreads
-        ctx.globalCompositeOperation = 'lighter';
-        for (var jp = 0; jp < 2; jp++) {       // outer flame, then the white core
-          var k2 = jp ? 0.42 : 1;
-          var jg = ctx.createLinearGradient(mx, my, mx - jl * k2, my);
-          if (jp) {
-            jg.addColorStop(0, 'rgba(255,252,235,' + (0.95 * jb).toFixed(3) + ')');
-            jg.addColorStop(1, 'rgba(255,220,140,0)');
-          } else {
-            jg.addColorStop(0.00, 'rgba(255,236,170,' + (0.90 * jb).toFixed(3) + ')');
-            jg.addColorStop(0.40, 'rgba(255,150,50,' + (0.72 * jb).toFixed(3) + ')');
-            jg.addColorStop(1.00, 'rgba(210,60,20,0)');
-          }
+        // TONGUES, NOT A CONE, AND NOT ALL ADDITIVE. Two smooth quadratic
+        // cones stacked read as a gradient blob -- VANUS: "the breath flame
+        // could look better". The first rebuild made five tongues but drew them
+        // ALL under 'lighter', and five overlapping additive shapes sum to a
+        // flat white lozenge: the silhouettes that were the whole point got
+        // erased by their own brightness. So the four body tongues are drawn
+        // NORMALLY -- overlapping opaque leaves at spread angles, which is what
+        // gives fire its ragged moving edge -- and only the small core is
+        // additive. Cosmetic lane: the flicker rides worldT (render time).
+        var JT = [
+          { a: -0.54, l: 0.60, w: 0.40, f: 23, c0: '255,166,52', c1: '172,40,10' , al: 0.70 },
+          { a:  0.51, l: 0.56, w: 0.38, f: 19, c0: '255,156,44', c1: '164,36,9'  , al: 0.70 },
+          { a: -0.21, l: 0.93, w: 0.70, f: 27, c0: '255,194,90', c1: '196,56,14' , al: 0.82 },
+          { a:  0.23, l: 1.00, w: 0.74, f: 31, c0: '255,186,78', c1: '190,52,12' , al: 0.80 },
+        ];
+        var CORE = { a: 0.02, l: 0.36, w: 0.26, f: 37, c0: '255,248,228', c1: '255,186,100', al: 0.46 };
+        function tongue(T2, jp) {
+          // each tongue flickers on its OWN clock, so the tips never line up
+          var fk = 0.80 + 0.20 * Math.sin(ht * T2.f + jp * 1.7);
+          var tl = jl * T2.l * fk, tw2 = jw * T2.w * fk;
+          var ca = Math.cos(T2.a), sa = Math.sin(T2.a);
+          var tx = mx - tl * ca, ty = my + tl * sa;     // the muzzle axis runs -x
+          var jg = ctx.createLinearGradient(mx, my, tx, ty);
+          jg.addColorStop(0.00, 'rgba(' + T2.c0 + ',' + (T2.al * jb).toFixed(3) + ')');
+          jg.addColorStop(0.55, 'rgba(' + T2.c1 + ',' + (T2.al * 0.62 * jb).toFixed(3) + ')');
+          jg.addColorStop(1.00, 'rgba(' + T2.c1 + ',0)');
           ctx.fillStyle = jg;
+          // a leaf: pinched at the lips, belled out, pinched again at the tip
           ctx.beginPath();
-          ctx.moveTo(mx, my - 3.2 * open);
-          ctx.quadraticCurveTo(mx - jl * k2 * 0.55, my - jw * k2 * 0.55,
-                               mx - jl * k2, my - jw * k2);
-          ctx.quadraticCurveTo(mx - jl * k2 * 1.06, my, mx - jl * k2, my + jw * k2);
-          ctx.quadraticCurveTo(mx - jl * k2 * 0.55, my + jw * k2 * 0.55,
-                               mx, my + 3.2 * open);
+          ctx.moveTo(mx, my - 3.0 * open);
+          ctx.quadraticCurveTo(mx - tl * 0.45 * ca - tw2 * sa,
+                               my + tl * 0.45 * sa - tw2 * ca, tx, ty);
+          ctx.quadraticCurveTo(mx - tl * 0.45 * ca + tw2 * sa,
+                               my + tl * 0.45 * sa + tw2 * ca, mx, my + 3.0 * open);
           ctx.closePath(); ctx.fill();
         }
+        for (var jp = 0; jp < JT.length; jp++) tongue(JT[jp], jp);   // silhouette
+        ctx.globalCompositeOperation = 'lighter';
+        tongue(CORE, 4);                                            // the heat
         // Muzzle bloom — the light the jet throws back onto his own snout.
         // BIASED FORWARD. Centred on the muzzle at r=16 it reached 21 world
         // units BEHIND his head (measured off the canvas: recoil suppressed,
         // fire alone still lit pixels a third of a body-length back), which
         // read as a pale bar across his brow rather than as flame. Offsetting
         // the centre down the jet keeps the backscatter to a few units.
-        var mbx = mx - 7;
-        var mb = ctx.createRadialGradient(mbx, my, 0, mbx, my, 12);
-        mb.addColorStop(0, 'rgba(255,210,130,' + (0.55 * jb).toFixed(3) + ')');
+        // Pushed FURTHER down the jet and dimmed. At mx-7/r12/0.55 the bloom
+        // and the hot core between them painted straight over the open jaw, so
+        // the one thing the beat exists to show -- VANUS: "he doesnt look like
+        // hes spitting it" -- was buried under its own glow.
+        var mbx = mx - 13;
+        var mb = ctx.createRadialGradient(mbx, my, 0, mbx, my, 11);
+        mb.addColorStop(0, 'rgba(255,210,130,' + (0.38 * jb).toFixed(3) + ')');
         mb.addColorStop(1, 'rgba(255,160,60,0)');
         ctx.fillStyle = mb;
-        ctx.beginPath(); ctx.arc(mbx, my, 12, 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(mbx, my, 11, 0, 6.283); ctx.fill();
         ctx.globalCompositeOperation = 'source-over';
       }
       ctx.restore();
@@ -7250,8 +7307,29 @@
       // the front lip is the SAME asset at the SAME x/width/baseline, so the
       // two halves cannot misregister — it must track the sizing above
       var lH = 190, lW = lH * (mound.width / mound.height), lX = 210 - lW / 2;
-      ctx.drawImage(mound, 0, mound.height * 0.78, mound.width, mound.height * 0.22,
-                    lX, 300 - lH * 0.22, lW, lH * 0.22);
+      // FEATHER ITS TOP EDGE. The lip is a horizontal SLICE of the mound, so it
+      // has a dead-straight top — and it lands at y 258 while Wick's feet are at
+      // 264, which drew a ruler-straight line across his legs. VANUS: "wicks
+      // foot is cut off on the bottom if you look". It was never a crop; it was
+      // this seam. Fading the top ~35% of the slice to nothing lets his feet
+      // sink INTO the coins instead of being sliced off by them. Cached: the
+      // feathered lip is built once, not per frame.
+      var lip = this._titleLip;
+      if (!lip) {
+        lip = document.createElement('canvas');
+        lip.width = mound.width; lip.height = Math.round(mound.height * 0.22);
+        var lx = lip.getContext('2d');
+        lx.drawImage(mound, 0, mound.height * 0.78, mound.width, lip.height,
+                     0, 0, lip.width, lip.height);
+        lx.globalCompositeOperation = 'destination-out';
+        var lg = lx.createLinearGradient(0, 0, 0, lip.height * 0.38);
+        lg.addColorStop(0, 'rgba(0,0,0,1)');
+        lg.addColorStop(1, 'rgba(0,0,0,0)');
+        lx.fillStyle = lg;
+        lx.fillRect(0, 0, lip.width, lip.height * 0.38);
+        this._titleLip = lip;
+      }
+      ctx.drawImage(lip, lX, 300 - lH * 0.22, lW, lH * 0.22);
     }
     embers(ctx, t, 18, 22, 1.4, 0.70);         // near-field parallax layer
 

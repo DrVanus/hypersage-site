@@ -171,6 +171,13 @@
    "codec_psnr": 35.8,
    "as_drawn_psnr": 37.5
   },
+  "hero_breathe.png": {
+   "size": "783px",
+   "kb": 130.8,
+   "q": 84,
+   "codec_psnr": 39.6,
+   "as_drawn_psnr": 39.6
+  },
   "hero_man.png": {
    "size": "779px",
    "kb": 139.3,
@@ -200,11 +207,18 @@
    "as_drawn_psnr": 39.6
   },
   "hero_whelp.png": {
-   "size": "693->333px",
-   "kb": 25.2,
+   "size": "783->333px",
+   "kb": 21.7,
    "q": 84,
-   "codec_psnr": 37.0,
-   "as_drawn_psnr": 38.7
+   "codec_psnr": 37.2,
+   "as_drawn_psnr": 38.9
+  },
+  "hero_whelp_prepack_backup.png": {
+   "size": "693px",
+   "kb": 67.1,
+   "q": 84,
+   "codec_psnr": 38.5,
+   "as_drawn_psnr": 38.5
   },
   "icon-180.png": {
    "size": "png (icon)",
