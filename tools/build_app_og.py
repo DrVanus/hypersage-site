@@ -404,7 +404,11 @@ CARDS = {
          -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%);
          mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%); }
 """,
-        "kicker": "Cozy gem-digging puzzle \u00b7 Coming to iPhone",
+        # Playable at /gemburrow/play/ (200) since before 2026-08-21; the product page
+        # itself leads with "Play free in your browser". A card that says only
+        # "Coming to iPhone" hides the thing a sharer can do right now. 38 chars,
+        # shorter than the 41 it replaces, so the nowrap above still clears.
+        "kicker": "Play in your browser \u00b7 coming to iPhone",
         "h1": 'Dig the jar.<br>Feed the <span class="grad">dragon.</span>',
         "sub": "Every gem and rock is real physics: pull one out and the whole pile settles. Fill the orders on the line \u2014 and decide what the dragon keeps.",
     },
