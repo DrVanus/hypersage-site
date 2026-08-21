@@ -114,8 +114,12 @@ CARDS = {
 """,
         # The page's own eyebrow ornament: .hero-eyebrow::before { content: '✦' }.
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.6l2.3 7.8 7.8 2.3-7.8 2.3-2.3 7.8-2.3-7.8L1.9 11.7l7.8-2.3z"/></svg>',
-        # NOT "· iOS": the page's eyebrow says "Coming to iOS" and links no App Store.
-        "kicker": "AI Adventures · Coming to iOS",
+        # Was "· Coming to iOS", justified by "the page's eyebrow says Coming to
+        # iOS and links no App Store". BOTH halves of that premise expired: the app
+        # went live 2026-08-17, the page eyebrow now reads "Available now", and it
+        # carries 3 App Store links (fetched 2026-08-21). The card is the image every
+        # share renders, so it was telling people a shipped app was not out yet.
+        "kicker": "AI Adventures · iOS",
         "h1": 'Branching tales,<br><span class="grad">written with you.</span>',
         "sub": "Step into Beowulf, Dracula, or a world only the AI has dreamed. Every choice rewrites the next page.",
     },
@@ -143,7 +147,13 @@ CARDS = {
 """,
         "kicker": "AI recipe app · Coming soon to iOS",
         "h1": 'Your kitchen,<br><span class="ital">understood.</span>',
-        "sub": "Premium recipes you can trust — built from a weighted consensus of tested, editor-vetted sources, then rewritten for your pantry.",
+        # 2026-08-19: was "built from a weighted consensus of tested, editor-vetted
+        # sources" — a sourcing claim saffra-api cannot support (no request to any
+        # recipe publication is ever made; the trust weights were never computed).
+        # It shipped INTO THE RENDERED PNG, which is the card people see when the
+        # link is shared, so fixing the page alone would have left it live.
+        # Completeness is measured and gated: see saffra-ios store/check_frame_claims.py.
+        "sub": "Premium recipes you can trust — every amount measured, every step cued, then rewritten for your pantry.",
     },
     "quietoak": {
         "art": "companions/group-painting.png",
@@ -284,7 +294,9 @@ CARDS = {
          box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(232,168,56,0.24); }
 """,
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-        "kicker": "Coming to iOS",
+        # Live since 2026-08-20; page links the App Store and says nothing about
+        # "coming". Follows the fleet's "<category> · iOS" kicker convention.
+        "kicker": "Dating coach · iOS",
         "h1": 'AI dating<br>coaches that<br><em>actually get&nbsp;it.</em>',
         "sub": "Four coaches, four perspectives. Drop a screenshot and get exact replies to send — platform-aware advice for Tinder, Hinge, Bumble, and texting.",
     },
