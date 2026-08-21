@@ -3077,6 +3077,7 @@
     this.hero = { x: hs.x, y: hs.y, tx: hs.x, ty: hs.y, range: 76, dmg: 9, rate: 1.25, cd: 0,
                   breathCd: 6, spd: 85, selected: false, castBreath: false,
                   manTid: -1, manned: false,     // manTid: stable tower id (survives splices)
+                  face: -1,                      // +1 right / -1 left; see _heroFacing
                   // Wick has SKIN IN THE GAME now. He could not be hurt, so
                   // there was never a reason to move him — a bot won 45 of 45
                   // runs without touching him once. hp/downT are sim state:
@@ -4112,6 +4113,7 @@
     var hdx = h.tx - h.x, hdy = h.ty - h.y;
     var hd = Math.sqrt(hdx * hdx + hdy * hdy);
     if (hd > 2) { h.x += hdx / hd * Math.min(h.spd * STEP, hd); h.y += hdy / hd * Math.min(h.spd * STEP, hd); }
+    if (Math.abs(hdx) > 0.5) h.face = hdx > 0 ? 1 : -1;      // walking sets his look
     var wasManned = h.manned;
     h.manned = h.manTid >= 0 && hd <= 3;
     if (h.manned && !wasManned) {
@@ -4225,11 +4227,29 @@
       var pick = inR[0];
       for (var pk = 1; pk < inR.length; pk++) if (inR[pk].d > pick.d) pick = inR[pk];
       h.cd = 1 / h.rate;
+      // TURN TO WHAT HE IS SHOOTING. Standing still leaves (tx - x) at zero, so
+      // without this he keeps whatever way he last walked and breathes fire
+      // backwards over his own shoulder.
+      if (Math.abs(h.tx - h.x) <= 0.5 && !h.manned) {
+        h.face = (pick.px - h.x) >= 0 ? 1 : -1;
+      }
       // He spits FIRE, and it looks like fire: a travelling fireball that
       // bursts on the target (the old tell was a 1px tracer nobody could see).
-      this.projectiles.push({ kind: 'fire', x: h.x, y: h.y - 14, target: pick.id,
+      // FROM HIS MOUTH. This was (h.x, h.y - 14): no forward offset at all and
+      // 14 units above his FEET, on a dragon 58 units tall whose mouth sits at
+      // 0.685 of that -- so the fireball left his chest, 21 units low and 18
+      // short, while the plate above it opened its jaws. VANUS: "the fireball
+      // from Wick seems to come from the middle of him not from his mouth, even
+      // though his mouth is opening."
+      //
+      // _muzzle() is the same anchor the BREATH was moved onto when it had this
+      // exact bug; the fireball simply never got the fix. It also follows him up
+      // onto a machine, which the hardcoded offset could not -- crewing lifts him
+      // ~27 units and the fire went on leaving from the floor.
+      var fmz = this._muzzle(false);
+      this.projectiles.push({ kind: 'fire', x: fmz.x, y: fmz.y, target: pick.id,
                               spd: 300, dmg: h.dmg, hero: true });
-      this.fxQueue.push({ k: 'muzzle', x: h.x, y: h.y - 14, tx: pick.px, ty: pick.py, hero: true });
+      this.fxQueue.push({ k: 'muzzle', x: fmz.x, y: fmz.y, tx: pick.px, ty: pick.py, hero: true });
       Sfx.play('flame');
     }
 
@@ -5730,6 +5750,17 @@
   // art/hero_breathe.png at the front of the gullet fire. Using the idle numbers
   // here is how fire ends up leaving his forehead.
   var MUZZLE_B_UP = 0.616, MUZZLE_B_FWD = 0.263;
+  // PLATE ASPECTS AS CONSTANTS, not reads of ART.images. _muzzle() is about to
+  // place a PROJECTILE, and a projectile's start position is sim state -- it
+  // decides how far the fireball flies and therefore when the damage lands. A
+  // sim number must never depend on whether an image finished decoding, and the
+  // old expression fell back to 0.77 when it had not, which is a fork between
+  // two players on the same seed. hero_whelp and hero_breathe deliberately share
+  // one canvas (see the repack note above), so they share one number; the manned
+  // plates are a different canvas and the drawer already sizes off theirs.
+  // tools/validate.py asserts both against the shipped PNGs.
+  var HERO_ASPECT = 783 / 730;          // hero_whelp.png, hero_breathe.png
+  var HERO_MAN_ASPECT = 951 / 746;      // hero_man.png, hero_man_up/_dn.png
   /// WHERE WICK IS DRAWN, and how big -- the single source both the drawer and
   /// _muzzle() read. They used to disagree: the drawer lifted him 26px onto a
   /// machine and _muzzle() went on reporting his mouth at ground level, so a
@@ -5757,18 +5788,42 @@
   // _breathT because _cosmetic() spends the fx queue BEFORE _breathT is set --
   // reading the flag here would put the first burst on the closed-mouth muzzle
   // every single time, which is the drift this function was written to end.
+  /// WHICH WAY WICK IS LOOKING: +1 right, -1 left. His plate is painted facing
+  /// LEFT, so the drawer mirrors by the negation of this.
+  ///
+  /// ONE number, read by the drawer AND by _muzzle(), because they derived it
+  /// separately and disagreed in the two states that matter. Both read
+  /// (tx - x), which is ZERO for a dragon standing still -- and zero again the
+  /// moment he mounts a machine, because manning sets tx to the machine he is
+  /// already sitting on. So a stationary Wick always resolved to LEFT and spat
+  /// his fireball out of the BACK of his head at anything on his right, and a
+  /// crewing Wick was drawn by the mount rule while his mouth stayed on the
+  /// other side of him. It is sim state (h.face), not a render cache, so it can
+  /// place a projectile without lagging a frame behind the plate.
+  Game.prototype._heroFacing = function () {
+    var h = this.hero;
+    var tw = h.manned ? this._towerByTid(h.manTid) : null;
+    if (tw) {
+      var mdx = (TOWER_TYPES[tw.type].mount || { dx: 0 }).dx;
+      return mdx >= 0 ? -1 : 1;        // sitting right of the crank -> look left at it
+    }
+    return (h.face | 0) || -1;
+  };
+
   Game.prototype._muzzle = function (onBreath) {
     var h = this.hero;
-    var img = (onBreath && ART.images.hero_breathe) || ART.images.hero;
     var a = this._heroAnchor();
     var hh = HERO_H * a.s;
-    var mw2 = hh * (img ? img.width / img.height : 0.77);
-    // Facing is derived from hero state with the SAME expression the drawer
-    // uses (hflip = (tx-x) > 0.5 ? -1 : 1, sprite faces left natively, so world
-    // facing is its negation). Reading the drawer's stored value instead would
-    // lag by a frame — _cosmetic() spends the fx queue BEFORE draw() runs — so
-    // a breath cast in the same frame he turns would leave his mouth.
-    var f = (h.tx - h.x) > 0.5 ? 1 : -1;
+    // ...and the aspect follows the plate he is actually drawn on. Crewing a
+    // machine swaps him to the manned canvas, which is wider (1.275 vs 1.073),
+    // so reading the idle plate's aspect put his mouth ~17% short of his snout
+    // for the whole time he is at a crank.
+    var mw2 = hh * (a.tw ? HERO_MAN_ASPECT : HERO_ASPECT);
+    // Facing comes from the sim (see _heroFacing), never from the drawer's
+    // stored value: _cosmetic() spends the fx queue BEFORE draw() runs, so
+    // reading the render cache would lag a frame and a breath cast on the frame
+    // he turns would leave his mouth.
+    var f = this._heroFacing();
     var mf = onBreath ? MUZZLE_B_FWD : MUZZLE_FWD;
     var mu = onBreath ? MUZZLE_B_UP : MUZZLE_UP;
     return { x: a.x + f * (mw2 * mf), y: a.y + 5 - a.lift - hh * mu, f: f };
@@ -7110,13 +7165,9 @@
       // side of the machine his mount puts him on. VANUS: "sometimes he's faced
       // the wrong way". On a mount the sign of mount.dx is the answer: sitting
       // to the RIGHT of the machine he must look left at it, and vice versa.
-      var hflip;
-      if (mnt) {
-        var mdx0 = (TOWER_TYPES[mtw.type].mount || { dx: 0 }).dx;
-        hflip = mdx0 >= 0 ? 1 : -1;            // dx>0 -> he is right of it -> face LEFT (native)
-      } else {
-        hflip = (h.tx - h.x) > 0.5 ? -1 : 1;   // sprite faces left natively
-      }
+      // ONE SOURCE (see _heroFacing): the sim owns which way he looks, and the
+      // plate is painted facing left, so the mirror is its negation.
+      var hflip = -this._heroFacing();
       var hmoving = Math.abs(h.tx - h.x) + Math.abs(h.ty - h.y) > 3;
       // HE STANDS. He is drawn standing in his own art -- the title plate, the
       // app icon, hero_whelp itself -- and he bobbed anyway, at every moment,
