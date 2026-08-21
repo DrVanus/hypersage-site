@@ -172,11 +172,25 @@
    "as_drawn_psnr": 37.5
   },
   "hero_man.png": {
-   "size": "885px",
-   "kb": 140.5,
+   "size": "779px",
+   "kb": 139.3,
    "q": 84,
-   "codec_psnr": 37.2,
-   "as_drawn_psnr": 37.2
+   "codec_psnr": 36.7,
+   "as_drawn_psnr": 36.7
+  },
+  "hero_man_dn.png": {
+   "size": "779px",
+   "kb": 146.1,
+   "q": 84,
+   "codec_psnr": 36.2,
+   "as_drawn_psnr": 36.2
+  },
+  "hero_man_up.png": {
+   "size": "779px",
+   "kb": 160.9,
+   "q": 84,
+   "codec_psnr": 35.4,
+   "as_drawn_psnr": 35.4
   },
   "hero_title.png": {
    "size": "863->594px",
