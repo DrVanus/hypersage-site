@@ -194,10 +194,10 @@
   },
   "hero_man_up.png": {
    "size": "951px",
-   "kb": 149.2,
+   "kb": 148.9,
    "q": 84,
-   "codec_psnr": 37.3,
-   "as_drawn_psnr": 37.3
+   "codec_psnr": 37.6,
+   "as_drawn_psnr": 37.6
   },
   "hero_title.png": {
    "size": "863->594px",

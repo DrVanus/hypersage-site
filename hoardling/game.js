@@ -5098,7 +5098,9 @@
   /// points against ~100 road samples and must not run per frame.
   Game.prototype._rivalSpots = function (rank, side) {
     side = side | 0;
-    var key = this.levelIdx + ':' + rank + ':' + side;
+    // rivalSide belongs in the key: BOTH the pad filter and _roadD2 branch on
+    // it, so a list built outside a duel is a different list.
+    var key = this.levelIdx + ':' + rank + ':' + side + ':' + (this.rivalSide ? 1 : 0);
     if (this._spotKey === key) return this._spotCache;
 
     var self = this;
@@ -5179,7 +5181,10 @@
   /// the hue; a flat fill would give a silhouette, which reads as a shadow
   /// rather than a rival. Cached per colour: this is a canvas op, not a filter.
   Game.prototype._rivalPlate = function (img, tint) {
-    var key = tint + '@' + (img.width | 0) + 'x' + (img.height | 0);
+    // KEYED ON THE SOURCE TOO. Dimensions do not identify an image -- the three
+    // manning frames are all 951x746 -- so a tint cache keyed on size alone
+    // hands the flap her body plate for every frame of the cycle.
+    var key = tint + '@' + (img.src || '?') + '@' + (img.width | 0) + 'x' + (img.height | 0);
     var cache = this._tintCache || (this._tintCache = {});
     if (cache[key]) return cache[key];
     var cv = document.createElement('canvas');
@@ -5251,10 +5256,9 @@
       var spots = this._rivalSpots(plan.rank, 1);      // already her side only
       var want = plan.mix[mine.length % plan.mix.length];
       for (var i = 0; i < spots.length; i++) {
-        var sp = spots[i];
-        var pi = this._nearestPad(sp.x, sp.y);
-        if (pi >= 0 && this._padTower(pi) !== -1) continue;   // that pad is taken
-        if (this._buyAt(want, sp.x, sp.y, null, 1)) break;
+        // (no "is this pad taken" test: _nearestPad already skips occupied pads,
+        // and _placeCheck rejects ground too close to a machine either way)
+        if (this._buyAt(want, spots[i].x, spots[i].y, null, 1)) break;
       }
     }
 
@@ -5306,15 +5310,22 @@
 
   Game.prototype._buyAt = function (type, x, y, chk, own) {
     own = own | 0;
-    chk = chk || this._placeCheck(x, y, own);
-    if (!chk.ok || !TOWER_TYPES[type]) return null;
+    if (!TOWER_TYPES[type]) return null;
     // each side pays out of its own purse, and the crowd multiplier counts only
     // that side's machines -- otherwise the rival building makes YOUR next
     // machine dearer, which is not a duel, it is a tax
     var mineCount = 0;
     for (var mc = 0; mc < this.towers.length; mc++) if ((this.towers[mc].own | 0) === own) mineCount++;
-    var cost = Math.round(TOWER_TYPES[type].cost * (chk.discount ? PAD_DISCOUNT : 1) * crowdMul(mineCount));
     var purse = own === 1 ? this.rivalGold : this.gold;
+    // CHEAPEST-POSSIBLE FIRST. _placeCheck walks every sample of every road, and
+    // the rival AI calls this once per candidate down a ~129-entry shortlist
+    // every half second -- so a rival who cannot afford anything was paying for
+    // the entire geometric scan to be told so, 129 times a tick. The pad
+    // discount is the best price available, so failing THAT fails all of them.
+    if (purse < Math.round(TOWER_TYPES[type].cost * PAD_DISCOUNT * crowdMul(mineCount))) return null;
+    chk = chk || this._placeCheck(x, y, own);
+    if (!chk.ok) return null;
+    var cost = Math.round(TOWER_TYPES[type].cost * (chk.discount ? PAD_DISCOUNT : 1) * crowdMul(mineCount));
     if (purse < cost) return null;
     var bx = x, by = y;
     if (chk.pad >= 0) { bx = MAP.pads[chk.pad].x; by = MAP.pads[chk.pad].y; }   // snap to the pad
@@ -6546,6 +6557,29 @@
         // when the machine FIRED, so the barrel pointed at where the raider had
         // been up to a full cooldown earlier. That is fixed above and it is what
         // makes the machine read as tracking; this only has to not break.
+        //
+        // MEASURED 2026-08-21, AND THE PARAGRAPH ABOVE IS WRONG ABOUT 0.30 BEING
+        // SEAM-SAFE. Compositing the real split at a range of angles and counting
+        // (a) top pixels that swing outside the plate's own outline and (b) plate
+        // pixels left uncovered:
+        //      6deg   560 over,    875 uncovered   clean
+        //     12deg  1167 over,  3811 uncovered   visible
+        //     19deg  1744 over,  7501 uncovered   BROKEN   <-- the shipped clamp
+        // `want` reaches ~0.30 rad (17deg) for any raider below the machine, i.e.
+        // most of them, so the plate is tearing at its own cut during normal play.
+        //
+        // AND ROTATION CANNOT SOLVE THE AIM ANYWAY. The plate's bow is painted
+        // 41.8deg above horizontal (principal axis of the top half's opaque
+        // pixels), so +/-18.9deg reaches 23deg..61deg and NEVER points level or
+        // below -- while a raider on the road sits at roughly 0..-30deg. VANUS,
+        // from the phone: "the crossbow isnt properly pointed at its enemy".
+        // That is a 25-70deg error no clamp can close.
+        //
+        // The answer is the one this repo already wrote down for the wings:
+        // THE ANSWER IS A FRAME, not a deformation. Directional plates, picked
+        // by angle, the way hero_man_up/_dn work. Left as-is pending that,
+        // because lowering the clamp trades a tear for a bow that never moves
+        // and raising it is what VANUS already rejected as broken.
         var want = 0.30 * (fdy / fn) + 0.07 * Math.abs(fdx / fn) * (fdy >= 0 ? 1 : -1);
         // Only a machine with a SEPARATED turret may turn at all — its base
         // stays planted. The Mimic is a chest: it mirrors, nothing rotates.
@@ -8464,8 +8498,12 @@
     ctx.fillStyle = '#ffc9a8'; ctx.font = 'bold 34px Georgia, serif';
     ctx.fillText('DUEL', WORLD_W / 2, 142);
     ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
-    ctx.fillText('The Guild posted two caves tonight. The same raiders', WORLD_W / 2, 172);
-    ctx.fillText('hit both. Keep more gold than they do.', WORLD_W / 2, 188);
+    // IT SAID "two caves". That is the shape VANUS rejected twice -- a second
+    // board in an inset -- and the mode has been ONE cavern with two sides
+    // since. Copy that describes the old format is the same lie as a dial that
+    // no longer does anything.
+    ctx.fillText('One cavern, split down the middle. The same raiders', WORLD_W / 2, 172);
+    ctx.fillText('down both roads. Keep more gold than they do.', WORLD_W / 2, 188);
     ctx.fillStyle = 'rgba(232,203,180,0.6)'; ctx.font = '11px system-ui, sans-serif';
     ctx.fillText(DUEL_WAVES + ' waves · no forge craft · all seven machines', WORLD_W / 2, 208);
 
@@ -8497,7 +8535,7 @@
       ctx.fillText(rv.blurb, DG.x + 14, ry + 42);
       // tonight's ground — the arena rotates daily, so name it
       ctx.fillStyle = 'rgba(201,184,255,0.7)'; ctx.font = '10px system-ui, sans-serif';
-      ctx.fillText(ready ? 'tonight: ' + MAPS[duelMapFor(i)].name : 'no recording yet',
+      ctx.fillText(ready ? 'tonight: ' + MAPS[duelMapFor(i)].name : 'no plan yet',
                    DG.x + 14, ry + DG.h - 8);
       // the badge: beaten, and by how much
       ctx.textAlign = 'right';
@@ -8569,8 +8607,15 @@
     // number the mode is about.
     if (r.rival) {
       ctx.font = 'bold 38px Georgia, serif';
-      ctx.fillText(r.won ? (r.knockout && (r.rivalHoard | 0) <= 0 ? 'SACKED THEM!' : 'DUEL WON!')
+      // A TIE IS NOT A WIN, even though it is scored as one. Ties go to the
+      // player (`hoard >= rivalHoard`), so "DUEL WON!" over a dead-level
+      // scoreline is true by the rule and reads as a lie by the number -- the
+      // margin line right underneath says +0. Name it for what it is.
+      var tie = (r.margin | 0) === 0 && r.won;
+      ctx.fillText(r.won ? (r.knockout && (r.rivalHoard | 0) <= 0 ? 'SACKED THEM!'
+                            : tie ? 'DEAD LEVEL — YOU KEEP IT' : 'DUEL WON!')
                          : 'DUEL LOST', WORLD_W / 2, 314);
+      if (tie) ctx.font = 'bold 25px Georgia, serif';
       ctx.font = 'bold 15px system-ui, sans-serif';
       ctx.fillStyle = r.won ? 'rgba(158,245,143,0.9)' : 'rgba(255,154,106,0.9)';
       var mg2 = r.margin | 0;
