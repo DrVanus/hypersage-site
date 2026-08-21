@@ -1532,8 +1532,15 @@
       //           tools/validate.py. The cosmetic jitter is applied HERE, on the
       //           far side of the call, exactly where it has always been.
       //   pri     see voice(): 2 = kill, 1 = impact, 0 = firing/UI.
+      // otherCave: set while the RIVAL's board is being stepped. A duel steps
+      // two full sims per frame and both of them call Sfx.play -- unmuted, the
+      // opponent's crossbows, kills and leaks all play in the player's ears,
+      // doubling every sound and making a cave the player cannot see the
+      // loudest thing in the game. A flag rather than a per-Game Sfx because
+      // the rival step is synchronous: it is set, it is stepped, it is cleared.
+      otherCave: false,
       play: function (name, key, opts) {
-        if (!ac || muted) return;                     // consumes NOTHING seeded
+        if (!ac || muted || Sfx.otherCave) return;    // consumes NOTHING seeded
         opts = opts || {};
         var now = Date.now();
         // KEYED ON THE EMITTER, NOT THE NAME. This was one timestamp per sound
@@ -2185,6 +2192,7 @@
   // Taps are converted to WORLD coordinates at CAPTURE time, with the view
   // that was live at that instant — so the sim's inputs are device- and
   // resize-independent, and a replay log of world-space taps is portable.
+  var EMPTY_TAPS = [];
   var Input = (function () {
     var taps = [];
     var convert = null;                       // installed by Game
@@ -2927,7 +2935,22 @@
   };
 
   // ===== Game =============================================================
-  function Game(canvas) {
+  // isRival: this instance is the OPPONENT'S CAVE, simulated live beside yours.
+  //
+  // Everything that makes a Game a Game is already per-instance -- ctx, view,
+  // towers, enemies, hoard -- so a second board costs a constructor call and
+  // not a refactor. What is NOT per-instance is the handful of globals a Game
+  // reaches OUT to, and each one is a way the rival could corrupt the player:
+  //   * Input.setConverter  -- the last Game to construct owns the taps, so a
+  //                            rival would silently steal every one of them
+  //   * requestAnimationFrame -- the rival must run on the PLAYER'S clock, in
+  //                            lockstep, or the two caves drift apart
+  //   * Save                -- _gameOver writes stars; the rival must never
+  //   * Sfx                 -- one cave's worth of sound, not two
+  // MAP/LANES are shared ON PURPOSE: a duel is the same raiding party hitting
+  // both caves, so both sides MUST be on the same ground.
+  function Game(canvas, isRival) {
+    this.isRival = !!isRival;
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.view = { cw: 1, ch: 1, dpr: 1, scale: 1, w: VIEW_MIN_W, h: VIEW_H, ox: 0, oy: 0 };
@@ -2940,7 +2963,7 @@
     this.reset((location && /[?&]seed=(\d+)/.exec(location.search) || [])[1] | 0 || dailySeed());
     this.resize();
     var self = this;
-    Input.setConverter(function (cx, cy) {
+    if (!this.isRival) Input.setConverter(function (cx, cy) {
       var w = self.toWorld(cx, cy);
       // view coords ride along for the screen-anchored HUD hit tests
       w.vx = cx / self.view.scale;
@@ -2948,7 +2971,7 @@
       return w;
     });
     this._frame = this._frame.bind(this);
-    requestAnimationFrame(this._frame);
+    if (!this.isRival) requestAnimationFrame(this._frame);
   }
 
   Game.prototype.reset = function (seed, mode, level, trialKey, rivalIdx) {
@@ -3020,6 +3043,20 @@
     // anything that can change the player's sim, so a duel is bit-identical to
     // the same seed played solo.
     this.rivalHoard = CFG.startHoard;
+    // THE OPPONENT'S CAVE. A second Game on the SAME ground, same seed, same
+    // twelve waves, stepped in lockstep below. Built only for the player's
+    // instance and only for a duel, and never by the rival itself -- that
+    // guard is what stops this recursing into a cave per cave forever.
+    this.rivalGame = null;
+    if (this.mode === 'duel' && !this.isRival && this.rival) {
+      var rc = this._rivalCanvas || (this._rivalCanvas = document.createElement('canvas'));
+      var rg = new Game(rc, true);
+      rg._rivalId = this.rival.id;
+      rg.reset(DUEL_ARENAS[this.duelSeedIdx].seed, 'duel', level, trialKey, this.rivalIdx);
+      rg.state = 'playing';
+      rg.resize();                     // owns its own canvas size and view
+      this.rivalGame = rg;
+    }
     this.rivalPrev = CFG.startHoard;
     this.rivalDrop = 0;                     // coins the rival lost on the last wave
     // The HUD pulse is DERIVED from (worldT - rivalStepT), not carried in a
@@ -3087,6 +3124,18 @@
   };
 
   Game.prototype.resize = function () {
+    // THE RIVAL'S CAVE IS NOT A VIEWPORT. This sizes the canvas from
+    // window.innerWidth, so the opponent's board got a full window-sized canvas
+    // and drew the world 1:1 into one corner of it -- the inset then showed the
+    // cave squeezed into its top-left with dead space around it. It renders the
+    // WORLD and nothing else, so its canvas is exactly the world and its view
+    // is the identity: no letterbox, no safe area, no bands to fill.
+    if (this.isRival) {
+      this.canvas.width = WORLD_W; this.canvas.height = WORLD_H;
+      this.view = { cw: WORLD_W, ch: WORLD_H, dpr: 1, scale: 1,
+                    w: WORLD_W, h: WORLD_H, ox: 0, oy: 0, safeT: 0, safeB: 0 };
+      return;
+    }
     var cw = Math.max(320, window.innerWidth || 0);
     var ch = Math.max(240, window.innerHeight || 0);
     var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -3172,7 +3221,7 @@
     this._waveStartHoard = this.hoard;   // cosmetic: lets the clear grade itself
     this.waveT = 0;
     this.countdown = 0;
-    if (!Save.data.tut && this.mode === 'campaign' && this.towers.length) {
+    if (!this.isRival && !Save.data.tut && this.mode === 'campaign' && this.towers.length) {
       Save.data.tut = 1; Save.write();       // taught: build, then call the wave
     }
     // daily: the server-timed run token starts at the FIRST wave call
@@ -3185,13 +3234,25 @@
     this.worldT += STEP;
     if (this.infoCard && (this.infoCard.t -= STEP) <= 0) this.infoCard = null;
     if (this.resultLockT > 0) this.resultLockT -= STEP;
-    var taps = Input.drain();
+    // THE RIVAL NEVER DRAINS THE PLAYER'S TAPS. Input is a module-level queue,
+    // so an unguarded rival step swallows every tap before the player's own
+    // sim sees it -- the game would simply stop responding during a duel.
+    var taps = this.isRival ? EMPTY_TAPS : Input.drain();
     for (var ti = 0; ti < taps.length; ti++) {
       var preState = this.state;
       this._handleTap(taps[ti]);
       if (this.state !== preState) break;   // no same-frame chaining through screens
     }
     if (this.state !== 'playing') return;
+
+    // THE OPPONENT'S CAVE, one fixed step, in lockstep with this one. Silent
+    // (Sfx.otherCave) because the player hears their own cave, not two. Wrapped
+    // so a throw in the rival's sim can never leave the player's game muted.
+    if (this.rivalGame && this.rivalGame.state === 'playing') {
+      Sfx.otherCave = true;
+      try { this.rivalGame._rivalTick(STEP); this.rivalGame.update(STEP); }
+      finally { Sfx.otherCave = false; }
+    }
 
     // hit-stop: an event-driven, DETERMINISTIC beat of frozen sim (same for
     // every replay of the same run — it lives in the sim, not the renderer)
@@ -3210,7 +3271,7 @@
       while (this.spawnQueue.length && this.spawnQueue[0].t <= this.waveT) {
         var sp = this.spawnQueue.shift();
         var base = ENEMY_TYPES[sp.type];
-        if (!Save.data.seen[sp.type] && ENEMY_CARDS[sp.type]) {
+        if (!this.isRival && !Save.data.seen[sp.type] && ENEMY_CARDS[sp.type]) {
           Save.data.seen[sp.type] = 1; Save.write();
           this.infoCard = { type: sp.type, t: 6 };   // display-only; sim ignores it
         }
@@ -3980,7 +4041,11 @@
       // in the corner of the HUD is a scoreboard; a number that announces
       // itself the moment yours moves is an opponent.
       if (this.mode === 'duel' && this.rival) {
-        var rh = rivalHoardAt(this.rivalIdx, this.duelSeedIdx, this.wave);
+        // LIVE, not baked. rivalHoardAt() is kept as the fallback for a rival
+        // whose cave failed to build -- a duel that cannot show an opponent is
+        // still better than a duel that crashes.
+        var rh = this.rivalGame ? Math.round(this.rivalGame.hoard)
+                                : rivalHoardAt(this.rivalIdx, this.duelSeedIdx, this.wave);
         if (rh !== null) {
           this.rivalPrev = this.rivalHoard;
           this.rivalHoard = rh;
@@ -4204,6 +4269,10 @@
     this.enemies.splice(i, 1);
   };
   Game.prototype._gameOver = function (won) {
+    // THE RIVAL'S CAVE ENDING IS NOT THE PLAYER'S RUN ENDING. This writes
+    // stars, duel records, daily bests and the leaderboard queue; a live
+    // opponent reaching wave 12 must set its own state and nothing else.
+    if (this.isRival) { this.state = won ? 'won' : 'lost'; return; }
     this.state = won ? 'won' : 'lost';
     this._bossWave = false;
     // Victory: the bed ducks and comes back — the cave is still his.
@@ -4331,6 +4400,15 @@
         if (vx >= G.spd && vx <= G.spd + 44) { this.speed = this.speed === 1 ? 2 : 1; return; }
         if (vx >= G.pause && vx <= G.pause + 44) { this.setPaused(true); return; }
         if (vx >= G.mute && vx <= G.mute + 44) { Sfx.toggle(); return; }
+      }
+      // THE OPPONENT'S CAVE SWELLS ON A TAP. It is a picture, not a playfield:
+      // this only resizes it, and the tap never reaches the rival's board, so
+      // there is no way to build in a cave that is not yours.
+      if (this.rivalGame) {
+        var ir = this._insetRect(G);
+        if (vx >= ir.x - 3 && vx <= ir.x + ir.w + 3 && vy >= ir.y - 3 && vy <= ir.y + ir.h + 15) {
+          this.insetBig = !this.insetBig; Sfx.play('chime'); return;
+        }
       }
       // A MACHINE IN HAND MEANS THE NEXT TAP ON LEGAL GROUND IS A BUILD.
       //
@@ -4608,19 +4686,10 @@
         this.fxQueue.push({ k: 'float', x: w.x, y: w.y - 18, txt: chk.why, c: '#ff9a9a' });
         return;                                   // stay armed: let them try again
       }
-      var cost = Math.round(TOWER_TYPES[stid].cost * (chk.discount ? PAD_DISCOUNT : 1) * crowdMul(this.towers.length));
-      if (this.gold < cost) {
+      if (!this._buyAt(stid, w.x, w.y, chk)) {
         this.fxQueue.push({ k: 'float', x: w.x, y: w.y - 18, txt: 'not enough gold', c: '#ff9a9a' });
         return;
       }
-      var bx = w.x, by = w.y;
-      if (chk.pad >= 0) { bx = MAP.pads[chk.pad].x; by = MAP.pads[chk.pad].y; }   // snap to the pad
-      this.gold -= cost;
-      this.towers.push({ tid: this.nextId++, type: stid, level: 0, fork: 0,
-                         x: bx, y: by, padIdx: chk.pad, cd: 0, targeting: 0, shotT: 9 });
-      this.fxQueue.push({ k: 'place', x: bx, y: by });
-      if (chk.discount) this.fxQueue.push({ k: 'float', x: bx, y: by - 40, txt: 'PAD BONUS -20%', c: '#9ef58f' });
-      Sfx.play('place');
       this.shopPick = -1; this.placeHint = null;
       return;
     }
@@ -4681,6 +4750,191 @@
       if (towerUnlocked(TOWER_ORDER[i], mode)) out.push(TOWER_ORDER[i]);
     }
     return out;
+  };
+
+  /// THE PURCHASE, and the only one. Pulled out of the tap handler when the
+  /// duel grew a live opponent: an AI with its own copy of the cost line is an
+  /// AI that quietly stops paying the crowd multiplier or the pad discount the
+  /// day either changes, and the scoreboard becomes a lie that looks fine.
+  /// Both the player's tap and the rival's AI buy through here.
+  // ===== THE RIVAL AI — a live opponent, not a recording ==================
+  //
+  // The duel used to be a race against RIVAL_CURVES: a baked table of hoard
+  // per wave, drawn as a number in the top bar. It was honest (a recording of
+  // this bot on this arena IS that bot on that arena) but it meant there was no
+  // second cave and no second dragon -- VANUS: "I don't see another dragon
+  // that's fighting against me". A number cannot be watched.
+  //
+  // So the opponent is now a SECOND Game, stepped in lockstep beside the
+  // player's on the same map, same seed, same waves, driven by this. It costs
+  // shipping an AI, which the bake deliberately avoided; that trade is the
+  // price of a visible opponent, and it is also the thing an online duel will
+  // need anyway to fill in for a dropped player.
+  //
+  // DETERMINISTIC BY CONSTRUCTION: every choice below is a function of the
+  // board (tower count, wave, pad order) and never of Math.random, so the same
+  // rival on the same arena plays the same duel every time -- which is what
+  // keeps a duel fair when two players fight "the same" opponent.
+  var RIVAL_PLANS = {
+    // mix cycles; depth = how far it upgrades; cap = how many machines it will
+    // own; rank = which ground it likes; call = whether it presses START early
+    tallow: { mix: ['ballista'], depth: 0, cap: 5, rank: 'keep', call: 'late', every: 2 },
+    flint:  { mix: ['ballista', 'crystal', 'ballista'], depth: 1, cap: 7, rank: 'road', call: 'late', every: 1 },
+    ember:  { mix: ['ballista', 'perch'], depth: 2, cap: 4, rank: 'road', call: 'early', every: 1 },
+    cinder: { mix: ['ballista', 'perch', 'rotor', 'brazier', 'ballista'], depth: 2, cap: 9,
+              rank: 'road', call: 'early', every: 1, wick: true },
+  };
+
+  /// Pads ranked for a plan, cached per (map, rank) — a sort per frame for a
+  /// board that never moves is pure waste.
+  /// THE OPPONENT'S CAVE, ON YOUR SCREEN. VANUS: "I don't see another dragon
+  /// that's fighting against me". This is that dragon: the rival Game rendered
+  /// to its own canvas and blitted here, live, every frame it moves.
+  ///
+  /// Portrait is the constraint. The world is 420x780 — two boards side by side
+  /// would be 210 wide each and unplayable — so the opponent gets an INSET, the
+  /// shape every mobile versus game lands on, and a tap swells it to half the
+  /// screen for a proper look without ever taking the player off their own
+  /// board. Their taps stay theirs: this is a picture, not a second playfield.
+  var INSET_W = 96, INSET_BIG = 190;
+  Game.prototype._insetRect = function (G) {
+    var w = this.insetBig ? INSET_BIG : INSET_W;
+    var h = Math.round(w * (WORLD_H / 420));
+    var v = this.view;
+    return { x: v.ox + WORLD_W - w - 8, y: G.topY + 84, w: w, h: h };
+  };
+  Game.prototype._drawRivalInset = function (ctx, G) {
+    var rg = this.rivalGame;
+    if (!rg || !(this.state === 'playing' || this.state === 'paused')) return;
+    // Render the opponent's board into ITS canvas, silent -- but not every
+    // frame. Measured: the player's own draw is 0.29ms and drawing the rival
+    // too takes it to 0.87ms, i.e. two thirds of the frame's render cost goes
+    // to a 96px panel. Its canvas persists between draws, so re-rendering every
+    // 3rd frame and blitting the last one costs nothing visible at that size
+    // and gives back most of the 0.58ms. The SIM still steps every frame (that
+    // is 0.012ms and it must stay in lockstep) -- this throttles the PICTURE.
+    this._insetT = (this._insetT | 0) + 1;
+    if (!rg._drawnOnce || this._insetT % 3 === 0) {
+      Sfx.otherCave = true;
+      try { rg.draw(0); rg._drawnOnce = true; } catch (e) { Sfx.otherCave = false; return; }
+      Sfx.otherCave = false;
+    }
+
+    var r = this._insetRect(G);
+    ctx.save();
+    // frame first, so the board never bleeds into the cavern behind it
+    uiPanel(ctx, r.x - 3, r.y - 3, r.w + 6, r.h + 18, 8);
+    ctx.beginPath(); rr(ctx, r.x, r.y, r.w, r.h, 5); ctx.clip();
+    ctx.drawImage(rg.canvas, 0, 0, rg.canvas.width, rg.canvas.height, r.x, r.y, r.w, r.h);
+    ctx.restore();
+    // a cool rim, matching the duel strip's "their pile is not your pile" tint
+    ctx.strokeStyle = 'rgba(127,147,168,0.55)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); rr(ctx, r.x, r.y, r.w, r.h, 5); ctx.stroke();
+    ctx.fillStyle = '#cfe0f0';
+    ctx.font = 'bold 9px system-ui, sans-serif'; ctx.textAlign = 'center';
+    // "CINDER'S CAVE" read as somewhere ELSE. It is the same arena, the same
+    // seed and the same twelve waves -- verified, the wave tables match entry
+    // for entry, road assignment included -- and she simply has her own copy to
+    // defend. "VS" says opponent without implying a second map.
+    ctx.fillText('VS ' + this.rival.name.toUpperCase(), r.x + r.w / 2, r.y + r.h + 11);
+    ctx.textAlign = 'left';
+  };
+
+  Game.prototype._rivalSpots = function (rank) {
+    var key = this.levelIdx + ':' + rank;
+    if (this._spotKey === key) return this._spotCache;
+    var pads = MAP.pads.slice();
+    if (rank === 'keep') {
+      var kx = MAP.keep.x, ky = MAP.keep.y;
+      pads.sort(function (a, b) {
+        return ((a.x - kx) * (a.x - kx) + (a.y - ky) * (a.y - ky))
+             - ((b.x - kx) * (b.x - kx) + (b.y - ky) * (b.y - ky));
+      });
+    } else {
+      // nearest to ANY road, so a two-road arena is ranked by both of them
+      var self = this;
+      var d2 = function (p) {
+        var best = 1e9;
+        for (var ln = 0; ln < LANES.length; ln++) {
+          for (var d = 0; d <= LANES[ln].len; d += 12) {
+            var q = pathPointAt(d, ln), dx = p.x - q.x, dy = p.y - q.y;
+            var v = dx * dx + dy * dy;
+            if (v < best) best = v;
+          }
+        }
+        return best;
+      };
+      var keyed = pads.map(function (p) { return { p: p, d: d2(p) }; });
+      keyed.sort(function (a, b) { return a.d - b.d; });
+      pads = keyed.map(function (k) { return k.p; });
+    }
+    this._spotKey = key; this._spotCache = pads;
+    return pads;
+  };
+
+  /// One AI beat. Called from update() on the RIVAL instance only.
+  Game.prototype._rivalTick = function (STEP) {
+    var plan = RIVAL_PLANS[this._rivalId] || RIVAL_PLANS.tallow;
+    // spend on a cadence, so a weak rival visibly hesitates and a strong one
+    // never leaves gold on the floor. STEP is passed in, not read from a
+    // module global -- it is update()'s parameter and does not exist here.
+    this._aiT = (this._aiT || 0) + STEP;
+    if (this._aiT < 0.5) return;
+    this._aiT = 0;
+
+    // 1. BUILD, cycling the mix, on its preferred ground
+    if (this.towers.length < plan.cap && (this.wave % (plan.every || 1)) === 0) {
+      var spots = this._rivalSpots(plan.rank);
+      var want = plan.mix[this.towers.length % plan.mix.length];
+      for (var i = 0; i < spots.length; i++) {
+        var sp = spots[i];
+        if (this._nearestPad(sp.x, sp.y) >= 0 && this._padTower(this._nearestPad(sp.x, sp.y)) !== -1) continue;
+        if (this._buyAt(want, sp.x, sp.y)) break;
+      }
+    }
+
+    // 2. UPGRADE toward its depth, shallowest machine first, so the board
+    //    levels evenly instead of one monster and four level-0s
+    if (plan.depth > 0) {
+      var low = null;
+      for (var t = 0; t < this.towers.length; t++) {
+        var tw = this.towers[t];
+        if (tw.level >= plan.depth) continue;
+        if (!low || tw.level < low.level) low = tw;
+      }
+      if (low) {
+        var lvl = TOWER_TYPES[low.type].levels[low.level];
+        if (lvl && this.gold >= lvl.upgradeCost) { this.gold -= lvl.upgradeCost; low.level++; }
+      }
+    }
+
+    // 3. CALL THE WAVE. 'late' forfeits the early-call bonus, which is exactly
+    //    what a distracted builder does and most of why tallow falls behind.
+    if (plan.call === 'early' && !this.waveActive && this.state === 'playing'
+        && this.wave < this.totalWaves()) this.startWave();
+
+    // 4. Cinder works the floor herself: park her Wick on the busiest road.
+    if (plan.wick && this.hero && !this.hero.manned) {
+      var spots2 = this._rivalSpots('road');
+      if (spots2.length) { this.hero.tx = spots2[0].x; this.hero.ty = spots2[0].y + 22; }
+    }
+  };
+
+  Game.prototype._buyAt = function (type, x, y, chk) {
+    chk = chk || this._placeCheck(x, y);
+    if (!chk.ok || !TOWER_TYPES[type]) return null;
+    var cost = Math.round(TOWER_TYPES[type].cost * (chk.discount ? PAD_DISCOUNT : 1) * crowdMul(this.towers.length));
+    if (this.gold < cost) return null;
+    var bx = x, by = y;
+    if (chk.pad >= 0) { bx = MAP.pads[chk.pad].x; by = MAP.pads[chk.pad].y; }   // snap to the pad
+    this.gold -= cost;
+    var tw = { tid: this.nextId++, type: type, level: 0, fork: 0,
+               x: bx, y: by, padIdx: chk.pad, cd: 0, targeting: 0, shotT: 9 };
+    this.towers.push(tw);
+    this.fxQueue.push({ k: 'place', x: bx, y: by });
+    if (chk.discount) this.fxQueue.push({ k: 'float', x: bx, y: by - 40, txt: 'PAD BONUS -20%', c: '#9ef58f' });
+    Sfx.play('place');
+    return tw;
   };
 
   Game.prototype._placeCheck = function (x, y) {
@@ -4746,6 +5000,12 @@
 
   // ---- COSMETIC lane. Per-frame, variable dt, Math.random. ----------------
   Game.prototype._cosmetic = function (dtRaw) {
+    // the opponent's cave spends its own fx queue too, or it grows without
+    // bound and its inset shows a board where nothing ever lands
+    if (this.rivalGame) {
+      Sfx.otherCave = true;
+      try { this.rivalGame._cosmetic(dtRaw); } finally { Sfx.otherCave = false; }
+    }
     // spend the fx queue emitted by the deterministic sim
     // note: handlers may push follow-up events (coinfly); the loop length is
     // re-read each pass so chained events spend in the same frame
@@ -5135,7 +5395,11 @@
     this._drawPads(ctx);
     this._drawEntities(ctx);
     this._drawParticles(ctx);
-    this._drawWorldHints(ctx);
+    // NO WORLD TEXT ON THE OPPONENT'S BOARD. Floats and build hints are drawn
+    // at world scale, and the inset is 96px wide, so "PAD BONUS -20%" and
+    // "OVERCLOCKED!" came out as an illegible smear covering her whole cave.
+    // Her numbers are on the duel strip; her board only has to show the fight.
+    if (!this.isRival) this._drawWorldHints(ctx);
     }
     if (this.menu) this._drawMenus(ctx);
     if (this.state === 'menu') this._drawTitle(ctx);
@@ -5170,8 +5434,11 @@
       ctx.fillStyle = gb2;
       ctx.fillRect(0, v.oy + WORLD_H - 10, v.w, 24);
     }
-    // screen-anchored HUD (drawn over everything except the dev overlay)
-    this._drawHudView(ctx);
+    // screen-anchored HUD (drawn over everything except the dev overlay).
+    // The rival's cave renders WORLD ONLY: its inset is 92px wide, where a
+    // second gold counter and a second wave chip are illegible noise, and its
+    // hoard is already on the player's own duel strip.
+    if (!this.isRival) this._drawHudView(ctx);
 
     // dev overlay: LOUD missing-art list (never silent fallbacks)
     if (_dev) {
@@ -6645,7 +6912,10 @@
       }
     }
     ctx.globalAlpha = 1;
-    for (var f = 0; f < this.floats.length; f++) {
+    // The floats still DECAY on the rival's board (skipping that loop would
+    // leak them forever); they are simply not DRAWN there -- at 96px wide a
+    // world-scale "PAD BONUS -20%" covers her whole cave.
+    for (var f = 0; !this.isRival && f < this.floats.length; f++) {
       var fl = this.floats[f];
       ctx.globalAlpha = Math.min(1, fl.t);
       ctx.fillStyle = fl.c;
@@ -7147,6 +7417,9 @@
       }
       ctx.textAlign = 'left';
     }
+  
+    // the opponent's cave, last so nothing in the HUD paints over it
+    if (this.rivalGame) this._drawRivalInset(ctx, G);
   };
 
   Game.prototype._drawMenus = function (ctx) {
