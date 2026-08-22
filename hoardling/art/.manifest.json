@@ -318,6 +318,27 @@
    "codec_psnr": 34.0,
    "as_drawn_psnr": 34.5
   },
+  "road_ash.png": {
+   "size": "512px",
+   "kb": 12.7,
+   "q": 84,
+   "codec_psnr": 40.2,
+   "as_drawn_psnr": 40.2
+  },
+  "road_bone.png": {
+   "size": "512px",
+   "kb": 41.6,
+   "q": 84,
+   "codec_psnr": 35.9,
+   "as_drawn_psnr": 35.9
+  },
+  "road_flag.png": {
+   "size": "512px",
+   "kb": 51.5,
+   "q": 84,
+   "codec_psnr": 35.4,
+   "as_drawn_psnr": 35.4
+  },
   "torch.png": {
    "size": "268->103px",
    "kb": 16.4,

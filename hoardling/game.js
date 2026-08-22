@@ -1989,11 +1989,11 @@
   var ROADS = [
     { id: 'cobble', name: 'Old Cobble',   art: null, price: 0,   tint: null,
       how: 'The road they have always come down.' },
-    { id: 'flag',   name: 'Flagstone',    art: null, price: 140, tint: '#b9b3a4', sat: 0.40, val: 1.08,
+    { id: 'flag',   name: 'Flagstone',    art: 'road_flag', price: 140, tint: '#b9b3a4', sat: 0.40, val: 1.08,
       how: 'Laid flat. Easier on a laden thief.' },
-    { id: 'bone',   name: 'Bone Road',    art: null, price: 220, tint: '#e8e0cc', sat: 0.22, val: 1.22,
+    { id: 'bone',   name: 'Bone Road',    art: 'road_bone', price: 220, tint: '#e8e0cc', sat: 0.22, val: 1.22,
       how: 'Paved with what the last lot left behind.' },
-    { id: 'ash',    name: 'Ashfall',      art: null, price: 220, tint: '#4e4a52', sat: 0.25, val: 0.72,
+    { id: 'ash',    name: 'Ashfall',      art: 'road_ash', price: 220, tint: '#4e4a52', sat: 0.25, val: 0.72,
       how: 'Scorched black. Wick has been practising.' },
   ];
 
@@ -2470,6 +2470,15 @@
       // 99%-opaque rectangle. Two failures in opposite directions, $1.25. Slate
       // landed clean on the same prompt, so this is a coin-flip, not a recipe.
       keep_slate:   'art/keep_slate.png',
+      // THE ROADS. road_flag was already on disk in the art pipeline's _out/
+      // from the ORIGINAL road job and had never been installed -- a free skin
+      // that only needed wiring. bone + ash bought 2026-08-22 ($0.33).
+      // TILES ARE NOT SPRITES: no bbox crop, no defringe, no hole punch. The
+      // whole frame is the art, and cropping a tile to its content is exactly
+      // what breaks a seam.
+      road_flag:    'art/road_flag.png',
+      road_bone:    'art/road_bone.png',
+      road_ash:     'art/road_ash.png',
       hoard_silver: 'art/hoard_silver.png',
       hoard_gem:    'art/hoard_gem.png',
       hoard_copper: 'art/hoard_copper.png',
@@ -9504,6 +9513,40 @@
         }
         starCoin(ctx, WORLD_W / 2 - 46 + s * 46, 360, 19 * pop, earned);
       }
+    }
+    // ---- HOARD MARKS EARNED ----------------------------------------------
+    // resetRun() writes result.marks and NOTHING READ IT: a player earned the
+    // currency the whole shop runs on and was never told. It lands in the gap
+    // between the star medallions (360) and the stats block (420), which is
+    // free in every layout this screen has -- a duel has no stars and its
+    // margin line stops at 340, a trial's line stops at 345.
+    // IT WAITS FOR THE STARS. A landing medallion pops to ~1.55x its resting
+    // radius, so a star that clears the chip at rest (centre 360, r19 -> 379)
+    // punches straight through it mid-animation. The third star lands at
+    // 0.22 + 2*0.26 = 0.74s and settles shortly after, so the chip fades in at
+    // 1.05s -- which is also the better beat: stars, then the reward.
+    var mkFade = RM ? 1 : Math.max(0, Math.min(1, ((this._resultT || 0) - 1.05) / 0.28));
+    if ((r.marks | 0) > 0 && mkFade > 0) {
+      ctx.save(); ctx.globalAlpha = mkFade;
+      // IT MUST NOT MOVE ANYTHING. Every y below this is a literal, down to the
+      // daily ladder at 610, so shifting the stats block to make room would
+      // collide with the leaderboard on exactly the mode that earns marks most
+      // often. The chip is sized to the gap instead: the star medallions are
+      // centred at 360 with r19, so they end at 379, and 'treasure kept' is a
+      // 17px baseline at 420, so its ink starts near 407. 381..405 is free.
+      var mkTxt = '+' + (r.marks | 0) + '  HOARD MARKS';
+      ctx.font = 'bold 13px system-ui, sans-serif';
+      var mkW = ctx.measureText(mkTxt).width + 40;
+      var mkX = WORLD_W / 2 - mkW / 2;
+      ctx.fillStyle = 'rgba(96,66,28,0.55)';
+      rr(ctx, mkX, 381, mkW, 24, 8); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,215,110,0.75)'; ctx.lineWidth = 1.5;
+      rr(ctx, mkX, 381, mkW, 24, 8); ctx.stroke();
+      drawCoin(ctx, mkX + 15, 393, 8, Save.equipped('coin'));
+      ctx.textAlign = 'left';
+      inkText(ctx, mkTxt, mkX + 28, 397, '#ffe9c4', 3, 1);
+      ctx.textAlign = 'center';
+      ctx.restore();
     }
     ctx.fillStyle = '#ffe9c4'; ctx.font = '17px system-ui, sans-serif';
     ctx.fillText('treasure kept: ' + (r.hoard | 0) + ' / ' + CFG.startHoard, WORLD_W / 2, 420);
