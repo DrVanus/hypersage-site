@@ -87,6 +87,41 @@
    "codec_psnr": 36.8,
    "as_drawn_psnr": 36.8
   },
+  "coin_bastion.png": {
+   "size": "256px",
+   "kb": 11.2,
+   "q": 84,
+   "codec_psnr": 39.7,
+   "as_drawn_psnr": 39.7
+  },
+  "coin_citadel.png": {
+   "size": "256px",
+   "kb": 15.2,
+   "q": 84,
+   "codec_psnr": 35.5,
+   "as_drawn_psnr": 35.5
+  },
+  "coin_gate.png": {
+   "size": "256px",
+   "kb": 15.0,
+   "q": 84,
+   "codec_psnr": 35.0,
+   "as_drawn_psnr": 35.0
+  },
+  "coin_keep.png": {
+   "size": "256px",
+   "kb": 13.9,
+   "q": 84,
+   "codec_psnr": 38.4,
+   "as_drawn_psnr": 38.4
+  },
+  "coin_spire.png": {
+   "size": "256px",
+   "kb": 22.9,
+   "q": 84,
+   "codec_psnr": 37.2,
+   "as_drawn_psnr": 37.2
+  },
   "enemy_bat.png": {
    "size": "643->160px",
    "kb": 13.6,
@@ -213,6 +248,34 @@
    "codec_psnr": 37.2,
    "as_drawn_psnr": 38.9
   },
+  "hoard_copper.png": {
+   "size": "700px",
+   "kb": 34.6,
+   "q": 84,
+   "codec_psnr": 36.9,
+   "as_drawn_psnr": 36.9
+  },
+  "hoard_gem.png": {
+   "size": "700px",
+   "kb": 75.1,
+   "q": 92,
+   "codec_psnr": 34.2,
+   "as_drawn_psnr": 34.2
+  },
+  "hoard_plate.png": {
+   "size": "700px",
+   "kb": 46.8,
+   "q": 84,
+   "codec_psnr": 36.3,
+   "as_drawn_psnr": 36.3
+  },
+  "hoard_silver.png": {
+   "size": "700px",
+   "kb": 35.9,
+   "q": 84,
+   "codec_psnr": 38.9,
+   "as_drawn_psnr": 38.9
+  },
   "icon-180.png": {
    "size": "png (icon)",
    "kb": 44.1,
@@ -240,6 +303,13 @@
    "q": 84,
    "codec_psnr": 34.6,
    "as_drawn_psnr": 35.6
+  },
+  "keep_slate.png": {
+   "size": "519px",
+   "kb": 29.6,
+   "q": 84,
+   "codec_psnr": 39.7,
+   "as_drawn_psnr": 39.7
   },
   "road.png": {
    "size": "512->326px",

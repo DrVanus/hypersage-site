@@ -1839,13 +1839,13 @@
   // opposite strengths — Flint owns the open switchbacks, Ember owns the
   // chokepoints. That is a better matchup than a straight line anyway.
   var RIVALS = [
-    { id: 'tallow', tint: '#e0c070', name: 'Tallow', rank: 'APPRENTICE', pips: 1, policy: 'rival_tallow', wick: false, purse: 0.85,
+    { id: 'tallow', tint: '#e0c070', coat: 'bone', name: 'Tallow', rank: 'APPRENTICE', pips: 1, policy: 'rival_tallow', wick: false, purse: 0.85,
       blurb: 'Builds wide and cheap. Never upgrades a thing.' },
-    { id: 'flint', tint: '#7fb0e0', name: 'Flint', rank: 'BROAD HAND', pips: 2, policy: 'rival_flint', wick: false, purse: 0.75,
+    { id: 'flint', tint: '#7fb0e0', coat: 'cobalt', name: 'Flint', rank: 'BROAD HAND', pips: 2, policy: 'rival_flint', wick: false, purse: 0.75,
       blurb: 'Spreads his brass thin and wide. Loves a long road.' },
-    { id: 'ember', tint: '#ff8a3c', name: 'Ember', rank: 'DEEP HAND', pips: 2, policy: 'rival_ember', wick: false, purse: 0.95,
+    { id: 'ember', tint: '#ff8a3c', coat: 'bronze', name: 'Ember', rank: 'DEEP HAND', pips: 2, policy: 'rival_ember', wick: false, purse: 0.95,
       blurb: 'Few machines, all of them monsters. Wants a chokepoint.' },
-    { id: 'cinder', tint: '#b06adf', name: 'Cinder', rank: 'DRAKE', pips: 3, policy: 'rival_cinder', wick: true, purse: 1.15,
+    { id: 'cinder', tint: '#b06adf', coat: 'amethyst', name: 'Cinder', rank: 'DRAKE', pips: 3, policy: 'rival_cinder', wick: true, purse: 1.15,
       blurb: 'Works the cavern floor herself. Good luck.' },
   ];
   var RIVAL_ORDER = ['tallow', 'flint', 'ember', 'cinder'];
@@ -1873,13 +1873,174 @@
     return !!(rv && RIVAL_PLANS[rv.id]);
   }
 
+  // ===== COSMETICS — "YOUR CAVERN" =======================================
+  /// Five equip slots: COAT (Wick), COIN, HOARD, KEEP, ROAD. Bought with
+  /// HOARD MARKS, the one meta currency, earned from campaign/trial/duel/daily
+  /// milestones (MARK_AWARDS) and never dripped per-second — this game has an
+  /// Endless mode and a drip would be a faucet inside a day.
+  ///
+  /// THE LAW THAT MAKES THIS SAFE. Hoardling has a seeded Daily, a duel and a
+  /// leaderboard, so an owned item is the classic way to fork a shared seed:
+  ///
+  ///   NO seeded draw may sit on any path whose reachability, branch or
+  ///   ITERATION COUNT depends on what the player owns or has equipped.
+  ///
+  /// Every cosmetic here is lane 3 — read only by draw()/_cosmetic(), never by
+  /// update(). Nothing in this block changes a stat, a cost, a range or a
+  /// count. If a skin ever needs to move, it moves in the render lane off
+  /// Math.random, exactly like every other particle in this file.
+  ///
+  /// PROPS ARE PALETTES UNTIL THE ART LANDS. coin/hoard/keep/road each carry
+  /// their colours, so the shop shows real differences today and a sprite drops
+  /// into the same seam later (`art` field, null = draw it procedurally).
+
+  /// COATS — recoloured from Wick's own plate, NEVER generated.
+  /// /v1/images/edits has no identity conditioning: a prompt for "green Wick"
+  /// returns a different dragon, the same way Waddleton's generated penguins
+  /// came back as a different penguin. Hoardling has a written identity law
+  /// (vivid red, white-sclera amber iris, faceted hex plates, cream ribbed
+  /// belly, brass goggles) and six rounds of icon work behind it.
+  ///
+  /// MEASURED on art/hero_whelp.png, which is what makes this exact:
+  ///   scales           hue 0.009 - 0.034   (pure red)
+  ///   belly + brass    hue 0.078 - 0.105   (orange-brown)
+  /// A clean empty gap between them, so the two materials separate by hue
+  /// alone and no painted mask is needed.
+  ///
+  /// THE BELLY NEVER TAKES THE HUE. Letting it follow even 45% of the way gave
+  /// a Cobalt dragon a MAGENTA chest stripe (and following 0% gave a RED one on
+  /// far hues, which is how this started). It is DRAINED TOWARD CREAM in
+  /// proportion to how far the scales travelled — which is what the icon law
+  /// said the belly was in the first place. Brass reads as brass on all eight.
+  var COAT_SCALE = { c: 0.021, full: 0.025, gone: 0.048, s0: 0.25, s1: 0.50 };
+  var COAT_WARM  = { c: 0.092, full: 0.020, gone: 0.045, s0: 0.30, s1: 0.55 };
+  var COAT_CREAM = 0.62;      // max belly desaturation at maximum hue travel
+
+  var COATS = [
+    { id: 'ember',     name: 'Ember',        hue: null,  sat: 1.00, val: 1.00, price: 0,
+      how: 'Wick as he is.' },
+    { id: 'verdigris', name: 'Verdigris',    hue: 0.365, sat: 0.86, val: 1.02, price: 120,
+      how: 'Copper left too long in a wet cave.' },
+    { id: 'bronze',    name: 'Old Bronze',   hue: 0.095, sat: 0.95, val: 1.06, price: 120,
+      how: 'Foundry-warm, straight off the pour.' },
+    { id: 'cobalt',    name: 'Cobalt',       hue: 0.590, sat: 0.92, val: 1.00, price: 200,
+      how: 'Deep-seam blue. Cold to the touch.' },
+    { id: 'viridian',  name: 'Sea Serpent',  hue: 0.470, sat: 0.90, val: 0.98, price: 200,
+      how: 'Something in the family swam.' },
+    { id: 'amethyst',  name: 'Amethyst',     hue: 0.775, sat: 0.88, val: 1.00, price: 260,
+      how: 'Gem-struck. The rarest seam in the mountain.' },
+    { id: 'obsidian',  name: 'Obsidian',     hue: 0.980, sat: 0.22, val: 0.60, price: 260,
+      how: 'Glass and ash. Nothing reflects off him.' },
+    { id: 'bone',      name: 'Bone Wyrm',    hue: 0.105, sat: 0.20, val: 1.30, price: 320,
+      how: 'Pale as the things further down.' },
+  ];
+
+  /// COINS — the top-left counter, the +N pops, and the loot a thief runs out
+  /// with. The FACE is a castle and the ALLOY under it is the grade: the stamp
+  /// says whose mint, the metal says how good. Two axes off one drawing.
+  var COINS = [
+    { id: 'gate',   name: 'Copper Gatehouse', art: 'coin_gate', price: 0,
+      face: '#e0a468', edge: '#8a5a1d', ink: '#7a4418', stamp: 'gate',
+      how: 'The coin Wick has always counted in.' },
+    { id: 'keepc',  name: 'Silver Keep',      art: 'coin_keep', price: 140,
+      face: '#d8dee6', edge: '#7d8894', ink: '#5c6672', stamp: 'keep',
+      how: 'Struck for the Long Sleep. Still legal tender.' },
+    { id: 'citadel',name: 'Gold Citadel',     art: 'coin_citadel', price: 220,
+      face: '#ffd75e', edge: '#8a5a1d', ink: '#8a5a1d', stamp: 'citadel',
+      how: 'Four towers and a curtain wall, in high relief.' },
+    { id: 'bastion',name: 'Blackiron Bastion',art: 'coin_bastion', price: 300,
+      face: '#5a5f68', edge: '#2b2e34', ink: '#c9cfd8', stamp: 'bastion',
+      how: 'Iron does not shine. That is the point.' },
+    { id: 'spire',  name: 'Electrum Spire',   art: 'coin_spire', price: 380,
+      face: '#f2e9a8', edge: '#a08b3c', ink: '#7d6a24', stamp: 'spire',
+      how: 'Gold and silver, poured together, arguing.' },
+  ];
+
+  /// HOARDS — the pile the keep sits on. This is the LIFE BAR, so it is the
+  /// most-looked-at object on the board and the slot worth owning.
+  var HOARDS = [
+    { id: 'coin',  name: 'Coin Bank',    art: null, price: 0,   tint: null,
+      how: 'Loose coin, heaped and slipping.' },
+    { id: 'silver',name: 'Silver Tithe', art: 'hoard_silver', price: 160, tint: '#cfd6de', sat: 0.30, val: 1.12,
+      how: 'A colder pile. Reads clean across the cavern.' },
+    { id: 'gem',   name: 'Gem Seam',     art: 'hoard_gem', price: 240, tint: '#7fd4e8', sat: 0.85, val: 1.05,
+      how: 'Cut stones packed in among the coin.' },
+    { id: 'copper',name: 'Copper Run',   art: 'hoard_copper', price: 160, tint: '#e08a4a', sat: 0.90, val: 0.96,
+      how: 'What a small workshop actually earns.' },
+    { id: 'plate', name: 'Plate & Cup',  art: 'hoard_plate', price: 300, tint: '#ffe9a8', sat: 0.72, val: 1.18,
+      how: 'Goblets, salvers, a crown nobody claims.' },
+  ];
+
+  /// KEEPS — one sprite, one call site (_drawKeep). Tinted until art lands.
+  var KEEPS = [
+    { id: 'stone',  name: 'Grey Stone',   art: null, price: 0,   tint: null,
+      how: 'The keep above the workshop.' },
+    { id: 'slate',  name: 'Slate Roofs',  art: 'keep_slate', price: 150, tint: '#8fa4c0', sat: 0.55, val: 1.02,
+      how: 'Re-roofed after the third raid.' },
+    { id: 'sand',   name: 'Sandstone',    art: null, price: 150, tint: '#e6c489', sat: 0.62, val: 1.10,
+      how: 'Warm rock from the shallow galleries.' },
+    { id: 'basalt', name: 'Basalt',       art: null, price: 230, tint: '#5a5560', sat: 0.35, val: 0.74,
+      how: 'Cut from the seam the fire came up through.' },
+  ];
+
+  /// ROADS — the one tile composited into _pathCache. Equipping one MUST
+  /// invalidate that cache (see the road id in the cache key), or the change
+  /// does not appear until the next level load.
+  var ROADS = [
+    { id: 'cobble', name: 'Old Cobble',   art: null, price: 0,   tint: null,
+      how: 'The road they have always come down.' },
+    { id: 'flag',   name: 'Flagstone',    art: null, price: 140, tint: '#b9b3a4', sat: 0.40, val: 1.08,
+      how: 'Laid flat. Easier on a laden thief.' },
+    { id: 'bone',   name: 'Bone Road',    art: null, price: 220, tint: '#e8e0cc', sat: 0.22, val: 1.22,
+      how: 'Paved with what the last lot left behind.' },
+    { id: 'ash',    name: 'Ashfall',      art: null, price: 220, tint: '#4e4a52', sat: 0.25, val: 0.72,
+      how: 'Scorched black. Wick has been practising.' },
+  ];
+
+  /// THE SLOT TABLE — the one place that knows the five slots exist. Order is
+  /// the Cavern screen's row order.
+  var SLOTS = [
+    { id: 'coat',  name: 'DRAGON', items: COATS },
+    { id: 'coin',  name: 'COIN',   items: COINS },
+    { id: 'hoard', name: 'HOARD',  items: HOARDS },
+    { id: 'keep',  name: 'KEEP',   items: KEEPS },
+    { id: 'road',  name: 'ROAD',   items: ROADS },
+  ];
+  var SLOT_BY_ID = {};
+  for (var _si = 0; _si < SLOTS.length; _si++) SLOT_BY_ID[SLOTS[_si].id] = SLOTS[_si];
+
+  /// item(slot, id) -> the item, or the slot's default (index 0, always free).
+  /// NEVER returns null: every draw path calls this and a missing skin must
+  /// render the stock game, not throw.
+  function cosItem(slot, id) {
+    var s = SLOT_BY_ID[slot];
+    if (!s) return null;
+    for (var i = 0; i < s.items.length; i++) if (s.items[i].id === id) return s.items[i];
+    return s.items[0];
+  }
+
+  /// MARKS — what each milestone pays, ONCE. Every payout below is keyed on a
+  /// save flag that was already being written for another reason, so a replay
+  /// of an old best cannot re-bill it.
+  var MARK_AWARDS = {
+    starFirst: 40,     // per star, per level, first time that star is reached
+    trialBadge: 60,    // per (level, trial), first clear
+    rivalFirst: 90,    // per rival, first win
+    dailyBest: 30,     // per day, only when today's best actually improves
+  };
+
   var Save = (function () {
     var KEY2 = 'hoardling.save.v2', KEY1 = 'hoardling.save.v1';
     // duels: { <rivalId>: { w: 1, m: <best margin> } } — an OBJECT, not a bare
     // number, because the best margin can legitimately be 0 (a duel won on the
     // tiebreak) and a falsy value would read as "never beaten". Same trap the
     // bountyMul null-check exists for.
-    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {}, trials: {}, duels: {} };
+    // marks: the HOARD MARKS wallet. owned: { <slot>: { <itemId>: 1 } }.
+    // equip: { <slot>: <itemId> }. All three are additive on the SAME v2 key --
+    // an existing save just reads the defaults, so there is no migration and no
+    // v3 loader to keep in step with this one.
+    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {}, trials: {}, duels: {},
+                 marks: 0, owned: {}, equip: {}, paid: {} };
     try {
       var raw = localStorage.getItem(KEY2);
       if (raw) {
@@ -1914,6 +2075,37 @@
             }
           }
         }
+        if (typeof p.marks === 'number' && isFinite(p.marks)) data.marks = Math.max(0, Math.min(999999, p.marks | 0));
+        // WHITELIST-ITERATE OUR OWN TABLES, never for-in over the parsed blob:
+        // COATS['constructor'] is truthy through Object.prototype and a hostile
+        // (or merely corrupt) save must not be able to mint an item id that no
+        // draw path knows how to render. Same discipline as forge/trials/duels.
+        if (p.owned && typeof p.owned === 'object') {
+          for (var os = 0; os < SLOTS.length; os++) {
+            var sl = SLOTS[os], row = p.owned[sl.id];
+            if (!row || typeof row !== 'object') continue;
+            for (var oi = 0; oi < sl.items.length; oi++) {
+              if (row[sl.items[oi].id]) {
+                (data.owned[sl.id] = data.owned[sl.id] || {})[sl.items[oi].id] = 1;
+              }
+            }
+          }
+        }
+        if (p.equip && typeof p.equip === 'object') {
+          for (var es = 0; es < SLOTS.length; es++) {
+            var esl = SLOTS[es], want = p.equip[esl.id];
+            if (typeof want !== 'string') continue;
+            for (var ei = 0; ei < esl.items.length; ei++) {
+              // EQUIPPED IMPLIES OWNED. A save that names an item it never
+              // bought equips the default instead of the item -- otherwise
+              // hand-editing localStorage is a free shop.
+              if (esl.items[ei].id === want &&
+                  (esl.items[ei].price === 0 || (data.owned[esl.id] && data.owned[esl.id][want]))) {
+                data.equip[esl.id] = want;
+              }
+            }
+          }
+        }
         if (p.duels && typeof p.duels === 'object') {
           // whitelist-iterate OUR ids, never for-in over hostile input
           for (var ro = 0; ro < RIVAL_ORDER.length; ro++) {
@@ -1933,6 +2125,48 @@
       }
     } catch (e) { /* corrupt save: keep defaults */ }
     function write() { try { localStorage.setItem(KEY2, JSON.stringify(data)); } catch (e) {} }
+    function addMarks(n) {
+      n = n | 0;
+      if (n <= 0) return 0;
+      data.marks = Math.max(0, Math.min(999999, (data.marks | 0) + n));
+      return n;
+    }
+    /// owns(): a price-0 item is owned by everyone, always. That is what makes
+    /// cosItem()'s "fall back to items[0]" safe on a fresh save.
+    function owns(slot, id) {
+      var it = cosItem(slot, id);
+      if (!it) return false;
+      if (!it.price) return true;
+      return !!(data.owned[slot] && data.owned[slot][id]);
+    }
+    function equipped(slot) {
+      var s2 = SLOT_BY_ID[slot];
+      if (!s2) return null;
+      var id = data.equip[slot];
+      return (id && owns(slot, id)) ? cosItem(slot, id) : s2.items[0];
+    }
+    /// buy() is the ONE grant seam. When a store console finally exists, an IAP
+    /// grant calls grant() directly and never touches the wallet -- which is why
+    /// they are two functions and not one.
+    function buy(slot, id) {
+      var it = cosItem(slot, id);
+      if (!it || owns(slot, id)) return false;
+      if ((data.marks | 0) < it.price) return false;
+      data.marks -= it.price;
+      grant(slot, id);
+      return true;
+    }
+    function grant(slot, id) {
+      var it = cosItem(slot, id);
+      if (!it) return false;
+      (data.owned[slot] = data.owned[slot] || {})[id] = 1;
+      write();
+      return true;
+    }
+    function equip(slot, id) {
+      if (!owns(slot, id)) return false;
+      data.equip[slot] = id; write(); return true;
+    }
     function unlocked(level) { return level === 0 || data.stars[level - 1] > 0; }
     function starsTotal() { return (data.stars[0] | 0) + (data.stars[1] | 0) + (data.stars[2] | 0); }
     function forgeSpent() {
@@ -1951,7 +2185,9 @@
       };
     }
     return { data: data, write: write, unlocked: unlocked,
-             starsTotal: starsTotal, forgeSpent: forgeSpent, forgeMods: forgeMods };
+             starsTotal: starsTotal, forgeSpent: forgeSpent, forgeMods: forgeMods,
+             addMarks: addMarks, owns: owns, equipped: equipped,
+             buy: buy, grant: grant, equip: equip };
   })();
 
   // ===== Daily leaderboard — the WADDLETON foundation (fail-soft, lane 3) ==
@@ -2212,6 +2448,37 @@
       e_boss:    'art/enemy_boss.png',
       e_sapper:  'art/enemy_sapper.png',
       e_splitter:'art/enemy_splitter.png',
+      // THE MINTED COINS. Bought 2026-08-22 ($0.84, jobs/hoardling_coins.json)
+      // -- the castle is the STAMP and the alloy is the GRADE. Installed at
+      // 256px square: the biggest use is the 88px Cavern preview and the
+      // smallest is a 20px HUD pip, so 700px of coin was 12x more than any
+      // draw. Squared on their own alpha bbox first -- drawCoin draws into a
+      // square box, and a 680x700 plate renders the coin 3% elliptical, which
+      // is the one silhouette an eye checks for free.
+      // THE HOARD PILES. Bought 2026-08-22 ($1.00, jobs/hoardling_hoards.json).
+      // All four are padded into gold_mound's own 700x485 box, content centred
+      // and bottom-anchored: the engine sizes the pile by WIDTH, so plates of
+      // different aspect would each render a different height against the keep.
+      // THE KEEPS. Only SLATE has art. Bought 2026-08-22 and padded into
+      // art/keep.png's own 519x700 box so its base lands where the stock keep's
+      // does. Sandstone and Basalt are still tint placeholders, and the reason
+      // is worth reading before anyone rerolls them: THE MODEL BAKES A LIT
+      // GROUND DISC under a keep even though the style header forbids it, and
+      // the negative strong enough to remove it ("no ground, no floor, no pool
+      // of light") pushes the model off the white background entirely -- both
+      // came back on a full opaque painted BACKDROP, which the matte keeps as a
+      // 99%-opaque rectangle. Two failures in opposite directions, $1.25. Slate
+      // landed clean on the same prompt, so this is a coin-flip, not a recipe.
+      keep_slate:   'art/keep_slate.png',
+      hoard_silver: 'art/hoard_silver.png',
+      hoard_gem:    'art/hoard_gem.png',
+      hoard_copper: 'art/hoard_copper.png',
+      hoard_plate:  'art/hoard_plate.png',
+      coin_gate:    'art/coin_gate.png',
+      coin_keep:    'art/coin_keep.png',
+      coin_citadel: 'art/coin_citadel.png',
+      coin_bastion: 'art/coin_bastion.png',
+      coin_spire:   'art/coin_spire.png',
       pad:       'art/build_pad.png',
       torch:     'art/torch.png',
       bg:        'art/cavern_bg.png',
@@ -4638,24 +4905,44 @@
                     rivalHoard: this.rival ? this.rivalHoard : null,
                     margin: this.rival ? (this.hoard - this.rivalHoard) : null,
                     knockout: this.rival ? (this.rivalHoard <= 0 || this.hoard <= 0) : false };
+    // ---- HOARD MARKS ------------------------------------------------------
+    // Every award below is PAID ON IMPROVEMENT ONLY, and each one is keyed on
+    // the same save flag the line under it is about to set. Replaying a level
+    // you have already 3-starred pays nothing, so there is no farm: the sinks
+    // are finite and so is the faucet. Bookkeeping only — no draws, no rng,
+    // nothing the sim can see.
+    var marksEarned = 0;
     if (this.mode === 'duel' && won && this.rival) {
       var prevD = Save.data.duels[this.rival.id];
       var mgn = Math.max(0, this.hoard - this.rivalHoard);
+      if (!prevD || !prevD.w) marksEarned += MARK_AWARDS.rivalFirst;
       // record OBJECT, never a bare number — a duel won on the tiebreak has a
       // margin of 0, and a falsy record would erase the badge that earned it
       if (!prevD || !prevD.w || mgn > (prevD.m | 0)) Save.data.duels[this.rival.id] = { w: 1, m: mgn };
     }
-    if (this.mode === 'campaign' && won && stars > Save.data.stars[this.levelIdx]) Save.data.stars[this.levelIdx] = stars;
+    if (this.mode === 'campaign' && won && stars > Save.data.stars[this.levelIdx]) {
+      // per NEW star, so a 1-star scrape later upgraded to 3 pays the other two
+      marksEarned += MARK_AWARDS.starFirst * (stars - (Save.data.stars[this.levelIdx] | 0));
+      Save.data.stars[this.levelIdx] = stars;
+    }
     if (this.mode === 'campaign' && won && this.trial) {           // trial badge
       if (!Save.data.trials[this.levelIdx]) Save.data.trials[this.levelIdx] = {};
+      if (!Save.data.trials[this.levelIdx][this.trial]) marksEarned += MARK_AWARDS.trialBadge;
       Save.data.trials[this.levelIdx][this.trial] = 1;
     }
     if (this.mode === 'daily') {
       var today2 = dayNumber();
       if (Save.data.daily.day !== today2) Save.data.daily = { day: today2, best: 0 };
-      if (this.wave > Save.data.daily.best) Save.data.daily.best = this.wave;
+      // TODAY's best, not the all-time one: the all-time record can never fall,
+      // so paying on it would stop paying forever after one good day.
+      if (this.wave > Save.data.daily.best) {
+        Save.data.daily.best = this.wave;
+        if (this.wave > 0) marksEarned += MARK_AWARDS.dailyBest;
+      }
       if (this.wave > Save.data.dailyBestWave) Save.data.dailyBestWave = this.wave;
     }
+    if (marksEarned > 0) Save.addMarks(marksEarned);
+    this.result.marks = marksEarned;
     Save.write();
     // daily board: submit this run, then pull today's top — UI-only state
     if (this.mode === 'daily' && Lb.on()) {
@@ -4838,7 +5125,8 @@
       if (hit(w, TG.duel)) { this.state = 'duel'; return; }
       if (hit(w, TG.pills[0])) { this.state = 'forge'; return; }
       if (hit(w, TG.pills[1])) { if (Save.starsTotal() > 0) this.state = 'trials'; return; }
-      if (hit(w, TG.pills[2])) { Sfx.toggle(); return; }
+      if (hit(w, TG.pills[2])) { this.state = 'cavern'; return; }
+      if (hit(w, TG.pills[3])) { Sfx.toggle(); return; }
       return;
     }
     if (this.state === 'duel') {
@@ -4876,6 +5164,31 @@
       if (w.y > 640 && w.y < 680 && w.x > WORLD_W / 2 - 70 && w.x < WORLD_W / 2 + 70) {
         this.state = 'menu'; return;
       }
+      return;
+    }
+    if (this.state === 'cavern') {
+      var CG = cavernRoomGeom(this.view.scale), ci;
+      for (ci = 0; ci < SLOTS.length; ci++) {
+        if (hit(w, CG.tabs[ci])) { this.cavSlot = ci; Sfx.play('place'); return; }
+      }
+      var cslot = SLOTS[this.cavSlot | 0] || SLOTS[0];
+      for (ci = 0; ci < cslot.items.length && ci < CG.cards.length; ci++) {
+        if (!hit(w, CG.cards[ci])) continue;
+        var cit = cslot.items[ci];
+        if (Save.owns(cslot.id, cit.id)) {
+          // ALREADY WEARING IT is not a failure and must not play a rejection
+          // sound -- a tap on the equipped card is the most likely misfire.
+          var was = Save.equipped(cslot.id);
+          if (was && was.id === cit.id) return;
+          Save.equip(cslot.id, cit.id); Sfx.play('coin'); return;
+        }
+        // buy() spends the wallet and grants; equipping it immediately is the
+        // only sane read of "I just bought this"
+        if (Save.buy(cslot.id, cit.id)) { Save.equip(cslot.id, cit.id); Sfx.play('upg'); }
+        else Sfx.play('sell');
+        return;
+      }
+      if (hit(w, CG.back)) { this.state = 'menu'; return; }
       return;
     }
     if (this.state === 'forge') {
@@ -5237,24 +5550,181 @@
   /// source-atop over the sprite keeps the painting's shading and swaps only
   /// the hue; a flat fill would give a silhouette, which reads as a shadow
   /// rather than a rival. Cached per colour: this is a canvas op, not a filter.
-  Game.prototype._rivalPlate = function (img, tint) {
-    // KEYED ON THE SOURCE TOO. Dimensions do not identify an image -- the three
-    // manning frames are all 951x746 -- so a tint cache keyed on size alone
-    // hands the flap her body plate for every frame of the cycle.
-    var key = tint + '@' + (img.src || '?') + '@' + (img.width | 0) + 'x' + (img.height | 0);
+  /// THE COLOURWAY KERNEL. This replaced a flat 55%-alpha source-atop wash,
+  /// which was cheap and looked it: filling over a painting flattens its
+  /// shading toward one colour, so a "rival" read as a coloured silhouette and
+  /// the goggles, lenses and belly went with it. This ROTATES HUE and scales
+  /// S/V per pixel instead, so every shadow, highlight and edge in the painting
+  /// survives -- and the two materials that ARE Wick's identity are protected
+  /// by construction rather than by luck. See COAT_SCALE / COAT_WARM for the
+  /// measured hue bands and why the belly is creamed and never tinted.
+  ///
+  /// Cost: one pass over ~571k pixels per plate, done ONCE per (plate, coat)
+  /// and cached. The stock coat has hue null and returns the image itself, so
+  /// a player who never opens the Cavern pays exactly nothing.
+  ///
+  /// KEYED ON THE SOURCE TOO. Dimensions do not identify an image -- the three
+  /// manning frames are all 951x746 -- so a cache keyed on size alone hands the
+  /// flap the body plate for every frame of the cycle.
+  function coatBand(h, b, s) {
+    var d = Math.abs(((h - b.c + 0.5) % 1 + 1) % 1 - 0.5);
+    var w = d <= b.full ? 1 : (d >= b.gone ? 0 : 1 - (d - b.full) / (b.gone - b.full));
+    if (w <= 0) return 0;
+    var ws = (s - b.s0) / (b.s1 - b.s0);
+    return w * (ws < 0 ? 0 : ws > 1 ? 1 : ws);
+  }
+  Game.prototype._coatPlate = function (img, coat) {
+    if (!img || !coat || coat.hue === null || coat.hue === undefined) return img;
+    var key = coat.id + '@' + (img.src || '?') + '@' + (img.width | 0) + 'x' + (img.height | 0);
     var cache = this._tintCache || (this._tintCache = {});
     if (cache[key]) return cache[key];
     var cv = document.createElement('canvas');
     cv.width = img.width; cv.height = img.height;
     var cx2 = cv.getContext('2d');
     cx2.drawImage(img, 0, 0);
-    cx2.globalCompositeOperation = 'source-atop';
-    cx2.globalAlpha = 0.55;
-    cx2.fillStyle = tint;
-    cx2.fillRect(0, 0, cv.width, cv.height);
-    cx2.globalAlpha = 1;
+    var dat;
+    // A cross-origin plate taints the canvas and getImageData throws. Falling
+    // back to the UNCOATED image is the right failure: the wrong colour dragon
+    // is a cosmetic miss, an exception here kills the frame.
+    try { dat = cx2.getImageData(0, 0, cv.width, cv.height); }
+    catch (e) { cache[key] = img; return img; }
+    var d = dat.data, n = d.length;
+    // how far this coat travels from red, 0..1 -- drives the belly's creaming
+    var far = Math.abs(((coat.hue - COAT_SCALE.c + 0.5) % 1 + 1) % 1 - 0.5) / 0.30;
+    if (far > 1) far = 1;
+    for (var i = 0; i < n; i += 4) {
+      if (d[i + 3] < 8) continue;
+      var r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255;
+      var mx = r > g ? (r > b ? r : b) : (g > b ? g : b);
+      var mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
+      var v = mx, c = mx - mn;
+      if (c === 0) continue;                      // greys carry no hue to move
+      var sa = c / mx, h;
+      if (mx === r)      h = ((g - b) / c) % 6;
+      else if (mx === g) h = (b - r) / c + 2;
+      else               h = (r - g) / c + 4;
+      h /= 6; if (h < 0) h += 1;
+      var ws = coatBand(h, COAT_SCALE, sa), ww = coatBand(h, COAT_WARM, sa);
+      if (ws <= 0 && ww <= 0) continue;
+      // scales take the hue in full; belly and brass NEVER take it
+      var dh = ((coat.hue - h + 0.5) % 1 + 1) % 1 - 0.5;
+      var nh = ((h + dh * ws) % 1 + 1) % 1;
+      var ns = sa * (1 + (coat.sat - 1) * ws + (COAT_CREAM - 1) * ww * far);
+      var nv = v  * (1 + (coat.val - 1) * ws + 0.10 * ww * far);
+      if (ns < 0) ns = 0; else if (ns > 1) ns = 1;
+      if (nv < 0) nv = 0; else if (nv > 1) nv = 1;
+      var hh = nh * 6, ii = Math.floor(hh), f = hh - ii;
+      var pp = nv * (1 - ns), qq = nv * (1 - ns * f), tt = nv * (1 - ns * (1 - f));
+      var nr, ng, nb;
+      switch (ii % 6) {
+        case 0: nr = nv; ng = tt; nb = pp; break;
+        case 1: nr = qq; ng = nv; nb = pp; break;
+        case 2: nr = pp; ng = nv; nb = tt; break;
+        case 3: nr = pp; ng = qq; nb = nv; break;
+        case 4: nr = tt; ng = pp; nb = nv; break;
+        default: nr = nv; ng = pp; nb = qq;
+      }
+      d[i] = (nr * 255 + 0.5) | 0; d[i + 1] = (ng * 255 + 0.5) | 0; d[i + 2] = (nb * 255 + 0.5) | 0;
+    }
+    cx2.putImageData(dat, 0, 0);
     cache[key] = cv;
     return cv;
+  };
+
+  /// The PLAYER's coat, applied to any hero plate. One call at each hero draw
+  /// site; the stock coat is a pass-through.
+  Game.prototype._myPlate = function (img) {
+    return this._coatPlate(img, Save.equipped('coat'));
+  };
+
+  /// PROP RECOLOUR -- the coin, hoard, keep and road slots, until each of them
+  /// has bought art. This is NOT the coat kernel: a prop has no protected
+  /// material, so the whole sprite moves.
+  ///
+  /// It ROTATES the whole image by (target hue - the image's own mean hue)
+  /// rather than forcing every pixel onto one hue. Forcing was tried first and
+  /// flattens a gold pile into a single cyan blob -- the coins stop reading as
+  /// separate objects. Rotating keeps the spread the painting already has, so
+  /// a Silver Tithe still has warm lowlights and cool highlights, and the
+  /// silhouette survives.
+  function hexHue(hex) {
+    var v = parseInt(hex.slice(1), 16);
+    var r = ((v >> 16) & 255) / 255, g = ((v >> 8) & 255) / 255, b = (v & 255) / 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), c = mx - mn;
+    if (c === 0) return 0;
+    var h = mx === r ? ((g - b) / c) % 6 : mx === g ? (b - r) / c + 2 : (r - g) / c + 4;
+    h /= 6; return h < 0 ? h + 1 : h;
+  }
+  Game.prototype._propPlate = function (img, item) {
+    if (!img || !item || !item.tint) return img;
+    var key = 'p:' + item.id + '@' + (img.src || '?') + '@' + (img.width | 0) + 'x' + (img.height | 0);
+    var cache = this._tintCache || (this._tintCache = {});
+    if (cache[key]) return cache[key];
+    var cv = document.createElement('canvas');
+    cv.width = img.width; cv.height = img.height;
+    var cx2 = cv.getContext('2d');
+    cx2.drawImage(img, 0, 0);
+    var dat;
+    try { dat = cx2.getImageData(0, 0, cv.width, cv.height); }
+    catch (e) { cache[key] = img; return img; }
+    var d = dat.data, n = d.length, i;
+    // mean hue as a UNIT VECTOR sum -- hue is circular, so averaging the raw
+    // numbers puts the mean of 0.98 and 0.02 at 0.5, i.e. cyan for two reds
+    var sx = 0, sy = 0;
+    for (i = 0; i < n; i += 4) {
+      if (d[i + 3] < 8) continue;
+      var r0 = d[i] / 255, g0 = d[i + 1] / 255, b0 = d[i + 2] / 255;
+      var m0 = Math.max(r0, g0, b0), n0 = Math.min(r0, g0, b0), c0 = m0 - n0;
+      if (c0 === 0) continue;
+      var h0 = m0 === r0 ? ((g0 - b0) / c0) % 6 : m0 === g0 ? (b0 - r0) / c0 + 2 : (r0 - g0) / c0 + 4;
+      h0 = h0 / 6; if (h0 < 0) h0 += 1;
+      var wt = c0 / m0;
+      sx += Math.cos(h0 * 6.283185) * wt; sy += Math.sin(h0 * 6.283185) * wt;
+    }
+    var mean = Math.atan2(sy, sx) / 6.283185; if (mean < 0) mean += 1;
+    var rot = hexHue(item.tint) - mean;
+    var satM = item.sat === undefined ? 1 : item.sat;
+    var valM = item.val === undefined ? 1 : item.val;
+    for (i = 0; i < n; i += 4) {
+      if (d[i + 3] < 8) continue;
+      var r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255;
+      var mx = Math.max(r, g, b), mn = Math.min(r, g, b), c = mx - mn;
+      if (c === 0) continue;
+      var h = mx === r ? ((g - b) / c) % 6 : mx === g ? (b - r) / c + 2 : (r - g) / c + 4;
+      h /= 6; if (h < 0) h += 1;
+      var nh = ((h + rot) % 1 + 1) % 1;
+      var ns = Math.min(1, (c / mx) * satM), nv = Math.min(1, mx * valM);
+      var hh = nh * 6, ii = Math.floor(hh), f = hh - ii;
+      var pp = nv * (1 - ns), qq = nv * (1 - ns * f), tt = nv * (1 - ns * (1 - f));
+      var nr, ng, nb;
+      switch (ii % 6) {
+        case 0: nr = nv; ng = tt; nb = pp; break;
+        case 1: nr = qq; ng = nv; nb = pp; break;
+        case 2: nr = pp; ng = nv; nb = tt; break;
+        case 3: nr = pp; ng = qq; nb = nv; break;
+        case 4: nr = tt; ng = pp; nb = nv; break;
+        default: nr = nv; ng = pp; nb = qq;
+      }
+      d[i] = (nr * 255 + 0.5) | 0; d[i + 1] = (ng * 255 + 0.5) | 0; d[i + 2] = (nb * 255 + 0.5) | 0;
+    }
+    cx2.putImageData(dat, 0, 0);
+    cache[key] = cv;
+    return cv;
+  };
+
+  /// The equipped plate for a prop slot. `art` on the item is the seam a bought
+  /// sprite drops into: set it and the recolour is bypassed entirely.
+  Game.prototype._slotPlate = function (slot, artId) {
+    var it = Save.equipped(slot);
+    if (it && it.art && ART.images[it.art]) return ART.images[it.art];
+    return this._propPlate(ART.images[artId], it);
+  };
+
+  /// A rival's coat. RIVALS[].coat names a COATS entry -- the four rivals used
+  /// to carry raw hex `tint` strings for the old wash, and those are now the
+  /// same four characters in real colourways.
+  Game.prototype._rivalPlate = function (img, coatId) {
+    return this._coatPlate(img, cosItem('coat', coatId));
   };
 
   /// Draw the rival hoardling on her side. She is a RENDER, not a sim entity:
@@ -5267,7 +5737,9 @@
     if (!img) return;
     var w = this.rivalWick || { x: keepOf(1).x, y: keepOf(1).y + 150 };
     var a = this._wickAnchor(w.x, w.y, this.rivalManTid === undefined ? -1 : this.rivalManTid);
-    var plate = this._rivalPlate(img, this.rival.tint || '#b06adf');
+    // COAT, not the old hex `tint`. `tint` stays on the roster because it is
+    // still the rival's UI accent colour; her SPRITE is now a real colourway.
+    var plate = this._rivalPlate(img, this.rival.coat || 'amethyst');
     var hh = HERO_H * a.s, hw = hh * (img.width / img.height);
     // A CREWED DRAGON DOES NOT BOB: she is braced against a crank. The idle bob
     // is for a dragon standing on her own floor.
@@ -5939,6 +6411,7 @@
     if (this.state === 'menu') this._drawTitle(ctx);
     if (this.state === 'forge') this._drawForge(ctx);
     if (this.state === 'trials') this._drawTrials(ctx);
+    if (this.state === 'cavern') this._drawCavernRoom(ctx);
     if (this.state === 'duel') this._drawDuelSelect(ctx);
     if (this.state === 'won' || this.state === 'lost') this._drawResult(ctx);
     if (this.state === 'paused') {
@@ -5989,7 +6462,12 @@
   // the bg art arrives) — the per-frame cost of the cavern + path drops to two
   // blits instead of gradients, 26 ellipses, and four wide path strokes.
   Game.prototype._buildSceneCache = function () {
-    var key = (ART.images.bg ? 'art' : 'proc') + (ART.images.road ? '+road' : '') + ':' + this.levelIdx;
+    // THE ROAD SKIN IS PART OF THE KEY. The path is baked into _bgCache once
+    // and reused; without the equipped road id here, changing it in the Cavern
+    // would silently do nothing until the next level load -- the exact shape of
+    // "my edit landed and the game behaves as before".
+    var key = (ART.images.bg ? 'art' : 'proc') + (ART.images.road ? '+road' : '') + ':' + this.levelIdx
+              + ':' + (Save.equipped('road') || { id: '?' }).id;
     if (this._bgKey === key && this._bgCache) return;
     this._bgKey = key;
     var res = 2;
@@ -6049,9 +6527,10 @@
       var rc = rl.getContext('2d');
       rc.scale(res, res);
       var tile = 148;                                   // ~12 world px per cobble
+      var roadImg = this._slotPlate('road', 'road');
       for (var ty = 0; ty < WORLD_H; ty += tile)
         for (var tx = 0; tx < WORLD_W; tx += tile)
-          rc.drawImage(ART.images.road, tx, ty, tile, tile);
+          rc.drawImage(roadImg, tx, ty, tile, tile);
       // UNION THE MASK, THEN CUT ONCE. Stroking each lane with
       // destination-in in turn does not add roads together, it INTERSECTS them:
       // lane 0's cut erases everything outside lane 0, then lane 1's erases
@@ -6132,7 +6611,7 @@
     ctx.beginPath();
     ctx.arc(k.x, k.y - 30, 160 + br * 12, 0, 6.283);
     ctx.fill();
-    if (drawSpriteBottom(ctx, 'mound', m.x, m.y + m.ry + 6, m.rx * 2 + 30)) { /* sprite */ }
+    if (drawSpriteBottom(ctx, this._slotPlate('hoard', 'mound'), m.x, m.y + m.ry + 6, m.rx * 2 + 30)) { /* sprite */ }
     else {
       // gold mound: layered warm ellipses + sparkle
       for (var l = 0; l < 3; l++) {
@@ -6165,7 +6644,7 @@
       ctx.fillStyle = mg2;
       ctx.beginPath(); ctx.arc(k.x, k.y - 30, 150 + mp2 * 24, 0, 6.283); ctx.fill();
     }
-    if (drawSpriteBottom(ctx, 'keep', k.x, k.y + 40, 158)) { /* sprite */ }
+    if (drawSpriteBottom(ctx, this._slotPlate('keep', 'keep'), k.x, k.y + 40, 158)) { /* sprite */ }
     else {
       // chunky keep: main cylinder + two side turrets, blue conical roofs
       drawTurret(ctx, k.x - 46, k.y - 6, 26, 52, '#8d8577', '#655e52', '#3e6bd6');
@@ -7227,6 +7706,10 @@
     } else {
       himg = (goingAway && ART.images.hero_back) ? ART.images.hero_back : ART.images.hero;
     }
+    // THE PLAYER'S COAT. One intercept below the whole plate-selection chain,
+    // so the idle, back, breath and all three manning frames are coated by the
+    // same call and can never drift to different colours mid-animation.
+    himg = this._myPlate(himg);
     if (himg) {
       // hover bob + sway; face the direction he's headed
       var ht = this.worldT;
@@ -7695,11 +8178,16 @@
       return { x: 80, y: y, w: 260, h: h,
                hx: 62, hy: y - pad, hw: 296, hh: minH };
     }
+    // FOUR pills now (FORGE / TRIALS / CAVERN / SOUND). Re-derived rather than
+    // extended: a fourth 120-wide pill on the old 102 pitch ends at x=474 on a
+    // 420-wide world and would have clipped off the screen silently, which is
+    // exactly how the shop shelf lost its 8th chip.
+    // 420 - 12 margins each side = 396 across 4 pills + 3 gutters of 8.
     var pillY = 676, pillH = 52, pillPad = (minH - pillH) / 2;
     var pills = [];
-    for (var i = 0; i < 3; i++) {
-      pills.push({ x: 48 + i * 102, y: pillY, w: 120, h: pillH,
-                   hx: 44 + i * 102, hy: pillY - pillPad, hw: 128, hh: minH });
+    for (var i = 0; i < 4; i++) {
+      pills.push({ x: 12 + i * 101, y: pillY, w: 93, h: pillH,
+                   hx: 12 + i * 101 - 4, hy: pillY - pillPad, hw: 101, hh: minH });
     }
     // TONIGHT band: two half-width plates instead of one full-width row.
     // WORLD_H is 780 and the campaign ladder already spends 348..540; a fifth
@@ -7730,13 +8218,11 @@
     // game that had not started — inert, but it read as leftover UI and it is
     // the first thing on the screen.
     if (this.state === 'menu' || this.state === 'forge' || this.state === 'trials' ||
-        this.state === 'duel') return;
+        this.state === 'duel' || this.state === 'cavern') return;
     // top bar
     uiPanel(ctx, G.barX, G.topY, G.barW, 48, 13);
     var lx = G.barX + 14;
-    ctx.fillStyle = '#ffd75e';
-    ctx.beginPath(); ctx.arc(lx + 10, G.topY + 24, 10, 0, 6.283); ctx.fill();
-    ctx.strokeStyle = '#8a5a1d'; ctx.lineWidth = 2; ctx.stroke();
+    drawCoin(ctx, lx + 10, G.topY + 24, 10, Save.equipped('coin'));
     ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 20px Georgia, serif';
     ctx.fillText(String(this.hoard), lx + 27, G.topY + 31);
     ctx.fillStyle = '#b9a27f'; ctx.font = 'bold 11px system-ui, sans-serif';
@@ -7765,9 +8251,11 @@
       var dlx = G.barX + 14;
       // rival's coin pip — deliberately cool and dim against your warm gold,
       // so a glance never mistakes their pile for yours
-      ctx.fillStyle = '#7f93a8';
-      ctx.beginPath(); ctx.arc(dlx + 7, dsY + 13, 7, 0, 6.283); ctx.fill();
-      ctx.strokeStyle = '#3f4c5a'; ctx.lineWidth = 1.5; ctx.stroke();
+      // A COIN, but never YOUR coin: the rival's pip is deliberately cool and
+      // dim against your warm gold so a glance never mistakes her pile for
+      // yours, and that separation must survive whatever you equip.
+      drawCoin(ctx, dlx + 7, dsY + 13, 7,
+               { face: '#8fa2b4', edge: '#3f4c5a', ink: '#2c3742', stamp: 'bastion' });
       ctx.fillStyle = '#cfe0f0'; ctx.font = 'bold 15px Georgia, serif';
       ctx.textAlign = 'left';
       ctx.fillText(String(Math.max(0, this.rivalHoard)), dlx + 20, dsY + 19);
@@ -8353,7 +8841,7 @@
         ctx.beginPath(); ctx.arc(0, 0, tw * 0.95, 0, 6.283); ctx.fill(); ctx.restore();
       }
     }
-    var mound = ART.images.mound;
+    var mound = this._slotPlate('hoard', 'mound');
     if (mound) {
       // the SAME asset twice, same x / width / baseline, so the two halves can
       // never misregister: back bank behind Wick, front lip in front of him
@@ -8412,7 +8900,7 @@
     ctx.fillStyle = bnc;
     ctx.beginPath(); ctx.arc(210, 252, 96, 0, 6.283); ctx.fill();
     ctx.restore();
-    var wick = ART.images.hero_title || ART.images.hero;
+    var wick = this._myPlate(ART.images.hero_title || ART.images.hero);
     if (wick) {
       // 150 world px, not the 78px corner sticker that used to cover 59% of
       // the sound button. This is the 918 KB hero asset finally used as a hero.
@@ -8550,9 +9038,9 @@
     var anyWon = Save.starsTotal() > 0;
     var tDone = 0;
     for (var tb = 0; tb < 3; tb++) { var tRow = Save.data.trials[tb] || {}; for (var tk in tRow) tDone++; }
-    for (var pi = 0; pi < 3; pi++) {
+    for (var pi = 0; pi < 4; pi++) {
       var pl = G.pills[pi];
-      var live = pi === 0 ? true : pi === 1 ? anyWon : true;
+      var live = pi === 1 ? anyWon : true;
       forgePlate(ctx, pl, 'util');
       var pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
       ctx.font = 'bold 12px system-ui, sans-serif';
@@ -8571,6 +9059,13 @@
         // as they were — and it can never be reached, so it reads as broken.
         inkText(ctx, live ? 'TRIALS ' + tDone + '/' + (TRIAL_ORDER.length * CAMPAIGN_MAPS) : 'TRIALS', pcx, pcy + 17,
                 live ? '#d9f2ff' : '#8a7f72', 3, 1);
+      } else if (pi === 2) {
+        // the wallet is the label: a shop with nothing in the purse should say
+        // so on the door rather than after the tap
+        var mk = Save.data.marks | 0;
+        drawCoin(ctx, pcx, pcy - 9, 9, Save.equipped('coin'));
+        inkText(ctx, mk > 0 ? 'CAVERN  ' + mk : 'CAVERN', pcx, pcy + 17,
+                mk > 0 ? '#ffe9c4' : 'rgba(255,233,196,0.55)', 3, 1);
       } else {
         drawSpeaker(ctx, pcx - 4, pcy - 9, Sfx.isMuted());
         inkText(ctx, Sfx.isMuted() ? 'SOUND OFF' : 'SOUND ON', pcx, pcy + 17, '#ffe9c4', 3, 1);
@@ -8579,6 +9074,227 @@
     ctx.textAlign = 'left';
   };
 
+
+  // ===== THE CAVERN — the cosmetics shop =================================
+  /// ONE GEOMETRY, TWO READERS -- the same law _titleGeom/trialGeom/duelGeom
+  /// follow. Everything the tap handler tests is computed here and nowhere
+  /// else, so a card cannot be drawn somewhere its hit box is not.
+  ///
+  /// Rows are sized off view.scale so every card clears the 44pt floor BY
+  /// CONSTRUCTION rather than by a number somebody measured once on one phone.
+  function cavernRoomGeom(scale) {
+    var s = scale || 1, minH = Math.max(62, 44 / s);
+    var tabs = [], i;
+    for (i = 0; i < SLOTS.length; i++) {
+      // 5 tabs, 12px margins, 6px gutters: 420 - 24 - 24 = 372 / 5 = 74.4
+      var tx = 12 + i * 80;
+      tabs.push({ x: tx, y: 142, w: 74, h: 38, hx: tx - 3, hy: 142 - (minH - 38) / 2, hw: 80, hh: minH });
+    }
+    var cards = [];
+    for (i = 0; i < 8; i++) {
+      var cx = 12 + (i % 2) * 200, cy = 324 + Math.floor(i / 2) * 88;
+      cards.push({ x: cx, y: cy, w: 190, h: 78,
+                   hx: cx - 4, hy: cy - Math.max(0, (minH - 78) / 2), hw: 198,
+                   hh: Math.max(78, minH) });
+    }
+    return {
+      tabs: tabs, cards: cards,
+      preview: { x: 12, y: 188, w: 396, h: 128 },
+      // the wallet chip, and the shelf a store would live on
+      wallet: { x: 12, y: 104, w: 200, h: 30 },
+      topUp:  { x: 300, y: 104, w: 108, h: 30,
+                hx: 296, hy: 104 - (minH - 30) / 2, hw: 116, hh: minH },
+      back:   { x: WORLD_W / 2 - 70, y: 690, w: 140, h: 40,
+                hx: WORLD_W / 2 - 78, hy: 690 - (minH - 40) / 2, hw: 156, hh: minH },
+    };
+  }
+
+  /// THE STORE SHELF IS RESERVED, NOT BUILT. Marks are earned-only today.
+  /// Flipping this to true draws a "MORE MARKS" chip that opens a purchase
+  /// sheet -- and that sheet needs a store console to exist first (there is no
+  /// App Store record for this bundle while the Apple migration is open, and no
+  /// Play Billing plugin in the fleet yet). The layout reserves the space now
+  /// so turning it on is not a re-layout later.
+  var STORE_ON = false;
+
+  Game.prototype._drawCavernRoom = function (ctx) {
+    var G = cavernRoomGeom(this.view.scale), i;
+    var slot = SLOTS[this.cavSlot | 0] || SLOTS[0];
+    ctx.fillStyle = 'rgba(12,7,5,0.88)';
+    ctx.fillRect(-this.view.ox - 60, -this.view.oy - 60, this.view.w + 120, this.view.h + 120);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 26px Georgia, serif';
+    inkText(ctx, 'YOUR CAVERN', WORLD_W / 2, 72, '#ffe9c4', 6, 2);
+    // UNDER the title, not over it: at y 62 this ran through the serif
+    // ascenders and both lines became unreadable.
+    ctx.font = '11px system-ui, sans-serif';
+    inkText(ctx, 'nothing here changes how a machine fires', WORLD_W / 2, 90,
+            'rgba(255,201,168,0.6)', 4, 1);
+
+    // ---- wallet -----------------------------------------------------------
+    ctx.textAlign = 'left';
+    drawCoin(ctx, G.wallet.x + 15, G.wallet.y + 15, 12, Save.equipped('coin'));
+    ctx.font = 'bold 20px Georgia, serif';
+    inkText(ctx, String(Save.data.marks | 0), G.wallet.x + 34, G.wallet.y + 22, '#ffe9c4', 4, 1);
+    ctx.font = 'bold 10px system-ui, sans-serif';
+    inkText(ctx, 'HOARD MARKS', G.wallet.x + 34 + ctx.measureText(String(Save.data.marks | 0)).width + 34,
+            G.wallet.y + 21, 'rgba(185,162,127,0.9)', 3, 1);
+    if (STORE_ON) {
+      forgePlate(ctx, G.topUp, 'util');
+      ctx.textAlign = 'center'; ctx.font = 'bold 11px system-ui, sans-serif';
+      inkText(ctx, 'MORE MARKS', G.topUp.x + G.topUp.w / 2, G.topUp.y + 19, '#ffe9c4', 3, 1);
+    }
+
+    // ---- slot tabs --------------------------------------------------------
+    ctx.textAlign = 'center';
+    for (i = 0; i < SLOTS.length; i++) {
+      var tb = G.tabs[i], on = i === (this.cavSlot | 0);
+      ctx.fillStyle = on ? 'rgba(120,78,34,0.85)' : 'rgba(38,26,20,0.85)';
+      rr(ctx, tb.x, tb.y, tb.w, tb.h, 8); ctx.fill();
+      ctx.strokeStyle = on ? 'rgba(255,215,110,0.9)' : 'rgba(120,100,78,0.5)';
+      ctx.lineWidth = on ? 2 : 1;
+      rr(ctx, tb.x, tb.y, tb.w, tb.h, 8); ctx.stroke();
+      ctx.font = 'bold 10px system-ui, sans-serif';
+      inkText(ctx, SLOTS[i].name, tb.x + tb.w / 2, tb.y + 17,
+              on ? '#ffe9c4' : 'rgba(200,180,150,0.75)', 3, 1);
+      // OWNED / TOTAL, so the tab says whether there is anything to look at
+      var own = 0;
+      for (var oi = 0; oi < SLOTS[i].items.length; oi++) {
+        if (Save.owns(SLOTS[i].id, SLOTS[i].items[oi].id)) own++;
+      }
+      ctx.font = 'bold 9px system-ui, sans-serif';
+      inkText(ctx, own + '/' + SLOTS[i].items.length, tb.x + tb.w / 2, tb.y + 30,
+              on ? 'rgba(255,233,196,0.8)' : 'rgba(185,162,127,0.6)', 3, 1);
+    }
+
+    // ---- preview: the equipped item for this slot, at size ----------------
+    var P = G.preview, eq = Save.equipped(slot.id);
+    uiPanel(ctx, P.x, P.y, P.w, P.h, 12);
+    this._drawCosPreview(ctx, slot.id, eq, P);
+    ctx.font = 'bold 13px Georgia, serif';
+    inkText(ctx, eq ? eq.name : '-', P.x + P.w / 2, P.y + P.h - 26, '#ffe9c4', 4, 1);
+    ctx.font = 'italic 10px Georgia, serif';
+    inkText(ctx, eq && eq.how ? eq.how : '', P.x + P.w / 2, P.y + P.h - 11,
+            'rgba(255,201,168,0.72)', 4, 1);
+
+    // ---- the shelf --------------------------------------------------------
+    for (i = 0; i < slot.items.length && i < G.cards.length; i++) {
+      var it = slot.items[i], cd = G.cards[i];
+      var owned = Save.owns(slot.id, it.id), worn = eq && eq.id === it.id;
+      var afford = (Save.data.marks | 0) >= it.price;
+      ctx.fillStyle = worn ? 'rgba(96,66,28,0.9)' : 'rgba(30,21,16,0.9)';
+      rr(ctx, cd.x, cd.y, cd.w, cd.h, 10); ctx.fill();
+      ctx.strokeStyle = worn ? 'rgba(255,215,110,0.95)'
+                      : owned ? 'rgba(150,126,96,0.7)' : 'rgba(90,76,60,0.5)';
+      ctx.lineWidth = worn ? 2 : 1;
+      rr(ctx, cd.x, cd.y, cd.w, cd.h, 10); ctx.stroke();
+      // swatch
+      this._drawCosSwatch(ctx, slot.id, it, cd.x + 34, cd.y + cd.h / 2, 24);
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 12px Georgia, serif';
+      inkText(ctx, it.name, cd.x + 64, cd.y + 28,
+              owned ? '#ffe9c4' : 'rgba(230,214,190,0.85)', 3, 1);
+      ctx.font = 'bold 10px system-ui, sans-serif';
+      if (worn) {
+        inkText(ctx, 'EQUIPPED', cd.x + 64, cd.y + 48, '#ffd75e', 3, 1);
+      } else if (owned) {
+        inkText(ctx, 'TAP TO WEAR', cd.x + 64, cd.y + 48, 'rgba(217,242,255,0.9)', 3, 1);
+      } else {
+        drawCoin(ctx, cd.x + 70, cd.y + 44, 7, Save.equipped('coin'));
+        inkText(ctx, String(it.price), cd.x + 82, cd.y + 48,
+                afford ? '#ffe9c4' : 'rgba(200,120,100,0.9)', 3, 1);
+        if (!afford) {
+          ctx.font = 'bold 9px system-ui, sans-serif';
+          inkText(ctx, 'need ' + (it.price - (Save.data.marks | 0)) + ' more', cd.x + 64, cd.y + 63,
+                  'rgba(200,120,100,0.75)', 3, 1);
+        }
+      }
+      ctx.textAlign = 'center';
+    }
+
+    // ---- back -------------------------------------------------------------
+    forgePlate(ctx, G.back, 'util');
+    ctx.font = 'bold 13px system-ui, sans-serif';
+    inkText(ctx, 'BACK', G.back.x + G.back.w / 2, G.back.y + 26, '#ffe9c4', 3, 1);
+    ctx.textAlign = 'left';
+  };
+
+  /// Big preview for the selected slot. Every branch falls back to the swatch
+  /// if its art has not loaded -- the Cavern must open on a cold cache.
+  Game.prototype._drawCosPreview = function (ctx, slot, it, P) {
+    var cx = P.x + P.w / 2, cy = P.y + 8;
+    ctx.save();
+    ctx.beginPath(); rr(ctx, P.x + 2, P.y + 2, P.w - 4, P.h - 4, 10); ctx.clip();
+    if (slot === 'coat') {
+      var hi = this._coatPlate(ART.images.hero_title || ART.images.hero, it);
+      if (hi) {
+        var hh = 96, hw = hh * (hi.width / hi.height);
+        ctx.drawImage(hi, cx - hw / 2, cy, hw, hh);
+      }
+    } else if (slot === 'coin') {
+      drawCoin(ctx, cx, cy + 46, 40, it);
+    } else if (slot === 'road') {
+      var ri = this._slotPlate('road', 'road');
+      if (ri) {
+        for (var tx = P.x + 6; tx < P.x + P.w - 6; tx += 46) {
+          ctx.drawImage(ri, tx, cy + 12, 46, 46);
+        }
+      }
+    } else {
+      var ii = this._slotPlate(slot, slot === 'hoard' ? 'mound' : 'keep');
+      if (ii) {
+        var ph = 92, pw = ph * (ii.width / ii.height);
+        if (pw > P.w - 24) { pw = P.w - 24; ph = pw * (ii.height / ii.width); }
+        ctx.drawImage(ii, cx - pw / 2, cy + (92 - ph), pw, ph);
+      }
+    }
+    ctx.restore();
+  };
+
+  /// Card swatch. Small, and it must read at 24px: a coat is its scale colour,
+  /// a prop is its tint, and the stock entry of every slot is drawn in the
+  /// game's own gold so "the one you already had" is never a grey blank.
+  Game.prototype._drawCosSwatch = function (ctx, slot, it, cx, cy, r) {
+    if (slot === 'coin') { drawCoin(ctx, cx, cy, r, it); return; }
+    // ONCE A SLOT HAS ART, the swatch shows the thing itself. A coloured ball
+    // beside a card called "Gem Seam" is a worse answer than the pile.
+    if (it.art && ART.images[it.art]) {
+      var si = ART.images[it.art];
+      var sw = r * 2.3, sh = sw * (si.height / si.width);
+      if (sh > r * 2.1) { sh = r * 2.1; sw = sh * (si.width / si.height); }
+      ctx.drawImage(si, cx - sw / 2, cy - sh / 2, sw, sh);
+      return;
+    }
+    var col;
+    if (slot === 'coat') {
+      col = it.hue === null || it.hue === undefined ? '#e0431a'
+            : hsvHex(it.hue, Math.min(1, 0.92 * it.sat), Math.min(1, 0.72 * it.val));
+    } else {
+      col = it.tint || '#ffd75e';
+    }
+    var g = ctx.createRadialGradient(cx - r * 0.4, cy - r * 0.4, r * 0.1, cx, cy, r * 1.1);
+    g.addColorStop(0, '#ffffff'); g.addColorStop(0.3, col); g.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.283); ctx.stroke();
+  };
+
+  function hsvHex(h, s, v) {
+    var i = Math.floor(h * 6), f = h * 6 - i;
+    var p = v * (1 - s), q = v * (1 - s * f), t = v * (1 - s * (1 - f));
+    var r, g, b;
+    switch (i % 6) {
+      case 0: r = v; g = t; b = p; break;
+      case 1: r = q; g = v; b = p; break;
+      case 2: r = p; g = v; b = t; break;
+      case 3: r = p; g = q; b = v; break;
+      case 4: r = t; g = p; b = v; break;
+      default: r = v; g = p; b = q;
+    }
+    function h2(x) { var n = Math.round(x * 255).toString(16); return n.length < 2 ? '0' + n : n; }
+    return '#' + h2(r) + h2(g) + h2(b);
+  }
 
   Game.prototype._drawForge = function (ctx) {
     var v = this.view;
@@ -8913,13 +9629,135 @@
   function clamp(x, a, b) { return x < a ? a : x > b ? b : x; }
   // Bottom-anchored aspect-correct sprite blit: sprites stand ON baseY.
   // Returns false when the image is missing so callers fall back LOUDLY.
+  /// `id` may be an ART id OR an already-resolved image -- the skin slots pass
+  /// a recoloured canvas, which has no id to look up.
   function drawSpriteBottom(ctx, id, cx, baseY, drawW) {
-    var img = ART.images[id];
+    var img = (typeof id === 'string') ? ART.images[id] : id;
     if (!img) return false;
     var h = drawW * (img.height / img.width);
     ctx.drawImage(img, cx - drawW / 2, baseY - h, drawW, h);
     return true;
   }
+  /// THE MINTED COIN. The top-left counter used to be `ctx.arc` filled flat
+  /// gold with a brown stroke -- a poker chip, and the one object on the HUD
+  /// the player looks at every three seconds. A coin has a RIM (a raised ring,
+  /// so it reads as struck metal rather than a printed circle), a LIGHT SIDE
+  /// (the gradient runs top-left, matching every other light source in the
+  /// cavern) and a FACE. The face is a castle, and the alloy under it is the
+  /// grade -- see COINS.
+  ///
+  /// This is drawn, not painted, ON PURPOSE for now: it is the seam a bought
+  /// sprite drops into (COINS[].art), and until that art exists a drawn coin
+  /// is still a coin, whereas a flat disc never was.
+  function stampCastle(ctx, kind, r, ink, face) {
+    // unit space: x,y in -1..1, scaled by r. Everything is drawn as ONE filled
+    // path in `ink`, then the openings (gate, windows) are punched back in
+    // `face` on top -- a castle with no openings is a lump, and at this size
+    // the openings are most of what says "castle".
+    //
+    // TOWERS MUST NOT TOUCH. The first version put the gatehouse towers at
+    // +-0.62 with half-width 0.24 against a centre block of half-width 0.42:
+    // the spans overlapped, the winding rule merged all three into one mass,
+    // and the coin read as a notched blob. Gaps are load-bearing here.
+    function block(x, w, top, mer) {
+      var y1 = 0.86, n = mer | 0;
+      ctx.moveTo(x - w, y1);
+      ctx.lineTo(x - w, top);
+      if (n > 0) {
+        var step = (2 * w) / (n * 2 - 1);
+        for (var i = 0; i < n * 2 - 1; i++) {
+          ctx.lineTo(x - w + step * (i + 1), (i % 2 === 0) ? top - 0.24 : top);
+        }
+      } else { ctx.lineTo(x + w, top); }
+      ctx.lineTo(x + w, y1);
+      ctx.closePath();
+    }
+    function roof(x, w, top) {
+      ctx.moveTo(x - w, top); ctx.lineTo(x, top - 0.46); ctx.lineTo(x + w, top);
+      ctx.closePath();
+    }
+    function arch(x, w, h) {          // a doorway: a round top on a stem
+      ctx.moveTo(x - w, 0.86);
+      ctx.lineTo(x - w, h + w);
+      ctx.arc(x, h + w, w, Math.PI, 0);
+      ctx.lineTo(x + w, 0.86);
+      ctx.closePath();
+    }
+    ctx.save(); ctx.scale(r, r);
+    ctx.fillStyle = ink;
+    ctx.beginPath();
+    if (kind === 'gate') {
+      block(-0.68, 0.20, -0.22, 2); block(0.68, 0.20, -0.22, 2); block(0, 0.34, 0.10, 3);
+    } else if (kind === 'keep') {
+      block(0, 0.42, -0.50, 3); block(-0.76, 0.16, -0.06, 2); block(0.76, 0.16, -0.06, 2);
+    } else if (kind === 'citadel') {
+      block(-0.80, 0.15, -0.20, 2); block(-0.32, 0.15, -0.56, 2);
+      block(0.32, 0.15, -0.56, 2);  block(0.80, 0.15, -0.20, 2);
+      block(0, 0.94, 0.30, 0);
+    } else if (kind === 'bastion') {
+      // a low angular fort: sloped curtain, two corner bastions, a squat keep.
+      // Iron does not decorate, so there are no merlons -- but there IS a
+      // stepped silhouette, because the first attempt was a smooth triangle
+      // and read as a mountain.
+      ctx.moveTo(-0.96, 0.86); ctx.lineTo(-0.80, 0.24); ctx.lineTo(-0.44, 0.24);
+      ctx.lineTo(-0.44, 0.86); ctx.closePath();
+      ctx.moveTo(0.96, 0.86); ctx.lineTo(0.80, 0.24); ctx.lineTo(0.44, 0.24);
+      ctx.lineTo(0.44, 0.86); ctx.closePath();
+      block(0, 0.40, -0.26, 0);
+      ctx.moveTo(-0.52, 0.86); ctx.lineTo(-0.52, 0.44); ctx.lineTo(0.52, 0.44);
+      ctx.lineTo(0.52, 0.86); ctx.closePath();
+    } else {
+      block(0, 0.22, -0.34, 0); roof(0, 0.30, -0.34);
+      block(-0.68, 0.14, 0.06, 0); roof(-0.68, 0.20, 0.06);
+      block(0.68, 0.14, 0.06, 0);  roof(0.68, 0.20, 0.06);
+    }
+    ctx.fill();
+    // openings, punched back in the coin's own face colour
+    ctx.fillStyle = face;
+    ctx.beginPath();
+    if (kind === 'gate')          { arch(0, 0.15, 0.34); }
+    else if (kind === 'keep')     { arch(0, 0.13, 0.42); }
+    else if (kind === 'citadel')  { arch(0, 0.14, 0.52); }
+    else if (kind === 'bastion')  { arch(0, 0.13, 0.56); }
+    else                          { arch(0, 0.10, 0.56); }
+    ctx.fill();
+    ctx.restore();
+  }
+
+  /// coin may be a COINS entry or null (falls back to the stock gatehouse).
+  function drawCoin(ctx, cx, cy, r, coin) {
+    coin = coin || COINS[0];
+    if (coin.art && ART.images[coin.art]) {
+      var im = ART.images[coin.art];
+      ctx.drawImage(im, cx - r, cy - r, r * 2, r * 2);
+      return;
+    }
+    ctx.save();
+    ctx.translate(cx, cy);
+    // body: light from the top-left, same as the cavern
+    var g = ctx.createRadialGradient(-r * 0.38, -r * 0.42, r * 0.10, 0, 0, r * 1.12);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(0.28, coin.face);
+    g.addColorStop(1, coin.edge);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, 6.283); ctx.fill();
+    // rim: struck metal has a raised ring, and it is what stops this reading
+    // as a printed dot at 10px
+    ctx.strokeStyle = coin.edge; ctx.lineWidth = Math.max(1, r * 0.16);
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.90, 0, 6.283); ctx.stroke();
+    // the face, in relief: a dark stamp with a 1px light offset above it
+    // relief: a light ghost one pixel high, then the real stamp over it
+    ctx.globalAlpha = 0.5;
+    ctx.save(); ctx.translate(0, -r * 0.10);
+    stampCastle(ctx, coin.stamp, r * 0.60, '#ffffff', 'rgba(255,255,255,0)');
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    ctx.save(); ctx.translate(0, r * 0.02);
+    stampCastle(ctx, coin.stamp, r * 0.60, coin.ink, coin.face);
+    ctx.restore();
+    ctx.restore();
+  }
+
   function rr(ctx, x, y, w, h, r) {
     r = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
