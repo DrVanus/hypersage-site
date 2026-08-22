@@ -1999,12 +1999,16 @@
 
   /// THE SLOT TABLE — the one place that knows the five slots exist. Order is
   /// the Cavern screen's row order.
+  /// `base` is the STOCK art id for the slot. The stock item of every prop slot
+  /// has art:null and tint:null -- it IS the shipped sprite -- so without this
+  /// the Cavern drew it as a plain gold ball beside four real tiles, which
+  /// reads as a missing asset rather than as "the one you already had".
   var SLOTS = [
-    { id: 'coat',  name: 'DRAGON', items: COATS },
-    { id: 'coin',  name: 'COIN',   items: COINS },
-    { id: 'hoard', name: 'HOARD',  items: HOARDS },
-    { id: 'keep',  name: 'KEEP',   items: KEEPS },
-    { id: 'road',  name: 'ROAD',   items: ROADS },
+    { id: 'coat',  name: 'DRAGON', items: COATS,  base: null },
+    { id: 'coin',  name: 'COIN',   items: COINS,  base: null },
+    { id: 'hoard', name: 'HOARD',  items: HOARDS, base: 'mound' },
+    { id: 'keep',  name: 'KEEP',   items: KEEPS,  base: 'keep' },
+    { id: 'road',  name: 'ROAD',   items: ROADS,  base: 'road' },
   ];
   var SLOT_BY_ID = {};
   for (var _si = 0; _si < SLOTS.length; _si++) SLOT_BY_ID[SLOTS[_si].id] = SLOTS[_si];
@@ -5731,12 +5735,20 @@
     return cv;
   };
 
+  /// The plate for ONE NAMED ITEM. _slotPlate answers "what is equipped", which
+  /// is the wrong question for a preview: the Cavern happens to preview the
+  /// equipped item today, so calling _slotPlate there was right by coincidence
+  /// and would have silently shown the wrong sprite the moment anything wanted
+  /// to preview an item the player does not wear.
+  Game.prototype._itemPlate = function (it, artId) {
+    if (it && it.art && ART.images[it.art]) return ART.images[it.art];
+    return this._propPlate(ART.images[artId], it);
+  };
+
   /// The equipped plate for a prop slot. `art` on the item is the seam a bought
   /// sprite drops into: set it and the recolour is bypassed entirely.
   Game.prototype._slotPlate = function (slot, artId) {
-    var it = Save.equipped(slot);
-    if (it && it.art && ART.images[it.art]) return ART.images[it.art];
-    return this._propPlate(ART.images[artId], it);
+    return this._itemPlate(Save.equipped(slot), artId);
   };
 
   /// A rival's coat. RIVALS[].coat names a COATS entry -- the four rivals used
@@ -9253,14 +9265,14 @@
     } else if (slot === 'coin') {
       drawCoin(ctx, cx, cy + 46, 40, it);
     } else if (slot === 'road') {
-      var ri = this._slotPlate('road', 'road');
+      var ri = this._itemPlate(it, SLOT_BY_ID.road.base);
       if (ri) {
         for (var tx = P.x + 6; tx < P.x + P.w - 6; tx += 46) {
           ctx.drawImage(ri, tx, cy + 12, 46, 46);
         }
       }
     } else {
-      var ii = this._slotPlate(slot, slot === 'hoard' ? 'mound' : 'keep');
+      var ii = this._itemPlate(it, (SLOT_BY_ID[slot] || {}).base);
       if (ii) {
         var ph = 92, pw = ph * (ii.width / ii.height);
         if (pw > P.w - 24) { pw = P.w - 24; ph = pw * (ii.height / ii.width); }
@@ -9275,10 +9287,13 @@
   /// game's own gold so "the one you already had" is never a grey blank.
   Game.prototype._drawCosSwatch = function (ctx, slot, it, cx, cy, r) {
     if (slot === 'coin') { drawCoin(ctx, cx, cy, r, it); return; }
-    // ONCE A SLOT HAS ART, the swatch shows the thing itself. A coloured ball
-    // beside a card called "Gem Seam" is a worse answer than the pile.
-    if (it.art && ART.images[it.art]) {
-      var si = ART.images[it.art];
+    // THE SWATCH SHOWS THE THING ITSELF wherever it can -- a coloured ball
+    // beside a card called "Gem Seam" is a worse answer than the pile, and the
+    // stock entry has no art of its own because it IS the slot's base sprite.
+    var sb = SLOT_BY_ID[slot];
+    var si = (sb && sb.base) ? this._itemPlate(it, sb.base) : null;
+    if (!si && it.art && ART.images[it.art]) si = ART.images[it.art];
+    if (si) {
       var sw = r * 2.3, sh = sw * (si.height / si.width);
       if (sh > r * 2.1) { sh = r * 2.1; sw = sh * (si.width / si.height); }
       ctx.drawImage(si, cx - sw / 2, cy - sh / 2, sw, sh);
