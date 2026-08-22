@@ -2026,7 +2026,8 @@
     starFirst: 40,     // per star, per level, first time that star is reached
     trialBadge: 60,    // per (level, trial), first clear
     rivalFirst: 90,    // per rival, first win
-    dailyBest: 30,     // per day, only when today's best actually improves
+    dailyWave: 4,      // per WAVE gained on today's best -- see below, this is
+                       // NOT per improvement, and the difference is a farm
   };
 
   var Save = (function () {
@@ -4944,9 +4945,18 @@
       if (Save.data.daily.day !== today2) Save.data.daily = { day: today2, best: 0 };
       // TODAY's best, not the all-time one: the all-time record can never fall,
       // so paying on it would stop paying forever after one good day.
+      //
+      // PAID PER WAVE GAINED, NOT PER IMPROVEMENT. A flat fee per improvement
+      // is a farm, and an easy one: die on purpose at wave 1, then wave 2, then
+      // wave 3, and every one of those runs is an "improvement" that pays full
+      // price. Fifteen deliberate near-misses paid fifteen times for a wave-15
+      // day. Per wave gained, the payouts TELESCOPE -- any sequence of
+      // improvements from 0 to N sums to rate x N no matter how it was reached,
+      // so the day is worth exactly what the best run was worth and playing
+      // badly on purpose earns nothing extra.
       if (this.wave > Save.data.daily.best) {
+        marksEarned += MARK_AWARDS.dailyWave * (this.wave - (Save.data.daily.best | 0));
         Save.data.daily.best = this.wave;
-        if (this.wave > 0) marksEarned += MARK_AWARDS.dailyBest;
       }
       if (this.wave > Save.data.dailyBestWave) Save.data.dailyBestWave = this.wave;
     }
