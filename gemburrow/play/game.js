@@ -14,7 +14,33 @@
   var CFG = {
     stepHz: 120,          // fixed physics substep rate. NOT the frame rate.
     gravity: 1500,        // world px/s^2 inside the jar
-    damping: 0.985,       // velocity keep when derived from displacement
+    // 0.90, not 0.985. THE PILE NEVER STOPPED MOVING.
+    //
+    // step() derives velocity from the solver's positional correction
+    // (`b.vx = (b.x - b.px) / STEP * CFG.damping`), so at 0.985 a seated body
+    // re-injects almost all of the overlap push it just received and trades it
+    // against gravity forever instead of decaying. Measured over 60 jars at
+    // 1/120: at 0.985, 36 of 60 NEVER reach rest and the same 36 are still
+    // moving 600 steps after anyone last touched them — an untouched pile that
+    // clacks at the player indefinitely. It also means `settled()` can never
+    // fire, so `start()`'s `fastForward(2400)` runs its full cap on every
+    // level start, every RETRY, every AGAIN and every archive dig.
+    //
+    //   damping   never settle   still moving when idle   p50 steps   worst
+    //   0.985        36/60             36/60                2400      2400
+    //   0.95         21/60             21/60                 670      2400
+    //   0.92          3/60              3/60                 827      2400
+    //   0.90          0/60              0/60                 961      1198
+    //   0.85          0/60              0/60                1313      1481
+    //
+    // 0.90 is where both columns reach zero and the worst case (1198) drops
+    // clear of the 2400 cap. It also moves TOWARD the documented feel — see
+    // Jar.step: "heavy dead-stop gems are the feel we want (restitution ~0)".
+    //
+    // THIS IS A LOAD-BEARING SIM CONSTANT: it changes where every body settles,
+    // so every daily board, every career seed and every store frame move with
+    // it. Changing it REQUIRES the full sweep cycle and a frame re-shoot.
+    damping: 0.90,        // velocity keep when derived from displacement
     solverIters: 4,
     sleepMove2: 0.0025,   // (px/step)^2 net movement below which a body rests —
                           // velocity is NOISE in a stack (gravity in, impulse
@@ -23,7 +49,44 @@
     slop: 0.5,            // resting overlap the solver tolerates (anti-jitter)
     correction: 0.6,      // fraction of excess overlap corrected per iteration
     fillTarget: 0.70,     // pour until body area hits this fraction of jar area
-    restockBelow: 0.30,   // pour again when fill drains below this fraction
+    // POUR AT THE SAME MARK CAREER USES. This was 0.30 while every career level
+    // pours at 0.45, and the career comment already gave the reason ("surface
+    // starvation — pour sooner"). Free and daily have exactly the same problem
+    // and were the modes left waiting. Measured on a live free jar: at 36
+    // bodies the fill reads 0.40, so the old threshold could not fire, and that
+    // jar had ONE legal tap in it — a rock. The drained middle of a shift is
+    // where the game died, and 0.30 is what kept it there.
+    // 0.68, not 0.66 — and CFG.junkRatio moves 0.30 -> 0.28 with it.
+    //
+    // CFG.damping moved 0.985 -> 0.90, every pile now settles differently, and
+    // one of the next 120 shared daily boards went DEAD: day 20706 finished
+    // 7/10 with 62% of its swings starved. A dead career level is one player's
+    // retry; a dead DAILY is every player on earth getting an unwinnable jar on
+    // the same day, with no reroll and no second seed.
+    //
+    // THE FIRST ATTEMPT WAS FITTED TO ITS OWN WINDOW. restockBelow 0.72 alone
+    // cleared all 120 screened days — and screening 260 found a DIFFERENT dead
+    // day (20903) further out. seedForDay runs forever, so a dial tuned until
+    // one finite window is clean has only moved the failure past the edge of
+    // the window. Re-searched over 260 days, both dials together:
+    //
+    //   junk  restock   clearable   DEAD
+    //   0.26   0.66      253/260      0
+    //   0.26   0.68      256/260      0
+    //   0.28   0.66      253/260      2
+    //   0.28   0.68      255/260      0     <- here
+    //   0.30   0.66      247/260      3     <- was shipping
+    //   0.30   0.68      255/260      1
+    //   0.32   0.66      250/260      3
+    //   0.32   0.68      252/260      2
+    //
+    // restock 0.68 beats 0.66 at every junk level, and 0.28 is the smallest
+    // move off the shipped rock density that reaches zero. 0.26 scores one
+    // better but thins the rock the dig is supposed to be about.
+    //
+    // CAREER IS UNAFFECTED by both: it overrides restockBelow with its own 0.45
+    // and careerCfg computes its own per-level `junk` (0.26 + tier*0.016).
+    restockBelow: 0.68,   // pour again when fill drains below this fraction
     pourMax: 200,         // hard cap of bodies per pour (safety)
     ordersPerShift: 10,   // complete this many orders -> epilogue payout
     swings: 55,           // pickaxe budget per shift — THE constraint that
@@ -34,10 +97,58 @@
     bagCap: 7,            // satchel slots — the per-tap tension engine: spam
                           // jams the bag; assembly is why you READ the cards
     timedDur: 45,         // seconds a timed order stays on the line
-    junkRatio: 0.45,      // probe finding 3: THE difficulty dial
-    freeLode: 0.12,       // lodestone rate in FREE and DAILY jars
-    freeShale: 0.10,      // shale rate in FREE and DAILY jars
-    rareChance: 0.10,
+    // FREE AND DAILY WERE TUNED HARDER THAN CAREER LEVEL 40. Swings-per-order
+    // 5.50 vs the ladder's floor of 5.48, verbs at career mid-ladder rates, and
+    // a restock threshold 0.15 lower than any level — on unscreened seeds,
+    // where career's 40 are hand-picked (CAREER_REROLL). tools/screen_daily.cjs
+    // put a number on the result: 13 of the next 120 SHARED daily boards went
+    // dead, one of them leaving the expert bot 4 orders done with 26 swings it
+    // had nothing legal to spend. These three dials, with the exposure cone
+    // below, take that to zero.
+    // UNDER A COVER RULE, ROCK IS A MANDATORY SWING, NOT A CHOICE.
+    // The old 0.45 was tuned for the support rule, where a rock could be left
+    // alone and the gem beside it taken instead. Digging downward you cannot
+    // route around anything: every rock on the face has to come out before
+    // what is under it exists. Measured over 300 free shifts at the new rule —
+    // 0.45 -> 75.0% of shifts complete, 0.38 -> 84.0%, 0.32 -> 90.3%,
+    // 0.30 -> 92.0% with zero dead daily boards, which is where it sits.
+    // 0.26, paired with restockBelow 0.68 — searched TOGETHER, and the search
+    // is the interesting part.
+    //
+    // CFG.damping 0.985 -> 0.90 moved every settled pile and pushed one of the
+    // next 120 shared daily boards to DEAD. Three rounds of tuning followed,
+    // and the first two were wrong in the same way:
+    //   restock 0.72 alone   -> clean over 120, a DIFFERENT dead day at 260
+    //   junk 0.28 / rb 0.68  -> clean over 260, a DIFFERENT dead day at 500
+    // A dial tuned until one finite window is clean has only pushed the failure
+    // past the edge of that window. seedForDay runs forever.
+    //
+    // Over 500 days (~16 months of the boards players will actually get):
+    //   junk 0.26  restock 0.68   489/500 clearable   0 DEAD   <- here
+    //   junk 0.27  restock 0.68   485/500             4 DEAD
+    //   junk 0.28  restock 0.68   491/500             1 DEAD
+    // The response is CHAOTIC, not smooth — 0.27 sits between two better
+    // neighbours — so this is a sampled result, not a proof. RE-RUN
+    // `node tools/screen_daily.cjs 500` before the coverage runs out, and treat
+    // any change to damping, the exposure cone or the pour as invalidating it.
+    //
+    // A starvation rescue was tried instead of dials and made it worse; the
+    // reason is recorded at the restock in update().
+    junkRatio: 0.26,
+    freeLode: 0.06,       // lodestone rate in FREE and DAILY jars
+    freeShale: 0.05,      // shale rate in FREE and DAILY jars
+    // THE PRISM WAS 7.5x OVERSUPPLIED AND ITS DECISION ALMOST NEVER FIRED.
+    // Measured over 200 free shifts: 10.4% of gems poured, 1.4% demanded, and
+    // because almost nothing consumed them they silted the working surface —
+    // 18.6% of every gem the player could reach was one no card wanted. The
+    // sell-vs-hoard prompt only fires when an ORDER wants the prism (see
+    // _route), so DESIGN's "best decision in the game" was firing on 1.4% of
+    // demand. Closed from both ends rather than one: supply 0.10 -> 0.07 and
+    // the BIG card's prism roll 0.30 -> 0.60. Oversupply 7.5x -> 2.9x, surface
+    // silt -> 11.6%, and the dilemma fires nearly twice as often. It stays
+    // oversupplied ON PURPOSE — a prism is mostly dragon food, and the hoard
+    // ladder is what it feeds.
+    rareChance: 0.07,
   };
   var VIEW_H = 720;       // reference world height (world units)
   // Portrait zoom knob. scale = min(ch/VIEW_H, cw/VIEW_MIN_W): in portrait the
@@ -57,7 +168,22 @@
   var BAG_HIT_TOP = BAG_Y - 6, BAG_HIT_BOT = BAG_Y + BAG_SLOT + 12;
   var PAY = { easy: 30, med: 60, big: 150, timed: 90 };
   var SLOT_CLS = ['easy', 'med', 'med', 'big', 'timed'];
-  var SLOT_N = { easy: 2, med: 3, big: 5, timed: 3 };
+  // THE BIG CARD ASKED FOR FIVE GEMS AND 68.5% OF THEM NEVER PAID.
+  //
+  // Measured over 250 free shifts: dealt 365, paid 115. A card that does not
+  // pay is not merely a missed 150c — it holds one of the five order slots for
+  // a mean of 18.7 swings, a third of the shift, doing nothing, and it is the
+  // one card that cannot be abandoned cheaply because five of the satchel's
+  // seven slots are already committed to it. Two slots of slack is not enough
+  // room to dig anything else, so a BIG card in progress turns every other
+  // card off.
+  //
+  // Four gems at the same 150c fixes the waste rather than the price: pay-rate
+  // 31.5% -> 46.5%, slot held 18.7 -> 15.2 swings, and 467 dealt instead of
+  // 365 because they now complete and refill. It stays the ambition card —
+  // 9.9 c/swing-held, second only to RUSH's 11.5 — without switching the other
+  // four cards off while it is on the line.
+  var SLOT_N = { easy: 2, med: 3, big: 4, timed: 3 };
 
   // THE DAILY'S CHARACTER. Free and Daily were the same shift with different
   // seeds and banking rules — and the DAILY, the one mode everybody plays on
@@ -157,6 +283,43 @@
   // shift, not against a single dig.
   var HEART_GIFT = 12;                 // hoard — most of a rank step (15)
   var HEART_SELL = 600;                // coins — a shift's whole take again
+  // How long the hover-choice stands before it resolves itself. ONE number for
+  // both rares: the prism ran 4.5s and the colossus 4.0s, and the draw repeated
+  // both as literals to size its countdown arc, so the clock on screen and the
+  // clock being counted were two facts that had to agree by hand.
+  //
+  // 6.0 because 4.5 was measured to be too short by the player it was raised
+  // for: read two plates, work out which future you want, and reach one, on a
+  // phone, with a pile still settling behind them. It resolves FOR you when it
+  // lapses, so a clock that outruns the reading does not look broken — it just
+  // never obeys, which is exactly how this survived twice.
+  var CHOICE_SECS = 6.0;
+
+  // THE DRAGON'S OWN SIZE, from the hoard alone. _drawHoardLedge clamps this by
+  // the counter's height, which is DEVICE-derived; the clamp only ever makes
+  // him SMALLER, so a tap region sized on the unclamped value contains him on
+  // every phone without update() ever reading the phone (the floorY law,
+  // HANDOFF §3e2).
+  function hoardDragonSize(total) {
+    return 74 + Math.sqrt(Math.max(0, total || 0)) * 3.2;
+  }
+  // ...and the half-plane that answers for a tap on him during the dilemma.
+  //
+  // It was the flat literal `x < 120`, authored when the dragon stopped growing
+  // at hoard 24 (74 + a clamped sprinkle ≈ 90 wide). "THE DRAGON KEEPS GROWING"
+  // then removed that ceiling and nothing widened the target with him. Measured
+  // through the shipped pointer path at 430x932: he draws x 10..133 at hoard
+  // 231, 10..150 at hoard 423, 10..176 at hoard 900. So at Vanus's own hoard of
+  // 423 the right FIFTH of the dragon was a DEAD TAP during the one moment in
+  // the game that asks you to tap him — a second, independent cause of "when
+  // you try to hoard, it doesn't actually go to the dragon below".
+  //
+  // +60 takes in the ×N tally chip, which is drawn beside him and rides with
+  // him, and is just as much "the hoard" to a thumb. Capped at 240 so that a
+  // hoard in the thousands can never creep into the gear at c.r-60 (>=360).
+  function hoardTapRight() {
+    return Math.min(240, Math.max(120, 10 + hoardDragonSize(Meta.data.hoardTotal) + 60));
+  }
   var ROCKS = [
     { k: 'rock_s', col: '#8d8578', hi: '#b5ac9d', r: 16 },
     { k: 'rock_m', col: '#83796c', hi: '#a89e8f', r: 22 },
@@ -227,7 +390,7 @@
     var base = Math.imul(slot, 7919) + Math.imul(k, 104729);
     for (var j = 0; j < n; j++) {
       var pool = ORDER_POOL;
-      if (!noPrism && cls === 'big' && j === 0 && noise2(base, 90 + j, (seed ^ 0x0AD51) >>> 0) < 0.30) {
+      if (!noPrism && cls === 'big' && j === 0 && noise2(base, 90 + j, (seed ^ 0x0AD51) >>> 0) < 0.60) {
         pool = ['prism'];
       }
       var g = pool[Math.floor(noise2(base, 10 + j, (seed ^ 0x0AD52) >>> 0) * pool.length)];
@@ -296,11 +459,40 @@
   // implied by DESIGN.md metric 6 the ladder FAILED its own gate: L27 cleared
   // with 0 swings to spare and L32 with 2.
   //   27: 0->2 (16)  32: 2->4 (13)  24: 2->7 (22)  35: 4->5 (16)  29: 1->7 (25)
-  var CAREER_REROLL = { 5: 5, 6: 1, 8: 3, 9: 1, 10: 6, 11: 1, 12: 1, 14: 0,
-                        15: 1, 16: 3, 17: 7, 21: 6, 22: 5, 23: 5, 24: 7,
-                        25: 3, 26: 1, 27: 2, 28: 2, 29: 7, 30: 6, 31: 4,
-                        32: 4, 34: 3, 35: 5, 36: 5, 37: 5, 38: 6, 39: 6,
-                        40: 1 };
+  // RE-SCREENED after the career gate learned the lodestone's two-swing rule.
+  // sweep_career.cjs had no `pick.lode` branch at all — screen_daily.cjs and
+  // sweep_difficulty.cjs both mirror it, the CAREER gate did not — so every
+  // level from 16 up (careerCfg pours lodestones at 0.30 on L16 and 0.14 from
+  // L19) was certified against a bot paying ONE swing per lodestone where the
+  // player pays two. With the rule mirrored, L19 fell to a margin of 4 and L32
+  // to 2, both under the floor of 6. L28 (7) was screened in the same pass.
+  //   19: 0 -> 8   margin  4 -> 19  (target 20)
+  //   32: 6 -> 4   margin  2 -> 15  (target 15)
+  //   28: 6 -> 5   margin  7 -> 17  (target 17)
+  // ...and four levels that had drifted the OTHER way, off the curve as
+  // freebies. The gate does not fail on those — it only reports them — but a
+  // level clearing 13 swings above its own target is a level that teaches
+  // nothing, and every spare swing is 5c of epilogue paid into a shop sink the
+  // gate below has to keep honest.
+  //    5: 5 -> 0   margin 38 -> 26  (target 26)
+  //    6: 1 -> 9   margin 35 -> 22  (target 24)
+  //   15: 1 -> 8   margin 33 -> 27  (target 22)
+  //   18: 0 -> 1   margin 33 -> 20  (target 20)
+  // RE-SCREENED AGAIN after CFG.damping moved 0.985 -> 0.90. Damping decides
+  // where every body comes to rest, so every one of the forty fixed seeds
+  // settles into a different jar — L32 and L34 became unclearable outright and
+  // eight more drifted off their curve target. This is the cycle that constant
+  // demands; it is not optional.
+  //   32: 4 -> 7  (uncleared -> 16)      34: 2 -> 4  (uncleared -> 18)
+  //   26: 1 -> 6  (6  -> 17)             39: 6 -> 0  (3  -> 11)
+  //   21: 5 -> 6  (9  -> 15)             24: 7 -> 3  (10 -> 16)
+  //   36: 0 -> 2  (5  -> 11)             8:  3 -> 7  (33 -> 25)
+  //    9: 1 -> 5  (32 -> 23)             10: 6 -> 8  (33 -> 24)
+  var CAREER_REROLL = { 5: 0, 6: 9, 7: 1, 8: 7, 9: 5, 10: 8, 11: 1, 12: 1,
+                        14: 3, 15: 8, 16: 3, 17: 7, 18: 1, 19: 8, 20: 4, 21: 6, 22: 2,
+                        23: 5, 24: 3, 25: 0, 26: 6, 27: 1, 28: 5, 29: 8,
+                        30: 6, 31: 4, 32: 7, 34: 4, 35: 5, 36: 2, 37: 9,
+                        38: 4, 39: 0, 40: 6 };
   // The ladder ends where the SCREENING ends. careerCfg(n) happily returns a
   // config for any n, but past the screened range the swing budget decays
   // (-tier*0.5 forever) while orders cap at 12, so swings-per-order falls
@@ -328,7 +520,7 @@
     // Now the RATE tightens with tier — 6.60 swings/order at L1 down to 5.48
     // at L40 — so a late level is both longer and meaner. Re-screening is
     // mandatory after any change to this line (tools/sweep_career.cjs).
-    var perOrder = 6.60 - tier * 0.16;
+    var perOrder = 7.00 - tier * 0.32;
 
     // TEACH, THEN TEST. A verb's debut level introduces THAT VERB AND NOTHING
     // ELSE — the ritual the genre runs on, and one this ladder was only
@@ -349,7 +541,7 @@
       return {
         level: n,
         seed: (squirrel3(n, (0xCAFE01 + Math.imul(rr, 0x9E3779B9)) | 0) >>> 0) || 1,
-        restockBelow: 0.45,
+        restockBelow: 0.66,
         orders: prev.orders,          // hold every dial at the previous level
         swings: prev.swings,
         junk: prev.junk,
@@ -365,12 +557,12 @@
     return {
       level: n,
       seed: (squirrel3(n, (0xCAFE01 + Math.imul(rr, 0x9E3779B9)) | 0) >>> 0) || 1,
-      restockBelow: 0.45,   // fixed seeds amplify surface starvation — pour
+      restockBelow: 0.66,   // the dig face: keep the surface fed as it recedes
                             // sooner (batch content is identical for everyone)
       orders: orders,
       swings: Math.max(46, Math.round(orders * perOrder
               + (inBand === 3 ? -2 : 0) + (inBand === 4 ? 6 : 0))),
-      junk: Math.min(0.55, 0.38 + tier * 0.024 + (inBand === 3 ? 0.04 : 0)),
+      junk: Math.min(0.44, 0.26 + tier * 0.016 + (inBand === 3 ? 0.04 : 0)),
       rare: n >= 5 ? CFG.rareChance : 0,
       timed: n >= 3,
       heart: n % 5 === 0,             // every band finale hides a colossus
@@ -467,6 +659,12 @@
       this.bodies.push({
         id: this.nextId++, key: s.key, r: s.r, geode: s.geode || null,
         lode: !!s.lode, shale: !!s.shale,
+        // WHERE THIS BODY WAS POURED FROM — the one pair of numbers that names
+        // a body identically for every player on a shared seed. `id` is a
+        // creation counter and is NOT that (see the shale collapse). Nothing
+        // in the sim or in stateHash reads these; they exist so a rule that
+        // must be positional has a positional key available.
+        pb: b, pi: i,
         x: s.x, y: s.y, px: s.x, py: s.y, vx: 0, vy: 0,
         rest: 0, asleep: false,
       });
@@ -625,69 +823,82 @@
     return maxSteps;
   };
 
-  // A body is diggable when nothing rests on top of it — and when no LODESTONE
-  // is holding it.
+  // YOU DIG FROM THE TOP DOWN. Nothing above you, at any height.
   //
-  // The lodestone (L16+) is the ladder's first real blocker: it grips every
-  // body it touches, so a gem beside one cannot be taken until the lodestone
-  // itself is dug out. That is a different question from "is anything on top
-  // of me" — it makes the pile a small puzzle about ORDER rather than only
-  // about height, and it is the literal version of digging the rocks out
-  // around a gem before you can reach it.
+  // This replaces a support test ("is anything RESTING on me") with a cover
+  // test ("is anything OVER me at all"), and the difference is the whole game.
+  // The support rule let a gem be taken from the bottom of the jar whenever it
+  // happened to sit in a pocket, which is legal, playable, and completely
+  // illegible: Vanus asked three separate times why he could collect gems that
+  // were not on top, and finally said "i thought the purpose of the game is to
+  // dig to the bottom". He is right that that is the fantasy the mole, the
+  // pickaxe and the burrow all promise, and no amount of marking the reachable
+  // bodies was going to make the old rule mean that.
   //
-  // A lodestone is NEVER pinned by another lodestone. Two of them touching
-  // would each hold the other forever, and anything they jointly gripped would
-  // be unreachable for the rest of the shift — a soft-lock by construction.
+  // Dropping the dy limit is what makes it TRULY top-down: a body high above
+  // now blocks all the way down its column, so the pile has a real surface
+  // that recedes as you dig, instead of a scatter of local maxima.
+  //
+  // 0.85 is the horizontal tolerance — how much overlap counts as "over me".
+  // 1.00 (any overlap at all) is defensible but punishing, because two circles
+  // grazing by a pixel block each other. Measured over 100 seeds:
+  //   1.00 -> 4.10 reachable, 12.4% of swings with no gem, 81/100 shifts done
+  //   0.85 -> 5.49 reachable,  9.2%                        85/100
+  //   0.78 -> 6.01 reachable,  8.3%                        81/100  (starts to
+  //                                                        read as sideways)
+  // Settled at 0.82 against the REAL gates rather than that probe: paired with
+  // junkRatio 0.30 it clears 117 of the next 120 daily boards with none dead,
+  // where 0.85/0.32 left one dead and 0.80/0.32 left two.
+  //
+  // THE LODESTONE'S GRIP IS GONE FROM HERE, and not by oversight: under a
+  // cover rule a lodestone sitting above you already blocks you, so the grip
+  // could only ever add blocking for a stone at the SAME height, which is not
+  // a rule anyone could see. It earns its keep as a HARD STONE instead — see
+  // `hits` in _route.
+  //
+  // Changing this re-screens EVERYTHING: sweep_career, sweep_difficulty and
+  // screen_daily all read exposed().
+  var COVER_X = 0.82;
+
   Jar.prototype.exposed = function (b) {
-    var bs = this.bodies, i, o, dx, dy, rs;
+    var bs = this.bodies, i, o, dx;
     for (i = 0; i < bs.length; i++) {
       o = bs[i];
       if (o === b || o.y >= b.y) continue;
-      dx = o.x - b.x; dy = b.y - o.y;
-      rs = (o.r + b.r);
-      if (dx < 0) dx = -dx;
-      if (dx < rs * 0.72 && dy < rs * 1.05) return false;
-    }
-    if (!b.lode) {
-      for (i = 0; i < bs.length; i++) {
-        o = bs[i];
-        if (o === b || !o.lode) continue;
-        dx = o.x - b.x; dy = o.y - b.y;
-        rs = o.r + b.r + 2;
-        if (dx * dx + dy * dy < rs * rs) return false;
-      }
+      dx = o.x - b.x; if (dx < 0) dx = -dx;
+      if (dx < (o.r + b.r) * COVER_X) return false;
     }
     return true;
   };
 
   // Is a lodestone holding this body? Split from exposed() so the tap handler
   // can tell the two refusal reasons apart without re-deriving them.
-  Jar.prototype.lodeHolding = function (b) {
-    if (b.lode) return null;
-    var bs = this.bodies;
-    for (var i = 0; i < bs.length; i++) {
-      var o = bs[i];
-      if (o === b || !o.lode) continue;
-      var dx = o.x - b.x, dy = o.y - b.y;
-      var rs = o.r + b.r + 2;
-      if (dx * dx + dy * dy < rs * rs) return o;
-    }
-    return null;
-  };
-
-  // Every body a given lodestone is currently gripping — used to draw the
-  // grip and to tell the player what to clear.
-  Jar.prototype.heldBy = function (lodeBody) {
-    var out = [], bs = this.bodies;
-    for (var i = 0; i < bs.length; i++) {
-      var o = bs[i];
-      if (o === lodeBody || o.lode) continue;
-      var dx = o.x - lodeBody.x, dy = o.y - lodeBody.y;
-      var rs = o.r + lodeBody.r + 2;
-      if (dx * dx + dy * dy < rs * rs) out.push(o);
+  // WHICH bodies are covering this one — the same test exposed() runs,
+  // collected instead of short-circuited, so a refused tap can point at them.
+  //
+  // Under the cover rule this is usually a short list and often a single body:
+  // the thing directly above. That is the point — the answer to "why can't I
+  // take that" should be one object the player can see and go clear.
+  Jar.prototype.blockersOf = function (b) {
+    var out = [], bs = this.bodies, i, o, dx;
+    for (i = 0; i < bs.length; i++) {
+      o = bs[i];
+      if (o === b || o.y >= b.y) continue;
+      dx = o.x - b.x; if (dx < 0) dx = -dx;
+      if (dx < (o.r + b.r) * COVER_X) out.push(o);
     }
     return out;
   };
+
+  // The lodestone no longer HOLDS anything — under the cover rule it blocks by
+  // simply being above you, like every other body. Kept as a null-returning
+  // stub so the tap handler's two-reason branch still compiles and reads
+  // truthfully; nothing may resurrect a grip without re-screening the ladder.
+  Jar.prototype.lodeHolding = function () { return null; };
+
+  // Every body a given lodestone is currently gripping — used to draw the
+  // grip and to tell the player what to clear.
+  Jar.prototype.heldBy = function () { return []; };
 
   Jar.prototype.bodyAt = function (wx, wy) {
     var best = null, bestD = 1e9;
@@ -800,11 +1011,11 @@
   var WALL_SKINS = [
     { id: 'clay',     name: 'Burrow Clay',  price: 0,    tint: null,
       note: 'plain worked earth' },
-    { id: 'amber',    name: 'Amber Seam',   price: 600,  tint: '#c98a2e', amt: 0.55,
+    { id: 'amber',    name: 'Amber Seam',   price: 700,  tint: '#c98a2e', amt: 0.55,
       note: 'warm ochre, lantern-lit' },
-    { id: 'frost',    name: 'Frost Vein',   price: 1200, tint: '#6fa8c9', amt: 0.55,
+    { id: 'frost',    name: 'Frost Vein',   price: 1400, tint: '#6fa8c9', amt: 0.55,
       note: 'cold blue, gems pop' },
-    { id: 'malach',   name: 'Malachite',    price: 2200, tint: '#3f9e6b', amt: 0.55,
+    { id: 'malach',   name: 'Malachite',    price: 2500, tint: '#3f9e6b', amt: 0.55,
       note: 'green copper, deep quiet' },
     // Re-priced when crusted rocks started feeding the satchel. That change
     // raised a full career's income 14,178c -> 19,012c, which put the ENTIRE
@@ -815,9 +1026,31 @@
     // stock is 16,600c, which sits ~2.6k above the floor and ~2.4k below the
     // ceiling. Prices — not more ROWS: shopRowY(i) is 250 + i*64 and the view
     // is 720 tall, so a seventh row would draw its bottom edge at 754.
-    { id: 'rose',     name: 'Rose Quartz',  price: 5000, tint: '#c96f8a', amt: 0.50,
+    // RE-PRICED FOR THE DIG-DOWN RULE. Career income rose from 16,444c to
+    // ~23,900c when the cover rule landed, because excavating downward digs
+    // far more rock and every rock is a coin. A 15,000c shop was then bought
+    // out by L30 and the back third of the ladder paid into a wallet with
+    // nothing left to want — the gate's other half, and it caught it.
+    // 17,000c sits between the two bars: covered eventually (18,972c), not
+    // covered early (14,200c at L30). Tightening perOrder pulled income back
+    // down from 23,900c, so this was priced twice — the sink follows income,
+    // and income follows every rule change.
+    // RE-PRICED against an income the gate could finally SEE. sweep_career.cjs
+    // granted coins in two places — order payouts and 1c a rock — and modelled
+    // neither the epilogue (5c per leftover swing, which every cleared level
+    // pays) nor the fact that a crusted rock pays no coin at all. Correcting
+    // both moved a full career from a reported 19,661c to 25,405c, and
+    // cumulative-at-L30 from 14,719c to 19,177c, which put the entire 17,000c
+    // shop inside the first three-quarters of the ladder: the gate's other bar,
+    // and it fired the moment it could measure.
+    //
+    // 22,000c sits between the two: not covered at L30 (19,177c) and covered
+    // eventually (25,405c). The top two tiers absorb the increase, as they did
+    // last time — the early rows pace the first hours and moving them would
+    // slow a new player down to fix a problem that only exists at the end.
+    { id: 'rose',     name: 'Rose Quartz',  price: 6300, tint: '#c96f8a', amt: 0.50,
       note: 'pink shot with white' },
-    { id: 'basalt',   name: 'Deep Basalt',  price: 7600, tint: '#5a4a7a', amt: 0.60, dark: 0.22,
+    { id: 'basalt',   name: 'Deep Basalt',  price: 11100, tint: '#5a4a7a', amt: 0.60, dark: 0.22,
       note: 'darkest seam, all aglow' },
   ];
 
@@ -841,6 +1074,14 @@
       dayNumber: dayNumber, dailySeed: dailySeed,
       WALL_SKINS: WALL_SKINS,
       DEEPER_PICK_COST: DEEPER_PICK_COST, DEEPER_PICK_SWINGS: DEEPER_PICK_SWINGS,
+      // EXPORTED SO THE GATES STOP GUESSING. Four separate divergences were
+      // found between _route and the sweeps that mirror it, and three of them
+      // were a constant the tool could not see: the shale collapse's drop
+      // height (JAR.top), the colossus's free/daily payout (HEART_SELL) and
+      // its career payout (HEART_GIFT). A mirror can only be faithful to
+      // numbers it can read.
+      JAR: JAR, HEART_SELL: HEART_SELL, HEART_GIFT: HEART_GIFT,
+      COVER_X: COVER_X,
     };
   }
 
@@ -868,12 +1109,12 @@
     // THE CRUSTED GEM — see bodySpr(). Its predecessor's only tell was two
     // 1.6px flecks painted BEFORE the opaque rock sprite covered them.
     rock_crusted: 'art/rock_crusted.png',
-    rock_crusted_hit: 'art/rock_crusted_hit.png',
     // The L16+/L24+ verbs. Both are flags on ordinary rocks, so they swap the
     // SPRITE only — the collision radius stays whatever the rock rolled.
     rock_lode: 'art/rock_lode.png',
     rock_shale: 'art/rock_shale.png',
     dragon_hoardling: 'art/dragon_hoardling.png',
+    ui_coin: 'art/ui_coin.png',
     gem_heartstone: 'art/gem_heartstone.png',
     prop_pickaxe: 'art/prop_pickaxe.png',
     mole_keeper: 'art/mole_keeper.png',
@@ -955,9 +1196,13 @@
   // missing or failed art file degrades to pass-1 art instead of dropping the
   // body to the procedural facet-circle.
   function bodySpr(b) {
+    // A crusted rock is ONE hit — b.crack was never assigned anywhere, so the
+    // two-stage sprite and its glint branch were unreachable code shipping a
+    // 91KB asset nothing could draw. (The art was also wrong: the model drew a
+    // literal pickaxe embedded in the stone.) If a multi-hit crust is ever
+    // wanted, add the stage AND the art together.
     if (b.geode) {
-      var ck = b.crack > 0 ? 'rock_crusted_hit' : 'rock_crusted';
-      if (SPR[ck]) return ck;
+      if (SPR.rock_crusted) return 'rock_crusted';
       return BODY_SPR[b.key];            // no crust art yet: plain rock
     }
     if (b.lode && SPR.rock_lode) return 'rock_lode';
@@ -988,16 +1233,15 @@
     rock_m: 2.946,                // ink fills 69.9% of its frame
     rock_l: 2.375,                // ink fills 86.7% of its frame
     gem_heartstone: 2.419,        // ink fills 85.2% of its frame
-    gem_ruby_b: 2.419,            // ink fills 85.2% of its frame
+    gem_ruby_b: 2.488,            // ink fills 82.8% of its frame
     gem_ruby_c: 2.523,            // ink fills 81.7% of its frame
     gem_emerald_b: 2.441,         // ink fills 84.4% of its frame
     gem_emerald_c: 2.244,         // ink fills 91.8% of its frame
-    gem_sapphire_b: 2.273,        // ink fills 90.6% of its frame
+    gem_sapphire_b: 2.476,        // ink fills 83.2% of its frame
     gem_sapphire_c: 2.354,        // ink fills 87.5% of its frame
     gem_amber_b: 2.323,           // ink fills 88.7% of its frame
-    gem_amber_c: 2.323,           // ink fills 88.7% of its frame
+    gem_amber_c: 2.293,           // ink fills 89.8% of its frame
     rock_crusted: 2.313,          // ink fills 89.1% of its frame
-    rock_crusted_hit: 2.263,      // ink fills 91.0% of its frame
     rock_lode: 2.283,             // ink fills 90.2% of its frame
     rock_shale: 2.408,            // ink fills 85.5% of its frame
   };
@@ -1224,8 +1468,48 @@
                  // existed keeps whatever it had and gains this default — but
                  // a save written with a corrupted value would keep the
                  // corruption, which is what the lazy guard is for.
-                 contracts: {} };
+                 contracts: {},
+                 // WHICH VERBS THE PLAYER HAS HAD EXPLAINED, once ever.
+                 // The lodestone and shale shipped into free and daily with no
+                 // teaching beat at all: the coach is three steps, dies around
+                 // swing 5, and names neither, while careerCfg's `intro` flag
+                 // was written and read by nothing. Vanus met the lodestone on
+                 // his phone and asked what it was and whether he liked it —
+                 // which is the report of a mechanic that was never introduced.
+                 taught: {},
+                 // 1 = show the gold "a card wants it" and violet "something
+                 // holds it" marks; 0 = quiet jar. Never gates the dig-light.
+                 hints: 1,
+                 // GEM SYMBOLS — a second identity channel, default OFF.
+                 //
+                 // Measured from the source art: every gem is a CIRCLE (aspect
+                 // 0.98-1.06, filling 99%+ of its bounding ellipse), so shape
+                 // carries no information at all and colour is the only channel
+                 // the player has. Pair separation in raw RGB — ruby/amber 63,
+                 // and under protanopia ruby/emerald collapses to 41, the
+                 // classic red/green collision. A player who cannot separate
+                 // those two cannot read an order card.
+                 //
+                 // Off by default because the painted gems are the game's whole
+                 // look and most players do not need this; on, it stamps a small
+                 // shape on every gem in the jar AND on the order-card icons, so
+                 // matching works on silhouette alone.
+                 marks: 0 };
     var hadLocal = false;
+    // IS THE LOCAL COPY PROVISIONAL? A session that could not read the native
+    // backup still writes localStorage — with `data` at DEFAULTS if the read
+    // failed before any play. That blob then made the NEXT boot take the
+    // `hadLocal` branch below, which declares "localStorage IS the truth here",
+    // latches nativeOK and mirrors the defaults straight over the only
+    // surviving copy of the save. One transient bridge reject on the eviction
+    // path — the exact case this mirror exists for — armed a total wipe on the
+    // boot after it. Reproduced across two boots in a sandbox: backup coins
+    // 1830 -> 0, hoard 42 -> 0, careerLevel 27 -> undefined.
+    //
+    // probe_meta_restore.cjs boots each mode exactly ONCE, so the gate could
+    // not see it; the second boot is the whole defect.
+    var provisional = false;
+    try { provisional = localStorage.getItem(K + '.prov') === '1'; } catch (e) {}
     try {
       var s = localStorage.getItem(K);
       if (s) { data = Object.assign(data, JSON.parse(s)); hadLocal = true; }
@@ -1239,9 +1523,40 @@
     function save(localOnly) {
       var s2 = JSON.stringify(data);
       try { localStorage.setItem(K, s2); } catch (e) {}
+      // ...and say which of the two it is. The mark rides beside the save, not
+      // inside it, so it can never travel to the native backup and cannot
+      // affect a payload any other code reads.
+      try {
+        if (Prefs && !nativeOK) localStorage.setItem(K + '.prov', '1');
+        else localStorage.removeItem(K + '.prov');
+      } catch (e) {}
       if (Prefs && !localOnly && nativeOK) {
         try { Prefs.set({ key: K, value: s2 }).catch(function () {}); } catch (e) {}
       }
+    }
+    // How much life is in a save. Only consulted when a PROVISIONAL local copy
+    // meets a readable native backup and one of them has to win.
+    //
+    // It reads SIX fields, not the obvious one. `stats.shifts` alone looked
+    // like the monotone answer and is a trap: `stats` shipped later than the
+    // save format, so every device that played before it has shifts = 0 while
+    // holding a full career — and scoring shifts highest made the blank copy
+    // beat a 27-level backup. The probe's REAL blob is deliberately that
+    // pre-stats shape, and it is what caught this.
+    //
+    // Native wins ties by construction (>=), because a provisional copy started
+    // from DEFAULTS with a freshly minted identity: it has to be clearly bigger
+    // to be believed, not merely equal.
+    function progress(d) {
+      if (!d) return 0;
+      var st = d.stats || {}, owned = 0, k;
+      for (k in (d.owned || {})) owned++;
+      return (st.shifts || 0)
+           + (d.careerLevel || 0) * 4
+           + (d.hoardTotal || 0)
+           + Math.floor((d.coins || 0) / 100)
+           + owned * 5
+           + Math.floor((d.bestFree || 0) / 100);
     }
     function mint() {
       if (data.clientId) return;
@@ -1266,7 +1581,10 @@
       for (var i = 0; i < waiting.length; i++) waiting[i]();
       waiting.length = 0;
     }
-    if (Prefs && !hadLocal) {
+    // A PROVISIONAL local copy must re-enter the restore, not skip it. Without
+    // `|| provisional` the second boot after a failed read never reads the
+    // backup again — and then overwrites it.
+    if (Prefs && (!hadLocal || provisional)) {
       // THE SECOND HALF OF THE WIPE TRAP. The trap above is about ORDER; this
       // one is about OUTCOME. A restore has THREE outcomes, and the old code
       // had two: it swallowed the reject in a `.catch` and then ran the same
@@ -1289,7 +1607,12 @@
           // Present but unreadable is NOT 'nothing stored'. Quarantine it and
           // stay local-only, so a parse bug cannot eat a real save.
           try {
-            Object.assign(data, JSON.parse(r.value));
+            var nat = JSON.parse(r.value);
+            // On an ORDINARY boot (no local copy) the backup simply wins. On a
+            // provisional one the local copy may be a whole week of play made
+            // while the bridge was down, so the fuller save wins and the other
+            // is published over on the next write either way.
+            if (!provisional || progress(nat) >= progress(data)) Object.assign(data, nat);
             nativeOK = true;
           } catch (e) {
             try { Prefs.set({ key: K + '.bad', value: r.value }).catch(function () {}); } catch (e2) {}
@@ -1546,8 +1869,23 @@
     var MAXQ = 64;
     var lastAt = {};                      // per-name rate limit
     var api = {
-      musicMuted: localStorage.getItem('gb_music_mute') === '1',
-      sfxMuted: localStorage.getItem('gb_sfx_mute') === '1',
+      // THROUGH Meta, not through two bare localStorage keys.
+      //
+      // Every other persisted setting — hints, marks, tutorialDone, the wallet,
+      // the hoard, the stars — lives in Meta.data and is mirrored to Capacitor
+      // Preferences precisely because, in the module's own words, "WKWebView
+      // localStorage is EVICTABLE under storage pressure". These two were
+      // written with a raw setItem to 'gb_music_mute'/'gb_sfx_mute' and mirrored
+      // nowhere, so they were the only settings in the game an eviction could
+      // silently undo — and the one it undoes loudly, by turning the sound back
+      // on for someone who deliberately turned it off.
+      //
+      // The legacy keys are still READ once, so nobody's existing choice is
+      // lost on the upgrade; the first toggle writes the new home.
+      musicMuted: Meta.data.musicMuted !== undefined
+                  ? !!Meta.data.musicMuted : localStorage.getItem('gb_music_mute') === '1',
+      sfxMuted: Meta.data.sfxMuted !== undefined
+                ? !!Meta.data.sfxMuted : localStorage.getItem('gb_sfx_mute') === '1',
     };
 
     function ensure() {
@@ -1799,7 +2137,7 @@
     };
 
     api.setMusicMuted = function (m) {
-      api.musicMuted = m; localStorage.setItem('gb_music_mute', m ? '1' : '0');
+      api.musicMuted = m; Meta.data.musicMuted = !!m; Meta.save();
       if (!m) ensure();                        // unmute must also revive a
                                                // suspended/interrupted context
       if (musicBus) {
@@ -1809,7 +2147,7 @@
       if (!m && Music.loaded && !Music.cur) startBed(Music.lastScene || 'shop');
     };
     api.setSfxMuted = function (m) {
-      api.sfxMuted = m; localStorage.setItem('gb_sfx_mute', m ? '1' : '0');
+      api.sfxMuted = m; Meta.data.sfxMuted = !!m; Meta.save();
       if (sfxBus) sfxBus.gain.value = m ? 0 : 1;
     };
 
@@ -1979,6 +2317,15 @@
     this.bagCap = (this.mode === 'free' && Meta.data.hoardTotal >= 12) ? CFG.bagCap + 1 : CFG.bagCap;
     this.shiftCrusts = 0; this.shiftHearts = 0; this.shiftCombo = 0;
     this.contractsWon = null;
+    // ...AND THE CAREER RESULT, which was reset nowhere. It is only ever
+    // written in _endShift's career branch, so it outlived its own shift: play
+    // career L7, three-star it, then start a FREE dig and lose it, and
+    // _checkContracts still read `stars: 3` from the career run two shifts ago
+    // and awarded 'Clean sheet' on a failed free shift. The results screen
+    // reads it too (`this.careerResult || {won:false}`), so a stale one could
+    // paint the career result over a mode that has none.
+    this.careerResult = null;
+    this.banked = 0;                     // same reason: it is written at the END of a shift
     seedStream(this.seed);               // LANE 2 seeded once, at reset
     var wildHeart = noise01(1, (this.seed ^ 0x4EA48) >>> 0) < 0.35;   // lane-1
     // FREE AND DAILY GET THE VERBS TOO. Lodestone and shale were gated behind
@@ -2025,6 +2372,30 @@
             + this.goalOrders + ' orders before the pick wears out',
       until: 4.0,
     } : null;
+    // AN INTRO LEVEL NAMES ITS VERB. `cc.intro` has been set since the teach-
+    // then-test pass and read by nothing, so L16 held every dial steady to
+    // introduce a lodestone it never mentioned and L24 did the same for shale.
+    // The level's whole purpose is the one sentence it was not saying. This
+    // outranks the generic goal line above — the goal is the same on all forty
+    // levels; the verb is why THIS one exists.
+    if (cc && cc.intro && Meta.data.tutorialDone) {
+      // IT MUST NAME THE RULE THE GAME ACTUALLY RUNS. This described the GRIP —
+      // "pins everything under it, lift it off first" — and the grip was
+      // deleted: Jar.lodeHolding is a null-returning stub and heldBy returns [],
+      // because the top-down cover rule made a grip redundant (a stone above you
+      // already blocks you by being above you). What a lodestone does now is
+      // cost TWO swings, and the only sentence in the game that says so lives in
+      // _route's _teach('lode', ...) LONG form — which this line then made
+      // unreachable for every career player by marking the verb taught below.
+      // So L16, the level whose entire purpose is one sentence, was saying the
+      // wrong one and silencing the right one.
+      this.toast = cc.intro === 'lode'
+        ? { text: 'NEW — LODESTONE: dense striped stone. It takes two swings to break through.', until: 4.6 }
+        : { text: 'NEW — SHALE: the cracked slab brings more rock down when you break it.', until: 4.6 };
+      if (!Meta.data.taught) Meta.data.taught = {};
+      Meta.data.taught[cc.intro] = 1;      // taught here, so the in-jar hint stays short
+      Meta.save();
+    }
     this.refill = [0, 0, 0, 0, 0];
     this.orders = [];
     for (var s = 0; s < 5; s++) this.orders.push(this._makeOrder(s));
@@ -2040,6 +2411,9 @@
     this.shakeT = 0;
     this.showSettings = false;
     this.choice = null; this.dragonPulse = 0;
+    // cleared with the jar: body ids are reused across shifts, so a stale
+    // blame set would ring whatever inherited those ids in the NEXT jar
+    this.blame = null;
     this.fliers.length = 0; this.sparks.length = 0; this.bursts.length = 0;
     this.state = 'playing';
     Snd.scene('dig');
@@ -2205,18 +2579,33 @@
       // a tap that outlived the shift must not score into the next one
       if (this.state !== 'playing') { this._taps.length = 0; break; }
       if (this.choice) {
-        if (t.x < 120 && t.y > VIEW_H - 120) { this._resolveChoice('hoard'); continue; }
-        if (this.choice.slot < 0) {
-          var hcx = VIEW_MIN_W / 2, hcy = JAR.top + 48;
-          if ((t.x - hcx) * (t.x - hcx) + (t.y - hcy) * (t.y - hcy) < 60 * 60) {
-            this._choiceTapped = true; this._resolveChoice('order'); continue;
-          }
-        } else {
+        // EVERY TARGET COMES FROM choiceRects(), WHICH IS ALSO WHAT DRAWS THEM.
+        //
+        // The previous pass gave this screen the targets Vanus said were
+        // missing ("i dont understand this sell or hoard option and it doesnt
+        // let me interact with it") but authored their boxes as literals beside
+        // the literals that painted the labels — and the two never matched. The
+        // gem's r=60 circle was tested FIRST and swallowed the left half of the
+        // HOARD caption, so the word HOARD bagged the gem. See choiceRects().
+        //
+        // Order still matters, but nothing overlaps now: two plates, then the
+        // dragon, then the glowing card, then a dead gutter that eats the tap
+        // rather than letting it dig.
+        var CR = this.choiceRects();
+        if (inRect(t, CR.use))   { this._choiceTapped = true; this._resolveChoice('order'); continue; }
+        if (inRect(t, CR.hoard)) { this._choiceTapped = true; this._resolveChoice('hoard'); continue; }
+        if (t.x < hoardTapRight() && t.y > VIEW_H - 120) { this._choiceTapped = true; this._resolveChoice('hoard'); continue; }
+        if (this.choice.slot >= 0) {
           var ccx = 14 + this.choice.slot * (ORDER_W + 8);
           if (t.x >= ccx && t.x <= ccx + ORDER_W && t.y >= ORDER_Y && t.y <= ORDER_Y + ORDER_H) {
             this._choiceTapped = true; this._resolveChoice('order'); continue;
           }
         }
+        // the gutter the gem hovers in: swallow, never resolve. A tap here fell
+        // through to the dig path and spent a swing on whatever body happened
+        // to sit under the hover — the one place on screen where a miss cost
+        // something.
+        if (inRect(t, CR.gutter)) continue;
       }
       // Bag slot tap = TOSS that gem. It leaves the game: no swing spent, no
       // coin earned (an undelivered gem earns nothing), ladder reset.
@@ -2261,9 +2650,18 @@
           // nothing at all — and since the solver leaves it 97.2% visible, it
           // does not even look covered. Name the blockers and it becomes a
           // goal instead of a dead tap.
+          // NAME THE BLOCKER THAT IS ACTUALLY THERE. The colossus has two
+          // refusal reasons and this only ever spoke one of them, so a
+          // heartstone held purely by a lodestone printed the sentence
+          // "0 rocks still pin the Heartstone" — a count of nothing, offered
+          // as an instruction. Ask for the rock count first and fall through
+          // to the grip when there is no rock to name.
           b.wiggle = 1; Snd.thunk();
+          var hb = this._heartBlockers(b);
           this.toast = {
-            text: this._heartBlockers(b) + ' rocks still pin the Heartstone',
+            text: hb > 0
+              ? hb + (hb === 1 ? ' rock still pins' : ' rocks still pin') + ' the Heartstone'
+              : 'A lodestone has the Heartstone — lift that off first.',
             until: this.worldT + 2,
           };
           continue;
@@ -2282,9 +2680,37 @@
           this.shakeT = 0.5;
           Hap.heavy();
           Snd.fanfare(300);
-          this.choice = { key: 'heartstone', slot: -1, until: this.worldT + 4.0, x: b.x, y: b.y };
+          this.choice = { key: 'heartstone', slot: -1, until: this.worldT + CHOICE_SECS, x: b.x, y: b.y };
           if (this.swings <= 0 && this.state === 'playing') this._endShift();
         }
+        continue;
+      }
+      // THE LODESTONE IS A HARD STONE NOW: two swings, not one.
+      //
+      // Its old job was to GRIP its neighbours, and the cover rule made that
+      // job vanish — a stone above you already blocks you by being above you,
+      // so a grip could only ever add blocking for a stone at the same height,
+      // which is not a rule a player could see. Rather than delete the verb,
+      // give it the one that means something while you are digging DOWNWARD: a
+      // seam of stone that does not come out on the first hit. Same art, same
+      // rarity, legible without a word of UI, and it costs the player exactly
+      // what a blocker should cost — a swing.
+      //
+      // Checked BEFORE extract so the first hit cannot remove it, and only
+      // when the body is actually diggable, so a covered lodestone still
+      // refuses without eating the swing.
+      if (b.lode && this.jar.exposed(b) && (b.hits || 0) < 1) {
+        b.hits = 1;
+        b.wiggle = 1.2;
+        this.swings--;
+        Hap.medium();
+        Snd.thunk();
+        this._rockChips(b.x, b.y);
+        this.picks.push({ x: b.x, y: b.y, t: 0, heavy: true, cracked: this.swings <= 5 });
+        this.toast = this._teach('lode',
+          'LODESTONE — dense stone. It takes two swings to break through.',
+          'The lodestone cracks — one more swing.');
+        if (this.swings <= 0 && this.state === 'playing') this._endShift();
         continue;
       }
       if (this.jar.extract(b)) {
@@ -2302,19 +2728,64 @@
       } else {
         b.wiggle = 1;                    // read by draw only; decays in _cosmetic
         Snd.thunk();
+        // POINT AT WHAT IS HOLDING IT. Cosmetic-only state: draw reads it,
+        // update never does, no RNG, so two players on the same jar still
+        // diverge in nothing that matters.
+        // TEACH IT, THEN GET OUT OF THE WAY.
+        //
+        // Shipped as a full-strength cue on EVERY refused tap, forever, and
+        // Vanus's next words were "why are there circles now around rocks and
+        // gems". Of course: a player probing the pile refuses several taps a
+        // minute, each painting up to five hard amber circles for 1.9s, so the
+        // teaching cue became permanent furniture. The lesson only needs
+        // teaching once — after that the player knows what a refused tap
+        // means, and the rings are answering a question they have stopped
+        // asking.
+        //
+        // First six refusals ever: the full 1.9s cue. After that a brief, dim
+        // version — the information stays available for the moment you DO want
+        // it, at a fifth of the ink.
+        var seen = (Meta.data.taught && Meta.data.taught.blocked) || 0;
+        if (seen < 6) {
+          if (!Meta.data.taught) Meta.data.taught = {};
+          Meta.data.taught.blocked = seen + 1;
+          Meta.save();
+        }
+        var loud = seen < 6;
+        var blk = this.jar.blockersOf(b);
+        // 1.9s, not the 1.15s this started at. This is a TEACHING cue, not a
+        // hit-flash: the player has to look away from where their finger was,
+        // find the ringed bodies, and connect them to the gem they wanted.
+        // Tested on the simulator at device scale — a cue this carries has to
+        // outlast the glance that finds it.
+        this.blame = { until: this.worldT + (loud ? 1.9 : 0.75), loud: loud,
+                       ids: {}, tid: b.id, x: b.x, y: b.y, r: b.r };
+        for (var qi = 0; qi < blk.length; qi++) this.blame.ids[blk[qi].id] = 1;
         // Say WHY, when the reason is the new rule rather than the obvious
         // one. "Something is on top of it" is legible from the pile; "a
         // lodestone is holding it" is not, and a refused tap the player cannot
         // explain reads as a bug. Only fires when nothing is stacked above, so
         // it never argues with what the player can already see.
-        if (!b.lode && this.jar.lodeHolding(b)) {
-          this.toast = { text: 'The lodestone has it — dig that out first.',
-                         until: this.worldT + 2 };
-        }
+        //
+        // THE FIRST TIME, TEACH IT. Everything after that is a reminder. A
+        // player meeting the lodestone for the first time does not need the
+        // instruction, they need the RULE — otherwise "dig that out first"
+        // reads as the game blaming them for a tap it never explained.
+
       }
     }
 
     if (this.epilogue > 0) {
+      // THE EPILOGUE OWNS THE STAGE, INCLUDING AN OPEN CHOICE.
+      //
+      // Taps are discarded above (the epilogue is a payout animation, not a
+      // play state) and this block returns before the timeout check below — so
+      // a prism dug on the swing that finished the last order used to FREEZE
+      // mid-air with a full clock for the whole rain of coins, and then be
+      // resolved blind by _endShift into a satchel nobody was going to deliver.
+      // Resolve it here, the moment the stage changes, and resolve it the way
+      // that is actually worth something.
+      if (this.choice) this._resolveChoice(this._choicePays() ? 'order' : 'hoard');
       this._epilogueT += STEP;
       if (this._epilogueT >= 0.15) {
         this._epilogueT = 0;
@@ -2340,14 +2811,38 @@
       if (this.worldT > o.expiresAt) {
         this.orders[s] = this._makeOrder(s);
         this.orders[s].dropT = 0.001;      // the new card drops in — a visible swap
+        // SAY WHAT ACTUALLY HAPPENED. This read "RUSH ORDER LOST — 90c gone",
+        // and 90c did not go anywhere: the slot immediately re-deals another
+        // timed card at the same price on a fresh clock, no swing is spent and
+        // no order is deducted from the goal. Over 250 shifts the toast
+        // claimed 16,020c of losses that never occurred. The real cost is the
+        // ladder — combo resets, so the fill run and its rising pitch restart
+        // — plus the swings already spent toward that card's gems, and those
+        // are worth naming honestly. Pillar 2 forbids manufacturing a loss;
+        // announcing one that did not happen is the same lie the PACE line was
+        // telling in the other direction.
         this.combo = 0;
-        this.toast = { text: 'RUSH ORDER LOST — ' + o.pay + 'c gone', until: this.worldT + 2.2 };
+        this.toast = { text: 'RUSH EXPIRED — new card, ladder reset',
+                       until: this.worldT + 2.2 };
         Snd.orderLost();
       }
     }
 
     // restock pour when the jar runs dry (batch content is lane-1 positional:
     // WHEN you trigger it is your play; WHAT pours is the same for everyone)
+    //
+    // A STARVATION RESCUE WAS TRIED HERE AND REVERTED — it made things worse,
+    // and the reason is worth keeping. `fill()` measures AREA, so a jar can sit
+    // at its target and hold nothing an order wants in reach; every reachable
+    // body is rock and the restock never fires. The obvious answer is to pour
+    // anyway when nothing wanted is reachable. Measured over 500 shared daily
+    // boards: dead boards went 1 -> 3. `pour()` drops bodies at the TOP of the
+    // jar, so an emergency batch onto an already-full pile BURIES the few
+    // useful gems that were reachable. The rescue caused the condition it was
+    // written to relieve.
+    //
+    // What is left is the dial pair, searched over 500 days rather than the
+    // 120 the first attempt was fitted to — see CFG.junkRatio / restockBelow.
     var rsb = this.career ? this.career.restockBelow : CFG.restockBelow;
     if (this.jar.fill() < rsb && this.ordersDone < this.goalOrders) {
       this.jar.pour(CFG.fillTarget);
@@ -2385,7 +2880,7 @@
           var gt = TYPE[gk];
           if (this.bag.length < this.bagCap) {
             this.bag.push(gk);
-            this.combo++;
+            this._bumpCombo();
             got++;
             this._fly({ x: b.x, y: b.y, key: gk, r: gt.r }, 'bag', this.bag.length - 1);
           } else {
@@ -2432,7 +2927,36 @@
         this._fly(b, 'scrap');
         var room = this.jar.fill() < CFG.fillTarget - 0.04;
         if (room) {
-          var bt = this.jar.batches++;
+          // POSITIONAL, LIKE EVERY OTHER LANE-1 DRAW. This used to read
+          // `this.jar.batches++` — the counter pour() draws from — so every
+          // shale dig silently advanced the restock stream and the NEXT pour
+          // delivered a different batch than it would have. The restock comment
+          // two hundred lines up promises the opposite ("WHEN you trigger it is
+          // your play; WHAT pours is the same for everyone"), and that was only
+          // true for a player who never touched a shale rock.
+          //
+          // A private COUNTER fixes that but is still order-dependent: two
+          // players who dig the same two slabs in opposite orders get different
+          // rubble. Keying on the slab itself makes the collapse a pure
+          // function of which rock you broke — the same rule §3a already
+          // demands of jar packing and order refills.
+          //
+          // IT MUST BE THE POUR COORDINATES, NOT `b.id`. This read
+          // `100000 + b.id` and called itself positional; `id` is
+          // `jar.nextId++`, a single creation counter that two PLAYER-PACED
+          // sites advance — the crusted-rock overflow push (fires only when the
+          // satchel happens to be full, and costs no swing) and this collapse's
+          // own rubble. So every body created after either event carries an id
+          // offset by that player's history, and two players could hold
+          // byte-identical jars, break the same slab, and bring down different
+          // rock. On a shared daily seed that is a fork, which is the one thing
+          // lane 1 exists to make impossible. (pb, pi) is stamped at pour time
+          // and is the same pair on every device.
+          //
+          // The 100000 offset keeps these indices clear of every pour batch a
+          // shift can reach (batches count up from 0), and pi < pourMax keeps
+          // one batch's slabs from colliding with the next batch's.
+          var bt = 100000 + (b.pb || 0) * CFG.pourMax + (b.pi || 0);
           for (var si = 0; si < 3; si++) {
             var sp = jarBodySpec(si, bt, this.jar.seed, 1, 0, 0, 0);  // junk=1: rock
             this.jar.bodies.push({
@@ -2445,7 +2969,9 @@
           this.shakeT = Math.max(this.shakeT, 0.22);
           Hap.medium();
           Snd.thunk();
-          this.toast = { text: 'The shale gives way — more rock!', until: this.worldT + 2 };
+          this.toast = this._teach('shale',
+            'SHALE — the cracked slab brings more rock down. Clearing it is not free.',
+            'The shale gives way — more rock!');
         } else {
           Snd.scrap();
         }
@@ -2456,7 +2982,17 @@
       Snd.scrap();
       return;
     }
-    if (TYPE[key].rare && !this.choice) {
+    // A RARE NEVER FALLS THROUGH TO THE JAM PATH.
+    //
+    // The guard was `rare && !this.choice`, so a prism dug while an EARLIER
+    // hover-choice was still open skipped this whole branch and landed in the
+    // bag-full scrap below — destroyed for nothing, the one outcome the
+    // sell-vs-hoard design explicitly forbids ("a payout is never silently
+    // stolen"). One hover-choice at a time is still correct; the answer for
+    // the second rare is to give it to the dragon, which is the resolution
+    // that cannot lose the player anything.
+    if (TYPE[key].rare) {
+      if (this.choice) { this._gainHoard(b); return; }
       var wanted = false;
       for (var s = 0; s < 5; s++) if ((this.orders[s].need[key] || 0) > 0) wanted = true;
       if (wanted && this.bag.length < this.bagCap) {
@@ -2465,11 +3001,29 @@
         // payout is never silently stolen).
         var bslot = null;
         for (var s2 = 0; s2 < 5; s2++) if ((this.orders[s2].need[key] || 0) > 0) { bslot = s2; break; }
-        this.choice = { key: key, slot: bslot, until: this.worldT + 3.0, x: b.x, y: b.y };
+        this.choice = { key: key, slot: bslot, until: this.worldT + CHOICE_SECS, x: b.x, y: b.y };
         Snd.hoard();
         return;
       }
+      // SAY WHAT JUST HAPPENED, ONCE. A prism no card wants flies to the
+      // dragon and +1's a counter, and _gainHoard only ever speaks on a
+      // MILESTONE — so the common case is silent. Vanus, at 421 hoard: "those
+      // white gems i dont know the point of them either or if they are special
+      // but they usually arent part of an order". Both halves are true: they
+      // ARE special, they usually are NOT on a card, and nothing ever said so.
+      // Kept to the first one ever, because this fires ~4 times a shift.
+      var priorToast = this.toast;
       this._gainHoard(b);
+      if (!(Meta.data.taught && Meta.data.taught.prism)) {
+        if (!Meta.data.taught) Meta.data.taught = {};
+        Meta.data.taught.prism = 1;
+        Meta.save();
+        // never stomp a milestone announcement — that one is rarer and louder
+        if (this.toast === priorToast) {
+          this.toast = { text: 'PRISM — no card wants it, so Hoardling keeps it. The hoard is your collection.',
+                         until: this.worldT + 3.6 };
+        }
+      }
       return;
     }
     if (this.bag.length >= this.bagCap) {
@@ -2482,9 +3036,7 @@
       return;
     }
     this.bag.push(key);
-    this.combo++;
-    if (this.combo > stats().bestCombo) stats().bestCombo = this.combo;
-    if (this.combo > (this.shiftCombo || 0)) this.shiftCombo = this.combo;
+    this._bumpCombo();
     if (this.tutStep === 0) this.tutStep = 1;
     this._fly(b, 'bag', this.bag.length - 1);
     Snd.fill(this.combo);                // ladder climbs the LIVE music chord
@@ -2494,18 +3046,91 @@
   // How many bodies are currently sitting ON the Heartstone — the same
   // overlap test exposed() uses, counted instead of short-circuited. Read-only
   // and called on a refused tap, so it costs one O(n) pass per blocked tap.
+  //
+  // IT MUST READ `COVER_X`, NOT A COPY OF ITS VALUE. This is the second copy
+  // of exposed()'s test, and when the cone last moved the literal here did not
+  // move with it — so the toast counted rocks that no longer blocked anything
+  // (2.52 reported against 1.82 real across 21,478 refused heartstone taps).
+  // The comment above claiming "the same overlap test" is the invariant; a
+  // literal cannot hold it.
   Game.prototype._heartBlockers = function (b) {
     var bs = this.jar.bodies, n = 0;
     for (var i = 0; i < bs.length; i++) {
       var o = bs[i];
       if (o === b || o.y >= b.y) continue;
-      var dx = o.x - b.x, dy = b.y - o.y;
-      var rs = o.r + b.r;
+      var dx = o.x - b.x;
       if (dx < 0) dx = -dx;
-      if (dx < rs * 0.72 && dy < rs * 1.05) n++;
+      if (dx < (o.r + b.r) * COVER_X) n++;
     }
     return n;
   };
+
+  // ONE-SHOT VERB TEACHING. Returns the toast to show: the long form the first
+  // time this player ever meets the verb, the short reminder every time after.
+  //
+  // Persisted in Meta rather than per-shift, because meeting the lodestone for
+  // the first time in shift forty is still the first time. Held on the LONG
+  // form for 3.4s against the reminder's 2s — a rule takes longer to read than
+  // an instruction. Writes at most twice per save, so the save cost is nil.
+  //
+  // This is what careerCfg's `intro` flag was supposed to drive and never did:
+  // it is set at game.js:405 and read by nothing, so L16 and L24 hold their
+  // dials for a verb they never name, and free and daily — which now pour both
+  // verbs — had no teaching beat at all.
+  Game.prototype._teach = function (verb, long, short) {
+    var first = !(Meta.data.taught && Meta.data.taught[verb]);
+    if (first) {
+      if (!Meta.data.taught) Meta.data.taught = {};
+      Meta.data.taught[verb] = 1;
+      Meta.save();
+    }
+    return { text: first ? long : short, until: this.worldT + (first ? 3.4 : 2) };
+  };
+
+  // GEM SYMBOLS — the second identity channel, drawn only when Meta.data.marks
+  // is on. One shape per ORDER gem, at the gem's centre, sized to the body so
+  // it works at 13px on an order card and at r15-22 in the jar.
+  //
+  // Deliberately geometric and few-sided: at 13 CSS px a glyph has about 8x8
+  // usable pixels, so anything with fine detail becomes a smudge. Drawn as a
+  // dark outline under a cream fill so it survives on both a pale amber and a
+  // dark sapphire without a per-gem colour table.
+  //
+  //   ruby      diamond      emerald   bar (the emerald cut)
+  //   sapphire  circle       amber     triangle
+  //   prism     four-point star
+  //
+  // Rocks and the heartstone get nothing: they are never an order requirement,
+  // so they are never the thing being matched.
+  var GEM_MARK = { ruby: 'diamond', emerald: 'bar', sapphire: 'circle',
+                   amber: 'tri', prism: 'star' };
+  function gemMark(ctx, key, x, y, s) {
+    var m = GEM_MARK[key];
+    if (!m) return;
+    ctx.save();
+    ctx.beginPath();
+    if (m === 'diamond') {
+      ctx.moveTo(x, y - s); ctx.lineTo(x + s, y); ctx.lineTo(x, y + s); ctx.lineTo(x - s, y);
+    } else if (m === 'bar') {
+      ctx.rect(x - s, y - s * 0.42, s * 2, s * 0.84);
+    } else if (m === 'circle') {
+      ctx.arc(x, y, s * 0.82, 0, 6.283);
+    } else if (m === 'tri') {
+      ctx.moveTo(x, y - s); ctx.lineTo(x + s * 0.92, y + s * 0.72); ctx.lineTo(x - s * 0.92, y + s * 0.72);
+    } else {
+      for (var i = 0; i < 8; i++) {
+        var a = i * 0.7854 - 1.5708, rr = (i % 2 ? s * 0.40 : s);
+        ctx[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+      }
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(18,10,4,0.78)';
+    ctx.lineWidth = Math.max(1.5, s * 0.42);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,250,238,0.94)';
+    ctx.fill();
+    ctx.restore();
+  }
 
   Game.prototype._bagCount = function (key) {
     var n = 0;
@@ -2515,6 +3140,31 @@
 
   // Deliver every order whose FULL need the bag now covers (slot order, then
   // re-scan — removing gems can un-cover a later order; deterministic).
+  // WOULD RESOLVING THIS CHOICE INTO THE SATCHEL ACTUALLY PAY, RIGHT NOW?
+  //
+  // During play the answer does not matter — a bagged prism can still be
+  // delivered on a later swing, which is why the ordinary 4-and-a-bit-second
+  // timeout bags it ("a payout is never silently stolen"). It matters at the
+  // two moments where there IS no later swing: the epilogue, and _endShift.
+  // There, 'order' drops the gem into a satchel that is about to be thrown
+  // away, while the dragon's +1 is permanent — so the default has to know the
+  // difference instead of always guessing 'order'.
+  //
+  // The heartstone is not a satchel gem: its 'order' branch SELLS for real
+  // coins, so it always pays. (Career on an already-starred level banks
+  // nothing, and _resolveChoice's own untouched-timeout rule already sends
+  // that one to the dragon.)
+  Game.prototype._choicePays = function () {
+    var c = this.choice;
+    if (!c) return false;
+    if (c.key === 'heartstone') return true;
+    if (this.bag.length >= this.bagCap) return false;
+    var counts = {};
+    for (var i = 0; i < this.bag.length; i++) counts[this.bag[i]] = (counts[this.bag[i]] || 0) + 1;
+    counts[c.key] = (counts[c.key] || 0) + 1;
+    return bestDelivery(counts, this.orders.slice(), 4).pay > 0;
+  };
+
   Game.prototype._checkDeliveries = function () {
     var again = true;
     while (again) {
@@ -2544,12 +3194,41 @@
     }
   };
 
+  // ONE chain counter, THREE places that grow it.
+  //
+  // Only the satchel push kept the records; the crusted-rock overflow and the
+  // dilemma's USE IT branch did a bare `this.combo++`, so a chain built through
+  // either of them counted for the pitch ladder and for nothing else. The two
+  // chain contracts read shiftCombo and the records screen reads bestCombo, so
+  // the longest run a player ever made could be a number the game never saw —
+  // and a 15-chain that happened to pass through one crust reported as
+  // whatever it was before the crust.
+  Game.prototype._bumpCombo = function () {
+    this.combo++;
+    if (this.combo > stats().bestCombo) stats().bestCombo = this.combo;
+    if (this.combo > (this.shiftCombo || 0)) this.shiftCombo = this.combo;
+  };
+
   Game.prototype._gainHoard = function (from) {
     this.hoard++;
     Meta.data.hoardTotal++;
     Meta.save();
     this._fly(from, 'hoard');
     Snd.hoard();
+    // THE DRAGON HAS TO ANSWER, not only on a milestone.
+    //
+    // A hoard used to be a flier and a coo — and the coo is the SAME tone that
+    // plays when the choice opens, so the confirmation was a sound the player
+    // had already heard two seconds earlier while nothing on the ledge moved.
+    // Only the milestone branch below ever pulsed him, and past hoard 20 a
+    // milestone is one gem in fifteen. Vanus at hoard 423: "when you try to
+    // hoard, it doesn't actually go to the dragon below" — the tap was landing
+    // wrong (see choiceRects), and on the runs where it landed right, nothing
+    // said so. He bounces and throws a few violet sparks now, every time; the
+    // milestone keeps its heavier haptic, its fanfare and its bigger burst.
+    this.dragonPulse = 1;
+    Hap.light();
+    this._burst(0, 0, 8, 220, 190, 1.4, 2.4, 0.7, '#e8c9ff', 'ledge');
     var hit = null;
     for (var m = 0; m < MILESTONES.length; m++) {
       if (Meta.data.hoardTotal === MILESTONES[m].n) hit = MILESTONES[m].label;
@@ -2634,7 +3313,7 @@
     for (var s = 0; s < 5; s++) if ((this.orders[s].need[c.key] || 0) > 0) stillWanted = true;
     if (dest === 'order' && stillWanted && this.bag.length < this.bagCap) {
       this.bag.push(c.key);
-      this.combo++;
+      this._bumpCombo();
       this._fly(from, 'bag', this.bag.length - 1);
       Snd.fill(this.combo);
       this._checkDeliveries();
@@ -2685,7 +3364,19 @@
         coins: this.coins,
         done: this.ordersDone,
         goal: this.goalOrders,
-        left: Math.max(0, this.swings),
+        // SWINGS AT THE BELL, not swings on the clock.
+        //
+        // This read `this.swings`, and the only way to satisfy `done >= goal`
+        // is to fill the last order — which sets `epilogue = swings` and then
+        // decrements BOTH in lockstep until epilogue hits 0. So `left` was
+        // exactly 0 on every finished shift in every mode, and 'Room to spare'
+        // (20 left, 3 hoard) and 'Barely broke a sweat' (30 left, 5 hoard) were
+        // unwinnable by construction while the jobs board counted them in its
+        // completion total. swingsAtGoal is the number the star scorer already
+        // uses for the same question, and the bought pick is subtracted for the
+        // same reason it is there: 250c may not mint a contract either.
+        left: this.swingsAtGoal >= 0
+              ? Math.max(0, this.swingsAtGoal - (this.pickBonus || 0)) : 0,
         crusts: this.shiftCrusts || 0,
         hearts: this.shiftHearts || 0,
         combo: this.shiftCombo || 0,
@@ -2718,7 +3409,9 @@
     // leaderboard payload. _resolveChoice can re-enter through
     // _checkDeliveries -> _deliver -> _endShift; the sentinel makes that a no-op.
     this._ending = true;
-    if (this.choice) this._resolveChoice('order');
+    // ...and it must resolve the way that PAYS. 'order' drops the gem into a
+    // satchel that is discarded one line below; the dragon's +1 is forever.
+    if (this.choice) this._resolveChoice(this._choicePays() ? 'order' : 'hoard');
     this._taps.length = 0;
     this.state = 'results';
 
@@ -2746,7 +3439,16 @@
     // inside a warped run.)
     //
     // Archive runs are daily runs and are excluded by the same test.
-    if (!this.isDaily) this._checkContracts();
+    // CONTRACTS ARE SCORED LAST, not here. Four of the twenty-seven read state
+    // this function has not written yet — careerResult.stars ('Clean sheet')
+    // and Meta.data.careerLevel ('Down the shaft', 'Deeper still', 'End of the
+    // shaft') — and three more read st.bestStreak, which the block just below
+    // is about to advance. Checking before those writes meant a contract could
+    // only ever fire on the shift AFTER the one that earned it, and 'End of the
+    // shaft' could never fire at all: clearing level 40 sets careerLevel to
+    // CAREER_MAX+1 further down this function, and the finale button then sends
+    // the player to the DAILY, which is the one mode contracts are deliberately
+    // switched off in.
     var d = dayNumber();
     if (d > (st.lastDay || 0)) {
       st.days = (st.days || 0) + 1;
@@ -2792,8 +3494,19 @@
         if (lv === (Meta.data.careerLevel || 1)) {
           Meta.data.careerLevel = Math.min(CAREER_MAX + 1, lv + 1);
         }
-        Meta.save();
       }
+      // A LOSS IS STILL A SHIFT, and this save used to sit inside `if (won)`.
+      //
+      // stats() hands back Meta.data.stats BY REFERENCE, so st.shifts, st.days,
+      // st.streak, st.bestStreak and st.lastDay above — plus the bestCombo
+      // written during the run itself — were all mutated in memory and then
+      // dropped on every failed career attempt. A player whose only session on
+      // a given day was one lost level did not count that day: the streak stayed
+      // where it was, and two days later the gap read as 2 and reset it to 1.
+      // It only ever appeared to work because some unrelated later write (a
+      // hoard gain, a purchase, a settings toggle) happened to flush it.
+      if (!this.isDaily) this._checkContracts();
+      Meta.save();
       return;
     }
     {
@@ -2855,6 +3568,11 @@
         Meta.data.bestFree = this.coins;
         Meta.save();
       }
+      // ...and the free path's contracts, for the same reason the career branch
+      // scores its own last: bestStreak, shifts and gems have all been written
+      // by now. The daily is excluded here exactly as it was before — a shared
+      // board with a date-derived character would make the right Tuesday a farm.
+      if (!this.isDaily) { this._checkContracts(); Meta.save(); }
     }
   };
 
@@ -2959,15 +3677,35 @@
   Game.prototype._ringTargets = function () {
     if (this.tutStep !== 0 || this.state !== 'playing' || !this.jar) { this._ringSet = null; return; }
     var bs = this.jar.bodies, to = this.orders && this.orders[0];
-    var want = {}, any = {}, nWant = 0;
+    var want = [], any = [];
     for (var i = 0; i < bs.length; i++) {
       var b = bs[i];
       if (b.key.indexOf('rock') === 0 || b.key === 'heartstone') continue;
       if (!(this._expo && this._expo[b.id])) continue;      // must be diggable
-      any[b.id] = 1;
-      if (to && (to.need[b.key] || 0) > this._bagCount(b.key)) { want[b.id] = 1; nWant++; }
+      any.push(b);
+      if (to && (to.need[b.key] || 0) > this._bagCount(b.key)) want.push(b);
     }
-    this._ringSet = nWant ? want : any;
+    // AT MOST TWO RINGS, AND THIS CAP IS LOAD-BEARING.
+    //
+    // The set used to be "every diggable gem order 0 wants", which was ~2.5
+    // bodies back when only ~11 of 80 were diggable at all. The exposure fix
+    // raised reachability 2-3x and this count went with it: caught on the
+    // iPhone 17 simulator at NINE gold rings on the first screen a new player
+    // ever sees — precisely the floating-circles debug-overlay look the ring
+    // pass was deleted for everywhere else, reintroduced by a change nowhere
+    // near it. A derived count that nobody bounded is a defect waiting for the
+    // day the thing it derives from moves.
+    //
+    // Two is what the lesson needs: tutStep 0 teaches "tap a gem, it goes in
+    // the bag", and one example plus an alternative says that. Highest in the
+    // jar first — smallest y — because those are the ones nearest the surface
+    // the specular has just taught the player to read, and a stable sort on a
+    // deterministic body list keeps the choice identical for every player.
+    var pool = want.length ? want : any;
+    pool.sort(function (p, q) { return p.y - q.y || p.id - q.id; });
+    var set = {};
+    for (var k = 0; k < pool.length && k < 2; k++) set[pool[k].id] = 1;
+    this._ringSet = set;
   };
 
   Game.prototype._cosmetic = function (dtRaw) {
@@ -3335,15 +4073,14 @@
     ctx.moveTo(x - sr, y); ctx.lineTo(x + sr, y);
     ctx.moveTo(x, y - sr); ctx.lineTo(x, y + sr);
     ctx.stroke();
-    if (b.crack > 0) {                    // already struck once: it is opening
-      ctx.strokeStyle = 'rgba(255,226,150,' + (0.30 + 0.30 * tw).toFixed(2) + ')';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(x, y, inkR(b) + 3, 0, 6.283); ctx.stroke();
-    }
   };
 
   Game.prototype._drawBody = function (b, alpha) {
     var ctx = this.ctx;
+    // Read ONCE at the top: `var` hoists but the assignment does not, and the
+    // first consumer (the scan halo) sits above where this used to be
+    // declared — so it evaluated `undefined` and the halo silently never drew.
+    var _hints = Meta.data.hints !== 0;
     var x = b.px + (b.x - b.px) * alpha;
     var y = b.py + (b.y - b.py) * alpha;
     if (b.wiggle) x += Math.sin(this.worldT * 42) * b.wiggle * 3;
@@ -3367,13 +4104,30 @@
       this.ctx.lineWidth = 3;
       this.ctx.beginPath(); this.ctx.arc(x, y, inkR(b) + 4, 0, 6.283); this.ctx.stroke();
     }
-    // scan halo: the tapped card's still-needed gems glow in the jar
-    if (this.scanUntil > this.worldT && this.state === 'playing') {
+    // SCAN HALO: the tapped card's still-needed gems glow in the jar — and it
+    // must obey the same rule the tutorial ring above was fixed to obey.
+    //
+    // It didn't. This drew the IDENTICAL gold ring at the IDENTICAL radius with
+    // no diggability test at all, so tapping a card lit up every gem of that
+    // colour anywhere in the pile. Measured over 12,000 simulated card-taps:
+    // 19.10 gems lit, 1.37 of them diggable — 92.8% of the glow pointed at a
+    // tap the game refuses, and on 37.7% of card-taps NOT ONE lit gem could be
+    // taken. Vanus reported it from the phone as "some gems glow ... when they
+    // are anywhere inside under rocks".
+    //
+    // A gem that is wanted but buried still deserves an answer, so it gets one
+    // in a different voice: a dim violet ring means "this card wants it, you
+    // cannot reach it yet". Gold has one meaning in this jar and it is
+    // "tappable right now".
+    if (_hints && this.scanUntil > this.worldT && this.state === 'playing') {
       var so = this.orders[this.scanSlot];
       if (so && (so.need[b.key] || 0) > this._bagCount(b.key)) {
         var fade = Math.min(1, (this.scanUntil - this.worldT) / 0.4);
-        this.ctx.strokeStyle = 'rgba(255,215,94,' + (0.85 * fade).toFixed(2) + ')';
-        this.ctx.lineWidth = 3;
+        var reach = this._expo && this._expo[b.id];
+        this.ctx.strokeStyle = reach
+          ? 'rgba(255,215,94,' + (0.85 * fade).toFixed(2) + ')'
+          : 'rgba(178,142,224,' + (0.34 * fade).toFixed(2) + ')';
+        this.ctx.lineWidth = reach ? 3 : 2;
         this.ctx.beginPath(); this.ctx.arc(x, y, inkR(b) + 4, 0, 6.283); this.ctx.stroke();
       }
     }
@@ -3434,12 +4188,70 @@
       } else {
         ctx.drawImage(spr, x - d / 2, y - d / 2, d, d);
       }
-      // A warm rim marks what can actually be dug RIGHT NOW. Kept quiet
-      // (alpha 0.30, 2px) so it reads as lamplight catching the top of the
-      // pile rather than as UI chrome — the loud ring is reserved for the
-      // scan halo, which answers a different question ("does this card want
-      // it?"). Buried bodies get nothing, so the pile visibly opens up as the
-      // player digs into it.
+      // THE BLAME PASS — "this is what is on it". Drawn BEFORE the diggable
+      // specular below, so a body that is both a blocker and itself diggable
+      // still keeps its own lamplight on top.
+      //
+      // THE JAR HAS EXACTLY THREE MARKS AND THEY DO NOT SHARE COLOURS.
+      // Vanus, looking at the result of the last two passes: "are the circles
+      // only when toggled on in settings ... i dont get it". Fair — five cues
+      // had accumulated in warm gold and amber and they all read as the same
+      // thing. The vocabulary is now one colour per QUESTION:
+      //
+      //   warm light, an ARC and never a ring   you can dig this  (ambient)
+      //   GOLD ring                             a card wants this (you asked)
+      //   VIOLET ring                           something holds this / is
+      //                                         holding it (you asked)
+      //
+      // Violet was already the jar's "held" colour — the lodestone's grip arcs
+      // and the scan halo's pinned-gem ring both use it — so this pass moved
+      // off amber and onto it rather than minting a fourth meaning. A player
+      // who learns "violet means stuck" learns it once and it holds everywhere.
+      //
+      // First, the gem the player ASKED FOR, dashed, so the cue reads as one
+      // sentence — "those are holding THIS" — rather than as a couple of rocks
+      // lighting up for no stated reason. Both halves dim hard once the player
+      // has seen the lesson six times (blame.loud); see the tap handler.
+      if (_hints && this.blame && this.worldT < this.blame.until && this.blame.tid === b.id) {
+        var _af = Math.min(1, (this.blame.until - this.worldT) / 0.35);
+        ctx.save();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(188,150,255,' + ((this.blame.loud ? 0.55 : 0.24) * _af).toFixed(2) + ')';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x, y, inkR(b) + 3, 0, 6.283); ctx.stroke();
+        ctx.restore();
+      }
+      if (_hints && this.blame && this.worldT < this.blame.until && this.blame.ids[b.id]) {
+        var _bf = Math.min(1, (this.blame.until - this.worldT) / 0.35);
+        ctx.save();
+        ctx.strokeStyle = 'rgba(196,150,255,' + ((this.blame.loud ? 0.85 : 0.30) * _bf).toFixed(2) + ')';
+        ctx.lineWidth = this.blame.loud ? 2.5 : 1.5;
+        ctx.beginPath(); ctx.arc(x, y, inkR(b) + 3, 0, 6.283); ctx.stroke();
+        // a short tether toward the gem the player actually tapped, so the
+        // sentence reads "THAT one is holding THIS one" rather than "these
+        // three rocks are highlighted for some reason"
+        var _vx = this.blame.x - b.x, _vy = this.blame.y - b.y;
+        var _d = Math.sqrt(_vx * _vx + _vy * _vy) || 1;
+        ctx.strokeStyle = 'rgba(196,150,255,' + ((this.blame.loud ? 0.5 : 0.18) * _bf).toFixed(2) + ')';
+        ctx.lineWidth = this.blame.loud ? 2 : 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x + _vx / _d * (inkR(b) + 3), y + _vy / _d * (inkR(b) + 3));
+        ctx.lineTo(x + _vx / _d * (_d - this.blame.r * 1.03), y + _vy / _d * (_d - this.blame.r * 1.03));
+        ctx.stroke();
+        ctx.restore();
+      }
+      // NOTHING MARKS WHAT IS DIGGABLE ANY MORE, and that is the payoff of
+      // the cover rule rather than an omission.
+      //
+      // Under the old support rule the reachable set was a scatter the picture
+      // could not express, so it had to be painted on: a specular arc on every
+      // reachable body. Vanus read the result, twice, as "circles around the
+      // gems and rocks and everything" — and he was right, because 21 marks on
+      // 74 bodies is not a highlight. Now the reachable set is exactly the top
+      // of the pile, which the player can already see. A mark would be
+      // restating the picture.
+      //
+      // The buried shadow below stays: it is depth, not instruction.
       // WHAT IS BURIED SITS IN SHADOW.
       //
       // Only ~11 of ~80 settled bodies can actually be dug, and nothing said
@@ -3457,6 +4269,10 @@
         ctx.fillStyle = 'rgba(16,10,6,0.34)';
         ctx.beginPath(); ctx.arc(x, y, inkR(b), 0, 6.283); ctx.fill();
       }
+      // The symbol goes ON TOP of the buried shadow: identity must survive
+      // being in shadow, or the channel that exists for players who cannot use
+      // colour switches off for exactly the gems they most need to identify.
+      if (Meta.data.marks === 1) gemMark(ctx, b.key, x, y, Math.max(3.5, b.r * 0.30));
       // Crusted rocks twinkle ON TOP of their sprite. The old tell was two
       // 1.6px flecks drawn BEFORE this drawImage — sampled alpha at both
       // fleck positions is 255 on all three rock PNGs, so the sprite painted
@@ -3597,6 +4413,24 @@
     ctx.beginPath(); ctx.arc(x - r * 0.25, y - r * 0.3, r * 0.35, 0, 6.283); ctx.fill();
   };
 
+  // THE CURRENCY HAS A FACE NOW. Three screens drew the coin as a filled arc
+  // with two stroked rings on top — the in-shift HUD, the menu chrome and the
+  // shop's price rows — which made the one symbol every screen shares the only
+  // thing still built from primitives. Vanus: "on the top right it's just a
+  // basic circle and on the homepage on the top left there's no icon".
+  //
+  // One helper, so a coin is the same object wherever it appears, and it falls
+  // back to the old primitive if the sprite has not loaded yet (a cold
+  // WKWebView boot paints a frame or two before the art arrives).
+  function drawCoin(ctx, x, y, r) {
+    var spr = SPR.ui_coin;
+    if (spr) { ctx.drawImage(spr, x - r, y - r, r * 2, r * 2); return; }
+    ctx.fillStyle = '#e8a53c';
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = '#8a5f1c'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.stroke();
+  }
+
   Game.prototype._drawOrders = function () {
     var ctx = this.ctx;
     // the clothesline the ad promised: a rope sagging gently across the top
@@ -3655,6 +4489,9 @@
         var gy = ORDER_Y + 22 + i * rowH;
         var spr = SPR[BODY_SPR[key]];
         if (spr) ctx.drawImage(spr, x + 8, gy - 2, icon, icon);
+        // the SAME symbol the jar stamps, so a card and a gem are matched on
+        // silhouette rather than on hue
+        if (Meta.data.marks === 1) gemMark(ctx, key, x + 8 + icon / 2, gy - 2 + icon / 2, icon * 0.30);
         else {
           ctx.fillStyle = TYPE[key].col;
           ctx.beginPath(); ctx.arc(x + 16, gy + 6, 7, 0, 6.283); ctx.fill();
@@ -3747,14 +4584,28 @@
       }
       if (i < this.bag.length) {
         var spr = SPR[BODY_SPR[this.bag[i]]];
-        var dead = true;
-        for (var os2 = 0; os2 < 5; os2++) {
-          if ((this.orders[os2].need[this.bag[i]] || 0) > 0) { dead = false; break; }
-        }
+        // WHICH SLOT IS WASTED. The old test asked "does ANY card want this
+        // colour" and stopped there, so a fourth emerald read as live while
+        // the whole line between them wanted three — the surplus copies are
+        // the ones that jam the satchel, and they were the ones with no mark.
+        //
+        // The right question is how many of this colour the five cards can
+        // absorb IN TOTAL. Cards are paid one full set at a time and the
+        // satchel is shared, so a gem whose running copy-index passes the sum
+        // of every card's need for it cannot be spent against this line at
+        // all. Left-to-right, so the marked copies are the RIGHTMOST ones —
+        // which is where a spam-dug run of the same gem piles up.
+        var bk = this.bag[i], capacity = 0, held = 0;
+        for (var os2 = 0; os2 < 5; os2++) capacity += (this.orders[os2].need[bk] || 0);
+        for (var bj = 0; bj <= i; bj++) if (this.bag[bj] === bk) held++;
+        var dead = held > capacity;
         if (spr) {
           if (dead) ctx.globalAlpha = 0.35;
           ctx.drawImage(spr, x + 2, BAG_Y + 2, BAG_SLOT - 4, BAG_SLOT - 4);
           ctx.globalAlpha = 1;
+          if (Meta.data.marks === 1) {
+            gemMark(ctx, bk, x + BAG_SLOT / 2, BAG_Y + BAG_SLOT / 2, BAG_SLOT * 0.22);
+          }
           if (dead) {
             ctx.strokeStyle = 'rgba(226,75,74,0.8)'; ctx.lineWidth = 2;
             ctx.beginPath();
@@ -3782,12 +4633,7 @@
     ctx.textAlign = 'right';
     ctx.fillStyle = '#ffd75e'; ctx.font = fD(20);
     ctx.fillText(String(Math.round(this.displayCoins)), VIEW_MIN_W - 40, 4);
-    ctx.fillStyle = '#e8a53c';
-    ctx.beginPath(); ctx.arc(VIEW_MIN_W - 25, 15, 9, 0, 6.283); ctx.fill();
-    ctx.strokeStyle = '#8a5f1c'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(VIEW_MIN_W - 25, 15, 9, 0, 6.283); ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,240,200,0.7)'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(VIEW_MIN_W - 25, 15, 5.5, 0, 6.283); ctx.stroke();
+    drawCoin(ctx, VIEW_MIN_W - 25, 15, 10);
     // shift progress
     ctx.fillStyle = '#e8dcc8'; ctx.font = fT(13, 'bold');
     ctx.textAlign = 'left';
@@ -3989,6 +4835,11 @@
     if (dimg) {
       ctx.drawImage(dimg, dx, base - ds, ds, ds);
     }
+    // Where he actually landed, for the decorations that must point AT him
+    // rather than at the plank he used to sit on. DRAW-side cache, exactly like
+    // this._counter: the scored hoard target reads hoardTapRight() instead, so
+    // no device value can reach update() through here.
+    this._dragonRect = { x: dx, y: base - ds, w: ds, h: ds };
     // the tally sits on the plank BESIDE him, not across his tail
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     var tw = c.compact ? 12 : 14;
@@ -4003,17 +4854,90 @@
     }
   };
 
-  // THE PACE LINE — the one number the player could never derive. Swings left
-  // per remaining order, against the budget's own par. Purely derived state:
-  // no new sim input, nothing seeded, identical for two players in the same
-  // position. This is what the empty band is FOR.
+  // THE CHEAPEST POSSIBLE FINISH, in swings. A lower bound, deliberately —
+  // it must never tell a player a shift is over that isn't.
+  //
+  // The five cards on the line are known exactly: sum what each still needs
+  // after the satchel. Orders beyond those five are not drawn yet, so they are
+  // costed at SLOT_N.easy = 2, the smallest card the game can deal. Then halve
+  // it: a crusted rock pays TWO gems for one swing, which is the best rate in
+  // the game, so an unbroken run of perfect crusts is the theoretical floor.
+  //
+  // Nothing here is seeded, sampled or device-dependent — it is arithmetic over
+  // state both players in the same position already share.
+  // GEMS STILL OWED to finish the shift. The five cards on the line are known
+  // exactly; orders past them are costed at SLOT_N.easy, the smallest card the
+  // game can deal. Cheapest-first, so this is a floor and never an alarmist
+  // over-estimate.
+  Game.prototype._gemsOwed = function () {
+    var left = Math.max(0, this.goalOrders - this.ordersDone);
+    if (left === 0) return 0;
+    var cards = [], s, k, o, rem;
+    for (s = 0; s < 5; s++) {
+      o = this.orders[s];
+      rem = 0;
+      for (k in o.need) rem += Math.max(0, o.need[k] - this._bagCount(k));
+      cards.push(rem);
+    }
+    cards.sort(function (a, b) { return a - b; });
+    var gems = 0;
+    for (var i = 0; i < left; i++) gems += i < cards.length ? cards[i] : SLOT_N.easy;
+    return gems;
+  };
+
+  // The absolute floor in SWINGS — gems owed, halved, because a crusted rock
+  // pays two gems for one swing and that is the best rate in the game. Only
+  // the DEAD test may use this: an unbroken run of perfect crusts is not a
+  // plan, it is a proof that no plan exists below it.
+  Game.prototype._minSwingsLeft = function () {
+    return Math.ceil(this._gemsOwed() / 2);
+  };
+
+  // THE PACE LINE — the one number the player could never derive. Purely
+  // derived state: no new sim input, nothing seeded, identical for two players
+  // in the same position. This is what the empty band is FOR.
+  //
+  // It used to read swings-per-ORDER against the budget's par, which is a fine
+  // signal while a shift is alive and a lie once it isn't. Vanus's screenshot:
+  // six swings, five orders left — five orders cannot be filled in six swings
+  // by any sequence of taps — and the line said "behind — pick your gems", as
+  // if picking better would still save it. Measured across 200 shifts, a lost
+  // shift plays a mean of 9.24 more swings under that unchanged red label.
+  // Pillar 2 forbids manufacturing a loss; quietly implying a won game is
+  // still recoverable is the same dishonesty pointed the other way.
+  //
+  // So the dead case gets its own tier and its own words. The shift does NOT
+  // end — free and daily still score coins per rock, and taking that away
+  // would punish the player for the jar's failure — but the line stops
+  // pretending and says what the remaining swings are actually worth.
   Game.prototype._drawPace = function (c) {
     var ctx = this.ctx;
     var left = Math.max(0, this.goalOrders - this.ordersDone);
-    var par = this.shiftSwings / this.goalOrders;
-    var have = left > 0 ? this.swings / left : Infinity;
-    var ok = have >= par, tight = have >= par * 0.82;
-    var col = left === 0 ? '#ffd75e' : ok ? '#8fd08a' : tight ? '#e8c45e' : '#e2705a';
+    // PAR HAS TO BE THE PAR FOR *THIS* MOMENT, NOT THE SHIFT AVERAGE.
+    //
+    // It was `shiftSwings / goalOrders` — 5.50 for a 55/10 shift — compared
+    // against `swings / left`, which starts at exactly 5.50 and drops below it
+    // on the FIRST swing, because a swing is spent before any order can
+    // possibly be filled. So the line went amber on swing 2 of 55 in 200 of
+    // 200 measured shifts and mostly stayed there, and its red tier was a
+    // false alarm in 54.5% of the shifts that later finished fine. A warning
+    // that is on almost always is not a warning; it is the background.
+    //
+    // The honest comparison is against the GEMS STILL OWED, because that is
+    // what the swings have to buy. A gem costs about one swing — geodes pay
+    // two and rock in the way costs extra, and those roughly cancel — so
+    // owed x1.25 is comfortable, owed x0.9 is on the line, and below the
+    // geode-optimistic floor it is over. The floor is used ONLY for the dead
+    // test; using it as the "you're fine" bar would call 24 swings against 29
+    // owed gems comfortable, which it is not.
+    var owed = left > 0 ? this._gemsOwed() : 0;
+    var floor = Math.ceil(owed / 2);
+    var dead = left > 0 && this.swings < floor;
+    var have = this.swings;
+    var ok = left === 0 || have >= owed * 1.25;
+    var tight = have >= owed * 0.9;
+    var col = left === 0 ? '#ffd75e' : dead ? '#b8867a'
+            : ok ? '#8fd08a' : tight ? '#e8c45e' : '#e2705a';
     var cx = c.l + (c.r - c.l) / 2 + (c.compact ? 30 : 18);
     var cy = c.y + (c.compact ? c.h / 2 : c.h * 0.42);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -4023,13 +4947,18 @@
     ctx.fillStyle = col;
     ctx.font = fD((c.compact ? 15 : 19));
     ctx.fillText(left === 0 ? 'ALL FILLED'
+               : dead ? "can't fill " + left + ' more'
                : this.swings + ' swings · ' + left + ' left', cx, cy + 2);
-    if (!c.compact) {
+    // The sub-line is the only place the words live, so the dead state must
+    // survive the compact band too — a colour-only signal for "this shift is
+    // over" is exactly the unreadable state this whole pass is about.
+    if (!c.compact || dead) {
       ctx.fillStyle = 'rgba(232,220,200,0.5)';
       ctx.font = fT(11);
       ctx.fillText(left === 0 ? 'cash out the leftovers'
+                 : dead ? this.swings + ' swings left · dig rock for coins'
                  : ok ? 'comfortably ahead' : tight ? 'on the line' : 'behind — pick your gems',
-                 cx, cy + 20);
+                 cx, cy + (c.compact ? 13 : 20));
     }
   };
 
@@ -4092,13 +5021,25 @@
     // Derived from state, never stored: a flag set at open time is one more
     // thing that can disagree with reality after a lifecycle pause.
     var inShift = this.state === 'paused' || this.state === 'playing';
-    var ids = inShift ? ['music', 'sound', 'resume', 'quit'] : ['music', 'sound', 'done'];
+    // HINTS is a real setting, not an apology for one. The jar's three marks
+    // (dig-light, gold "a card wants it", violet "something holds it") are
+    // meant to be legible without being asked for — but Vanus's first read of
+    // them was "are the circles only when toggled on in settings ... i dont
+    // get it", and a player who finds the jar busy should be able to quiet it
+    // rather than put the game down. Default ON, and it never touches the
+    // dig-light: which gems are reachable is the game's core readability, not
+    // a hint, and turning THAT off would recreate the bug this whole pass
+    // exists to fix.
+    var ids = inShift ? ['music', 'sound', 'hints', 'marks', 'resume', 'quit']
+                      : ['music', 'sound', 'hints', 'marks', 'done'];
     var ph = SET_HEAD + SET_PAD + ids.length * SET_ROW_H + (ids.length - 1) * SET_GAP + SET_FOOT;
     var px = VIEW_MIN_W / 2 - SET_W / 2;
     var py = Math.round(VIEW_H / 2 - ph / 2);
     var out = {
       panel: { x: px, y: py, w: SET_W, h: ph },
-      close: { x: px + SET_W - 50, y: py + 9, w: 40, h: 40 },
+      // 50 square: this was 40 (35.7pt on an SE3) and it is the explicit way
+      // out of the settings panel for anyone who does not guess the scrim.
+      close: { x: px + SET_W - 56, y: py + 6, w: 50, h: 50 },
       rows: [],
     };
     for (var i = 0; i < ids.length; i++) {
@@ -4147,19 +5088,25 @@
 
     // ✕ — the explicit way out, for anyone who does not try the scrim
     ctx.fillStyle = 'rgba(232,220,200,0.65)'; ctx.font = fD(20);
-    ctx.fillText('✕', R.close.x + R.close.w / 2, R.close.y + 10);
+    ctx.fillText('✕', R.close.x + R.close.w / 2, R.close.y + 14);   // centred in the 50-square
 
     for (var i = 0; i < R.rows.length; i++) {
       var r = R.rows[i];
-      if (r.id === 'music' || r.id === 'sound') {
-        var on = r.id === 'music' ? !Snd.musicMuted : !Snd.sfxMuted;
+      if (r.id === 'music' || r.id === 'sound' || r.id === 'hints' || r.id === 'marks') {
+        var on = r.id === 'music' ? !Snd.musicMuted
+               : r.id === 'sound' ? !Snd.sfxMuted
+               : r.id === 'hints' ? Meta.data.hints !== 0
+               : Meta.data.marks === 1;
         ctx.fillStyle = 'rgba(20,12,6,0.5)';
         rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.fill();
         ctx.strokeStyle = 'rgba(201,168,106,0.35)'; ctx.lineWidth = 1.5;
         rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.stroke();
         ctx.textAlign = 'left';
         ctx.fillStyle = '#e8dcc8'; ctx.font = fD(17);
-        ctx.fillText(r.id === 'music' ? 'Music' : 'Sound effects', r.x + 16, r.y + 17);
+        ctx.fillText(r.id === 'music' ? 'Music'
+                   : r.id === 'sound' ? 'Sound effects'
+                   : r.id === 'hints' ? 'Hints in the jar'
+                   : 'Gem symbols', r.x + 16, r.y + 17);
         // a switch that shows its state in COLOUR as well as in words, so it
         // still reads without the label
         var sw = { x: r.x + r.w - 76, y: r.y + 11, w: 60, h: 30 };
@@ -4197,6 +5144,14 @@
       if (!inRect(w, r)) continue;
       if (r.id === 'music') { Snd.setMusicMuted(!Snd.musicMuted); Snd.pop(); }
       else if (r.id === 'sound') { Snd.setSfxMuted(!Snd.sfxMuted); Snd.pop(); }
+      else if (r.id === 'hints') {
+        Meta.data.hints = Meta.data.hints === 0 ? 1 : 0;
+        Meta.save(); Snd.pop();
+      }
+      else if (r.id === 'marks') {
+        Meta.data.marks = Meta.data.marks === 1 ? 0 : 1;
+        Meta.save(); Snd.pop();
+      }
       else if (r.id === 'resume' || r.id === 'done') { Snd.pop(); this.closeSettings(); }
       else if (r.id === 'quit') {
         if (this._quitArmed > nowMs()) {
@@ -4225,49 +5180,136 @@
     return { x: c.r - s - 10, y: c.y + Math.max(6, (c.h - s) / 2), w: s, h: s };
   };
 
+  // THE DILEMMA'S TAP TARGETS — ONE definition, shared by _drawChoice and the
+  // pointer chain. It is the law gearRect() and menuRect() already live under,
+  // and the choice was the last surface still keeping two sets of magic numbers.
+  //
+  // They disagreed, and the disagreement WAS the bug. The gem's hit circle
+  // (r=60 at cx) was tested FIRST and reached x=270, while "↙ HOARD" was
+  // PAINTED from x=238 — so the left 56% of the word HOARD, the arrow glyph
+  // included, resolved as USE IT and flew the prism into the satchel. Measured
+  // through the shipped pointer path at 430x932: taps at x=236..260 on the
+  // HOARD caption all bagged the gem; only x>=264 hoarded. The colossus was
+  // worse — "↙ GIFT (+12 hoard)" runs x=233..343, of which the first third
+  // SOLD it, the middle third gifted it, and the last third fell past the
+  // caption box (which stopped at x=306) into nothing at all.
+  //
+  // Vanus, from the phone: "when you try to hoard, it doesn't actually go to
+  // the dragon below ... when I say use it it just goes to my bag". Both halves
+  // are one defect. The previous pass added the targets he said were missing;
+  // it did not check that they covered the words they were named after.
+  //
+  // Two labelled plates now. 50 world units tall is 44.6pt on an SE3 — the
+  // floor gearRect() is authored against — and the 104-unit gutter between them
+  // belongs to NEITHER, with the hovering gem sitting in it, so a finger that
+  // misses cannot resolve the choice by accident in either direction.
+  Game.prototype.choiceRects = function () {
+    var cy = JAR.top + 48, h = 50, w = 150;
+    return {
+      cx: VIEW_MIN_W / 2, cy: cy,
+      use:   { x: 8,   y: cy - h / 2, w: w, h: h },
+      hoard: { x: 262, y: cy - h / 2, w: w, h: h },
+      // the dead band between them: swallowed, never resolved. A tap here used
+      // to fall through to the dig path and spend a swing on whatever body sat
+      // under the hover.
+      gutter: { x: 158, y: cy - h / 2, w: 104, h: h },
+    };
+  };
+
+  // One plate of the dilemma, drawn in _menuBtn's grammar (cast shadow,
+  // vertical gradient body, top bevel, dark under-edge, toned rim) so the pair
+  // reads as furniture from the same shop and not as two debug rectangles.
+  //
+  // The SUB LINE is the teaching. "USE IT" never said where the gem went, and
+  // the answer — the satchel, not the card the arrow pointed at — is the other
+  // half of what Vanus could not work out. A permanent line on the plate beats
+  // a toast: it is there every time the dilemma opens, not once ever.
+  function choicePlate(ctx, r, title, sub, tone, dim) {
+    var t = BTN_TONE[tone] || BTN_TONE.wood;
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    rr(ctx, r.x + 2, r.y + 4, r.w, r.h, 12); ctx.fill();
+    var g = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+    g.addColorStop(0, dim ? '#3a2f26' : t.top);
+    g.addColorStop(1, dim ? '#2d251e' : t.bot);
+    ctx.fillStyle = g;
+    rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    rr(ctx, r.x, r.y + r.h - 6, r.w, 6, 12); ctx.fill();
+    ctx.strokeStyle = dim ? 'rgba(150,132,110,0.30)' : t.rim;
+    ctx.lineWidth = dim ? 1.5 : 2;
+    rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.stroke();
+    if (!dim) {
+      ctx.strokeStyle = 'rgba(255,246,220,0.30)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(r.x + 14, r.y + 4); ctx.lineTo(r.x + r.w - 14, r.y + 4); ctx.stroke();
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = dim ? 'rgba(200,186,166,0.55)' : t.ink;
+    fitT(ctx, title, r.x + r.w / 2, r.y + 23, r.w - 20, 15, 'bold');
+    ctx.fillStyle = dim ? 'rgba(200,186,166,0.42)' : 'rgba(255,248,232,0.66)';
+    fitT(ctx, sub, r.x + r.w / 2, r.y + 39, r.w - 14, 10.5);
+    ctx.textAlign = 'left';
+  }
+
   // The prism dilemma: the gem hovers between its two futures. The wanting
   // card glows gold, the dragon glows violet, a shrinking arc is the clock.
   Game.prototype._drawChoice = function () {
-    var ctx = this.ctx, c = this.choice;
+    var ctx = this.ctx, c = this.choice, R = this.choiceRects();
     // hover INSIDE the jar's top: above it sits the bag row now
-    var cx = VIEW_MIN_W / 2, cy = JAR.top + 48;
+    var cx = R.cx, cy = R.cy;
     var pulse = 1 + Math.sin(this.worldT * 6) * 0.06;
-    var frac = Math.max(0, (c.until - this.worldT) / (c.key === 'heartstone' ? 4.0 : 3.0));
+    var frac = Math.max(0, (c.until - this.worldT) / CHOICE_SECS);
     if (c.slot >= 0) {
       var ox = 14 + c.slot * (ORDER_W + 8);
       ctx.strokeStyle = 'rgba(255,215,94,0.9)'; ctx.lineWidth = 3;
       rr(ctx, ox - 2, ORDER_Y - 2, ORDER_W + 4, ORDER_H + 4, 10); ctx.stroke();
     }
-    // the dragon's "give it to me" ring, over wherever the ledge actually is.
-    // The scored hit region (update(), x<120 && y>VIEW_H-120) is an authored
-    // half-plane that contains the ledge on every device — so the ring can
-    // follow the art without the decision following the phone.
-    var lg2 = this._counter;
-    var lgx = lg2 ? lg2.l + 46 : 50, lgy = lg2 ? lg2.y + lg2.h - 44 : VIEW_H - 70;
+    // The dragon's "give it to me" ring, ON THE DRAGON.
+    //
+    // It was anchored to the COUNTER (l+46, y+h-44) at a fixed radius of 46,
+    // which was right while he was a fixed 74 units wide and wrong from the
+    // moment he started growing. Measured at 430x932: the ring's centre sits
+    // 3.2 units off his at hoard 0, 26.6 at hoard 110 and 49.4 at hoard 423 —
+    // by then it is a circle drawn low and left of him, around the plank. The
+    // one mark that says "give it to me" stopped pointing at the thing.
+    //
+    // _dragonRect is a DRAW-side cache (like this._counter) and the scored
+    // region reads hoardTapRight() instead, so following the art here still
+    // cannot let the phone reach the decision.
+    var dr = this._dragonRect;
+    var lgx = dr ? dr.x + dr.w / 2 : 50, lgy = dr ? dr.y + dr.h / 2 : VIEW_H - 70;
+    var lgr = dr ? Math.max(46, dr.w * 0.54) : 46;
     ctx.strokeStyle = 'rgba(232,201,255,0.8)'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(lgx, lgy, 46 + Math.sin(this.worldT * 5) * 4, 0, 6.283); ctx.stroke();
+    ctx.beginPath(); ctx.arc(lgx, lgy, lgr + Math.sin(this.worldT * 5) * 4, 0, 6.283); ctx.stroke();
+    // Career used to bank NO coins, which made "SELL 200c" a dominated choice
+    // dressed up with a fanfare, and the label said so. The wallet changed
+    // that: a FIRST clear banks its payout, so on a level you have not cleared
+    // yet the coins are real money and the dilemma is a genuine one. On a
+    // replay it is still dominated — so the plate tells the truth about THIS
+    // run rather than about the mode.
+    var heart = c.key === 'heartstone';
+    var coinsCount = !this.career ||
+                     !(Meta.data.careerStars && Meta.data.careerStars[this.career.level] > 0);
+    // "SELL" was a lie for the prism: _resolveChoice('order') puts it in the
+    // SATCHEL toward the highlighted card, it does not pay coins. Only the
+    // heartstone is actually sold — and the sub line now says where the gem
+    // goes, which is the question the old one-word label never answered.
+    choicePlate(ctx, R.use,
+                heart ? 'SELL' : 'USE IT',
+                heart ? (coinsCount ? HEART_SELL + ' coins' : 'no coins on a replay')
+                      : 'into your satchel',
+                'wood', heart && !coinsCount);
+    choicePlate(ctx, R.hoard,
+                heart ? 'GIFT' : 'HOARD',
+                heart ? '+' + HEART_GIFT + ' hoard' : 'Hoardling keeps it',
+                'hoard', false);
+    // the gem last, in the gutter, ON TOP of nothing it could be confused with
     var spr = (c.key === 'heartstone' && SPR.gem_heartstone) || SPR.gem_prism;
     var d = (c.key === 'heartstone' ? 84 : 52) * pulse;
     ctx.beginPath();
     ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 4;
-    ctx.arc(cx, cy, 34, -1.5708, -1.5708 + 6.28318 * frac);
+    ctx.arc(cx, cy, 46, -1.5708, -1.5708 + 6.28318 * frac);
     ctx.stroke();
     if (spr) ctx.drawImage(spr, cx - d / 2, cy - d / 2, d, d);
-    ctx.font = fT(12, 'bold'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    // Career used to bank NO coins, which made "SELL 200c" a dominated choice
-    // dressed up with a fanfare, and the label said so. The wallet changed
-    // that: a FIRST clear banks its payout, so on a level you have not cleared
-    // yet the 200c is real money and the dilemma is a genuine one. On a replay
-    // it is still dominated — so the label tells the truth about THIS run
-    // rather than about the mode.
-    var heart = c.key === 'heartstone';
-    var coinsCount = !this.career ||
-                     !(Meta.data.careerStars && Meta.data.careerStars[this.career.level] > 0);
-    ctx.fillStyle = (this.career && heart && !coinsCount) ? 'rgba(255,215,94,0.55)' : '#ffd75e';
-    ctx.fillText(heart ? (coinsCount ? 'SELL ' + HEART_SELL + 'c ↑' : 'SELL (replay — no coins) ↑') : 'SELL ↑',
-                 cx - (heart ? 70 : 52), cy - 8);
-    ctx.fillStyle = '#e8c9ff';
-    ctx.fillText(heart ? '↙ GIFT (+' + HEART_GIFT + ' hoard)' : '↙ HOARD', cx + (heart ? 78 : 56), cy - 8);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
   };
 
@@ -4303,8 +5345,16 @@
   //                     crowding the next button
   //  702  end (18 to spare)
   var MENU = {
-    gear:   { x: VIEW_MIN_W - 62, y: 20, w: 46, h: 46 },
-    shop:   { x: VIEW_MIN_W - 164, y: 20, w: 92, h: 46 },
+    // 50, NOT 46. gearRect() — the in-shift gear — carries the arithmetic in a
+    // comment: "50 world units clears the 44pt touch floor on the SMALLEST
+    // device (SE3 scale 0.893 -> 44.6pt)". These four copies of the same
+    // affordance were authored at 46, which is 41.1pt, and they are the
+    // settings door on the menu, the shop, records, the level map and the
+    // results screen — every screen except the one that got the arithmetic
+    // right. The row keeps its 46 height: it is a wide button, not a square,
+    // and 92 x 46 is not a thumb-sized-target problem.
+    gear:   { x: VIEW_MIN_W - 64, y: 18, w: 50, h: 50 },
+    shop:   { x: VIEW_MIN_W - 164, y: 18, w: 92, h: 50 },   // 44.6pt, and level with the gear
     // the career strip: it painted five tappable-looking nodes and dropped
     // every tap. It is the door to the level map now.
     // wraps the nodes (400 ± 13) and their star pips (420 ± 3.5), and stops at
@@ -4318,7 +5368,7 @@
   var MENU_CHROME = { gear: 1, shop: 1 };   // pinned to the top bar, never shifted
   // the shop screen's own chrome — same gear, same corner, so it is never a
   // dead end without sound controls either
-  var SHOP_GEAR = { x: VIEW_MIN_W - 62, y: 20, w: 46, h: 46 };
+  var SHOP_GEAR = { x: VIEW_MIN_W - 64, y: 18, w: 50, h: 50 };   // 44.6pt on an SE3 — see MENU.gear
 
   // ===== THE JOB LADDER — the level map ====================================
   // The home strip PAINTED five tappable-looking nodes and dropped every tap,
@@ -4438,9 +5488,12 @@
     ctx.strokeStyle = 'rgba(255,215,94,0.45)'; ctx.lineWidth = 1.5;
     rr(ctx, 16, 20, 112, 46, 12); ctx.stroke();
     ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fT(10);
-    ctx.fillText('COINS', 72, 26);
+    ctx.fillText('COINS', 78, 26);
+    // the chip carried a label and a number and no coin — the one place the
+    // currency is named is the one place it had no face
+    drawCoin(ctx, 34, 46, 11);
     ctx.fillStyle = '#ffd75e'; ctx.font = fN(20);
-    fitText(ctx, coins.toLocaleString() + 'c', 72, 38, 96, fN, 20);
+    fitText(ctx, coins.toLocaleString() + 'c', 80, 38, 82, fN, 20);
     var sb = MENU.shop;
     ctx.fillStyle = 'rgba(20,12,6,0.62)';
     rr(ctx, sb.x, sb.y, sb.w, sb.h, 12); ctx.fill();
@@ -4556,10 +5609,13 @@
     // --- status card: today's best + the hoard -------------------------------
     var day = dayNumber();
     var best = Meta.data.bestDaily[day] || 0;
+    // Drawn THROUGH recordsRects().card, not beside it — the box and the art
+    // were two copies of 440/46 and there is no reason for a second.
+    var rcard = this.recordsRects().card;
     ctx.fillStyle = 'rgba(30,20,12,0.72)';
-    rr(ctx, cx - 132, 440, 264, 46, 12); ctx.fill();
+    rr(ctx, rcard.x, rcard.y, rcard.w, rcard.h, 12); ctx.fill();
     ctx.strokeStyle = 'rgba(201,168,106,0.5)'; ctx.lineWidth = 1.5;
-    rr(ctx, cx - 132, 440, 264, 46, 12); ctx.stroke();
+    rr(ctx, rcard.x, rcard.y, rcard.w, rcard.h, 12); ctx.stroke();
     ctx.fillStyle = '#ffd75e'; ctx.font = fT(13, 'bold');
     // The card carries TWO text lines, a dragon AND a records chevron, so the
     // text column is narrowed and re-centred to leave the right third free.
@@ -4622,7 +5678,17 @@
     var todayChar = dailyCharacter(dayNumber());
     this._menuBtn('DAILY DIG', MENU.daily.y, {
       w: MENU.daily.w, h: MENU.daily.h, tone: 'daily', icon: 'gem_sapphire',
-      quiet: firstRun,
+      disabled: firstRun,
+      // "after your first shift" WAS NOT TRUE — the button worked. The handler
+      // has no tutorialDone test, and the consequences the note above already
+      // names all fire: start() sets tutStep from tutorialDone with no mode
+      // test, so the three-step coach written for career L1 (8 orders, 53
+      // swings, no prisms, no RUSH) runs inside a daily jar that is 10 orders
+      // with a RUSH card ticking from t=0 — and the daily banks once per UTC
+      // day, so a fumbled first-ever run also spends the day's only payout.
+      //
+      // Enforced rather than reworded: the caption said what this screen was
+      // designed to do, and it is the right thing to do. See the menu handler.
       sub: firstRun ? 'one shared jar · after your first shift'
                     : todayChar.name + ' · one jar, everyone',
     });
@@ -4649,8 +5715,38 @@
   var SHOP_TAB_W = 132, SHOP_TAB_H = 34, SHOP_TAB_Y = 210;
   // Eight skins need a tighter row than the wall shop's 56+8, or the last one
   // lands past the view bottom — the same arithmetic that forced these tabs.
-  var DRAGON_ROW_Y = 286, DRAGON_ROW_H = 40, DRAGON_ROW_GAP = 6;
+  // THE WARDROBE ROWS REACH THE TOUCH FLOOR, and the space came from a band
+  // that was already empty.
+  //
+  // They were 40 tall on a 46 pitch — 41.1pt at the SE3 scale, under the 44pt
+  // floor, for a control that EQUIPS something. Growing them looked impossible:
+  // the rank line sat at 258 and eight rows of 50 would have ended at 686,
+  // past the BACK button, which `_shopBackY` pins no lower than floorY-78
+  // (669 on an SE3). But the WALLET CHIP at 168..208 is drawn on the walls tab
+  // ONLY — "nothing in the wardrobe costs coins" — so on the two tabs that
+  // needed the room, forty units of it were sitting unused above the tabs.
+  //
+  // The rank/star line moves up into that band, the rows start right under the
+  // tabs, and eight of them at a 51 pitch (50 of art, 44.6pt) run 254..662 with
+  // BACK still landing at 669. The gap is 1 rather than 6, and the hit band
+  // takes the whole pitch, so there is no dead strip between two equip targets.
+  var DRAGON_ROW_Y = 254, DRAGON_ROW_H = 50, DRAGON_ROW_GAP = 1;
   function dragonRowY(i) { return DRAGON_ROW_Y + i * (DRAGON_ROW_H + DRAGON_ROW_GAP); }
+  // The tally line for both wardrobe tabs, in the wallet chip's empty band.
+  var WARDROBE_TALLY_Y = 176;
+  // HALF-OPEN, so the bands PARTITION the column: row i owns [y, y+pitch) and
+  // the next row owns the boundary. An inclusive `<=` on both ends makes the
+  // earlier row win the shared pixel, which is a tap on the top edge of a row
+  // equipping the one above it.
+  var DRAGON_HIT_H = DRAGON_ROW_H + DRAGON_ROW_GAP;
+  // The tab strips are the same problem with room to solve it upward: 34 units
+  // is 30.4pt, and every one of them has empty header space above. Growing the
+  // pill instead would move the content under it on five screens, and 34 is the
+  // right SIZE — it was only ever the wrong TARGET.
+  function padHitUp(r, h) {
+    h = h || 50;
+    return { x: r.x, y: r.y - (h - r.h), w: r.w, h: h };
+  }
   // Tinted preview of ONE skin, independent of what is equipped.
   var _skinPrev = {};
   var _pickPrev = {};
@@ -4712,7 +5808,13 @@
     var x0 = cx - (W * 2.5 + G * 2);
     return {
       backY: RECORDS_BACK_Y,
-      card: { x: cx - 132, y: 440, w: 264, h: 46 },
+      // 50, not 46: this card is the ONLY door to the records screen — the
+      // board, the league, the archive and the whole contract board are behind
+      // it — and at 46 it was 41.1pt on an SE3, under the floor this file
+      // enforces on every other control. The strip above ends at 432 and the
+      // CAREER button starts at 502, so the four units come out of the slack
+      // and nothing else moves.
+      card: { x: cx - 132, y: 438, w: 264, h: 50 },
       tabStats:  { x: x0,                 y: REC_TAB_Y, w: W, h: REC_TAB_H },
       tabBoard:  { x: x0 + (W + G),       y: REC_TAB_Y, w: W, h: REC_TAB_H },
       tabLeague: { x: x0 + (W + G) * 2,   y: REC_TAB_Y, w: W, h: REC_TAB_H },
@@ -4749,6 +5851,23 @@
   // Read-only by construction — anon may SELECT every column EXCEPT client_id
   // (see tools/leaderboard-rpc.sql); writes go through the definer RPC. So the
   // worst this can do is show a stale or empty board.
+  // A FETCH THAT NEVER CALLS BACK MUST STILL RESOLVE ON SCREEN.
+  //
+  // Both boards sit in `state: 'loading'` until their callback fires, and the
+  // draw renders that as a bare "reading the board…" line. The 'error' state
+  // already has the right copy AND the retry affordance ("tap the tab again"),
+  // but nothing promotes a stuck load into it — so a request that hangs rather
+  // than rejecting (a captive-portal Wi-Fi, a dead DNS, a phone that lost the
+  // network mid-flight) leaves a spinner on screen with no way out and nothing
+  // to tap. Reading the clock at DRAW time needs no timer and no new state.
+  //
+  // 12s: the board is a 10-row read of one indexed table over HTTPS. Anything
+  // past that is not slow, it is gone.
+  var FETCH_PATIENCE = 12000;
+  function fetchStalled(b) {
+    return !!b && b.state === 'loading' && nowMs() - b.at > FETCH_PATIENCE;
+  }
+
   Game.prototype._loadBoard = function (force) {
     var day = dayNumber();
     var b = this._board;
@@ -4892,6 +6011,10 @@
   // THE CONTRACT BOARD. Scrolls by page rather than by drag — a canvas drag
   // scroller is a whole input surface and this list is 27 entries.
   var JOBS_PER_PAGE = 13;
+  // The archive list, paged for the same reason and to the same shape. 49 world
+  // units is 43.7pt on an SE3 — the floor, near enough — and eight of them plus
+  // a pager fit between the header at 118 and the BACK button at 640.
+  var PAST_ROW_Y = 138, PAST_ROW_H = 49, PAST_PER_PAGE = 8;
   Game.prototype._drawJobsTab = function () {
     var ctx = this.ctx, cx = VIEW_MIN_W / 2;
     var done = contractsDone();
@@ -4933,13 +6056,34 @@
       y += H;
     }
     if (pages > 1) {
-      ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = fT(11, 'bold');
-      ctx.fillText('\u2039  page ' + (page + 1) + ' of ' + pages + '  \u203A', cx, y + 8, 200);
+      // drawn THROUGH the rect the pointer answers on — see jobsPageRect
+      var pr = this.jobsPageRect();
+      ctx.fillStyle = 'rgba(20,12,6,0.42)';
+      rr(ctx, pr.x, pr.y, pr.w, pr.h, 10); ctx.fill();
+      ctx.strokeStyle = 'rgba(232,201,255,0.30)'; ctx.lineWidth = 1.5;
+      rr(ctx, pr.x, pr.y, pr.w, pr.h, 10); ctx.stroke();
+      ctx.fillStyle = 'rgba(232,220,200,0.85)'; ctx.font = fT(12, 'bold');
+      ctx.fillText('\u2039  page ' + (page + 1) + ' of ' + pages + '  \u203A',
+                   cx, pr.y + 18, pr.w - 20);
     }
   };
 
+  // THE PAGER MOVES WITH THE PAGE, SO ITS BOX HAS TO MOVE TOO.
+  //
+  // This hardcoded `154 + JOBS_PER_PAGE * 33 + 2` — it assumed every page is
+  // FULL. With 27 contracts at 13 a page the pages are 13/13/1, so on the last
+  // page _drawJobsTab's loop runs once, y ends at 187 and the control paints at
+  // 195, while the only box that answers for it sits at 585: 390 world units
+  // (~348pt on an SE3) apart. The one visible pager in the game did nothing,
+  // and there was no way off page 3.
+  //
+  // 44 tall rather than 26, because it was under the touch floor as well
+  // (26 * 0.893 = 23pt). _drawJobsTab draws THROUGH this, so they cannot
+  // disagree again.
   Game.prototype.jobsPageRect = function () {
-    return { x: VIEW_MIN_W / 2 - 100, y: 154 + JOBS_PER_PAGE * 33 + 2, w: 200, h: 26 };
+    var page = this.jobsPage || 0;
+    var rows = Math.min(JOBS_PER_PAGE, Math.max(0, CONTRACTS.length - page * JOBS_PER_PAGE));
+    return { x: VIEW_MIN_W / 2 - 100, y: 154 + rows * 33 - 6, w: 200, h: 50 };
   };
 
   Game.prototype._drawPastTab = function () {
@@ -4948,37 +6092,75 @@
     ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = fT(11);
     ctx.fillText('every past jar, still diggable · no coins, no board', cx, 118, 300);
 
-    var rows = this.archiveRows(), y = 138, H = 33;
+    // PAGED, AND EACH ROW IS A REAL TARGET.
+    //
+    // Fourteen days at a 33 pitch drew a 29-unit row — 25.9pt on an SE3, barely
+    // half the 44pt floor — with a 4-unit dead gap between neighbours, and each
+    // row LAUNCHES A DIG. A mis-hit either did nothing or started the wrong
+    // day's jar. Fourteen 44pt rows do not fit under a header at 138 with a
+    // BACK button at 640, so the list pages instead, exactly as the contract
+    // board next door does: 8 rows of 49 (43.7pt) run 138..530 and leave the
+    // pager its own 44-unit box at 534.
+    var all = this.archiveRows();
+    var page = this.pastPage || 0;
+    var pages = Math.ceil(all.length / PAST_PER_PAGE);
+    if (page >= pages) page = this.pastPage = 0;
+    var rows = all.slice(page * PAST_PER_PAGE, page * PAST_PER_PAGE + PAST_PER_PAGE);
+    var y = PAST_ROW_Y, H = PAST_ROW_H;
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i], dug = r.best > 0;
       ctx.fillStyle = i % 2 ? 'rgba(20,12,6,0.30)' : 'rgba(20,12,6,0.48)';
       rr(ctx, cx - 150, y, 300, H - 4, 8); ctx.fill();
       ctx.textAlign = 'left';
       ctx.fillStyle = 'rgba(240,226,200,0.55)'; ctx.font = fT(11);
-      ctx.fillText(r.ago === 1 ? 'yesterday' : r.ago + ' days ago', cx - 140, y + 8, 74);
+      ctx.fillText(r.ago === 1 ? 'yesterday' : r.ago + ' days ago', cx - 140, y + 16, 74);
       ctx.fillStyle = dug ? 'rgba(240,226,200,0.9)' : 'rgba(240,226,200,0.5)';
       ctx.font = fT(11);
-      ctx.fillText(r.ch.name, cx - 62, y + 8, 118);
+      ctx.fillText(r.ch.name, cx - 62, y + 16, 118);
       ctx.textAlign = 'right';
       if (dug) {
         ctx.fillStyle = '#ffd75e'; ctx.font = fT(12, 'bold');
-        ctx.fillText(r.best + 'c', cx + 140, y + 7, 70);
+        ctx.fillText(r.best + 'c', cx + 140, y + 15, 70);
       } else {
         ctx.fillStyle = 'rgba(201,168,106,0.75)'; ctx.font = fT(11, 'bold');
-        ctx.fillText('dig it', cx + 140, y + 8, 70);
+        ctx.fillText('dig it', cx + 140, y + 16, 70);
       }
       ctx.textAlign = 'center';
       y += H;
     }
+    if (pages > 1) {
+      var pr = this.pastPageRect();
+      ctx.fillStyle = 'rgba(20,12,6,0.42)';
+      rr(ctx, pr.x, pr.y, pr.w, pr.h, 10); ctx.fill();
+      ctx.strokeStyle = 'rgba(232,201,255,0.30)'; ctx.lineWidth = 1.5;
+      rr(ctx, pr.x, pr.y, pr.w, pr.h, 10); ctx.stroke();
+      ctx.fillStyle = 'rgba(232,220,200,0.85)'; ctx.font = fT(12, 'bold');
+      ctx.fillText('\u2039  page ' + (page + 1) + ' of ' + pages + '  \u203A',
+                   cx, pr.y + 18, pr.w - 20);
+    }
+  };
+
+  // ONE definition, shared by _drawPastTab and the pointer listener.
+  Game.prototype.pastPageRect = function () {
+    var page = this.pastPage || 0;
+    var n = Math.min(PAST_PER_PAGE, Math.max(0, ARCHIVE_DAYS - page * PAST_PER_PAGE));
+    return { x: VIEW_MIN_W / 2 - 100, y: PAST_ROW_Y + n * PAST_ROW_H, w: 200, h: 50 };
   };
 
   Game.prototype._drawLeagueTab = function () {
     var ctx = this.ctx, cx = VIEW_MIN_W / 2, b = this._league;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
 
-    if (!b || b.state === 'loading') {
+    if (!b || (b.state === 'loading' && !fetchStalled(b))) {
       ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('counting the fortnight…', cx, 300);
+      return;
+    }
+    if (fetchStalled(b)) {
+      ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
+      ctx.fillText('the league is out of reach right now', cx, 292);
+      ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = fT(11);
+      ctx.fillText('tap the tab again to retry', cx, 314);
       return;
     }
     if (b.state === 'closed') {
@@ -5048,12 +6230,12 @@
     var b = this._board;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
 
-    if (!b || b.state === 'loading') {
+    if (!b || (b.state === 'loading' && !fetchStalled(b))) {
       ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('reading the board…', cx, 300);
       return;
     }
-    if (b.state === 'error') {
+    if (b.state === 'error' || fetchStalled(b)) {
       ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('the board is out of reach right now', cx, 292);
       ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = fT(11);
@@ -5128,7 +6310,7 @@
     var eq = equippedPickId(), have = starTotal();
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     ctx.fillStyle = 'rgba(255,215,94,0.85)'; ctx.font = fT(12);
-    ctx.fillText('\u2605 ' + have + ' of ' + (CAREER_MAX * 3) + ' career stars', cx, 258, 300);
+    ctx.fillText('\u2605 ' + have + ' of ' + (CAREER_MAX * 3) + ' career stars', cx, WARDROBE_TALLY_Y, 300);
 
     var base = SPR.prop_pickaxe;
     for (var i = 0; i < PICK_SKINS.length; i++) {
@@ -5150,13 +6332,13 @@
       ctx.textAlign = 'left';
       ctx.fillStyle = open ? '#f0e2c8' : 'rgba(200,186,166,0.45)';
       ctx.font = fT(14, 'bold');
-      ctx.fillText(sk.name, x0 + 58, y + 10, 150);
+      ctx.fillText(sk.name, x0 + 58, y + 15, 150);
       ctx.textAlign = 'right';
       ctx.font = fT(12, 'bold');
-      if (isEq) { ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN', x0 + 290, y + 13, 90); }
-      else if (open) { ctx.fillStyle = 'rgba(201,168,106,0.9)'; ctx.fillText('wear', x0 + 290, y + 13, 90); }
+      if (isEq) { ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN', x0 + 290, y + 18, 90); }
+      else if (open) { ctx.fillStyle = 'rgba(201,168,106,0.9)'; ctx.fillText('wear', x0 + 290, y + 18, 90); }
       else { ctx.fillStyle = 'rgba(200,186,166,0.5)';
-             ctx.fillText('\u2605 ' + sk.stars, x0 + 290, y + 13, 90); }
+             ctx.fillText('\u2605 ' + sk.stars, x0 + 290, y + 18, 90); }
       ctx.textAlign = 'center';
     }
     this._menuBtn('BACK', this._shopBackY(dragonRowY(PICK_SKINS.length) + 6));
@@ -5170,7 +6352,7 @@
     ctx.fillStyle = 'rgba(232,201,255,0.85)'; ctx.font = fT(12);
     ctx.fillText(rk ? rk.name + ' · hoard ' + Meta.data.hoardTotal
                     : 'hoard ' + Meta.data.hoardTotal + ' · first skin at 20',
-                 cx, 258, 300);
+                 cx, WARDROBE_TALLY_Y, 300);
 
     var base = SPR.dragon_hoardling;
     for (var i = 0; i < DRAGON_SKINS.length; i++) {
@@ -5195,16 +6377,16 @@
       ctx.textAlign = 'left';
       ctx.fillStyle = open ? '#f0e2c8' : 'rgba(200,186,166,0.45)';
       ctx.font = fT(14, 'bold');
-      ctx.fillText(sk.name, x0 + 58, y + 10, 150);
+      ctx.fillText(sk.name, x0 + 58, y + 15, 150);
       ctx.textAlign = 'right';
       ctx.font = fT(12, 'bold');
       if (isEq) {
-        ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN', x0 + 290, y + 13, 90);
+        ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN', x0 + 290, y + 18, 90);
       } else if (open) {
-        ctx.fillStyle = 'rgba(201,168,106,0.9)'; ctx.fillText('wear', x0 + 290, y + 13, 90);
+        ctx.fillStyle = 'rgba(201,168,106,0.9)'; ctx.fillText('wear', x0 + 290, y + 18, 90);
       } else {
         ctx.fillStyle = 'rgba(200,186,166,0.5)';
-        ctx.fillText('hoard ' + (20 + sk.rank * HOARD_STEP), x0 + 290, y + 13, 110);
+        ctx.fillText('hoard ' + (20 + sk.rank * HOARD_STEP), x0 + 290, y + 18, 110);
       }
       ctx.textAlign = 'center';
     }
@@ -5345,7 +6527,14 @@
         // x-height 0 \u2014 which read as broken rather than as a typeface.
         ctx.fillStyle = afford ? '#ffd75e' : 'rgba(200,186,166,0.5)';
         ctx.font = fN(afford ? 18 : 17);
-        ctx.fillText(sk.price.toLocaleString() + 'c', rightX, afford ? y + 20 : y + 13);
+        var ptxt = sk.price.toLocaleString();
+        var py = afford ? y + 20 : y + 13;
+        ctx.fillText(ptxt, rightX, py);
+        // the coin replaces the trailing 'c' — the shop is where the currency
+        // is actually spent, so it is the last place it should be an initial
+        ctx.globalAlpha = afford ? 1 : 0.5;
+        drawCoin(ctx, rightX - ctx.measureText(ptxt).width - 11, py + 9, 8);
+        ctx.globalAlpha = 1;
         if (!afford) {
           var have = Meta.data.coins || 0;
           var bw2 = 74, bx = rightX - bw2, byy = y + 38;
@@ -5610,7 +6799,13 @@
                                  + (Meta.data.coins || 0) + 'c',
                      VIEW_MIN_W / 2, 450);
         ctx.fillStyle = 'rgba(232,220,200,0.6)';
-        fitT(ctx, '+' + DEEPER_PICK_SWINGS + ' swings next attempt · stars still scored on 55',
+        // 55 IS THE FREE BUDGET AND THIS BUTTON CANNOT REACH IT. Career budgets
+        // come from careerCfg and run 54..66 — level 14 is the only one that is
+        // 55 — so the line named the one number that is wrong on 39 of the 40
+        // levels it can appear on. The rule it was trying to state is real and
+        // better said plainly: stars score on `swingsAtGoal - pickBonus`, i.e.
+        // on THIS level's own budget with the bought swings taken back off.
+        fitT(ctx, '+' + DEEPER_PICK_SWINGS + ' swings next attempt · the bought swings do not count toward stars',
              VIEW_MIN_W / 2, 470, 300, 12);
         // Drawn DISABLED when it cannot be bought. It used to render at full
         // gold strength either way, so a broke player tapped a live-looking
@@ -5634,6 +6829,23 @@
     ctx.fillText(won ? 'SHIFT COMPLETE' : 'THE PICK GAVE OUT', VIEW_MIN_W / 2, 180);
     ctx.fillStyle = '#fff'; ctx.font = fD(26);
     ctx.fillText(this.coins + ' coins', VIEW_MIN_W / 2, 250);
+    // DID IT GO IN THE PURSE? `this.banked` has been computed by _endShift
+    // since the wallet shipped and read by NOTHING — grep found only its two
+    // write sites. So a daily replay and an archive dig, neither of which pays,
+    // printed the same confident coin total as a run that did, and the only
+    // way to find out was to go and look at the shop. The career screen has
+    // always been careful about exactly this ("+Nc banked · first clear"); this
+    // branch was the inconsistency.
+    if (this.banked > 0) {
+      ctx.fillStyle = '#8fd08a'; ctx.font = fT(12, 'bold');
+      ctx.fillText('+' + this.banked + 'c banked · purse ' + (Meta.data.coins || 0) + 'c',
+                   VIEW_MIN_W / 2, 272, 320);
+    } else if (this.coins > 0) {
+      ctx.fillStyle = 'rgba(232,220,200,0.62)'; ctx.font = fT(12);
+      ctx.fillText(this.archiveDay ? 'archive dig · coins not banked'
+                                   : "today's daily has already paid · coins not banked",
+                   VIEW_MIN_W / 2, 272, 320);
+    }
     ctx.fillStyle = won ? '#e8dcc8' : '#f0a090';
     ctx.font = won ? fD(16, 'normal') : fD(17);
     ctx.fillText(this.ordersDone + '/' + this.goalOrders + ' orders · ' + this.pops + ' swings · hoard +' + this.hoard, VIEW_MIN_W / 2, 295);
@@ -5652,15 +6864,31 @@
       for (var ci = 0; ci < cw.length; ci++) hsum += cw[ci].h;
       ctx.fillText(label + '  +' + hsum + ' hoard', VIEW_MIN_W / 2, 313, 320);
     }
+    // AN ARCHIVE RUN IS NOT TODAY. `isDaily` is true for one, so this whole
+    // block called a jar up to fourteen days old "today": the record line said
+    // "today's best", and the board below it painted rows Lb.top fetched for
+    // the CURRENT day beside a score from a different game entirely (an archive
+    // run returns from _endShift before `this.board = null`, so it could even be
+    // a board left over from an earlier run this session). The archive tab
+    // itself is honest about which day it is; the results screen was not.
+    var arch = !!this.archiveDay;
     var best = this.isDaily ? (Meta.data.bestDaily[this.day] || 0) : Meta.data.bestFree;
     if (this.coins >= best && this.coins > 0) {
       ctx.fillStyle = '#ffd75e'; ctx.font = fT(15, 'bold');
-      ctx.fillText(this.isDaily ? 'BEST DAILY DIG TODAY!' : 'BEST FREE DIG EVER!', VIEW_MIN_W / 2, 328);
+      ctx.fillText(arch ? 'BEST ON THIS DAY!'
+                        : this.isDaily ? 'BEST DAILY DIG TODAY!' : 'BEST FREE DIG EVER!',
+                   VIEW_MIN_W / 2, 328);
     } else {
       ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = fT(14);
-      ctx.fillText((this.isDaily ? "today's best: " : 'best: ') + best, VIEW_MIN_W / 2, 328);
+      ctx.fillText((arch ? "best on this day: " : this.isDaily ? "today's best: " : 'best: ') + best,
+                   VIEW_MIN_W / 2, 328);
     }
-    if (this.isDaily && this.board && this.board.length) {
+    if (arch) {
+      // say WHY there is no board, rather than leaving a hole where one was
+      ctx.fillStyle = 'rgba(232,201,255,0.65)'; ctx.font = fT(12);
+      ctx.fillText('archive dig · not scored on the board', VIEW_MIN_W / 2, 362, 320);
+    }
+    if (this.isDaily && !arch && this.board && this.board.length) {
       ctx.fillStyle = '#c9a86a'; ctx.font = fT(13, 'bold');
       ctx.fillText("TODAY'S DIGGERS", VIEW_MIN_W / 2, 362);
       for (var bi = 0; bi < this.board.length && bi < 8; bi++) {
@@ -5791,6 +7019,11 @@
     daily:  { top: '#2e405e', bot: '#1b2739', rim: 'rgba(190,178,150,0.58)', ink: '#dde5f2' },
     free:   { top: '#375138', bot: '#213221', rim: 'rgba(196,190,130,0.58)', ink: '#dfeadb' },
     wood:   { top: '#5a4632', bot: '#3f3123', rim: 'rgba(255,215,94,0.85)',  ink: '#ffe9a8' },
+    // The dilemma's dragon plate. Violet is already the hoard's colour on this
+    // screen (the ledge ring, the milestone burst), so the plate inherits it
+    // rather than inventing a seventh hue — and it keeps the brown floor and
+    // the warm rim every other tone keeps, for the reason written above.
+    hoard:  { top: '#4b3760', bot: '#2f2242', rim: 'rgba(232,201,255,0.80)', ink: '#eddcff' },
   };
 
   // ---- tiny draw helpers ----
@@ -5866,9 +7099,9 @@
       if (inRect(w, SHOP_GEAR)) { uiTick(); game.openSettings(); return; }
       // recordsRects(), not the literals — the same promise SHOP_ROW_Y makes.
       var RR = game.recordsRects();
-      if (inRect(w, RR.tabStats)) { uiTick(); game.recTab = 'stats'; return; }
-      if (inRect(w, RR.tabPast)) { uiTick(); game.recTab = 'past'; return; }
-      if (inRect(w, RR.tabJobs)) { uiTick(); game.recTab = 'jobs'; return; }
+      if (inRect(w, padHitUp(RR.tabStats))) { uiTick(); game.recTab = 'stats'; return; }
+      if (inRect(w, padHitUp(RR.tabPast))) { uiTick(); game.recTab = 'past'; return; }
+      if (inRect(w, padHitUp(RR.tabJobs))) { uiTick(); game.recTab = 'jobs'; return; }
       if (game.recTab === 'jobs') {
         var pr = game.jobsPageRect();
         if (inRect(w, pr)) {
@@ -5881,12 +7114,22 @@
         }
       }
       if (game.recTab === 'past') {
+        var ppr = game.pastPageRect();
+        var ppgs = Math.ceil(ARCHIVE_DAYS / PAST_PER_PAGE);
+        if (ppgs > 1 && inRect(w, ppr)) {
+          uiTick();
+          game.pastPage = ((game.pastPage || 0) + (w.x < ppr.x + ppr.w / 2 ? -1 : 1) + ppgs) % ppgs;
+          return;
+        }
         // tap a day to dig it. dailyCharacter and seedForDay are both pure
         // functions of the day number, so the jar rebuilds exactly.
-        var ar = game.archiveRows();
+        var apage = game.pastPage || 0;
+        var ar = game.archiveRows().slice(apage * PAST_PER_PAGE, apage * PAST_PER_PAGE + PAST_PER_PAGE);
         for (var ai = 0; ai < ar.length; ai++) {
-          var ay = 138 + ai * 33;
-          if (w.y >= ay && w.y <= ay + 29 &&
+          var ay = PAST_ROW_Y + ai * PAST_ROW_H;
+          // the FULL pitch, not the drawn height: a 4-unit dead gap between two
+          // rows that each launch a dig is a mis-hit that silently does nothing
+          if (w.y >= ay && w.y < ay + PAST_ROW_H &&
               w.x > VIEW_MIN_W / 2 - 150 && w.x < VIEW_MIN_W / 2 + 150) {
             uiTick();
             game.start(0, 'daily', 0, ar[ai].day);
@@ -5894,13 +7137,13 @@
           }
         }
       }
-      if (inRect(w, RR.tabLeague)) {
+      if (inRect(w, padHitUp(RR.tabLeague))) {
         uiTick();
         game._loadLeague(game.recTab === 'league');   // same-tab tap retries
         game.recTab = 'league';
         return;
       }
-      if (inRect(w, RR.tabBoard)) {
+      if (inRect(w, padHitUp(RR.tabBoard))) {
         uiTick();
         // Tapping the tab it is already on RETRIES — that is what the error
         // state tells the player to do, and it is the only retry affordance
@@ -5917,14 +7160,16 @@
     if (game.state === 'shop') {
       if (inRect(w, SHOP_GEAR)) { uiTick(); game.openSettings(); return; }
       var TBs = shopTabs();
-      if (inRect(w, TBs.walls))  { uiTick(); game.shopTab = 'walls'; return; }
-      if (inRect(w, TBs.dragon)) { uiTick(); game.shopTab = 'dragon'; return; }
-      if (inRect(w, TBs.pick))   { uiTick(); game.shopTab = 'pick'; return; }
+      // padded UPWARD only: the wall rows start at 250 and a downward pad
+      // would steal the top of row 0, which is a purchase
+      if (inRect(w, padHitUp(TBs.walls)))  { uiTick(); game.shopTab = 'walls'; return; }
+      if (inRect(w, padHitUp(TBs.dragon))) { uiTick(); game.shopTab = 'dragon'; return; }
+      if (inRect(w, padHitUp(TBs.pick)))   { uiTick(); game.shopTab = 'pick'; return; }
 
       if (game.shopTab === 'pick') {
         for (var pi = 0; pi < PICK_SKINS.length; pi++) {
           var py = dragonRowY(pi);
-          if (w.y >= py && w.y <= py + DRAGON_ROW_H &&
+          if (w.y >= py && w.y < py + DRAGON_HIT_H &&
               w.x > VIEW_MIN_W / 2 - 150 && w.x < VIEW_MIN_W / 2 + 150) {
             var psk = PICK_SKINS[pi];
             if (!pickUnlocked(psk)) { Snd.thunk(); return; }
@@ -5945,7 +7190,7 @@
         // wall rows below.
         for (var di = 0; di < DRAGON_SKINS.length; di++) {
           var dy = dragonRowY(di);
-          if (w.y >= dy && w.y <= dy + DRAGON_ROW_H &&
+          if (w.y >= dy && w.y < dy + DRAGON_HIT_H &&
               w.x > VIEW_MIN_W / 2 - 150 && w.x < VIEW_MIN_W / 2 + 150) {
             var dsk = DRAGON_SKINS[di];
             if (!dragonUnlocked(dsk)) { Snd.thunk(); return; }
@@ -6026,7 +7271,20 @@
         Snd.scene('shop'); return;
       }
       if (inRect(w, game.menuRect('career'))) { uiTick(); game.start(0, 'career'); }
-      else if (inRect(w, game.menuRect('daily'))) { uiTick(); game.start(dailySeed(), 'daily'); }
+      else if (inRect(w, game.menuRect('daily'))) {
+        // THE BUTTON NOW KEEPS THE CAPTION'S PROMISE. It reads "after your
+        // first shift" on a fresh save and used to start anyway — dropping a
+        // brand-new player into a 10-order jar with a RUSH card already
+        // counting down, running the coach written for career L1, and spending
+        // the day's only bankable daily on the attempt.
+        // A refusal must be VISIBLE. this.toast is drawn by the in-play HUD and
+        // by nothing on the menu, so a toast here would have been a silent
+        // thunk on a button that still looked live — the same defect this pass
+        // has been fixing all day. The button is drawn DISABLED on a fresh save
+        // instead, so the caption, the art and the tap all say the same thing.
+        if (!Meta.data.tutorialDone) { Snd.thunk(); return; }
+        uiTick(); game.start(dailySeed(), 'daily');
+      }
       else if (inRect(w, game.menuRect('free'))) { uiTick(); game.start((Math.random() * 4294967296) >>> 0, 'free'); }
       return;
     }
@@ -6043,7 +7301,14 @@
         Meta.save();
         Snd.fanfare(150);
         game.pendingPick = DEEPER_PICK_SWINGS;
-        game.start(0, 'career');
+        // THE SAME LEVEL — which is what the line above this block already
+        // promised and what the code did not do. start()'s `level` argument
+        // defaults to the FRONTIER (start(): `want = level ? ... : reached`),
+        // so a player replaying an earlier level for a better star, who failed
+        // and bought the deeper pick, was charged 250c and then dealt their
+        // highest level instead. The level map has always passed the level
+        // (game.start(0, 'career', li + 1)); both ways OUT of a shift did not.
+        game.start(0, 'career', game.career.level);
         return;
       }
       if (hitBtn(w, RB.again)) {
@@ -6057,9 +7322,20 @@
         // The finale button says DAILY DIG, so it must START the daily.
         if (game.careerFinale()) {
           game.start(dailySeed(), 'daily');
+        } else if (game.career) {
+          // RETRY MEANS THIS LEVEL. Same defect as the deeper pick above, for
+          // free: `game.career ? 0 : ...` supplied a SEED and no level, so
+          // retrying a replayed level jumped to the frontier.
+          game.start(0, 'career', game.career.level);
+        } else if (game.archiveDay) {
+          // AN ARCHIVE RUN'S AGAIN MUST RE-DEAL *THAT* DAY'S JAR. start() takes
+          // archiveDay as its fourth argument and this call never passed it, so
+          // AGAIN on a past-day run swapped in today's jar under a screen still
+          // labelled with the archive date — and today's jar is the one the
+          // leaderboard is for.
+          game.start(0, 'daily', 0, game.archiveDay);
         } else {
           game.start(game.mode === 'free' ? ((Math.random() * 4294967296) >>> 0)
-                   : game.career ? 0
                    : game.mode === 'daily' ? dailySeed() : game.seed, game.mode);
         }
       }
