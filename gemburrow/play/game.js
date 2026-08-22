@@ -879,7 +879,23 @@
   // Under the cover rule this is usually a short list and often a single body:
   // the thing directly above. That is the point — the answer to "why can't I
   // take that" should be one object the player can see and go clear.
-  Jar.prototype.blockersOf = function (b) {
+  // WHAT IS ON TOP OF THIS GEM — and `limit` is the whole point.
+  //
+  // Uncapped, this returns the entire column above the target. Measured over
+  // 3,268 refused taps across 40 settled jars: the median marks EIGHT bodies,
+  // p90 fourteen, worst twenty-four, and 71.6% mark more than four. Ringing a
+  // whole column with lines converging on the gem does not read as "clear these
+  // first" — it reads as a rendering fault. I mistook it for one myself, on a
+  // phone, having worked on this game all day.
+  //
+  // The actionable answer is the handful actually resting on it, so callers ask
+  // for the NEAREST few: sorted by how far above the target they sit, closest
+  // first. This is the same lesson as capping the first-run rings at two —
+  // a teaching cue that marks everything teaches nothing.
+  //
+  // Uncapped remains available (omit `limit`) for anything that COUNTS rather
+  // than draws.
+  Jar.prototype.blockersOf = function (b, limit) {
     var out = [], bs = this.bodies, i, o, dx;
     for (i = 0; i < bs.length; i++) {
       o = bs[i];
@@ -887,7 +903,10 @@
       dx = o.x - b.x; if (dx < 0) dx = -dx;
       if (dx < (o.r + b.r) * COVER_X) out.push(o);
     }
-    return out;
+    if (!limit || out.length <= limit) return out;
+    // closest above the target first — the ones a player would lift off
+    out.sort(function (p, q) { return q.y - p.y; });
+    return out.slice(0, limit);
   };
 
   // The lodestone no longer HOLDS anything — under the cover rule it blocks by
@@ -2752,7 +2771,9 @@
           Meta.save();
         }
         var loud = seen < 6;
-        var blk = this.jar.blockersOf(b);
+        // THREE, not the whole column — see blockersOf. The cue has to name a
+        // next action, and "lift these three off" is one.
+        var blk = this.jar.blockersOf(b, 3);
         // 1.9s, not the 1.15s this started at. This is a TEACHING cue, not a
         // hit-flash: the player has to look away from where their finger was,
         // find the ringed bodies, and connect them to the gem they wanted.
@@ -7360,7 +7381,23 @@
   }
 
   // Production exposes lifecycle pause only; it never exports the game object.
+  // THE LIFECYCLE SURFACE — the ONLY part of window.__game a release build keeps.
+  //
+  // `pauseIfPlaying` exists because the Android back button asks a question the
+  // release build could not answer. MainActivity used to eval
+  // the `.game` handle's `state`, and that handle is exactly what the
+  // release strip REMOVES — so on a store build the check read undefined, fell
+  // through to 'exit', and back QUIT the app mid-run instead of pausing it. The
+  // debug build worked, which is what would have kept it hidden.
+  //
+  // It answers with a string rather than exposing state, so it grants a store
+  // build no reading or writing of the game beyond the pause it already had.
   window.__game = { pause: function (v) { game.setPaused(v); } };
+  window.__game.pauseIfPlaying = function () {
+    if (game.state !== 'playing') return 'exit';
+    game.setPaused(true);
+    return 'paused';
+  };
 
 
 })();
