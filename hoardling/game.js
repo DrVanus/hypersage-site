@@ -8619,12 +8619,19 @@
     // extended: a fourth 120-wide pill on the old 102 pitch ends at x=474 on a
     // 420-wide world and would have clipped off the screen silently, which is
     // exactly how the shop shelf lost its 8th chip.
-    // 420 - 12 margins each side = 396 across 4 pills + 3 gutters of 8.
-    var pillY = 676, pillH = 52, pillPad = (minH - pillH) / 2;
+    // THE RIVETS DEFINE THE SAFE TRACK, not the pill width. forgePlate strikes
+    // four rivets at x+11 and x+w-11 (r 2.4), so a 93-wide pill has only 63px a
+    // label may use -- and "TRIALS 3/18" is ~70px and "CAVERN 9000" ~75px at the
+    // old bold 12px. Both ran straight through the right-hand rivets, which is
+    // what VANUS photographed. The old single line also sat at pcy+17, level
+    // with the BOTTOM rivets, so it collided vertically as well.
+    // 420 - 24 margins across 4 pills + 3 gutters of 6 = 94 each, 64 of safe
+    // track, and 56 tall so two short centred lines clear both rivet rows.
+    var pillY = 672, pillH = 56, pillPad = (minH - pillH) / 2;
     var pills = [];
     for (var i = 0; i < 4; i++) {
-      pills.push({ x: 12 + i * 101, y: pillY, w: 93, h: pillH,
-                   hx: 12 + i * 101 - 4, hy: pillY - pillPad, hw: 101, hh: minH });
+      pills.push({ x: 12 + i * 100, y: pillY, w: 94, h: pillH,
+                   hx: 12 + i * 100 - 3, hy: pillY - pillPad, hw: 100, hh: minH });
     }
     // TONIGHT band: two half-width plates instead of one full-width row.
     // WORLD_H is 780 and the campaign ladder already spends 348..540; a fifth
@@ -9481,32 +9488,45 @@
       var live = pi === 1 ? anyWon : true;
       forgePlate(ctx, pl, 'util');
       var pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
-      ctx.font = 'bold 12px system-ui, sans-serif';
+      // TWO SHORT CENTRED LINES. The name never carries its number any more:
+      // joined, they overflowed the 64px the rivets leave. Centred, the longest
+      // name ("SOUND ON", ~48px at bold 10) and the longest number ("9000",
+      // ~26px) both sit well clear of the corner rivets by construction.
+      var nameY = pcy + 2, numY = pcy + 15, ICO = pcy - 13;
+      ctx.font = 'bold 10px system-ui, sans-serif';
       if (pi === 0) {
-        starCoin(ctx, pcx, pcy - 9, 8, fAvail > 0);
-        inkText(ctx, fAvail > 0 ? 'FORGE  ' + fAvail : 'FORGE', pcx, pcy + 17,
+        starCoin(ctx, pcx, ICO, 8, fAvail > 0);
+        inkText(ctx, 'FORGE', pcx, nameY,
                 fAvail > 0 ? '#ffe9c4' : 'rgba(255,233,196,0.55)', 3, 1);
+        if (fAvail > 0) inkText(ctx, String(fAvail), pcx, numY, '#ffd75e', 3, 1);
       } else if (pi === 1) {
         ctx.strokeStyle = live ? 'rgba(217,242,255,0.9)' : 'rgba(138,127,114,0.7)';
         ctx.lineWidth = 2;
-        rr(ctx, pcx - 8, pcy - 17, 16, 14, 3); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(pcx - 4, pcy - 13); ctx.lineTo(pcx + 4, pcy - 13);
-        ctx.moveTo(pcx - 4, pcy - 8); ctx.lineTo(pcx + 4, pcy - 8); ctx.stroke();
+        rr(ctx, pcx - 8, ICO - 7, 16, 14, 3); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(pcx - 4, ICO - 3); ctx.lineTo(pcx + 4, ICO - 3);
+        ctx.moveTo(pcx - 4, ICO + 2); ctx.lineTo(pcx + 4, ICO + 2); ctx.stroke();
         // 6 trials x 3 levels = 18 badges. '/9' dated from when there were
         // three trials and quietly told the player they were twice as done
         // as they were — and it can never be reached, so it reads as broken.
-        inkText(ctx, live ? 'TRIALS ' + tDone + '/' + (TRIAL_ORDER.length * CAMPAIGN_MAPS) : 'TRIALS', pcx, pcy + 17,
-                live ? '#d9f2ff' : '#8a7f72', 3, 1);
+        ctx.font = 'bold 10px system-ui, sans-serif';
+        inkText(ctx, 'TRIALS', pcx, nameY, live ? '#d9f2ff' : '#8a7f72', 3, 1);
+        if (live) inkText(ctx, tDone + '/' + (TRIAL_ORDER.length * CAMPAIGN_MAPS),
+                          pcx, numY, 'rgba(217,242,255,0.75)', 3, 1);
       } else if (pi === 2) {
         // the wallet is the label: a shop with nothing in the purse should say
         // so on the door rather than after the tap
         var mk = Save.data.marks | 0;
-        drawCoin(ctx, pcx, pcy - 9, 9, Save.equipped('coin'));
-        inkText(ctx, mk > 0 ? 'CAVERN  ' + mk : 'CAVERN', pcx, pcy + 17,
+        drawCoin(ctx, pcx, ICO, 9, Save.equipped('coin'));
+        ctx.font = 'bold 10px system-ui, sans-serif';
+        inkText(ctx, 'CAVERN', pcx, nameY,
                 mk > 0 ? '#ffe9c4' : 'rgba(255,233,196,0.55)', 3, 1);
+        if (mk > 0) inkText(ctx, String(mk), pcx, numY, '#ffd75e', 3, 1);
       } else {
-        drawSpeaker(ctx, pcx - 4, pcy - 9, Sfx.isMuted());
-        inkText(ctx, Sfx.isMuted() ? 'SOUND OFF' : 'SOUND ON', pcx, pcy + 17, '#ffe9c4', 3, 1);
+        drawSpeaker(ctx, pcx - 4, ICO, Sfx.isMuted());
+        ctx.font = 'bold 10px system-ui, sans-serif';
+        inkText(ctx, 'SOUND', pcx, nameY, '#ffe9c4', 3, 1);
+        inkText(ctx, Sfx.isMuted() ? 'OFF' : 'ON', pcx, numY,
+                Sfx.isMuted() ? 'rgba(255,233,196,0.55)' : '#9ef58f', 3, 1);
       }
     }
     ctx.textAlign = 'left';
