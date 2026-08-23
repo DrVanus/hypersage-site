@@ -1904,8 +1904,15 @@
   /// MEASURED on art/hero_whelp.png, which is what makes this exact:
   ///   scales           hue 0.009 - 0.034   (pure red)
   ///   belly + brass    hue 0.078 - 0.105   (orange-brown)
-  /// A clean empty gap between them, so the two materials separate by hue
-  /// alone and no painted mask is needed.
+  /// The two materials separate by hue alone, so no painted mask is needed --
+  /// but this used to claim "a clean EMPTY gap between them", and that is
+  /// false: 27.3% of the dragon (66,808 opaque chromatic px) lies strictly
+  /// between 0.034 and 0.078. What the kernel actually relies on is that the
+  /// two SELECTORS are disjoint by construction -- COAT_SCALE is gone by 0.048,
+  /// COAT_WARM does not begin until 0.047 -- so those in-between pixels are
+  /// taken by the warm shoulder and CREAMED rather than hue-shifted. That is
+  /// why the scale/belly boundary reads as a soft material transition and not
+  /// as a seam.
   ///
   /// THE BELLY NEVER TAKES THE HUE. Letting it follow even 45% of the way gave
   /// a Cobalt dragon a MAGENTA chest stripe (and following 0% gave a RED one on
@@ -1940,9 +1947,12 @@
   /// bands, so each can be moved on its own instead of washing the whole plate.
   ///
   /// MEASURED on art/keep.png (opaque px, alpha > 200):
-  ///   hue 0.06-0.11  n=2737  sat 0.56  val 0.61   cream MASONRY, the bulk
-  ///   hue 0.56-0.67  n=1750  sat 0.72  val 0.44   royal-blue ROOFS
-  ///   hue 0.11-0.17  n=52    sat 0.60  val 0.95   amber WINDOW GLOW
+  ///   hue 0.06-0.11  n=90,334  sat 0.56  val 0.61   cream MASONRY, the bulk
+  ///   hue 0.56-0.67  n=64,629  sat 0.72  val 0.44   royal-blue ROOFS
+  ///   hue 0.11-0.17  n=2,362   sat 0.60  val 0.95   amber WINDOW GLOW
+  /// (These were once quoted as 2737 / 1750 / 52 -- SAMPLE counts from a
+  /// subsampled scan printed as populations, 33x to 45x low. The proportions
+  /// were right, which is why the design held; the absolutes were not.)
   /// Three materials, three disjoint bands. art/keep_slate.png is NOT a usable
   /// base -- its stone AND its roofs both sit at 0.56-0.61, one family.
   ///
@@ -1954,8 +1964,10 @@
   ///
   /// The first fix was a hard value ceiling on masonry (vmax 0.80) and it was
   /// WORSE, in a way that only showed up when the candidates were judged in
-  /// context. MEASURED: that ceiling excluded 14,124 of 60,032 warm pixels --
-  /// 23.8% of the castle, mean value 0.89 -- which is the whole LIT SIDE. So
+  /// context. MEASURED: that ceiling excluded 23.0% of the WARM pixels at mean
+  /// value 0.90 -- 13.6% of the whole opaque plate, and the entire LIT SIDE of
+  /// it. (This read "23.8% of the castle", promoting a share of the warm pixels
+  /// into a share of the building.) So
   /// the shadow side went black while the lit side stayed cream, and the
   /// terminator between them became a hard ragged step straight through the
   /// gold dragon crest and the archway. A judge lens caught it; the eye did
@@ -1972,7 +1984,7 @@
   var LIFT_KNEE   = 0.22;
   var MAT_MASONRY = { c: 0.085, full: 0.050, gone: 0.070, s0: 0.06, vmax: 1.01, vmin: 0.00 };
   /// ROOF EXCLUDES THE TEAL RIM LIGHT, and that is not a tuning preference.
-  /// MEASURED: the shipped keep has a teal band at hue 0.50-0.56 (n=122,
+  /// MEASURED: the shipped keep has a teal band at hue 0.50-0.56 (n=5,244,
   /// sat 0.83) which is the RIM LIGHT the style header requires -- "a thin
   /// saturated teal rim light traces the right edge" -- and the roofs proper
   /// sit at 0.56-0.67. A roof band wide enough to reach 0.545 does two bad
@@ -1999,9 +2011,17 @@
   // centre, and 90% of real glow pixels still claimed.
   var MAT_GLOW    = { c: 0.140, full: 0.030, gone: 0.042, s0: 0.20, vmax: 1.01, vmin: 0.78 };
 
-  /// COINS — the top-left counter, the +N pops, and the loot a thief runs out
-  /// with. The FACE is a castle and the ALLOY under it is the grade: the stamp
-  /// says whose mint, the metal says how good. Two axes off one drawing.
+  /// COINS — HUD AND MENU CHROME ONLY: the top-left counter, the title pill,
+  /// the Cavern's wallet and cards, and the result screen's marks chip. The
+  /// FACE is a castle and the ALLOY under it is the grade: the stamp says whose
+  /// mint, the metal says how good. Two axes off one drawing.
+  ///
+  /// IT DOES NOT SKIN THE `+N` POPS OR A THIEF'S LOOT, and this comment used to
+  /// say it did. Both are deliberate rather than missed: the pops are TEXT in
+  /// the gold colour, and the carried coins are baked into _bakeLedger's shared
+  /// atlas, which is drawn for BOTH caves -- feeding the player's coin in would
+  /// paint a purchased skin onto the rival's thieves, breaking the separation
+  /// the duel pip is hardcoded cool to preserve.
   var COINS = [
     { id: 'gate',   name: 'Copper Gatehouse', art: 'coin_gate', price: 0,
       face: '#e0a468', edge: '#8a5a1d', ink: '#7a4418', stamp: 'gate',
@@ -2011,7 +2031,7 @@
       how: 'Struck for the Long Sleep. Still legal tender.' },
     { id: 'citadel',name: 'Gold Citadel',     art: 'coin_citadel', price: 220,
       face: '#ffd75e', edge: '#8a5a1d', ink: '#8a5a1d', stamp: 'citadel',
-      how: 'Four towers and a curtain wall, in high relief.' },
+      how: 'Three towers over a curtain wall, in high relief.' },
     { id: 'bastion',name: 'Blackiron Bastion',art: 'coin_bastion', price: 300,
       face: '#5a5f68', edge: '#2b2e34', ink: '#c9cfd8', stamp: 'bastion',
       how: 'Iron does not shine. That is the point.' },
@@ -2040,7 +2060,7 @@
     { id: 'stone',  name: 'Grey Stone',   art: null, price: 0,   tint: null,
       how: 'The keep above the workshop.' },
     { id: 'slate',  name: 'Slate Roofs',  art: 'keep_slate', price: 150, tint: '#8fa4c0', sat: 0.55, val: 1.02,
-      how: 'Re-roofed after the third raid.' },
+      how: 'Slate walls, slate roofs. Cut cold and set square.' },
     { id: 'sand',   name: 'Sandstone',    art: null, price: 150,
       // S1, unanimous first place on all four judge lenses (material honesty,
       // set coherence, legibility at true size, adversarial). ORDER IS
@@ -2120,6 +2140,7 @@
 
   var Save = (function () {
     var KEY2 = 'hoardling.save.v2', KEY1 = 'hoardling.save.v1';
+    var DAILY_LEDGER = 16;         // ~two weeks of seeds; enough to defeat clock games
     // duels: { <rivalId>: { w: 1, m: <best margin> } } — an OBJECT, not a bare
     // number, because the best margin can legitimately be 0 (a duel won on the
     // tiebreak) and a falsy value would read as "never beaten". Same trap the
@@ -2129,7 +2150,11 @@
     // an existing save just reads the defaults, so there is no migration and no
     // v3 loader to keep in step with this one.
     var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {}, trials: {}, duels: {},
-                 marks: 0, owned: {}, equip: {}, paid: {} };
+    // dailyPaid: the daily payout LEDGER, newest last, capped at DAILY_LEDGER.
+    // An ARRAY rather than a map so the eviction order is the data itself --
+    // daily seeds are (day+1)*2654435761>>>0 and therefore NOT monotonic, so
+    // "evict the smallest key" would drop the wrong one after a wrap.
+                 marks: 0, owned: {}, equip: {}, dailyPaid: [] };
     try {
       var raw = localStorage.getItem(KEY2);
       if (raw) {
@@ -2165,6 +2190,15 @@
           }
         }
         if (typeof p.marks === 'number' && isFinite(p.marks)) data.marks = Math.max(0, Math.min(999999, p.marks | 0));
+        if (Array.isArray(p.dailyPaid)) {
+          for (var dp = 0; dp < p.dailyPaid.length && data.dailyPaid.length < DAILY_LEDGER; dp++) {
+            var row = p.dailyPaid[dp];
+            if (!row || typeof row !== 'object') continue;
+            if (typeof row.s !== 'string' || !/^\d{1,10}$/.test(row.s)) continue;
+            if (typeof row.w !== 'number' || !isFinite(row.w) || row.w < 0) continue;
+            data.dailyPaid.push({ s: row.s, w: Math.min(9999, row.w | 0) });
+          }
+        }
         // WHITELIST-ITERATE OUR OWN TABLES, never for-in over the parsed blob:
         // COATS['constructor'] is truthy through Object.prototype and a hostile
         // (or merely corrupt) save must not be able to mint an item id that no
@@ -2185,9 +2219,13 @@
             var esl = SLOTS[es], want = p.equip[esl.id];
             if (typeof want !== 'string') continue;
             for (var ei = 0; ei < esl.items.length; ei++) {
-              // EQUIPPED IMPLIES OWNED. A save that names an item it never
-              // bought equips the default instead of the item -- otherwise
-              // hand-editing localStorage is a free shop.
+              // EQUIPPED IMPLIES OWNED -- a CONSISTENCY guard, not an anti-
+              // cheat. It stops a save whose equip and owned maps disagree from
+              // rendering an item the shop still shows as locked. It cannot stop
+              // hand-editing: anyone editing `equip` can edit `owned` in the
+              // same breath, and `marks` is read straight out of the blob. This
+              // is a single-player client-side game and its save is the
+              // player's; the comment here used to claim otherwise.
               if (esl.items[ei].id === want &&
                   (esl.items[ei].price === 0 || (data.owned[esl.id] && data.owned[esl.id][want]))) {
                 data.equip[esl.id] = want;
@@ -2220,13 +2258,34 @@
       data.marks = Math.max(0, Math.min(999999, (data.marks | 0) + n));
       return n;
     }
-    /// owns(): a price-0 item is owned by everyone, always. That is what makes
-    /// cosItem()'s "fall back to items[0]" safe on a fresh save.
+    function dailyPaidFor(sKey) {
+      for (var i = 0; i < data.dailyPaid.length; i++) if (data.dailyPaid[i].s === sKey) return data.dailyPaid[i].w | 0;
+      return 0;
+    }
+    function setDailyPaid(sKey, wave) {
+      for (var i = 0; i < data.dailyPaid.length; i++) {
+        if (data.dailyPaid[i].s === sKey) { data.dailyPaid[i].w = wave | 0; return; }
+      }
+      data.dailyPaid.push({ s: sKey, w: wave | 0 });
+      while (data.dailyPaid.length > DAILY_LEDGER) data.dailyPaid.shift();
+    }
+    /// owns(): a price-0 item is owned by everyone, always.
+    ///
+    /// IT MUST RESOLVE THE ID ITSELF. cosItem() deliberately falls back to
+    /// items[0] so no draw path can ever throw on a missing skin -- and items[0]
+    /// of every slot is free, so routing owns() through it answered TRUE for any
+    /// id at all, including ones that do not exist. grant() then reported a
+    /// successful grant it could not persist, because the loader whitelists
+    /// unknown ids straight back out.
     function owns(slot, id) {
-      var it = cosItem(slot, id);
-      if (!it) return false;
-      if (!it.price) return true;
-      return !!(data.owned[slot] && data.owned[slot][id]);
+      var s2 = SLOT_BY_ID[slot];
+      if (!s2) return false;
+      for (var i = 0; i < s2.items.length; i++) {
+        if (s2.items[i].id !== id) continue;
+        if (!s2.items[i].price) return true;
+        return !!(data.owned[slot] && data.owned[slot][id]);
+      }
+      return false;                       // no such item in this slot
     }
     function equipped(slot) {
       var s2 = SLOT_BY_ID[slot];
@@ -2276,7 +2335,8 @@
     return { data: data, write: write, unlocked: unlocked,
              starsTotal: starsTotal, forgeSpent: forgeSpent, forgeMods: forgeMods,
              addMarks: addMarks, owns: owns, equipped: equipped,
-             buy: buy, grant: grant, equip: equip };
+             buy: buy, grant: grant, equip: equip,
+             dailyPaidFor: dailyPaidFor, setDailyPaid: setDailyPaid };
   })();
 
   // ===== Daily leaderboard — the WADDLETON foundation (fail-soft, lane 3) ==
@@ -2548,10 +2608,12 @@
       // All four are padded into gold_mound's own 700x485 box, content centred
       // and bottom-anchored: the engine sizes the pile by WIDTH, so plates of
       // different aspect would each render a different height against the keep.
-      // THE KEEPS. Only SLATE has art. Bought 2026-08-22 and padded into
-      // art/keep.png's own 519x700 box so its base lands where the stock keep's
-      // does. Sandstone and Basalt are still tint placeholders, and the reason
-      // is worth reading before anyone rerolls them: THE MODEL BAKES A LIT
+      // THE KEEPS. Only SLATE has bought art, padded into art/keep.png's own
+      // 519x700 box so its base lands where the stock keep's does. Sandstone
+      // and Basalt ship as MULTI-BAND RECOLOURS (see their `bands` in KEEPS) --
+      // NOT tint placeholders, and the `tint` each still carries is unreachable
+      // because _propPlate short-circuits on `bands`. Why those two were not
+      // bought is worth reading before anyone rerolls them: THE MODEL BAKES A LIT
       // GROUND DISC under a keep even though the style header forbids it, and
       // the negative strong enough to remove it ("no ground, no floor, no pool
       // of light") pushes the model off the white background entirely -- both
@@ -5031,21 +5093,31 @@
     if (this.mode === 'daily') {
       var today2 = dayNumber();
       if (Save.data.daily.day !== today2) Save.data.daily = { day: today2, best: 0 };
-      // TODAY's best, not the all-time one: the all-time record can never fall,
-      // so paying on it would stop paying forever after one good day.
-      //
+
       // PAID PER WAVE GAINED, NOT PER IMPROVEMENT. A flat fee per improvement
       // is a farm, and an easy one: die on purpose at wave 1, then wave 2, then
       // wave 3, and every one of those runs is an "improvement" that pays full
       // price. Fifteen deliberate near-misses paid fifteen times for a wave-15
-      // day. Per wave gained, the payouts TELESCOPE -- any sequence of
-      // improvements from 0 to N sums to rate x N no matter how it was reached,
-      // so the day is worth exactly what the best run was worth and playing
-      // badly on purpose earns nothing extra.
-      if (this.wave > Save.data.daily.best) {
-        marksEarned += MARK_AWARDS.dailyWave * (this.wave - (Save.data.daily.best | 0));
-        Save.data.daily.best = this.wave;
+      // day. Per wave gained, the payouts TELESCOPE -- any sequence from 0 to N
+      // sums to rate x N however it was reached.
+      //
+      // KEYED ON THE RUN'S OWN SEED, NOT ON THE DAY, and that is the whole
+      // point. The first version reset `best` to 0 whenever `daily.day` changed,
+      // and `dayNumber()` is the DEVICE CLOCK -- so a run STARTED before
+      // midnight and FINISHED after it was paid in full a second time for the
+      // same seed, and the pause button is enough to force it. Rolling the clock
+      // back and forth farmed the same way, indefinitely.
+      //
+      // The ledger is per-seed and MONOTONIC: a given daily can never pay for a
+      // wave it has already paid for, whatever the clock says. `daily.best`
+      // survives only as the "today's best" the title screen prints.
+      var sKey = String(this.seed >>> 0);
+      var paidTo = Save.dailyPaidFor(sKey);
+      if (this.wave > paidTo) {
+        marksEarned += MARK_AWARDS.dailyWave * (this.wave - paidTo);
+        Save.setDailyPaid(sKey, this.wave);
       }
+      if (this.wave > Save.data.daily.best) Save.data.daily.best = this.wave;
       if (this.wave > Save.data.dailyBestWave) Save.data.dailyBestWave = this.wave;
     }
     if (marksEarned > 0) Save.addMarks(marksEarned);
@@ -6713,8 +6785,16 @@
     // and reused; without the equipped road id here, changing it in the Cavern
     // would silently do nothing until the next level load -- the exact shape of
     // "my edit landed and the game behaves as before".
+    // THE KEY TRACKS THE EQUIPPED SKIN'S ART, not just the stock tile's.
+    // ART.load bails after 12s and images that land later are still written into
+    // ART.images, so on a slow connection the first _buildSceneCache can run
+    // while road_bone (511 KB) is still in flight. _itemPlate then falls through
+    // to the hue-rotated STOCK cobble and bakes it -- and with only the stock
+    // tile's presence in the key, nothing ever invalidates it, so the player
+    // spends the whole session on a tinted placeholder of the road they bought.
+    var _rd = Save.equipped('road') || { id: '?' };
     var key = (ART.images.bg ? 'art' : 'proc') + (ART.images.road ? '+road' : '') + ':' + this.levelIdx
-              + ':' + (Save.equipped('road') || { id: '?' }).id;
+              + ':' + _rd.id + (_rd.art && ART.images[_rd.art] ? '+skin' : '');
     if (this._bgKey === key && this._bgCache) return;
     this._bgKey = key;
     var res = 2;
@@ -7956,6 +8036,15 @@
     // THE PLAYER'S COAT. One intercept below the whole plate-selection chain,
     // so the idle, back, breath and all three manning frames are coated by the
     // same call and can never drift to different colours mid-animation.
+    // POSE IS DECIDED ABOVE; THE COAT IS APPLIED HERE. _myPlate returns a
+    // recoloured <canvas> for any non-stock coat, and 80 lines below there is an
+    // OBJECT-IDENTITY test -- `himg === ART.images.hero_breathe` -- that picks
+    // the open-muzzle anchor for the fire. Coating first made that test false on
+    // every coated frame, so a player in any colour but stock Ember breathed
+    // from the CLOSED-muzzle point: the jaw glow and all five fire tongues
+    // anchored at MUZZLE_FWD/MUZZLE_UP while the sprite drawn was the open jaw.
+    // Take the identity while himg still IS an ART image.
+    var breathPose = himg === ART.images.hero_breathe;
     himg = this._myPlate(himg);
     if (himg) {
       // hover bob + sway; face the direction he's headed
@@ -8039,7 +8128,7 @@
       // the sprite's own transform, so the mirror puts it on whichever side he
       // is facing and it can never drift off his face.
       if (b > 0.01) {
-        var onBreathPlate = himg === ART.images.hero_breathe;
+        var onBreathPlate = breathPose;   // taken before the coat swap -- see above
         var mx = -hw0 * (onBreathPlate ? MUZZLE_B_FWD : MUZZLE_FWD);
         var my = -hh0 * (onBreathPlate ? MUZZLE_B_UP : MUZZLE_UP);
         var open = Math.sin(Math.min(1, b * 1.35) * Math.PI) * 0.9 + 0.1;
@@ -9760,7 +9849,7 @@
       }
     }
     // ---- HOARD MARKS EARNED ----------------------------------------------
-    // resetRun() writes result.marks and NOTHING READ IT: a player earned the
+    // _gameOver() writes result.marks and NOTHING READ IT: a player earned the
     // currency the whole shop runs on and was never told. It lands in the gap
     // between the star medallions (360) and the stats block (420), which is
     // free in every layout this screen has -- a duel has no stars and its
@@ -9877,7 +9966,10 @@
         ctx.textAlign = 'center';
       }
     } else {
-      var rimg = ART.images.hero;
+      // THE COAT BELONGS HERE TOO. _drawHero's intercept covers the board; this
+      // is a separate draw site, so the win screen congratulated the player
+      // while showing a stock red dragon they had just paid to recolour.
+      var rimg = this._myPlate(ART.images.hero);
       if (rimg) {
         // HEIGHT-first, like _drawHero: the plate's aspect is not a constant of
         // the universe (it changed the day the clipped tail was restored), so
@@ -9934,9 +10026,12 @@
   /// cavern) and a FACE. The face is a castle, and the alloy under it is the
   /// grade -- see COINS.
   ///
-  /// This is drawn, not painted, ON PURPOSE for now: it is the seam a bought
-  /// sprite drops into (COINS[].art), and until that art exists a drawn coin
-  /// is still a coin, whereas a flat disc never was.
+  /// ALL FIVE COINS HAVE ART, so this procedural path is the FALLBACK, not the
+  /// default -- `coin.art` short-circuits it above. It still runs in two real
+  /// cases: the duel rival's pip, a synthetic literal with no `art` key so it
+  /// stays deliberately cool against your warm gold, and any frame before the
+  /// sprite has decoded. (This used to say the art did not exist yet; it
+  /// shipped in the same change that wrote the sentence.)
   function stampCastle(ctx, kind, r, ink, face) {
     // unit space: x,y in -1..1, scaled by r. Everything is drawn as ONE filled
     // path in `ink`, then the openings (gate, windows) are punched back in
@@ -10034,12 +10129,20 @@
     ctx.strokeStyle = coin.edge; ctx.lineWidth = Math.max(1, r * 0.16);
     ctx.beginPath(); ctx.arc(0, 0, r * 0.90, 0, 6.283); ctx.stroke();
     // the face, in relief: a dark stamp with a 1px light offset above it
-    // relief: a light ghost one pixel high, then the real stamp over it
-    ctx.globalAlpha = 0.5;
+    // relief: a light ghost one pixel high, then the real stamp over it.
+    //
+    // MULTIPLY THE CALLER'S ALPHA, NEVER ASSIGN IT. These were absolute writes
+    // (0.5, then 1), and the result screen calls this INSIDE a fade -- so the
+    // coin's rim and stamp punched through at full opacity while the chip
+    // around them was still fading in, and the ghost rendered at 0.5 whatever
+    // the fade said. The outer save/restore already brackets this whole
+    // function, so scaling from a0 is all that is needed.
+    var a0 = ctx.globalAlpha;
+    ctx.globalAlpha = a0 * 0.5;
     ctx.save(); ctx.translate(0, -r * 0.10);
     stampCastle(ctx, coin.stamp, r * 0.60, '#ffffff', 'rgba(255,255,255,0)');
     ctx.restore();
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = a0;
     ctx.save(); ctx.translate(0, r * 0.02);
     stampCastle(ctx, coin.stamp, r * 0.60, coin.ink, coin.face);
     ctx.restore();
