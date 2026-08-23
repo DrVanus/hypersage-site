@@ -447,7 +447,7 @@
   /// stays identical for everyone.
   function towerUnlocked(id, mode) {
     // The DUEL is a shared fight for the same reason the Daily is, so it takes
-    // the same answer: both sides get all seven. The rival's curve was baked
+    // the same answer: both sides get all EIGHT. The rival's curve was baked
     // with the full shelf, so gating the player's would hand them a narrower
     // game than the opponent they are being scored against.
     if (mode === 'daily' || mode === 'duel') return true;
@@ -1858,7 +1858,6 @@
   // against could sit on different ground — the one failure this whole mode
   // has to make impossible.
   function duelMapAt(seedIdx) { return Math.min(MAPS.length - 1, DUEL_ARENAS[seedIdx].map | 0); }
-  function duelMapFor(rivalIdx) { return duelMapAt(duelSeedIdx(rivalIdx)); }   // tonight's, for the picker
   /** Can this rival actually play her half of the cavern?
    *
    *  THIS USED TO ASK A DIFFERENT QUESTION. The duel was once a race against
@@ -5097,6 +5096,12 @@
     // say about it. The asymmetry is the point.
     this._mCue = won ? { name: 'win' } : { name: 'lose', stop: true };
     this.menu = null; this.infoCard = null; // an open chooser/menu must not outlive the run
+    // AND THE FLOATS. reset() clears them on the way IN, nothing cleared them on
+    // the way OUT, and the result scrim is only rgba(12,7,5,0.75) -- so the last
+    // wave's "-1 treasure!" printed through the story, and the build-hint variant
+    // printed "TAP THE KEEP!" over a run that had already ended: a live
+    // affordance on a dead screen. MEASURED at 10 of 10 natural losses.
+    this.floats.length = 0;
     this.resultLockT = 0.8;                 // battle taps can't skip the screen
     this._resultT = 0;                      // cosmetic: drives the star landings
     // stars grade COINS LOST FOREVER (escaped carriers), not the closing balance
@@ -9577,7 +9582,6 @@
 
     // ---- 5. sections ------------------------------------------------------
     var G = this._titleGeom();
-    var self = this;
     // NO HAIRLINE RULES. Two lines with a word in the gap is ornament doing a
     // job contrast does better, on a screen already carrying a gold wordmark,
     // an ember ladder and a cold pair.
@@ -9677,10 +9681,11 @@
     forgePlate(ctx, D, 'cold');
     ctx.font = 'bold 16px system-ui, sans-serif';
     inkText(ctx, 'DAILY SIEGE', dcx, TT, '#f0eaff', 5, 2);
-    if (Lb.on() && (!this._lbTopT || Date.now() - this._lbTopT > 300000)) {
-      this._lbTopT = Date.now();
-      Lb.top(1, function (rows) { self._lbTop = (rows && rows[0]) || null; });
-    }
+    // NO WORLD-BEST FETCH HERE. It read the top row into `self._lbTop`, and the
+    // only thing that ever DREW _lbTop was deleted at 28d1e56 -- so every fresh
+    // visitor's first sight of the title fired Lb.top -> ensureSession ->
+    // POST /auth/v1/signup, minting a Supabase account to render nothing. It
+    // burned the signup quota to 429. Restore the row before restoring the call.
     // CAPTIONS INSIDE THE PLATE when there is room for them. Floating under it
     // they read as loose text belonging to the page rather than to the button,
     // and they were the only unhoused type on the screen.
@@ -9712,7 +9717,11 @@
       if (rvr && rvr.w) beaten++;
     }
     ctx.font = '11px system-ui, sans-serif';
-    inkText(ctx, 'same waves, two caves', ducx, UN, '#ffc9a8', 4, 1);
+    // NOT "two caves". The duel is ONE cavern split down the middle, a keep and
+    // a road each, both dragons on screen -- and "two caves" is the Bloons-inset
+    // shape VANUS rejected twice on the way to this one ("I don't see another
+    // dragon that's fighting against me"). The button was still selling it.
+    inkText(ctx, 'one cavern, two sides', ducx, UN, '#ffc9a8', 4, 1);
     ctx.font = '10px system-ui, sans-serif';
     inkText(ctx, beaten ? 'beaten ' + beaten + '/' + RIVAL_ORDER.length : 'four rivals waiting',
             ducx, US, 'rgba(255,201,168,0.75)', 4, 1);
@@ -10108,7 +10117,11 @@
     ctx.fillText('One cavern, split down the middle. The same raiders', WORLD_W / 2, 172);
     ctx.fillText('down both roads. Keep more gold than they do.', WORLD_W / 2, 188);
     ctx.fillStyle = 'rgba(232,203,180,0.6)'; ctx.font = '11px system-ui, sans-serif';
-    ctx.fillText(DUEL_WAVES + ' waves · no forge craft · all seven machines', WORLD_W / 2, 208);
+    // EIGHT. TOWER_ORDER gained `press` and neither this line nor
+    // towerUnlocked's comment followed it, so the screen undersold the shelf it
+    // actually hands you by one machine.
+    ctx.fillText('The Split Cavern · ' + DUEL_WAVES + ' waves · no forge craft · all eight machines',
+                 WORLD_W / 2, 208);
 
     for (var i = 0; i < RIVAL_ORDER.length; i++) {
       var rv = RIVALS[i], ry = DG.top + i * DG.pitch;
@@ -10148,10 +10161,13 @@
       ctx.fillStyle = ready ? 'rgba(232,203,180,0.8)' : 'rgba(122,106,92,0.8)';
       ctx.font = '11px system-ui, sans-serif';
       ctx.fillText(rv.blurb, DG.x + 14, ry + 46);
-      // tonight's ground — the arena rotates daily, so name it
+      // NO "tonight: <map>". The arena does NOT rotate -- every DUEL_ARENAS
+      // entry is map 5, The Split Cavern, ON PURPOSE (the duel is one shared
+      // cavern), so the line named the same ground on all four rows forever
+      // while its own comment promised a daily rotation. What actually differs
+      // per rival is the generator offset, and the header names the ground once.
       ctx.fillStyle = 'rgba(201,184,255,0.7)'; ctx.font = '10px system-ui, sans-serif';
-      ctx.fillText(ready ? 'tonight: ' + MAPS[duelMapFor(i)].name : 'no plan yet',
-                   DG.x + 14, ry + DG.h - 10);
+      if (!ready) ctx.fillText('no plan yet', DG.x + 14, ry + DG.h - 10);
       // the badge: beaten, and by how much
       ctx.textAlign = 'right';
       if (rec && rec.w) {
