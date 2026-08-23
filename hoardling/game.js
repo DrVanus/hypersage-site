@@ -5981,8 +5981,11 @@
     if (!img) return;
     var w = this.rivalWick || { x: keepOf(1).x, y: keepOf(1).y + 150 };
     var a = this._wickAnchor(w.x, w.y, this.rivalManTid === undefined ? -1 : this.rivalManTid);
-    // COAT, not the old hex `tint`. `tint` stays on the roster because it is
-    // still the rival's UI accent colour; her SPRITE is now a real colourway.
+    // COAT, not the old hex `tint`. Her SPRITE is a real colourway now; `tint`
+    // is her UI ACCENT -- her name and her difficulty pips on the duel select,
+    // and her name on the in-game duel strip. That sentence used to be here
+    // claiming the same thing while NOTHING read RIVALS[].tint at all, which is
+    // the repo's own definition of a bug: a comment is a claim.
     var plate = this._rivalPlate(img, this.rival.coat || 'amethyst');
     var hh = HERO_H * a.s, hw = hh * (img.width / img.height);
     // A CREWED DRAGON DOES NOT BOB: she is braced against a crank. The idle bob
@@ -8503,7 +8506,8 @@
       ctx.fillStyle = '#cfe0f0'; ctx.font = 'bold 15px Georgia, serif';
       ctx.textAlign = 'left';
       ctx.fillText(String(Math.max(0, this.rivalHoard)), dlx + 20, dsY + 19);
-      ctx.fillStyle = 'rgba(190,210,230,0.78)'; ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.fillStyle = this.rival.tint || 'rgba(190,210,230,0.78)';
+      ctx.font = 'bold 10px system-ui, sans-serif';
       ctx.fillText(this.rival.name.toUpperCase(), dlx + 52, dsY + 17);
       // the margin chip
       var mg = this.hoard - this.rivalHoard;
@@ -9618,7 +9622,10 @@
       uiPanel(ctx, DG.x, ry, DG.w, DG.h, 11);
       ctx.textAlign = 'left';
       // name + rank
-      ctx.fillStyle = ready ? '#ffe4cf' : '#7a6a5c';
+      // HER COLOUR, so four rivals read as four characters rather than four
+      // rows of the same text. Locked rows stay grey -- the accent is a reward
+      // for the row being live, not decoration on a row you cannot tap.
+      ctx.fillStyle = ready ? (rv.tint || '#ffe4cf') : '#7a6a5c';
       ctx.font = 'bold 17px system-ui, sans-serif';
       ctx.fillText(rv.name, DG.x + 14, ry + 24);
       ctx.fillStyle = ready ? 'rgba(255,190,150,0.75)' : 'rgba(140,124,110,0.7)';
@@ -9630,7 +9637,7 @@
       var pipX = rankX + ctx.measureText(rv.rank).width + 10;
       for (var pp = 0; pp < 3; pp++) {
         var lit = pp < (rv.pips | 0);
-        ctx.fillStyle = lit ? (ready ? 'rgba(255,150,60,0.95)' : 'rgba(120,104,90,0.8)')
+        ctx.fillStyle = lit ? (ready ? (rv.tint || 'rgba(255,150,60,0.95)') : 'rgba(120,104,90,0.8)')
                             : 'rgba(255,255,255,0.13)';
         ctx.beginPath(); ctx.arc(pipX + pp * 9, ry + 19, 3, 0, 6.283); ctx.fill();
       }
