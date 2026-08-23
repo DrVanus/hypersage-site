@@ -5422,11 +5422,16 @@
           // sound -- a tap on the equipped card is the most likely misfire.
           var was = Save.equipped(cslot.id);
           if (was && was.id === cit.id) return;
-          Save.equip(cslot.id, cit.id); Sfx.play('coin'); return;
+          Save.equip(cslot.id, cit.id); Sfx.play('coin');
+          if (cslot.id === 'finish') this._warmFinish();   // pay it here, not on the board
+          return;
         }
         // buy() spends the wallet and grants; equipping it immediately is the
         // only sane read of "I just bought this"
-        if (Save.buy(cslot.id, cit.id)) { Save.equip(cslot.id, cit.id); Sfx.play('upg'); }
+        if (Save.buy(cslot.id, cit.id)) {
+          Save.equip(cslot.id, cit.id); Sfx.play('upg');
+          if (cslot.id === 'finish') this._warmFinish();
+        }
         else Sfx.play('sell');
         return;
       }
@@ -5914,7 +5919,9 @@
     return w * (ws < 0 ? 0 : ws > 1 ? 1 : ws);
   }
   Game.prototype._bandPlate = function (img, item) {
-    var key = 'b:' + item.id + '@' + (img.src || '?') + '@' + (img.width | 0) + 'x' + (img.height | 0);
+    // `_srcKey` lets a DERIVED canvas identify itself: a downscaled plate has no
+    // .src, and without this every one of them would collide on '?'.
+    var key = 'b:' + item.id + '@' + (img._srcKey || img.src || '?') + '@' + (img.width | 0) + 'x' + (img.height | 0);
     var cache = this._tintCache || (this._tintCache = {});
     if (cache[key]) return cache[key];
     var cv = document.createElement('canvas');
@@ -6105,20 +6112,70 @@
   ///                        the plate's colour
   ///   4. the shop shelf chip, so what you buy matches what you get
   ///
-  /// `_rimFor` is deliberately NOT on that list: it throws the colour away
-  /// (source-in with a flat warm fill) and keeps only the alpha, so a finish
-  /// cannot change it and keying it would only waste memory. Checked, not
-  /// assumed -- an earlier note in HANDOFF claimed it needed keying.
+  /// `_rimFor` is not on that list, and the reason given here used to be the
+  /// wrong one. It was called "a machine plate consumer that happens to discard
+  /// colour" -- but it has exactly ONE call site, `_drawEnemy` at the separation
+  /// rim, with `sid = 'e_' + e.type`. It never touches a machine plate at all.
+  /// (It is also alpha-only, which is why keying it would be pointless even if
+  /// it did.) An earlier HANDOFF note claimed it needed keying; both that note
+  /// and its correction were reasoning about a path machines never take.
   /// `side` is the machine's OWNER. Without it a duel painted the RIVAL's brass
   /// in the player's finish -- the exact bug _sideItem was written to fix for
   /// the keep and the hoard, reintroduced here because a machine plate had
   /// never needed an owner before. `_sideItem` falls back to the player's save
   /// whenever this is not a duel, so every non-duel call is unchanged.
+  /// A MACHINE IS NEVER DRAWN LARGE, so it is never recoloured large. MEASURED:
+  /// the ten machine plates total 4.04 MEGAPIXELS, and the first frame the shop
+  /// shelf paints after a finish change misses the cache on all of them at once
+  /// -- a full per-pixel RGB->HSV->RGB round-trip over every one, in one frame,
+  /// at the start of every run. It is a visible hitch and a reviewer reproduced
+  /// it twice.
+  ///
+  /// The plates are 418-723px wide and the largest thing ever drawn from one is
+  /// ~180 device px (a level-2 machine at 54*(1+2*0.12) world units, on a 375pt
+  /// phone at 3x) or the Cavern's 92-unit preview. Capping the long side at 384
+  /// leaves better than 2x headroom on every use, cuts the recolour to ~1.2 MP
+  /// total, and cuts what _tintCache retains by the same factor -- which is the
+  /// other half of the same finding.
+  var FINISH_MAX = 384;
+  Game.prototype._finishSrc = function (img) {
+    var long = Math.max(img.width, img.height);
+    if (long <= FINISH_MAX) return img;
+    var cache = this._smallCache || (this._smallCache = {});
+    var k = (img.src || '?') + '@' + img.width + 'x' + img.height;
+    if (cache[k]) return cache[k];
+    var sc = FINISH_MAX / long;
+    var cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(img.width * sc));
+    cv.height = Math.max(1, Math.round(img.height * sc));
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    cv._srcKey = k;                       // it has no .src of its own — see _bandPlate
+    cache[k] = cv;
+    return cv;
+  };
+  /// WARM THE FINISH WHERE A BLIP IS FREE. Even capped, recolouring the ten
+  /// machine plates costs ~51ms (MEASURED on device; it was 155ms before the
+  /// cap). Paid on the first frame of a run that is nine dropped frames as the
+  /// shop shelf paints; paid on the frame the player taps a shop card, it lands
+  /// in a static menu where nothing is moving and nobody can see it.
+  ///
+  /// Called from the Cavern's equip, and deliberately NOT from anywhere the sim
+  /// can reach -- it is a draw-lane cache fill, and it reads Save.equipped.
+  var FINISH_PLATES = ['t_crystal', 't_ballista', 't_mimic', 't_perch', 't_rotor',
+                       't_brazier', 't_bellows', 't_press',
+                       't_ballista_base', 't_ballista_weapon'];
+  Game.prototype._warmFinish = function () {
+    for (var i = 0; i < FINISH_PLATES.length; i++) {
+      var im = ART.images[FINISH_PLATES[i]];
+      if (im) this._finishPlate(im, 0);
+    }
+  };
+
   Game.prototype._finishPlate = function (img, side) {
     if (!img) return img;
     var it = this._sideItem(side | 0, 'finish');
     if (!it || !it.bands) return img;
-    return this._bandPlate(img, it);
+    return this._bandPlate(this._finishSrc(img), it);
   };
 
   /// The equipped plate for a prop slot. `art` on the item is the seam a bought
