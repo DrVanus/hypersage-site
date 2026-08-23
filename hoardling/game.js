@@ -1839,13 +1839,13 @@
   // opposite strengths — Flint owns the open switchbacks, Ember owns the
   // chokepoints. That is a better matchup than a straight line anyway.
   var RIVALS = [
-    { id: 'tallow', tint: '#e0c070', coat: 'bone',   keep: 'stone',  hoard: 'copper', name: 'Tallow', rank: 'APPRENTICE', pips: 1, policy: 'rival_tallow', wick: false, purse: 0.85,
+    { id: 'tallow', tint: '#e0c070', coat: 'bone', finish: 'brass',   keep: 'stone',  hoard: 'copper', name: 'Tallow', rank: 'APPRENTICE', pips: 1, policy: 'rival_tallow', wick: false, purse: 0.85,
       blurb: 'Builds wide and cheap. Never upgrades a thing.' },
-    { id: 'flint',  tint: '#7fb0e0', coat: 'cobalt', keep: 'slate',  hoard: 'silver', name: 'Flint', rank: 'BROAD HAND', pips: 2, policy: 'rival_flint', wick: false, purse: 0.75,
+    { id: 'flint',  tint: '#7fb0e0', coat: 'cobalt', finish: 'iron', keep: 'slate',  hoard: 'silver', name: 'Flint', rank: 'BROAD HAND', pips: 2, policy: 'rival_flint', wick: false, purse: 0.75,
       blurb: 'Spreads his brass thin and wide. Loves a long road.' },
-    { id: 'ember',  tint: '#ff8a3c', coat: 'bronze', keep: 'sand',   hoard: 'coin', name: 'Ember', rank: 'DEEP HAND', pips: 2, policy: 'rival_ember', wick: false, purse: 0.95,
+    { id: 'ember',  tint: '#ff8a3c', coat: 'bronze', finish: 'gilt', keep: 'sand',   hoard: 'coin', name: 'Ember', rank: 'DEEP HAND', pips: 2, policy: 'rival_ember', wick: false, purse: 0.95,
       blurb: 'Few machines, all of them monsters. Wants a chokepoint.' },
-    { id: 'cinder', tint: '#b06adf', coat: 'amethyst', keep: 'basalt', hoard: 'gem', name: 'Cinder', rank: 'DRAKE', pips: 3, policy: 'rival_cinder', wick: true, purse: 1.15,
+    { id: 'cinder', tint: '#b06adf', coat: 'amethyst', finish: 'bone', keep: 'basalt', hoard: 'gem', name: 'Cinder', rank: 'DRAKE', pips: 3, policy: 'rival_cinder', wick: true, purse: 1.15,
       blurb: 'Works the cavern floor herself. Good luck.' },
   ];
   var RIVAL_ORDER = ['tallow', 'flint', 'ember', 'cinder'];
@@ -6109,9 +6109,14 @@
   /// (source-in with a flat warm fill) and keeps only the alpha, so a finish
   /// cannot change it and keying it would only waste memory. Checked, not
   /// assumed -- an earlier note in HANDOFF claimed it needed keying.
-  Game.prototype._finishPlate = function (img) {
+  /// `side` is the machine's OWNER. Without it a duel painted the RIVAL's brass
+  /// in the player's finish -- the exact bug _sideItem was written to fix for
+  /// the keep and the hoard, reintroduced here because a machine plate had
+  /// never needed an owner before. `_sideItem` falls back to the player's save
+  /// whenever this is not a duel, so every non-duel call is unchanged.
+  Game.prototype._finishPlate = function (img, side) {
     if (!img) return img;
-    var it = Save.equipped('finish');
+    var it = this._sideItem(side | 0, 'finish');
     if (!it || !it.bands) return img;
     return this._bandPlate(img, it);
   };
@@ -7394,13 +7399,13 @@
   /// all, so a machine skinned after the first draw would keep serving brass
   /// halves for the life of the page -- the same defect the _bgCache key had
   /// with the road skin.
-  Game.prototype._turretFor = function (spriteId, tt) {
+  Game.prototype._turretFor = function (spriteId, tt, side) {
     if (!tt || !tt.turret) return null;
     this._turretCache = this._turretCache || {};
-    var fin = Save.equipped('finish');
+    var fin = this._sideItem(side | 0, 'finish');
     var key = spriteId + '@' + ((fin && fin.id) || 'brass');
     if (this._turretCache[key] !== undefined) return this._turretCache[key];
-    var img = this._finishPlate(ART.images[spriteId]);
+    var img = this._finishPlate(ART.images[spriteId], side);
     if (!img || !img.width) return (this._turretCache[key] = null);
     var w = img.width, h = img.height;
     var cut = Math.round(h * tt.turret.cut), F = Math.max(2, Math.round(h * 0.012));
@@ -7486,7 +7491,7 @@
         ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 33 + ocp2 * 4, 16 + ocp2 * 3, 0, 0, 6.283); ctx.stroke();
       }
     }
-    var timg = this._finishPlate(ART.images[spriteId]);
+    var timg = this._finishPlate(ART.images[spriteId], tw.own);
     var tt2 = TOWER_TYPES[tw.type];
     if (timg) {
       // recoil press-down right after firing + gentle idle breathing
@@ -7624,9 +7629,9 @@
       // finish threaded only through `timg` would leave the crossbow brass on
       // an otherwise blackened board.
       var rig = tt2.aimRig;
-      var rigB = rig && this._finishPlate(ART.images[rig.base]);
-      var rigW = rig && this._finishPlate(ART.images[rig.weapon]);
-      var split = (rig && rigB && rigW) ? null : this._turretFor(spriteId, tt2);
+      var rigB = rig && this._finishPlate(ART.images[rig.base], tw.own);
+      var rigW = rig && this._finishPlate(ART.images[rig.weapon], tw.own);
+      var split = (rig && rigB && rigW) ? null : this._turretFor(spriteId, tt2, tw.own);
       ctx.save();
       ctx.translate(p.x, p.y + 8);
       ctx.scale((2 - tsq) * fSign, tsq);
@@ -9364,7 +9369,14 @@
       // this seam. Fading the top ~35% of the slice to nothing lets his feet
       // sink INTO the coins instead of being sliced off by them. Cached: the
       // feathered lip is built once, not per frame.
-      var lip = this._titleLip;
+      // KEYED ON THE PLATE OBJECT. This was cached under NO key at all, so the
+      // title screen kept the front lip of whichever hoard skin happened to
+      // paint first -- equip Gem Seam from the Cavern, come back, and the pile
+      // was gems with a Coin Bank lip. Object identity is the right key rather
+      // than the item id, because it also catches the loading-fallback ->
+      // decoded-art swap that an id would miss; _propPlate and _bandPlate both
+      // memoize, so the reference is stable per item and this cannot thrash.
+      var lip = (this._titleLipSrc === mound) ? this._titleLip : null;
       if (!lip) {
         lip = document.createElement('canvas');
         lip.width = mound.width; lip.height = Math.round(mound.height * 0.22);
@@ -9377,7 +9389,7 @@
         lg.addColorStop(1, 'rgba(0,0,0,0)');
         lx.fillStyle = lg;
         lx.fillRect(0, 0, lip.width, lip.height * 0.38);
-        this._titleLip = lip;
+        this._titleLip = lip; this._titleLipSrc = mound;
       }
       ctx.drawImage(lip, lX, 300 - lH * 0.22, lW, lH * 0.22);
     }
@@ -9952,6 +9964,18 @@
     var r = this.result || {};
     ctx.fillStyle = 'rgba(12,7,5,0.75)';
     ctx.fillRect(-40, -40, WORLD_W + 80, WORLD_H + 80);
+    // A COLUMN SCRIM UNDER THE COPY. 0.75 over the board is enough on a
+    // campaign map; a DUEL ends over two full caverns -- two keeps, two hoards
+    // and up to fourteen machines -- and every line of this screen was being
+    // read against that. The column is soft-edged top and bottom so it reads as
+    // depth rather than as a panel, and it leaves the board visible either
+    // side, which is the thing worth looking at after a duel.
+    var rs = ctx.createLinearGradient(0, 270, 0, 700);
+    rs.addColorStop(0, 'rgba(10,6,4,0)');
+    rs.addColorStop(0.10, 'rgba(10,6,4,0.62)');
+    rs.addColorStop(0.86, 'rgba(10,6,4,0.62)');
+    rs.addColorStop(1, 'rgba(10,6,4,0)');
+    ctx.fillStyle = rs; ctx.fillRect(18, 270, WORLD_W - 36, 430);
     ctx.textAlign = 'center';
     ctx.fillStyle = r.won ? '#9ef58f' : '#ff7b7b';
     ctx.font = 'bold 42px Georgia, serif';
@@ -10127,9 +10151,20 @@
         // HEIGHT-first, like _drawHero: the plate's aspect is not a constant of
         // the universe (it changed the day the clipped tail was restored), so
         // sizing off WIDTH silently rescaled him on this screen.
-        var rh = 109.3, rw = rh * (rimg.width / rimg.height);
-        var rb = Math.sin(this.worldT * 4) * 2;
-        ctx.drawImage(rimg, WORLD_W / 2 - rw / 2, 668 - rh + rb, rw, rh);
+        // HE SITS BELOW THE STORY, WHATEVER LENGTH IT RAN TO. At a fixed
+        // 109.3 tall bottom-anchored at 668 his head starts at 558.7 -- and a
+        // duel with two leak rows puts the story's two lines at 566 and 587,
+        // straight through him. The story is the beat this whole screen is for,
+        // so it wins: Wick takes what is left between it and 'tap for menu',
+        // and if that is less than 54 he does not draw at all, because a
+        // squashed thumbnail of the hero is worse than no hero.
+        var wickTop = Math.max(storyY + 31, 540);
+        var rh = Math.min(109.3, 668 - wickTop);
+        if (rh >= 54) {
+          var rw = rh * (rimg.width / rimg.height);
+          var rb = Math.sin(this.worldT * 4) * 2;
+          ctx.drawImage(rimg, WORLD_W / 2 - rw / 2, 668 - rh + rb, rw, rh);
+        }
       }
     }
     ctx.font = 'bold 15px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
