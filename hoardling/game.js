@@ -1789,10 +1789,12 @@
   // on 0, which makes the duel trivially won by surviving at all. Not every
   // map makes a versus map; that is true of every game with a versus mode, and
   // it is cheaper to say so than to re-tune a road authored for a hand-built
-  // campaign. The Undergallery and the Coldroot Stair take three arenas each.
+  // campaign. (HISTORIC: "the Undergallery and the Coldroot Stair take three
+  // arenas each" was true of the one-road arenas this paragraph was written
+  // for. All six arenas are map 5 now -- see the orphan note below.)
   // Because a map is now stated rather than derived, a seed is free to appear
   // on whichever road suits it.
-  // Interleaved m1/m2 ON PURPOSE: tonight's arena is (day + rivalIdx) %% 6,
+  // Interleaved m1/m2 ON PURPOSE: tonight's arena is (day + rivalIdx) % 6,
   // so four consecutive indices are what the picker shows at once. Grouped
   // by map, that put three of the four rivals on the same road every night.
   // This list is now free to be reordered: nothing is indexed against it any
@@ -1800,11 +1802,22 @@
   // THE ARENAS ARE NOW THEIR OWN GROUND. Every one of these used to be map 1 or
   // map 2 -- the two boards the campaign already walks you through -- so a duel
   // was a level you had played, with a scoreboard. VANUS: "why is our dual game
-  // just the same as any other game and every map is all the same". Maps 3 and
-  // 4 are duel-only and are the first two-road maps in the game: the Twin
-  // Throats merges its roads into one climb (7 of 10 pads reach both, so the
-  // merge is the map) and the Sunder never merges at all (9 of 10 pads reach
-  // exactly one road, so you fund two fronts or lose one).
+  // just the same as any other game and every map is all the same".
+  //
+  // *** MAPS 3 AND 4 ARE ORPHANED. READ THIS BEFORE BELIEVING ANYTHING ABOUT
+  // THEM. *** The Twin Throats and the Sunder were built as the duel's two-road
+  // arenas and this comment described them as such for two days after they
+  // stopped being used. Every DUEL_ARENAS entry below is `map: 5` -- The Split
+  // Cavern, ONE cavern down the middle with a keep and a road each and both
+  // dragons on screen, which is the shape VANUS actually asked for and the
+  // second one built (the two-road maps read to him as the two PLAYERS' lanes,
+  // which is why the split road confused him). So maps 3 and 4 are reachable
+  // from NOTHING: the campaign clamps to 0..CAMPAIGN_MAPS-1, the daily is
+  // seed % CAMPAIGN_MAPS, and the duel is map 5 six times over. That is 20 pads
+  // and 12 torches of hand-placed level art drawn by no code path.
+  // They are KEPT, not deleted, because wiring one back costs a wave table and
+  // a campaign row and the art is already done. Nothing in the game may claim
+  // they are in it until that happens.
   var DUEL_ARENAS = [
     // at 3-4, not the 5-10 the one-road arenas used. Swept: on two roads at>=5
     // wipes every rival but cinder, which is the DEAD-arena pattern (see the
@@ -2395,7 +2408,21 @@
   // every path silently no-ops. NOTHING here touches the seeded stream.
   var Lb = (function () {
     var cfg = (typeof window !== 'undefined' && window.HOARDLING_LB) || null;
-    function on() { return !!(cfg && cfg.url && cfg.key && cfg.board); }
+    /// THE POLICY SAYS "OPTIONAL" AND THERE WAS NO WAY TO OPT OUT. The live
+    /// privacy page reads "Hoardling has an optional Daily Siege leaderboard",
+    /// while every Daily run posted automatically with no control anywhere in
+    /// the game. Two ways to make that sentence true; this is the one that
+    /// keeps the promise instead of retracting it.
+    /// configured() is the old on(): "is a board wired up at all". on() is the
+    /// question every caller actually meant: "may we talk to it".
+    function configured() { return !!(cfg && cfg.url && cfg.key && cfg.board); }
+    function optedOut() {
+      try { return localStorage.getItem('hoardling.lbOut') === '1'; } catch (e) { return false; }
+    }
+    function setOptOut(v) {
+      try { localStorage.setItem('hoardling.lbOut', v ? '1' : '0'); } catch (e) {}
+    }
+    function on() { return configured() && !optedOut(); }
     var sess = null;
     try { sess = JSON.parse(localStorage.getItem('hoardling.sb') || 'null'); } catch (e) {}
     function saveSess() { try { localStorage.setItem('hoardling.sb', JSON.stringify(sess)); } catch (e) {} }
@@ -2511,7 +2538,9 @@
       });
     }
     if (typeof window !== 'undefined') window.addEventListener('online', function () { flush(); });
-    return { on: on, beginRun: beginRun, finishRun: finishRun, top: top, tag: tag, safeName: safeName, flush: flush };
+    return { on: on, configured: configured, optedOut: optedOut, setOptOut: setOptOut,
+             beginRun: beginRun, finishRun: finishRun, top: top, tag: tag,
+             safeName: safeName, flush: flush };
   })();
 
   // Placeholder + preview tint per enemy (shared by the enemy drawer and the
@@ -5468,6 +5497,18 @@
     }
     if (this.state === 'won' || this.state === 'lost') {
       if (this.resultLockT > 0) return;      // a mid-battle tap can't skip the screen
+      // THE OPT-OUT IS TESTED FIRST, because every other pixel on this screen
+      // dismisses it. Its rect is written by the drawer, so it exists only on
+      // the frames the control is actually on screen.
+      var lo = this._lbOptRect;
+      if (lo && w.x > lo.x && w.x < lo.x + lo.w && w.y > lo.y && w.y < lo.y + lo.h) {
+        Lb.setOptOut(!Lb.optedOut());
+        if (Lb.on()) { var slf = this; this.lbRows = 'loading';
+                       Lb.top(10, function (rows) { slf.lbRows = rows || 'error'; }); }
+        else this.lbRows = null;
+        Sfx.play('upg');
+        return;
+      }
       // Leaving a duel drops OUT of duel mode: a reset that stayed in 'duel'
       // would carry this.rival back to the title, and every later reset would
       // re-derive an arena for a fight nobody asked for.
@@ -10396,7 +10437,7 @@
   /// The lowest baseline anything on the result screen may use. 'tap for menu'
   /// sits 18 under it; Wick is bottom-anchored 62 above it. Named once so the
   /// ladder, the hero and the footer cannot each guess.
-  var RESULT_FOOT = 730;
+  var RESULT_FOOT = 706;
 
   Game.prototype._drawResult = function (ctx) {
     var r = this.result || {};
@@ -10586,6 +10627,21 @@
       ctx.fillText('Wick will not let it happen twice.', CX, storyY + 21);
     }
     // daily: the global best-runs ladder (names render through safeName ONLY)
+    // THE CONTROL THE PRIVACY PAGE ALREADY PROMISED. It is drawn whenever a
+    // board is CONFIGURED, not whenever we are posting -- opted out, it is the
+    // only way back in, and a toggle that disappears when you use it is not a
+    // toggle. Its rect is on the geometry so the tap handler reads the same one.
+    this._lbOptRect = null;
+    if (this.mode === 'daily' && Lb.configured()) {
+      var optTxt = Lb.optedOut() ? 'not posting — tap to join the ladder'
+                                 : 'posting as ' + Lb.tag() + ' — tap to stop';
+      ctx.font = '11px system-ui, sans-serif';
+      var optW = ctx.measureText(optTxt).width + 28;
+      var optY = RESULT_FOOT - 6;
+      this._lbOptRect = { x: CX - optW / 2, y: optY - 15, w: optW, h: 26 };
+      ctx.fillStyle = 'rgba(255,233,196,0.40)';
+      ctx.fillText(optTxt, CX, optY);
+    }
     if (this.mode === 'daily' && Lb.on()) {
       // THE LADDER FOLLOWS THE STORY, and takes only the rows that fit above
       // 'tap for menu'. It was pinned at 584/606+n*17, so a daily that earned
@@ -10649,7 +10705,7 @@
       }
     }
     ctx.font = 'bold 15px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
-    ctx.fillText('tap for menu', CX, RESULT_FOOT + 18);
+    ctx.fillText('tap for menu', CX, RESULT_FOOT + 42);
     ctx.textAlign = 'left';
   };
 
