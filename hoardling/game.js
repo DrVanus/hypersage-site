@@ -8583,8 +8583,12 @@
   // overflowing off the bottom of the screen.
   function duelGeom() {
     var n = RIVAL_ORDER.length;
-    var top = 226, backY = 664, gap = 10;
-    var pitch = Math.min(104, Math.floor((backY - 24 - top + gap) / n));
+    // 88, not 104. At 104 the row held its content in the top 44px and left a
+    // 30px dead band above the footer line, which reads as three separate
+    // cards' worth of air inside one card. 78px of body is still comfortably
+    // over the 44pt tap floor.
+    var top = 232, backY = 664, gap = 10;
+    var pitch = Math.min(88, Math.floor((backY - 24 - top + gap) / n));
     return { top: top, pitch: pitch, h: pitch - gap, backY: backY,
              x: 30, w: WORLD_W - 60 };
   }
@@ -9796,6 +9800,17 @@
     ctx.fillStyle = 'rgba(12,7,5,0.85)';
     ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
     ctx.textAlign = 'center';
+    // A SCRIM UNDER THE HEADER. The 0.85 page wash is not enough on its own:
+    // this screen sits over the title room, so the three lines of copy land on
+    // the painted keep and its gold, which is the busiest, brightest patch on
+    // the screen. A soft vertical fade behind just the header block keeps the
+    // art visible and the words readable, without flattening the whole page.
+    var hg = ctx.createLinearGradient(0, 96, 0, 224);
+    hg.addColorStop(0, 'rgba(10,6,4,0)');
+    hg.addColorStop(0.35, 'rgba(10,6,4,0.72)');
+    hg.addColorStop(0.75, 'rgba(10,6,4,0.72)');
+    hg.addColorStop(1, 'rgba(10,6,4,0)');
+    ctx.fillStyle = hg; ctx.fillRect(0, 96, WORLD_W, 128);
     ctx.fillStyle = '#ffc9a8'; ctx.font = 'bold 34px Georgia, serif';
     ctx.fillText('DUEL', WORLD_W / 2, 142);
     ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
@@ -9834,28 +9849,42 @@
                             : 'rgba(255,255,255,0.13)';
         ctx.beginPath(); ctx.arc(pipX + pp * 9, ry + 19, 3, 0, 6.283); ctx.fill();
       }
+      // THE BLURB OWNS ITS WHOLE LINE. 'best margin +N' used to be right-aligned
+      // on the SAME baseline, and that was not a near miss -- MEASURED at the
+      // shipped fonts, the longest rival blurb ("Few machines, all of them
+      // monsters. Wants a chokepoint.") is ~314px and the margin text ~78px, in
+      // a track only 346px wide. A guaranteed ~46px collision on every beaten
+      // rival with a long blurb, which is exactly what VANUS photographed.
+      // The margin moved down to share the bottom baseline with 'tonight:',
+      // where the row was empty anyway -- so the two can never meet again
+      // whatever anybody writes in a blurb.
       ctx.fillStyle = ready ? 'rgba(232,203,180,0.8)' : 'rgba(122,106,92,0.8)';
       ctx.font = '11px system-ui, sans-serif';
-      ctx.fillText(rv.blurb, DG.x + 14, ry + 42);
+      ctx.fillText(rv.blurb, DG.x + 14, ry + 46);
       // tonight's ground — the arena rotates daily, so name it
       ctx.fillStyle = 'rgba(201,184,255,0.7)'; ctx.font = '10px system-ui, sans-serif';
       ctx.fillText(ready ? 'tonight: ' + MAPS[duelMapFor(i)].name : 'no plan yet',
-                   DG.x + 14, ry + DG.h - 8);
+                   DG.x + 14, ry + DG.h - 10);
       // the badge: beaten, and by how much
       ctx.textAlign = 'right';
       if (rec && rec.w) {
         ctx.fillStyle = '#9ef58f'; ctx.font = 'bold 12px system-ui, sans-serif';
         ctx.fillText('BEATEN', DG.x + DG.w - 14, ry + 24);
         ctx.fillStyle = 'rgba(158,245,143,0.7)'; ctx.font = '10px system-ui, sans-serif';
-        ctx.fillText('best margin +' + (rec.m | 0), DG.x + DG.w - 14, ry + 40);
+        ctx.fillText('best margin +' + (rec.m | 0), DG.x + DG.w - 14, ry + DG.h - 10);
       } else if (ready) {
         ctx.fillStyle = 'rgba(255,201,168,0.85)'; ctx.font = 'bold 12px system-ui, sans-serif';
-        ctx.fillText('FIGHT', DG.x + DG.w - 14, ry + 30);
+        ctx.fillText('FIGHT', DG.x + DG.w - 14, ry + 24);
       }
       ctx.textAlign = 'center';
     }
+    // BACK WEARS THE PLATE EVERY OTHER ROOM'S BACK WEARS. It was bare text
+    // here, which reads as a label rather than a control -- and this is the one
+    // screen where the text sits over painted cavern floor instead of a panel.
+    forgePlate(ctx, { x: WORLD_W / 2 - 70, y: DG.backY, w: 140, h: 40 }, 'util');
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#e8cbb4'; ctx.font = 'bold 15px system-ui, sans-serif';
-    ctx.fillText('BACK', WORLD_W / 2, DG.backY + 26);
+    inkText(ctx, 'BACK', WORLD_W / 2, DG.backY + 26, '#e8cbb4', 3, 1);
     ctx.textAlign = 'left';
   };
 
