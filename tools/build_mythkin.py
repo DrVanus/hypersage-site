@@ -507,11 +507,17 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
          "Mythkin Plus raises all of those, answers on a more capable model, and "
          "is what lets you publish a story to the marketplace. Prices are whatever "
          "the App Store shows you."),
-        ("What are sparks?",
-         "A separate one-off purchase, not a subscription. A spark pays for one "
-         "painting — a scene moment or a story cover. They do not expire. Because "
-         "they are a consumable they are not restored by Restore purchases, so an "
-         "unspent balance stays on the device that bought it."),
+        # SPARKS FAQ REMOVED 2026-08-22, and it must stay out until they can be
+        # BOUGHT. Both consumables sit in MISSING_METADATA on App Store Connect
+        # with no price schedule, so StoreKit prices neither and the app's own
+        # sparks row — gated on SELLABLE-or-OWNED, app.js:8973 — correctly never
+        # renders at 1.0. A public FAQ answering "what are sparks?" for a
+        # feature nobody can reach or see is the site describing a product the
+        # binary does not have. It also described their persistence in terms the
+        # app contradicts on screen: the app says a reinstall leaves the balance
+        # unreachable until support relinks it, not that it "stays on the
+        # device". Restore this entry in the same change that gives the
+        # consumables a price.
         ("Do the characters really remember?",
          "Yes, and you can audit it. Facts a character learns are listed on a "
          "memory screen, each traceable back to the message it came from, and each "
