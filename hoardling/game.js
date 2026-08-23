@@ -6895,8 +6895,21 @@
     }
     ctx.restore();
 
-    // soft seams where the brighter sim world meets the dimmed band scenery
-    if (v.oy > 2) {
+    // Soft seams where the brighter sim world meets the DIMMED BAND SCENERY --
+    // and only then. A full-screen state paints its own backdrop across the
+    // whole viewport (see the `menuish` branch above, and _drawCavernRoom /
+    // _drawForge / _drawDuelSelect / _drawTrials, which all fill
+    // -v.ox-60 .. v.w+120), so there is no band to feather INTO: the bottom
+    // gradient just laid a 24-unit ramp to 50% black across world y 770..794
+    // and then STOPPED DEAD, leaving a hard edge at 794 on every screen with a
+    // letterbox band. It was invisible while nothing was drawn below 770.
+    // MEASURED once the title's utility bar reached down there: a +6 luminance
+    // step straight across the bar, 41% of the way down it, at world y 794 on
+    // every viewport height tested -- and it moved with the WORLD, not with the
+    // device pixels, which is what ruled out a capture artifact.
+    // _drawResult is the exception and correctly still gets the feather: it
+    // fills only WORLD_W+80 x WORLD_H+80, so it really does sit on the bands.
+    if (v.oy > 2 && !this._ownsViewport()) {
       var gt2 = ctx.createLinearGradient(0, v.oy - 14, 0, v.oy + 10);
       gt2.addColorStop(0, 'rgba(10,6,4,0.5)');
       gt2.addColorStop(1, 'rgba(10,6,4,0)');
@@ -8669,119 +8682,143 @@
              backY: backY };
   }
 
-  /// TITLE VARIANTS. `__game.titleVariant(n)` in a dev build; 0 is what shipped.
-  /// They live in _titleGeom rather than in the drawer because the TAP HANDLER
-  /// reads this same function -- one geometry, two readers -- so a variant
-  /// physically cannot move a control away from its own hit box.
-  ///   0  shipped: three equal ember rows, two section rules, floating captions
-  ///   1  CONTINUE-LED: the row you should play next is tall and lit, the others
-  ///      compact and quiet; captions move INSIDE the Tonight plates
-  ///   2  QUIET CHROME: same sizes as 0, but only the next row is ember and the
-  ///      rules go -- hierarchy from contrast instead of from ornament
-  ///   3  ONE BAR: 1's ladder + 2's plain labels, and the four brass chips
-  ///      become one divided chrome bar so the wallet can be read at a glance
-  /// The SHIPPED layout. 0 is what the screen looked like before this pass and
-  /// is kept only so a variant can be compared against it in a dev build.
-  var TITLE_VARIANT = 3;
+  /// THE TITLE LAYOUT. One layout, not four: variants 0-2 were built to be
+  /// compared and are in git (see "The home screen: one lit row, plain labels,
+  /// and one chrome bar"). Keeping three dead ladders alive while the live one
+  /// learned to stretch would have tripled the surface for no reader.
+  ///
+  /// It lives here rather than in the drawer because the TAP HANDLER reads this
+  /// same function -- one geometry, two readers -- so a layout change physically
+  /// cannot move a control away from its own hit box.
+  ///
+  /// THE SCREEN IS NOT THE DESIGN BOX. Everything below the art is anchored to
+  /// the REAL bottom of the viewport, not to WORLD_H. draw() translates by
+  /// v.oy, so the visible band in world coords runs from -v.oy to v.h - v.oy;
+  /// on a 19.5:9 phone that is 65 units of extra room above the box and 65
+  /// below it. Laid out in the fixed 420x780 box the utility row ended at 712
+  /// and left a MEASURED 133.3 world units -- 14.6% of an iPhone 15 Pro's
+  /// screen -- of dead black under it, which is what VANUS saw as "it doesnt
+  /// stretch to the bottom of the screen either it looks broken". The in-game
+  /// HUD already anchored its shop bar this way (`shopY: v.h - bm - 56`); the
+  /// title never did, and nothing measured the gap because every capture was
+  /// shot at 420x780 -- a rig that only renders the design box cannot see a
+  /// design-box bug.
   Game.prototype._nextLevel = function () {
     for (var i = 0; i < CAMPAIGN_MAPS; i++) {
       if (Save.unlocked(i) && (Save.data.stars[i] | 0) < 3) return i;
     }
     return -1;
   };
+
+  /// The stack, BOTTOM-MOST FIRST. `d` is what the piece measured in the 780
+  /// box; `f` is its share of whatever the real screen has spare. THE FLEXES
+  /// SUM TO 1, so on a screen exactly the size of the design box every piece
+  /// comes out at the number it was authored with and the ladder still starts
+  /// at y 368 -- the art above it never moves, on any phone. `cap` is a
+  /// backstop for an aspect nobody has shipped yet, not a working limit: at
+  /// 21:9, the tallest phone aspect sold, the largest piece lands well inside
+  /// its cap. Anything the caps refuse becomes bottom margin rather than being
+  /// tipped silently into whichever piece happens to be last.
+  var TITLE_STACK = [
+    { k: 'bar',     d: 56, f: 0.12, cap: 76 },   // the utility bar
+    { k: 'gapBar',  d: 32, f: 0.06 },            // ... under the Tonight pair
+    { k: 'ton',     d: 66, f: 0.19, cap: 96 },   // DAILY SIEGE / DUEL plates
+    { k: 'gapTon',  d: 16, f: 0.05 },            // ... under the TONIGHT label
+    { k: 'gapRule', d: 18, f: 0.07 },            // ... under the last row
+    { k: 'rowGap',  d: 16, f: 0.12, cap: 40 },   // TWO gaps between three rows
+    { k: 'rowSm',   d: 80, f: 0.29, cap: 124 },  // TWO compact rows
+    { k: 'rowBig',  d: 60, f: 0.10, cap: 84 },   // the CONTINUE row
+  ];
+  var TITLE_ROWS_TOP = 368;      // the art ends at the tagline (baseline 326)
+  var TITLE_SLACK_MAX = 240;     // past this the screen gets margin, not a bar the size of a door
+
   Game.prototype._titleGeom = function () {
-    var s = this.view.scale || 1;
+    var v = this.view, s = v.scale || 1;
     var minH = Math.max(62, 44 / s);
-    var tv = (this._tvar == null) ? TITLE_VARIANT : (this._tvar | 0);
-    if (tv === 1 || tv === 3) {
-      // The tagline's baseline is 326, so a section label at 336 sits 10px under
-      // it and the two read as one crowded block. 352 gives the art room to end.
-      var nx = this._nextLevel();
-      var rows1 = [], yy = 368;
-      for (var q = 0; q < CAMPAIGN_MAPS; q++) {
-        var hq = (q === nx) ? 60 : 40;
-        var padq = Math.max(0, (minH - hq) / 2);
-        rows1.push({ x: 42, y: yy, w: 336, h: hq,
-                     hx: 38, hy: yy - padq, hw: 344, hh: Math.max(hq, minH), big: q === nx });
-        yy += hq + 8;
-      }
-      var tY = yy + 26;
-      function half1(x, y, w, h) {
-        var pad = Math.max(0, (minH - h) / 2);
-        return { x: x, y: y, w: w, h: h, hx: x - 4, hy: y - pad, hw: w + 8, hh: Math.max(h, minH) };
-      }
-      // VARIANT 3 replaces four brass chips with ONE bar divided by hairlines.
-      // The rivets are what squeezed the labels (see the note below), and a bar
-      // has four of them for the whole row instead of sixteen: MEASURED by
-      // check_pill_row_fits, a 94-wide chip leaves 60 units of clear label
-      // track and a 99-wide bar cell leaves 65 at the ends (one bar rivet
-      // crosses it) and 91 in the middle two, which cross nothing.
-      var bar3 = (tv === 3);
-      var BX = 12, BW = WORLD_W - 24;
-      var pills1 = [], PW1 = bar3 ? BW / 4 : Math.floor((BW - 18) / 4);
-      for (var p1 = 0; p1 < 4; p1++) {
-        // PULLED UP to close the dead band. With the Tonight plates ending at
-        // ~626 a pill row at 676 left 50px of nothing, which read as the screen
-        // running out rather than as breathing room.
-        var px1 = bar3 ? BX + p1 * PW1 : BX + p1 * (PW1 + 6);
-        // Bar cells ABUT, so their hit rects are inset by 1 on each side rather
-        // than inflated: hit() is inclusive on both bounds, and two touching
-        // rects give the shared column to whichever branch is tested first.
-        pills1.push({ x: px1, y: 656, w: PW1, h: 56,
-                      hx: px1 + (bar3 ? 1 : -3), hy: 656 - (minH - 56) / 2,
-                      hw: PW1 - (bar3 ? 2 : -6), hh: minH });
-      }
-      return { rows: rows1, ruleY: 352, tonightY: tY - 16,
-               daily: half1(42, tY, 162, 66), duel: half1(216, tY, 162, 66),
-               pills: pills1, bar: bar3 ? { x: BX, y: 656, w: BW, h: 56 } : null,
-               variant: tv };
+
+    // The world y of the lowest pixel a control may occupy. Same safe-area rule
+    // as _hudGeom's bottom stack, so the two screens agree about the home
+    // indicator instead of each guessing at it.
+    var bm = Math.max(10, (v.safeB || 0) + 6);
+    var bot = (v.h || WORLD_H) - (v.oy || 0) - bm;
+
+    var design = 0, i;
+    for (i = 0; i < TITLE_STACK.length; i++) design += TITLE_STACK[i].d;
+    var slack = Math.min(TITLE_SLACK_MAX, Math.max(0, bot - design - TITLE_ROWS_TOP));
+
+    var H = {};
+    for (i = 0; i < TITLE_STACK.length; i++) {
+      var e = TITLE_STACK[i];
+      var got = e.d + slack * e.f;
+      if (e.cap && got > e.cap) got = e.cap;
+      H[e.k] = got;
     }
-    function row(y, h) {
-      var pad = (minH - h) / 2;
-      return { x: 80, y: y, w: 260, h: h,
-               hx: 62, hy: y - pad, hw: 296, hh: minH };
+    // LAID OUT DOWNWARD FROM THE LADDER, not upward from the floor. Both land
+    // the bar exactly on `bot` while no cap binds -- but walking up from the
+    // floor makes a bound cap push the LADDER down, which moves the art, and
+    // the caps exist to protect a screen so tall that moving the art is the
+    // last thing you want. Downward, a bound cap becomes bottom margin, which
+    // is what it was always meant to be.
+    var top = TITLE_ROWS_TOP;
+
+    var rowBig = H.rowBig, rowSm = H.rowSm / 2, rowGap = H.rowGap / 2;
+    var nx = this._nextLevel();
+    var rows = [], yy = top;
+    for (var q = 0; q < CAMPAIGN_MAPS; q++) {
+      var hq = (q === nx) ? rowBig : rowSm;
+      var padq = Math.max(0, (minH - hq) / 2);
+      rows.push({ x: 42, y: yy, w: 336, h: hq,
+                  hx: 38, hy: yy - padq, hw: 344, hh: Math.max(hq, minH), big: q === nx });
+      yy += hq + rowGap;
     }
-    // FOUR pills now (FORGE / TRIALS / CAVERN / SOUND). Re-derived rather than
-    // extended: a fourth 120-wide pill on the old 102 pitch ends at x=474 on a
-    // 420-wide world and would have clipped off the screen silently, which is
-    // exactly how the shop shelf lost its 8th chip.
-    // THE RIVETS DEFINE THE SAFE TRACK, not the pill width. forgePlate strikes
-    // four rivets at x+11 and x+w-11 (r 2.4), so a 93-wide pill has only 63px a
-    // label may use -- and "TRIALS 3/18" is ~70px and "CAVERN 9000" ~75px at the
-    // old bold 12px. Both ran straight through the right-hand rivets, which is
-    // what VANUS photographed. The old single line also sat at pcy+17, level
-    // with the BOTTOM rivets, so it collided vertically as well.
-    // 420 - 24 margins across 4 pills + 3 gutters of 6 = 94 each, 64 of safe
-    // track, and 56 tall so two short centred lines clear both rivet rows.
-    var pillY = 672, pillH = 56, pillPad = (minH - pillH) / 2;
-    var pills = [];
-    for (var i = 0; i < 4; i++) {
-      pills.push({ x: 12 + i * 100, y: pillY, w: 94, h: pillH,
-                   hx: 12 + i * 100 - 3, hy: pillY - pillPad, hw: 100, hh: minH });
-    }
-    // TONIGHT band: two half-width plates instead of one full-width row.
-    // WORLD_H is 780 and the campaign ladder already spends 348..540; a fifth
-    // full-width row needs 62 more (minH is the 44pt floor, and it BINDS on
-    // every phone) and there are only 35 free above the utility pills. Two
-    // columns cost zero vertical. They also read correctly: the Daily and the
-    // Duel are both "one fight tonight" against the campaign's ladder.
-    // Hit boxes are 38..208 and 212..382 — a deliberate 4px gutter, because
-    // hit() is inclusive on both bounds and touching rects would make the
-    // shared edge belong to whichever branch the tap handler tested first.
+    var tY = yy - rowGap + H.gapRule + H.gapTon;      // top of the Tonight plates
     function half(x, y, w, h) {
-      var pad = (minH - h) / 2;
-      return { x: x, y: y, w: w, h: h, hx: x - 4, hy: y - pad, hw: w + 8, hh: minH };
+      var pad = Math.max(0, (minH - h) / 2);
+      return { x: x, y: y, w: w, h: h, hx: x - 4, hy: y - pad, hw: w + 8, hh: Math.max(h, minH) };
     }
-    return { rows: [row(368, 52), row(430, 52), row(492, 52)],
-             ruleY: 356, tonightY: 566,
-             daily: half(42, 578, 162, tv === 2 ? 66 : 54),
-             duel: half(216, 578, 162, tv === 2 ? 66 : 54),
-             pills: pills, variant: tv };
+
+    // THE PLATE'S BEVEL IS NOT DECORATION, IT IS THE CELL'S EDGE. Dividing the
+    // bar's OUTER width left the first and last cells' content ~4 units outboard
+    // of the section the eye actually sees, because the rounded cap and the
+    // bevel eat into those two cells and into nothing else. Divide the INNER
+    // width and every cell's visual centre IS its arithmetic centre. VANUS read
+    // it as "cavern and forge aren't centered in their sections".
+    var BX = 12, BW = WORLD_W - 24, BI = 7, IW = BW - 2 * BI;
+    var barY = tY + H.ton + H.gapBar, PW = IW / 4;
+    var pills = [];
+    for (var p1 = 0; p1 < 4; p1++) {
+      var px1 = BX + BI + p1 * PW;
+      // Hit rects span the WHOLE bar: the bevel belongs to the cell it sits on,
+      // so the outer two reach the plate's edge instead of leaving a 7-unit dead
+      // column a finger will certainly find. Inset by 1 only where two cells
+      // MEET -- hit() is inclusive on both bounds, and two touching rects give
+      // the shared column to whichever branch is tested first.
+      var l1 = (p1 === 0) ? BX : px1 + 1;
+      var r1 = (p1 === 3) ? BX + BW : px1 + PW - 1;
+      pills.push({ x: px1, y: barY, w: PW, h: H.bar,
+                   hx: l1, hy: barY - Math.max(0, (minH - H.bar) / 2),
+                   hw: r1 - l1, hh: Math.max(H.bar, minH) });
+    }
+    return { rows: rows, ruleY: TITLE_ROWS_TOP - 16, tonightY: tY - H.gapTon,
+             daily: half(42, tY, 162, H.ton), duel: half(216, tY, 162, H.ton),
+             pills: pills, bar: { x: BX, y: barY, w: BW, h: H.bar },
+             bot: bot, screenTop: -(v.oy || 0) };
   };
 
   function hit(w, r) {
     return w.x >= r.hx && w.x <= r.hx + r.hw && w.y >= r.hy && w.y <= r.hy + r.hh;
   }
+
+  /// The states that paint their OWN backdrop across the whole viewport, so
+  /// there is no letterbox band underneath them. ONE source, two readers: the
+  /// HUD skips itself on these, and draw() skips the band-seam feathering on
+  /// them. They had drifted apart -- the HUD knew, the feather did not, and the
+  /// feather went on drawing a hard-edged 24-unit dark ramp across the bottom
+  /// of every one of these screens.
+  Game.prototype._ownsViewport = function () {
+    return this.state === 'menu' || this.state === 'forge' || this.state === 'trials' ||
+           this.state === 'duel' || this.state === 'cavern';
+  };
 
   Game.prototype._drawHudView = function (ctx) {
     var v = this.view, G = this._hudGeom();
@@ -8789,8 +8826,7 @@
     // the title screen wore an opaque "60 / GOLD 120 / WAVE 1/20" slab for a
     // game that had not started — inert, but it read as leftover UI and it is
     // the first thing on the screen.
-    if (this.state === 'menu' || this.state === 'forge' || this.state === 'trials' ||
-        this.state === 'duel' || this.state === 'cavern') return;
+    if (this._ownsViewport()) return;
     // top bar
     uiPanel(ctx, G.barX, G.topY, G.barW, 48, 13);
     var lx = G.barX + 14;
@@ -9276,7 +9312,18 @@
     fg.addColorStop(1.00, 'rgba(255,120,40,0)');
     ctx.fillStyle = fg; ctx.fillRect(X, Y, W, H);
     ctx.globalCompositeOperation = 'source-over';
-    var vg = ctx.createRadialGradient(210, 360, 150, 210, 360, 470);
+    // THE VIGNETTE HAS TO KNOW HOW BIG THE SCREEN IS. Its outer stop is 86%
+    // black, and at a fixed radius of 470 everything past y=830 is AT that stop
+    // -- which is exactly where the utility bar now sits on a 19.5:9 phone, so
+    // the bar and its icons came out visibly dimmer than they were designed.
+    // Derived from the farthest visible corner instead: on the design box the
+    // corner is at hypot(210, 420) = 470 and the numbers below are the ones
+    // that shipped, unchanged, so this reaches further ONLY where there is
+    // further to reach.
+    var vBot = (v.h || WORLD_H) - (v.oy || 0);
+    var vR = Math.sqrt(Math.pow(WORLD_W / 2, 2) +
+                       Math.pow(Math.max(360 - (-(v.oy || 0)), vBot - 360), 2));
+    var vg = ctx.createRadialGradient(210, 360, vR * 0.3191, 210, 360, vR);
     vg.addColorStop(0.00, 'rgba(6,3,2,0)');
     vg.addColorStop(0.62, 'rgba(6,3,2,0.30)');
     vg.addColorStop(1.00, 'rgba(4,2,1,0.86)');
@@ -9291,13 +9338,20 @@
     ctx.font = 'bold ' + fs.toFixed(1) + 'px Georgia, serif';
     var plateW = Math.max(300, ctx.measureText('HOARDLING').width + 44);
     var px = 210 - plateW / 2, py = 26, ph = 78, ch = 16;
-    for (var cxi = 0; cxi < 2; cxi++) {        // two short brass chains
+    // THE CHAINS MUST REACH THE TOP OF THE SCREEN, not the top of the design
+    // box. Three links from y 2 to y 20 hang the plate from the box's ceiling —
+    // and on a 19.5:9 phone the box's ceiling is 65 world units BELOW the top of
+    // the screen, so the sign hung from two short chains floating in mid-air
+    // with painted cave above them. Walk UP from the plate instead, past the
+    // screen edge, and the count follows the phone.
+    var chTop = -(v.oy || 0) - 12;
+    for (var cxi = 0; cxi < 2; cxi++) {
       var chx = cxi ? 285 : 135;
-      var cg = ctx.createLinearGradient(0, 0, 0, 30);
+      var cg = ctx.createLinearGradient(0, chTop, 0, py);
       cg.addColorStop(0, '#8f7038'); cg.addColorStop(1, '#d4a840');
       ctx.strokeStyle = cg; ctx.lineWidth = 2;
-      for (var lk = 0; lk < 3; lk++) {
-        ctx.beginPath(); ctx.ellipse(chx, 2 + lk * 9, 3.5, 4.5, 0, 0, 6.283); ctx.stroke();
+      for (var lky = py - 6; lky > chTop; lky -= 9) {
+        ctx.beginPath(); ctx.ellipse(chx, lky, 3.5, 4.5, 0, 0, 6.283); ctx.stroke();
       }
     }
     ctx.globalCompositeOperation = 'lighter';
@@ -9524,28 +9578,16 @@
     // ---- 5. sections ------------------------------------------------------
     var G = this._titleGeom();
     var self = this;
-    function rule(y, label, col, alpha) {
+    // NO HAIRLINE RULES. Two lines with a word in the gap is ornament doing a
+    // job contrast does better, on a screen already carrying a gold wordmark,
+    // an ember ladder and a cold pair.
+    function sectionLabel(y, label, col) {
+      ctx.textAlign = 'center';
       ctx.font = 'bold 10px system-ui, sans-serif';
-      var lw = ctx.measureText(label).width + 18;
-      ctx.strokeStyle = 'rgba(' + col + ',' + alpha + ')'; ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(40, y); ctx.lineTo(210 - lw / 2, y);
-      ctx.moveTo(210 + lw / 2, y); ctx.lineTo(380, y); ctx.stroke();
-      ctx.fillStyle = 'rgba(' + col + ',' + (alpha + 0.5) + ')';
+      ctx.fillStyle = col;
       ctx.fillText(label, 210, y + 4);
     }
-    var TV = G.variant | 0;
-    // VARIANT 2 DROPS THE RULES. Two hairlines with a word in the gap is
-    // ornament doing a job that contrast can do better -- and this screen
-    // already carries a gold wordmark, an ember row family, a cold row family
-    // and a brass row family. Removing them is the cheapest way to quiet it.
-    if (TV === 2 || TV === 3) {
-      ctx.font = 'bold 10px system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(212,168,64,0.55)';
-      ctx.fillText('CAMPAIGN', 210, G.ruleY + 4);
-    } else {
-      rule(G.ruleY, 'CAMPAIGN', '212,168,64', 0.28);
-    }
+    sectionLabel(G.ruleY, 'CAMPAIGN', 'rgba(212,168,64,0.55)');
 
     // which keep to hold next — the first unlocked level short of 3 stars
     var next = this._nextLevel();
@@ -9562,8 +9604,10 @@
       // ONLY THE NEXT ROW IS EMBER in variants 1 and 2. Three identical lit
       // plates make the player read all three to find the one to press; one lit
       // plate among quiet ones is the same information with no reading.
-      var tone = !open ? 'lock'
-               : (TV === 0 || li === next) ? 'ember' : 'util';
+      // ONLY THE NEXT ROW IS EMBER. Three identical lit plates made the player
+      // read all three to find the one to press; one lit plate among quiet ones
+      // is the same information with no reading.
+      var tone = !open ? 'lock' : (li === next) ? 'ember' : 'util';
       forgePlate(ctx, r, tone);
       numeralSeal(ctx, r.x + 2, r.y + r.h / 2, li + 1, open);
       ctx.textAlign = 'left';
@@ -9572,45 +9616,67 @@
         var big = !!r.big;
         if (big) {
           // the CONTINUE row says what pressing it does, above the map's name
+          // OFF THE ROW'S CENTRE, not off its top. These were 22 and 44,
+          // written when the CONTINUE row was 60 tall; it stretches with the
+          // screen now, so a constant offset stops being centred the moment the
+          // phone is not the design box. The pair reads as one block whose
+          // optical centre is r.h/2: cap-top 22-7=15 and baseline 44 straddle
+          // 30 at h 60, which is what these two numbers preserve.
+          var bc = r.y + r.h / 2;
           ctx.font = 'bold 10px system-ui, sans-serif';
           inkText(ctx, (Save.data.stars[li] | 0) > 0 ? 'CONTINUE' : 'BEGIN HERE',
-                  r.x + 30, r.y + 22, 'rgba(255,226,170,0.9)', 3, 1);
+                  r.x + 30, bc - 8, 'rgba(255,226,170,0.9)', 3, 1);
           ctx.font = 'bold 18px system-ui, sans-serif';
-          inkText(ctx, MAPS[li].name, r.x + 30, r.y + 44, '#fff6e6', 4, 1.5);
+          inkText(ctx, MAPS[li].name, r.x + 30, bc + 14, '#fff6e6', 4, 1.5);
         } else {
-          ctx.font = 'bold ' + (TV === 1 || TV === 3 ? 15 : 17) + 'px system-ui, sans-serif';
+          ctx.font = 'bold 15px system-ui, sans-serif';
           inkText(ctx, MAPS[li].name, r.x + 30, r.y + r.h / 2 + 6,
-                  li === next || TV === 0 ? '#fff6e6' : 'rgba(240,228,208,0.82)', 4, 1.5);
+                  li === next ? '#fff6e6' : 'rgba(240,228,208,0.82)', 4, 1.5);
         }
+        // THE RIVETS BIT A SECOND TIME. forgePlate strikes four at x+11 and
+        // x+w-11 (r 2.4); the third star sat at x+w-18 with r 10, so its right
+        // shoulder ran under BOTH right-hand rivets and they read as two loose
+        // dots stuck to the star -- which is what VANUS saw. Same defect as the
+        // pill labels, on a different plate. The cluster ends at x+w-28 now, so
+        // the star's edge clears the rivet by 4.6 at the big radius.
         for (var si = 0; si < 3; si++) {
-          starCoin(ctx, r.x + r.w - 62 + si * 22, r.y + r.h / 2, big ? 10 : 9,
+          starCoin(ctx, r.x + r.w - 72 + si * 22, r.y + r.h / 2, big ? 10 : 9,
                    si < (Save.data.stars[li] | 0));
         }
       } else {
+        // BASELINES OFF THE ROW, NOT OFF 0. These were 27 and 42, written when
+        // every row was 52 tall; a compact variant-1/3 row is 40, so the second
+        // line printed 2 units BELOW its own plate and onto whatever came next.
+        // The current save has no locked row, which is the only reason nobody
+        // saw it -- stars [3,0,0] puts a locked row on the screen at once.
+        var lc = r.y + r.h / 2;
         ctx.fillStyle = '#7a6a5c';
-        ctx.fillText(MAPS[li].name, r.x + 30, r.y + 27);
+        ctx.font = 'bold 15px system-ui, sans-serif';
+        ctx.fillText(MAPS[li].name, r.x + 30, lc - 1);
         ctx.font = '11px system-ui, sans-serif';
         ctx.fillStyle = 'rgba(180,150,120,0.65)';
         // say WHAT unlocks it — a bare padlock is a dead end
-        ctx.fillText('hold keep ' + li + ' to open', r.x + 30, r.y + 42);
-        lockGlyph(ctx, r.x + r.w - 26, r.y + r.h / 2, 1.25, '#6b5b4c');
+        ctx.fillText('hold keep ' + li + ' to open', r.x + 30, lc + 13);
+        lockGlyph(ctx, r.x + r.w - 32, r.y + r.h / 2, 1.25, '#6b5b4c');
       }
       ctx.textAlign = 'center';
     }
 
-    if (TV === 2 || TV === 3) {
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 10px system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(157,138,214,0.62)';
-      ctx.fillText('TONIGHT', 210, G.tonightY + 4);
-    } else {
-      rule(G.tonightY, 'TONIGHT', '157,138,214', 0.30);
-    }
+    sectionLabel(G.tonightY, 'TONIGHT', 'rgba(157,138,214,0.62)');
     var D = G.daily, DU = G.duel;
     var dcx = D.x + D.w / 2, ducx = DU.x + DU.w / 2;
+    // THE THREE LINES ARE CENTRED AS A BLOCK, not hung off the plate's top. At
+    // 33/48/60 in a 66-tall plate the block ran 21.5..62.5 -- 21.5 units of air
+    // above it and 3.5 below, which is what VANUS saw as "empty space above".
+    // Solved off the plate's own height so it stays centred as the plate
+    // stretches: the 16/11/10 stack spans capHeight 11.5 above the top baseline
+    // to descender 2.5 below the last, and the two are 30 apart, so the top
+    // baseline sits at h/2 - 10.5. At h 66 that is 22.5, and MEASURED margins
+    // come out 9 and 12 against the 21.5/3.5 they replace.
+    var TT = D.y + D.h / 2 - 9.5, TN = TT + 17, TS = TT + 30;
     forgePlate(ctx, D, 'cold');
     ctx.font = 'bold 16px system-ui, sans-serif';
-    inkText(ctx, 'DAILY SIEGE', dcx, D.y + 33, '#f0eaff', 5, 2);
+    inkText(ctx, 'DAILY SIEGE', dcx, TT, '#f0eaff', 5, 2);
     if (Lb.on() && (!this._lbTopT || Date.now() - this._lbTopT > 300000)) {
       this._lbTopT = Date.now();
       Lb.top(1, function (rows) { self._lbTop = (rows && rows[0]) || null; });
@@ -9622,36 +9688,34 @@
     var todayBest = (Save.data.daily.day === dayNumber()) ? Save.data.daily.best : 0;
     var dl2 = todayBest ? 'your best wave ' + todayBest
       : (Save.data.dailyBestWave > 0 ? 'all-time wave ' + Save.data.dailyBestWave : 'endless — no finish line');
-    var inD = D.h >= 62;
-    inkText(ctx, MAPS[dailySeed() % CAMPAIGN_MAPS].name, dcx, inD ? D.y + 48 : 648, '#c9b8ff', 4, 1);
+    // NO 648/662 FALLBACK. Those were absolute world y values for a caption
+    // floating under a short plate, and the plate is never short now -- but an
+    // absolute y under a plate that MOVES is a caption stranded mid-screen, so
+    // the branch goes rather than waiting to be right once.
+    inkText(ctx, MAPS[dailySeed() % CAMPAIGN_MAPS].name, dcx, TN, '#c9b8ff', 4, 1);
     ctx.font = '10px system-ui, sans-serif';
-    inkText(ctx, dl2, dcx, inD ? D.y + 60 : 662, 'rgba(201,184,255,0.75)', 4, 1);
+    inkText(ctx, dl2, dcx, TS, 'rgba(201,184,255,0.75)', 4, 1);
     ctx.font = '11px system-ui, sans-serif';
 
     // ---- the DUEL plate ---------------------------------------------------
     forgePlate(ctx, DU, 'cold');
     ctx.font = 'bold 16px system-ui, sans-serif';
-    inkText(ctx, 'DUEL', ducx, DU.y + 33, '#ffd9c4', 5, 2);
-    // Crossed-wrench mark: this is the one mode with somebody on the other
-    // side. Parked against the plate's left edge — at ducx-30 it printed
-    // straight through the D of DUEL.
-    ctx.strokeStyle = 'rgba(255,190,150,0.8)'; ctx.lineWidth = 1.8;
-    var mkx = DU.x + 15, mky = DU.y + 27;
-    ctx.beginPath();
-    ctx.moveTo(mkx - 5, mky - 5); ctx.lineTo(mkx + 5, mky + 5);
-    ctx.moveTo(mkx + 5, mky - 5); ctx.lineTo(mkx - 5, mky + 5);
-    ctx.stroke();
+    // NO CROSSED MARK. It hung off the plate's left edge while its title stayed
+    // centred, so the DUEL plate read as lopsided beside a DAILY SIEGE plate
+    // that carries no mark at all -- one ornament buying an asymmetry across a
+    // matched pair. "same waves, two caves" already says what the mark said.
+    var UT = DU.y + DU.h / 2 - 9.5, UN = UT + 17, US = UT + 30;
+    inkText(ctx, 'DUEL', ducx, UT, '#ffd9c4', 5, 2);
     var beaten = 0;
     for (var rvi = 0; rvi < RIVAL_ORDER.length; rvi++) {
       var rvr = Save.data.duels[RIVAL_ORDER[rvi]];
       if (rvr && rvr.w) beaten++;
     }
-    var inDU = DU.h >= 62;
     ctx.font = '11px system-ui, sans-serif';
-    inkText(ctx, 'same waves, two caves', ducx, inDU ? DU.y + 48 : 648, '#ffc9a8', 4, 1);
+    inkText(ctx, 'same waves, two caves', ducx, UN, '#ffc9a8', 4, 1);
     ctx.font = '10px system-ui, sans-serif';
     inkText(ctx, beaten ? 'beaten ' + beaten + '/' + RIVAL_ORDER.length : 'four rivals waiting',
-            ducx, inDU ? DU.y + 60 : 662, 'rgba(255,201,168,0.75)', 4, 1);
+            ducx, US, 'rgba(255,201,168,0.75)', 4, 1);
 
     // ---- 6. utility row ---------------------------------------------------
     var fAvail = Save.starsTotal() - Save.forgeSpent();
@@ -9667,7 +9731,8 @@
     if (G.bar) {
       forgePlate(ctx, G.bar, 'util');
       for (var dv = 1; dv < 4; dv++) {
-        var dx = G.bar.x + G.bar.w * dv / 4;
+        // the boundary a cell OWNS, so a divider can never drift off a cell edge
+        var dx = G.pills[dv].x;
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(0,0,0,0.34)';
         ctx.beginPath(); ctx.moveTo(dx, G.bar.y + 11); ctx.lineTo(dx, G.bar.y + G.bar.h - 11); ctx.stroke();
@@ -9688,8 +9753,13 @@
       // At PF 11 the cap-height grows 1.5 units and the TRIALS glyph (drawn
       // ICO-7..ICO+7) landed exactly on the T. The bar has the room, so the
       // three lines spread rather than the icon shrinking.
-      var nameY = pcy + (G.bar ? 5 : 2), numY = pcy + (G.bar ? 19 : 15),
-          ICO = pcy - (G.bar ? 15 : 13);
+      // THE STACK SPREADS WITH THE BAR. At the 56 it was authored for these are
+      // 13/7/21; the bar stretches to ~71 on a 19.5:9 phone and a fixed stack
+      // then floats in the middle of it with 12 units of air top and bottom.
+      // Capped, because past ~1.25 the icon and the value stop reading as one
+      // cell and start reading as two rows.
+      var pk = Math.min(1.25, pl.h / 56);
+      var nameY = pcy + 7 * pk, numY = pcy + 21 * pk, ICO = pcy - 13 * pk;
       ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
       if (pi === 0) {
         starCoin(ctx, pcx, ICO, 8, fAvail > 0);
