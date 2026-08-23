@@ -8669,9 +8669,73 @@
              backY: backY };
   }
 
+  /// TITLE VARIANTS. `__game.titleVariant(n)` in a dev build; 0 is what shipped.
+  /// They live in _titleGeom rather than in the drawer because the TAP HANDLER
+  /// reads this same function -- one geometry, two readers -- so a variant
+  /// physically cannot move a control away from its own hit box.
+  ///   0  shipped: three equal ember rows, two section rules, floating captions
+  ///   1  CONTINUE-LED: the row you should play next is tall and lit, the others
+  ///      compact and quiet; captions move INSIDE the Tonight plates
+  ///   2  QUIET CHROME: same sizes as 0, but only the next row is ember and the
+  ///      rules go -- hierarchy from contrast instead of from ornament
+  ///   3  ONE BAR: 1's ladder + 2's plain labels, and the four brass chips
+  ///      become one divided chrome bar so the wallet can be read at a glance
+  /// The SHIPPED layout. 0 is what the screen looked like before this pass and
+  /// is kept only so a variant can be compared against it in a dev build.
+  var TITLE_VARIANT = 3;
+  Game.prototype._nextLevel = function () {
+    for (var i = 0; i < CAMPAIGN_MAPS; i++) {
+      if (Save.unlocked(i) && (Save.data.stars[i] | 0) < 3) return i;
+    }
+    return -1;
+  };
   Game.prototype._titleGeom = function () {
     var s = this.view.scale || 1;
     var minH = Math.max(62, 44 / s);
+    var tv = (this._tvar == null) ? TITLE_VARIANT : (this._tvar | 0);
+    if (tv === 1 || tv === 3) {
+      // The tagline's baseline is 326, so a section label at 336 sits 10px under
+      // it and the two read as one crowded block. 352 gives the art room to end.
+      var nx = this._nextLevel();
+      var rows1 = [], yy = 368;
+      for (var q = 0; q < CAMPAIGN_MAPS; q++) {
+        var hq = (q === nx) ? 60 : 40;
+        var padq = Math.max(0, (minH - hq) / 2);
+        rows1.push({ x: 42, y: yy, w: 336, h: hq,
+                     hx: 38, hy: yy - padq, hw: 344, hh: Math.max(hq, minH), big: q === nx });
+        yy += hq + 8;
+      }
+      var tY = yy + 26;
+      function half1(x, y, w, h) {
+        var pad = Math.max(0, (minH - h) / 2);
+        return { x: x, y: y, w: w, h: h, hx: x - 4, hy: y - pad, hw: w + 8, hh: Math.max(h, minH) };
+      }
+      // VARIANT 3 replaces four brass chips with ONE bar divided by hairlines.
+      // The rivets are what squeezed the labels (see the note below), and a bar
+      // has four of them for the whole row instead of sixteen: MEASURED by
+      // check_pill_row_fits, a 94-wide chip leaves 60 units of clear label
+      // track and a 99-wide bar cell leaves 65 at the ends (one bar rivet
+      // crosses it) and 91 in the middle two, which cross nothing.
+      var bar3 = (tv === 3);
+      var BX = 12, BW = WORLD_W - 24;
+      var pills1 = [], PW1 = bar3 ? BW / 4 : Math.floor((BW - 18) / 4);
+      for (var p1 = 0; p1 < 4; p1++) {
+        // PULLED UP to close the dead band. With the Tonight plates ending at
+        // ~626 a pill row at 676 left 50px of nothing, which read as the screen
+        // running out rather than as breathing room.
+        var px1 = bar3 ? BX + p1 * PW1 : BX + p1 * (PW1 + 6);
+        // Bar cells ABUT, so their hit rects are inset by 1 on each side rather
+        // than inflated: hit() is inclusive on both bounds, and two touching
+        // rects give the shared column to whichever branch is tested first.
+        pills1.push({ x: px1, y: 656, w: PW1, h: 56,
+                      hx: px1 + (bar3 ? 1 : -3), hy: 656 - (minH - 56) / 2,
+                      hw: PW1 - (bar3 ? 2 : -6), hh: minH });
+      }
+      return { rows: rows1, ruleY: 352, tonightY: tY - 16,
+               daily: half1(42, tY, 162, 66), duel: half1(216, tY, 162, 66),
+               pills: pills1, bar: bar3 ? { x: BX, y: 656, w: BW, h: 56 } : null,
+               variant: tv };
+    }
     function row(y, h) {
       var pad = (minH - h) / 2;
       return { x: 80, y: y, w: 260, h: h,
@@ -8709,8 +8773,10 @@
       return { x: x, y: y, w: w, h: h, hx: x - 4, hy: y - pad, hw: w + 8, hh: minH };
     }
     return { rows: [row(368, 52), row(430, 52), row(492, 52)],
-             daily: half(42, 578, 162, 54), duel: half(216, 578, 162, 54),
-             pills: pills };
+             ruleY: 356, tonightY: 566,
+             daily: half(42, 578, 162, tv === 2 ? 66 : 54),
+             duel: half(216, 578, 162, tv === 2 ? 66 : 54),
+             pills: pills, variant: tv };
   };
 
   function hit(w, r) {
@@ -9468,13 +9534,21 @@
       ctx.fillStyle = 'rgba(' + col + ',' + (alpha + 0.5) + ')';
       ctx.fillText(label, 210, y + 4);
     }
-    rule(356, 'CAMPAIGN', '212,168,64', 0.28);
+    var TV = G.variant | 0;
+    // VARIANT 2 DROPS THE RULES. Two hairlines with a word in the gap is
+    // ornament doing a job that contrast can do better -- and this screen
+    // already carries a gold wordmark, an ember row family, a cold row family
+    // and a brass row family. Removing them is the cheapest way to quiet it.
+    if (TV === 2 || TV === 3) {
+      ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(212,168,64,0.55)';
+      ctx.fillText('CAMPAIGN', 210, G.ruleY + 4);
+    } else {
+      rule(G.ruleY, 'CAMPAIGN', '212,168,64', 0.28);
+    }
 
     // which keep to hold next — the first unlocked level short of 3 stars
-    var next = -1;
-    for (var ri = 0; ri < CAMPAIGN_MAPS; ri++) {
-      if (Save.unlocked(ri) && (Save.data.stars[ri] | 0) < 3) { next = ri; break; }
-    }
+    var next = this._nextLevel();
     // bounded by rows, not maps — same landmine as the tap side (see there)
     for (var li = 0; li < Math.min(CAMPAIGN_MAPS, G.rows.length); li++) {
       var r = G.rows[li], open = Save.unlocked(li);
@@ -9485,14 +9559,31 @@
         ctx.lineWidth = 2.5;
         rr(ctx, r.x - 3, r.y - 3, r.w + 6, r.h + 6, 15); ctx.stroke();
       }
-      forgePlate(ctx, r, open ? 'ember' : 'lock');
+      // ONLY THE NEXT ROW IS EMBER in variants 1 and 2. Three identical lit
+      // plates make the player read all three to find the one to press; one lit
+      // plate among quiet ones is the same information with no reading.
+      var tone = !open ? 'lock'
+               : (TV === 0 || li === next) ? 'ember' : 'util';
+      forgePlate(ctx, r, tone);
       numeralSeal(ctx, r.x + 2, r.y + r.h / 2, li + 1, open);
       ctx.textAlign = 'left';
       ctx.font = 'bold 17px system-ui, sans-serif';
       if (open) {
-        inkText(ctx, MAPS[li].name, r.x + 30, r.y + 32, '#fff6e6', 4, 1.5);
+        var big = !!r.big;
+        if (big) {
+          // the CONTINUE row says what pressing it does, above the map's name
+          ctx.font = 'bold 10px system-ui, sans-serif';
+          inkText(ctx, (Save.data.stars[li] | 0) > 0 ? 'CONTINUE' : 'BEGIN HERE',
+                  r.x + 30, r.y + 22, 'rgba(255,226,170,0.9)', 3, 1);
+          ctx.font = 'bold 18px system-ui, sans-serif';
+          inkText(ctx, MAPS[li].name, r.x + 30, r.y + 44, '#fff6e6', 4, 1.5);
+        } else {
+          ctx.font = 'bold ' + (TV === 1 || TV === 3 ? 15 : 17) + 'px system-ui, sans-serif';
+          inkText(ctx, MAPS[li].name, r.x + 30, r.y + r.h / 2 + 6,
+                  li === next || TV === 0 ? '#fff6e6' : 'rgba(240,228,208,0.82)', 4, 1.5);
+        }
         for (var si = 0; si < 3; si++) {
-          starCoin(ctx, r.x + r.w - 62 + si * 22, r.y + r.h / 2, 9,
+          starCoin(ctx, r.x + r.w - 62 + si * 22, r.y + r.h / 2, big ? 10 : 9,
                    si < (Save.data.stars[li] | 0));
         }
       } else {
@@ -9507,7 +9598,14 @@
       ctx.textAlign = 'center';
     }
 
-    rule(566, 'TONIGHT', '157,138,214', 0.30);
+    if (TV === 2 || TV === 3) {
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(157,138,214,0.62)';
+      ctx.fillText('TONIGHT', 210, G.tonightY + 4);
+    } else {
+      rule(G.tonightY, 'TONIGHT', '157,138,214', 0.30);
+    }
     var D = G.daily, DU = G.duel;
     var dcx = D.x + D.w / 2, ducx = DU.x + DU.w / 2;
     forgePlate(ctx, D, 'cold');
@@ -9517,12 +9615,18 @@
       this._lbTopT = Date.now();
       Lb.top(1, function (rows) { self._lbTop = (rows && rows[0]) || null; });
     }
+    // CAPTIONS INSIDE THE PLATE when there is room for them. Floating under it
+    // they read as loose text belonging to the page rather than to the button,
+    // and they were the only unhoused type on the screen.
     ctx.font = '11px system-ui, sans-serif';
     var todayBest = (Save.data.daily.day === dayNumber()) ? Save.data.daily.best : 0;
-    inkText(ctx, MAPS[dailySeed() % CAMPAIGN_MAPS].name, dcx, 648, '#c9b8ff', 4, 1);
     var dl2 = todayBest ? 'your best wave ' + todayBest
       : (Save.data.dailyBestWave > 0 ? 'all-time wave ' + Save.data.dailyBestWave : 'endless — no finish line');
-    inkText(ctx, dl2, dcx, 662, 'rgba(201,184,255,0.75)', 4, 1);
+    var inD = D.h >= 62;
+    inkText(ctx, MAPS[dailySeed() % CAMPAIGN_MAPS].name, dcx, inD ? D.y + 48 : 648, '#c9b8ff', 4, 1);
+    ctx.font = '10px system-ui, sans-serif';
+    inkText(ctx, dl2, dcx, inD ? D.y + 60 : 662, 'rgba(201,184,255,0.75)', 4, 1);
+    ctx.font = '11px system-ui, sans-serif';
 
     // ---- the DUEL plate ---------------------------------------------------
     forgePlate(ctx, DU, 'cold');
@@ -9542,27 +9646,51 @@
       var rvr = Save.data.duels[RIVAL_ORDER[rvi]];
       if (rvr && rvr.w) beaten++;
     }
+    var inDU = DU.h >= 62;
     ctx.font = '11px system-ui, sans-serif';
-    inkText(ctx, 'same waves, two caves', ducx, 648, '#ffc9a8', 4, 1);
+    inkText(ctx, 'same waves, two caves', ducx, inDU ? DU.y + 48 : 648, '#ffc9a8', 4, 1);
+    ctx.font = '10px system-ui, sans-serif';
     inkText(ctx, beaten ? 'beaten ' + beaten + '/' + RIVAL_ORDER.length : 'four rivals waiting',
-            ducx, 662, 'rgba(255,201,168,0.75)', 4, 1);
+            ducx, inDU ? DU.y + 60 : 662, 'rgba(255,201,168,0.75)', 4, 1);
 
     // ---- 6. utility row ---------------------------------------------------
     var fAvail = Save.starsTotal() - Save.forgeSpent();
     var anyWon = Save.starsTotal() > 0;
     var tDone = 0;
     for (var tb = 0; tb < 3; tb++) { var tRow = Save.data.trials[tb] || {}; for (var tk in tRow) tDone++; }
+    // VARIANT 3: ONE plate under all four cells, hairline-divided. Four separate
+    // chips were the screen's third UI family (after the ember ladder and the
+    // cold Tonight pair) and the busiest of the three -- sixteen rivets, four
+    // bevels and four shadows carrying eight words. One bar is one family, and
+    // it buys the labels 65-91 units of clear track against the chips' 60,
+    // which is what pays for the 11px type.
+    if (G.bar) {
+      forgePlate(ctx, G.bar, 'util');
+      for (var dv = 1; dv < 4; dv++) {
+        var dx = G.bar.x + G.bar.w * dv / 4;
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(0,0,0,0.34)';
+        ctx.beginPath(); ctx.moveTo(dx, G.bar.y + 11); ctx.lineTo(dx, G.bar.y + G.bar.h - 11); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,214,140,0.10)';
+        ctx.beginPath(); ctx.moveTo(dx + 1, G.bar.y + 11); ctx.lineTo(dx + 1, G.bar.y + G.bar.h - 11); ctx.stroke();
+      }
+    }
+    var PF = G.bar ? 11 : 10;
     for (var pi = 0; pi < 4; pi++) {
       var pl = G.pills[pi];
       var live = pi === 1 ? anyWon : true;
-      forgePlate(ctx, pl, 'util');
+      if (!G.bar) forgePlate(ctx, pl, 'util');
       var pcx = pl.x + pl.w / 2, pcy = pl.y + pl.h / 2;
       // TWO SHORT CENTRED LINES. The name never carries its number any more:
       // joined, they overflowed the 64px the rivets leave. Centred, the longest
       // name ("SOUND ON", ~48px at bold 10) and the longest number ("9000",
       // ~26px) both sit well clear of the corner rivets by construction.
-      var nameY = pcy + 2, numY = pcy + 15, ICO = pcy - 13;
-      ctx.font = 'bold 10px system-ui, sans-serif';
+      // At PF 11 the cap-height grows 1.5 units and the TRIALS glyph (drawn
+      // ICO-7..ICO+7) landed exactly on the T. The bar has the room, so the
+      // three lines spread rather than the icon shrinking.
+      var nameY = pcy + (G.bar ? 5 : 2), numY = pcy + (G.bar ? 19 : 15),
+          ICO = pcy - (G.bar ? 15 : 13);
+      ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
       if (pi === 0) {
         starCoin(ctx, pcx, ICO, 8, fAvail > 0);
         inkText(ctx, 'FORGE', pcx, nameY,
@@ -9577,7 +9705,7 @@
         // 6 trials x 3 levels = 18 badges. '/9' dated from when there were
         // three trials and quietly told the player they were twice as done
         // as they were — and it can never be reached, so it reads as broken.
-        ctx.font = 'bold 10px system-ui, sans-serif';
+        ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
         inkText(ctx, 'TRIALS', pcx, nameY, live ? '#d9f2ff' : '#8a7f72', 3, 1);
         if (live) inkText(ctx, tDone + '/' + (TRIAL_ORDER.length * CAMPAIGN_MAPS),
                           pcx, numY, 'rgba(217,242,255,0.75)', 3, 1);
@@ -9585,14 +9713,14 @@
         // the wallet is the label: a shop with nothing in the purse should say
         // so on the door rather than after the tap
         var mk = Save.data.marks | 0;
-        drawCoin(ctx, pcx, ICO, 9, Save.equipped('coin'));
-        ctx.font = 'bold 10px system-ui, sans-serif';
+        drawCoin(ctx, pcx, ICO, G.bar ? 11 : 9, Save.equipped('coin'));
+        ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
         inkText(ctx, 'CAVERN', pcx, nameY,
                 mk > 0 ? '#ffe9c4' : 'rgba(255,233,196,0.55)', 3, 1);
         if (mk > 0) inkText(ctx, String(mk), pcx, numY, '#ffd75e', 3, 1);
       } else {
         drawSpeaker(ctx, pcx - 4, ICO, Sfx.isMuted());
-        ctx.font = 'bold 10px system-ui, sans-serif';
+        ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
         inkText(ctx, 'SOUND', pcx, nameY, '#ffe9c4', 3, 1);
         inkText(ctx, Sfx.isMuted() ? 'OFF' : 'ON', pcx, numY,
                 Sfx.isMuted() ? 'rgba(255,233,196,0.55)' : '#9ef58f', 3, 1);
