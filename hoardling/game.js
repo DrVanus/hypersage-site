@@ -1935,6 +1935,70 @@
       how: 'Pale as the things further down.' },
   ];
 
+  /// MATERIAL BANDS for the KEEP. Same idea as COAT_SCALE/COAT_WARM and the
+  /// same reason it works: a painted object's materials sit on disjoint hue
+  /// bands, so each can be moved on its own instead of washing the whole plate.
+  ///
+  /// MEASURED on art/keep.png (opaque px, alpha > 200):
+  ///   hue 0.06-0.11  n=2737  sat 0.56  val 0.61   cream MASONRY, the bulk
+  ///   hue 0.56-0.67  n=1750  sat 0.72  val 0.44   royal-blue ROOFS
+  ///   hue 0.11-0.17  n=52    sat 0.60  val 0.95   amber WINDOW GLOW
+  /// Three materials, three disjoint bands. art/keep_slate.png is NOT a usable
+  /// base -- its stone AND its roofs both sit at 0.56-0.61, one family.
+  ///
+  /// BANDS ARE PRIORITISED, NOT CEILINGED. The window glow sits close enough to
+  /// the masonry band's shoulder to be caught by it, and driving masonry to
+  /// val x0.42 dragged the hot window cores down: the basalt keeps came back
+  /// with YELLOW-GREEN windows, in a game whose fantasy is a forge burning
+  /// inside the rock.
+  ///
+  /// The first fix was a hard value ceiling on masonry (vmax 0.80) and it was
+  /// WORSE, in a way that only showed up when the candidates were judged in
+  /// context. MEASURED: that ceiling excluded 14,124 of 60,032 warm pixels --
+  /// 23.8% of the castle, mean value 0.89 -- which is the whole LIT SIDE. So
+  /// the shadow side went black while the lit side stayed cream, and the
+  /// terminator between them became a hard ragged step straight through the
+  /// gold dragon crest and the archway. A judge lens caught it; the eye did
+  /// not, because on a small tile it reads as contrast rather than as a seam.
+  ///
+  /// Priority is the right tool and needs no threshold at all: the bands are
+  /// listed most-specific-first, each claims what is left of the pixel
+  /// (eff = w * remaining), and the general masonry band takes the remainder.
+  /// A glow pixel is claimed by GLOW, so masonry never sees it; a lit stone
+  /// pixel is claimed in full; everything between blends smoothly, which is
+  /// exactly what a terminator needs.
+  // widened now that GLOW claims first -- masonry may safely cover all the warm stone
+  // Above this value the per-band shadow lift is inert -- see `lift` below.
+  var LIFT_KNEE   = 0.22;
+  var MAT_MASONRY = { c: 0.085, full: 0.050, gone: 0.070, s0: 0.06, vmax: 1.01, vmin: 0.00 };
+  /// ROOF EXCLUDES THE TEAL RIM LIGHT, and that is not a tuning preference.
+  /// MEASURED: the shipped keep has a teal band at hue 0.50-0.56 (n=122,
+  /// sat 0.83) which is the RIM LIGHT the style header requires -- "a thin
+  /// saturated teal rim light traces the right edge" -- and the roofs proper
+  /// sit at 0.56-0.67. A roof band wide enough to reach 0.545 does two bad
+  /// things at once:
+  ///   1. it recolours a LIGHTING EFFECT as if it were roof material, and
+  ///   2. hue 0.545 is EXACTLY ANTIPODAL to the terracotta roof target 0.045,
+  ///      where "the short way round" is undefined -- so two pixels a hair
+  ///      apart, or two implementations of the same maths, rotate in OPPOSITE
+  ///      directions and the rim light comes out as colour speckle. Measured
+  ///      against the Python preview: 299 pixels differing by up to 185, and
+  ///      the worst ones were channel ROTATIONS of each other, the signature.
+  /// Narrowing the band to 0.065 leaves the rim light alone and puts the
+  /// instability out of reach.
+  var MAT_ROOF    = { c: 0.615, full: 0.055, gone: 0.065, s0: 0.15, vmax: 1.01, vmin: 0.00 };
+  // GLOW IS THE BRIGHT THING, so it is gated from BELOW -- vmin, not vmax.
+  // MEASURED: the first glow band fell off to hue 0.08, which is MASONRY'S OWN
+  // CENTRE (0.085), so with priority ordering it claimed 22.0% of the stone.
+  // On a basalt that left its masonry hue alone, that dragged a fifth of the
+  // castle to the glow's own hue and an adversarial judge measured the result
+  // exactly: "the flame is 1.0 degrees of hue from the wall immediately around
+  // it" and "saturated orange has bled off the light sources onto the masonry".
+  // A fire that is the same colour as the rock it is inside is not a fire.
+  // Narrowed to 0.098-0.182 and floored at v 0.78: zero weight at masonry's
+  // centre, and 90% of real glow pixels still claimed.
+  var MAT_GLOW    = { c: 0.140, full: 0.030, gone: 0.042, s0: 0.20, vmax: 1.01, vmin: 0.78 };
+
   /// COINS — the top-left counter, the +N pops, and the loot a thief runs out
   /// with. The FACE is a castle and the ALLOY under it is the grade: the stamp
   /// says whose mint, the metal says how good. Two axes off one drawing.
@@ -1977,9 +2041,29 @@
       how: 'The keep above the workshop.' },
     { id: 'slate',  name: 'Slate Roofs',  art: 'keep_slate', price: 150, tint: '#8fa4c0', sat: 0.55, val: 1.02,
       how: 'Re-roofed after the third raid.' },
-    { id: 'sand',   name: 'Sandstone',    art: null, price: 150, tint: '#e6c489', sat: 0.62, val: 1.10,
+    { id: 'sand',   name: 'Sandstone',    art: null, price: 150,
+      // S1, unanimous first place on all four judge lenses (material honesty,
+      // set coherence, legibility at true size, adversarial). ORDER IS
+      // PRIORITY: the GLOW entry multiplies by 1.0 and exists only to CLAIM
+      // the window pixels so the masonry band below it never sees them.
+      bands: [{ band: MAT_GLOW,    hue: null,  sat: 1.00, val: 1.00 },
+              { band: MAT_ROOF,    hue: 0.045, sat: 0.95, val: 1.05 },
+              { band: MAT_MASONRY, hue: 0.100, sat: 1.25, val: 1.12 }], tint: '#e6c489', sat: 0.62, val: 1.10,
       how: 'Warm rock from the shallow galleries.' },
-    { id: 'basalt', name: 'Basalt',       art: null, price: 230, tint: '#5a5560', sat: 0.35, val: 0.74,
+    { id: 'basalt', name: 'Basalt',       art: null, price: 230,
+      // B3 "ember black" + a 0.06 shadow lift. Two judge lenses that specialise
+      // in material read and in adversarial scrutiny both ranked B3 first, and
+      // it was the ONLY candidate no lens raised a blocker against: B1's glow
+      // measured YELLOWER than the stock castle it replaces (39.8 deg against
+      // 32.2) and landed in the gold heap's own hue band, so its "fire" read as
+      // more trim on the pile; B2's flame sat 1 degree from the wall around it.
+      // The third lens ranked B3 last on one measured count -- its doorway fell
+      // to L* 11.6, below the cavern floor at 19.6 -- and the shadow lift is the
+      // answer to exactly that: door 21.6 (better than stock's 20.7) with the
+      // near-black stone share still 32.1% against B2's 27.4%.
+      bands: [{ band: MAT_GLOW,    hue: 0.075, sat: 1.35, val: 1.20 },
+              { band: MAT_ROOF,    hue: null,  sat: 0.15, val: 0.42, lift: 0.06 },
+              { band: MAT_MASONRY, hue: 0.030, sat: 0.25, val: 0.38, lift: 0.06 }], tint: '#5a5560', sat: 0.35, val: 0.74,
       how: 'Cut from the seam the fire came up through.' },
   ];
 
@@ -5678,8 +5762,116 @@
     var h = mx === r ? ((g - b) / c) % 6 : mx === g ? (b - r) / c + 2 : (r - g) / c + 4;
     h /= 6; return h < 0 ? h + 1 : h;
   }
+  /// MULTI-BAND recolour: move each material on its own. This is what the
+  /// single-tint path below cannot do -- rotating a whole castle by one angle
+  /// turns cream walls and blue roofs into two tints of one colour, which reads
+  /// as a filter rather than as a different building.
+  ///
+  /// Rotate hue and scale S/V; NEVER fill. A fill flattens the painting's
+  /// shading toward one colour, which is exactly what the old 55% source-atop
+  /// wash did to the duel rivals and why it was replaced.
+  function bandWeight(h, s, v, b) {
+    if (v > b.vmax || v < (b.vmin || 0)) return 0;
+    var d = Math.abs(((h - b.c + 0.5) % 1 + 1) % 1 - 0.5);
+    var w = d <= b.full ? 1 : (d >= b.gone ? 0 : 1 - (d - b.full) / (b.gone - b.full));
+    if (w <= 0) return 0;
+    var ws = (s - b.s0) / 0.15;
+    return w * (ws < 0 ? 0 : ws > 1 ? 1 : ws);
+  }
+  Game.prototype._bandPlate = function (img, item) {
+    var key = 'b:' + item.id + '@' + (img.src || '?') + '@' + (img.width | 0) + 'x' + (img.height | 0);
+    var cache = this._tintCache || (this._tintCache = {});
+    if (cache[key]) return cache[key];
+    var cv = document.createElement('canvas');
+    cv.width = img.width; cv.height = img.height;
+    var cx2 = cv.getContext('2d');
+    cx2.drawImage(img, 0, 0);
+    var dat;
+    try { dat = cx2.getImageData(0, 0, cv.width, cv.height); }
+    catch (e) { cache[key] = img; return img; }      // tainted canvas: ship it uncoated
+    var d = dat.data, n = d.length, bands = item.bands;
+    for (var i = 0; i < n; i += 4) {
+      if (d[i + 3] < 8) continue;
+      var r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255;
+      var mx = r > g ? (r > b ? r : b) : (g > b ? g : b);
+      var mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
+      var v = mx, c = mx - mn;
+      if (c === 0) continue;                          // greys carry no hue to move
+      var sa = c / mx, h;
+      if (mx === r)      h = ((g - b) / c) % 6;
+      else if (mx === g) h = (b - r) / c + 2;
+      else               h = (r - g) / c + 4;
+      h /= 6; if (h < 0) h += 1;
+      var nh = h, ns = sa, nv = v, moved = 0, remain = 1;
+      for (var k = 0; k < bands.length; k++) {
+        var bd = bands[k], w = bandWeight(h, sa, v, bd.band) * remain;
+        if (w <= 0) continue;
+        remain -= w;
+        moved = 1;
+        if (bd.hue !== null && bd.hue !== undefined) {
+          // Shortest way round the hue circle, with a DETERMINISTIC tie-break
+          // at the antipode: fold into [0,1) then take the negative side only
+          // when clearly past the halfway point. Ties go positive, in both this
+          // kernel and tools/keep_bands.py, so a target that lands opposite a
+          // material cannot make the two disagree. (Keeping a band away from
+          // its own antipode is still the real defence -- see MAT_ROOF.)
+          var dh = bd.hue - h; dh -= Math.floor(dh);
+          if (dh > 0.5 + 1e-9) dh -= 1;
+          nh = ((nh + dh * w) % 1 + 1) % 1;
+        }
+        ns *= 1 + (bd.sat - 1) * w;
+        var nvT = nv * (1 + (bd.val - 1) * w);
+        if (bd.lift) {
+          // A SHADOW-ONLY BLACK-POINT LIFT. Scaling value alone crushes every
+          // shadow toward zero: at val x0.38 the keep's archway fell to L* 11.6,
+          // BELOW the cavern floor it stands on (19.6), so the entrance -- the
+          // building's one gameplay landmark -- became a void and the darks lost
+          // the micro-contrast that separates stonework. Raising the multiplier
+          // does not fix it (door only 14.6 while the stone washed from L 49.9
+          // to 59.0), because a multiplier moves a dark pixel proportionally,
+          // i.e. barely. A FLAT lift traded the defect for a worse one -- door
+          // 22.2 but near-black stone fell 37.4% -> 21.5%, so it stopped being
+          // basalt to save a door. Rolling the lift off by LIFT_KNEE reaches the
+          // crushed darks and leaves the midtones: door 21.6, near-black 32.1%.
+          // `kn`, NOT `k`: k is the BAND LOOP COUNTER and `var` is function-
+          // scoped, so declaring `var k` here overwrote the index with a
+          // fraction and the next iteration read bands[1.4] -> undefined. It
+          // only fired on items that actually use `lift`, which is why the
+          // sandstone keep worked and the basalt keep threw. No table-drift
+          // gate could see this: the two kernels' tables agreed perfectly and
+          // only the CODE diverged -- the Python preview names its loop
+          // variable `entry`, so the same line is harmless there.
+          var kn = (LIFT_KNEE - nvT) / LIFT_KNEE;
+          kn = kn < 0 ? 0 : (kn > 1 ? 1 : kn);
+          nvT = nvT + bd.lift * w * kn * (1 - nvT);
+        }
+        nv = nvT;
+      }
+      if (!moved) continue;
+      if (ns < 0) ns = 0; else if (ns > 1) ns = 1;
+      if (nv < 0) nv = 0; else if (nv > 1) nv = 1;
+      var hh = nh * 6, ii = Math.floor(hh), f = hh - ii;
+      var pp = nv * (1 - ns), qq = nv * (1 - ns * f), tt = nv * (1 - ns * (1 - f));
+      var nr, ng, nb;
+      switch (ii % 6) {
+        case 0: nr = nv; ng = tt; nb = pp; break;
+        case 1: nr = qq; ng = nv; nb = pp; break;
+        case 2: nr = pp; ng = nv; nb = tt; break;
+        case 3: nr = pp; ng = qq; nb = nv; break;
+        case 4: nr = tt; ng = pp; nb = nv; break;
+        default: nr = nv; ng = pp; nb = qq;
+      }
+      d[i] = (nr * 255 + 0.5) | 0; d[i + 1] = (ng * 255 + 0.5) | 0; d[i + 2] = (nb * 255 + 0.5) | 0;
+    }
+    cx2.putImageData(dat, 0, 0);
+    cache[key] = cv;
+    return cv;
+  };
+
   Game.prototype._propPlate = function (img, item) {
-    if (!img || !item || !item.tint) return img;
+    if (!img || !item) return img;
+    if (item.bands && item.bands.length) return this._bandPlate(img, item);
+    if (!item.tint) return img;
     var key = 'p:' + item.id + '@' + (img.src || '?') + '@' + (img.width | 0) + 'x' + (img.height | 0);
     var cache = this._tintCache || (this._tintCache = {});
     if (cache[key]) return cache[key];
