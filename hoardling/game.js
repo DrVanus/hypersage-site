@@ -1982,6 +1982,21 @@
   // widened now that GLOW claims first -- masonry may safely cover all the warm stone
   // Above this value the per-band shadow lift is inert -- see `lift` below.
   var LIFT_KNEE   = 0.22;
+
+  /// MATERIAL BANDS for the MACHINES. Same kernel as the keep, different shape
+  /// of subject: a keep is three materials on three bands, a machine is
+  /// essentially ONE.
+  ///
+  /// MEASURED, pooled over all 10 machine plates (opaque, sat > 0.18,
+  /// n = 1,918,926):
+  ///   hue 0.00-0.15   87.8%   brass, wood, iron -- one warm family
+  ///   hue 0.50-0.70    8.4%   the teal RIM LIGHT the style header requires
+  /// So the finish moves one wide warm band, and the rim is PROTECTED by
+  /// claiming it first with identity multipliers -- the same priority trick the
+  /// keep's GLOW band uses. Recolouring a lighting effect as if it were
+  /// material is how the keep's rim light got eaten the first time.
+  var MAT_BRASS = { c: 0.075, full: 0.075, gone: 0.110, s0: 0.10, vmax: 1.01, vmin: 0.00 };
+  var MAT_RIM   = { c: 0.575, full: 0.075, gone: 0.110, s0: 0.15, vmax: 1.01, vmin: 0.00 };
   var MAT_MASONRY = { c: 0.085, full: 0.050, gone: 0.070, s0: 0.06, vmax: 1.01, vmin: 0.00 };
   /// ROOF EXCLUDES THE TEAL RIM LIGHT, and that is not a tuning preference.
   /// MEASURED: the shipped keep has a teal band at hue 0.50-0.56 (n=5,244,
@@ -2103,7 +2118,36 @@
       how: 'Scorched black. Wick has been practising.' },
   ];
 
-  /// THE SLOT TABLE — the one place that knows the five slots exist. Order is
+  /// FINISHES — the machines. This is the surface a player looks at most: five
+  /// to ten contraptions are on the board for a whole run, and every one of them
+  /// was the same brass until now. Recoloured, never generated: they are
+  /// painted assets with a house palette, and the same argument that bans
+  /// generating Wick bans regenerating them.
+  ///
+  /// ORDER IS PRIORITY, as everywhere else: RIM first so the teal edge light is
+  /// claimed before the warm band can reach it.
+  var FINISHES = [
+    { id: 'brass',  name: 'Workshop Brass', price: 0,   bands: null,
+      how: 'What Wick builds with.' },
+    { id: 'iron',   name: 'Blackiron',      price: 180,
+      bands: [{ band: MAT_RIM, hue: null, sat: 1.00, val: 1.00 },
+              { band: MAT_BRASS, hue: null, sat: 0.16, val: 0.60, lift: 0.05 }],
+      how: 'Stripped, blacked and re-riveted.' },
+    { id: 'verd',   name: 'Verdigris',      price: 220,
+      bands: [{ band: MAT_RIM, hue: null, sat: 1.00, val: 1.00 },
+              { band: MAT_BRASS, hue: 0.420, sat: 0.72, val: 0.98 }],
+      how: 'Left out in a wet cave and forgiven.' },
+    { id: 'gilt',   name: 'Gilt Works',     price: 300,
+      bands: [{ band: MAT_RIM, hue: null, sat: 1.00, val: 1.00 },
+              { band: MAT_BRASS, hue: 0.120, sat: 1.18, val: 1.16 }],
+      how: 'He spent the hoard on the machines.' },
+    { id: 'bone',   name: 'Bonework',       price: 260,
+      bands: [{ band: MAT_RIM, hue: null, sat: 1.00, val: 1.00 },
+              { band: MAT_BRASS, hue: 0.095, sat: 0.20, val: 1.22 }],
+      how: 'Ivory and gut. Quieter than brass.' },
+  ];
+
+  /// THE SLOT TABLE — the one place that knows the six slots exist. Order is
   /// the Cavern screen's row order.
   /// `base` is the STOCK art id for the slot. The stock item of every prop slot
   /// has art:null and tint:null -- it IS the shipped sprite -- so without this
@@ -2115,6 +2159,7 @@
     { id: 'hoard', name: 'HOARD',  items: HOARDS, base: 'mound' },
     { id: 'keep',  name: 'KEEP',   items: KEEPS,  base: 'keep' },
     { id: 'road',  name: 'ROAD',   items: ROADS,  base: 'road' },
+    { id: 'finish',name: 'WORKS',  items: FINISHES, base: 't_ballista' },
   ];
   var SLOT_BY_ID = {};
   for (var _si = 0; _si < SLOTS.length; _si++) SLOT_BY_ID[SLOTS[_si].id] = SLOTS[_si];
@@ -6048,6 +6093,29 @@
     return this._propPlate(ART.images[artId], it);
   };
 
+  /// THE MACHINE FINISH, applied to any machine plate. Every machine draw site
+  /// must go through this or the board will show two finishes at once -- there
+  /// are FOUR plate sources, and they were checked one by one:
+  ///   1. `timg`            the plain board plate
+  ///   2. `rigB` / `rigW`   the ballista's two-plate aim rig, which reads
+  ///                        ART.images[rig.base/weapon] DIRECTLY and never sees
+  ///                        spriteId at all
+  ///   3. `_turretFor`      the split turret, DERIVED from the plate -- its
+  ///                        cache must be keyed on the finish, because it keeps
+  ///                        the plate's colour
+  ///   4. the shop shelf chip, so what you buy matches what you get
+  ///
+  /// `_rimFor` is deliberately NOT on that list: it throws the colour away
+  /// (source-in with a flat warm fill) and keeps only the alpha, so a finish
+  /// cannot change it and keying it would only waste memory. Checked, not
+  /// assumed -- an earlier note in HANDOFF claimed it needed keying.
+  Game.prototype._finishPlate = function (img) {
+    if (!img) return img;
+    var it = Save.equipped('finish');
+    if (!it || !it.bands) return img;
+    return this._bandPlate(img, it);
+  };
+
   /// The equipped plate for a prop slot. `art` on the item is the seam a bought
   /// sprite drops into: set it and the recolour is bypassed entirely.
   Game.prototype._slotPlate = function (slot, artId) {
@@ -7322,12 +7390,18 @@
     return (this._rimCache[spriteId] = cv);
   };
 
+  /// KEYED ON THE FINISH. This cache holds halves CUT FROM THE PLATE, colour and
+  /// all, so a machine skinned after the first draw would keep serving brass
+  /// halves for the life of the page -- the same defect the _bgCache key had
+  /// with the road skin.
   Game.prototype._turretFor = function (spriteId, tt) {
     if (!tt || !tt.turret) return null;
     this._turretCache = this._turretCache || {};
-    if (this._turretCache[spriteId] !== undefined) return this._turretCache[spriteId];
-    var img = ART.images[spriteId];
-    if (!img || !img.width) return (this._turretCache[spriteId] = null);
+    var fin = Save.equipped('finish');
+    var key = spriteId + '@' + ((fin && fin.id) || 'brass');
+    if (this._turretCache[key] !== undefined) return this._turretCache[key];
+    var img = this._finishPlate(ART.images[spriteId]);
+    if (!img || !img.width) return (this._turretCache[key] = null);
     var w = img.width, h = img.height;
     var cut = Math.round(h * tt.turret.cut), F = Math.max(2, Math.round(h * 0.012));
     function half(keepTop) {
@@ -7345,7 +7419,7 @@
       x.globalCompositeOperation = 'source-over';
       return cv;
     }
-    return (this._turretCache[spriteId] = {
+    return (this._turretCache[key] = {
       top: half(true), base: half(false), pvx: tt.turret.pvx, pvy: tt.turret.pvy });
   };
 
@@ -7412,7 +7486,7 @@
         ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 33 + ocp2 * 4, 16 + ocp2 * 3, 0, 0, 6.283); ctx.stroke();
       }
     }
-    var timg = ART.images[spriteId];
+    var timg = this._finishPlate(ART.images[spriteId]);
     var tt2 = TOWER_TYPES[tw.type];
     if (timg) {
       // recoil press-down right after firing + gentle idle breathing
@@ -7546,7 +7620,12 @@
         tw._faceSign = fSign;                        // the mirror snaps; the angle eases
         fRot = tw._faceRot;
       }
-      var rig = tt2.aimRig, rigB = rig && ART.images[rig.base], rigW = rig && ART.images[rig.weapon];
+      // BOTH RIG PLATES TAKE THE FINISH. They bypass spriteId entirely, so a
+      // finish threaded only through `timg` would leave the crossbow brass on
+      // an otherwise blackened board.
+      var rig = tt2.aimRig;
+      var rigB = rig && this._finishPlate(ART.images[rig.base]);
+      var rigW = rig && this._finishPlate(ART.images[rig.weapon]);
       var split = (rig && rigB && rigW) ? null : this._turretFor(spriteId, tt2);
       ctx.save();
       ctx.translate(p.x, p.y + 8);
@@ -8713,7 +8792,7 @@
           ctx.strokeStyle = '#ffd75e'; ctx.lineWidth = 2.5;
           rr(ctx, sxx + 1, syy + 1, G.shopW - 2, G.shopH - 2, 11); ctx.stroke();
         }
-        var sIm = ART.images['t_' + sid2];
+        var sIm = this._finishPlate(ART.images['t_' + sid2]);   // what you buy is what you get
         if (sIm) {
           // FIT the machine INSIDE its card. It used to be blitted at a fixed
           // 34px wide with its baseline at syy+26, so a 700px-tall master
@@ -9440,10 +9519,17 @@
   function cavernRoomGeom(scale) {
     var s = scale || 1, minH = Math.max(62, 44 / s);
     var tabs = [], i;
+    // RE-DERIVED FOR SIX, NOT EXTENDED. The 5-tab pitch was `12 + i * 80` with
+    // w 74; a sixth on that pitch ends at x=486 in a 420-wide world and would
+    // simply not be on screen -- silently, which is how the shop shelf lost its
+    // 8th chip and how the 4th title pill would have gone. Six tabs, 12px
+    // margins, 6px gutters: (420 - 24 - 5*6) / 6 = 61.
+    var TW = Math.floor((WORLD_W - 24 - (SLOTS.length - 1) * 6) / SLOTS.length);
+    var TP = TW + 6;
     for (i = 0; i < SLOTS.length; i++) {
-      // 5 tabs, 12px margins, 6px gutters: 420 - 24 - 24 = 372 / 5 = 74.4
-      var tx = 12 + i * 80;
-      tabs.push({ x: tx, y: 142, w: 74, h: 38, hx: tx - 3, hy: 142 - (minH - 38) / 2, hw: 80, hh: minH });
+      var tx = 12 + i * TP;
+      tabs.push({ x: tx, y: 142, w: TW, h: 38,
+                  hx: tx - 3, hy: 142 - (minH - 38) / 2, hw: TP, hh: minH });
     }
     var cards = [];
     for (i = 0; i < 8; i++) {
