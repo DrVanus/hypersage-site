@@ -304,6 +304,20 @@
    "codec_psnr": 34.6,
    "as_drawn_psnr": 35.6
   },
+  "keep_basalt.png": {
+   "size": "519px",
+   "kb": 74.2,
+   "q": 84,
+   "codec_psnr": 40.2,
+   "as_drawn_psnr": 40.2
+  },
+  "keep_sand.png": {
+   "size": "519px",
+   "kb": 102.9,
+   "q": 84,
+   "codec_psnr": 38.0,
+   "as_drawn_psnr": 38.0
+  },
   "keep_slate.png": {
    "size": "519px",
    "kb": 29.6,

@@ -2062,6 +2062,7 @@
     { id: 'slate',  name: 'Slate Roofs',  art: 'keep_slate', price: 150, tint: '#8fa4c0', sat: 0.55, val: 1.02,
       how: 'Slate walls, slate roofs. Cut cold and set square.' },
     { id: 'sand',   name: 'Sandstone',    art: null, price: 150,
+      art: 'keep_sand',
       // S1, unanimous first place on all four judge lenses (material honesty,
       // set coherence, legibility at true size, adversarial). ORDER IS
       // PRIORITY: the GLOW entry multiplies by 1.0 and exists only to CLAIM
@@ -2071,6 +2072,7 @@
               { band: MAT_MASONRY, hue: 0.100, sat: 1.25, val: 1.12 }], tint: '#e6c489', sat: 0.62, val: 1.10,
       how: 'Warm rock from the shallow galleries.' },
     { id: 'basalt', name: 'Basalt',       art: null, price: 230,
+      art: 'keep_basalt',
       // B3 "ember black" + a 0.06 shadow lift. Two judge lenses that specialise
       // in material read and in adversarial scrutiny both ranked B3 first, and
       // it was the ONLY candidate no lens raised a blocker against: B1's glow
@@ -2608,12 +2610,26 @@
       // All four are padded into gold_mound's own 700x485 box, content centred
       // and bottom-anchored: the engine sizes the pile by WIDTH, so plates of
       // different aspect would each render a different height against the keep.
-      // THE KEEPS. Only SLATE has bought art, padded into art/keep.png's own
-      // 519x700 box so its base lands where the stock keep's does. Sandstone
-      // and Basalt ship as MULTI-BAND RECOLOURS (see their `bands` in KEEPS) --
-      // NOT tint placeholders, and the `tint` each still carries is unreachable
-      // because _propPlate short-circuits on `bands`. Why those two were not
-      // bought is worth reading before anyone rerolls them: THE MODEL BAKES A LIT
+      // THE KEEPS. All three non-stock keeps have bought art now, each padded
+      // into art/keep.png's own 519x700 box so every base lands where the stock
+      // keep's does.
+      //
+      // SANDSTONE AND BASALT ARE CHOSEN FOR SILHOUETTE, NOT COLOUR. They shipped
+      // first as multi-band recolours of the stock keep, which VANUS called
+      // correctly: "some of the castles too repetitive". He was right and it is
+      // measurable -- a recolour has IoU 1.000 against the plate it recolours,
+      // so three of the four keeps were literally the same building. Measured
+      // over all 16 sweep candidates, these two give a set whose most-similar
+      // pair is 0.823, which is exactly the distance between Grey Stone and
+      // Slate -- the two distinct forms the game already shipped. No pair in the
+      // set is closer than a pair the game already had.
+      //
+      // THEIR `bands` ARE KEPT AND ARE NOT DEAD: _itemPlate falls back to
+      // _propPlate whenever an item's art has not decoded yet, so the recolour
+      // is now the LOADING FALLBACK. A keep whose sprite is still in flight
+      // renders as the right colour rather than as the wrong castle.
+      //
+      // Why the first three generation runs failed, and why it matters: THE MODEL BAKES A LIT
       // GROUND DISC under a keep even though the style header forbids it, and
       // the negative strong enough to remove it ("no ground, no floor, no pool
       // of light") pushes the model off the white background entirely -- both
@@ -2621,6 +2637,8 @@
       // 99%-opaque rectangle. Two failures in opposite directions, $1.25. Slate
       // landed clean on the same prompt, so this is a coin-flip, not a recipe.
       keep_slate:   'art/keep_slate.png',
+      keep_sand:    'art/keep_sand.png',
+      keep_basalt:  'art/keep_basalt.png',
       // THE ROADS. road_flag was already on disk in the art pipeline's _out/
       // from the ORIGINAL road job and had never been installed -- a free skin
       // that only needed wiring. bone + ash bought 2026-08-22 ($0.33).
