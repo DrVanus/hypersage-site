@@ -8,10 +8,26 @@
   <meta name="description" content="Hoardling — defend the sleeping dragon's hoard. Hold the chokepoints, recover every stolen coin.">
   <title>Hoardling</title>
   <meta name="theme-color" content="#17100e">
+  <!-- LINK PREVIEWS WERE BLANK, and og-image.png (1200x630) had been sitting in
+       the deployed tree since 2026-08-18 referenced by nothing. A shared link to
+       this page rendered as a bare URL everywhere. -->
+  <link rel="canonical" href="https://hypersage.ai/hoardling/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Hypersage">
+  <meta property="og:title" content="Hoardling">
+  <meta property="og:description" content="Too young for dragonfire. Built his own. Defend the sleeping dragon's hoard — hold the chokepoints, recover every stolen coin.">
+  <meta property="og:url" content="https://hypersage.ai/hoardling/">
+  <meta property="og:image" content="https://hypersage.ai/hoardling/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hoardling">
+  <meta name="twitter:description" content="Too young for dragonfire. Built his own.">
+  <meta name="twitter:image" content="https://hypersage.ai/hoardling/og-image.png">
   <!-- installable PWA: "Add to Home Screen" gives a fullscreen portrait app -->
-  <link rel="manifest" href="manifest.json?v=9da1f95961">
-  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=9da1f95961">
-  <link rel="apple-touch-icon" href="art/icon-180.png?v=9da1f95961">
+  <link rel="manifest" href="manifest.json?v=044464674b">
+  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=044464674b">
+  <link rel="apple-touch-icon" href="art/icon-180.png?v=044464674b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Hoardling">
@@ -38,6 +54,18 @@
       box-shadow:0 0 12px rgba(255,190,80,.65);transition:width .22s ease-out}
     #boot-note{font-family:system-ui,sans-serif;font-size:12px;letter-spacing:.10em;
       text-transform:uppercase;color:rgba(255,233,196,.46)}
+    /* THE LEGAL PAGES WERE LIVE AND UNREACHABLE. privacy.html and terms.html
+       have returned 200 since 5156798 and this page linked to NEITHER, so a
+       player -- or a reviewer -- had no way to get to them from the game.
+       They sit in the boot overlay: it is the only DOM that is ever on top of
+       the canvas, it is in the markup for anything that reads the page, and it
+       is on screen for the whole load. It fades out with the overlay, which is
+       the honest limitation -- the canvas owns the viewport after that. */
+    #boot-legal{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));
+      font-family:system-ui,sans-serif;font-size:12px;letter-spacing:.04em}
+    #boot-legal a{color:rgba(255,233,196,.52);text-decoration:none;padding:6px 8px}
+    #boot-legal a:hover{color:#ffd75e;text-decoration:underline}
+    #boot-legal span{color:rgba(255,233,196,.28)}
     /* An ember drifting up behind the wordmark: proof of life while the bytes
        land, and it costs one compositor-only animation. */
     #boot-ember{position:absolute;width:5px;height:5px;border-radius:50%;
@@ -48,7 +76,7 @@
     @media (prefers-reduced-motion:reduce){
       #boot-ember{display:none}#boot-fill{transition:none}#boot{transition:none}}
   </style>
-  <link rel="stylesheet" href="style.css?v=9da1f95961">
+  <link rel="stylesheet" href="style.css?v=044464674b">
 </head>
 <body>
   <div id="game-wrap">
@@ -67,11 +95,14 @@
     <div id="boot-sub">Too young for dragonfire. Built his own.</div>
     <div id="boot-track"><div id="boot-fill"></div></div>
     <div id="boot-note">stoking the forge</div>
+    <div id="boot-legal">
+      <a href="privacy.html">Privacy</a><span>·</span><a href="terms.html">Terms</a>
+    </div>
   </div>
   <!-- optional leaderboard config; a 404 here is fine (board stays off) -->
-  <script>window.__BUILD__="9da1f95961";window.__ART_EXT__="webp";</script>
+  <script>window.__BUILD__="044464674b";window.__ART_EXT__="webp";</script>
   <script>(function(){var B=window.__BUILD__;function chk(){fetch("build.txt?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(t){t=(t||"").trim();if(!t||t===B)return;try{if(sessionStorage.getItem("hl.rl")===t)return;sessionStorage.setItem("hl.rl",t);}catch(e){}location.reload();}).catch(function(){});}chk();document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});})();</script>
-  <script src="lb-config.js?v=9da1f95961"></script>
-  <script src="game.js?v=9da1f95961" defer></script>
+  <script src="lb-config.js?v=044464674b"></script>
+  <script src="game.js?v=044464674b" defer></script>
 </body>
 </html>

@@ -5377,7 +5377,7 @@
       return;
     }
     if (this.state === 'duel') {
-      var DGt = duelGeom(this.view.scale);
+      var DGt = duelGeom(this.view);
       for (var rq = 0; rq < RIVAL_ORDER.length; rq++) {
         var ryq = DGt.top + rq * DGt.pitch;
         if (w.y > ryq && w.y < ryq + DGt.h && w.x > DGt.x && w.x < DGt.x + DGt.w) {
@@ -5393,7 +5393,7 @@
       return;
     }
     if (this.state === 'trials') {
-      var TGt = trialGeom(this.view.scale);
+      var TGt = trialGeom(this.view);
       for (var tr = 0; tr < TRIAL_ORDER.length; tr++) {
         var try2 = TGt.top + tr * TGt.pitch;
         if (w.y > try2 && w.y < try2 + TGt.h) {
@@ -5415,7 +5415,7 @@
       return;
     }
     if (this.state === 'cavern') {
-      var CG = cavernRoomGeom(this.view.scale), ci;
+      var CG = cavernRoomGeom(this.view), ci;
       for (ci = 0; ci < SLOTS.length; ci++) {
         if (hit(w, CG.tabs[ci])) { this.cavSlot = ci; Sfx.play('place'); return; }
       }
@@ -5445,7 +5445,7 @@
       return;
     }
     if (this.state === 'forge') {
-      var FGt = forgeGeom(this.view.scale);
+      var FGt = forgeGeom(this.view);
       // BUTTONS BEFORE ROWS. The rows used to be tested first, so a sixth
       // FORGE_NODES entry -- whose band would reach 682 against RESPEC/BACK at
       // 640..680 -- would have eaten the back button with nothing to say so.
@@ -8673,6 +8673,46 @@
   ///
   /// WIDTH IS A FLOOR TOO, and it is the one that bites: a 40-unit-wide chip is
   /// 34.2pt across on an SE however tall it is.
+  /// THE WORLD Y OF THE LOWEST PIXEL A ROOM MAY USE. draw() translates by
+  /// v.oy, so the visible band in world coords runs from -v.oy to v.h - v.oy;
+  /// on a 19.5:9 phone that is ~65 units below WORLD_H that the 420x780 design
+  /// box never knew about. _titleGeom and _hudGeom both anchor to it. The other
+  /// four rooms pinned their bottom control to a literal instead, and MEASURED
+  /// at 393x852 they left 115-166 world units -- 12.7% to 18.3% of the screen --
+  /// of dead black under it. Same rule as _hudGeom's bottom stack so no two
+  /// screens guess differently at the home indicator.
+  ///
+  /// It takes the VIEW rather than the scale because a room needs both numbers
+  /// and passing scale alone is what made the other four unable to ask.
+  function roomBottom(v) {
+    if (!v || !v.h) return WORLD_H - 10;
+    return v.h - (v.oy || 0) - Math.max(10, (v.safeB || 0) + 6);
+  }
+
+  /// WHERE A BOTTOM BUTTON'S TOP GOES, so that its INFLATED rect — not its
+  /// painted box — is what lands on the margin. Anchoring the visual box at
+  /// roomBottom - h puts the 44pt inflation 11 units past it and one unit off
+  /// the bottom of the screen, which the room harness catches and which is the
+  /// whole reason the inflation and the anchor have to be computed together.
+  function roomBackY(v, h) {
+    var s = (v && v.scale) || 1;
+    var minH = Math.max(62, 44 / s);
+    return roomBottom(v) - h - Math.max(0, (minH - h) / 2);
+  }
+
+  /// A LIST CENTRED IN WHAT IS LEFT. Bottom-anchoring a back button without
+  /// this just MOVES the hole: a duel's four cards cap at 88 units of pitch for
+  /// a good reason (at 104 each card held its content in the top 44 and left 30
+  /// of air inside itself), so on a tall phone the extra height cannot all go
+  /// into the rows. Growing them a little and centring the remainder reads as
+  /// deliberate; leaving it all at the bottom is what VANUS called broken.
+  function centredList(topMin, botMax, n, pitchCap, gap) {
+    var avail = Math.max(0, botMax - topMin);
+    var pitch = Math.min(pitchCap, Math.floor((avail + gap) / n));
+    var block = n * pitch - gap;
+    return { top: topMin + Math.max(0, (avail - block) / 2), pitch: pitch, h: pitch - gap };
+  }
+
   function uiBtn(scale, x, y, w, h) {
     var s = scale || 1;
     var minH = Math.max(62, 44 / s), minW = 44 / s;
@@ -8682,15 +8722,17 @@
              hw: Math.max(w, minW), hh: Math.max(h, minH) };
   }
 
-  function duelGeom(scale) {
-    var n = RIVAL_ORDER.length;
+  function duelGeom(v) {
+    var scale = v && v.scale, n = RIVAL_ORDER.length;
     // 88, not 104. At 104 the row held its content in the top 44px and left a
     // 30px dead band above the footer line, which reads as three separate
     // cards' worth of air inside one card. 78px of body is still comfortably
-    // over the 44pt tap floor.
-    var top = 232, backY = 664, gap = 10;
-    var pitch = Math.min(88, Math.floor((backY - 24 - top + gap) / n));
-    return { top: top, pitch: pitch, h: pitch - gap, backY: backY,
+    // over the 44pt tap floor. 96 is the tall-phone ceiling: the extra 8 goes
+    // into the card, the rest into the air around the block.
+    var top = 232, gap = 10;
+    var backY = roomBackY(v, 40);
+    var L = centredList(top, backY - 30, n, 96, gap);
+    return { top: L.top, pitch: L.pitch, h: L.h, backY: backY,
              back: uiBtn(scale, WORLD_W / 2 - 70, backY, 140, 40),
              x: 30, w: WORLD_W - 60 };
   }
@@ -8702,27 +8744,33 @@
   /// `w.y > 640 && w.y < 680`. A sixth FORGE_NODES entry would have put its row
   /// at 620..682 straight through RESPEC/BACK at 640..680, with the rows tested
   /// FIRST, so the sixth node would have silently eaten the back button.
-  function forgeGeom(scale) {
-    var rows = [], top = 250, pitch = 74, h = 62;
+  function forgeGeom(v) {
+    var scale = v && v.scale, rows = [], gap = 12;
+    var btnY = roomBackY(v, 40);
+    // 92 is the ceiling, not 74: a forge row carries a name, a description and
+    // a rank pip strip, so the extra height is spent on the row rather than on
+    // the air around it -- unlike a duel card, which had nothing to do with it.
+    var L = centredList(250, btnY - 30, FORGE_NODES.length, 92, gap);
     for (var i = 0; i < FORGE_NODES.length; i++) {
-      var ry = top + i * pitch;
+      var ry = L.top + i * L.pitch;
       // the FORGE-star button is the target, and the row is its generous band
-      rows.push({ y: ry, h: h,
-                  btn: uiBtn(scale, WORLD_W - 118, ry + 12, 88, 38),
-                  band: { hx: WORLD_W - 118, hy: ry, hw: 88, hh: h } });
+      rows.push({ y: ry, h: L.h,
+                  btn: uiBtn(scale, WORLD_W - 118, ry + (L.h - 38) / 2, 88, 38),
+                  band: { hx: WORLD_W - 118, hy: ry, hw: 88, hh: L.h } });
     }
-    var btnY = 640;
-    return { rows: rows, top: top, pitch: pitch, h: h, btnY: btnY,
+    return { rows: rows, top: L.top, pitch: L.pitch, h: L.h, btnY: btnY,
              respec: uiBtn(scale, WORLD_W / 2 - 150, btnY, 140, 40),
              back:   uiBtn(scale, WORLD_W / 2 + 10,  btnY, 140, 40) };
   }
 
-  function trialGeom(scale) {
-    var n = TRIAL_ORDER.length;
-    var top = 214, backY = 664, gap = 8;
+  function trialGeom(v) {
+    var scale = v && v.scale, n = TRIAL_ORDER.length;
+    var top = 214, gap = 8;
+    var backY = roomBackY(v, 40);
     // last row's BOTTOM is top + n*pitch - gap, and it must clear BACK
-    var pitch = Math.min(108, Math.floor((backY - 24 - top + gap) / n));
-    var h = pitch - gap;
+    var L = centredList(top, backY - 30, n, 108, gap);
+    var pitch = L.pitch, h = L.h;
+    top = L.top;
     // The level chips run the FULL height of the row and are the tap targets,
     // so a compact row shrinks the text, never the thing you have to hit. At
     // the old (h - 46) they collapsed to 14 units on a six-trial list — about
@@ -9884,8 +9932,8 @@
   ///
   /// Rows are sized off view.scale so every card clears the 44pt floor BY
   /// CONSTRUCTION rather than by a number somebody measured once on one phone.
-  function cavernRoomGeom(scale) {
-    var s = scale || 1, minH = Math.max(62, 44 / s);
+  function cavernRoomGeom(v) {
+    var s = (v && v.scale) || 1, minH = Math.max(62, 44 / s);
     var tabs = [], i;
     // RE-DERIVED FOR SIX, NOT EXTENDED. The 5-tab pitch was `12 + i * 80` with
     // w 74; a sixth on that pitch ends at x=486 in a 420-wide world and would
@@ -9899,12 +9947,34 @@
       tabs.push({ x: tx, y: 142, w: TW, h: 38,
                   hx: tx - 3, hy: 142 - (minH - 38) / 2, hw: TP, hh: minH });
     }
+    // THE GRID WAS A HARDCODED 8, and DRAGON already holds exactly 8 coats:
+    // one more and the ninth would be silently INVISIBLE and UNBUYABLE, since
+    // the drawer caps at G.cards.length and so does the tap. Same class as the
+    // tab-pitch trap the comment above describes, one entry away from firing.
+    // Derived from the room instead, so a tall phone shows a fifth row (ten
+    // cards) rather than leaving 115 world units of dead black under BACK --
+    // and check_cavern_capacity fails the build if the SMALLEST screen can no
+    // longer hold the fullest slot.
+    var backY = roomBackY(v, 40);
+    var CARD_TOP = 324, CARD_PITCH = 88, CARD_H = 78;
+    var maxItems = 0;
+    for (i = 0; i < SLOTS.length; i++) {
+      var lst = SLOTS[i].items;
+      if (lst && lst.length > maxItems) maxItems = lst.length;
+    }
+    var band = backY - 30 - CARD_TOP;
+    var fitRows = Math.max(1, Math.floor((band + (CARD_PITCH - CARD_H)) / CARD_PITCH));
+    var rowsN = Math.min(fitRows, Math.ceil(maxItems / 2));
+    // THE SLACK SPLITS. A slot that needs fewer rows than the screen can hold
+    // (every slot but DRAGON) would otherwise leave all of it in one lump above
+    // BACK, which is the same "looks broken" the bottom anchor was for.
+    var gridTop = CARD_TOP + Math.max(0, (band - (rowsN * CARD_PITCH - (CARD_PITCH - CARD_H))) / 2);
     var cards = [];
-    for (i = 0; i < 8; i++) {
-      var cx = 12 + (i % 2) * 200, cy = 324 + Math.floor(i / 2) * 88;
-      cards.push({ x: cx, y: cy, w: 190, h: 78,
-                   hx: cx - 4, hy: cy - Math.max(0, (minH - 78) / 2), hw: 198,
-                   hh: Math.max(78, minH) });
+    for (i = 0; i < rowsN * 2; i++) {
+      var cx = 12 + (i % 2) * 200, cy = gridTop + Math.floor(i / 2) * CARD_PITCH;
+      cards.push({ x: cx, y: cy, w: 190, h: CARD_H,
+                   hx: cx - 4, hy: cy - Math.max(0, (minH - CARD_H) / 2), hw: 198,
+                   hh: Math.max(CARD_H, minH) });
     }
     return {
       tabs: tabs, cards: cards,
@@ -9925,8 +9995,9 @@
         ? { x: 300, y: 104, w: 108, h: 30,
             hx: 296, hy: 104 - (minH - 30) / 2, hw: 116, hh: minH }
         : { x: 300, y: 104, w: 108, h: 30 },
-      back:   { x: WORLD_W / 2 - 70, y: 690, w: 140, h: 40,
-                hx: WORLD_W / 2 - 78, hy: 690 - (minH - 40) / 2, hw: 156, hh: minH },
+      back:   { x: WORLD_W / 2 - 70, y: backY, w: 140, h: 40,
+                hx: WORLD_W / 2 - 78, hy: backY - Math.max(0, (minH - 40) / 2),
+                hw: 156, hh: Math.max(40, minH) },
     };
   }
 
@@ -9939,7 +10010,7 @@
   var STORE_ON = false;
 
   Game.prototype._drawCavernRoom = function (ctx) {
-    var G = cavernRoomGeom(this.view.scale), i;
+    var G = cavernRoomGeom(this.view), i;
     var slot = SLOTS[this.cavSlot | 0] || SLOTS[0];
     ctx.fillStyle = 'rgba(12,7,5,0.88)';
     ctx.fillRect(-this.view.ox - 60, -this.view.oy - 60, this.view.w + 120, this.view.h + 120);
@@ -10138,19 +10209,24 @@
     ctx.textAlign = 'left';
     inkText(ctx, spendTxt, WORLD_W / 2 - spendW / 2 + 4, 228, '#fff2d8', 4, 1);
     ctx.textAlign = 'center';
-    var FG = forgeGeom(v.scale);
+    var FG = forgeGeom(v);
     for (var i = 0; i < FG.rows.length; i++) {
       var node = FORGE_NODES[i], ry = FG.rows[i].y;
       var cur = Save.data.forge[node.id] | 0;
       uiPanel(ctx, 26, ry, WORLD_W - 52, FG.rows[i].h, 11);
       ctx.textAlign = 'left';
       ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 15px system-ui, sans-serif';
-      ctx.fillText(node.name, 42, ry + 24);
+      // OFF THE ROW'S CENTRE, not its top. These were 24/43/54, written for a
+      // 62-tall row; the row grows to 92 on a tall phone now, and constants
+      // would leave the three lines hugging the top of it. At h 62 the derived
+      // values are 24, 43 and 54 exactly, so nothing moves on the design box.
+      var rc = ry + FG.rows[i].h / 2;
+      ctx.fillText(node.name, 42, rc - 7);
       ctx.fillStyle = '#b9a27f'; ctx.font = '12px system-ui, sans-serif';
-      ctx.fillText(node.desc, 42, ry + 43);
+      ctx.fillText(node.desc, 42, rc + 12);
       for (var rp2 = 0; rp2 < node.ranks; rp2++) {
         ctx.fillStyle = rp2 < cur ? '#ffd75e' : 'rgba(255,215,94,0.2)';
-        ctx.beginPath(); ctx.arc(42 + rp2 * 16, ry + 54, 4, 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(42 + rp2 * 16, rc + 23, 4, 0, 6.283); ctx.fill();
       }
       var can = cur < node.ranks && avail > 0;
       var fbtn = FG.rows[i].btn;
@@ -10176,7 +10252,7 @@
   };
 
   Game.prototype._drawDuelSelect = function (ctx) {
-    var v = this.view, DG = duelGeom(v.scale);
+    var v = this.view, DG = duelGeom(v);
     ctx.fillStyle = 'rgba(12,7,5,0.85)';
     ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
     ctx.textAlign = 'center';
@@ -10286,7 +10362,7 @@
     ctx.fillText('Wick sets himself a challenge on a keep he has held.', WORLD_W / 2, 182);
     ctx.fillText('Win the level first; forge craft still counts.', WORLD_W / 2, 198);
     for (var i = 0; i < TRIAL_ORDER.length; i++) {
-      var TG = trialGeom(this.view.scale);
+      var TG = trialGeom(this.view);
       var key = TRIAL_ORDER[i], tr = TRIALS[key], ry = TG.top + i * TG.pitch;
       uiPanel(ctx, 26, ry, WORLD_W - 52, TG.h, 11);
       ctx.textAlign = 'left';
@@ -10309,7 +10385,7 @@
       }
     }
     ctx.textAlign = 'center';
-    var TB = trialGeom(this.view.scale).back;
+    var TB = trialGeom(this.view).back;
     ctx.fillStyle = 'rgba(214,69,69,0.9)';
     rr(ctx, TB.x, TB.y, TB.w, TB.h, 10); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.font = 'bold 14px system-ui, sans-serif';
