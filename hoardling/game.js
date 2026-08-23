@@ -5377,7 +5377,7 @@
       return;
     }
     if (this.state === 'duel') {
-      var DGt = duelGeom();
+      var DGt = duelGeom(this.view.scale);
       for (var rq = 0; rq < RIVAL_ORDER.length; rq++) {
         var ryq = DGt.top + rq * DGt.pitch;
         if (w.y > ryq && w.y < ryq + DGt.h && w.x > DGt.x && w.x < DGt.x + DGt.w) {
@@ -5389,18 +5389,19 @@
           this.state = 'playing'; return;
         }
       }
-      if (w.y > DGt.backY && w.y < DGt.backY + 40 &&
-          w.x > WORLD_W / 2 - 70 && w.x < WORLD_W / 2 + 70) { this.state = 'menu'; return; }
+      if (hit(w, DGt.back)) { this.state = 'menu'; return; }
       return;
     }
     if (this.state === 'trials') {
-      var TGt = trialGeom();
+      var TGt = trialGeom(this.view.scale);
       for (var tr = 0; tr < TRIAL_ORDER.length; tr++) {
         var try2 = TGt.top + tr * TGt.pitch;
         if (w.y > try2 && w.y < try2 + TGt.h) {
           for (var tlv = 0; tlv < CAMPAIGN_MAPS; tlv++) {
-            var chx = WORLD_W - 168 + tlv * 46;
-            if (w.x > chx && w.x < chx + 40 && w.y > try2 + TGt.chipY && w.y < try2 + TGt.chipY + TGt.chipH) {
+            // the chip's OWN inflated rect, offset onto this row
+            var cq = TGt.chips[tlv];
+            if (w.x >= cq.hx && w.x <= cq.hx + cq.hw &&
+                w.y >= try2 + cq.hy && w.y <= try2 + cq.hy + cq.hh) {
               if (!(Save.data.stars[tlv] > 0)) return;       // trial needs the level won first
               this.reset(1, 'campaign', tlv, TRIAL_ORDER[tr]);
               this.state = 'playing'; return;
@@ -5408,7 +5409,7 @@
           }
         }
       }
-      if (w.y > 640 && w.y < 680 && w.x > WORLD_W / 2 - 70 && w.x < WORLD_W / 2 + 70) {
+      if (hit(w, TGt.back)) {
         this.state = 'menu'; return;
       }
       return;
@@ -5444,24 +5445,23 @@
       return;
     }
     if (this.state === 'forge') {
-      var rows0 = 250;
-      for (var fn = 0; fn < FORGE_NODES.length; fn++) {
-        var ry = rows0 + fn * 74;
-        if (w.y > ry && w.y < ry + 62 && w.x > WORLD_W - 118 && w.x < WORLD_W - 30) {
+      var FGt = forgeGeom(this.view.scale);
+      // BUTTONS BEFORE ROWS. The rows used to be tested first, so a sixth
+      // FORGE_NODES entry -- whose band would reach 682 against RESPEC/BACK at
+      // 640..680 -- would have eaten the back button with nothing to say so.
+      if (hit(w, FGt.respec)) {
+        Save.data.forge = {}; Save.write(); Sfx.play('sell'); return;
+      }
+      if (hit(w, FGt.back)) { this.state = 'menu'; return; }
+      for (var fn = 0; fn < FGt.rows.length; fn++) {
+        var fb = FGt.rows[fn].band;
+        if (w.y > fb.hy && w.y < fb.hy + fb.hh && w.x > fb.hx && w.x < fb.hx + fb.hw) {
           var node = FORGE_NODES[fn];
           var cur = Save.data.forge[node.id] | 0;
           if (cur < node.ranks && Save.starsTotal() - Save.forgeSpent() > 0) {
             Save.data.forge[node.id] = cur + 1; Save.write(); Sfx.play('upg');
           }
           return;
-        }
-      }
-      if (w.y > 640 && w.y < 680) {
-        if (w.x > WORLD_W / 2 - 150 && w.x < WORLD_W / 2 - 10) {   // respec
-          Save.data.forge = {}; Save.write(); Sfx.play('sell'); return;
-        }
-        if (w.x > WORLD_W / 2 + 10 && w.x < WORLD_W / 2 + 150) {   // back
-          this.state = 'menu'; return;
         }
       }
       return;
@@ -8661,7 +8661,28 @@
   // trialGeom/_titleGeom. Rows are the tap targets and are derived from the
   // back-button position, so adding a fifth rival re-flows instead of
   // overflowing off the bottom of the screen.
-  function duelGeom() {
+  /// A BOTTOM-ROW BUTTON, INFLATED TO THE TAP FLOOR. Four of them -- the
+  /// forge's RESPEC and BACK, the trials BACK, the duel BACK -- were 40 world
+  /// units drawn and hit-tested from LITERALS duplicated thousands of lines
+  /// apart, with no inflation at all. MEASURED: 40 units x scale is 34.2pt on
+  /// an iPhone SE 3 (scale 0.8551), 37.4pt on a 15 Pro and 41.0pt on a 15 Pro
+  /// Max -- under Apple's 44pt minimum on EVERY iPhone sold. _titleGeom and
+  /// cavernRoomGeom had carried the rule for months; these three rooms never
+  /// got it, because nothing derived their geometry from one place and so
+  /// nothing could apply a rule to it.
+  ///
+  /// WIDTH IS A FLOOR TOO, and it is the one that bites: a 40-unit-wide chip is
+  /// 34.2pt across on an SE however tall it is.
+  function uiBtn(scale, x, y, w, h) {
+    var s = scale || 1;
+    var minH = Math.max(62, 44 / s), minW = 44 / s;
+    var padY = Math.max(0, (minH - h) / 2), padX = Math.max(0, (minW - w) / 2);
+    return { x: x, y: y, w: w, h: h,
+             hx: x - padX, hy: y - padY,
+             hw: Math.max(w, minW), hh: Math.max(h, minH) };
+  }
+
+  function duelGeom(scale) {
     var n = RIVAL_ORDER.length;
     // 88, not 104. At 104 the row held its content in the top 44px and left a
     // 30px dead band above the footer line, which reads as three separate
@@ -8670,10 +8691,33 @@
     var top = 232, backY = 664, gap = 10;
     var pitch = Math.min(88, Math.floor((backY - 24 - top + gap) / n));
     return { top: top, pitch: pitch, h: pitch - gap, backY: backY,
+             back: uiBtn(scale, WORLD_W / 2 - 70, backY, 140, 40),
              x: 30, w: WORLD_W - 60 };
   }
 
-  function trialGeom() {
+  /// THE FORGE HAD NO GEOMETRY FUNCTION. Its row y was the literal
+  /// `250 + i * 74` hand-duplicated in the drawer and the tap handler 4,611
+  /// lines apart -- the exact duplication _titleGeom, trialGeom and duelGeom
+  /// were written to abolish -- and its two buttons were a bare
+  /// `w.y > 640 && w.y < 680`. A sixth FORGE_NODES entry would have put its row
+  /// at 620..682 straight through RESPEC/BACK at 640..680, with the rows tested
+  /// FIRST, so the sixth node would have silently eaten the back button.
+  function forgeGeom(scale) {
+    var rows = [], top = 250, pitch = 74, h = 62;
+    for (var i = 0; i < FORGE_NODES.length; i++) {
+      var ry = top + i * pitch;
+      // the FORGE-star button is the target, and the row is its generous band
+      rows.push({ y: ry, h: h,
+                  btn: uiBtn(scale, WORLD_W - 118, ry + 12, 88, 38),
+                  band: { hx: WORLD_W - 118, hy: ry, hw: 88, hh: h } });
+    }
+    var btnY = 640;
+    return { rows: rows, top: top, pitch: pitch, h: h, btnY: btnY,
+             respec: uiBtn(scale, WORLD_W / 2 - 150, btnY, 140, 40),
+             back:   uiBtn(scale, WORLD_W / 2 + 10,  btnY, 140, 40) };
+  }
+
+  function trialGeom(scale) {
     var n = TRIAL_ORDER.length;
     var top = 214, backY = 664, gap = 8;
     // last row's BOTTOM is top + n*pitch - gap, and it must clear BACK
@@ -8683,7 +8727,31 @@
     // so a compact row shrinks the text, never the thing you have to hit. At
     // the old (h - 46) they collapsed to 14 units on a six-trial list — about
     // 14 CSS px, a third of the 44pt minimum.
-    return { top: top, pitch: pitch, h: h, chipY: 8, chipH: Math.max(30, h - 16),
+    // THE CHIPS WERE 40 WIDE ON A PITCH OF 46, which is 34.2pt across on an
+    // SE 3 -- and no amount of hit inflation fixes it, because inflating to the
+    // full 46 pitch only reaches 39.3pt. The strip had to WIDEN. 44 wide on a
+    // pitch of 56 gives the hit rect the whole pitch (46.2pt) and still leaves
+    // 12 units of visible gutter; the row's text loses 14 units, which fitText
+    // already handles. The last chip's right edge lands exactly on the panel's.
+    var CW = 44, CP = 56, CX = WORLD_W - 26 - CW - (CAMPAIGN_MAPS - 1) * CP;
+    var chipH = Math.max(30, h - 16);
+    var chips = [];
+    for (var ci = 0; ci < CAMPAIGN_MAPS; ci++) {
+      var cbx = CX + ci * CP;
+      var cb = uiBtn(scale, cbx, 8, CW, chipH);
+      // THE HIT RECT IS THE PITCH, not the chip. Inflating the 44-wide chip to
+      // the 44/scale floor and THEN insetting 1 a side for the abutting
+      // neighbour lands at 42 units -- 42.0pt at scale 1, which is under the
+      // floor the inflation existed to clear. Claim the whole pitch first, then
+      // inset: hit() is inclusive on both bounds, so two touching rects give
+      // the shared column to whichever branch is tested first.
+      cb.hx = cbx - (CP - CW) / 2 + 1;
+      cb.hw = CP - 2;
+      chips.push(cb);
+    }
+    return { top: top, pitch: pitch, h: h, chipY: 8, chipH: chipH,
+             chips: chips, textW: CX - 42 - 10,
+             back: uiBtn(scale, WORLD_W / 2 - 70, backY, 140, 40),
              backY: backY };
   }
 
@@ -9841,10 +9909,22 @@
     return {
       tabs: tabs, cards: cards,
       preview: { x: 12, y: 188, w: 396, h: 128 },
-      // the wallet chip, and the shelf a store would live on
+      // the wallet chip, and the shelf a store would live on (see topUp)
       wallet: { x: 12, y: 104, w: 200, h: 30 },
-      topUp:  { x: 300, y: 104, w: 108, h: 30,
-                hx: 296, hy: 104 - (minH - 30) / 2, hw: 116, hh: minH },
+      // THE STORE CHIP HAS NO HIT RECT UNTIL THERE IS A STORE, because there
+      // is no tap site for it either -- a rect nothing tests is fiction, and
+      // this one MEASURES as an overlap: inflated it is y 88..150 against the
+      // slot tabs' 130..192, so tabs 4 and 5 share 48x20 and 67x20 world units
+      // with it. The tabs are tested first, so flipping STORE_ON would hand
+      // the ROAD and WORKS tabs the top 32% of the chip.
+      // SO THE CLAIM ABOVE IS FALSE BY 20 UNITS: reserving the space now is
+      // NOT the same as not needing a re-layout later. Turning the flag on
+      // needs the wallet row moved to y 84, and tools/tap_rooms.js fails the
+      // moment the flag moves so nobody has to remember this.
+      topUp:  STORE_ON
+        ? { x: 300, y: 104, w: 108, h: 30,
+            hx: 296, hy: 104 - (minH - 30) / 2, hw: 116, hh: minH }
+        : { x: 300, y: 104, w: 108, h: 30 },
       back:   { x: WORLD_W / 2 - 70, y: 690, w: 140, h: 40,
                 hx: WORLD_W / 2 - 78, hy: 690 - (minH - 40) / 2, hw: 156, hh: minH },
     };
@@ -10058,10 +10138,11 @@
     ctx.textAlign = 'left';
     inkText(ctx, spendTxt, WORLD_W / 2 - spendW / 2 + 4, 228, '#fff2d8', 4, 1);
     ctx.textAlign = 'center';
-    for (var i = 0; i < FORGE_NODES.length; i++) {
-      var node = FORGE_NODES[i], ry = 250 + i * 74;
+    var FG = forgeGeom(v.scale);
+    for (var i = 0; i < FG.rows.length; i++) {
+      var node = FORGE_NODES[i], ry = FG.rows[i].y;
       var cur = Save.data.forge[node.id] | 0;
-      uiPanel(ctx, 26, ry, WORLD_W - 52, 62, 11);
+      uiPanel(ctx, 26, ry, WORLD_W - 52, FG.rows[i].h, 11);
       ctx.textAlign = 'left';
       ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 15px system-ui, sans-serif';
       ctx.fillText(node.name, 42, ry + 24);
@@ -10072,27 +10153,30 @@
         ctx.beginPath(); ctx.arc(42 + rp2 * 16, ry + 54, 4, 0, 6.283); ctx.fill();
       }
       var can = cur < node.ranks && avail > 0;
+      var fbtn = FG.rows[i].btn;
       ctx.fillStyle = can ? 'rgba(214,69,69,0.9)' : 'rgba(70,52,44,0.7)';
-      rr(ctx, WORLD_W - 118, ry + 12, 88, 38, 10); ctx.fill();
+      rr(ctx, fbtn.x, fbtn.y, fbtn.w, fbtn.h, 10); ctx.fill();
       ctx.fillStyle = can ? '#fff' : '#8a7f72';
       ctx.font = 'bold 14px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(cur >= node.ranks ? 'MAX' : 'FORGE ★', WORLD_W - 74, ry + 36);
+      ctx.fillText(cur >= node.ranks ? 'MAX' : 'FORGE ★',
+                   fbtn.x + fbtn.w / 2, fbtn.y + fbtn.h / 2 + 5);
       ctx.textAlign = 'left';
     }
     ctx.textAlign = 'center';
+    var FR = FG.respec, FB = FG.back;
     ctx.fillStyle = 'rgba(80,60,140,0.9)';
-    rr(ctx, WORLD_W / 2 - 150, 640, 140, 40, 10); ctx.fill();
+    rr(ctx, FR.x, FR.y, FR.w, FR.h, 10); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.font = 'bold 14px system-ui, sans-serif';
-    ctx.fillText('RESPEC (free)', WORLD_W / 2 - 80, 665);
+    ctx.fillText('RESPEC (free)', FR.x + FR.w / 2, FR.y + FR.h / 2 + 5);
     ctx.fillStyle = 'rgba(214,69,69,0.9)';
-    rr(ctx, WORLD_W / 2 + 10, 640, 140, 40, 10); ctx.fill();
+    rr(ctx, FB.x, FB.y, FB.w, FB.h, 10); ctx.fill();
     ctx.fillStyle = '#fff';
-    ctx.fillText('BACK', WORLD_W / 2 + 80, 665);
+    ctx.fillText('BACK', FB.x + FB.w / 2, FB.y + FB.h / 2 + 5);
     ctx.textAlign = 'left';
   };
 
   Game.prototype._drawDuelSelect = function (ctx) {
-    var v = this.view, DG = duelGeom();
+    var v = this.view, DG = duelGeom(v.scale);
     ctx.fillStyle = 'rgba(12,7,5,0.85)';
     ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
     ctx.textAlign = 'center';
@@ -10184,10 +10268,10 @@
     // BACK WEARS THE PLATE EVERY OTHER ROOM'S BACK WEARS. It was bare text
     // here, which reads as a label rather than a control -- and this is the one
     // screen where the text sits over painted cavern floor instead of a panel.
-    forgePlate(ctx, { x: WORLD_W / 2 - 70, y: DG.backY, w: 140, h: 40 }, 'util');
+    forgePlate(ctx, DG.back, 'util');
     ctx.textAlign = 'center';
     ctx.fillStyle = '#e8cbb4'; ctx.font = 'bold 15px system-ui, sans-serif';
-    inkText(ctx, 'BACK', WORLD_W / 2, DG.backY + 26, '#e8cbb4', 3, 1);
+    inkText(ctx, 'BACK', DG.back.x + DG.back.w / 2, DG.back.y + 26, '#e8cbb4', 3, 1);
     ctx.textAlign = 'left';
   };
 
@@ -10202,34 +10286,41 @@
     ctx.fillText('Wick sets himself a challenge on a keep he has held.', WORLD_W / 2, 182);
     ctx.fillText('Win the level first; forge craft still counts.', WORLD_W / 2, 198);
     for (var i = 0; i < TRIAL_ORDER.length; i++) {
-      var TG = trialGeom();
+      var TG = trialGeom(this.view.scale);
       var key = TRIAL_ORDER[i], tr = TRIALS[key], ry = TG.top + i * TG.pitch;
       uiPanel(ctx, 26, ry, WORLD_W - 52, TG.h, 11);
       ctx.textAlign = 'left';
       ctx.fillStyle = '#d9f2ff'; ctx.font = 'bold 15px system-ui, sans-serif';
-      var textW = (WORLD_W - 168) - 42 - 10;   // stop before the L1 chip
+      var textW = TG.textW;                   // stop before the L1 chip
       ctx.fillText(fitText(ctx, tr.name, textW), 42, ry + 24);
       ctx.fillStyle = '#b9a27f'; ctx.font = '11px system-ui, sans-serif';
       ctx.fillText(fitText(ctx, tr.pitch, textW), 42, ry + 42);
       for (var lv2 = 0; lv2 < CAMPAIGN_MAPS; lv2++) {
-        var chx = WORLD_W - 168 + lv2 * 46;
+        var chp = TG.chips[lv2], chx = chp.x;
         var wonLv = Save.data.stars[lv2] > 0;
         var badge = wonLv && Save.data.trials[lv2] && Save.data.trials[lv2][key];
         ctx.fillStyle = badge ? 'rgba(255,215,94,0.9)' : wonLv ? 'rgba(214,69,69,0.85)' : 'rgba(70,52,44,0.6)';
-        rr(ctx, chx, ry + TG.chipY, 40, TG.chipH, 8); ctx.fill();
+        rr(ctx, chx, ry + TG.chipY, chp.w, TG.chipH, 8); ctx.fill();
         ctx.fillStyle = badge ? '#3a2c14' : wonLv ? '#fff' : '#8a7f72';
         ctx.font = 'bold 12px system-ui, sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(badge ? '\u2605' : 'L' + (lv2 + 1), chx + 20, ry + TG.chipY + TG.chipH * 0.66);
+        ctx.fillText(badge ? '\u2605' : 'L' + (lv2 + 1),
+                     chx + chp.w / 2, ry + TG.chipY + TG.chipH * 0.66);
         ctx.textAlign = 'left';
       }
     }
     ctx.textAlign = 'center';
+    var TB = trialGeom(this.view.scale).back;
     ctx.fillStyle = 'rgba(214,69,69,0.9)';
-    rr(ctx, WORLD_W / 2 - 70, 640, 140, 40, 10); ctx.fill();
+    rr(ctx, TB.x, TB.y, TB.w, TB.h, 10); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.font = 'bold 14px system-ui, sans-serif';
-    ctx.fillText('BACK', WORLD_W / 2, 665);
+    ctx.fillText('BACK', TB.x + TB.w / 2, TB.y + TB.h / 2 + 5);
     ctx.textAlign = 'left';
   };
+
+  /// The lowest baseline anything on the result screen may use. 'tap for menu'
+  /// sits 18 under it; Wick is bottom-anchored 62 above it. Named once so the
+  /// ladder, the hero and the footer cannot each guess.
+  var RESULT_FOOT = 730;
 
   Game.prototype._drawResult = function (ctx) {
     var r = this.result || {};
@@ -10296,6 +10387,19 @@
         starCoin(ctx, WORLD_W / 2 - 46 + s * 46, 360, 19 * pop, earned);
       }
     }
+    // ---- EVERYTHING BELOW FLOWS FROM ONE CURSOR ---------------------------
+    // Every y under here used to be a literal, and they collided the moment two
+    // optional blocks were on at once. MEASURED on a real lost daily (15,165
+    // fixed steps, wave 3, 2 leaks): 'WHO GOT THROUGH' was drawn at 496 while
+    // 'waves survived' was drawn at 498 -- two units apart, both painted -- and
+    // with the toll firing as well, 'Wick shook loose' landed on 498 too, three
+    // strings in the same two units. `leakTop` DID shift by 26 for the toll; its
+    // own header did not follow it, because the header was a literal.
+    // A cursor cannot do that: a block that is not drawn advances nothing.
+    var CX = WORLD_W / 2;
+    var RY = r.rival ? 352 : (r.trial ? 357 : 332);       // under the headline
+    if (r.won && !r.rival) RY = 379;                      // under the medallions
+
     // ---- HOARD MARKS EARNED ----------------------------------------------
     // _gameOver() writes result.marks and NOTHING READ IT: a player earned the
     // currency the whole shop runs on and was never told. It lands in the gap
@@ -10310,33 +10414,41 @@
     var mkFade = RM ? 1 : Math.max(0, Math.min(1, ((this._resultT || 0) - 1.05) / 0.28));
     if ((r.marks | 0) > 0 && mkFade > 0) {
       ctx.save(); ctx.globalAlpha = mkFade;
-      // IT MUST NOT MOVE ANYTHING. Every y below this is a literal, down to the
-      // daily ladder at 610, so shifting the stats block to make room would
-      // collide with the leaderboard on exactly the mode that earns marks most
-      // often. The chip is sized to the gap instead: the star medallions are
-      // centred at 360 with r19, so they end at 379, and 'treasure kept' is a
-      // 17px baseline at 420, so its ink starts near 407. 381..405 is free.
+      // IT RIDES THE CURSOR NOW. It used to be wedged into the one 24-unit gap
+      // that happened to be free in every layout (381..405, between the star
+      // medallions ending at 379 and 'treasure kept' at 420) precisely BECAUSE
+      // every y below it was a literal and it could not move anything. It can
+      // move things now, so it simply sits where it falls.
       var mkTxt = '+' + (r.marks | 0) + '  HOARD MARKS';
       ctx.font = 'bold 13px system-ui, sans-serif';
       var mkW = ctx.measureText(mkTxt).width + 40;
       var mkX = WORLD_W / 2 - mkW / 2;
       ctx.fillStyle = 'rgba(96,66,28,0.55)';
-      rr(ctx, mkX, 381, mkW, 24, 8); ctx.fill();
+      rr(ctx, mkX, RY + 2, mkW, 24, 8); ctx.fill();
       ctx.strokeStyle = 'rgba(255,215,110,0.75)'; ctx.lineWidth = 1.5;
-      rr(ctx, mkX, 381, mkW, 24, 8); ctx.stroke();
-      drawCoin(ctx, mkX + 15, 393, 8, Save.equipped('coin'));
+      rr(ctx, mkX, RY + 2, mkW, 24, 8); ctx.stroke();
+      drawCoin(ctx, mkX + 15, RY + 14, 8, Save.equipped('coin'));
       ctx.textAlign = 'left';
-      inkText(ctx, mkTxt, mkX + 28, 397, '#ffe9c4', 3, 1);
+      inkText(ctx, mkTxt, mkX + 28, RY + 18, '#ffe9c4', 3, 1);
       ctx.textAlign = 'center';
       ctx.restore();
     }
+    if ((r.marks | 0) > 0) RY += 26;
     ctx.fillStyle = '#ffe9c4'; ctx.font = '17px system-ui, sans-serif';
-    ctx.fillText('treasure kept: ' + (r.hoard | 0) + ' / ' + CFG.startHoard, WORLD_W / 2, 420);
-    ctx.fillText('coins carried off: ' + (r.lost | 0), WORLD_W / 2, 446);
-    ctx.fillText('raiders slain: ' + (r.kills | 0), WORLD_W / 2, 472);
+    var LINE = 26;
+    RY += 15;
+    ctx.fillText('treasure kept: ' + (r.hoard | 0) + ' / ' + CFG.startHoard, CX, RY); RY += LINE;
+    ctx.fillText('coins carried off: ' + (r.lost | 0), CX, RY); RY += LINE;
+    ctx.fillText('raiders slain: ' + (r.kills | 0), CX, RY); RY += LINE;
+    // THE DAILY'S OWN LINE BELONGS IN THE STATS BLOCK. It was drawn at a
+    // literal 498 four blocks further down, which is how it came to be printed
+    // on top of the leak header.
+    if (this.mode === 'daily') {
+      ctx.fillText('waves survived: ' + (r.wave | 0), CX, RY); RY += LINE;
+    }
     if (r.toll > 0) {
       ctx.fillStyle = '#9ef58f';
-      ctx.fillText('Wick shook loose: ' + (r.toll | 0), WORLD_W / 2, 472 + 26);
+      ctx.fillText('Wick shook loose: ' + (r.toll | 0), CX, RY); RY += LINE;
       ctx.fillStyle = '#ffe9c4';
     }
     // WHO TOOK IT. "coins carried off: 25" told the player they had failed and
@@ -10345,71 +10457,93 @@
     // different machine from the answer to a Bulwark, and the player could not
     // previously tell which one had beaten them.
     // The block is only drawn when something LEAKED, so a clean run keeps the
-    // old tight layout and the story beat stays where it was.
-    var leakTop = (this.mode === 'daily' ? 522 : 496) + (r.toll > 0 ? 26 : 0);
-    var storyY = 528;
+    // tight layout and the story beat stays where it was.
     if (r.leaks && r.leaks.length) {
-      storyY = leakTop + 18 + Math.min(3, r.leaks.length) * 19 + 14;
+      RY += 6;
       ctx.font = 'bold 11px system-ui, sans-serif';
       ctx.fillStyle = '#c9b8a8';
-      ctx.fillText('WHO GOT THROUGH', WORLD_W / 2, 496);
+      ctx.fillText('WHO GOT THROUGH', CX, RY);
+      RY += 16;
       for (var lz = 0; lz < Math.min(3, r.leaks.length); lz++) {
-        var lr = r.leaks[lz], ly = leakTop + 18 + lz * 19;
+        var lr = r.leaks[lz], ly = RY + lz * 18;
         var card = ENEMY_CARDS[lr.type];
         var lname = card ? card[0] : lr.type.toUpperCase();
         var li2 = ART.images['e_' + lr.type];
         if (li2) {
           var lih = 17, liw = lih * (li2.width / li2.height);
-          ctx.drawImage(li2, WORLD_W / 2 - 104 - liw, ly - 13, liw, lih);
+          ctx.drawImage(li2, CX - 104 - liw, ly - 13, liw, lih);
         }
+        // THE NAME RAN INTO ITS OWN COIN COUNT. Left-aligned at CX-98 against a
+        // count right-aligned at CX+28 gives the name 126 units -- and
+        // 'THE HOARD KING' MEASURES 114.0 at bold 13, so it ended at CX+16
+        // while '-25' started near CX+6. It printed as 'THE HOARD KING-25', on
+        // a boss row, in ordinary play. The count and the wave move right into
+        // the space the row already had (the wave text ends at CX+130 against a
+        // column edge near CX+180), and fitText is the backstop for a longer
+        // name than any card carries today.
         ctx.textAlign = 'left';
         ctx.fillStyle = ENEMY_COLORS[lr.type] || '#ffe9c4';
         ctx.font = 'bold 13px system-ui, sans-serif';
-        ctx.fillText(lname, WORLD_W / 2 - 98, ly);
+        ctx.fillText(fitText(ctx, lname, 126), CX - 98, ly);
         ctx.textAlign = 'right';
         ctx.fillStyle = '#ff7b7b';
-        ctx.fillText('-' + lr.coins, WORLD_W / 2 + 28, ly);
+        ctx.fillText('-' + lr.coins, CX + 58, ly);
         ctx.fillStyle = 'rgba(201,184,168,0.85)';
         ctx.font = '11px system-ui, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('from wave ' + lr.wave, WORLD_W / 2 + 40, ly);
+        ctx.fillText('from wave ' + lr.wave, CX + 68, ly);
         ctx.textAlign = 'center';
       }
+      // EVERY UNIT HERE IS A LADDER ROW. This block and the ladder are the two
+      // longest optional things on the screen and they are both on exactly the
+      // mode that has a ladder, so the leak block is drawn as tight as it reads.
+      RY += Math.min(3, r.leaks.length) * 18 + 10;
     }
-    if (this.mode === 'daily') ctx.fillText('waves survived: ' + (r.wave | 0), WORLD_W / 2, 498);
     // the story beat this whole game is for
+    var storyY = RY + 12;
     ctx.font = 'italic 15px Georgia, serif'; ctx.fillStyle = '#ff9a3c';
     if (r.won) {
-      ctx.fillText('Auremma stirs, half-dreaming:', WORLD_W / 2, storyY);
-      ctx.fillText('“You kept the warm in, little one.”', WORLD_W / 2, storyY + 21);
+      ctx.fillText('Auremma stirs, half-dreaming:', CX, storyY);
+      ctx.fillText('“You kept the warm in, little one.”', CX, storyY + 21);
     } else {
-      ctx.fillText('The cavern grows colder.', WORLD_W / 2, storyY);
-      ctx.fillText('Wick will not let it happen twice.', WORLD_W / 2, storyY + 21);
+      ctx.fillText('The cavern grows colder.', CX, storyY);
+      ctx.fillText('Wick will not let it happen twice.', CX, storyY + 21);
     }
     // daily: the global best-runs ladder (names render through safeName ONLY)
     if (this.mode === 'daily' && Lb.on()) {
+      // THE LADDER FOLLOWS THE STORY, and takes only the rows that fit above
+      // 'tap for menu'. It was pinned at 584/606+n*17, so a daily that earned
+      // marks, fired the toll AND leaked three raiders pushed the story down
+      // into it -- the two longest blocks on the screen are both optional and
+      // both on exactly the mode this ladder belongs to. Eight rows still fit
+      // on a clean run; a loaded run gives up the tail of the ladder rather
+      // than printing it through the story, and the count is honest either way.
+      var LBY = storyY + 21 + 24;
       ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
-      ctx.fillText('— ALL-TIME BEST SIEGES —', WORLD_W / 2, 584);
+      ctx.fillText('— ALL-TIME BEST SIEGES —', CX, LBY);
+      var LBR = LBY + 22;
       if (this.lbRows === 'loading') {
         ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
-        ctx.fillText('fetching the ladder…', WORLD_W / 2, 610);
+        ctx.fillText('fetching the ladder…', CX, LBR);
       } else if (this.lbRows === 'error' || !this.lbRows) {
         ctx.fillStyle = '#8a7f72'; ctx.font = '13px system-ui, sans-serif';
-        ctx.fillText('ladder unreachable — your run is queued', WORLD_W / 2, 610);
+        ctx.fillText('ladder unreachable — your run is queued', CX, LBR);
       } else if (!this.lbRows.length) {
         ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
-        ctx.fillText('no siegers yet — yours could be first', WORLD_W / 2, 610);
+        ctx.fillText('no siegers yet — yours could be first', CX, LBR);
       } else {
         ctx.font = '13px ui-monospace, Menlo, monospace';
         var mine = Lb.tag();
-        for (var bi = 0; bi < Math.min(8, this.lbRows.length); bi++) {
+        var nFit = Math.max(0, Math.floor((RESULT_FOOT - 18 - LBR) / 17) + 1);
+        var nShow = Math.min(8, this.lbRows.length, nFit);
+        for (var bi = 0; bi < nShow; bi++) {
           var row = this.lbRows[bi];
           var nm = Lb.safeName(String(row.display_name || ''));
           ctx.fillStyle = nm === mine ? '#9ef58f' : '#ffe9c4';
           ctx.textAlign = 'left';
-          ctx.fillText((bi + 1) + '.  ' + nm, WORLD_W / 2 - 105, 606 + bi * 17);
+          ctx.fillText((bi + 1) + '.  ' + nm, CX - 105, LBR + bi * 17);
           ctx.textAlign = 'right';
-          ctx.fillText('wave ' + (row.value | 0), WORLD_W / 2 + 105, 606 + bi * 17);
+          ctx.fillText('wave ' + (row.value | 0), CX + 105, LBR + bi * 17);
         }
         ctx.textAlign = 'center';
       }
@@ -10430,7 +10564,7 @@
         // and if that is less than 54 he does not draw at all, because a
         // squashed thumbnail of the hero is worse than no hero.
         var wickTop = Math.max(storyY + 31, 540);
-        var rh = Math.min(109.3, 668 - wickTop);
+        var rh = Math.min(109.3, RESULT_FOOT - 62 - wickTop);
         if (rh >= 54) {
           var rw = rh * (rimg.width / rimg.height);
           var rb = Math.sin(this.worldT * 4) * 2;
@@ -10439,7 +10573,7 @@
       }
     }
     ctx.font = 'bold 15px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
-    ctx.fillText('tap for menu', WORLD_W / 2, 748);
+    ctx.fillText('tap for menu', CX, RESULT_FOOT + 18);
     ctx.textAlign = 'left';
   };
 
