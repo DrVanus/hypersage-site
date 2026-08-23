@@ -1839,13 +1839,13 @@
   // opposite strengths — Flint owns the open switchbacks, Ember owns the
   // chokepoints. That is a better matchup than a straight line anyway.
   var RIVALS = [
-    { id: 'tallow', tint: '#e0c070', coat: 'bone', name: 'Tallow', rank: 'APPRENTICE', pips: 1, policy: 'rival_tallow', wick: false, purse: 0.85,
+    { id: 'tallow', tint: '#e0c070', coat: 'bone',   keep: 'stone',  hoard: 'copper', name: 'Tallow', rank: 'APPRENTICE', pips: 1, policy: 'rival_tallow', wick: false, purse: 0.85,
       blurb: 'Builds wide and cheap. Never upgrades a thing.' },
-    { id: 'flint', tint: '#7fb0e0', coat: 'cobalt', name: 'Flint', rank: 'BROAD HAND', pips: 2, policy: 'rival_flint', wick: false, purse: 0.75,
+    { id: 'flint',  tint: '#7fb0e0', coat: 'cobalt', keep: 'slate',  hoard: 'silver', name: 'Flint', rank: 'BROAD HAND', pips: 2, policy: 'rival_flint', wick: false, purse: 0.75,
       blurb: 'Spreads his brass thin and wide. Loves a long road.' },
-    { id: 'ember', tint: '#ff8a3c', coat: 'bronze', name: 'Ember', rank: 'DEEP HAND', pips: 2, policy: 'rival_ember', wick: false, purse: 0.95,
+    { id: 'ember',  tint: '#ff8a3c', coat: 'bronze', keep: 'sand',   hoard: 'coin', name: 'Ember', rank: 'DEEP HAND', pips: 2, policy: 'rival_ember', wick: false, purse: 0.95,
       blurb: 'Few machines, all of them monsters. Wants a chokepoint.' },
-    { id: 'cinder', tint: '#b06adf', coat: 'amethyst', name: 'Cinder', rank: 'DRAKE', pips: 3, policy: 'rival_cinder', wick: true, purse: 1.15,
+    { id: 'cinder', tint: '#b06adf', coat: 'amethyst', keep: 'basalt', hoard: 'gem', name: 'Cinder', rank: 'DRAKE', pips: 3, policy: 'rival_cinder', wick: true, purse: 1.15,
       blurb: 'Works the cavern floor herself. Good luck.' },
   ];
   var RIVAL_ORDER = ['tallow', 'flint', 'ember', 'cinder'];
@@ -5927,6 +5927,27 @@
     return cv;
   };
 
+  /// THE RIVAL WEARS HER OWN CAVERN. _drawMoundAndKeep and _drawKeep already
+  /// take a `side` and use it for geometry and for the warmth halo, but they
+  /// pulled the SKIN from Save.equipped -- the player's -- so in a duel the
+  /// rival's keep and hoard wore YOUR cosmetics and the two halves of the
+  /// cavern were identical but for the dragon. That is the whole premise of
+  /// the shop: the duel is the display case, and a display case that shows
+  /// your own coat twice is not one.
+  ///
+  /// Her loadout is also the LADDER MADE VISIBLE. Tallow the apprentice keeps a
+  /// copper heap under a plain grey keep; Cinder the drake sits on a gem seam
+  /// under black basalt. You can see how far up the ladder you are standing.
+  Game.prototype._sideItem = function (side, slot) {
+    if (this.rivalSide && (side | 0) === 1 && this.rival && this.rival[slot]) {
+      return cosItem(slot, this.rival[slot]);
+    }
+    return Save.equipped(slot);
+  };
+  Game.prototype._sidePlate = function (side, slot, artId) {
+    return this._itemPlate(this._sideItem(side, slot), artId);
+  };
+
   /// The plate for ONE NAMED ITEM. _slotPlate answers "what is equipped", which
   /// is the wrong question for a preview: the Cavern happens to preview the
   /// equipped item today, so calling _slotPlate there was right by coincidence
@@ -6834,7 +6855,7 @@
     ctx.beginPath();
     ctx.arc(k.x, k.y - 30, 160 + br * 12, 0, 6.283);
     ctx.fill();
-    if (drawSpriteBottom(ctx, this._slotPlate('hoard', 'mound'), m.x, m.y + m.ry + 6, m.rx * 2 + 30)) { /* sprite */ }
+    if (drawSpriteBottom(ctx, this._sidePlate(side, 'hoard', 'mound'), m.x, m.y + m.ry + 6, m.rx * 2 + 30)) { /* sprite */ }
     else {
       // gold mound: layered warm ellipses + sparkle
       for (var l = 0; l < 3; l++) {
@@ -6867,7 +6888,7 @@
       ctx.fillStyle = mg2;
       ctx.beginPath(); ctx.arc(k.x, k.y - 30, 150 + mp2 * 24, 0, 6.283); ctx.fill();
     }
-    if (drawSpriteBottom(ctx, this._slotPlate('keep', 'keep'), k.x, k.y + 40, 158)) { /* sprite */ }
+    if (drawSpriteBottom(ctx, this._sidePlate(side, 'keep', 'keep'), k.x, k.y + 40, 158)) { /* sprite */ }
     else {
       // chunky keep: main cylinder + two side turrets, blue conical roofs
       drawTurret(ctx, k.x - 46, k.y - 6, 26, 52, '#8d8577', '#655e52', '#3e6bd6');
