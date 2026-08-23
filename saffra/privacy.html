@@ -40,7 +40,7 @@
     <ul>
       <li>We collect only what the app needs to work: your identity (via Sign in with Apple or Google), your cooking profile (equipment, allergies, preferences), your pantry, your conversation history with the chef, and recipes you import.</li>
       <li>We use this data <strong>solely to operate the app</strong> — personalize the chef, remember your pantry, adapt recipes for you. We do not sell it, we do not use it to train models, we do not share it with advertisers.</li>
-      <li>Voice transcription runs <strong>on your device</strong> by default.</li>
+      <li>Voice commands are transcribed by <strong>Apple's speech recognition service</strong>, which processes audio on Apple's servers.</li>
       <li>Your conversations with the chef do leave your device: each message, along with a summary of your profile and pantry, goes to our server and on to <strong>OpenAI</strong> to generate the reply. Two more things can leave to be read by an AI model — a photo of a shelf when you ask Saffra to identify what's on it, and a short audio clip if on-device transcription fails in a noisy kitchen; those two are read, then discarded. All of it is detailed below.</li>
       <li>You can delete your account and all associated data at any time.</li>
     </ul>
@@ -102,7 +102,7 @@
 
     <h3>Voice</h3>
     <ul>
-      <li>When you use voice mode, transcription runs <strong>on-device via Apple Speech.framework</strong> — audio is not sent to us.</li>
+      <li>When you use voice mode, audio is transcribed by <strong>Apple's Speech framework</strong>. Apple's recognition service is server-backed, so the audio reaches Apple; it does not reach us, and it falls back to on-device recognition when you are offline.</li>
       <li>As a fallback (only when on-device accuracy is too low for a noisy kitchen), audio may be sent briefly to our server and forwarded to OpenAI's Whisper for transcription. We do not retain the audio; it is processed and discarded.</li>
       <li>Text-to-speech uses OpenAI's text-to-speech. Audio is generated on our server and streamed to your device. Audio for publicly available curated recipes is cached (content-addressed) so we don't re-generate the same clip for every user.</li>
     </ul>
