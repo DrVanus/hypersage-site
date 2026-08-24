@@ -151,6 +151,98 @@ def load_roster() -> list[dict]:
     return kin
 
 
+SHOT_V = "20260824a"   # bump when any screenshot is re-exported
+# Which captures reach the page, in order, with the caption each one earns.
+# site_shots.py writes more than this; a gallery is an edit, not a dump.
+SHOTS = [
+    ("01-discover",
+     "The Discover shelf: a featured character of the week above rows of painted "
+     "portraits and collections.",
+     "The shelf you open on."),
+    ("02-chat",
+     "A conversation with Sherlock Holmes, who is reasoning about a torn ticket "
+     "found in a coat pocket.",
+     "A character, mid-conversation."),
+    ("04-create",
+     "The New kin form, part filled in: a name, a one-line description, and dials "
+     "for warmth, humour, energy and candour.",
+     "Or write one of your own."),
+]
+
+
+def shot_figures() -> str:
+    """Both schemes, same alt on each: only one is ever displayed, and
+    display:none takes the other out of the accessibility tree too, so a
+    screen-reader user hears the picture once and hears the right one."""
+    out = []
+    for key, alt, cap in SHOTS:
+        imgs = "".join(
+            f'<img class="{cls}" src="screens/{key}{suf}.jpg?v={SHOT_V}" '
+            f'width="786" height="1704" loading="lazy" decoding="async" '
+            f'alt="{e(alt)}">'
+            for cls, suf in (("lt", ""), ("dk", "-dark")))
+        out.append(f'<figure class="shot"><div class="pic">{imgs}</div>'
+                   f'<figcaption>{e(cap)}</figcaption></figure>')
+    return "".join(out)
+
+
+def load_limits() -> dict[str, int]:
+    """The tier numbers, read from the settings that ENFORCE them.
+
+    Same argument as the roster above, and the FAQ used to lose it: the answer
+    said "a set number of replies in a rolling window" — true, and it named
+    nothing, so a reader learned no more than that a limit existed. Meanwhile
+    the standalone mythkin-site source carried a hand-typed "200 replies a day"
+    against a server that allows 600. That is the drift this whole file exists
+    to stop, so the cure is the same: parse app/config.py, never retype it.
+
+    These are the same fields app/plans.py renders into GET /v1/plans, which is
+    what the app's own paywall draws — so the page and the paywall cannot say
+    different things about the same limit.
+    """
+    src = API / "app" / "config.py"
+    if not src.exists():
+        sys.exit(f"FAIL: {src} not found — is mythkin-api checked out?")
+    want = {
+        "free_window_messages", "free_window_hours", "plus_window_messages",
+        "free_max_borrowed_characters", "free_max_memories",
+        "plus_max_created_characters", "moment_paint_free", "moment_paint_plus",
+        "moment_paint_window_hours",
+    }
+    got: dict[str, int] = {}
+    for node in ast.walk(ast.parse(src.read_text())):
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            name = node.target.id
+            if name in want and isinstance(node.value, ast.Constant) \
+                    and isinstance(node.value.value, int):
+                got[name] = node.value.value
+    missing = want - set(got)
+    if missing:
+        sys.exit("FAIL: config.py no longer defines " + ", ".join(sorted(missing))
+                 + " — the FAQ's numbers cannot be derived, so the page is not built")
+    return got
+
+
+# The page spells small numbers out; anything not here falls back to digits
+# rather than inventing a spelling.
+_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+          7: "seven", 8: "eight", 9: "nine", 10: "ten", 12: "twelve",
+          20: "twenty", 24: "twenty-four", 30: "thirty", 50: "fifty",
+          100: "a hundred", 200: "two hundred", 500: "five hundred",
+          600: "six hundred"}
+
+
+def _w(n: int) -> str:
+    return _WORDS.get(n, f"{n:,}")
+
+
+def _paint_window(L: dict[str, int]) -> str:
+    """720 hours is 30 days is 'a month'. Any other window says its own
+    length rather than being rounded into a word that would be wrong."""
+    days = L["moment_paint_window_hours"] // 24
+    return "a month" if days == 30 else f"every {_w(days)} days"
+
+
 def load_collections() -> list[tuple[str, str]]:
     src = API / "app" / "collections" / "seed.py"
     if not src.exists():
@@ -498,14 +590,25 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
     nscript = len(by_section.get("Scripture", []))
     nwork = len(by_section.get("Originals", []))
 
+    # Read here rather than passed in: the FAQ is the only consumer, and a
+    # missing field must stop the build rather than print a blank number.
+    L = load_limits()
+    shots = shot_figures()
+
     faq = [
         ("Is this free?",
          "Yes, and the free plan is the whole app rather than a demo — every kin, "
          "the collections, the stories, memory, and one character of your own. "
-         "What it limits is volume: a set number of replies in a rolling window, "
-         "three borrowed kin, fifty remembered facts, and three paintings a month. "
-         "Mythkin Plus raises all of those, answers on a more capable model, and "
-         "is what lets you publish a story to the marketplace. Prices are whatever "
+         f"What it limits is volume: {_w(L['free_window_messages'])} replies every "
+         f"{_w(L['free_window_hours'])} hours, {_w(L['free_max_borrowed_characters'])} "
+         f"borrowed kin, {_w(L['free_max_memories'])} remembered facts, and "
+         f"{_w(L['moment_paint_free'])} paintings {_paint_window(L)}. Mythkin Plus "
+         f"raises those to {_w(L['plus_window_messages'])} replies a day with no "
+         f"{_w(L['free_window_hours'])}-hour window, memory with no "
+         f"{_w(L['free_max_memories'])}-fact cap, {_w(L['plus_max_created_characters'])} "
+         f"characters of your own and {_w(L['moment_paint_plus'])} paintings "
+         f"{_paint_window(L)}. It also answers on a more capable model, and is what "
+         "lets you publish a story to the marketplace. Prices are whatever "
          "the App Store shows you."),
         # SPARKS FAQ REMOVED 2026-08-22, and it must stay out until they can be
         # BOUGHT. Both consumables sit in MISSING_METADATA on App Store Connect
@@ -616,7 +719,7 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
 <link rel="icon" type="image/png" href="mythkin-icon.png">
 <link rel="apple-touch-icon" href="mythkin-icon.png">
 <link rel="sitemap" type="application/xml" href="sitemap.xml">
-<link rel="stylesheet" href="style.css?v=20260816-ember">
+<link rel="stylesheet" href="style.css?v=20260824-screens">
 <script type="application/ld+json">
 {app_ld}
 </script>
@@ -795,6 +898,27 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
   of those takes her out of the other two.</p>
   <div class="setlist">{sets}</div>
   {setrest}
+</div></section>
+
+<!-- A SCREENSHOT IS A CLAIM. These are captures of the RUNNING app, posed by
+     clicking what a user clicks (mythkin-app/tools/site_shots.py, pointed at
+     the live API): the reply in the chat shot is whatever the model actually
+     wrote, and any count on any screen is whatever the server held. Nothing is
+     mocked and nothing may be retouched.
+     RE-SHOOT WHEN THE INTERFACE CHANGES, and bump SHOT_V below — a screenshot
+     of a build that no longer exists is a false claim rather than a stale
+     asset, and a cache still serving the old one makes it a durable one.
+     BOTH SCHEMES SHIP, and the swap is CSS rather than a <picture> with a
+     prefers-color-scheme <source>: this page has an explicit theme picker, and
+     a <picture> resolves before any attribute on <html> is read, so it would
+     hand a reader who PICKED Dark the light screenshots. See .shot .pic in
+     style.css. -->
+<section id="screens"><div class="wrap">
+  <h2>What it actually looks like</h2>
+  <p class="sub">Captures of the running app, not pictures drawn for this page.
+  The reply in the middle one is whatever the character wrote when the shot was
+  taken.</p>
+  <div class="shots">{shots}</div>
 </div></section>
 
 <section id="safety-short" class="safety"><div class="wrap">

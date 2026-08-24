@@ -549,3 +549,36 @@ ul.plain li{padding:.35rem 0;border-bottom:1px solid var(--border)}
   .card,.memcard,.phone,.phone-screen,.band-strip img,.mrow img{
     background:Canvas;border-color:CanvasText}
 }
+
+/* Screenshot gallery — the THEMED PAIR variant.
+   `.shot picture` above styles the frame and assumes one <picture> whose dark
+   twin arrives via <source media="(prefers-color-scheme:dark)">. That is right
+   on a page whose scheme is only ever the OS preference, and wrong on THIS one:
+   it has an explicit theme picker, so the media query alone fails in both
+   directions — a reader on a light OS who picks Dark gets light screenshots on
+   a dark page, and one on a dark OS who picks Light gets dark shots on a light
+   page. A <picture> cannot help, because it resolves before any class on <html>
+   is consulted.
+   So the frame is repeated verbatim on a plain box, both images ship, and the
+   swap uses THIS FILE'S OWN tri-state selectors — the same shape as the palette
+   block at the top. The hidden twin is display:none, so it also leaves the
+   accessibility tree and is never announced twice. */
+.shot .pic{display:block;border-radius:26px;padding:7px;background:var(--surface);
+  border:1px solid var(--border);box-shadow:var(--shadow-soft)}
+.shot .pic img{width:100%;height:auto;display:block;border-radius:20px}
+/* EVERY SWAP RULE CARRIES `img`, and it has to. Written as `.shot .dk` the hide
+   is (0,2,0) and loses to `.shot .pic img` at (0,2,1) directly above — so in
+   the DEFAULT state (light OS, no explicit pick, which is most readers) BOTH
+   screenshots rendered, stacked, one above the other. The themed states all
+   worked, because `:root:not([data-theme="light"]) .shot .dk` is (0,4,0) and
+   outranks it; only the one state with no attribute on <html> was broken, which
+   is exactly the state a quick look in dark mode would not show you. */
+.shot .pic img.dk{display:none}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .shot .pic img.lt{display:none}
+  :root:not([data-theme="light"]) .shot .pic img.dk{display:block}
+}
+html[data-theme="dark"] .shot .pic img.lt{display:none}
+html[data-theme="dark"] .shot .pic img.dk{display:block}
+html[data-theme="light"] .shot .pic img.lt{display:block}
+html[data-theme="light"] .shot .pic img.dk{display:none}
