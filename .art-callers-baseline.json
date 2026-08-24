@@ -1,0 +1,6 @@
+{
+  "_comment": "Files that build their own OpenAI image request instead of using artcore. These are grandfathered; the gate fails on anything NEW. Shrink this list, never grow it.",
+  "known_hand_rolled_callers": [
+    "hoardling/game.js"
+  ]
+}
