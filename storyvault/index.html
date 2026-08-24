@@ -1415,7 +1415,7 @@
       "name": "What happens if I cancel Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You keep access through the end of the current period, then drop back to the free tier (15 AI Adventure turns / month). Your saved adventures and library stay — they're on your device."
+        "text": "You keep access through the end of the current period. Your saved adventures and your library stay — they're on your device, and all 80 classics stay free to read. The 10 free AI Adventure turns are a one-time welcome for new readers, so if you have already used them, new AI turns need an active subscription."
       }
     },
     {
@@ -1906,7 +1906,13 @@
     <div class="container">
       <div class="section-eyebrow center">StoryVault Pro</div>
       <h2 style="text-align:center;" class="reveal">Free to read. <em class="grad">Pro for more AI.</em></h2>
-      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">All 80 classics are free to read. The free tier adds 15 AI Adventure turns a month; Pro raises the allowances.</p>
+      <!-- The free allowance is a ONE-TIME trial, not a monthly one. It read "15 AI
+     Adventure turns a month" until 2026-08-24, when the app moved to a 10-turn
+     lifetime grant (EntitlementStore.Limits.freeDefault.aiAdventureTurns,
+     counted by FreeTrialQuota). Site and binary must state the same thing:
+     this page promising a monthly refill the app no longer performs is the
+     over-claiming direction, so this line ships WITH the build, never after. -->
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">All 80 classics are free to read. Your first AI adventure is free too — 10 turns, enough to finish one story. Pro carries on from there.</p>
 
       <div class="plans reveal-stagger">
         <div class="plan">
@@ -1917,8 +1923,21 @@
             <li>3,000 AI Adventure turns a month</li>
             <li>Unlimited custom premises</li>
             <li>Unlimited saved adventures</li>
-            <li>AI voice narration</li>
+            <!-- Narration is METERED and this line must say so. It said "up to
+                 600 minutes a month", quoting EntitlementStore.Limits.proDefault
+                 .narrationMinutesPerMonth — a number NOTHING has ever enforced.
+                 No client meter reads it. The real limit is the server's
+                 tts_daily_char_cap_pro, 80,000 characters PER DAY (~80 minutes),
+                 so the monthly figure was both the wrong unit and roughly 4x
+                 under the true allowance. Quote the cap that actually runs; if
+                 app/config.py moves, move this with it. -->
+            <li>AI voice narration, around 80 minutes a day</li>
             <li>AI-painted scene art, up to 10 turns a day</li>
+            <!-- Art styles were a Pro feature nothing sold. Three of the four
+                 ArtStyleFamily cases are requiresPro; a free reader gets
+                 Painterly Classic only. It appeared on neither this page nor the
+                 App Store description nor the in-app paywall until 2026-08-24. -->
+            <li>All four illustration styles — Painterly Classic, Ink &amp; Watercolor, Cinematic Noir, Modern Illustrated</li>
           </ul>
         </div>
         <!-- Prices must match what is registered at ASC: Configuration.storekit:74 monthly
@@ -2027,7 +2046,7 @@
         </details>
         <details class="faq">
           <summary>What happens if I cancel Pro?</summary>
-          <p>You keep access through the end of the current period, then drop back to the free tier (15 AI Adventure turns / month). Your saved adventures and library stay — they're on your device.</p>
+          <p>You keep access through the end of the current period. Your saved adventures and your library stay — they're on your device, and all 80 classics stay free to read. The 10 free AI Adventure turns are a one-time welcome for new readers, so if you have already used them, new AI turns need an active subscription.</p>
         </details>
         <details class="faq">
           <summary>How is this different from AI Dungeon?</summary>
