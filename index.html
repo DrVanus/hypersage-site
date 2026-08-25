@@ -821,7 +821,11 @@
        finding nothing. Update these when a product goes live. */
     .product .status {
       margin-left: auto; align-self: flex-start; flex: 0 0 auto;
-      font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; font-weight: 600;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.69rem; font-weight: 600;
+      /* 0.62rem was 9.92px. This estate's legibility floor is 11px: below ~12px
+         Space Grotesk's descenders collapse, and a status chip is the one string
+         on a product card a visitor MUST be able to read (it says whether the app
+         is downloadable). 0.69rem = 11.04px, the same floor the hero diagram holds. */
       /* No text-transform — "iOS" must keep its casing. */
       letter-spacing: 0.07em; white-space: nowrap;
       color: var(--faint); padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: 999px;

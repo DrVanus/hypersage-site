@@ -460,7 +460,10 @@
     }
     .evo-step svg { width: 32px; height: 32px; color: var(--primary-bright); filter: drop-shadow(0 0 10px var(--violet-glow)); }
     .evo-label {
-      font-family: 'Cinzel', serif; font-size: 0.6rem; font-weight: 700;
+      font-family: 'Cinzel', serif; font-size: 0.69rem; font-weight: 700;
+      /* 0.6rem was 9.6px and the phone override took it to 8.64px. Cinzel is a
+         high-contrast serif — its thin strokes are the first thing to disappear
+         at that size on a dark ground. 0.69rem = 11.04px, this estate's floor. */
       letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-fg);
       line-height: 1.5; padding: 0 8px;
     }
@@ -485,7 +488,7 @@
       .evo-step { width: 78px; gap: 7px; }
       .evo-step svg { width: 26px; height: 26px; }
       .evo-step.evo-result svg { width: 30px; height: 30px; }
-      .evo-label { font-size: 0.54rem; padding: 0 5px; }
+      .evo-label { padding: 0 5px; }   /* size no longer reduced on phones: 0.54rem was 8.64px */
     }
 
     /* ===== GALLERY ===== */
