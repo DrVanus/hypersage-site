@@ -11,5 +11,11 @@
 # cover all of them.
 User-agent: *
 Allow: /
+# /fleet/ is the internal Harbormaster status board. Its contents are
+# encrypted at rest — a crawler fetching it gets a base64 blob — but it is
+# disallowed as well, because a URL in an index invites the traffic that
+# makes the passphrase the only thing standing there. It is linked from no
+# page and is in no sitemap; keep it that way.
+Disallow: /fleet/
 
 Sitemap: https://hypersage.ai/sitemap.xml
