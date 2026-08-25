@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260811a">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260825a">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260811a">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260825a">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -43,7 +43,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260811a",
+        "image": "https://hypersage.ai/og-image.png?v=20260825a",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -52,7 +52,7 @@
         "url": "https://waddleton.pages.dev/", "publisher": { "@id": "https://hypersage.ai/#org" },
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://waddleton.pages.dev/" } },
       { "@type": "MobileApplication", "name": "Saffra", "applicationCategory": "Food & Drink", "operatingSystem": "iOS", "url": "https://hypersage.ai/saffra/", "publisher": { "@id": "https://hypersage.ai/#org" } },
-      { "@type": "MobileApplication", "name": "StoryVault", "applicationCategory": "Entertainment", "operatingSystem": "iOS", "url": "https://hypersage.ai/storyvault/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "MobileApplication", "name": "StoryVault AI", "applicationCategory": "Entertainment", "operatingSystem": "iOS", "url": "https://hypersage.ai/storyvault/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "Nightshelf", "applicationCategory": "Lifestyle", "operatingSystem": "iOS", "url": "https://hypersage.ai/nightshelf/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "Quietoak", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS", "url": "https://hypersage.ai/quietoak/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "CryptoSage AI", "applicationCategory": "Finance", "operatingSystem": "iOS", "url": "https://cryptosageai.io/", "publisher": { "@id": "https://hypersage.ai/#org" } },
@@ -62,7 +62,7 @@
       { "@type": "MobileApplication", "name": "Rowan", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS", "url": "https://hypersage.ai/rowan/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "Alder", "applicationCategory": "Health & Fitness", "operatingSystem": "iOS", "url": "https://hypersage.ai/alder/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "Mythkin", "applicationCategory": "EntertainmentApplication", "operatingSystem": "iOS", "url": "https://hypersage.ai/mythkin/", "publisher": { "@id": "https://hypersage.ai/#org" } },
-      { "@type": "MobileApplication", "name": "Gemburrow", "applicationCategory": "Game", "operatingSystem": "iOS", "url": "https://hypersage.ai/gemburrow/", "publisher": { "@id": "https://hypersage.ai/#org" } },
+      { "@type": "VideoGame", "name": "Gemburrow", "applicationCategory": "Game", "operatingSystem": "Web", "url": "https://hypersage.ai/gemburrow/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "MobileApplication", "name": "Holohound", "applicationCategory": "Utilities", "operatingSystem": "iOS", "url": "https://hypersage.ai/holohound/", "publisher": { "@id": "https://hypersage.ai/#org" } },
       { "@type": "VideoGame", "name": "Hoardling", "applicationCategory": "Game", "operatingSystem": "Web", "url": "https://hypersage.ai/hoardling/", "publisher": { "@id": "https://hypersage.ai/#org" } }
     ]
@@ -198,7 +198,10 @@
     }
     nav.site .container { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; }
     .brand { display: flex; align-items: center; gap: 11px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.08rem; letter-spacing: -0.01em; }
-    .brand .mark { width: 38px; height: 34px; object-fit: contain; flex: 0 0 auto; display: block; }
+    /* 36x24 matches the 2026-08-25 re-derived logo.png (342x228, trimmed +
+       centered — the old 333x372 canvas held the mark at half size). Keep these
+       pins in step with the attrs on all three logo <img>s. */
+    .brand .mark { width: 36px; height: 24px; object-fit: contain; flex: 0 0 auto; display: block; }
     .brand .co-sub { color: var(--faint); font-weight: 500; }
     nav .links { display: flex; align-items: center; gap: 26px; }
     nav .links a { color: var(--muted); font-weight: 500; font-size: 0.94rem; transition: color .2s; }
@@ -278,8 +281,10 @@
     .hero-try:hover { color: var(--fg); }
 
     /* The Context Engine is explanatory art: a compact map of the system described
-       by the semantic ordered list in #ai. It is deliberately decorative here so
-       screen-reader users encounter the complete explanation only once. */
+       by the sr-only ordered list in #ai (the visible cards that used to repeat
+       these stages were replaced by the .layer-proof cases, 2026-08-25). It is
+       deliberately decorative here so screen-reader users encounter the complete
+       explanation only once. */
     /* 500x368 is also the wire viewBox, so at the desktop size one SVG user unit
        is exactly one CSS pixel and the preserveAspectRatio="none" stretch is the
        identity. The aspect is constant at every width above 560px, so the stretch
@@ -376,15 +381,42 @@
     .pl-msg-tag { display: block; margin: 0 0 5px 2px; font-family: 'JetBrains Mono', monospace; font-size: .69rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
     .pl-msg-bubble {
       display: grid; align-items: center;
-      padding: 8px 10px; color: var(--fg); font-size: .8rem; line-height: 1.4;
+      padding: 9px 11px 10px; color: var(--fg); font-size: .8rem; line-height: 1.4;
       border: 1px solid rgba(45,212,191,.32); border-radius: 12px 12px 12px 4px;
       background: rgba(45,212,191,.09); box-shadow: 0 8px 22px rgba(0,0,0,.22);
     }
-    .pl-prompt { grid-area: 1 / 1; }
-    /* Resting state = prompt 1 alone, fully composed. Prompts 2-4 only ever
+    /* Balanced wraps: a two-line question breaks near its middle instead of
+       stranding one word on the second line. */
+    .pl-q { display: block; text-wrap: balance; }
+    .pl-prompt { grid-area: 1 / 1; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; }
+    /* Resting state = prompt 1 alone, fully composed. Prompts 2-5 only ever
        surface while .pl-live is armed, so no-JS, reduced-motion and print all
        show prompt 1 and nothing stacked behind it. */
     .pl-prompt + .pl-prompt { opacity: 0; }
+    /* App attribution inside the bubble — swaps atomically with its prompt
+       because it is part of the .pl-prompt element. Colored with the product's
+       own accent so the tie to the portfolio cards is carried the same way
+       everywhere on the page. Owner ask 2026-08-25: "put the name of the app in
+       that specific style/color... can put logo too". */
+    .pl-of {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      /* .69rem = 11.04px, the estate's legibility floor — do not shrink. */
+      font-size: .69rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--app, var(--brand-a));
+    }
+    .pl-of img {
+      width: 16px; height: 16px; border-radius: 5px; flex: 0 0 auto;
+      object-fit: cover; border: 1px solid var(--line-strong);
+      background: rgba(255,255,255,.05);
+    }
+    /* The source-card captions roll with the prompts: each <small> is a 1x1
+       grid of five .pl-ctx spans (one per app, same order as the prompts), so
+       the card always sizes to the WIDEST caption and can never breathe as the
+       scenario changes. Resting state = caption 1 (Saffra), matching prompt 1. */
+    .pl-src small.pl-roll { display: grid; }
+    .pl-src .pl-ctx { grid-area: 1 / 1; }
+    .pl-src .pl-ctx + .pl-ctx { opacity: 0; }
 
     /* The core — a processor block whose four faculties light as the message
        passes through. */
@@ -400,7 +432,7 @@
       pointer-events: none; opacity: 0;
       box-shadow: 0 0 26px rgba(45,212,191,.4), inset 0 0 16px rgba(45,212,191,.18);
     }
-    .pl-core img { width: 24px; height: 26px; object-fit: contain; margin-bottom: 4px; }
+    .pl-core img { width: 24px; height: 16px; object-fit: contain; margin-bottom: 4px; }
     /* The core is 35% wide because that is what the four faculty pills actually
        need: at the 11.04px floor "KNOWLEDGE" and "SAFEGUARDS" measure 67.6 and
        74.5 JetBrains Mono pixels, so a two-column row needs 147px of content box.
@@ -489,22 +521,31 @@
     .context-engine.pl-live .pl-stamp:last-child { animation: plStamp2 14s ease infinite; }
     .context-engine.pl-live .pl-playhead { animation: plPlayhead 14s linear infinite; }
 
-    /* Prompt rotation — one question per loop, four loops to a 56s master cycle.
-       Each prompt's turn is offset by a positive animation-delay, and fill-mode
-       stays `none`, so before its first turn a prompt shows its RESTING opacity
-       (0 for 2-4). The handover sits at 24.8-25.2% of the master = 13.888-14.112s,
-       squarely inside the window where the bubble itself is at opacity 0
-       (plMsgD is out from 96% = 13.44s to 1% of the next loop = 14.14s), so the
-       swap is never visible.
-       The four strings are true to four shipped apps and none of them is a claim. */
-    .context-engine.pl-live .pl-prompt { animation: plPrompt 56s ease infinite; }
-    .context-engine.pl-live .pl-prompt:nth-child(2) { animation-delay: 14s; }
-    .context-engine.pl-live .pl-prompt:nth-child(3) { animation-delay: 28s; }
-    .context-engine.pl-live .pl-prompt:nth-child(4) { animation-delay: 42s; }
-    @keyframes plPrompt {
-      0%, 24.8% { opacity: 1; }
-      25.2%, 99.8% { opacity: 0; }
-      100% { opacity: 1; }
+    /* Scenario rotation — one APP per loop, five loops to a 70s master cycle.
+       Each prompt (and each source-card caption, see .pl-ctx below) turns over
+       on the same clock: element n gets a (n-1)*14s animation-delay, fill-mode
+       stays `none`, so before its first turn it shows its RESTING opacity
+       (0 for 2-5). The prompt handover sits at 19.8-20.2% of the master =
+       13.86-14.14s, inside the window where the bubble itself is at opacity 0
+       (plMsgD is out from 96% = 13.44s; the next loop's fade-in runs 14.14-14.84s),
+       so the prompt swap is never visible. The source captions ARE visible at
+       the handover — they get a deliberate ~0.3s crossfade, which reads as the
+       diagram loading the next product's context.
+       The five prompts are true to five shipped apps and none of them is a claim. */
+    .context-engine.pl-live .pl-prompt,
+    .context-engine.pl-live .pl-ctx { animation: plRoll 70s ease infinite; }
+    .context-engine.pl-live .pl-prompt:nth-child(2),
+    .context-engine.pl-live .pl-ctx:nth-child(2) { animation-delay: 14s; }
+    .context-engine.pl-live .pl-prompt:nth-child(3),
+    .context-engine.pl-live .pl-ctx:nth-child(3) { animation-delay: 28s; }
+    .context-engine.pl-live .pl-prompt:nth-child(4),
+    .context-engine.pl-live .pl-ctx:nth-child(4) { animation-delay: 42s; }
+    .context-engine.pl-live .pl-prompt:nth-child(5),
+    .context-engine.pl-live .pl-ctx:nth-child(5) { animation-delay: 56s; }
+    @keyframes plRoll {
+      0% { opacity: 0; }
+      0.6%, 19.8% { opacity: 1; }
+      20.2%, 100% { opacity: 0; }
     }
 
     @keyframes plMsgD {
@@ -764,6 +805,16 @@
     }
 
     /* ===== PRODUCTS ===== */
+    /* Group rule between the apps grid and the games grid. Quiet on purpose: the
+       section keeps one teal eyebrow ("The portfolio"); these are sub-labels. */
+    .grid-label {
+      display: flex; align-items: center; gap: 18px; margin: 0 0 22px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--faint);
+    }
+    .grid-label::after { content: ''; flex: 1 1 auto; height: 1px; background: var(--line); }
+    .products-grid + .grid-label { margin-top: 48px; }
     .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
     /* minmax(0,1fr), not 1fr: a 1fr track's automatic minimum is min-content, and
        four of the cards min-content at 289-299px. At a 320px viewport (272px of
@@ -772,14 +823,15 @@
        Binds at 320 alone; the track is unchanged at 360 and above. */
     @media (max-width: 700px) { .products-grid { grid-template-columns: minmax(0, 1fr); } }
     /* The portfolio card FINISHES the last row instead of starting a new one.
-       With an odd number of products (fifteen, since Hoardling) the last
-       product sits alone with a hole beside it — so the contact card drops into
-       that hole at normal card size and closes the section.
+       The count that matters is PER GRID (there are two now: apps, then games —
+       the contact card sits in the games grid). With an odd number of articles in
+       its grid the last one sits alone with a hole beside it — so the contact
+       card drops into that hole at normal card size and closes the section.
        It has to flip back when the count is even, or the card would be the one
        left alone. `article:last-of-type:nth-of-type(even) ~ aside` says exactly
        that: only when the last PRODUCT is even-numbered does the card span the
        full row. Counting articles (not children) matters because the card is
-       itself a child of this grid. Nothing to maintain when the next app lands. */
+       itself a child of this grid. Nothing to maintain when the next game lands. */
     @media (min-width: 701px) {
       .products-grid > aside { grid-column: auto; }
       .products-grid > article:last-of-type:nth-of-type(even) ~ aside { grid-column: 1 / -1; }
@@ -859,34 +911,47 @@
     .systems { background: linear-gradient(180deg, var(--bg-2), var(--bg)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
                overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-    .intelligence-flow {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-      margin: 0 0 24px; padding: 0; list-style: none; counter-reset: intelligence-step;
+    /* The layer AT WORK — three concrete cases instead of the four abstract cards
+       that used to sit here. Those cards repeated the hero diagram's stages word
+       for word (Vanus called the repeat out 2026-08-25); the accessible version of
+       the four stages is the sr-only <ol> in the markup. Each case card borrows
+       the product's own accent, so the tie back to the portfolio is carried the
+       same way the cards above carry it. */
+    .layer-proof {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin: 0 0 24px; padding: 0; list-style: none;
     }
-    .flow-step {
-      position: relative; min-height: 156px; padding: 24px 22px;
+    .proof-card {
+      --accent: var(--brand-a);
+      --accent-text: var(--accent);
+      position: relative; overflow: clip;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 11px;
+      padding: 22px 22px 20px;
       border: 1px solid var(--line); border-radius: var(--radius-sm);
       background: linear-gradient(145deg, rgba(45,212,191,0.055), rgba(167,139,250,0.025));
-      counter-increment: intelligence-step;
     }
-    .flow-step::before {
-      content: "0" counter(intelligence-step); display: block; margin-bottom: 13px;
-      font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.14em;
-      color: var(--brand-a);
+    /* Left accent spine, the vertical twin of the product cards' top bar. */
+    .proof-card::before {
+      content: ''; position: absolute; inset: 0 auto 0 0; width: 3px;
+      background: linear-gradient(180deg, var(--accent), transparent 85%);
+      opacity: 0.9;
     }
-    .flow-step:not(:last-child)::after {
-      content: "→"; position: absolute; z-index: 2; right: -18px; top: 50%; transform: translateY(-50%);
-      width: 24px; height: 24px; display: grid; place-items: center;
-      border: 1px solid var(--line-strong); border-radius: 50%; background: var(--bg-2);
-      color: var(--faint); font-size: 0.8rem;
+    .proof-head { display: flex; align-items: center; gap: 9px; }
+    .proof-head img {
+      width: 26px; height: 26px; border-radius: 7px; flex: 0 0 auto; object-fit: cover;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
-    .flow-step h3 { font-size: 1rem; font-weight: 600; margin-bottom: 7px; }
-    .flow-step p { color: var(--muted); font-size: 0.88rem; line-height: 1.55; }
-    @media (max-width: 920px) {
-      .intelligence-flow { grid-template-columns: repeat(2, 1fr); }
-      .flow-step:not(:last-child)::after { display: none; }
+    /* 0.69rem, not smaller — the estate's 11px legibility floor. */
+    .proof-head span {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.69rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--accent-text);
     }
-    @media (max-width: 560px) { .intelligence-flow { grid-template-columns: 1fr; } }
+    .proof-card p { color: var(--muted); font-size: 0.92rem; line-height: 1.6; text-wrap: pretty; }
+    .proof-card .link { margin-top: auto; display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent-text); transition: gap .2s; }
+    .proof-card .link:hover { gap: 11px; }
+    @media (max-width: 860px) { .layer-proof { grid-template-columns: 1fr; gap: 12px; } }
     /* Uncapped this ran the full container: 164 characters per line at 1440 and
        150 at 1024 — the worst measure on the page. It is a footnote, so it sits
        left under the flow and stops at a readable width. */
@@ -944,24 +1009,23 @@
     .js-reveal .section-head,
     .js-reveal .approach-row,
     .js-reveal .product,
-    .js-reveal .flow-step,
+    .js-reveal .proof-card,
     .js-reveal .cta .container {
       opacity: 0; transform: translateY(20px);
       transition: opacity .6s cubic-bezier(.16,.8,.3,1), transform .6s cubic-bezier(.16,.8,.3,1);
     }
     .js-reveal .is-in { opacity: 1 !important; transform: none !important; }
     .js-reveal .products-grid > *:nth-child(2n) { transition-delay: .07s; }
-    .js-reveal .intelligence-flow > *:nth-child(2),
+    .js-reveal .layer-proof > *:nth-child(2),
     .js-reveal .approach-ledger > *:nth-child(2) { transition-delay: .06s; }
-    .js-reveal .intelligence-flow > *:nth-child(3),
+    .js-reveal .layer-proof > *:nth-child(3),
     .js-reveal .approach-ledger > *:nth-child(3) { transition-delay: .12s; }
-    .js-reveal .intelligence-flow > *:nth-child(4),
     .js-reveal .approach-ledger > *:nth-child(4) { transition-delay: .18s; }
 
     /* Print never fires IntersectionObserver — force everything visible on paper. */
     @media print {
       .js-reveal .section-head, .js-reveal .approach-row, .js-reveal .product,
-      .js-reveal .flow-step, .js-reveal .cta .container {
+      .js-reveal .proof-card, .js-reveal .cta .container {
         opacity: 1 !important; transform: none !important;
       }
       .context-engine .pl-tok, .context-engine .pl-pulse,
@@ -976,6 +1040,7 @@
       .context-engine .pl-fac span { opacity: 1 !important; }
       .context-engine .pl-stamp, .context-engine .pl-fac span { transform: none !important; }
       .context-engine .pl-prompt + .pl-prompt { opacity: 0 !important; }
+      .context-engine .pl-ctx + .pl-ctx { opacity: 0 !important; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -997,7 +1062,7 @@
       body::before, .context-engine { display: none; }
       .hero-stage { grid-template-columns: 1fr; grid-template-areas: "eyebrow" "title" "copy"; }
       .grad-text { color: CanvasText; background: none; -webkit-text-fill-color: CanvasText; }
-      .btn, .eyebrow, .product, .flow-step, .approach-row {
+      .btn, .eyebrow, .product, .proof-card, .approach-row {
         color: CanvasText; background: Canvas; border-color: CanvasText;
       }
       .btn-primary { color: ButtonText; background: ButtonFace; border: 1px solid ButtonText; box-shadow: none; }
@@ -1025,7 +1090,7 @@
   <nav class="site">
     <div class="container">
       <a class="brand" href="#top" aria-label="HyperSage AI Labs home">
-        <img class="mark" src="logo.png" alt="" width="34" height="38">
+        <img class="mark" src="logo.png" alt="" width="36" height="24">
         <span>HyperSage<span class="co-sub"> AI Labs</span></span>
       </a>
       <div class="links">
@@ -1114,22 +1179,27 @@
 
           <div class="pl-msg">
             <span class="pl-msg-tag">You ask</span>
-            <!-- Four questions, one per loop, each true to a shipped app: Saffra,
-                 StoryVault, Nightshelf, Hexhunter. None of them makes a claim, and
-                 none touches a regulated category. Prompt 1 is the resting state.
-                 Do not add a health, finance, DBT or dating-outcome prompt here. -->
+            <!-- Five scenarios, one per loop, each true to a shipped app: Saffra,
+                 StoryVault, Nightshelf, Wingmate, Mythkin. None of them makes a
+                 claim, and none touches a regulated category. Prompt 1 is the
+                 resting state. Do not add a health, finance, DBT or
+                 dating-outcome prompt here. -->
             <span class="pl-msg-bubble">
               <!-- EVERY PROMPT HERE MUST BE A REAL ASK IN A SHIPPED APP. Verified 2026-08-25
-                   against source, and chosen to span four of the categories the hero
-                   sentence names (food, sleep, stories, relationships):
+                   against source, and chosen to span the categories the hero
+                   sentence names (food, stories, sleep, relationships):
                      1 Saffra     - chef chat. The app's own core interaction.
-                     2 Nightshelf - generated bedtime stories: CustomStory.swift, backend
-                                    /v1/nightshelf/story, "Write a bedtime story" on Home.
-                     3 StoryVault - Dracula is a bundled classic with its own AI Adventure
+                     2 StoryVault - Dracula is a bundled classic with its own AI Adventure
                                     scenario (AdventureArrivalUITests drives a Dracula run);
                                     HomeView.swift:859 is the "Write a Story" entry.
+                     3 Nightshelf - generated bedtime stories: CustomStory.swift, backend
+                                    /v1/nightshelf/story, "Write a bedtime story" on Home.
                      4 Wingmate   - CoachChatView.swift:1517 placeholder is "Ask {coach}…",
                                     and the coach reads the whole thread.
+                     5 Mythkin    - talking with roster characters IS the app; Athena is a
+                                    real roster character (mythkin/index.html has an
+                                    "Ask Them About Athena" block, generated from the
+                                    roster by tools/build_mythkin.py, never hand-typed).
                    TWO WERE REMOVED and must not be restored. One addressed a question to
                    Hexhunter, which is a horde-survivor game with NO assistant to ask - the
                    prompt invented a feature, which is the same defect as false copy wearing
@@ -1140,24 +1210,41 @@
                    it. Check the served bytes, not just the rendered text.
                    Health, recovery, DBT and markets prompts are deliberately absent: Rowan,
                    Alder, Quietoak and CryptoSage carry regulatory copy law, and putting one
-                   of their questions on the studio homepage drags that law here for no gain. -->
-                <span class="pl-prompt">What should I cook tonight?</span>
-              <span class="pl-prompt">Start an adventure in Dracula&rsquo;s castle.</span>
-              <span class="pl-prompt">Write me a bedtime story about the sea.</span>
-              <span class="pl-prompt">What should I say back to her?</span>
+                   of their questions on the studio homepage drags that law here for no gain.
+                   The .pl-of tag names the APP only — never the model vendor. Per-prompt
+                   vendor tags were considered 2026-08-25 and rejected: Saffra's chat runs
+                   on OpenAI (not Claude — see fleet provider map), StoryVault's vendor is
+                   a deploy-time secret (LLM_PROVIDER), so a per-app vendor label is wrong
+                   or unstable for two of the five. The accurate, hedged vendor sentence
+                   lives in #ai ("Claude is the primary model in most..."), and only there. -->
+              <span class="pl-prompt"><span class="pl-q">What should I cook tonight?</span><span class="pl-of" style="--app: var(--c-saffra);"><img src="icons/saffra.png" alt="" width="16" height="16">Saffra</span></span>
+              <span class="pl-prompt"><span class="pl-q">Start an adventure in Dracula&rsquo;s castle.</span><span class="pl-of" style="--app: var(--c-story);"><img src="icons/storyvault.png" alt="" width="16" height="16">StoryVault&nbsp;AI</span></span>
+              <span class="pl-prompt"><span class="pl-q">Write me a bedtime story about the sea.</span><span class="pl-of" style="--app: var(--c-night);"><img src="icons/nightshelf.png" alt="" width="16" height="16">Nightshelf</span></span>
+              <span class="pl-prompt"><span class="pl-q">What should I say back to her?</span><span class="pl-of" style="--app: var(--c-wingmate);"><img src="icons/wingmate.png" alt="" width="16" height="16">Wingmate</span></span>
+              <span class="pl-prompt"><span class="pl-q">Athena, what makes a hero?</span><span class="pl-of" style="--app: var(--c-mythkin);"><img src="icons/mythkin.png" alt="" width="16" height="16">Mythkin</span></span>
             </span>
           </div>
 
           <div class="pl-conn c1"></div>
+          <!-- Captions roll per app in prompt order (Saffra, StoryVault AI,
+               Nightshelf, Wingmate, Mythkin — owner ask 2026-08-25: "the
+               different apps change the different sections on top"). Every
+               caption RESTATES a claim already on this page's product cards:
+               Saffra diet/allergen + kitchen, StoryVault chosen classic /
+               follows your moves / current scene, Nightshelf narrators + timer /
+               place saved / custom story, Wingmate connection context / whole
+               thread / screenshot analysis, Mythkin author-your-own kin /
+               conversation / Hearth room. Keep each caption <= 18 characters:
+               the cards are absolutely positioned and size to the widest span. -->
           <div class="pl-sources">
-            <div class="pl-src src-1"><i class="pl-dot"></i><span><strong>Your context</strong><small>goals · preferences</small></span></div>
-            <div class="pl-src src-2"><i class="pl-dot"></i><span><strong>Recent activity</strong><small>diary · check-ins</small></span></div>
-            <div class="pl-src src-3"><i class="pl-dot"></i><span><strong>Current task*</strong><small>live product state</small></span></div>
+            <div class="pl-src src-1"><i class="pl-dot"></i><span><strong>Your context</strong><small class="pl-roll"><span class="pl-ctx">diet · allergies</span><span class="pl-ctx">the chosen classic</span><span class="pl-ctx">narrator · timer</span><span class="pl-ctx">the connection</span><span class="pl-ctx">the kin you chose</span></small></span></div>
+            <div class="pl-src src-2"><i class="pl-dot"></i><span><strong>Recent activity</strong><small class="pl-roll"><span class="pl-ctx">recent chats</span><span class="pl-ctx">your turns so far</span><span class="pl-ctx">your saved place</span><span class="pl-ctx">the whole thread</span><span class="pl-ctx">the conversation</span></small></span></div>
+            <div class="pl-src src-3"><i class="pl-dot"></i><span><strong>Current task*</strong><small class="pl-roll"><span class="pl-ctx">your kitchen</span><span class="pl-ctx">the current scene</span><span class="pl-ctx">tonight&rsquo;s story</span><span class="pl-ctx">the screenshot</span><span class="pl-ctx">who&rsquo;s in the room</span></small></span></div>
           </div>
 
           <div class="pl-conn c2"></div>
           <div class="pl-core">
-            <img src="logo.png" alt="" width="24" height="26">
+            <img src="logo.png" alt="" width="24" height="16">
             <strong>Product intelligence</strong>
             <div class="pl-fac">
               <span class="fac-k">knowledge</span><span class="fac-t">tools</span>
@@ -1196,12 +1283,12 @@
       <a class="word" href="#product-saffra"><img src="icons/saffra.png" alt="" width="26" height="26" loading="lazy">Saffra</a>
       <a class="word" href="#product-storyvault"><img src="icons/storyvault.png" alt="" width="26" height="26" loading="lazy">StoryVault&nbsp;AI</a>
       <a class="word" href="#product-nightshelf"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
-      <a class="word" href="#product-hexhunter"><img src="icons/hexhunter.png" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
-      <a class="word" href="#product-mythwright"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
       <a class="word" href="#product-rowan"><img src="icons/rowan.png" alt="" width="26" height="26" loading="lazy">Rowan</a>
       <a class="word" href="#product-alder"><img src="icons/alder.png" alt="" width="26" height="26" loading="lazy">Alder</a>
-      <a class="word" href="#product-waddleton"><img src="icons/waddleton.png" alt="" width="26" height="26" loading="lazy">Waddleton</a>
       <a class="word" href="#product-mythkin"><img src="icons/mythkin.png" alt="" width="26" height="26" loading="lazy">Mythkin</a>
+      <a class="word" href="#product-hexhunter"><img src="icons/hexhunter.png" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
+      <a class="word" href="#product-mythwright"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
+      <a class="word" href="#product-waddleton"><img src="icons/waddleton.png" alt="" width="26" height="26" loading="lazy">Waddleton</a>
       <a class="word" href="#product-hoardling"><img src="icons/hoardling.png" alt="" width="26" height="26" loading="lazy">Hoardling</a>
       <a class="word" href="#product-gemburrow"><img src="icons/gemburrow.png" alt="" width="26" height="26" loading="lazy">Gemburrow</a>
     </div>
@@ -1213,9 +1300,13 @@
       <div class="section-head">
         <span class="eyebrow">The portfolio</span>
         <h2>Focused products for different parts of life.</h2>
-        <p>Each product is designed around a clear audience and job, with its own identity and way of working. What we learn carries across the portfolio; the products themselves remain distinct.</p>
+        <!-- "What we learn carries across the portfolio" cut 2026-08-25 at
+             Vanus's call; the studio ledger's "Shared learning" row already
+             carries that idea. -->
+        <p>Each product is designed around a clear audience and job, with its own identity and way of working. The products themselves remain distinct.</p>
       </div>
 
+      <div class="grid-label"><span>Apps</span></div>
       <div class="products-grid">
 
         <!-- HOLOHOUND -->
@@ -1327,7 +1418,9 @@
           <div class="top">
             <img class="app-icon" src="icons/storyvault.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>StoryVault</h3>
+              <!-- "StoryVault AI" is the App Store listing name — canonical per
+                   press.html's own rule; matches the strip and the legal pages. -->
+              <h3>StoryVault AI</h3>
               <div class="cat">Interactive Fiction</div>
             </div>
             <span class="status live">iOS · Live</span>
@@ -1335,11 +1428,14 @@
           <p class="desc">Step inside a classic and take it somewhere the author never did, or write a world from a single line. Tap one of the offered choices or type your own move instead &mdash; the story follows, and it remembers.</p>
           <ul role="list">
             <li>A library of complete classics, bundled and readable offline</li>
-            <li>A hand-written scenario behind every classic in the library</li>
+            <!-- "hand-curated AI scenario", never "hand-written": the scenarios
+                 are AI-generated with human curation (the subsite says exactly
+                 this), and claiming human authorship is a provenance overclaim. -->
+            <li>A hand-curated AI scenario behind every classic in the library</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download StoryVault on the App Store" href="https://apps.apple.com/us/app/id6792759454" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the StoryVault site" href="storyvault/">Visit StoryVault <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Download StoryVault AI on the App Store" href="https://apps.apple.com/us/app/id6792759454" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit the StoryVault AI site" href="storyvault/">Visit StoryVault&nbsp;AI <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1361,47 +1457,6 @@
           <div class="foot">
             <a class="btn-store" aria-label="Download Nightshelf on the App Store" href="https://apps.apple.com/us/app/id6792761643" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
             <a class="link" aria-label="Visit the Nightshelf site" href="nightshelf/">Visit Nightshelf <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <!-- HEXHUNTER -->
-        <article class="product" id="product-hexhunter" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
-          <div class="top">
-            <img class="app-icon" src="icons/hexhunter.png" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Hexhunter</h3>
-              <div class="cat">Gothic Horde-Survivor</div>
-            </div>
-            <span class="status">iOS · Coming soon</span>
-          </div>
-          <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor built around distinct heroes, illustrated upgrades, and escalating chaos.</p>
-          <ul role="list">
-            <li>8 heroes with distinct playstyles</li>
-            <li>18 weapons, secret evolutions, and 3 escalating biomes</li>
-            <!-- Art is generated; do not describe it as hand-drawn or hand-illustrated. -->
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Visit the Hexhunter site" href="hexhunter/">Visit Hexhunter <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <!-- MYTHWRIGHT -->
-        <article class="product" id="product-mythwright" style="--accent: var(--c-myth);">
-          <div class="top">
-            <img class="app-icon" src="icons/mythwright.png" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Mythwright</h3>
-              <div class="cat">Strategy Card Game</div>
-            </div>
-            <span class="status">iOS · Coming soon</span>
-          </div>
-          <p class="desc">A tactical card battler with hundreds of cards, shifting locations, and six-turn ranked duels played a turn at a time, where a single reveal can turn the board.</p>
-          <ul role="list">
-            <li>Campaign, ranked, practice, and daily missions</li>
-            <li>A seasonal ladder that climbs from Recruit to Infinite</li>
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Visit the Mythwright site" href="mythwright/">Visit Mythwright <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1446,6 +1501,76 @@
           </div>
         </article>
 
+        <article class="product" id="product-mythkin" style="--accent: var(--c-mythkin);">
+          <div class="top">
+            <img class="app-icon" src="icons/mythkin.png" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Mythkin</h3>
+              <div class="cat">AI Characters &amp; Legends</div>
+            </div>
+            <span class="status">iOS · Coming soon</span>
+          </div>
+          <p class="desc">Talk with 470 painted characters across 85 collections &mdash; history, storybook, legend and scripture &mdash; or author your own with a temperament, a history and an opening line.</p>
+          <ul role="list">
+            <li>Start a Hearth: two or three characters in one room together</li>
+            <li>44 stories to step into, each cast with kin from the roster</li>
+          </ul>
+          <div class="foot">
+            <a class="link" aria-label="Visit the Mythkin site" href="mythkin/">Visit Mythkin <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      </div>
+
+      <div class="grid-label"><span>Original games</span></div>
+      <div class="products-grid">
+
+        <!-- HEXHUNTER -->
+        <article class="product" id="product-hexhunter" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
+          <div class="top">
+            <img class="app-icon" src="icons/hexhunter.png" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Hexhunter</h3>
+              <div class="cat">Gothic Horde-Survivor</div>
+            </div>
+            <span class="status">iOS · Coming soon</span>
+          </div>
+          <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor built around distinct heroes, illustrated upgrades, and escalating chaos.</p>
+          <ul role="list">
+            <!-- NINE matches the hexhunter subsite and the live App Store listing
+                 (both name Silas the ninth). The in-review build-7 binary carries
+                 eight — the subsite's #heroes comment documents why nine is the
+                 page standard while the app is unreleased, and the revert
+                 condition: if a build without Silas goes LIVE, this and the
+                 subsite's nine-counts drop to eight together. -->
+            <li>9 heroes with distinct playstyles</li>
+            <li>18 weapons, secret evolutions, and 3 escalating biomes</li>
+            <!-- Art is generated; do not describe it as hand-drawn or hand-illustrated. -->
+          </ul>
+          <div class="foot">
+            <a class="link" aria-label="Visit the Hexhunter site" href="hexhunter/">Visit Hexhunter <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <!-- MYTHWRIGHT -->
+        <article class="product" id="product-mythwright" style="--accent: var(--c-myth);">
+          <div class="top">
+            <img class="app-icon" src="icons/mythwright.png" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Mythwright</h3>
+              <div class="cat">Strategy Card Game</div>
+            </div>
+            <span class="status">iOS · Coming soon</span>
+          </div>
+          <p class="desc">A tactical card battler with hundreds of cards, shifting locations, and six-turn ranked duels played a turn at a time, where a single reveal can turn the board.</p>
+          <ul role="list">
+            <li>Campaign, ranked, practice, and daily missions</li>
+            <li>A seasonal ladder that climbs from Recruit to Infinite</li>
+          </ul>
+          <div class="foot">
+            <a class="link" aria-label="Visit the Mythwright site" href="mythwright/">Visit Mythwright <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
         <!-- WADDLETON -->
         <article class="product" id="product-waddleton" style="--accent: var(--c-waddle);">
           <div class="top">
@@ -1465,24 +1590,6 @@
           <div class="foot">
             <a class="btn-store" aria-label="Play Waddleton, free in your browser" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
             <a class="link" aria-label="Visit the Waddleton site" href="waddleton/">Visit Waddleton <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-        <article class="product" id="product-mythkin" style="--accent: var(--c-mythkin);">
-          <div class="top">
-            <img class="app-icon" src="icons/mythkin.png" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Mythkin</h3>
-              <div class="cat">AI Characters &amp; Legends</div>
-            </div>
-            <span class="status">iOS · Coming soon</span>
-          </div>
-          <p class="desc">Talk with 470 painted characters across 85 collections &mdash; history, storybook, legend and scripture &mdash; or author your own with a temperament, a history and an opening line.</p>
-          <ul role="list">
-            <li>Start a Hearth: two or three characters in one room together</li>
-            <li>44 stories to step into, each cast with kin from the roster</li>
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Visit the Mythkin site" href="mythkin/">Visit Mythkin <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1576,25 +1683,47 @@
         <p>Where a product uses AI, it runs on models from Anthropic and OpenAI: Claude is the primary model in most of the products that write to you, OpenAI leads in others and makes every image a product generates while you use it. Any studio can call those same models. What we build is the layer around them — the part that decides what to ask, what the product already knows about your situation, and what it checks before you see an answer.</p>
       </div>
 
-      <ol class="intelligence-flow" aria-label="How a context-aware response is formed">
-        <li class="flow-step">
-          <h3>Your context</h3>
-          <p>Goals, preferences, conditions, and boundaries you provide within the product.</p>
-        </li>
-        <li class="flow-step">
-          <h3>Recent activity</h3>
-          <p>Relevant diary entries, symptoms, check-ins, conversations, and in-product activity.</p>
-        </li>
-        <li class="flow-step">
-          <h3>Product intelligence</h3>
-          <p>Current task, domain knowledge, live data, tools, rules, and safeguards.</p>
-        </li>
-        <li class="flow-step">
-          <!-- Twin of the diagram RESULT box — moves with it, per the owner ruling above. -->
-          <h3>The best possible answer</h3>
-          <p>An answer, brief, recipe, story beat, or next action — grounded in your context and checked before you see it.</p>
-        </li>
+      <!-- The four stages of the pipeline are DRAWN in the hero's context-engine
+           figure, which is aria-hidden decorative art. This sr-only list is the
+           page's one accessible description of that system — never remove it
+           without giving the diagram a spoken equivalent. The four VISIBLE cards
+           that used to stand here repeated the diagram's stages word for word;
+           Vanus called the repeat out 2026-08-25 and they were replaced with the
+           .layer-proof cases below. "The best possible answer" is the owner's
+           wording (twin of the diagram RESULT box — moves with it, per the ruling
+           above); it lives on here and in the hero. -->
+      <h3 class="sr-only">How a response is formed</h3>
+      <ol class="sr-only">
+        <li>Your context — goals, preferences, conditions, and boundaries you provide within the product.</li>
+        <li>Recent activity — relevant diary entries, symptoms, check-ins, conversations, and in-product activity.</li>
+        <li>Product intelligence — the current task, domain knowledge, live data, tools, rules, and safeguards.</li>
+        <li>The best possible answer — an answer, brief, recipe, story beat, or next action, grounded in your context and checked before you see it.</li>
       </ol>
+
+      <!-- Three cases only, and only from Wingmate, Saffra and StoryVault: every
+           sentence here RESTATES the already-verified claim on that product's own
+           card in #products — if a card claim changes, its restatement here moves
+           with it. Health, recovery, DBT and markets products stay out of this row
+           for the same reason they stay out of the hero's "You ask" prompts:
+           their regulatory copy law should not be dragged onto the studio
+           homepage for no gain. -->
+      <ul class="layer-proof" role="list" aria-label="The intelligence layer at work in three shipped products">
+        <li class="proof-card" style="--accent: var(--c-wingmate);">
+          <span class="proof-head"><img src="icons/wingmate.png" alt="" width="26" height="26" loading="lazy"><span>In Wingmate</span></span>
+          <p>Before a reply is suggested, the coach has read the whole thread &mdash; not just the last message &mdash; and what all four coaches remember about the person you&rsquo;re talking to.</p>
+          <a class="link" href="#product-wingmate">See Wingmate <span aria-hidden="true">↑</span></a>
+        </li>
+        <li class="proof-card" style="--accent: var(--c-saffra);">
+          <span class="proof-head"><img src="icons/saffra.png" alt="" width="26" height="26" loading="lazy"><span>In Saffra</span></span>
+          <p>Tell it what&rsquo;s in your kitchen and the recipe is rewritten around exactly that &mdash; with anything you can&rsquo;t eat filtered out before it&rsquo;s ever suggested.</p>
+          <a class="link" href="#product-saffra">See Saffra <span aria-hidden="true">↑</span></a>
+        </li>
+        <li class="proof-card" style="--accent: var(--c-story);">
+          <span class="proof-head"><img src="icons/storyvault.png" alt="" width="26" height="26" loading="lazy"><span>In StoryVault&nbsp;AI</span></span>
+          <p>Tap an offered choice or type your own move &mdash; the story follows, and it remembers, so the next beat fits the adventure you&rsquo;ve actually had.</p>
+          <a class="link" href="#product-storyvault">See StoryVault&nbsp;AI <span aria-hidden="true">↑</span></a>
+        </li>
+      </ul>
 
       <p class="model-note">Not every product uses AI. Where one does, the provider, data path, memory, on-device versus cloud processing, and safety controls vary by product and feature — and most artwork ships with the app rather than being generated while you use it.</p>
     </div>
@@ -1628,6 +1757,13 @@
           <div>
             <h3>Feedback reaches us directly</h3>
             <p>Questions and reported problems come directly to us, keeping the path from a user observation to a product decision short.</p>
+          </div>
+        </div>
+        <div class="approach-row">
+          <div class="k">Accuracy</div>
+          <div>
+            <h3>Say only what ships</h3>
+            <p>Copy is checked against the products themselves &mdash; the counts, capabilities, and prices a page claims are audited against the shipped build, and corrected when they drift.</p>
           </div>
         </div>
         <!-- "Who we are / Founder-run, end to end" removed 2026-08-10 at Vanus's
@@ -1664,7 +1800,7 @@
     <div class="container">
       <div class="f-brand">
         <div class="brand">
-          <img class="mark" src="logo.png" alt="" width="34" height="38">
+          <img class="mark" src="logo.png" alt="" width="36" height="24">
           <span>HyperSage<span class="co-sub"> AI Labs</span></span>
         </div>
         <p>An independent studio building distinctive consumer apps and original games.</p>
@@ -1722,7 +1858,7 @@
     (function () {
       if (!document.documentElement.classList.contains('js-reveal') || !('IntersectionObserver' in window)) return;
       var els = document.querySelectorAll(
-        '.section-head, .approach-row, .product, .flow-step, .cta .container'
+        '.section-head, .approach-row, .product, .proof-card, .cta .container'
       );
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {

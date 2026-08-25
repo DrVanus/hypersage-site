@@ -1,6 +1,6 @@
-# Hypersage AI Labs
+# HyperSage AI Labs
 
-> Hypersage AI Labs is an independent product studio building distinctive consumer
+> HyperSage AI Labs is an independent product studio building distinctive consumer
 > apps for relationships, health, recovery, food, stories, markets, and sleep —
 > alongside original games. Where AI belongs, its products add a product-specific
 > intelligence layer that combines information a person provides and relevant
