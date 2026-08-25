@@ -71,7 +71,14 @@ def build_html() -> str:
     half = (len(products) + 1) // 2
     row1 = " · ".join(products[:half])
     row2 = " · ".join(products[half:])
-    return f"""<!doctype html><html><head><meta charset="utf-8"><style>{style}</style>
+    return f"""<!doctype html><html><head><meta charset="utf-8">
+<!-- The site's @font-face rules live HERE, not in index.html's <style> block, so
+     lifting that block alone rendered the whole card — including the lifted
+     figure, whose CSS asks for these families BY NAME — in system fallback.
+     A preview set in a different typeface than the page it previews is the same
+     drift this renderer exists to prevent, wearing a font instead of a claim. -->
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>{style}</style>
 <style>
   html,body {{ margin:0; padding:0; width:{W}px; height:{H}px; overflow:hidden; }}
   body {{ background:#080B0F; }}
@@ -84,21 +91,28 @@ def build_html() -> str:
   .og-left {{ width:520px; flex:0 0 520px; }}
   .og-right {{ flex:1; display:flex; align-items:center; justify-content:center; }}
   .og-brand {{ display:flex; align-items:center; gap:12px; margin-bottom:30px; }}
-  .og-brand img {{ width:38px; height:42px; }}
-  .og-brand .t1 {{ font: 600 11px/1.1 ui-sans-serif,-apple-system,'Segoe UI',sans-serif;
+  /* object-fit, and a box that matches the ASSET's aspect rather than restating
+     it. This pair was 38x42 — the exact aspect of the old logo.png, which was a
+     portrait canvas with the mark floating inside it. When logo.png was
+     re-cropped to the mark's own 3:2, the pin silently stretched it 61% too
+     tall. A box that hardcodes one asset's proportions is a second definition
+     of that asset, and it does not travel when the asset is fixed. */
+  .og-brand img {{ width:38px; height:26px; object-fit:contain; }}
+  .og-brand .t1 {{ font: 600 11px/1.1 'JetBrains Mono',ui-monospace,monospace;
                    letter-spacing:.22em; text-transform:uppercase; color:#5EEAD4; }}
-  .og-brand .t2 {{ font: 700 17px/1.3 ui-sans-serif,-apple-system,'Segoe UI',sans-serif; color:#F2F6F8; margin-top:3px; }}
-  .og h1 {{ font: 800 54px/1.06 ui-sans-serif,-apple-system,'Segoe UI',sans-serif;
-            color:#F2F6F8; margin:0 0 22px; letter-spacing:-.022em; }}
+  .og-brand .t2 {{ font: 700 17px/1.45 'Space Grotesk','Inter',sans-serif; color:#F2F6F8;
+                   margin-top:3px; letter-spacing:-.01em; }}
+  .og h1 {{ font: 700 54px/1.14 'Space Grotesk','Inter',sans-serif;
+            color:#F2F6F8; margin:0 0 22px; letter-spacing:-.02em; padding-bottom:.1em; }}
   /* The SAME gradient the live headline uses — teal -> blue -> violet. The old
      preview flattened this to one teal, which is half the brand. */
   .og h1 .grad {{ background:linear-gradient(96deg,#2DD4BF 0%,#5AA9E6 52%,#A78BFA 100%);
                   -webkit-background-clip:text; background-clip:text; color:transparent; }}
   .og .rule {{ width:330px; height:2px; margin:0 0 22px;
                background:linear-gradient(90deg,#2DD4BF,#A78BFA); border-radius:2px; }}
-  .og p {{ font: 400 18px/1.5 ui-sans-serif,-apple-system,'Segoe UI',sans-serif;
+  .og p {{ font: 400 18px/1.5 'Inter',ui-sans-serif,-apple-system,sans-serif;
            color:#B9C6CE; margin:0; max-width:470px; }}
-  .og .apps {{ position:absolute; left:56px; bottom:44px; font: 400 13px/1.75 ui-sans-serif,-apple-system,sans-serif;
+  .og .apps {{ position:absolute; left:56px; bottom:44px; font: 400 13px/1.75 'Inter',ui-sans-serif,sans-serif;
                color:#7C8B95; letter-spacing:.005em; }}
   /* The figure is the site's, so pin only its BOX — never its internals.
      Scaled UP, and that is the whole point: a link preview is rendered ~460px
@@ -184,11 +198,27 @@ def main() -> None:
     from playwright.sync_api import sync_playwright
     with sync_playwright() as pw:
         b = pw.chromium.launch()
-        pg = b.new_page(viewport={"width": W, "height": H}, device_scale_factor=1)
+        # SUPERSAMPLED. Rendered at 2x and resampled down to exactly WxH, because
+        # a card drawn at 1x puts 17px text and a 26px mark on a whole-pixel grid:
+        # descenders came out a single thin row and read as CHOPPED at the size a
+        # message bubble actually shows this (~460px wide). Downsampling from 2x
+        # gives those strokes real coverage. The file stays WxH — the site
+        # auditor fails og-image.png at any other dimensions, and social scrapers
+        # size against the declared og:image:width/height.
+        pg = b.new_page(viewport={"width": W, "height": H}, device_scale_factor=2)
         pg.goto(tmp.as_uri())
+        # The families are ours and self-hosted, but font-display:swap means the
+        # first paint can still be fallback metrics. Screenshotting through that
+        # window is how a card ends up in a typeface the site does not use.
+        pg.wait_for_function("document.fonts.status === 'loaded'", timeout=10_000)
         pg.wait_for_timeout(700)          # let the figure's CSS animation settle
-        pg.screenshot(path=str(OUT))
+        shot = ROOT / "_og_2x.png"
+        pg.screenshot(path=str(shot))
         b.close()
+    from PIL import Image
+    with Image.open(shot) as im:
+        im.convert("RGB").resize((W, H), Image.LANCZOS).save(OUT, optimize=True)
+    shot.unlink(missing_ok=True)
     tmp.unlink(missing_ok=True)
     # Stamp what this render was made of, so --check can tell later whether
     # the page moved on without it.
