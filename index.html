@@ -1119,10 +1119,28 @@
                  none touches a regulated category. Prompt 1 is the resting state.
                  Do not add a health, finance, DBT or dating-outcome prompt here. -->
             <span class="pl-msg-bubble">
-              <span class="pl-prompt">What should I cook tonight?</span>
-              <span class="pl-prompt">What happens if I side with the captain?</span>
-              <span class="pl-prompt">Read me something calm.</span>
-              <span class="pl-prompt">Which hunter counters the Plague Abbot?</span>
+              <!-- EVERY PROMPT HERE MUST BE A REAL ASK IN A SHIPPED APP. Verified 2026-08-25
+                   against source, and chosen to span four of the categories the hero
+                   sentence names (food, sleep, stories, relationships):
+                     1 Saffra     - chef chat. The app's own core interaction.
+                     2 Nightshelf - generated bedtime stories: CustomStory.swift, backend
+                                    /v1/nightshelf/story, "Write a bedtime story" on Home.
+                     3 StoryVault - Dracula is a bundled classic with its own AI Adventure
+                                    scenario (AdventureArrivalUITests drives a Dracula run);
+                                    HomeView.swift:859 is the "Write a Story" entry.
+                     4 Wingmate   - CoachChatView.swift:1517 placeholder is "Ask {coach}…",
+                                    and the coach reads the whole thread.
+                   REMOVED and do not restore: "Which hunter counters the Plague Abbot?"
+                   (Hexhunter is a horde-survivor game with NO assistant to ask - the prompt
+                   invented a feature), and "What happens if I side with the captain?" (no
+                   such captain in any scenario; it read as filler).
+                   Health, recovery, DBT and markets prompts are deliberately absent: Rowan,
+                   Alder, Quietoak and CryptoSage carry regulatory copy law, and putting one
+                   of their questions on the studio homepage drags that law here for no gain. -->
+                <span class="pl-prompt">What should I cook tonight?</span>
+              <span class="pl-prompt">Start an adventure in Dracula&rsquo;s castle.</span>
+              <span class="pl-prompt">Write me a bedtime story about the sea.</span>
+              <span class="pl-prompt">What should I say back to her?</span>
             </span>
           </div>
 
