@@ -3,27 +3,28 @@
      together by the <sitemapindex> in sitemap.xml.
      <priority> and <changefreq> are deliberately absent: Google ignores both.
      Origin is hypersage.ai, live since 2026-08-06 and attached by this repo's CNAME.
-     <lastmod> values are generated from each file's last commit date — regenerate
-     them when a page changes rather than hand-editing. -->
+     <lastmod> is the date the page FILE last changed. There is no generator for
+     this file (nothing in tools/ writes it), so it is maintained by hand: when you
+     change a page here, set that page's lastmod in the same edit. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://hypersage.ai/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-24</lastmod>
   </url>
   <url>
     <loc>https://hypersage.ai/press.html</loc>
-    <lastmod>2026-08-08</lastmod>
+    <lastmod>2026-08-24</lastmod>
   </url>
   <url>
     <loc>https://hypersage.ai/privacy.html</loc>
-    <lastmod>2026-08-08</lastmod>
+    <lastmod>2026-08-24</lastmod>
   </url>
   <url>
     <loc>https://hypersage.ai/terms.html</loc>
-    <lastmod>2026-08-08</lastmod>
+    <lastmod>2026-08-18</lastmod>
   </url>
   <url>
     <loc>https://hypersage.ai/support.html</loc>
-    <lastmod>2026-08-08</lastmod>
+    <lastmod>2026-08-24</lastmod>
   </url>
 </urlset>

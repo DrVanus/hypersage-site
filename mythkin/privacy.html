@@ -20,7 +20,7 @@
 (function(){try{var t=localStorage.getItem('mythkin.theme');
 if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();
 </script>
-<link rel="stylesheet" href="style.css?v=20260816-ember">
+<link rel="stylesheet" href="style.css?v=20260824-screens">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -70,7 +70,8 @@ we want to hear about it.</p>
 <tr><td><strong>Age confirmation</strong> — that you confirmed you are 18+.</td><td>Legal requirement.</td><td>Our server, as a dated event against your device ID.</td></tr>
 <tr><td><strong>Crisis referral counts</strong> — that a referral was shown, and when. <em>Not what was said.</em> The row also holds a salted hash of the network the request came from — never an address, and it cannot be turned back into one.</td><td>California SB 243 requires operators to report these annually from July 2027. The network hash is what stops one caller looking like a crowd: crisis turns skip the free-tier limit, and without it anyone could mint a fresh device ID per message and take unlimited free replies.</td><td>Our server.</td></tr>
 <tr><td><strong>Subscription status</strong> — an Apple- or Google-signed receipt.</td><td>To unlock Plus. We never see your payment details; the store handles payment.</td><td>Verified in memory per request; not stored as a payment record.</td></tr>
-<tr><td><strong>Sparks you buy</strong> — sparks are a one-off purchase that pays for paintings. We store the store's transaction ID, which pack it was, and your remaining balance.</td><td>The transaction ID is how the same receipt cannot be redeemed twice. The balance is what you still own.</td><td>Our server. <strong>Your balance survives "Delete everything"</strong>, still keyed to your device — deleting it would destroy something you paid for and we cannot refund it. See below.</td></tr>
+<!-- NOT ON SALE YET, SO EVERY VERB HERE IS CONDITIONAL. This row read "Sparks you buy … We store … your remaining balance", which describes a purchase nobody can make and a balance nobody can hold: the two consumables sit in MISSING_METADATA at App Store Connect, so StoreKit prices neither and the shipped 1.0 build cannot sell one. terms.html has said "not on sale yet" since 2026-08-15 and this page contradicted it. Move this row back to the present tense ONLY when the consumables have a price schedule and the store returns them — and change support.html in the same edit. -->
+<tr><td><strong>Sparks, if they go on sale</strong> — sparks are a planned one-off purchase that would pay for paintings, and they are <strong>not on sale yet</strong>. If they are offered, we would store the store's transaction ID, which pack it was, and your remaining balance.</td><td>The transaction ID is how the same receipt could not be redeemed twice. The balance is what you would still own.</td><td>Our server. <strong>A balance would survive "Delete everything"</strong>, still keyed to your device — deleting it would destroy something you had paid for and we cannot refund it. See below.</td></tr>
 <tr><td><strong>Usage counts</strong> — how many messages you have sent in the current window.</td><td>To enforce the free tier fairly.</td><td>Our server.</td></tr>
 <tr><td><strong>What you heart, borrow, block and report</strong> — one row per action, holding your device ID, what it pointed at, and when. A report also holds the reason, anything you typed into it, and a salted hash of the network it came from, for the same reason the crisis row does — so one reporter cannot look like a crowd.</td><td>Hearts and borrows are how the shelves rank and how your library knows what is in it. Blocks are how a creator stays hidden from you. Reports are how a human can review something you flagged.</td><td>Our server. Hearts and borrows appear as counts on the creator's card, never as your identity. All of it is in your export. Hearts, borrows and blocks are deleted when you delete everything; a report you filed stays open with your identifier removed, because it is evidence about someone else's content.</td></tr>
 </tbody>
@@ -174,12 +175,16 @@ visible to whoever has the link.</p>
   finish reviewing.</li>
   <li><strong>Rate-limit counters</strong> for the window you are currently in. They
   hold a request count and nothing else.</li>
-  <li><strong>A record that a spark purchase was redeemed</strong> — kept, with your
-  identifier removed, so the same store receipt cannot be redeemed twice.</li>
-  <li><strong>Any sparks you have not spent</strong> — kept, and <em>still keyed to
-  your device</em>, because that is the only way you can still spend them. This is
-  the one thing on this list that is not anonymised. If you would rather it went,
-  spend the sparks first, or write to us and we will remove them for you.</li>
+  <!-- Conditional for the same reason as the Sparks row above: sparks are not
+       on sale, so no redemption record and no balance can exist yet. -->
+  <li><strong>A record that a spark purchase was redeemed</strong>, if sparks go on
+  sale — kept, with your identifier removed, so the same store receipt could not be
+  redeemed twice.</li>
+  <li><strong>Any sparks you had not spent</strong> — kept, and <em>still keyed to
+  your device</em>, because that would be the only way you could still spend them.
+  This is the one thing on this list that would not be anonymised. If you would
+  rather it went, spend the sparks first, or write to us and we will remove them for
+  you.</li>
 </ul>
 <p>Otherwise we keep your data for as long as you use the app. Server logs, which
 do not contain conversation text, are kept for up to 30 days for debugging.</p>
@@ -209,7 +214,7 @@ we will say so in the app before the change takes effect, not only on this page.
   <a href="safety.html">Safety</a>
   <a href="terms.html">Terms</a>
   <a href="support.html">Support</a>
-  <span class="meta">Last updated 2026-08-16</span>
+  <span class="meta">Last updated 2026-08-24</span>
 </div></footer>
 <script>
 (function(){

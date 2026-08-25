@@ -101,23 +101,27 @@ nav.site .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-
      first quarter-second of every page load, which is the one moment the hero
      has to land. Measured before the shift: 0.007 at t=0. */
   .hero-carousel img:nth-child(1){animation-delay:-0.6s}
-  .hero-carousel img:nth-child(2){animation-delay:2.4s}
-  .hero-carousel img:nth-child(3){animation-delay:5.4s}
-  .hero-carousel img:nth-child(4){animation-delay:8.4s}
+  .hero-carousel img:nth-child(2){animation-delay:3.4s}
+  .hero-carousel img:nth-child(3){animation-delay:7.4s}
 }
-/* HOLD at full opacity for the WHOLE 1/N slot (4 images -> 25%), then a short
-   crossfade into the next. The first version of this ramped straight from 1 to
-   0 across 5%->22% and sat at zero for the remaining 78%, so the phone frame
-   was empty or near-empty most of the time and read as a broken image — the
-   live page was measured at opacity 0.15/0/0/0. Same shape as storyvault's
-   carousel, which is the proven one; if you add a fifth screenshot, the hold
-   stop and the delays both have to move (100/N, and N evenly across 12s). */
+/* HOLD at full opacity for the WHOLE 1/N slot (3 images -> 33.33%), then a
+   short crossfade into the next. The first version of this ramped straight from
+   1 to 0 across 5%->22% and sat at zero for the remaining 78%, so the phone
+   frame was empty or near-empty most of the time and read as a broken image —
+   the live page was measured at opacity 0.15/0/0/0. Same shape as storyvault's
+   carousel, which is the proven one.
+   N IS 3 AS OF 2026-08-24, down from 4: the Hound frame was withdrawn (see the
+   comment in index.html's screens rail). The hold stop and the delays are both
+   FUNCTIONS OF N — 100/N, and N spaced evenly across 12s, each shifted back by
+   the 0.6s fade-in — so adding or removing a screenshot means moving both here.
+   Leaving a fourth delay behind for a third image is a 4s hole in the loop with
+   an empty phone in it. */
 @keyframes hh-fade{
-  0%   {opacity:0}
-  5%   {opacity:1}
-  25%  {opacity:1}
-  30%  {opacity:0}
-  100% {opacity:0}
+  0%     {opacity:0}
+  5%     {opacity:1}
+  33.33% {opacity:1}
+  38.33% {opacity:0}
+  100%   {opacity:0}
 }
 
 /* ===== stats strip ===== */

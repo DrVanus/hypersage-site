@@ -621,7 +621,7 @@
     }
 
     /* Adaptation flow — the concept intro's closing line ("Then she rewrites
-       it for you") drawn as a flow: one vetted recipe, read against your
+       it for you") drawn as a flow: one catalog recipe, read against your
        kitchen, out comes your version. Every label restates copy that already
        appears elsewhere on this page — add no new claims here. */
     .adapt-flow {
@@ -1138,7 +1138,7 @@
       "name": "What's actually powering Saffra?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The core assistant uses a multimodal AI model, with a faster utility model for tasks such as parsing receipt text and folding older conversations into summaries. Recipe search uses vector embeddings over the curated library. Voice synthesis uses a neural TTS voice with content-addressed caching, while speech recognition runs on-device through Apple's Speech framework with an OpenAI Whisper fallback when on-device accuracy is insufficient. Receipt and cookbook OCR runs on-device through Apple's Vision framework; shelf photos are sent to the server for vision analysis and are not stored. The recipe catalog is written ahead of time rather than improvised per request, and every recipe carries allergen flags."
+        "text": "The core assistant uses a multimodal AI model, with a faster utility model for tasks such as parsing receipt text and folding older conversations into summaries. Recipe search uses vector embeddings over the curated library. Voice synthesis uses a neural TTS voice with content-addressed caching, while speech recognition uses Apple's Speech framework, which is server-backed — the audio reaches Apple, not us. In Cooking Mode the clip is also re-transcribed by OpenAI's Whisper, for every spoken question rather than only noisy ones, then discarded. Receipt and cookbook OCR runs on-device through Apple's Vision framework; shelf photos are sent to the server for vision analysis and are not stored. The recipe catalog is written ahead of time rather than improvised per request, and every recipe carries allergen flags."
       }
     },
     {
@@ -1194,7 +1194,7 @@
       "name": "Is the free tier actually usable?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Free gives you 10 chef messages in total — a lifetime allowance, not a daily one — plus full recipe-library browsing, one recipe adaptation, pantry tracking, and the same safety rules. Pro adds unlimited chat, voice cooking, ongoing recipe adaptation, receipt and barcode scanning, recipe import from URLs and cookbook photos, and a personal library that learns from your cooking history."
+        "text": "Free gives you 10 chef messages in total — a lifetime allowance, not a daily one — plus full recipe-library browsing, one recipe adaptation, pantry tracking, and the same safety rules. Pro lifts the free tier's 10-message chef-chat cap (fair-use rate limits still apply), and adds voice cooking, ongoing recipe adaptation, receipt and barcode scanning, recipe import from URLs and cookbook photos, and a personal library that learns from your cooking history."
       }
     },
     {
@@ -1218,7 +1218,7 @@
       "name": "What about my data?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sign in with Apple or Google. We never sell data. We never use your conversations to train models. We never track you across apps or websites. Voice transcription runs on-device by default — normally only the text reaches our server. If on-device accuracy fails in a noisy kitchen, a short clip is sent to OpenAI's Whisper and discarded after transcription. Receipt and cookbook photos run through Apple's Vision framework on your phone — only the extracted text leaves the device. The one image that does leave is the shelf photo you take to stock your pantry: that is sent to our server and read by OpenAI's vision model, and not stored. You can delete your account and every byte of your data from Profile / Me at any time. Full policy at /privacy."
+        "text": "Sign in with Apple or Google. We never sell data. We never use your conversations to train models. We never track you across apps or websites. When you use voice mode, audio is transcribed by Apple's Speech framework, which is server-backed — the audio reaches Apple, not us. In Cooking Mode the clip is also sent to OpenAI's Whisper for a second, more accurate transcription — every spoken question, not only the noisy ones — and discarded afterwards. Receipt and cookbook photos run through Apple's Vision framework on your phone — only the extracted text leaves the device. The one image that does leave is the shelf photo you take to stock your pantry: that is sent to our server and read by OpenAI's vision model, and not stored. You can delete your account and every byte of your data from Profile / Me at any time. Full policy at /privacy."
       }
     }
   ]
@@ -1271,35 +1271,35 @@
                dark captures alternate, but the visitor chooses when to advance. -->
           <div class="hero-phone-frame" id="heroRotator" aria-roledescription="carousel" aria-label="Saffra app walkthrough">
             <img class="hero-phone-img is-active"
-                 src="screenshots-raw/01-chef-tab-light.jpg?v=20260818a"
+                 src="screenshots-raw/01-chef-tab-light.jpg?v=20260824a"
                  width="417" height="900" fetchpriority="high" decoding="async"
                  data-caption="Pantry-aware ways to begin"
                  data-allow-duplicate="true"
                  alt="Saffra Chef tab in light mode — pantry-aware quick-start prompts">
             <img class="hero-phone-img"
-                 src="screenshots-raw/07-chat-recipe-dark.jpg?v=20260818a"
+                 src="screenshots-raw/07-chat-recipe-dark.jpg?v=20260824a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Answers grounded in the recipe catalog"
                  data-allow-duplicate="true"
                  alt="Ask Saffra in dark mode — she answers with a recipe pulled from the catalog">
             <img class="hero-phone-img"
-                 src="screenshots-raw/05-recipes-light.jpg?v=20260818a"
+                 src="screenshots-raw/05-recipes-light.jpg?v=20260824a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="A trusted recipe catalog, ready to adapt"
                  alt="Recipes in light mode — the flagship catalog with Saffra's daily pick">
             <img class="hero-phone-img"
-                 src="screenshots-raw/02-cooking-mode-dark.jpg?v=20260818a"
+                 src="screenshots-raw/02-cooking-mode-dark.jpg?v=20260824a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Hands-free guidance while you cook"
                  alt="Cooking Mode in dark mode — hands-free voice with a suggested step timer">
             <img class="hero-phone-img"
-                 src="screenshots-raw/06-search-light.jpg?v=20260818a"
+                 src="screenshots-raw/06-search-light.jpg?v=20260824a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Search by meaning, not just title"
                  data-allow-duplicate="true"
                  alt="Search in light mode — semantic recipe search across the whole catalog">
             <img class="hero-phone-img"
-                 src="screenshots-raw/10-recipes-dinner-dark.jpg?v=20260818a"
+                 src="screenshots-raw/10-recipes-dinner-dark.jpg?v=20260824a"
                  width="417" height="900" loading="lazy" decoding="async"
                  data-caption="Suggestions shaped for tonight"
                  data-allow-duplicate="true"
@@ -1425,7 +1425,7 @@
       <div class="time-card anim anim-d1">
         <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>7:00 AM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/08-recipes-breakfast-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/08-recipes-breakfast-light.jpg?v=20260824a" width="417" height="900" loading="lazy"
                alt="Recipes tab in the morning — Saffra's breakfast pick and a Quick breakfast rail">
         </div>
         <h3>Morning</h3>
@@ -1434,7 +1434,7 @@
       <div class="time-card anim anim-d2">
         <div class="time-tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>12:30 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/09-recipes-lunch-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/09-recipes-lunch-light.jpg?v=20260824a" width="417" height="900" loading="lazy"
                alt="Recipes tab at midday — Saffra's lunch pick with bowls and salads ranked first">
         </div>
         <h3>Midday</h3>
@@ -1443,7 +1443,7 @@
       <div class="time-card anim anim-d3">
         <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/></svg>6:30 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/10-recipes-dinner-dark.jpg?v=20260818a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
+          <img src="screenshots-raw/10-recipes-dinner-dark.jpg?v=20260824a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
                alt="Recipes tab in the evening — Saffra picks for tonight with a Quick tonight rail">
         </div>
         <h3>Evening</h3>
@@ -1452,7 +1452,7 @@
       <div class="time-card anim anim-d4">
         <div class="time-tag"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>11:50 PM</div>
         <div class="shot-wrap">
-          <img src="screenshots-raw/11-recipes-latenight-dark.jpg?v=20260818a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/11-recipes-latenight-dark.jpg?v=20260824a" width="417" height="900" loading="lazy"
                alt="Recipes tab late at night — a late-night pick and a rail of 25-minute dishes">
         </div>
         <h3>Late night</h3>
@@ -1492,7 +1492,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/07-chat-recipe-dark.jpg?v=20260818a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
+          <img src="screenshots-raw/07-chat-recipe-dark.jpg?v=20260824a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
                alt="Ask Saffra — visible tool chips show her checking the pantry and searching recipes before answering with a recipe card">
           <div class="fd-shot-caption">Tool chips = her actually checking, live</div>
         </div>
@@ -1533,8 +1533,16 @@
       </div>
       <div class="intelligence-card anim anim-d2">
         <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></div>
+        <!-- VOICE DATA FLOW - Apple is the baseline, Whisper is not accuracy-gated.
+             saffra-ios MasterChef/Voice/SpeechRecognizer.swift:161 `r.requiresOnDeviceRecognition = false`
+             (server-backed Apple STT); MasterChef/Cooking/CookingSessionModel.swift:901-919 uploads the
+             recorded clip to OpenAI Whisper for EVERY .askChef question even when Apple's transcript
+             succeeded, plus :845-849 (empty transcript) and :879-891 (unparsed intent). The old
+             "falls back to on-device recognition offline" clause was deleted 2026-08-24: no shipped
+             code implements it. Full reasoning in privacy.html, VOICE DATA FLOW comment. Same wording
+             lives in the two FAQ answers and their JSON-LD twins - change all five together. -->
         <h3>A voice built for a real kitchen</h3>
-        <p>Streaming <strong>neural TTS</strong> — Saffra's signature voice — served from a content-addressed cache so the same line never re-renders twice. Speech recognition uses <strong>Apple's Speech framework</strong>, which is server-backed — audio goes to Apple, not to us, and falls back to on-device recognition offline. The wake phrase "hey saffra" is only armed inside Cooking Mode, never app-wide. Voice timers land in Live Activities, including the Dynamic Island.</p>
+        <p>Streaming <strong>neural TTS</strong> — Saffra's signature voice — served from a content-addressed cache so the same line never re-renders twice. Speech recognition uses <strong>Apple's Speech framework</strong>, which is server-backed — audio goes to Apple, not to us. Every question you speak in Cooking Mode is also re-transcribed by <strong>OpenAI's Whisper</strong> for accuracy, then discarded. The wake phrase "hey saffra" is only armed inside Cooking Mode, never app-wide. Voice timers land in Live Activities, including the Dynamic Island.</p>
       </div>
     </div>
 
@@ -1648,12 +1656,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/02-cooking-mode-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/02-cooking-mode-light.jpg?v=20260824a" width="417" height="900" loading="lazy"
                alt="Cooking Mode step 1 — Saffra reads the step aloud with ingredient chips and a suggested 15-minute timer">
           <div class="fd-shot-caption">Step 1 — she's reading it aloud</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/14-cooking-step2-dark.jpg?v=20260818a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/14-cooking-step2-dark.jpg?v=20260824a" width="417" height="900" loading="lazy"
                alt="Cooking Mode mid-recipe — the dish photo on the step card with progress bar and hands-free controls">
           <div class="fd-shot-caption">Mid-recipe, dark mode</div>
         </div>
@@ -1678,7 +1686,7 @@
       <div class="fd-copy anim">
         <span class="section-label">Ask Saffra</span>
         <h2>A chef on the other end —<br><span class="gradient-text-warm">not a search box.</span></h2>
-        <p>The Saffra tab opens with a time-of-day greeting, your pantry at a glance, and quick-starts built from what's actually in your kitchen. Ask anything — she answers like a chef, and when a recipe is the answer, she hands you a real card from the vetted catalog: one tap to open it, one more to cook it.</p>
+        <p>The Saffra tab opens with a time-of-day greeting, your pantry at a glance, and quick-starts built from what's actually in your kitchen. Ask anything — she answers like a chef, and when a recipe is the answer, she hands you a real card from the recipe catalog: one tap to open it, one more to cook it.</p>
         <ul class="fd-points">
           <li>
             <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
@@ -1696,12 +1704,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/01-chef-tab-light.jpg?v=20260818a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
+          <img src="screenshots-raw/01-chef-tab-light.jpg?v=20260824a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
                alt="The Saffra tab — time-of-day greeting, pantry pills, and quick-start prompts">
           <div class="fd-shot-caption">The greeting knows your kitchen</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/07-chat-recipe-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/07-chat-recipe-light.jpg?v=20260824a" width="417" height="900" loading="lazy"
                alt="Ask Saffra answering with a tappable recipe card after checking the pantry">
           <div class="fd-shot-caption">She answers with a real recipe</div>
         </div>
@@ -1748,7 +1756,7 @@
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/03-pantry-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/03-pantry-light.jpg?v=20260824a" width="417" height="900" loading="lazy"
                alt="The pantry — item counts by category with expiring and stale flags, plus photo, receipt, and barcode capture">
           <div class="fd-shot-caption">Grocery, fridge &amp; freshness at a glance</div>
         </div>
@@ -1776,15 +1784,28 @@
             <div class="icon-box green"><svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
             <div><h3>Filters that matter</h3><p>Under 30 minutes. Vegetarian. Thai. Stack refinements and the results re-rank instantly.</p></div>
           </li>
-          <li>
-            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M2 17l10 5 10-5M2 12l10 5 10-5M12 2L2 7l10 5 10-5-10-5z"/></svg></div>
-            <div><h3>Flagship first</h3><p>Flagship recipes from the prepared catalog rank above the wider index, so the most complete recipes surface first.</p></div>
-          </li>
+          <!-- REMOVED 2026-08-24 — third bullet, verbatim: <h3>Flagship first</h3>
+               "Flagship recipes from the prepared catalog rank above the wider index,
+               so the most complete recipes surface first."
+               BOTH halves are false. There is no "wider index": the catalog is one
+               Recipe table (saffra-api/app/recipes/routes.py:523-623). And nothing
+               ranks flagship rows above anything — the ORDER BY is title_boost, then
+               Reciprocal Rank Fusion (k=60) over the full-text and vector CTEs, then
+               Recipe.quality_score; `flagship` appears nowhere in the ordering, and a
+               repo-wide grep for it in saffra-api/app finds only comments and a
+               one-shot generator script. Named as a surviving forbidden claim in
+               x-ads/saffra/AUDIT.json (survivor of the deleted 230,000-recipe /
+               two-population framing).
+               DELETED, not reworded: no file on disk determines a replacement
+               sentence, and the two bullets above already carry the true search
+               story. .fd-points is `display:flex; flex-direction:column` (line ~894),
+               so dropping to two items needs no layout change — cf. the 2026-08-19
+               Lifetime-card removal that stranded a third grid column. -->
         </ul>
       </div>
       <div class="fd-shots anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/06-search-light.jpg?v=20260818a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
+          <img src="screenshots-raw/06-search-light.jpg?v=20260824a" width="417" height="900" loading="lazy" data-allow-duplicate="true"
                alt="Saffra's search results for &quot;pasta&quot; — 18 matches, with cuisine, time and diet refinements above the list">
           <div class="fd-shot-caption">Refine by cuisine, time and diet</div>
         </div>
@@ -1795,7 +1816,7 @@
 
 <div class="section-divider"></div>
 
-<!-- Recipe detail — what a vetted recipe looks like up close. -->
+<!-- Recipe detail — what a recipe looks like up close. -->
 <section id="recipe-detail">
   <div class="container">
     <div class="fd-grid">
@@ -1824,12 +1845,12 @@
       </div>
       <div class="fd-shots pair anim">
         <div class="fd-shot">
-          <img src="screenshots-raw/04-recipe-detail-light.jpg?v=20260818a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/04-recipe-detail-light.jpg?v=20260824a" width="417" height="900" loading="lazy"
                alt="Recipe detail — hero photo with timing, difficulty, servings, and the Let's cook button">
           <div class="fd-shot-caption">The top: vitals + "Let's cook"</div>
         </div>
         <div class="fd-shot">
-          <img src="screenshots-raw/13-recipe-ingredients-dark.jpg?v=20260818a" width="417" height="900" loading="lazy"
+          <img src="screenshots-raw/13-recipe-ingredients-dark.jpg?v=20260824a" width="417" height="900" loading="lazy"
                alt="Recipe detail scrolled — the ingredient list checked against your pantry">
           <div class="fd-shot-caption">Below the fold: ingredients &amp; more</div>
         </div>
@@ -1984,7 +2005,7 @@
     <div class="faq-list">
       <div class="faq-item"><button class="faq-q">How is Saffra different from a recipe site or a general chatbot?<span class="faq-icon">+</span></button><div class="faq-a"><p>Three differences matter. <strong>First:</strong> a general model drafts a recipe the moment you ask, from model knowledge alone. Saffra's flagship recipes are written in advance and complete enough to cook from — 99.8% of ingredients carry a measured amount, 97.2% say how to prep it, every recipe lists the equipment it needs, and 99.3% name a cue for what done looks like. <strong>Second:</strong> the assistant works with your pantry, equipment, allergies, skill level, and current cooking step rather than treating each question in isolation. <strong>Third:</strong> product-specific tools handle catalog search, substitutions, techniques, and hands-free cooking, so the model is one part of a larger cooking system.</p></div></div>
 
-      <div class="faq-item"><button class="faq-q">What's actually powering Saffra?<span class="faq-icon">+</span></button><div class="faq-a"><p>The core assistant uses a <strong>multimodal AI model</strong>, with a faster utility model for tasks such as parsing receipt text and folding older conversations into summaries. Recipe search uses <strong>vector embeddings</strong> over the curated library. Voice synthesis uses a neural TTS voice with content-addressed caching, while speech recognition runs on-device through Apple's Speech framework with an OpenAI Whisper fallback when on-device accuracy is insufficient. Receipt and cookbook OCR runs on-device through Apple's Vision framework; shelf photos are sent to the server for vision analysis and are not stored. The recipe catalog is written ahead of time rather than improvised per request, and every recipe carries allergen flags.</p></div></div>
+      <div class="faq-item"><button class="faq-q">What's actually powering Saffra?<span class="faq-icon">+</span></button><div class="faq-a"><p>The core assistant uses a <strong>multimodal AI model</strong>, with a faster utility model for tasks such as parsing receipt text and folding older conversations into summaries. Recipe search uses <strong>vector embeddings</strong> over the curated library. Voice synthesis uses a neural TTS voice with content-addressed caching, while speech recognition uses <strong>Apple's Speech framework</strong>, which is server-backed — the audio reaches Apple, not us. In Cooking Mode the clip is also re-transcribed by OpenAI's Whisper, for every spoken question rather than only noisy ones, then discarded. Receipt and cookbook OCR runs on-device through Apple's Vision framework; shelf photos are sent to the server for vision analysis and are not stored. The recipe catalog is written ahead of time rather than improvised per request, and every recipe carries allergen flags.</p></div></div>
 
       <div class="faq-item"><button class="faq-q">How accurate is the cooking advice?<span class="faq-icon">+</span></button><div class="faq-a"><p>Two things keep her grounded. <strong>One</strong>: when you ask for a specific dish or "what should I cook?", she calls a tool that searches Saffra's own recipe catalog — every recipe in it written in advance — instead of improvising one from memory. So you get a real recipe, adapted for you, not a hallucination. <strong>Two</strong>: for techniques and substitutions she calls dedicated tools (technique explainer, substitution lookup) rather than guessing. She also won't claim to have personally tasted something — she'll say "by the numbers, this should read bright and savory" instead of "I love this." If she's not sure, she says so.</p></div></div>
 
@@ -1998,13 +2019,13 @@
 
       <div class="faq-item"><button class="faq-q">What about allergies and food safety?<span class="faq-icon">+</span></button><div class="faq-a"><p>Declared allergens are treated as <strong>hard product rules</strong>. Saffra either names a substitution or declines the recipe and offers an alternative rather than silently proceeding. For serious allergies (peanut, tree nut, shellfish, sesame, and gluten for celiac users), it also flags cross-contamination risks in shared oils, fryers, and cutting boards. Adapted recipes carry a persistent allergen notice, and recipes include target internal temperatures where appropriate. Saffra is still an AI system: verify allergens and cooking temperatures yourself, and do not treat it as medical or dietary advice.</p></div></div>
 
-      <div class="faq-item"><button class="faq-q">Is the free tier actually usable?<span class="faq-icon">+</span></button><div class="faq-a"><p>Free gives you <strong>10 chef messages in total</strong> — a lifetime allowance, not a daily one — plus full recipe-library browsing, one recipe adaptation, pantry tracking, and the same safety rules. Pro adds unlimited chat, voice cooking, ongoing recipe adaptation, receipt and barcode scanning, recipe import from URLs and cookbook photos, and a personal library that learns from your cooking history.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Is the free tier actually usable?<span class="faq-icon">+</span></button><div class="faq-a"><p>Free gives you <strong>10 chef messages in total</strong> — a lifetime allowance, not a daily one — plus full recipe-library browsing, one recipe adaptation, pantry tracking, and the same safety rules. Pro lifts the free tier's 10-message chef-chat cap (fair-use rate limits still apply), and adds voice cooking, ongoing recipe adaptation, receipt and barcode scanning, recipe import from URLs and cookbook photos, and a personal library that learns from your cooking history.</p></div></div>
 
       <div class="faq-item"><button class="faq-q">How are Saffra's flagship recipes made?<span class="faq-icon">+</span></button><div class="faq-a"><p>Saffra separates recipe writing from real-time adaptation. The flagship catalog is drafted in advance and reviewed in-house, with allergen flags on every recipe — it is not improvised the moment you ask. What that buys you is completeness: a measured amount on 99.8% of ingredients, a prep note on 97.2%, an equipment list on every recipe, and a sensory cue for the finish on 99.3% (measured 2026-08-19 across the shipped catalog). When you ask for the dish, Saffra starts from that prepared catalog entry and adapts it to your pantry, equipment, allergies, and skill level. The adaptation is generated by an AI model; the catalog entry is not.</p></div></div>
 
       <div class="faq-item"><button class="faq-q">When is Saffra launching?<span class="faq-icon">+</span></button><div class="faq-a"><p>Saffra is preparing for TestFlight beta. Join the waitlist above to be notified when invitations open. The first release is focused on iPhone; no timing has been announced for other platforms.</p></div></div>
 
-      <div class="faq-item"><button class="faq-q">What about my data?<span class="faq-icon">+</span></button><div class="faq-a"><p>Sign in with Apple or Google. We never sell data. We never use your conversations to train models. We never track you across apps or websites. Voice transcription runs on-device by default — normally only the text reaches our server. If on-device accuracy fails in a noisy kitchen, a short clip is sent to OpenAI's Whisper and discarded after transcription. Receipt and cookbook photos run through Apple's Vision framework on your phone — only the extracted text leaves the device. The one image that does leave is the shelf photo you take to stock your pantry: that is sent to our server and read by OpenAI's vision model, and not stored. You can delete your account and every byte of your data from Profile / Me at any time. Full policy at <a href="privacy.html" style="color:#F5C088;text-decoration:underline">/privacy</a>.</p></div></div>
+      <div class="faq-item"><button class="faq-q">What about my data?<span class="faq-icon">+</span></button><div class="faq-a"><p>Sign in with Apple or Google. We never sell data. We never use your conversations to train models. We never track you across apps or websites. When you use voice mode, audio is transcribed by <strong>Apple's Speech framework</strong>, which is server-backed — the audio reaches Apple, not us. In Cooking Mode the clip is also sent to OpenAI's Whisper for a second, more accurate transcription — every spoken question, not only the noisy ones — and discarded afterwards. Receipt and cookbook photos run through Apple's Vision framework on your phone — only the extracted text leaves the device. The one image that does leave is the shelf photo you take to stock your pantry: that is sent to our server and read by OpenAI's vision model, and not stored. You can delete your account and every byte of your data from Profile / Me at any time. Full policy at <a href="privacy.html" style="color:#F5C088;text-decoration:underline">/privacy</a>.</p></div></div>
     </div>
   </div>
 </section>

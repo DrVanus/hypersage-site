@@ -16,8 +16,8 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://hypersage.ai/quietoak/og-image.png?v=20260811a">
-  <link rel="icon" type="image/png" href="quietoak-icon.png">
-  <link rel="apple-touch-icon" href="quietoak-icon.png">
+  <link rel="icon" type="image/png" href="quietoak-icon.png?v=20260810w">
+  <link rel="apple-touch-icon" href="quietoak-icon.png?v=20260810w">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
   <nav class="legal-nav">
     <div class="container">
       <a href="index.html" class="brand">
-        <img src="quietoak-icon.png" alt="Quietoak">
+        <img src="quietoak-icon.png?v=20260810w" alt="Quietoak">
         Quietoak
       </a>
       <div class="links">
@@ -41,7 +41,7 @@
 
   <main class="legal">
     <h1>Terms of Use</h1>
-    <p class="updated">Last updated: 2026-08-13</p>
+    <p class="updated">Last updated: 2026-08-24</p>
 
     <p>These terms govern your use of the Quietoak iOS app. By using Quietoak, you agree to them. Please read the safety and medical-disclaimer sections carefully — they matter.</p>
 
@@ -62,14 +62,18 @@
     <h2>Subscriptions &amp; billing</h2>
     <ul>
       <li>The core DBT skills, the diary card, all six companions, and the Crisis Survival Kit are <strong>free</strong>. Crisis features are never paywalled.</li>
-      <!-- The "30 chain-analysis reflections a day instead of 3" clause was removed
-           2026-08-18: the reflection backend is live and verified in production
-           (storyvault-api POST /v1/dbt/chain-reflection), but the iOS half that
-           lets a user trigger it sits on companion-redesign and is absent from
-           build 2 — this was selling a Plus benefit the download can't deliver.
-           Re-add it, matching index.html's "Add the fourth point when 1.1 is
-           live" convention, the day that build ships. -->
-      <li><strong>Quietoak Plus</strong> is an auto-renewing subscription ($9.99/month or $59.99/year, where available) that unlocks <strong>100 companion messages a day instead of 5</strong> (a message with a photo attached counts as three of that daily allowance; crisis support is always unlimited and free, at every tier), a smarter companion model, a premium companion voice (the on-device voice stays free for everyone), and a clinician-ready PDF of your diary card to share with your therapist.</li>
+      <!-- The "30 companion reflections on your chain analyses a day instead of 3"
+           clause is RESTORED (2026-08-24). It was removed 2026-08-18 because the iOS
+           half that lets a user trigger it sat on companion-redesign and was absent
+           from build 2 — that branch is now the build under review. Build 12 compiles
+           Anchor/Diary/ChainDetailView.swift and ChainAnalysisView.swift:335 is the
+           "Finish and ask <companion>" CTA, so the download can deliver it. The
+           wording and both numbers are PlusGate.swift:53; the crisis sentence is
+           PlusGate.swift:52 ("Crisis support is always free and never limited, at any
+           tier") — that file is the source for both, and the word "unlimited" never
+           returns to this page. If either cap moves, this clause and that file move
+           together; do not remove it again without first checking the build. -->
+      <li><strong>Quietoak Plus</strong> is an auto-renewing subscription ($9.99/month or $59.99/year, where available) that unlocks <strong>100 companion messages a day instead of 5</strong> (a message with a photo attached counts as three of that daily allowance; crisis support is always free and never limited, at any tier), <strong>30 companion reflections on your chain analyses a day instead of 3</strong> (writing and keeping chains is always free), a smarter companion model, a premium companion voice (the on-device voice stays free for everyone), and a clinician-ready PDF of your diary card to share with your therapist.</li>
       <li>Payment is charged to your Apple ID. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the period. Manage or cancel in <strong>iOS Settings → Apple ID → Subscriptions</strong>.</li>
       <li>Refunds are handled by Apple via <a href="https://reportaproblem.apple.com/" rel="noopener">reportaproblem.apple.com</a>.</li>
     </ul>

@@ -504,7 +504,7 @@
         "name": "Does it cost anything, and are there ads?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Gemburrow is free, and there is nothing to buy. It ships with no in-app purchases, no subscription, no advertising SDK, and no energy meter or wait timers. The coins you spend in the mole's shop are earned by digging — there is no way to buy them, because there is no store to buy them from."
+          "text": "Gemburrow is free to play, and there is one optional in-app purchase: The Full Burrow, a single one-time unlock that opens career levels 11–40 and the 14-day dig archive. Everything else is free forever — free digs, the Daily Dig with its leaderboard and league, career levels 1–10, all 27 contracts, and the whole shop and wardrobe. That one unlock is the entire catalogue: no subscription, no coin packs, no advertising SDK and no energy meter. The coins you spend in the mole's shop are earned by digging and are not for sale. The browser version at hypersage.ai/gemburrow/play/ carries no store at all, so the whole 40-level ladder is open there."
         }
       },
       {
@@ -606,7 +606,7 @@
           </a>
           <a class="btn-ghost" href="#notify">Get notified about the iPhone app</a>
         </div>
-        <p class="hero-note">The whole game, in your browser · free · no ads · no in-app purchases</p>
+        <p class="hero-note">The whole game, free in your browser · all 40 career levels · no ads · no sign-in</p>
       </div>
       <div class="phone">
         <img src="shots/daily.jpg?v=20260821a" width="828" height="1795" loading="eager"
@@ -759,12 +759,15 @@
       </div>
       <div>
         <div class="section-eyebrow">The collection</div>
-        <h2>Sell it… or feed the dragon.</h2>
+        <h2>Use it… or feed the dragon.</h2>
         <p class="section-lede">
           Hoardling sleeps on a ledge in the shop. When you unearth a rare prism and
-          an order happens to want it, the game stops and asks: take the payout, or
-          keep it forever? Let the clock run out and it always sells — a payout is
-          never quietly taken from you.
+          an order happens to want it, the game stops and asks on two labelled plates:
+          USE IT, into your satchel toward that card, or HOARD, and Hoardling keeps it
+          forever. You get six seconds, and if you don't answer the game answers for
+          you — into the satchel while a card still wants it, otherwise to the dragon.
+          A rare is never scrapped and a payout is never quietly taken from you. Only
+          the Heartstone, the colossus buried near the bottom, is ever actually sold.
         </p>
         <div class="ladder">
           <div class="rung"><span class="n">3</span><span>Hoardling wakes up</span></div>
@@ -859,10 +862,38 @@
   <!-- CLAIMS: every line below is checked against the shipped build and the
        approvals in site-audit-contract.json. No ad or analytics SDK is linked
        (package.json ships only @capacitor/core|ios|android|haptics|preferences);
-       there is no StoreKit and no purchase path; there is no sign-in surface.
+       there is no sign-in surface.
+       THERE IS ONE IN-APP PURCHASE AND IT SHIPPED 2026-08-22. It is
+       gemburrow.full.unlock, a non-consumable that opens career levels 11-40 and
+       the 14-day dig archive — store/iap-catalog.json is the source of truth,
+       game.js declares FULL_PRODUCT in the "IAP — one non-consumable" block, and
+       the entitlement is read by exactly two gates: careerCap() (which career
+       levels this save may enter) and the archive-row tap
+       (game.js "if (!Ent.owned()) { uiTick(); game.openPaywall(); return; }").
+       It touches nothing in the sim. So "no in-app
+       purchases", "nothing to buy" and "no purchase path" are DEAD STRINGS on
+       this page: store/frames.json _forbidden_strings already fails the
+       store-frame build on "Nothing to buy", and this page must not restore the
+       family either. The browser build under play/ carries no store code at all,
+       so the whole 40-level ladder is open there — when that is the fact being
+       claimed, say "in your browser" and scope it.
+       NEVER PUBLISH A PRICE. store/iap-catalog.json marks planned_price_usd with
+       _price_is_a_hint: "planned_price_usd is a console-setup crib and NOTHING
+       else." A US dollar figure was written into the FAQ answer and its JSON-LD
+       twin and was removed on 2026-08-24 — it is not repeated here, because an
+       HTML comment ships to every reader who views source. The app never prints
+       a number either:
+       game.js Store.load() takes displayPrice from the storefront and the
+       paywall label falls back to "PRICE UNAVAILABLE" rather than inventing one
+       (a hardcoded figure is an App Review 3.1.2 rejection off USD). Describe
+       WHAT the unlock opens, never what it costs.
+       "No timers" is a DEAD STRING for the same reason: CFG.timedDur is 45 and
+       SLOT_CLS is ['easy','med','med','big','timed'], so a timed Rush order is in
+       EVERY shift, and the FAQ below says so. "No energy meter" is the true half
+       and is the one to keep — nothing recharges on a clock.
        The ONE thing that leaves the device is a Daily Dig score — stated here
-       and on privacy.html rather than glossed. Do not soften "no in-app
-       purchases" into "no pay-to-win" or harden the offline line into
+       and on privacy.html rather than glossed. Do not soften the purchase line
+       into "no pay-to-win" or harden the offline line into
        "nothing ever leaves your device". -->
   <section class="section-block panel" id="honest">
     <div class="container">
@@ -870,15 +901,15 @@
       <h2>An honest game about greed.</h2>
       <p class="section-lede">
         Gemburrow is about hoarding treasure. It would be a poor joke to build that
-        on a slot machine, so we didn't: there is nothing to buy in it, and nothing
-        that stops you playing.
+        on a slot machine, so we didn't: there is one optional purchase in the whole
+        game, nothing you can buy changes a dig, and nothing stops you playing.
       </p>
       <div class="honest">
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>No in-app purchases</b><p>Not a subscription, not a coin pack, not a starter bundle. There is no purchase path in the app at all.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>One optional purchase</b><p>The Full Burrow unlocks career levels 11–40 and the 14-day dig archive. That is the entire catalogue — no subscription, no coin pack, no starter bundle. Free digs, the Daily Dig and career levels 1–10 stay free forever.</p></div></div>
         <div><span class="tick" aria-hidden="true">✓</span><div><b>No ads</b><p>No advertising SDK is linked into the build, so there is nothing to watch, skip, or accidentally tap.</p></div></div>
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>No energy, no timers</b><p>Play as long as you like. Nothing recharges, and nothing asks you to come back in four hours.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>No energy meter</b><p>Play as long as you like. Nothing recharges on a clock, and nothing asks you to come back in four hours. A Rush order does run its own 45-second countdown — that is the puzzle, not a wait.</p></div></div>
         <div><span class="tick" aria-hidden="true">✓</span><div><b>No account</b><p>No sign-in, no email, no profile. The leaderboard names you MOLE-something and gets on with it.</p></div></div>
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>Nothing you buy changes a dig</b><p>The shop sells dig walls — colour, nothing else. The Daily has to be the same jar for everyone, so it is.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>Nothing you buy changes a dig</b><p>The shop sells dig walls — colour, nothing else — and the paid unlock only gates which career levels you may enter: never swings, satchel slots or jar content. The Daily has to be the same jar for everyone, so it is.</p></div></div>
         <div><span class="tick" aria-hidden="true">✓</span><div><b>One thing leaves your phone</b><p>A Daily Dig score: a random ID made on your device, an auto-generated name and the run's numbers. Career and Free digs send nothing. <a href="privacy.html">The details</a>.</p></div></div>
       </div>
     </div>
@@ -886,9 +917,11 @@
 
   <!-- ===== FAQ =====
        Every answer here is mirrored verbatim in the FAQPage JSON-LD in <head>.
-       Edit the two together. Sources: no purchase/ad SDK (gemburrow/package.json,
-       no StoreKit anywhere); wallet + six WALL_SKINS 0..11,100c (22,000c for all
-       six) and DEEPER_PICK_COST
+       Edit the two together. Sources: no ad or analytics SDK
+       (gemburrow/package.json); the ONE in-app purchase and its boundary, never
+       its price (gemburrow/store/iap-catalog.json, game.js FULL_PRODUCT /
+       FREE_CAREER_LEVELS / careerCap); wallet + six WALL_SKINS 0..11,100c
+       (22,000c for all six) and DEEPER_PICK_COST
        250 / +8 swings (game.js); CAREER_MAX 40; CFG.swings 55; CFG.timedDur 45;
        daily seed shared, leaderboard payload day/seed/player/coins/pops/client_id;
        art generated through artcore, music rendered by tools/generate_music.py. -->
@@ -907,7 +940,7 @@
         </details>
         <details class="faq">
           <summary>Does it cost anything, and are there ads?</summary>
-          <p>Gemburrow is free, and there is nothing to buy. It ships with no in-app purchases, no subscription, no advertising SDK, and no energy meter or wait timers. The coins you spend in the mole's shop are earned by digging — there is no way to buy them, because there is no store to buy them from.</p>
+          <p>Gemburrow is free to play, and there is one optional in-app purchase: The Full Burrow, a single one-time unlock that opens career levels 11–40 and the 14-day dig archive. Everything else is free forever — free digs, the Daily Dig with its leaderboard and league, career levels 1–10, all 27 contracts, and the whole shop and wardrobe. That one unlock is the entire catalogue: no subscription, no coin packs, no advertising SDK and no energy meter. The coins you spend in the mole's shop are earned by digging and are not for sale. The browser version at hypersage.ai/gemburrow/play/ carries no store at all, so the whole 40-level ladder is open there.</p>
         </details>
         <details class="faq">
           <summary>What do coins actually do?</summary>

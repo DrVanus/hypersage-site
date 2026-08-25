@@ -28,7 +28,7 @@
 <main>
   <div class="container">
     <h1>Privacy Policy</h1>
-    <p class="last-updated">Last updated: July 19, 2026</p>
+    <p class="last-updated">Last updated: August 24, 2026</p>
 
     <div class="draft-note">
       This policy covers both the Saffra iOS app and the email you give us on the early-access list on this website. We will flag material changes here and in-app before they take effect.
@@ -41,7 +41,7 @@
       <li>We collect only what the app needs to work: your identity (via Sign in with Apple or Google), your cooking profile (equipment, allergies, preferences), your pantry, your conversation history with the chef, and recipes you import.</li>
       <li>We use this data <strong>solely to operate the app</strong> — personalize the chef, remember your pantry, adapt recipes for you. We do not sell it, we do not use it to train models, we do not share it with advertisers.</li>
       <li>Voice commands are transcribed by <strong>Apple's speech recognition service</strong>, which processes audio on Apple's servers.</li>
-      <li>Your conversations with the chef do leave your device: each message, along with a summary of your profile and pantry, goes to our server and on to <strong>OpenAI</strong> to generate the reply. Two more things can leave to be read by an AI model — a photo of a shelf when you ask Saffra to identify what's on it, and a short audio clip if on-device transcription fails in a noisy kitchen; those two are read, then discarded. All of it is detailed below.</li>
+      <li>Your conversations with the chef do leave your device: each message, along with a summary of your profile and pantry, goes to our server and on to <strong>OpenAI</strong> to generate the reply. Two more things can leave to be read by an AI model — a photo of a shelf when you ask Saffra to identify what's on it, and the audio clip of any question you ask in Cooking Mode, which is re-transcribed by OpenAI's Whisper; those two are read, then discarded. All of it is detailed below.</li>
       <li>You can delete your account and all associated data at any time.</li>
     </ul>
 
@@ -92,6 +92,22 @@
     </ul>
 
     <h3>Community content (opt-in)</h3>
+    <!-- SOFTENED 2026-08-24. Every bullet below was written in the present tense, as
+         a description of data we collect today. We do not collect any of it, because
+         nothing can be posted:
+           * saffra-ios MasterChef/Social/SocialStore.swift:701-703 ships
+             shareToCommunityEnabled / communityFeedEnabled / feedTabVisible all
+             false in the submitted build;
+           * production https://masterchef-api.fly.dev/readyz returns
+             {"status":"degraded", ... "r2":"degraded: not configured"} (curl,
+             2026-08-24) — /posts/upload-url 503s, photo_key is required on
+             CookPostCreateIn, and app/social/moderation.py can never reach
+             state = "live".
+         The bullets are KEPT and made conditional rather than deleted: a privacy
+         policy that under-declares a category it later starts collecting is the worse
+         failure, and the schema is already in the shipped app. Do not restore the
+         present tense until the flags flip AND the four R2 secrets are set. -->
+    <p><strong>Community sharing is not available in the current version of Saffra</strong>, so none of the following is collected today. It describes what would be collected if community sharing becomes available and you opt in.</p>
     <ul>
       <li><strong>Public handle &amp; display name</strong> — only if you opt into the Community and pick a handle.</li>
       <li><strong>Cook posts</strong> you explicitly share to the community, including the photo you uploaded, the caption you wrote, and which recipe the photo is for. Anyone using the app can see posts whose moderation state is <code>live</code>; your private cook photos (the default) stay on your device and are never uploaded.</li>
@@ -101,9 +117,31 @@
     </ul>
 
     <h3>Voice</h3>
+    <!-- VOICE DATA FLOW - two claims, both from shipped source; do not soften either.
+         (1) Apple is the BASELINE, not the fallback: saffra-ios
+         MasterChef/Voice/SpeechRecognizer.swift:161 sets `r.requiresOnDeviceRecognition = false`
+         ("Was true."), so SFSpeechRecognizer routes voice-mode audio through Apple's servers.
+         The file's own doc comment at :5-6 still claims the old on-device default - it is stale,
+         do not cite it. The former "falls back to on-device recognition when you are offline"
+         clause was DELETED on 2026-08-24: nothing in the app implements that fallback (no
+         `supportsOnDeviceRecognition` check, no retry with the flag flipped), it rested only on
+         the inline comment at :160, and a privacy policy must not promise audio stays on the
+         phone on evidence that thin.
+         (2) Whisper is NOT accuracy-triggered. MasterChef/Cooking/CookingSessionModel.swift:901-919
+         uploads the clip for EVERY .askChef question even when Apple's transcript succeeded
+         ("prefer Whisper's transcription over Apple's even when both succeeded"); :845-849 uploads
+         when Apple returned an empty transcript; :879-891 uploads when the intent parses .unknown.
+         Only a cleanly parsed nav command escapes the upload (Networking/Endpoints.swift:1304:
+         "we only call it for the question path, not for nav"). The parallel recorder is armed for
+         .command mode only, at Voice/SpeechRecognizer.swift:241-243. Chat/ChefChatView.swift:2658
+         starts .command for composer dictation but never calls consumeCommandAudioURL() or
+         transcribeAudio(), so that path uploads nothing. saffra-api/app/voice/routes.py:330 carries
+         the same stale "when on-device STT confidence is low" docstring - the server does not gate
+         on confidence, it transcribes whatever iOS sends. If any of this changes, change the code
+         first and this section second. -->
     <ul>
-      <li>When you use voice mode, audio is transcribed by <strong>Apple's Speech framework</strong>. Apple's recognition service is server-backed, so the audio reaches Apple; it does not reach us, and it falls back to on-device recognition when you are offline.</li>
-      <li>As a fallback (only when on-device accuracy is too low for a noisy kitchen), audio may be sent briefly to our server and forwarded to OpenAI's Whisper for transcription. We do not retain the audio; it is processed and discarded.</li>
+      <li>When you use voice mode, audio is transcribed by <strong>Apple's Speech framework</strong>. The app does not request on-device recognition, so Apple's server-backed service is what runs and the audio reaches Apple; it does not reach us.</li>
+      <li>In Cooking Mode the recorded clip is <em>also</em> sent to our server and forwarded to <strong>OpenAI's Whisper</strong> for a second transcription. This is not a rare backstop: it runs for every spoken question, because Whisper reads question-length kitchen speech more accurately than Apple's transcript, and it also runs whenever Apple returns nothing or returns something the app cannot parse. A navigation command Apple recognizes cleanly (&ldquo;next&rdquo;, &ldquo;back&rdquo;) is not sent, and dictation in the chat composer is never sent. We do not retain the audio; it is processed and discarded.</li>
       <li>Text-to-speech uses OpenAI's text-to-speech. Audio is generated on our server and streamed to your device. Audio for publicly available curated recipes is cached (content-addressed) so we don't re-generate the same clip for every user.</li>
     </ul>
 
@@ -126,14 +164,24 @@
     <ul>
       <li><strong>Operate the app</strong> — personalize recommendations, remember your pantry, stream chef responses.</li>
       <li><strong>Safety</strong> — enforce rate limits and guard against abuse.</li>
-      <li><strong>Community safety</strong> — run an automated vision check ("is this food?" / "is this safe?") on every community photo <em>before</em> it's visible to others, and review user reports so we can remove rule-breaking content quickly.</li>
+      <li><strong>Community safety</strong> — if community sharing becomes available: run an automated vision check ("is this food?" / "is this safe?") on every community photo <em>before</em> it's visible to others, and review user reports so we can remove rule-breaking content quickly.</li>
       <li><strong>Product improvement</strong> — only via aggregate metrics (e.g., "how often does the chef call <code>lookup_recipe</code>?"), never with identifiable data.</li>
     </ul>
 
     <h2>Third-party services</h2>
     <p>We share data with these service providers only to the extent needed to run the app:</p>
     <ul>
-      <li><strong>Apple</strong> — Sign in with Apple.</li>
+      <!-- Apple receives AUDIO, not just an auth token. saffra-ios
+           MasterChef/Voice/SpeechRecognizer.swift:161 sets
+           `r.requiresOnDeviceRecognition = false` ("Was true."), so SFSpeechRecognizer
+           routes voice-mode audio through Apple's servers. Added 2026-08-24 —
+           the "Voice" section above (audio is transcribed by Apple's Speech
+           framework, which is server-backed) had said so since 2026-08-23 while this
+           vendor list still read "Sign in with Apple" only. The offline/on-device
+           clause that used to end this bullet was deleted 2026-08-24 for the reason
+           given in the VOICE DATA FLOW comment above. If the code ever goes
+           back to on-device, change the code first and both places second. -->
+      <li><strong>Apple</strong> — Sign in with Apple, and <strong>speech recognition</strong>: the audio you speak in voice mode is transcribed by Apple's Speech framework. The app does not request on-device recognition, so the service runs server-backed and the audio reaches Apple. It does not reach us.</li>
       <li><strong>Google</strong> — Sign in with Google, only if you use it. Governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
       <!-- VENDOR CLAIM — path (6) must name whoever actually moderates community
            photos. It was "Anthropic (Claude)" in its own bullet until 2026-08-08,
@@ -142,7 +190,7 @@
            client paths (1)-(5) use. ANTHROPIC_API_KEY has never been set on the
            masterchef-api Fly app. If moderation ever moves again, this line and the
            support.html "Where your data goes" list move with it. -->
-      <li><strong>OpenAI</strong> — six paths. (1) <strong>Chef chat</strong>: your messages, along with a summary of your profile and pantry, are sent to OpenAI to generate and adapt the chef's replies. (2) <strong>Vision</strong>: when you photograph a shelf to add ingredients, that image is sent to OpenAI's vision model to identify the foods in it. (3) <strong>Whisper</strong>: audio sent <em>only</em> when the noisy-kitchen voice fallback is used. (4) <strong>Text-to-speech</strong>: text you want spoken aloud. (5) <strong>Search</strong>: your recipe searches and imported recipe text are converted to embeddings to power search over Saffra's own recipe catalog — there is no external web-search provider. (6) <strong>Community photo review</strong>: if you share a cook photo to the Community, that photo is sent to OpenAI's vision model for the "is this food / is this safe" check before it goes live. Governed by <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's privacy policy</a>. Neither the shelf image nor the audio is retained by us, and none of your content is used to train models.</li>
+      <li><strong>OpenAI</strong> — six paths. (1) <strong>Chef chat</strong>: your messages, along with a summary of your profile and pantry, are sent to OpenAI to generate and adapt the chef's replies. (2) <strong>Vision</strong>: when you photograph a shelf to add ingredients, that image is sent to OpenAI's vision model to identify the foods in it. (3) <strong>Whisper</strong>: the audio of every question you ask in Cooking Mode, re-transcribed for accuracy — see <em>Voice</em> above for exactly when a clip is sent. (4) <strong>Text-to-speech</strong>: text you want spoken aloud. (5) <strong>Search</strong>: your recipe searches and imported recipe text are converted to embeddings to power search over Saffra's own recipe catalog — there is no external web-search provider. (6) <strong>Community photo review</strong>: if community sharing becomes available and you share a cook photo to it, that photo would be sent to OpenAI's vision model for the "is this food / is this safe" check before it goes live. This path does not run today — community sharing is not available in the current version. Governed by <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's privacy policy</a>. Neither the shelf image nor the audio is retained by us, and none of your content is used to train models.</li>
       <li><strong>USDA FoodData Central</strong> — ingredient names are sent to look up nutrition information. No personal data.</li>
       <li><strong>Open Food Facts</strong> — barcode lookups send just the barcode number. No personal data.</li>
       <li><strong>Google Firebase</strong> — for the early-access waitlist on this website only. Stores your email address until launch notification is sent.</li>
@@ -155,9 +203,9 @@
       <li><strong>Account + profile + pantry</strong> — until you delete your account.</li>
       <li><strong>Conversations</strong> — individual messages may be auto-summarized and deleted after ~20 turns; summaries persist until you delete the conversation.</li>
       <li><strong>TTS audio cache</strong> — until you delete your account.</li>
-      <li><strong>Voice audio for Whisper fallback</strong> — not stored; discarded after transcription.</li>
+      <li><strong>Voice audio sent to Whisper</strong> — not stored; discarded after transcription.</li>
       <li><strong>Ingredient/shelf photos</strong> — not stored; held only for the length of the request that identifies the foods in them, then discarded.</li>
-      <li><strong>Community posts, photos, comments, likes, follows, blocks, notifications</strong> — until you delete them individually or delete your account. When you delete your account we hard-delete the photos from object storage and remove the associated rows. Reports you've filed are retained in an anonymized form so we can keep acting on repeat abuse.</li>
+      <li><strong>Community posts, photos, comments, likes, follows, blocks, notifications</strong> (only if community sharing becomes available; none exist today) — until you delete them individually or delete your account. When you delete your account we hard-delete the photos from object storage and remove the associated rows. Reports you've filed are retained in an anonymized form so we can keep acting on repeat abuse.</li>
       <li><strong>Waitlist email</strong> — until launch notification is sent or you ask for removal, whichever is sooner.</li>
     </ul>
 
@@ -167,8 +215,7 @@
       <li><strong>Delete a pantry item, recipe, or conversation</strong> any time.</li>
       <li><strong>Sign out</strong> via Profile / Me.</li>
       <li><strong>Delete your account</strong> → from Profile / Me, or by emailing <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>. In-app deletion runs the cascade immediately (photos, posts, comments, likes, follows, blocks, notifications); email requests are processed within 30 days.</li>
-      <li><strong>Block another community member</strong> any time from their public profile.</li>
-      <li><strong>Report a post or comment</strong> — every report is reviewed, and we always respond to abusive content within 24 hours.</li>
+      <li><strong>Block another community member</strong>, and <strong>report a post or comment</strong>, from their public profile or the post itself — available if community sharing becomes available. Every report is reviewed, and we always respond to abusive content within 24 hours.</li>
       <li><strong>Turn off premium voice</strong> in Settings to use on-device iOS voices only — no text leaves your device to be spoken.</li>
     </ul>
 

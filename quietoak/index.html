@@ -448,6 +448,15 @@
     .cv-head-img { width: 34px; height: 34px; border-radius: 30%; object-fit: contain; }
     .cv-head-name { font-weight: 800; font-size: 0.98rem; line-height: 1.1; }
     .cv-head-role { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary-dark); }
+    /* The shipped chat header's AI-status line, mirrored here. This block is a
+       CSS replica of a real screen, so it carries what that screen carries:
+       Anchor/Companion/CompanionChatScreen.swift:848 pins "AI companion · not
+       human" directly under the name for the whole interaction, and that pinned
+       line is how Quietoak discharges the recurring AI-companion disclosure duty
+       (Anchor/Companion/AICompanionDisclosure.swift:14-19). Styled off
+       .cv-head-role with the uppercase transform dropped — a disclosure is read,
+       not decorated. Never drop this line while the header replica stands. */
+    .cv-head-ai { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; color: var(--primary-dark); }
     .cv-help { margin-left: auto; font-size: 0.72rem; font-weight: 700; color: #fff; background: #C2604B;
       padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
     /* The transcript is a real one, so it is longer than the panel. Wrap it so a
@@ -1002,7 +1011,12 @@
       <div class="cv-phone">
         <div class="cv-head">
           <img class="cv-head-img" src="companions/willow-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="">
-          <div><div class="cv-head-name">Willow</div><div class="cv-head-role">Grounding</div></div>
+          <!-- Name, then the AI-status line, then the persona word — the first two
+               in the shipped screen's own order (CompanionChatScreen.swift:838-852).
+               .cv-head-ai is a SEPARATE element from .cv-head-role on purpose: the
+               tab script rewrites the role per companion, and a legal disclosure
+               must not travel through per-companion text. -->
+          <div><div class="cv-head-name">Willow</div><div class="cv-head-ai">AI companion · not human</div><div class="cv-head-role">Grounding</div></div>
           <span class="cv-help">Get help now</span>
         </div>
         <div class="cv-scroll"><div class="cv-thread" id="cvThread"></div></div>
@@ -1338,16 +1352,21 @@
 
   <!-- ===== CRISIS BAND ===== -->
   <!-- ===== CHAIN ANALYSIS SPOTLIGHT =====
-       Claims here are checked against the shipping 1.0 build, not the branch:
+       Claims here are checked against the build under review, not a branch:
        ChainAnalysis.swift carries problemBehavior / promptingEvent /
        vulnerabilities[] / links[] / consequences / skillIdeas[] / repairPlan, and
        ChainLinkKind is exactly event | thought | feeling | sensation | urge |
        action. Chains persist on device (ChainStore, .completeFileProtection) and
        open from Diary > History.
-       DELIBERATELY NOT MENTIONED: the companion's written reflection. That is
-       real and deployed server-side, but the iOS half ships in 1.1 — saying it
-       here would sell a payoff the downloadable app does not have. Add the
-       fourth point when 1.1 is live. -->
+       THE COMPANION'S WRITTEN REFLECTION IS NOW STATED HERE — restored 2026-08-24.
+       It was suppressed while the iOS half sat unreleased on `companion-redesign`;
+       that branch is now the build under review. Build 12 compiles
+       Anchor/Diary/ChainDetailView.swift (project.yml excludes only Auth and two
+       render manifests from the Anchor source tree), ChainAnalysisView.swift:335
+       is the "Finish and ask <companion>" CTA that requests it, and the live App
+       Store set sells it on frame 07-chain — "Willow finds the turning point /
+       Finish a chain analysis and she reads it back" (anchor-ios/store/frames.json).
+       Do not re-suppress the fourth bullet below. -->
   <section class="section-block" id="chain">
     <div class="container">
       <div class="spotlight-grid">
@@ -1367,19 +1386,23 @@
             <li><strong>Skip anything, keep everything.</strong> Every field is optional and nothing is graded. Your chains stay on your device and are yours to reopen, edit or delete.</li>
             <!-- chainviz figure below depends on this copy staying as-is: its
                  chip labels are lifted from the lede and the first two bullets. -->
-            <!-- READY TO SHIP WITH 1.1 — uncomment the <li> below the day the build
-                 carrying ChainDetailView is the one on the App Store. The backend
-                 half is already live and verified in production (storyvault-api
-                 POST /v1/dbt/chain-reflection, Fly v98); what is NOT live is the
-                 iOS half, which sits on `companion-redesign` and is absent from
-                 build 2. Until that ships this is a promise the download cannot
-                 keep. TWO things move together when you uncomment it:
-                   1. re-shoot screenshots/10-chain*.jpg — the current shot shows
-                      the old "Save" toolbar, not "Finish" and not the reflection
-                      card, so the picture would contradict the words;
-                   2. the same sentence belongs in the App Store description.
+            <!-- SHIPS IN BUILD 12 — uncommented 2026-08-24; the evidence is in the
+                 section comment above. The two riders the old suppression note
+                 carried are kept here so neither is lost:
+                   1. PICTURE DEBT, still open. screenshots/10-chain*.jpg shows the
+                      editor's "Save" toolbar. That is a real shipping state
+                      (ChainAnalysisView.swift:81 — editing an existing chain; a NEW
+                      chain shows "Finish" at :77), so it is not a false picture, but
+                      it shows neither the Finish CTA nor the reflection card. The
+                      reflection capture already exists on this site, unused, as
+                      screenshots/17-chain-reflection-dark.jpg — it is DARK-ONLY, so
+                      it cannot drop into this section's data-light/data-dark pair
+                      until a light capture exists. Swap the pair, never half of it,
+                      and bump the ?v= token on EVERY reference to any file you
+                      change (10-chain.jpg is also used in the gallery above).
+                   2. The same sentence belongs in the App Store description;
+                      anchor-ios/store/listing.md carries it in What's New. -->
             <li><strong>And then your companion writes back.</strong> Finish a chain and, if you want it, the companion you chose reads it and answers — in their own voice, about your chain, naming the link you found and the skill you picked. Never automatic, never graded, and it never counts against your daily chat.</li>
-                 -->
           </ul>
         </div>
       </div>
@@ -1449,7 +1472,21 @@
           <div class="price">$0</div>
           <div class="period">no account, ever</div>
           <ul>
-            <li>The full DBT skills library, all four modules</li>
+            <!-- "Eighteen DBT skills across all four modules" is the App Store
+                 listing's own wording, adopted here 2026-08-24. The completeness
+                 claim it replaced is deliberately not quoted here, per this page's
+                 own convention a few sections up: a claim we scrubbed is still a
+                 greppable sentence in the source, and the next person copies it.
+                 It was scrubbed from the LIVE listing on 2026-08-12 for the reason
+                 recorded in anchor-ios/store/listing.md:84-90 — "full library" is a
+                 completeness claim about the DBT canon that no app can honour. Both
+                 numbers are checked against the binary:
+                 Anchor/Content/SkillsLibrary.swift declares exactly 18 skills
+                 (4 mindfulness + 7 distress tolerance + 4 emotion regulation +
+                 3 interpersonal), and Anchor/Models/DBTSkill.swift's DBTModule enum
+                 has exactly four cases. If the catalogue grows, this number moves
+                 with it — "full library" never comes back, in any wording. -->
+            <li>Eighteen DBT skills across all four modules</li>
             <li>The one-minute diary card &amp; gentle trends</li>
             <li>All six companions</li>
             <li>Saved conversations — your companion remembers you between chats</li>
@@ -1468,6 +1505,17 @@
                  cap moves, this line and that file move together. Never "unlimited":
                  the ceiling is real, and only crisis support is genuinely unmetered. -->
             <li>100 messages a day with your companion instead of 5 — on the smartest, warmest version of them</li>
+            <!-- PlusGate.swift:53's own words and both of its numbers: "30 companion
+                 reflections on your chain analyses a day instead of 3. (Writing and
+                 keeping chains is always free.)" Restored 2026-08-24 alongside the
+                 chain-reflection bullet in #chain — the feature ships in build 12.
+                 Placed directly after the messages line because PlusGate declares
+                 `moreDailyMessages` then `moreReflections`, and that declaration
+                 order IS the paywall's display order (see that file's own comment).
+                 Reflections are metered on BOTH tiers; never write "unlimited" or
+                 "always free" about them — only writing and keeping chains is free.
+                 If either cap moves, this line and that file move together. -->
+            <li>30 companion reflections on your chain analyses a day instead of 3 — writing and keeping chains is always free</li>
             <li>Premium companion voice — a warmer, more natural voice (the on-device voice stays free for everyone)</li>
             <li>A clinician-ready PDF of your diary card to share with your therapist</li>
           </ul>
@@ -1655,6 +1703,11 @@
       thread.scrollTop = 0;
       headImg.src = 'companions/' + cid + '-card.png?v=20260810w';
       headName.textContent = m[0];
+      // Name and persona word only. The "AI companion · not human" line is a
+      // separate element (.cv-head-ai) and is deliberately NOT addressed here:
+      // it is identical for every companion and is a legal disclosure, so
+      // routing it through this function is exactly how it would get lost on a
+      // tab switch. Do not fold it into headRole.
       headRole.textContent = m[1];
       composer.textContent = 'Message ' + m[0] + '\u2026';
     }

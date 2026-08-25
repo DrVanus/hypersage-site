@@ -20,7 +20,7 @@
 (function(){try{var t=localStorage.getItem('mythkin.theme');
 if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();
 </script>
-<link rel="stylesheet" href="style.css?v=20260816-ember">
+<link rel="stylesheet" href="style.css?v=20260824-screens">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -84,9 +84,18 @@ feed immediately.</p>
 <h3>How do I cancel Mythkin Plus?</h3>
 <p>Subscriptions are billed by Apple, so they are cancelled there, not by us. On
 iPhone: Settings → your name → Subscriptions → Mythkin → Cancel. Refunds are
-handled by the store under its own policy. (Sparks are a separate one-off purchase
-rather than a subscription, so there is nothing to cancel — an unspent balance just
-stays yours.)</p>
+handled by the store under its own policy.</p>
+<!-- SPARKS ARE NOT ON SALE. This parenthetical read "Sparks are a separate one-off
+     purchase … an unspent balance just stays yours", present tense, about a
+     consumable the shipped 1.0 build cannot sell: both spark products sit in
+     MISSING_METADATA at App Store Connect, so StoreKit prices neither. terms.html
+     says "not on sale yet"; this page has to say the same thing. Restore the
+     present tense only alongside privacy.html, and only once there is a price
+     schedule. -->
+<p>Sparks are a planned second purchase and are <strong>not on sale yet</strong>. If
+they are offered they would be a one-off purchase rather than a subscription, so
+there would be nothing to cancel — an unspent balance would simply stay yours. See
+<a href="terms.html">Terms</a>.</p>
 
 <h3>I hit my message limit</h3>
 <p>The free tier gives you a set number of messages in a rolling window; the app
@@ -101,8 +110,8 @@ see <a href="safety.html">Safety</a> for exactly how that works.</p>
 <p>Settings → Your data → Export everything downloads what we hold. Settings → Your
 data → Delete everything removes your characters, conversations and memories from
 our servers. Both work without contacting us. A short list of what a full delete
-keeps — crisis referral counts, open reports, and any sparks you have not spent —
-and why, is in <a href="privacy.html">Privacy</a>.</p>
+keeps — crisis referral counts, open reports, and, if sparks ever go on sale, any
+unspent balance — and why, is in <a href="privacy.html">Privacy</a>.</p>
 
 <h3>Can I make a character of a real person?</h3>
 <p>Yourself, yes — and someone you know who has agreed to it, or someone who has
@@ -138,7 +147,7 @@ anything leaves your phone. See <a href="privacy.html">Privacy</a>.</p>
   <a href="safety.html">Safety</a>
   <a href="privacy.html">Privacy</a>
   <a href="terms.html">Terms</a>
-  <span class="meta">Last updated 2026-08-03</span>
+  <span class="meta">Last updated 2026-08-24</span>
 </div></footer>
 <script>
 (function(){

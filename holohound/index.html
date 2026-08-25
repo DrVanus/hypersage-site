@@ -21,7 +21,7 @@
 <meta name="theme-color" content="#0A0D18" media="(prefers-color-scheme: dark)">
 <link rel="icon" type="image/png" href="app-icon.png">
 <link rel="apple-touch-icon" href="app-icon.png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20260824a">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -91,9 +91,8 @@
         <div class="device">
           <div class="hero-carousel">
             <img data-allow-duplicate="true" src="screenshots/home.png?v=20260818b" width="390" height="844" fetchpriority="high" alt="Holohound home screen — binder value with today's movers, Scan and Ask Hound quick actions">
-            <img data-allow-duplicate="true" src="screenshots/report.png?v=20260818b" width="390" height="844" loading="lazy" alt="A card report — last-sold price, the cheapest listing, the middle of the book, and a pre-grade estimate with its hedge stated first">
+            <img data-allow-duplicate="true" src="screenshots/report.png?v=20260818b" width="390" height="844" loading="lazy" alt="A card report — the TCGplayer market price with the cheapest listing and the middle of the book beside it, and Cardmarket's European prices read separately">
             <img data-allow-duplicate="true" src="screenshots/set.png?v=20260818b" width="390" height="844" loading="lazy" alt="Master-set completion — a completion ring, the cards still needed, and what finishing the set would cost">
-            <img data-allow-duplicate="true" src="screenshots/hound.png?v=20260818b" width="390" height="844" loading="lazy" alt="A chat with Hound, the AI companion, answering with the user's own cards as context">
           </div>
         </div>
       </div>
@@ -105,8 +104,8 @@
 <div class="container">
   <div class="stats-strip">
     <div class="stat"><div class="n">21,775</div><div class="l">cards recognized on-device</div></div>
-    <div class="stat"><div class="n">97.5%</div><div class="l">match accuracy, measured on 400 real photos</div></div>
-    <div class="stat"><div class="n">10</div><div class="l">free Hound questions a day — unlimited on Pro</div></div>
+    <div class="stat"><div class="n">97.5%</div><div class="l">match accuracy, measured on 400 synthetic composites</div></div>
+    <div class="stat"><div class="n">10</div><div class="l">free Hound questions a day</div></div>
     <div class="stat"><div class="n">0</div><div class="l">accounts required</div></div>
   </div>
 </div>
@@ -123,8 +122,8 @@
         <h3>Hound: an AI companion that knows your binder.</h3>
         <p>Ask what you're missing, what's worth flipping, or what a card is really worth.
         Hound answers with your own collection AND live market data as context, and names its
-        sources — something no Pokémon-tracking app currently ships. Not switched on in this
-        build yet; the FAQ below says exactly what that means today.</p>
+        sources — something no Pokémon-tracking app currently ships. Live since 18 August 2026:
+        replies come from a real model through our own server, not from a script.</p>
       </div>
       <div class="feature">
         <h3>Scanning is free. Unlimited. Forever.</h3>
@@ -137,12 +136,6 @@
         <p>Market price, the cheapest current listing, and the middle of the book — from
         TCGplayer via TCGdex, dated and sourced. Sold-price history isn't connected yet, and
         the app says exactly that instead of showing you a number and letting you assume.</p>
-      </div>
-      <div class="feature">
-        <h3>Pre-grades are a lead, not a verdict.</h3>
-        <p>An estimate from your photo, with the hedge stated <em>before</em> the number, every
-        time — never a flip, a count-up, or a grade the app didn't measure. Already slabbed? We
-        read the case instead of guessing.</p>
       </div>
       <div class="feature">
         <h3>Master-set completion, done right.</h3>
@@ -167,7 +160,7 @@
     <p class="lede">The prototype below is what's actually on the phone today — not mockups.</p>
     <div class="screens-rail">
       <div class="screen-card">
-        <div class="device"><img data-allow-duplicate="true" src="screenshots/home.png?v=20260818b" width="390" height="844" loading="lazy" alt="Home — binder value, today's movers, and recent scans"></div>
+        <div class="device"><img data-allow-duplicate="true" src="screenshots/home.png?v=20260818b" width="390" height="844" loading="lazy" alt="Home — binder value over time, with today's movers underneath"></div>
         <p>Binder value at a glance, with today's movers.</p>
       </div>
       <div class="screen-card">
@@ -175,17 +168,24 @@
         <p>Point the camera. Recognition runs on your phone.</p>
       </div>
       <div class="screen-card">
-        <div class="device"><img data-allow-duplicate="true" src="screenshots/report.png?v=20260818b" width="390" height="844" loading="lazy" alt="Report — sold comps, cheapest listing, middle of the book, and a pre-grade estimate"></div>
-        <p>Every price sourced. Every estimate hedged.</p>
+        <div class="device"><img data-allow-duplicate="true" src="screenshots/report.png?v=20260818b" width="390" height="844" loading="lazy" alt="Report — market price, cheapest listing, the middle of the book, and Cardmarket's observed European prices"></div>
+        <p>Every price sourced. Every market named.</p>
       </div>
       <div class="screen-card">
         <div class="device"><img data-allow-duplicate="true" src="screenshots/set.png?v=20260818b" width="390" height="844" loading="lazy" alt="Set — a master-set completion ring with the exact cards still needed"></div>
         <p>What's missing, and what it costs to finish.</p>
       </div>
-      <div class="screen-card">
-        <div class="device"><img data-allow-duplicate="true" src="screenshots/hound.png?v=20260818b" width="390" height="844" loading="lazy" alt="Hound — a chat companion that answers using the user's own binder"></div>
-        <p>Hound knows your binder and the market. Ask it anything.</p>
-      </div>
+      <!-- NO HOUND FRAME HERE, AND IT MAY NOT COME BACK UNTIL IT IS RE-SHOT.
+           screenshots/hound.png was byte-identical to holohound/shots-dark/hound.png,
+           which captured the seeded transcript answer "Sell into strength — these three
+           sit furthest above their own 30-day average…" sitting directly under the app's
+           own "Hound is AI — it can be wrong, and it isn't financial advice" banner.
+           That is buy/sell/hold advice, which holohound-api/src/prompts/hound.js rule 4
+           forbids outright. The fixture that produced it (holohound/mock-data.js, the
+           "/chat" seeded transcript) was fixed on 2026-08-24; a replacement frame has to
+           be captured from the FIXED fixture and read before it is published here.
+           The same applies to the hero carousel above, which is now three frames — see
+           the nth-child delays in style.css, which move with the frame count. -->
     </div>
   </div>
 </section>
@@ -196,7 +196,9 @@
     <div class="section-eyebrow center">Holohound Pro</div>
     <h2 class="title center">Hound is the paid part of Holohound. Scanning never was.</h2>
     <p class="lede center">Scanning, your binder, your wishlist and CSV export are free with no
-    limit. Hound gives you 10 free messages a day — Pro makes that unlimited.</p>
+    limit. Hound gives you 10 free messages a day; Pro is planned to raise that to 400 a day.
+    <strong>Nothing here is on sale yet</strong> — Holohound is not on the App Store, so the
+    plans below are what we intend to offer at launch, not something you can buy today.</p>
     <div class="plans">
       <div class="plan">
         <h3>Free</h3>
@@ -217,7 +219,7 @@
         <div class="period">per year, ≈$5.00/mo — 7-day free trial, then $59.99/year</div>
         <ul>
           <li>Everything in Free</li>
-          <li>Unlimited Hound messages</li>
+          <li>400 Hound messages a day, up from 10</li>
           <li>Price alerts on cards you own</li>
           <li>Graded-tier prices, once connected</li>
         </ul>
@@ -228,15 +230,16 @@
         <div class="period">per month, cancel anytime</div>
         <ul>
           <li>Everything in Free</li>
-          <li>Unlimited Hound messages</li>
+          <li>400 Hound messages a day, up from 10</li>
           <li>Price alerts on cards you own</li>
           <li>Graded-tier prices, once connected</li>
         </ul>
       </div>
     </div>
-    <p class="dim center" style="max-width:60ch;margin-top:24px;font-size:13.5px">Prices are set
-    at launch on the App Store and billed by Apple. Restore Purchases works without a Holohound
-    account, because there isn't one.</p>
+    <p class="dim center" style="max-width:60ch;margin-top:24px;font-size:13.5px">Holohound Pro
+    cannot be bought yet: the app is not on the App Store and there is no purchase anywhere in
+    it. Final prices are set on the App Store at launch and billed by Apple, and Restore
+    Purchases will work without a Holohound account, because there isn't one.</p>
   </div>
 </section>
 
@@ -270,22 +273,18 @@
       <details class="faq">
         <summary>What is Hound, and can I use it now?</summary>
         <p>Hound is the AI companion built into your binder — ask what you're missing from a
-        set, what's worth flipping, or what a card is really worth, and it answers using your
-        own collection as context, sources named. <strong>It isn't switched on in this build
-        yet</strong>: today its replies are pre-written examples so you can see the shape of it,
-        not a live model. This page and the privacy policy update the day that changes.</p>
+        set, or what a card is really worth, and it answers using your own collection as
+        context, sources named. <strong>Hound has been live since 18 August 2026</strong>:
+        replies come from a real model through our own server, not from pre-written examples.
+        Holohound itself is still in development and not on the App Store, so there is no
+        build you can install yet.</p>
       </details>
       <details class="faq">
         <summary>What does Hound see when I ask it something?</summary>
-        <p>Once it's live: your message plus the specific card rows relevant to the question —
-        not your whole binder, and no account is created to enable it.</p>
-      </details>
-      <details class="faq">
-        <summary>How is a pre-grade different from a real grade?</summary>
-        <p>A pre-grade is an estimate from your photo — a lead on whether a card is worth
-        submitting, never a prediction of what PSA, BGS or CGC will actually return. If a card
-        is already in a graded slab, Holohound reads the grade off the case instead of
-        estimating.</p>
+        <p>Your message, any photo you attach, the last few messages of that conversation, and
+        the specific card rows relevant to the question — not your whole binder. No account is
+        created; the app sends a random per-install id so the daily message allowance can be
+        counted. The <a href="privacy.html">privacy policy</a> lists it in full.</p>
       </details>
       <details class="faq">
         <summary>Is this an official Pokémon app?</summary>

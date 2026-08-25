@@ -10,18 +10,21 @@
 
 ## Products
 
-- [Wingmate](https://hypersage.ai/wingmate/): AI dating coach that organizes context by connection (iOS, coming soon)
+- [Holohound](https://hypersage.ai/holohound/): Pokémon card scanner and binder; every price names its source (iOS, in development)
+- [Wingmate](https://hypersage.ai/wingmate/): AI dating coach that organizes context by connection (iOS, live — [App Store](https://apps.apple.com/app/id6792772729))
 - [Quietoak](https://hypersage.ai/quietoak/): companion for practicing DBT skills; not therapy or crisis care (iOS, coming soon)
-- [CryptoSage AI](https://cryptosageai.io/): market-research workspace; informational, not investment advice (iOS, coming soon)
+- [CryptoSage AI](https://cryptosageai.io/): market-research workspace; informational, not investment advice (iOS, live — [App Store](https://apps.apple.com/app/id6792761331))
 - [Saffra](https://hypersage.ai/saffra/): AI cooking companion that adapts prepared recipes to your kitchen (iOS, coming soon)
-- [StoryVault AI](https://hypersage.ai/storyvault/): interactive fiction where story state shapes each new page (iOS, coming soon)
-- [Nightshelf](https://hypersage.ai/nightshelf/): wind-down app of calming books, narration, and ambient sound (iOS, coming soon)
+- [StoryVault AI](https://hypersage.ai/storyvault/): interactive fiction where story state shapes each new page (iOS, live — [App Store](https://apps.apple.com/app/id6792759454))
+- [Nightshelf](https://hypersage.ai/nightshelf/): wind-down app of calming books, narration, and ambient sound (iOS, live — [App Store](https://apps.apple.com/app/id6792761643))
 - [Hexhunter](https://hypersage.ai/hexhunter/): gothic horde-survivor game (iOS, coming soon)
 - [Mythwright](https://hypersage.ai/mythwright/): tactical card battler with literary heroes (iOS, coming soon)
-- [Rowan](https://hypersage.ai/rowan/): chronic-condition companion that turns conversations into structured records (iOS, coming soon)
+- [Rowan](https://hypersage.ai/rowan/): chronic-condition companion that turns conversations into structured records (iOS, live — [App Store](https://apps.apple.com/app/id6797693737))
 - [Alder](https://hypersage.ai/alder/): recovery companion for cravings, lapses, and progress (iOS, coming soon)
 - [Waddleton](https://waddleton.pages.dev/): snowy social world in the browser, free to play (live, [about](https://hypersage.ai/waddleton/))
 - [Mythkin](https://hypersage.ai/mythkin/): original AI characters plus figures from history and myth (iOS, coming soon)
+- [Hoardling](https://hypersage.ai/hoardling/): hoard-defence game — hold the chokepoints, kill the carrier and the coins fly home; free in the browser (live on the web, not on the App Store)
+- [Gemburrow](https://hypersage.ai/gemburrow/): cozy gem-digging puzzle where every gem and rock is real physics; free in the browser (live on the web, not on the App Store, [play](https://hypersage.ai/gemburrow/play/))
 
 ## Studio
 

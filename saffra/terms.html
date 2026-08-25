@@ -28,7 +28,7 @@
 <main>
   <div class="container">
     <h1>Terms of Service</h1>
-    <p class="last-updated">Last updated: April 25, 2026</p>
+    <p class="last-updated">Last updated: August 24, 2026</p>
 
     <div class="draft-note">
       Saffra is preparing for App Store launch. These Terms describe how the Service will operate. The early-access waitlist on this site is governed by sections 4 and 11 (AI disclaimers and "as is" warranty). The remaining sections apply once you have an account in the iOS app.
@@ -65,7 +65,23 @@
     </ul>
 
     <h3>5a. Community content rules (objectionable-content policy)</h3>
-    <p>If you opt into the <strong>Community</strong>, additional rules apply to anything you post (photos, captions, comments, display name, bio). These rules exist so everyone can enjoy the feed, and so we can comply with the App Store's user-generated-content guidelines.</p>
+    <!-- SOFTENED 2026-08-24 — this section is written in the future conditional on
+         purpose, and the rules themselves are deliberately KEPT.
+         Community sharing does not work and cannot work in the submitted build:
+           * saffra-ios MasterChef/Social/SocialStore.swift:701-703 ships
+             shareToCommunityEnabled = false, communityFeedEnabled = false,
+             feedTabVisible = false;
+           * production https://masterchef-api.fly.dev/readyz returns
+             {"status":"degraded", ... "r2":"degraded: not configured"} (curl,
+             2026-08-24), so /posts/upload-url 503s, photo_key is required on
+             CookPostCreateIn, and app/social/moderation.py can never set
+             state = "live". The feed is empty BY CONSTRUCTION, not slow.
+         The rules stay written because they are the Guideline 1.2 answer the day the
+         flags flip and the four R2 secrets are set; asserting the feed WORKS is the
+         part that was false. Do not restore the present tense, and do not name a
+         date. -->
+    <p><strong>Community sharing is not available in the current version of Saffra</strong> — there is no feed and no way to publish a post. The rules in this section apply if and when community sharing becomes available. They exist so everyone can enjoy the feature, and so we can comply with the App Store's user-generated-content guidelines.</p>
+    <p>If community sharing becomes available and you opt into it, additional rules apply to anything you post (photos, captions, comments, display name, bio).</p>
     <p>You <strong>will not</strong> post:</p>
     <ul>
       <li>Nudity, sexual content, or sexual solicitation.</li>
@@ -77,16 +93,15 @@
       <li>Personal information about other people (addresses, phone numbers, government IDs, etc.) without their consent.</li>
       <li>Content that violates any law.</li>
     </ul>
-    <p>We use automated image classification and manual review to enforce these rules. <strong>We reserve the right to remove any content and, in serious or repeat cases, terminate the account responsible, without notice.</strong> You can report content from the post's overflow menu; every report is reviewed and actioned within 24 hours.</p>
-    <p>You can also <strong>block</strong> another user at any time from their public profile; they will no longer see your posts and you will no longer see theirs.</p>
+    <p>We use automated image classification and manual review to enforce these rules. <strong>We reserve the right to remove any content and, in serious or repeat cases, terminate the account responsible, without notice.</strong> Where community sharing is available, you can report content from the post's overflow menu; every report is reviewed and actioned within 24 hours, and you can <strong>block</strong> another user at any time from their public profile, after which they will no longer see your posts and you will no longer see theirs.</p>
     <p>We have <strong>zero tolerance</strong> for objectionable content or abusive behavior. Violations may result in immediate removal and permanent ban.</p>
     <p>We may suspend or terminate accounts that violate these rules.</p>
 
     <h2>6. Your content</h2>
     <ul>
-      <li>You retain ownership of recipes you import, photos of receipts/cookbooks you scan, messages you send to the chef, and community posts you publish.</li>
+      <li>You retain ownership of recipes you import, photos of receipts/cookbooks you scan, messages you send to the chef, and any community post you publish if community sharing becomes available.</li>
       <li>You grant us a limited license to store, process, and display your content <strong>solely to operate the Service for you</strong>. We don't use it for anything else.</li>
-      <li>For <strong>community posts</strong> only, you additionally grant every other user of the Service the right to view your post inside the app, and you grant us the right to display it in community-discovery surfaces (per-recipe rails, the community feed, your public profile). This license ends when you delete the post or your account.</li>
+      <li>If community sharing becomes available and you publish a <strong>community post</strong>, you additionally grant every other user of the Service the right to view that post inside the app, and you grant us the right to display it in community-discovery surfaces (per-recipe rails, the community feed, your public profile). This license ends when you delete the post or your account. No such license is granted today, because no post can be published.</li>
       <li>You represent that you have the right to any content you post — including that you took any photo you upload and that nothing in the post violates someone else's rights.</li>
     </ul>
 
@@ -100,14 +115,39 @@
     <p>Parts of the Service depend on third parties (OpenAI, Apple, Google, USDA FoodData Central, Open Food Facts, Fly.io). Those providers have their own terms. We're not responsible for their downtime or policy changes.</p>
 
     <h2>9. Subscriptions and payment</h2>
-    <p>Saffra is free to try. <strong>Saffra Pro</strong> is an optional paid tier that unlocks unlimited chef chat, per-recipe adaptation, hands-free voice cooking, recipe imports, and pantry scanning (barcode + receipt). The free tier gives you a full taste of each feature before you decide to pay.</p>
+    <!-- "unlimited chef chat" removed 2026-08-24. Pro chat is bounded on the
+         server: saffra-api/app/config.py:131-132 sets rate_limit_chat_per_hour = 60
+         and rate_limit_chat_per_day = 300, enforced at app/ratelimit/limiter.py:122
+         (HTTP 429 "chat_daily_limit"); the iOS mirror is
+         EntitlementStore.swift proDefault (chatPerHour 60, chatPerDay 300). What Pro
+         actually removes is the FREE cap — config.py:140 free_chat_lifetime = 10,
+         a lifetime counter with no reset. index.html already prints this honest
+         shape ("the 10-message starter cap lifted"); this page was missed.
+         The trailing sentence "The free tier gives you a full taste of each feature
+         before you decide to pay" was DELETED, not reworded: free is 0 receipt scans
+         and 0 recipe imports (EntitlementStore.swift freeDefault:
+         pantryReceiptPerMonth = 0, recipeImportPerMonth = 0), so two of the five
+         features named in this very sentence get no taste at all. -->
+    <p>Saffra is free to try. <strong>Saffra Pro</strong> is an optional paid tier that lifts the free tier's 10-message chef-chat cap (fair-use rate limits still apply), and unlocks per-recipe adaptation, hands-free voice cooking, recipe imports, and pantry scanning (barcode + receipt).</p>
 
     <h3>9.1 Products, pricing, and billing</h3>
-    <p>Saffra Pro is sold exclusively through the App Store in three flavors:</p>
+    <!-- TWO products, not three. "Lifetime Founders — single non-consumable
+         purchase, grants Pro forever on the Apple ID that bought it" was deleted
+         2026-08-24: App Store Connect inAppPurchasesV2 for app 6792760857 returns an
+         EMPTY list, and saffra-ios MasterChef/Billing/StoreKitManager.swift:23-26
+         says the same in source — the `lifetime` case is annotated "Not in ASC — no
+         non-consumable was ever created, so StoreKit returns nothing for it and
+         `orderedPlans` drops the row." A buyer could never have bought it. index.html
+         removed its $149.99 Lifetime card on 2026-08-19; the legal pages were never
+         swept. Do not re-add it here before the IAP exists in ASC.
+         The annual 7-day trial below stays — it is real and ASC-verified
+         (saffra-ios/APP_STORE_LAUNCH.md:262: FREE_TRIAL, ONE_WEEK, 175 territories,
+         checked 2026-08-08; the monthly product carries zero offers, which is why
+         "New subscribers only" and the annual attribution must stay attached). -->
+    <p>Saffra Pro is sold exclusively through the App Store in two forms:</p>
     <ul>
       <li><strong>Pro Monthly</strong> — billed every month.</li>
       <li><strong>Pro Annual</strong> — <strong>7-day free trial</strong>, then billed every 12 months. New subscribers only.</li>
-      <li><strong>Lifetime Founders</strong> — single non-consumable purchase, grants Pro forever on the Apple ID that bought it.</li>
     </ul>
     <p>Exact prices are shown in-app on the upgrade screen immediately before purchase, in your local currency. Prices may vary by region per Apple's pricing matrix.</p>
 
@@ -121,7 +161,6 @@
     <ul>
       <li><strong>Manage or cancel</strong>: tap Settings → Saffra Pro → Manage Subscription (or go to iPhone Settings → [your name] → Subscriptions). Cancellation takes effect at the end of the current period; you keep Pro until then.</li>
       <li><strong>Refunds</strong>: all refund decisions are handled by Apple under Apple's refund policy (<a href="https://reportaproblem.apple.com" target="_blank" rel="noopener">reportaproblem.apple.com</a>). We do not issue refunds directly.</li>
-      <li><strong>Lifetime Founders</strong>: the one-time purchase is non-refundable except where Apple's refund policy or applicable consumer law requires otherwise. Purchase is tied to the Apple ID that paid and transfers via Apple Family Sharing if enabled for the product.</li>
       <li><strong>Restore purchases</strong>: tap Settings → Saffra Pro → Restore Purchases to re-entitle a previous purchase on a new device or after reinstall.</li>
     </ul>
 
@@ -129,13 +168,13 @@
     <p>If we change the price of an existing subscription, Apple will notify you in advance and require your explicit consent before charging the new price. If you don't consent, the subscription will not renew.</p>
 
     <h3>9.6 Downgrade behavior</h3>
-    <p>If your Pro subscription lapses (non-renewal, cancellation, refund, or expired payment method), you will be moved back to the free tier. Your data — recipes, pantry, conversations, community posts — stays put; only the usage caps re-engage. You can re-subscribe at any time.</p>
+    <p>If your Pro subscription lapses (non-renewal, cancellation, refund, or expired payment method), you will be moved back to the free tier. Your data — recipes, pantry, conversations — stays put; only the usage caps re-engage. You can re-subscribe at any time.</p>
 
     <h3>9.7 What Pro is not</h3>
     <p>Saffra Pro is a subscription to a software service — it does not include human nutrition counseling, medical advice, or any offline product. The AI safety disclaimers in §4 apply to Pro just as they do to the free tier.</p>
 
     <h2>10. Termination</h2>
-    <p>You can stop using the Service at any time. We may terminate or suspend your access if you violate these Terms, abuse the Service, violate the community rules in §5a, or create safety risk for other users. Deleting your account from Profile / Me immediately removes your community content, including photos, posts, comments, likes, follows, and notifications.</p>
+    <p>You can stop using the Service at any time. We may terminate or suspend your access if you violate these Terms, abuse the Service, violate the community rules in §5a, or create safety risk for other users. Deleting your account from Profile / Me immediately removes your data from our servers, including any community content — photos, posts, comments, likes, follows and notifications — that exists if community sharing becomes available.</p>
 
     <h2>11. Disclaimers</h2>
     <ul>

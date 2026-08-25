@@ -15,13 +15,13 @@
 <meta name="theme-color" content="#0A0D18" media="(prefers-color-scheme: dark)">
 <link rel="icon" type="image/png" href="app-icon.png">
 <link rel="apple-touch-icon" href="app-icon.png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20260824a">
 </head>
 <body>
 <header class="site"><img class="mark" src="app-icon.png" alt="" width="30" height="30"><a class="brand" href="./">Holohound</a></header>
 <main class="wrap">
 <h1>Privacy</h1>
-<p class="updated">Last updated 18 August 2026 · applies to Holohound 0.1</p>
+<p class="updated">Last updated 24 August 2026 · applies to Holohound 0.1</p>
 
 <div class="card">
 <h2 style="margin-top:0">The short version</h2>
@@ -34,10 +34,9 @@ third-party tracking</strong>. We cannot see your binder.</p>
 <p>Everything you create in the app: the cards in your binder, what you paid, your want
 list, your price watches, your notification choices, and the value history the app records
 over time. This lives in the app's own storage on your phone. Deleting the app deletes it.</p>
-<p>When you scan a card, the app also keeps a rectified photo of it on your device — used to
-show a condition read and, later, as the image you'd share with Hound — capped at your
-newest 40 captures so the library can't grow without bound. These photos are never uploaded
-anywhere; the card-matching step that reads them runs entirely on the phone.</p>
+<p>When you scan a card, the app also keeps a rectified photo of it on your device, capped at
+your newest 40 captures so the library can't grow without bound. These photos are never
+uploaded anywhere; the card-matching step that reads them runs entirely on the phone.</p>
 <p>Because it is only on your phone, <strong>we cannot restore it for you</strong> if you
 lose the device or delete the app. Backup is not implemented in this version.</p>
 
@@ -54,13 +53,18 @@ collection, and the requests carry no identifier from us.</p>
 is not endorsed or certified by TCGplayer.</p>
 
 <h3>Hound, the AI companion</h3>
-<p><strong>Hound is not enabled in this build</strong> — its answers are pre-written
-examples. When it is enabled, this is exactly what will happen and nothing more: the
-message you type, plus the specific card rows relevant to your question, are sent to our
-server and forwarded to <a href="https://www.anthropic.com/" rel="noopener">Anthropic</a>
-to generate the reply. Your whole collection is not sent, no account is created, and we do
-not store the conversation on our servers. This page will be updated on the day that
-changes, and the app will say so on the screen where it happens.</p>
+<p><strong>Hound has been live since 18 August 2026.</strong> Until that date its answers
+were pre-written examples; they now come from a real model. This is exactly what happens
+when you send it a message, and nothing more: the message you type, any photo you attach to
+it, the last few messages of that conversation, and the specific card rows relevant to your
+question are sent to our server and forwarded to
+<a href="https://www.anthropic.com/" rel="noopener">Anthropic</a> to generate the reply.
+Your whole collection is not sent, no account is created, and we do not store the
+conversation on our servers.</p>
+<p>Two things are counted so the daily message allowance can be enforced: a random id the
+app generates for your install, and the IP address the request arrives from. Neither is a
+login and neither is joined to anything else — they are a running count for the day, which
+resets at midnight UTC. The app ships no password, no email address and no profile.</p>
 
 <h2>What we never collect</h2>
 <ul>
@@ -73,13 +77,17 @@ changes, and the app will say so on the screen where it happens.</p>
 <h2>Camera</h2>
 <p>The app requests camera access to identify the card in front of it — asked for in
 context, the moment you first tap Scan, never on launch. Recognition runs entirely on your
-phone against an index of card images bundled with the app: nothing the camera sees is
-uploaded, and no image or video ever reaches our servers or anyone else's.</p>
+phone against an index of card images bundled with the app: nothing the camera sees while
+you are scanning is uploaded, and no video ever leaves the device.</p>
+<p>The one exception, and it is yours to make: if you deliberately attach a photo to a
+message to Hound, that photo is sent with the message, exactly as described above. Nothing
+attaches a photo on your behalf.</p>
 
 <h2>Children</h2>
 <p>Holohound is a collection tracker for a hobby many children take part in. It collects no
 personal information from anyone, of any age, and has no social features, no chat with
-strangers, and no user-generated content.</p>
+strangers, and no user-generated content. Hound is an AI, not a person and not another
+user; what a message to it sends is listed in full above, and none of it is stored.</p>
 
 <h2>Your choices</h2>
 <p>You can export your collection to a CSV file from the Profile screen at any time,

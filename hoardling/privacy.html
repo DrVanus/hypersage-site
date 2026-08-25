@@ -12,22 +12,24 @@
 <meta property="og:type" content="article">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#17100e">
-<link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=85d6295b91">
 <link rel="stylesheet" href="legal.css">
 </head>
 <body>
 <header class="site"><span class="mark"></span><a class="brand" href="./">Hoardling</a></header>
 <main class="wrap">
 <h1>Privacy</h1>
-<p class="updated">Last updated 18 August 2026</p>
+<p class="updated">Last updated 24 August 2026</p>
 
 <div class="card">
 <h2 style="margin-top:0">The short version</h2>
 <p>Hoardling has <strong>no accounts, no sign-up form, and no name or email to give us</strong>.
 Your campaign progress is stored on your device, not on our servers. We run
 <strong>no analytics, no advertising, and no third-party trackers</strong>. The only thing that
-leaves your device is an anonymous, auto-created leaderboard identity and the wave number you
-post to it — never anything that identifies you.</p>
+leaves your device is an anonymous, auto-created leaderboard identity and the wave number your
+Daily Siege runs post to it — never anything that identifies you. <strong>Daily Siege posting is
+on by default</strong>: your first Daily run is posted before you are shown the switch that turns
+it off. That is spelled out below.</p>
 </div>
 
 <h2>What stays on your device</h2>
@@ -39,12 +41,21 @@ no backup, so <strong>we cannot restore your progress</strong> if you clear your
 devices.</p>
 
 <h2>The leaderboard identity</h2>
-<p>Hoardling has an optional Daily Siege leaderboard. The first time it needs one, your browser is
-issued an <strong>anonymous session</strong> by our database provider, Supabase — no email,
-password, or personal detail is asked for or collected. That session is used only to post your
-best Daily Siege wave under a name we generate for you, in the fixed shape <code>WICK-XXXX</code>
-(four characters derived from the session itself). You never type a name, and the app never asks
-you for one.</p>
+<p>Hoardling has a public Daily Siege leaderboard, and <strong>posting to it is on by
+default</strong>. Starting a Daily Siege run issues your browser an <strong>anonymous
+session</strong> from our database provider, Supabase — no email, password, or personal detail is
+asked for or collected — and when that run ends, the wave you reached is submitted to the board
+automatically. There is no confirmation step and no prompt.</p>
+<p><strong>The switch that stops posting is on the results screen at the end of a run, so your
+very first Daily Siege score is posted before you have ever been shown it.</strong> Once you use
+it, the setting is remembered on your device and no further run is posted; the same switch turns
+posting back on. Turning it off stops new scores and holds back any still waiting to be sent — it
+cannot remove a score already on the board (see below). Campaign and Duel runs are never posted;
+only Daily Siege is.</p>
+<p>Scores are posted under a name we generate for you, in the fixed shape <code>WICK-XXXX</code>
+(four characters derived from the anonymous session itself). You never type a name, and the app
+never asks you for one. Each submission carries that name, the board, the wave number, and a
+one-run token the server issued when the run began — nothing else about you or your device.</p>
 <p>Hoardling and its experimental sibling, <a href="https://hypersage.ai/hoardling3d/">Hoardling
 3D</a>, are both served from hypersage.ai, so browsers treat them as the same site for storage
 purposes: your anonymous session and your sound setting are shared between the two if you play
@@ -69,8 +80,9 @@ beyond your ten most recent runs.</p>
 <p>A posted Daily Siege score is a row on a public leaderboard, tagged only with your generated
 <code>WICK-XXXX</code> name and a wave number — not your device, browser, or IP address by design.
 Because the tag carries nothing that identifies you, there is currently no way for us to find and
-delete one score out of the board on request; the whole board can be reset. If that changes, this
-page will say so on the day it ships.</p>
+delete one score out of the board on request; the whole board can be reset. <strong>This applies
+to the first Daily Siege score too — the one posted automatically before you were shown the
+switch.</strong> If that changes, this page will say so on the day it ships.</p>
 
 <h2>Purchases and ads</h2>
 <p>Hoardling has no in-app purchases, no subscriptions, and no advertising in this build. If that

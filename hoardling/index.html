@@ -5,7 +5,14 @@
   <!-- viewport-fit=cover is REQUIRED for env(safe-area-inset-*) to resolve on
        notched phones and under Android's forced edge-to-edge (targetSdk 35+). -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="description" content="Hoardling — defend the sleeping dragon's hoard. Hold the chokepoints, recover every stolen coin.">
+  <!-- "RECOVER EVERY STOLEN COIN" WAS FALSE AND IS NOT COMING BACK. A laden
+       raider that reaches the exit escapes permanently into `stolenLost`
+       (game.js:4211-4215) and the run is GRADED on that number — two stars
+       tolerates 28 coins lost forever (game.js:5149). Only the CONDITIONAL
+       form is true: killing a carrier credits the full carried amount back to
+       the pile (game.js:5054-5058). Any copy on this surface must keep the
+       "if you kill it" clause. -->
+  <meta name="description" content="Hoardling — defend the sleeping dragon's hoard. Hold the chokepoints; kill the carrier and the coins fly home.">
   <title>Hoardling</title>
   <meta name="theme-color" content="#17100e">
   <!-- LINK PREVIEWS WERE BLANK, and og-image.png (1200x630) had been sitting in
@@ -15,8 +22,13 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Hypersage">
   <meta property="og:title" content="Hoardling">
-  <meta property="og:description" content="Too young for dragonfire. Built his own. Defend the sleeping dragon's hoard — hold the chokepoints, recover every stolen coin.">
+  <meta property="og:description" content="Too young for dragonfire. Built his own. Defend the sleeping dragon's hoard — hold the chokepoints, kill the carrier and the coins fly home.">
   <meta property="og:url" content="https://hypersage.ai/hoardling/">
+  <!-- OPEN, NEEDS A RECAPTURE: og-image.png still BAKES the refuted line
+       "recover every stolen coin" into its subhead. It is a 1200x630 PNG and
+       cannot be corrected by editing this page, so the link preview keeps
+       claiming what the code disproves until the plate is re-rendered. When it
+       is replaced, bump ?v= on BOTH og:image and twitter:image together. -->
   <meta property="og:image" content="https://hypersage.ai/hoardling/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +37,7 @@
   <meta name="twitter:description" content="Too young for dragonfire. Built his own.">
   <meta name="twitter:image" content="https://hypersage.ai/hoardling/og-image.png">
   <!-- installable PWA: "Add to Home Screen" gives a fullscreen portrait app -->
-  <link rel="manifest" href="manifest.json?v=85d6295b91">
+  <link rel="manifest" href="manifest.json?v=20260824a">
   <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=85d6295b91">
   <link rel="apple-touch-icon" href="art/icon-180.png?v=85d6295b91">
   <meta name="apple-mobile-web-app-capable" content="yes">

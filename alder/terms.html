@@ -42,7 +42,7 @@
 
   <main class="legal" id="main">
     <h1>Terms of Use</h1>
-    <p class="updated">Last updated: 2026-07-31</p>
+    <p class="updated">Last updated: 2026-08-24</p>
 
     <p>These terms govern your use of the Alder app. By using Alder, you agree to them. Please read the sections on what Alder is not, and on emergencies — those are the ones that matter.</p>
 
@@ -75,7 +75,15 @@
     <p>What you log stays yours. You grant us only the permission needed to operate the app for you. We do not sell or share your content, and we do not use it to advertise to you. You can export or delete it at any time — see the <a href="privacy.html">privacy policy</a>.</p>
 
     <h2>Purchases</h2>
-    <p><strong>Alder is free to use, and there is an optional subscription called Alder Plus.</strong> Plus is <strong>US$9.99 per month</strong> or <strong>US$59.99 per year</strong>. Both are auto-renewing: they renew at the end of each period unless you turn renewal off at least 24 hours before it ends, and Apple charges your Apple Account. You can see, change, or cancel a subscription any time in Settings &rsaquo; your name &rsaquo; Subscriptions on your device; cancelling stops the next renewal and you keep Plus until the period you already paid for runs out. Prices are set per App Store region and the App Store shows your local price and currency before you buy.</p>
+    <!-- The benefit sentence below is four-way pinned: it must stay identical
+         here, in index.html's "What does it cost?" FAQ answer, in that answer's
+         copy inside the FAQPage JSON-LD, and in support.html. Both of its claims
+         are server-enforced — alder-api/app/config.py:143 (free daily cap; Plus
+         uncapped) and app/config.py:61-62 (haiku free vs sonnet plus). The
+         never-paywalled list is the app's own paywall wording. Do NOT print the
+         free-tier number on this site: the binary reads it from the server, so a
+         digit here goes stale silently. -->
+    <p><strong>Alder is free to use, and there is an optional subscription called Alder Plus.</strong> Plus is <strong>US$9.99 per month</strong> or <strong>US$59.99 per year</strong>. Both are auto-renewing: they renew at the end of each period unless you turn renewal off at least 24 hours before it ends, and Apple charges your Apple Account. You can see, change, or cancel a subscription any time in Settings &rsaquo; your name &rsaquo; Subscriptions on your device; cancelling stops the next renewal and you keep Plus until the period you already paid for runs out. Prices are set per App Store region and the App Store shows your local price and currency before you buy. Plus lifts the daily limit on everyday conversation and answers with Alder's most capable model. Your counter, check-ins, urge log, milestones and the slip debrief are never paywalled.</p>
     <p><strong>What is never behind a payment.</strong> The SOS screen, the crisis resources, and every safety conversation &mdash; a crisis, an overdose or withdrawal concern, an active craving, or telling Alder you used &mdash; are never metered, rate-limited into silence, or placed behind Plus. That is a deliberate product rule, not a launch promotion: the 3am conversation is the reason this app exists and it is never the thing you have to pay to finish. Your sober clock, check-ins and the crisis kit are free forever.</p>
 
     <h2>Acceptable use</h2>

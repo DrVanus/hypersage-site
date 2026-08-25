@@ -1,63 +1,57 @@
 {
   "schema": "static-site-audit-contract/v1",
   "canonical_url": "https://hypersage.ai/holohound/",
-  "_why": "Written 2026-08-18, the day the marketing site was rebuilt from a one-section stub. Holohound is pre-launch and its own privacy.html already made no_account/no_tracking/no_ads claims with no contract behind them \u2014 this backs those with evidence from the actual app repo (~/Developer/DrVanus/holohound) rather than removing the claims.",
+  "_why": "Written 2026-08-18, the day the marketing site was rebuilt from a one-section stub. Holohound is pre-launch and its own privacy.html already made no_account/no_tracking/no_ads claims with no contract behind them — this backs those with evidence from the actual app repo (~/Developer/DrVanus/holohound) rather than removing the claims.",
   "approved_absolute_claims": {
     "no_account": {
       "approved": true,
       "evidence": [
-        "DESIGN.md's accepted decisions state the app is a cold open with no onboarding sequence: 'no splash, no carousel, no account, no ATT' \u2014 camera permission fires in context, account is never required to scan or see your own collection.",
-        "holohound/ios/project.yml declares zero third-party SPM/CocoaPods dependencies for the Holohound target \u2014 no auth SDK (Firebase Auth, Sign in with Apple wrapper, etc.) is linked.",
-        "Identity to the Hound backend (holohound-api) is an opaque, install-scoped localStorage id generated client-side (index.html 'HOUND, LIVE' block, deviceId()) \u2014 explicitly documented as 'a METERING key, not a credential'. There is no login, password or profile screen anywhere in the 13-screen prototype."
+        "DESIGN.md's accepted decisions state the app is a cold open with no onboarding sequence: 'no splash, no carousel, no account, no ATT' — camera permission fires in context, account is never required to scan or see your own collection.",
+        "holohound/ios/project.yml declares zero third-party SPM/CocoaPods dependencies for the Holohound target — no auth SDK (Firebase Auth, Sign in with Apple wrapper, etc.) is linked.",
+        "Identity to the Hound backend (holohound-api) is an opaque, install-scoped localStorage id generated client-side (index.html 'HOUND, LIVE' block, deviceId()) — explicitly documented as 'a METERING key, not a credential'. There is no login, password or profile screen anywhere in the 13-screen prototype."
       ]
     },
     "no_tracking": {
       "approved": true,
       "evidence": [
-        "holohound/ios/project.yml lists only first-party Swift sources for the Holohound target (HolohoundApp, Haptics, Recognition, Scanner, Grading, PrivacyInfo.xcprivacy) and zero package dependencies \u2014 no analytics or attribution SDK (Firebase, Amplitude, Mixpanel, PostHog, AppsFlyer, Adjust) is linked.",
+        "holohound/ios/project.yml lists only first-party Swift sources for the Holohound target (HolohoundApp, Haptics, Recognition, Scanner, Grading, PrivacyInfo.xcprivacy) and zero package dependencies — no analytics or attribution SDK (Firebase, Amplitude, Mixpanel, PostHog, AppsFlyer, Adjust) is linked.",
         "Card recognition is on-device: DESIGN.md and the app's own NSCameraUsageDescription ('Recognition runs entirely on this device') describe a bundled pHash index (tools/build_phash_index.py, 21,775 EN cards) matched locally, with no image or video sent anywhere.",
-        "The only network calls in the prototype are to api.tcgdex.net (public card/price data, no identifier attached \u2014 mock-data.js:2221) and, once enabled, to holohound-api for Hound chat, which is metering-only per the no_account evidence above, not tracking."
+        "The only network calls in the prototype are to api.tcgdex.net (public card/price data, no identifier attached — mock-data.js:2221) and to holohound-api for Hound chat, LIVE since 2026-08-18 (index.html 'HOUND, LIVE' block; default HOUND_API = https://holohound-api.fly.dev). That call carries an install-scoped device id and is metered per day and per IP (holohound-api/src/middleware/meter.js) — metering, not tracking: it is joined to nothing, and holohound-api stores no message content."
       ]
     },
     "no_ads": {
       "approved": true,
       "evidence": [
         "Same project.yml dependency list as no_tracking: no ad SDK (Google Mobile Ads/AdMob, AppLovin, Unity Ads, ironSource) is linked anywhere in the iOS shell.",
-        "DESIGN.md's paywall copy law (accepted decisions) rules out ad-supported mechanics entirely: monetisation is a single StoreKit subscription (Holohound Pro, $9.99/mo or $59.99/yr in the mock's PLANS block, mock-data.js:1673-1676), with 'exactly two paywall entry points' and no rewarded-ad or ad-gated surface described anywhere in the design log."
+        "DESIGN.md's paywall copy law (accepted decisions) rules out ad-supported mechanics entirely: monetisation is INTENDED to be a single subscription (Holohound Pro, $9.99/mo or $59.99/yr in the mock's PLANS block, mock-data.js:2327-2331), with 'exactly two paywall entry points' and no rewarded-ad or ad-gated surface described anywhere in the design log. NOTE, and it is why the site may not say the app is purchasable: that plan is display-only. There is no StoreKit code, no product identifier and no purchase anywhere in the holohound repo, and the app is not on the App Store."
       ]
     }
   },
-  "contract_notes": "Pre-launch \u2014 app is a 13-screen HTML/WKWebView prototype running on-device, not yet submitted. Two claims on this site are deliberately present-tense-false and disclosed as such rather than hidden: Hound chat is not wired to its live backend in the current build (privacy.html), and collection backup is not implemented (support.html). Re-verify this contract and delete the 'In development' hero eyebrow the same day the app goes live on the App Store, per the fleet's status-lives-in-one-line convention. SCREENSHOT PROVENANCE: the five frames were re-shot 2026-08-18 from main at a81b7e2. The first set was captured at 12:40 and 22 commits touched index.html after it \u2014 Conversations became its own screen and the composer was rebuilt \u2014 so the shipped Hound frame showed a surface that no longer existed while every static gate passed. Re-run the capture_command above and diff before any launch-facing use of this page; a screenshot is only valid against the commit it was shot from.",
+  "contract_notes": "Pre-launch — app is a 13-screen HTML/WKWebView prototype running on-device, not yet submitted, and NOT PURCHASABLE: there is no App Store listing and no StoreKit product anywhere in the repo, so no page here may state or imply that the app or Holohound Pro can be bought today. RETRACTED 2026-08-24: this file and privacy.html both used to say 'Hound chat is not wired to its live backend in the current build'. That has been FALSE since 2026-08-18 — commit 840263a flipped the default HOUND_API to https://holohound-api.fly.dev and Hound has answered from claude-opus-5 through holohound-api ever since. privacy.html, index.html and this file were corrected together on 2026-08-24. Still deliberately present-tense-false and disclosed as such: collection backup is not implemented (support.html). Re-verify this contract and delete the 'In development' hero eyebrow the same day the app goes live on the App Store, per the fleet's status-lives-in-one-line convention. SCREENSHOT PROVENANCE: the frames were re-shot 2026-08-18 from main at a81b7e2. The first set was captured at 12:40 and 22 commits touched index.html after it — Conversations became its own screen and the composer was rebuilt — so the shipped Hound frame showed a surface that no longer existed while every static gate passed. Re-run the capture_command above and diff before any launch-facing use of this page; a screenshot is only valid against the commit it was shot from. CAPTURE LIST, two open items. (1) RESOLUTION: every frame here is 390x844, i.e. 1x, and renders soft on any 2x/3x display. nav_walk.py must be re-run at device scale (2x -> 780x1688 minimum) and all frames replaced together; bump the ?v= cache-buster on every reference in index.html to one new token when they are. (2) THE HOUND FRAME IS WITHDRAWN, not merely missing: screenshots/hound.png was deleted on 2026-08-24 because it was byte-identical to holohound/shots-dark/hound.png and captured the seeded answer 'Sell into strength — these three sit furthest above their own 30-day average, Lugia V most of all' directly beneath the app's own 'it isn't financial advice' banner — buy/sell/hold advice, which holohound-api/src/prompts/hound.js rule 4 forbids. The fixture behind it (holohound/mock-data.js, the '/chat' seeded transcript and cannedReplies) was corrected the same day. Any replacement frame must be shot from the FIXED fixture and read before it is published.",
   "screenshots": [
     {
       "path": "screenshots/home.png",
       "source_revision": "a81b7e2",
       "capture_command": "python3 tools/nav_walk.py . --out <dir> --scheme dark  (in ~/Developer/DrVanus/holohound)",
-      "journey": "launch/home \u2014 binder value, movers, quick actions"
+      "journey": "launch/home — binder value, movers, quick actions"
     },
     {
       "path": "screenshots/scan.png",
       "source_revision": "a81b7e2",
       "capture_command": "python3 tools/nav_walk.py . --out <dir> --scheme dark  (in ~/Developer/DrVanus/holohound)",
-      "journey": "home > Scan \u2014 live viewfinder"
+      "journey": "home > Scan — live viewfinder"
     },
     {
       "path": "screenshots/report.png",
       "source_revision": "a81b7e2",
       "capture_command": "python3 tools/nav_walk.py . --out <dir> --scheme dark  (in ~/Developer/DrVanus/holohound)",
-      "journey": "scan shutter > report \u2014 priced card with sources"
+      "journey": "scan shutter > report — priced card with sources"
     },
     {
       "path": "screenshots/set.png",
       "source_revision": "a81b7e2",
       "capture_command": "python3 tools/nav_walk.py . --out <dir> --scheme dark  (in ~/Developer/DrVanus/holohound)",
-      "journey": "market > set \u2014 master-set completion"
-    },
-    {
-      "path": "screenshots/hound.png",
-      "source_revision": "a81b7e2",
-      "capture_command": "python3 tools/nav_walk.py . --out <dir> --scheme dark  (in ~/Developer/DrVanus/holohound)",
-      "journey": "hound tab \u2014 companion chat answering with card context"
+      "journey": "market > set — master-set completion"
     }
   ]
 }

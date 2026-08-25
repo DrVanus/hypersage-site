@@ -570,7 +570,7 @@
       "name": "What does it cost?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Alder is free to use. There is an optional subscription, Alder Plus — US$9.99 per month or US$59.99 per year, billed by Apple. The SOS screen and the crisis numbers are never metered, limited, or put behind a payment."
+        "text": "Alder is free to use. There is an optional subscription, Alder Plus — US$9.99 per month or US$59.99 per year, billed by Apple. Plus lifts the daily limit on everyday conversation and answers with Alder's most capable model. Your counter, check-ins, urge log, milestones and the slip debrief are never paywalled. The SOS screen and the crisis numbers are never metered, limited, or put behind a payment."
       }
     },
     {
@@ -847,10 +847,24 @@
           <div class="screen-frame"><img data-shot="chat" src="shots/chat-dark.webp?v=20260804a" alt="A conversation with Alder: the user says they are having a craving, and Alder answers that cravings crest and break, then offers a 20-minute timer, guided urge surfing, or calling Sam" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Alder</strong>Awake when you are</div>
         </div>
-        <div class="screen-card">
-          <div class="screen-frame"><img data-shot="sos" src="shots/sos-dark.webp?v=20260804a" alt="Alder's SOS screen with a 20-minute wave running at 19:58, a &quot;call or text 988&quot; bar at the top, and the user's own people listed underneath" width="780" height="1688" loading="lazy"></div>
-          <div class="screen-label"><strong>SOS</strong>One tap, from anywhere</div>
-        </div>
+        <!-- NO SOS TILE. `shots/sos.webp` and `shots/sos-dark.webp` render the
+             contact rows as "Sam / Sponsor" and "Mia / Sister" — a relationship
+             label under the name — and the shipping build (1.0 build 6) cannot
+             produce that in any state:
+               - `role` has exactly ONE writer, index-onboarding.html:511, and it
+                 pushes `role: ""`. There is no editor anywhere in the app.
+               - app.js:1734-1741 renders the second line ONLY when role is
+                 non-empty, so a real profile always renders name + Call/Text.
+               - mock-data.js's `/profile` merge is `people: mine.people || []`
+                 (no seed fallback), and app.js:47 redirects a first run with no
+                 profile+consent to onboarding, so the demo persona's roles can
+                 never reach an installed user either.
+             Verified against the RETAINED build-6 artifact, not the source tree
+             (~/Developer/DrVanus/releases/alder/Alder-1.0-build6/Alder.ipa,
+             Payload/App.app/public/). The store frames hit this same defect and
+             were re-shot on 2026-08-20; the SITE set has not been re-shot yet.
+             DO NOT restore a SOS tile until shots/sos*.webp are re-captured
+             against a build whose contact rows carry no relationship label. -->
         <div class="screen-card">
           <div class="screen-frame"><img data-shot="toolbox" src="shots/toolbox-dark.webp?v=20260804a" alt="Alder's toolbox of short practical things to do during an urge, each labelled with how long it takes" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Toolbox</strong>Something to do with your hands</div>
@@ -983,7 +997,27 @@
   <!-- ===== PRIVACY SPOTLIGHT ===== -->
   <section class="section-block band" id="privacy-spotlight">
     <div class="container">
-      <div class="spotlight-grid flip">
+      <!-- ONE COLUMN ON PURPOSE — this grid used to carry a phone showing
+           shots/you-dark.webp, and that shot is FALSE against the shipping
+           build (1.0 build 6). It advertises five rows marked SOON:
+           "What I'm quitting", "My people", "Daily reminders", "App lock —
+           Face ID", "Notifications — Nothing on your lock screen names
+           recovery". On 2026-08-09 the app removed every one of them, in two
+           different ways, and the shipped index.html says so in a standing
+           comment of its own (Payload/App.app/public/index.html:115-133):
+           the two data rows became `.setting-row--static` divs with NO "soon"
+           marking and no tap, and the three IOU rows — daily reminders, app
+           lock, notifications — were DELETED OUTRIGHT. The notifications row
+           is the one that mattered: its subtitle was a privacy guarantee about
+           a surface Alder never touches (it schedules no local notifications
+           and requests no notification permission).
+           Verified against the retained build-6 artifact, not the source tree.
+           NOT replaced: no capture of the You screen postdating 2026-08-09
+           exists anywhere in alder-app — shots/, shots/site/, shots/store/ and
+           shots/store-next/ are all 2026-08-04 or earlier, so every candidate
+           carries the same five false rows. Restore a phone here only with a
+           fresh capture; the grid columns come back with it. -->
+      <div class="spotlight-grid flip" style="grid-template-columns: 1fr; max-width: 740px; margin: 0 auto;">
         <div>
           <div class="section-eyebrow">Privacy</div>
           <h2>Nobody has to know <em>you have this.</em></h2>
@@ -1001,9 +1035,6 @@
             <li><strong>Delete it all, whenever</strong> — and export it first if you want to keep it.</li>
           </ul>
           <p style="margin-top: 22px;"><a href="privacy.html" style="font-weight:700;">Read the full privacy policy →</a></p>
-        </div>
-        <div class="spotlight-phone">
-          <div class="screen-frame"><img src="shots/you-dark.webp?v=20260804a" alt="Alder's settings screen with privacy and data controls, including export and delete" width="780" height="1688" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -1055,8 +1086,25 @@
                US$59.99/yr) and the products in alder-app/ios/App/App/AlderPlus.swift:31-32
                (com.hypersage.alder.plus.monthly / .annual). This answer previously said
                "nothing is for sale yet" while our own Terms quoted the price — do not
-               change a figure on one page alone. -->
-          <p>Alder is free to use. There is an optional subscription, <strong>Alder Plus</strong> — US$9.99 per month or US$59.99 per year, billed by Apple. The SOS screen and the crisis numbers are never metered, limited, or put behind a payment.</p>
+               change a figure on one page alone.
+               THE BENEFIT SENTENCE IS ALSO FOUR-WAY PINNED: it must stay identical
+               here, in the FAQPage JSON-LD above, in terms.html:78 and in
+               support.html:122. Its two claims are the only two things Plus buys,
+               and BOTH are server-enforced:
+                 - the daily cap lift — alder-api/app/config.py:143
+                   `companion_chat_daily_cap: int = 5  # per device/day, FREE tier;
+                   Plus = unlimited`
+                 - the stronger model — alder-api/app/config.py:61-62
+                   `companion_chat_model_free: "claude-haiku-4-5"` vs
+                   `companion_chat_model_plus: "claude-sonnet-5"`
+               The never-paywalled list is the app's own paywall wording verbatim
+               (alder-app/app.js, .pw-trust: "The counter, check-ins, the urge log,
+               milestones and the slip debrief stay fully yours").
+               DO NOT print the free-tier number on this site. The binary reads it
+               from the server (app.js `freeCap()` takes it from the 402 the server
+               actually enforces), so a digit in HTML goes stale the moment the cap
+               moves — which it already did once, 10 -> 5 on 2026-08-15. -->
+          <p>Alder is free to use. There is an optional subscription, <strong>Alder Plus</strong> — US$9.99 per month or US$59.99 per year, billed by Apple. Plus lifts the daily limit on everyday conversation and answers with Alder's most capable model. Your counter, check-ins, urge log, milestones and the slip debrief are never paywalled. The SOS screen and the crisis numbers are never metered, limited, or put behind a payment.</p>
         </details>
         <details class="faq">
           <summary>When can I use it?</summary>

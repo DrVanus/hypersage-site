@@ -14,17 +14,17 @@
   <meta property="og:description" content="Help with Gemburrow: lost progress, a stuck level, sound, the leaderboard, and how to reach a human.">
   <meta property="og:url" content="https://hypersage.ai/gemburrow/support.html">
   <meta property="og:site_name" content="Gemburrow">
-  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260811a">
+  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260821b">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Gemburrow — a cozy gem-digging puzzle for iPhone">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Gemburrow — Support">
   <meta name="twitter:description" content="Help with Gemburrow, and how to reach a human.">
-  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260811a">
+  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260821b">
   <meta name="twitter:image:alt" content="Gemburrow — a cozy gem-digging puzzle for iPhone">
-  <link rel="icon" type="image/png" href="app-icon-512.png?v=20260811a">
-  <link rel="apple-touch-icon" href="app-icon-512.png?v=20260811a">
+  <link rel="icon" type="image/png" href="app-icon-512.png?v=20260821a">
+  <link rel="apple-touch-icon" href="app-icon-512.png?v=20260821a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -35,7 +35,7 @@
   <nav class="legal-nav">
     <div class="container">
       <a href="index.html" class="brand">
-        <img src="app-icon-512.png?v=20260811a" alt="" width="512" height="512">
+        <img src="app-icon-512.png?v=20260821a" alt="" width="512" height="512">
         Gemburrow
       </a>
       <div class="links">
@@ -49,9 +49,16 @@
   <!-- Every route promised here exists in the shipped build: the gear opens
        settings with two independent mutes (music / sfx) from the playing and
        paused screens; the Deeper Pick is offered on the career FAIL screen for
-       250 coins and adds 8 swings to ONE retry; there is no Restore Purchases
-       button because there are no purchases. Do not add a step the app cannot
-       perform. -->
+       250 coins and adds 8 swings to ONE retry.
+       THERE IS A RESTORE PURCHASE BUTTON — this comment used to say there was
+       none "because there are no purchases", and that went false on 2026-08-22
+       when gemburrow.full.unlock shipped. game.js draws the row in the settings
+       panel (label RESTORE PURCHASE, "RESTORING…" while busy) and the same
+       button on the paywall; it is shown only while Store.available() is true
+       and the unlock is NOT already owned, which is why the answer below says it
+       disappears once owned. The two outcome strings quoted below are the app's
+       own: "Purchase restored." / "No purchase found on this Apple ID."
+       Do not add a step the app cannot perform. -->
   <main class="legal">
     <h1>Support</h1>
     <p class="updated">We answer email. Usually within a day or two.</p>
@@ -123,11 +130,21 @@
     </div>
 
     <div class="faq-block">
-      <h3>How do I restore my purchases?</h3>
+      <h3>How do I restore my purchase?</h3>
       <p>
-        There is nothing to restore — Gemburrow has no in-app purchases and no
-        subscription. Coins are earned by digging, and everything the shop sells
-        is bought with them.
+        Gemburrow has one purchase — <strong>The Full Burrow</strong>, which opens
+        career levels 11&ndash;40 and the 14-day dig archive. If you have bought it
+        already, on this phone or another one on the same Apple ID, tap the
+        <strong>gear</strong> on the home screen &mdash; not mid-dig &mdash; and
+        choose <strong>RESTORE PURCHASE</strong>. The unlock screen carries the
+        same button. The game will tell you either <em>Purchase restored</em> or
+        <em>No purchase found on this Apple ID</em>. The button disappears once
+        the unlock is already on the device, because there is then nothing left to
+        restore.
+      </p>
+      <p>
+        Coins are a different thing entirely: they are earned by digging, never
+        bought, and everything the mole's shop sells is paid for with them.
       </p>
     </div>
 

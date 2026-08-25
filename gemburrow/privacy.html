@@ -14,17 +14,17 @@
   <meta property="og:description" content="What Gemburrow stores on your phone, the one thing that leaves it, and what it never collects.">
   <meta property="og:url" content="https://hypersage.ai/gemburrow/privacy.html">
   <meta property="og:site_name" content="Gemburrow">
-  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260811a">
+  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260821b">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Gemburrow — a cozy gem-digging puzzle for iPhone">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Gemburrow — Privacy Policy">
   <meta name="twitter:description" content="What Gemburrow stores on your phone, and the one thing that leaves it.">
-  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260811a">
+  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260821b">
   <meta name="twitter:image:alt" content="Gemburrow — a cozy gem-digging puzzle for iPhone">
-  <link rel="icon" type="image/png" href="app-icon-512.png?v=20260811a">
-  <link rel="apple-touch-icon" href="app-icon-512.png?v=20260811a">
+  <link rel="icon" type="image/png" href="app-icon-512.png?v=20260821a">
+  <link rel="apple-touch-icon" href="app-icon-512.png?v=20260821a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -35,7 +35,7 @@
   <nav class="legal-nav">
     <div class="container">
       <a href="index.html" class="brand">
-        <img src="app-icon-512.png?v=20260811a" alt="" width="512" height="512">
+        <img src="app-icon-512.png?v=20260821a" alt="" width="512" height="512">
         Gemburrow
       </a>
       <div class="links">
@@ -50,16 +50,27 @@
        game.js Meta (localStorage key gb_meta_v1 mirrored to Capacitor
        Preferences), Lb (the ONE network client — Supabase REST, daily only),
        package.json (Capacitor core/ios/android/haptics/preferences and nothing
-       else: no analytics, no ads, no StoreKit). If any of those change, this
-       page and the App Store Connect App Privacy answers change together. -->
+       else: no analytics, no ads).
+       STOREKIT IS NOW IN THE BUILD — that line used to say "no StoreKit" and
+       went false on 2026-08-22. native/ios/GemburrowStore.swift is a StoreKit 2
+       handler and gemburrow.full.unlock is a real non-consumable
+       (store/iap-catalog.json). It changes what this page must say only in one
+       place: the save gains `full` and `iapSeen` (game.js Meta DEFAULTS), which
+       is a hashed transaction id and a flag, never a payment detail — Apple runs
+       the transaction and we never see a card. "No in-app purchases" and "no
+       purchases" are DEAD STRINGS here.
+       If any of those change, this page and the App Store Connect App Privacy
+       answers change together. -->
   <main class="legal">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: August 11, 2026</p>
+    <p class="updated">Last updated: August 24, 2026</p>
 
     <div class="callout">
-      <strong>The short version.</strong> Gemburrow has no account, no analytics,
-      no advertising SDK and no in-app purchases. Your progress lives on your
-      phone. The one thing that ever leaves it is a <strong>Daily Dig score</strong> —
+      <strong>The short version.</strong> Gemburrow has no account, no analytics
+      and no advertising SDK. It has one in-app purchase, and Apple runs it: we
+      never see or store a card, a name or a billing address. Your progress lives
+      on your phone. The one thing that ever leaves it is a
+      <strong>Daily Dig score</strong> —
       a random ID made on your device, an auto-generated name like
       <code>MOLE-4F2A</code>, and the numbers from that run.
     </div>
@@ -75,6 +86,10 @@
       <li>your hoard total — the gems you have given to the dragon;</li>
       <li>your best Daily Dig and Free Dig results;</li>
       <li>whether you have seen the first-run coaching, and your sound settings;</li>
+      <li>whether the Full Burrow unlock has been purchased, and a one-way hash of
+          the transaction id it was granted against — so the same purchase is
+          never granted twice. The hash is not the receipt and cannot be turned
+          back into one;</li>
       <li>a random identifier and the display name generated from it (below).</li>
     </ul>
     <p>
@@ -129,7 +144,7 @@
       <li><strong>No account.</strong> There is no sign-in, no email, no profile, and no password anywhere in the game.</li>
       <li><strong>No analytics or crash SDK.</strong> None is linked into the build. We do not know how many levels you cleared or when you played.</li>
       <li><strong>No advertising.</strong> No ad SDK, no ad identifier, no tracking across apps or websites.</li>
-      <li><strong>No purchases.</strong> There are no in-app purchases and no subscription, so no payment data exists to collect.</li>
+      <li><strong>No payment data.</strong> There is one in-app purchase and no subscription. The purchase is handled entirely by the App Store: we never see or receive your card, your Apple ID, your name or your billing address, and none of it is stored in the game or sent anywhere by it.</li>
       <li><strong>No location, contacts, photos, microphone or camera.</strong> The game never asks for any of them.</li>
     </ul>
 

@@ -34,10 +34,29 @@
       ]
     },
     "no_purchases": {
+      "approved": false,
+      "_RETRACTED": "2026-08-22. This approval is DEAD and must not be relied on again. gemburrow.full.unlock shipped that day — a non-consumable declared in gemburrow/store/iap-catalog.json and read by game.js (var FULL_PRODUCT, the Ent journal, careerCap()), with native/ios/GemburrowStore.swift as its StoreKit 2 handler. The 2026-08-11 evidence below was true when written and is kept only so the next reader can see WHY the grep passed: it greps a build that no longer exists.",
+      "evidence": [
+        "STALE (2026-08-11): There is no StoreKit dependency and no purchase code: a case-insensitive grep of game.js for storekit, purchase, iap and revenuecat returns only two comment lines about 'purchased cosmetic ids' and 'a purchased deeper pick' — both referring to spending in-game coins (game.js:672, 1195).",
+        "STILL TRUE: The shop's six dig walls and the Deeper Pick (250 coins) are bought with COINS, and coins are only ever earned by digging — store/iap-catalog.json _MODEL: 'Coins are earned by digging and are not for sale — that is a design law, not an omission.' Wall prices were re-priced to 22,000c for all six on 2026-08-21, so do not quote the 0..2400 figures this entry used to carry."
+      ]
+    },
+    "one_purchase_content_only": {
+      "approved": true,
+      "_replaces": "no_purchases, retracted 2026-08-22",
+      "evidence": [
+        "EXACTLY ONE product exists and it is a non-consumable: store/iap-catalog.json products[] holds a single entry, id gemburrow.full.unlock, display_name 'The Full Burrow'. _MODEL: 'no subscription, no consumable, no currency pack, and no ads.' The site may say 'one optional purchase' and must not say 'no in-app purchases', 'nothing to buy' or 'no purchase path'.",
+        "WHAT IT UNLOCKS, and what stays free: _BOUNDARY.unlocked_by_purchase is career levels 11-40 and the 14-day daily archive; _BOUNDARY.free_forever is Free Dig, the Daily Dig with its leaderboard and 14-day league, career levels 1-10, all 27 contracts, and the whole shop and wardrobe. game.js FREE_CAREER_LEVELS = 10 and CAREER_MAX = 40 agree.",
+        "CONTENT, NEVER POWER — this is what lets the site keep its fairness card. iap-catalog _NEVER_SELLABLE: 'Nothing purchasable may touch the SIM — not swings, not satchel slots, not jar content, not the restock valve... The gate is CONTENT (which levels you may enter), never power.' game.js says the same at careerCap(): 'How far up the ladder this save may go. The ONLY thing the entitlement changes anywhere in the game.' tools/probe_iap_fairness.js proves the daily is byte-identical for a fresh save and an owns-everything save.",
+        "NO PRICE ON THIS SITE, AND NONE IN THIS FILE. iap-catalog.json flags its own planned_price_usd with _price_is_a_hint: 'planned_price_usd is a console-setup crib and NOTHING else. The paywall renders the storefront's own localized displayPrice; hardcoding a dollar figure is an App Review 3.1.2 rejection on every non-USD storefront.' The number is also unshipped — console_steps_for_vanus is still open and _PLATFORM_STATE_2026_08_22 records iOS as 'SELLABLE once the console work is done' — so no storefront has ever charged it. A US dollar figure was written into index.html's FAQ answer and its JSON-LD twin and was removed on 2026-08-24; this contract dropped it in the same pass, because a public file under /gemburrow/ publishes whatever it quotes. The approved claim is WHAT the unlock opens, never what it costs.",
+        "SCOPE — THE BROWSER BUILD HAS NO STORE AT ALL. The deployed play/game.js contains no careerCap, no Store, no GemburrowStore and no paywall (grep, 2026-08-24), and CAREER_MAX is 40 there, so the whole ladder is open in a browser. iap-catalog _NO_STORE_NO_WALL says the same of any storeless build. Claims about the browser build must be scoped with 'in your browser'; index.html's hero note is."
+      ]
+    },
+    "no_energy_meter_but_there_ARE_timed_orders": {
       "approved": true,
       "evidence": [
-        "There is no StoreKit dependency and no purchase code: a case-insensitive grep of game.js for storekit, purchase, iap and revenuecat returns only two comment lines about 'purchased cosmetic ids' and 'a purchased deeper pick' — both referring to spending in-game coins (game.js:672, 1195).",
-        "The shop's six dig walls cost 0..2400 coins (WALL_SKINS, game.js:607-614) and the Deeper Pick costs 250 coins (DEEPER_PICK_COST, game.js:605). Coins are only ever earned by digging: Meta.data.coins is incremented at game.js:1744 and 1767 from run payouts and nowhere else."
+        "TRUE HALF: nothing recharges on a clock. There is no energy, stamina or lives system anywhere in game.js, and the archive was opened precisely because 'a daily playable only on its own day is an APPOINTMENT WINDOW, which the design forbids in the same breath as energy and lives' (game.js, THE ARCHIVE note).",
+        "FALSE HALF, TWICE CAUGHT: 'No timers' is a forbidden string. CFG.timedDur is 45 and SLOT_CLS is ['easy','med','med','big','timed'], so a 45-second Rush order is in EVERY shift, not only on a RUSH DAY. gemburrow/store/frames.json _forbidden_strings carries it with the note that it was caught on 08-21 and reintroduced on 08-22. index.html's 'No energy, no timers' card was the site's copy of the same defect and was replaced on 2026-08-24; the FAQ answer four sections down had been telling the truth about the 45-second dial the whole time."
       ]
     },
     "local_only": {

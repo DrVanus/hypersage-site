@@ -656,7 +656,7 @@
       </div>
       <div class="device-wrap reveal">
         <div class="device">
-          <img src="shots/home.jpg" alt="The Nightshelf home screen on iPhone — a nighttime library with tonight's story, fairy tales, and myths &amp; legends." width="840" height="1825" loading="lazy" data-allow-duplicate="true">
+          <img src="shots/home.jpg?v=20260824a" alt="The Nightshelf home screen on iPhone — the Pro bedtime-story writer, a featured classic marked Unlock with Pro, and the free Fairy Tales shelf." width="840" height="1825" loading="lazy" data-allow-duplicate="true">
         </div>
       </div>
       <div class="chip-col right" aria-hidden="true">
@@ -673,15 +673,54 @@
         <h2 class="grad-text">A closer look</h2>
         <p>Read it, hear it, and drift off — Nightshelf, screen by screen.</p>
       </div>
+      <!-- ===================== CAPTURE DISCIPLINE =====================
+           EVERY shots/ reference carries the SAME ?v= token (currently
+           v=20260824a) — the hero device at the top of this file included.
+           Bump all of them together or some pages keep serving the old file.
+
+           Every shot here must be shot from a CLEAN FREE INSTALL. A capture
+           taken with purchase.isPro == true photographs Pro content with no
+           lock badge, which sells the free tier something it does not get.
+           Three tiles were removed on 2026-08-24 for exactly that, and the
+           files still sitting in shots/ are the BAD captures — do not restore
+           a tile from them:
+             story.jpg    — gold CTA reads "Write the story". The shipping free
+                            app renders lock.fill + "Unlock with Nightshelf Pro"
+                            (CustomStoryFormView.swift:607-609); Tonight's Story
+                            is Pro-only with no free allowance
+                            (StreamingStoryController.swift:289).
+             voice.jpg    — the six cloud narrators with no PRO badge. The free
+                            app draws a "PRO" capsule beside every one of them
+                            (VoicePickerSheet.swift:249-258), and committing to
+                            one hits the paywall (VoicePickerSheet.swift:455).
+             settings.jpg — reads "All 53 stories unlocked" while this page
+                            states 82 (SleepCatalog.swift ships 82 / 13 free /
+                            69 Pro). Nightshelf's own store manifest also holds
+                            that a settings screen never earns a slot
+                            (Nightshelf/store/frames.json _deliberately_omitted).
+
+           home.jpg is Nightshelf/store/screens/01-shelf.png (clean free
+           install, 2026-08-21) resized 1320->840 wide. It replaced a capture
+           showing "The Children of Odin", removed from the catalogue in
+           9ae6323 and named in frames.json _forbidden_strings — the store
+           frames are gated on that list, this page is not, so check it here
+           by hand. Do not swap this file for a Pro-state capture: its three
+           tier affordances (the Pro lock on the TONIGHT card, "Unlock with
+           Pro" on the featured cover, the NIGHTSHELF PRO row) are the reason
+           it is honest, and the four FAIRY TALES covers under them are all
+           freeTier: true (SleepCatalog.swift:111,121,151,171).
+
+           KNOWN RESIDUAL, not yet fixed: reader.jpg shows sleep-timer chips
+           90m and 120m, which SleepTimer.swift:63-67 gives only to Pro. The
+           screen's subject (a free book read aloud with a timer) is genuinely
+           free, so it was left standing — but re-shoot it free before the
+           next capture pass. -->
       <div class="gallery-shell reveal">
         <div class="gallery-row">
-          <figure class="shot"><div class="frame"><img src="shots/home.jpg" alt="The Nightshelf home screen — a nighttime library with tonight's story, fairy tales, and myths and legends." loading="lazy" width="840" height="1825" data-allow-duplicate="true"></div><figcaption class="cap">A shelf for the night</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/story.jpg" alt="The Nightshelf bedtime-story composer — pick a setting and tone, then write a calm original story." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Conjure a bedtime story</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/reader.jpg" alt="The Nightshelf reader playing The Wind in the Willows aloud, with a sleep-timer that fades the narration out." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Read along, or listen</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/voice.jpg" alt="The Nightshelf voice picker — six warm narrators like Nova, Fable, and Onyx to read each story." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Six warm narrators</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/ambient.jpg" alt="The Nightshelf ambient-sound picker — rain, fireplace, ocean, and more to layer under any book." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Ambient sound underneath</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/chapters.jpg" alt="The Nightshelf chapter list for The Wind in the Willows — jump to any chapter with one tap." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Skip to any chapter</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/settings.jpg" alt="Nightshelf settings — reading speed, default sleep timer, listening mode, voice, and ambient sound." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Tuned for bedtime</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/home.jpg?v=20260824a" alt="The Nightshelf home screen — the Pro bedtime-story writer, a featured classic marked Unlock with Pro, and the free Fairy Tales shelf." loading="lazy" width="840" height="1825" data-allow-duplicate="true"></div><figcaption class="cap">A shelf for the night</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/reader.jpg?v=20260824a" alt="The Nightshelf reader playing The Wind in the Willows aloud, with a sleep-timer that fades the narration out." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Read along, or listen</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/ambient.jpg?v=20260824a" alt="The Nightshelf ambient-sound picker — rain, fireplace, ocean, and more to layer under any book." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Ambient sound underneath</figcaption></figure>
+          <figure class="shot"><div class="frame"><img src="shots/chapters.jpg?v=20260824a" alt="The Nightshelf chapter list for The Wind in the Willows — jump to any chapter with one tap." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Skip to any chapter</figcaption></figure>
         </div>
       </div>
     </div>

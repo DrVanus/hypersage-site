@@ -46,9 +46,25 @@ APP = Path.home() / "Developer" / "DrVanus" / "mythkin-app"
 
 SECTION_ORDER = ["Storybook", "Legends", "History", "Scripture", "Originals"]
 
-# Room blurbs. These are OURS — the app's own ROOM_NOTE strings are written for
-# a reader who is already inside, and the Scripture one especially needs to say
-# the same thing to somebody who has not installed anything yet.
+# Room blurbs. Four of these are OURS — the app's own ROOM_NOTE strings are
+# written for a reader who is already inside, and these say the same thing to
+# somebody who has not installed anything yet.
+#
+# SCRIPTURE IS THE EXCEPTION: it is the app's own ROOM_NOTE string, copied
+# verbatim from mythkin-app/app.js (const ROOM_NOTE, ~line 5325), and it must
+# stay that way. This slot used to read "The Hebrew Bible and the Gospels,
+# written as teachers rather than as converts." The app DELETED that exact
+# enumeration and left a comment saying why: the room files a kin by WHERE THEY
+# COME FROM ("canonical religious text -> Scripture", generically), so naming
+# two corpora described 63 of the then-64 kin and implied the Pali Canon is not
+# scripture — a claim about somebody's religion that a shelf caption has no
+# business making. The seed proves it: app/characters/seed.py currently files
+# Siddhartha Gautama, Mahapajapati Gotami, Thorani, Gargi Vachaknavi and Asiya
+# bint Muzahim into Scripture, plus Peter, Paul of Tarsus, Priscilla, Barnabas
+# and Lydia, who are not in the Gospels either. An enumeration also cannot
+# survive the roster — it goes false the day one kin arrives from anywhere
+# else, silently, with every gate green. DO NOT re-list corpora here; if the
+# app's ROOM_NOTE changes, copy the new string, do not compose one.
 # ONE LINE EACH, and they sit UNDER the heading rather than opposite it.
 #
 # These were three and four sentences, right-aligned across from the room title.
@@ -66,8 +82,8 @@ SECTION_NOTE = {
                "retold.",
     "History": "People who actually lived, written from the record and honest "
                "about where it runs thin.",
-    "Scripture": "The Hebrew Bible and the Gospels, written as teachers rather "
-                 "than as converts.",
+    "Scripture": "Figures whose stories reach us through scripture, written as "
+                 "teachers — warm, story-first, and never here to convert you.",
     "Originals": "Written in-house and bylined <em>Mythkin Workshop</em>, not "
                  "passed off as somebody's upload.",
 }
@@ -928,9 +944,15 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
       <p class="sub">Companion apps have a bad name for good reasons. Here is
       what we have ruled out — in the product, rather than in a policy nobody
       reads.</p>
+      <!-- SAME RULE AS SECTION_NOTE["Scripture"] ABOVE: no corpus is named
+           here. This read "figures from the Hebrew Bible and the Gospels" over
+           a room that also holds Siddhartha Gautama, Gargi Vachaknavi and Asiya
+           bint Muzahim. Say WHERE THEY COME FROM generically, as the app's own
+           ROOM_NOTE does, or say nothing. -->
       <p class="sub" style="margin:0">Mythkin is 18+. {nscript} of the kin are
-      figures from the Hebrew Bible and the Gospels, written as teachers rather
-      than converts — that room is ours and is marked as ours. The first {nwork}
+      figures whose stories reach us through scripture, written as teachers —
+      warm, story-first, and never here to convert you. That room is ours and is
+      marked as ours. The first {nwork}
       cards on the community shelf are bylined Mythkin Workshop for the same
       reason. <a href="safety.html">The full safety page</a> sets out what
       happens when a conversation turns to self-harm.</p>
