@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260825a">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260825c">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260825a">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260825c">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -43,7 +43,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260825a",
+        "image": "https://hypersage.ai/og-image.png?v=20260825c",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -377,7 +377,11 @@
     /* The utterance entering the pipeline. The bubble is a 1x1 grid and all four
        prompts share the single cell, so the box always sizes to the TALLEST of
        them: rotating the prompt can never reflow the diagram or clip a line. */
-    .pl-msg { position: absolute; z-index: 2; left: 13.5%; top: 60%; width: 23%; transform: translate(-50%,-50%); }
+    /* 26% wide, not 23: "StoryVault AI" is the longest app tag and the mono-caps
+       first cut of it overflowed the bubble's right border on the live site
+       (Vanus caught it). The wire that used to start at x=127 now starts at 138
+       — keep the msg right edge (27.2% of width) left of it. */
+    .pl-msg { position: absolute; z-index: 2; left: 14.2%; top: 60%; width: 26%; transform: translate(-50%,-50%); }
     .pl-msg-tag { display: block; margin: 0 0 5px 2px; font-family: 'JetBrains Mono', monospace; font-size: .69rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
     .pl-msg-bubble {
       display: grid; align-items: center;
@@ -389,7 +393,7 @@
        stranding one word on the second line. */
     .pl-q { display: block; text-wrap: balance; }
     .pl-prompt { grid-area: 1 / 1; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; }
-    /* Resting state = prompt 1 alone, fully composed. Prompts 2-5 only ever
+    /* Resting state = prompt 1 alone, fully composed. Prompts 2-11 only ever
        surface while .pl-live is armed, so no-JS, reduced-motion and print all
        show prompt 1 and nothing stacked behind it. */
     .pl-prompt + .pl-prompt { opacity: 0; }
@@ -399,11 +403,17 @@
        everywhere on the page. Owner ask 2026-08-25: "put the name of the app in
        that specific style/color... can put logo too". */
     .pl-of {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      /* .69rem = 11.04px, the estate's legibility floor — do not shrink. */
-      font-size: .69rem; font-weight: 600; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--app, var(--brand-a));
+      display: inline-flex; align-items: center; gap: 5px;
+      /* Space Grotesk mixed case, like the product-card titles — the app NAME,
+         not a label. Mono caps at .08em tracking needed ~119px for
+         "StoryVault AI" against a 93px content box and overflowed the bubble.
+         .72rem = 11.52px, above the estate's 11px floor — do not shrink.
+         Zero tracking and the 5px gap are load-bearing: the longest tag,
+         "CryptoSage AI", clears the bubble's content box by ~6px, measured.
+         Adding tracking or a wider gap re-opens the overflow Vanus caught. */
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: .72rem; font-weight: 600; letter-spacing: 0;
+      color: var(--app, var(--brand-a));
     }
     .pl-of img {
       width: 16px; height: 16px; border-radius: 5px; flex: 0 0 auto;
@@ -411,7 +421,7 @@
       background: rgba(255,255,255,.05);
     }
     /* The source-card captions roll with the prompts: each <small> is a 1x1
-       grid of five .pl-ctx spans (one per app, same order as the prompts), so
+       grid of eleven .pl-ctx spans (one per app, same order as the prompts), so
        the card always sizes to the WIDEST caption and can never breathe as the
        scenario changes. Resting state = caption 1 (Saffra), matching prompt 1. */
     .pl-src small.pl-roll { display: grid; }
@@ -521,19 +531,22 @@
     .context-engine.pl-live .pl-stamp:last-child { animation: plStamp2 14s ease infinite; }
     .context-engine.pl-live .pl-playhead { animation: plPlayhead 14s linear infinite; }
 
-    /* Scenario rotation — one APP per loop, five loops to a 70s master cycle.
-       Each prompt (and each source-card caption, see .pl-ctx below) turns over
-       on the same clock: element n gets a (n-1)*14s animation-delay, fill-mode
-       stays `none`, so before its first turn it shows its RESTING opacity
-       (0 for 2-5). The prompt handover sits at 19.8-20.2% of the master =
-       13.86-14.14s, inside the window where the bubble itself is at opacity 0
-       (plMsgD is out from 96% = 13.44s; the next loop's fade-in runs 14.14-14.84s),
-       so the prompt swap is never visible. The source captions ARE visible at
-       the handover — they get a deliberate ~0.3s crossfade, which reads as the
-       diagram loading the next product's context.
-       The five prompts are true to five shipped apps and none of them is a claim. */
+    /* Scenario rotation — one APP per loop, eleven loops to a 154s master cycle
+       (one scenario for every product with an assistant to ask, owner ask
+       2026-08-25). Each prompt (and each source-card caption, see .pl-ctx
+       below) turns over on the same clock: element n gets a (n-1)*14s
+       animation-delay, fill-mode stays `none`, so before its first turn it
+       shows its RESTING opacity (0 for 2-11). Percentages are the SAME absolute
+       times as the old 70s clock, re-expressed for 154s (1% = 1.54s): the
+       prompt handover sits at 9-9.18% of the master = 13.86-14.14s, inside the
+       window where the bubble itself is at opacity 0 (plMsgD is out from 96% =
+       13.44s; the next loop's fade-in runs 14.14-14.84s), so the prompt swap is
+       never visible. The source captions ARE visible at the handover — they get
+       a deliberate ~0.3s crossfade, which reads as the diagram loading the next
+       product's context.
+       The eleven prompts are true to eleven shipped apps; none is a claim. */
     .context-engine.pl-live .pl-prompt,
-    .context-engine.pl-live .pl-ctx { animation: plRoll 70s ease infinite; }
+    .context-engine.pl-live .pl-ctx { animation: plRoll 154s ease infinite; }
     .context-engine.pl-live .pl-prompt:nth-child(2),
     .context-engine.pl-live .pl-ctx:nth-child(2) { animation-delay: 14s; }
     .context-engine.pl-live .pl-prompt:nth-child(3),
@@ -542,10 +555,22 @@
     .context-engine.pl-live .pl-ctx:nth-child(4) { animation-delay: 42s; }
     .context-engine.pl-live .pl-prompt:nth-child(5),
     .context-engine.pl-live .pl-ctx:nth-child(5) { animation-delay: 56s; }
+    .context-engine.pl-live .pl-prompt:nth-child(6),
+    .context-engine.pl-live .pl-ctx:nth-child(6) { animation-delay: 70s; }
+    .context-engine.pl-live .pl-prompt:nth-child(7),
+    .context-engine.pl-live .pl-ctx:nth-child(7) { animation-delay: 84s; }
+    .context-engine.pl-live .pl-prompt:nth-child(8),
+    .context-engine.pl-live .pl-ctx:nth-child(8) { animation-delay: 98s; }
+    .context-engine.pl-live .pl-prompt:nth-child(9),
+    .context-engine.pl-live .pl-ctx:nth-child(9) { animation-delay: 112s; }
+    .context-engine.pl-live .pl-prompt:nth-child(10),
+    .context-engine.pl-live .pl-ctx:nth-child(10) { animation-delay: 126s; }
+    .context-engine.pl-live .pl-prompt:nth-child(11),
+    .context-engine.pl-live .pl-ctx:nth-child(11) { animation-delay: 140s; }
     @keyframes plRoll {
       0% { opacity: 0; }
-      0.6%, 19.8% { opacity: 1; }
-      20.2%, 100% { opacity: 0; }
+      0.27%, 9% { opacity: 1; }
+      9.18%, 100% { opacity: 0; }
     }
 
     @keyframes plMsgD {
@@ -1150,12 +1175,12 @@
               </linearGradient>
             </defs>
             <!-- pipeline lane, y=221 = the 60% centre line the three cards sit on.
-                 Block edges at this size: msg 10-125, core 162.5-337.5, result 365-485 -->
+                 Block edges at this size: msg 6-136, core 162.5-337.5, result 365-485 -->
             <path class="pl-wire glow" d="M0 221 L8 221"/>
-            <path class="pl-wire glow" d="M127 221 L160 221"/>
+            <path class="pl-wire glow" d="M138 221 L160 221"/>
             <path class="pl-wire out glow" d="M340 221 L363 221"/>
             <path class="pl-wire" d="M0 221 L8 221"/>
-            <path class="pl-wire" d="M127 221 L160 221"/>
+            <path class="pl-wire" d="M138 221 L160 221"/>
             <path class="pl-wire out" d="M340 221 L363 221"/>
             <!-- source drops, funnelling into the core inlet at y=153 -->
             <path class="pl-wire glow" d="M85 114 C85 136 130 136 220 152"/>
@@ -1179,67 +1204,90 @@
 
           <div class="pl-msg">
             <span class="pl-msg-tag">You ask</span>
-            <!-- Five scenarios, one per loop, each true to a shipped app: Saffra,
-                 StoryVault, Nightshelf, Wingmate, Mythkin. None of them makes a
-                 claim, and none touches a regulated category. Prompt 1 is the
-                 resting state. Do not add a health, finance, DBT or
-                 dating-outcome prompt here. -->
+            <!-- Eleven scenarios, one per loop — one for EVERY product with an
+                 assistant to ask (owner ask 2026-08-25: "you don't have prompt
+                 examples for each app i have ai in"). None of them makes a
+                 claim. Prompt 1 is the resting state. -->
             <span class="pl-msg-bubble">
-              <!-- EVERY PROMPT HERE MUST BE A REAL ASK IN A SHIPPED APP. Verified 2026-08-25
-                   against source, and chosen to span the categories the hero
-                   sentence names (food, stories, sleep, relationships):
-                     1 Saffra     - chef chat. The app's own core interaction.
-                     2 StoryVault - Dracula is a bundled classic with its own AI Adventure
-                                    scenario (AdventureArrivalUITests drives a Dracula run);
-                                    HomeView.swift:859 is the "Write a Story" entry.
-                     3 Nightshelf - generated bedtime stories: CustomStory.swift, backend
-                                    /v1/nightshelf/story, "Write a bedtime story" on Home.
-                     4 Wingmate   - CoachChatView.swift:1517 placeholder is "Ask {coach}…",
-                                    and the coach reads the whole thread.
-                     5 Mythkin    - talking with roster characters IS the app; Athena is a
-                                    real roster character (mythkin/index.html has an
-                                    "Ask Them About Athena" block, generated from the
-                                    roster by tools/build_mythkin.py, never hand-typed).
-                   TWO WERE REMOVED and must not be restored. One addressed a question to
-                   Hexhunter, which is a horde-survivor game with NO assistant to ask - the
-                   prompt invented a feature, which is the same defect as false copy wearing
-                   a UI costume. The other named a character who appears in no shipped
-                   scenario and read as filler. The exact strings are in the git history of
-                   the commit that removed them, and are not repeated here: this comment is
-                   served verbatim to every visitor, so quoting a retired string re-publishes
-                   it. Check the served bytes, not just the rendered text.
-                   Health, recovery, DBT and markets prompts are deliberately absent: Rowan,
-                   Alder, Quietoak and CryptoSage carry regulatory copy law, and putting one
-                   of their questions on the studio homepage drags that law here for no gain.
+              <!-- EVERY PROMPT HERE MUST BE A REAL ASK IN A SHIPPED APP, and must
+                   make NO claim: no outcome promised, no diagnosis, no treatment,
+                   no trade advice, no dating result. Verified 2026-08-25:
+                     1 Saffra      - chef chat. The app's own core interaction.
+                     2 StoryVault  - Dracula is a bundled classic with its own AI Adventure
+                                     scenario (AdventureArrivalUITests drives a Dracula run);
+                                     HomeView.swift:859 is the "Write a Story" entry.
+                     3 Nightshelf  - generated bedtime stories: CustomStory.swift, backend
+                                     /v1/nightshelf/story, "Write a bedtime story" on Home.
+                     4 Wingmate    - CoachChatView.swift:1517 placeholder is "Ask {coach}…",
+                                     and the coach reads the whole thread.
+                     5 Mythkin     - talking with roster characters IS the app; Athena is a
+                                     real roster character (mythkin/index.html has an
+                                     "Ask Them About Athena" block, generated from the
+                                     roster by tools/build_mythkin.py, never hand-typed).
+                     6 Quietoak    - the skills companion chat; "practise" spelled as the
+                                     product card spells it. The ask requests practice,
+                                     never crisis care.
+                     7 Holohound   - Hound is live (claude-sonnet-5 via holohound-api);
+                                     master-set completion is a shipped screen and the
+                                     binder rides houndContext.
+                     8 Rowan       - the visit brief is the app's core output ("a visit
+                                     brief you can hand your doctor" — this page's card).
+                                     The ask requests the brief, not a diagnosis.
+                     9 Alder       - progress clocks per goal ("keeps the count"). The ask
+                                     reads the count, promises nothing about recovery.
+                    10 CryptoSage  - this page's own card sentence as a question ("Ask why
+                                     your portfolio moved…"); the card beside it carries
+                                     the consent + not-investment-advice disclosures.
+                    11 Mythwright  - the AI Forge takes any free-form description; the
+                                     sea-witch is an example INPUT, not a roster claim.
+                   OWNER OVERRIDE 2026-08-25: the old rule keeping health / recovery /
+                   DBT / markets prompts off this page is retired — Vanus asked for every
+                   AI product to be represented. What still binds is the sentence above:
+                   a REAL ask that makes NO claim. Keep each ask on the safe side of its
+                   category (brief not diagnosis, count not cure, why-it-moved not
+                   what-to-buy, practice not therapy).
+                   TWO PROMPTS WERE REMOVED long before this and must not be restored. One
+                   addressed a question to Hexhunter, which is a horde-survivor game with
+                   NO assistant to ask - the prompt invented a feature. The other named a
+                   character who appears in no shipped scenario. The exact strings are in
+                   git history and not repeated here: this comment is served verbatim, so
+                   quoting a retired string re-publishes it. Games without an assistant
+                   (Hexhunter, Waddleton, Hoardling, Gemburrow) stay out for that reason.
                    The .pl-of tag names the APP only — never the model vendor. Per-prompt
                    vendor tags were considered 2026-08-25 and rejected: Saffra's chat runs
                    on OpenAI (not Claude — see fleet provider map), StoryVault's vendor is
                    a deploy-time secret (LLM_PROVIDER), so a per-app vendor label is wrong
-                   or unstable for two of the five. The accurate, hedged vendor sentence
-                   lives in #ai ("Claude is the primary model in most..."), and only there. -->
+                   or unstable. The accurate, hedged vendor sentence lives in #ai, only. -->
               <span class="pl-prompt"><span class="pl-q">What should I cook tonight?</span><span class="pl-of" style="--app: var(--c-saffra);"><img src="icons/saffra.png" alt="" width="16" height="16">Saffra</span></span>
               <span class="pl-prompt"><span class="pl-q">Start an adventure in Dracula&rsquo;s castle.</span><span class="pl-of" style="--app: var(--c-story);"><img src="icons/storyvault.png" alt="" width="16" height="16">StoryVault&nbsp;AI</span></span>
               <span class="pl-prompt"><span class="pl-q">Write me a bedtime story about the sea.</span><span class="pl-of" style="--app: var(--c-night);"><img src="icons/nightshelf.png" alt="" width="16" height="16">Nightshelf</span></span>
               <span class="pl-prompt"><span class="pl-q">What should I say back to her?</span><span class="pl-of" style="--app: var(--c-wingmate);"><img src="icons/wingmate.png" alt="" width="16" height="16">Wingmate</span></span>
               <span class="pl-prompt"><span class="pl-q">Athena, what makes a hero?</span><span class="pl-of" style="--app: var(--c-mythkin);"><img src="icons/mythkin.png" alt="" width="16" height="16">Mythkin</span></span>
+              <span class="pl-prompt"><span class="pl-q">Which skill should I practise tonight?</span><span class="pl-of" style="--app: var(--c-quietoak);"><img src="icons/quietoak.png?v=20260810w" alt="" width="16" height="16">Quietoak</span></span>
+              <span class="pl-prompt"><span class="pl-q">What do I need to finish this set?</span><span class="pl-of" style="--app: var(--c-holohound);"><img src="icons/holohound.png" alt="" width="16" height="16">Holohound</span></span>
+              <span class="pl-prompt"><span class="pl-q">What should I tell my doctor on Friday?</span><span class="pl-of" style="--app: var(--c-rowan-text);"><img src="icons/rowan.png" alt="" width="16" height="16">Rowan</span></span>
+              <span class="pl-prompt"><span class="pl-q">How long have I been on track?</span><span class="pl-of" style="--app: var(--c-alder);"><img src="icons/alder.png" alt="" width="16" height="16">Alder</span></span>
+              <span class="pl-prompt"><span class="pl-q">Why did my portfolio move today?</span><span class="pl-of" style="--app: var(--c-crypto);"><img src="icons/cryptosage.png" alt="" width="16" height="16">CryptoSage&nbsp;AI</span></span>
+              <span class="pl-prompt"><span class="pl-q">Forge me a card: a cunning sea-witch.</span><span class="pl-of" style="--app: var(--c-myth);"><img src="icons/mythwright.png" alt="" width="16" height="16">Mythwright</span></span>
             </span>
           </div>
 
           <div class="pl-conn c1"></div>
-          <!-- Captions roll per app in prompt order (Saffra, StoryVault AI,
-               Nightshelf, Wingmate, Mythkin — owner ask 2026-08-25: "the
-               different apps change the different sections on top"). Every
-               caption RESTATES a claim already on this page's product cards:
-               Saffra diet/allergen + kitchen, StoryVault chosen classic /
-               follows your moves / current scene, Nightshelf narrators + timer /
-               place saved / custom story, Wingmate connection context / whole
-               thread / screenshot analysis, Mythkin author-your-own kin /
-               conversation / Hearth room. Keep each caption <= 18 characters:
-               the cards are absolutely positioned and size to the widest span. -->
+          <!-- Captions roll per app in prompt order (owner ask 2026-08-25: "the
+               different apps change the different sections on top"). Order:
+               Saffra, StoryVault AI, Nightshelf, Wingmate, Mythkin, Quietoak,
+               Holohound, Rowan, Alder, CryptoSage AI, Mythwright. Every caption
+               RESTATES a claim already on this page's product cards or the
+               sr-only stage list in #ai (e.g. Rowan "conditions · meds" from
+               the card's medication list + the list's "conditions"; Alder "the
+               count" verbatim from its card; Holohound "your binder" from the
+               scanning/binder card; CryptoSage holdings/watchlists/live prices
+               from its card). Keep each caption <= 18 characters: the cards are
+               absolutely positioned and size to the widest span. -->
           <div class="pl-sources">
-            <div class="pl-src src-1"><i class="pl-dot"></i><span><strong>Your context</strong><small class="pl-roll"><span class="pl-ctx">diet · allergies</span><span class="pl-ctx">the chosen classic</span><span class="pl-ctx">narrator · timer</span><span class="pl-ctx">the connection</span><span class="pl-ctx">the kin you chose</span></small></span></div>
-            <div class="pl-src src-2"><i class="pl-dot"></i><span><strong>Recent activity</strong><small class="pl-roll"><span class="pl-ctx">recent chats</span><span class="pl-ctx">your turns so far</span><span class="pl-ctx">your saved place</span><span class="pl-ctx">the whole thread</span><span class="pl-ctx">the conversation</span></small></span></div>
-            <div class="pl-src src-3"><i class="pl-dot"></i><span><strong>Current task*</strong><small class="pl-roll"><span class="pl-ctx">your kitchen</span><span class="pl-ctx">the current scene</span><span class="pl-ctx">tonight&rsquo;s story</span><span class="pl-ctx">the screenshot</span><span class="pl-ctx">who&rsquo;s in the room</span></small></span></div>
+            <div class="pl-src src-1"><i class="pl-dot"></i><span><strong>Your context</strong><small class="pl-roll"><span class="pl-ctx">diet · allergies</span><span class="pl-ctx">the chosen classic</span><span class="pl-ctx">narrator · timer</span><span class="pl-ctx">the connection</span><span class="pl-ctx">the kin you chose</span><span class="pl-ctx">goals · boundaries</span><span class="pl-ctx">your binder</span><span class="pl-ctx">conditions · meds</span><span class="pl-ctx">your reasons</span><span class="pl-ctx">your holdings</span><span class="pl-ctx">your collection</span></small></span></div>
+            <div class="pl-src src-2"><i class="pl-dot"></i><span><strong>Recent activity</strong><small class="pl-roll"><span class="pl-ctx">recent chats</span><span class="pl-ctx">your turns so far</span><span class="pl-ctx">your saved place</span><span class="pl-ctx">the whole thread</span><span class="pl-ctx">the conversation</span><span class="pl-ctx">diary · check-ins</span><span class="pl-ctx">recent scans</span><span class="pl-ctx">recent symptoms</span><span class="pl-ctx">recent check-ins</span><span class="pl-ctx">your watchlists</span><span class="pl-ctx">recent duels</span></small></span></div>
+            <div class="pl-src src-3"><i class="pl-dot"></i><span><strong>Current task*</strong><small class="pl-roll"><span class="pl-ctx">your kitchen</span><span class="pl-ctx">the current scene</span><span class="pl-ctx">tonight&rsquo;s story</span><span class="pl-ctx">the screenshot</span><span class="pl-ctx">who&rsquo;s in the room</span><span class="pl-ctx">tonight&rsquo;s practice</span><span class="pl-ctx">the set you&rsquo;re on</span><span class="pl-ctx">Friday&rsquo;s visit</span><span class="pl-ctx">the count</span><span class="pl-ctx">live prices</span><span class="pl-ctx">the forge</span></small></span></div>
           </div>
 
           <div class="pl-conn c2"></div>
