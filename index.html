@@ -119,7 +119,14 @@
 
       --radius: 16px;
       --radius-sm: 12px;
-      --maxw: 1120px;
+      --maxw: 1300px; /* 1120 -> 1300 on 2026-08-25. The hero pins its art column at
+      500px so the diagram's type can hold an 11px floor; at a 1120 rail that left
+      the lede at 46 characters per line over 7 ragged lines. Widening the SHARED
+      rail buys the measure (64 cpl, 5 lines, at 1280 and above) while every band
+      keeps the same left and right edges — the alternative, bleeding the hero
+      rightward on its own, put the diagram past the nav CTA above it and the
+      portfolio strip below it by up to 150px. Verified at 1100-2560: rails
+      aligned, h1 stays 2 lines, diagram min font-size 11.04px, zero overflow. */;
     }
 
     html { scroll-behavior: smooth; background: var(--bg); }
@@ -220,13 +227,29 @@
     }
 
     /* ===== HERO ===== */
-    section.hero { padding: 82px 0 64px; position: relative; }
+    /* 72px below, not 64: the strip's own 40px margin-top is gone (see .strip), so
+       this padding is now the WHOLE gap from the last hero control to the strip's
+       rule. 82 above / 72 below reads as one bracketed band instead of a hole. */
+    section.hero { padding: 82px 0 72px; position: relative; }
+    /* The hero's right column is PINNED at 500px so the diagram's type can hold
+       its 11px floor, which used to be paid for out of the headline column — the
+       lede fell to 46 characters per line. The fix is to widen the page rail for
+       EVERY band symmetrically (--maxw below), not to bleed the hero rightward.
+       An earlier attempt spent the spare viewport off the hero's right margin
+       only: it bought the measure, but the diagram's right edge then overhung the
+       nav's "Get in touch" button directly above it, and the portfolio strip
+       below it, by up to 150px. Protecting the left rail and silently spending
+       the right one is not a trade worth making — the nav CTA sits over the
+       diagram exactly as the logo sits over the h1. */
     /* The engine spans every row of the right column, so the title and copy sit
        beside it and no desktop dead zone opens above the diagram. */
     /* The engine column is pinned at 500px so the diagram's type can hold an 11px
        floor; the two-column hero therefore only runs where 500px still leaves the
        headline column WIDER than the art (vw > ~1086 — see the 1099px stack
        breakpoint below). The headline always leads. */
+    /* Gutter capped at 44px, not 60: between a text column and a bordered art
+       panel with its own 24px radius and drop shadow, 60px was buying separation
+       the panel already had, and paying for it in measure. */
     .hero-stage {
       display: grid;
       grid-template-columns: minmax(0, 1.15fr) minmax(500px, .85fr);
@@ -235,7 +258,7 @@
         "title engine"
         "copy engine";
       align-items: center;
-      column-gap: clamp(28px, 3.5vw, 60px);
+      column-gap: clamp(28px, 2.8vw, 44px);
     }
     .hero .eyebrow { grid-area: eyebrow; justify-self: start; align-self: end; }
     .hero h1 { grid-area: title; }
@@ -597,7 +620,9 @@
       .context-engine { justify-self: start; max-width: 560px; margin-top: 42px; }
     }
     @media (max-width: 560px) {
-      section.hero { padding: 58px 0 48px; }
+      /* Same trade as desktop: the strip's 40px margin is gone, so this padding is
+         the whole gap from the diagram to the strip's rule. 88px → 56px. */
+      section.hero { padding: 58px 0 56px; }
       /* The pipeline rotates vertical: message → sources → core → result, with a
          ticked rail standing in for the timeline. */
       .context-engine {
@@ -664,7 +689,10 @@
     @keyframes plConnC { 0%, 43% { opacity: .5; } 48% { opacity: 1; } 56%, 100% { opacity: .5; } }
 
     /* ===== LOGO / WORDMARK STRIP ===== */
-    .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 26px 0; margin-top: 40px; background: rgba(255,255,255,0.012); }
+    /* No margin-top. It used to ADD to the hero's own bottom padding — 64+40=104px
+       from the last hero control to this rule, and 233px from the diagram — which
+       is what read as a hole. One owner for that gap now: the hero's padding. */
+    .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 26px 0; background: rgba(255,255,255,0.012); }
     .strip .container { display: flex; align-items: center; gap: 14px 27px; flex-wrap: wrap; justify-content: center; }
     .strip .label { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); }
     /* Desktop: the label heads its own centered line so the 15 marks wrap in balanced
@@ -696,6 +724,11 @@
        band with an empty right half. Phones keep the left-aligned reading flow. */
     @media (min-width: 861px) {
       .section-head { max-width: 780px; margin-left: auto; margin-right: auto; text-align: center; }
+      /* The h2 wants the full 780 — it is display type set in two or three long
+         lines. The paragraph under it does not: at 780px and 17.28px it ran 90
+         characters per line, and centred text at 90cpl loses the reader on the
+         return sweep. 640px puts it at ~74. */
+      .section-head p { max-width: 640px; margin-left: auto; margin-right: auto; }
     }
     .section-head .eyebrow { display: block; margin-bottom: 16px; }
     .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; line-height: 1.22; margin-bottom: 16px; }
@@ -732,7 +765,12 @@
 
     /* ===== PRODUCTS ===== */
     .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-    @media (max-width: 700px) { .products-grid { grid-template-columns: 1fr; } }
+    /* minmax(0,1fr), not 1fr: a 1fr track's automatic minimum is min-content, and
+       four of the cards min-content at 289-299px. At a 320px viewport (272px of
+       container) that stretched the track past the container and pushed 3px of
+       document overflow — invisible only because body{overflow-x:hidden} ate it.
+       Binds at 320 alone; the track is unchanged at 360 and above. */
+    @media (max-width: 700px) { .products-grid { grid-template-columns: minmax(0, 1fr); } }
     /* The portfolio card FINISHES the last row instead of starting a new one.
        With an odd number of products (fifteen, since Hoardling) the last
        product sits alone with a hole beside it — so the contact card drops into
@@ -845,11 +883,15 @@
       .flow-step:not(:last-child)::after { display: none; }
     }
     @media (max-width: 560px) { .intelligence-flow { grid-template-columns: 1fr; } }
-    .model-note { color: var(--faint); font-size: 0.82rem; margin-top: 18px; }
+    /* Uncapped this ran the full container: 164 characters per line at 1440 and
+       150 at 1024 — the worst measure on the page. It is a footnote, so it sits
+       left under the flow and stops at a readable width. */
+    .model-note { color: var(--faint); font-size: 0.82rem; margin-top: 18px; max-width: 62ch; }
 
     /* ===== CTA ===== */
     .cta {
-      text-align: center; padding: 84px 24px; margin: 0;
+      /* 88, not 84 — every other section band on the page is 88/88. */
+      text-align: center; padding: 88px 24px; margin: 0;
       background:
         radial-gradient(ellipse 60% 100% at 50% 0%, rgba(45,212,191,0.12), transparent 70%),
         radial-gradient(ellipse 60% 100% at 50% 100%, rgba(167,139,250,0.10), transparent 70%);
