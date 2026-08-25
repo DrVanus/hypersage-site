@@ -1077,6 +1077,13 @@
     .world-card img {
       display: block;
       width: 100%;
+      /* height:auto is LOAD-BEARING. The tags carry width/height attributes for
+         CLS, which set a definite height, and aspect-ratio only computes a
+         dimension when the other is auto — so 4/5 was ignored and the paintings
+         rendered 341x600 (0.57) instead of 341x426. object-fit:cover then
+         cropped the extra off the scenario art. Fixed 2026-08-25; the same trap
+         is documented on quietoak's .hero-image img. */
+      height: auto;
       aspect-ratio: 4 / 5;
       object-fit: cover;
       transition: transform .5s var(--ease);

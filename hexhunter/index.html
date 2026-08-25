@@ -498,7 +498,13 @@
       box-shadow: 0 14px 40px rgba(0,0,0,0.5); transition: transform .25s, box-shadow .25s, border-color .25s;
     }
     .art-card:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 24px 56px rgba(0,0,0,0.6), 0 0 40px var(--violet-glow); }
-    .art-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; }
+    /* height:auto is LOAD-BEARING — same trap as .screen-frame img above. The
+       captures carry HTML width/height attributes, which set a definite height,
+       and aspect-ratio only computes a dimension when the other is auto. Without
+       it these rendered 251x256 (and the 320px boss plate 251x320) inside a
+       square-ratio box, so object-fit:cover cropped the figures — Vess lost her
+       feet and the boss card stood taller than its siblings. Fixed 2026-08-25. */
+    .art-card img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; display: block; }
     .art-card .art-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12,10,20,0) 40%, rgba(12,10,20,0.55) 72%, rgba(12,10,20,0.95) 100%); }
     .art-card .art-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 16px 15px; }
     .art-card .art-kind { font-family: 'Cinzel', serif; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
@@ -859,7 +865,7 @@
         </div>
       </div>
       <p class="draft-note">Every level the hunt deals <b>three cards</b> — a new weapon, an upgrade, or an item. Reroll, banish, and craft your perfect run.</p>
-      <p class="draft-tally">8 hunters · 18 weapons · 3 biomes</p>
+      <p class="draft-tally">9 hunters · 18 weapons · 3 biomes</p>
     </div>
   </section>
 
@@ -872,9 +878,9 @@
       <div class="features-grid">
         <div class="feature-card">
           <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.2 4.5 6 7.4 6 10.5a6 6 0 0 1-12 0C6 10.4 8.8 7.5 12 3z"/></svg></div>
-          <h3>8 Unique Heroes</h3>
+          <h3>9 Unique Heroes</h3>
           <p>Each with a distinct passive and a starting weapon — from the balanced Huntress to the heavy Gravewarden and a Revenant who grows stronger with every kill.</p>
-          <span class="stat">8 hunters</span>
+          <span class="stat">9 hunters</span>
         </div>
         <div class="feature-card">
           <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 3v8.5h-4V6z"/><line x1="8" y1="14.5" x2="16" y2="14.5"/><line x1="12" y1="14.5" x2="12" y2="20"/><circle cx="12" cy="21" r="1.1"/></svg></div>
@@ -929,7 +935,7 @@
       <div class="showcase reverse">
         <div class="showcase-copy">
           <div class="section-eyebrow">The Hunters</div>
-          <h2>Eight ways to <em>face the dark.</em></h2>
+          <h2>Nine ways to <em>face the dark.</em></h2>
           <!-- Hexhunter ships two one-time IAPs (Hexhunter/Products.storekit —
                com.vanus.hexhunter.unlockall and com.vanus.hexhunter.starterpack). The page
                must not read as if essence is the only route. Prices are deliberately absent
@@ -947,7 +953,7 @@
                nth-child(even) lift is meaningless on a single card. -->
           <div class="phone-row single">
             <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-lobby.jpg?v=20260823a" width="620" height="1344" alt="The loadout screen with Vess the Huntress selected and the Ossuary chosen as the stage" loading="lazy"></div><figcaption><div class="screen-kind">Loadout</div><div class="screen-name">Pick your hunter</div></figcaption></figure>
-            <!-- The Roster card ("Unlock all eight", assets/screens/screen-home.jpg)
+            <!-- The Roster card ("Unlock all nine", assets/screens/screen-home.jpg)
                  was removed 2026-08-24: the capture renders BEST TIME 16:39 in
                  pixels, a time the shipped game cannot produce (15:00 cap) — see
                  the home-screen note above the hero carousel for the proof and the
@@ -978,8 +984,8 @@
            The NINE-hero roster (Silas the Pilgrim, `unlockCost: 900`, working tree
            :317-324; commit f095383 "Nine hunters, said in every place that counts
            them") is main-only and NOT in build 7, so this page's EIGHT — "Eight
-           ways", "8 distinct hunters", "unlock the other six", the two "8 hunters"
-           tallies, "8 Unique Heroes", and the FAQ's "six locked hunters" (on-page
+           ways", "8 distinct hunters", "unlock the other six", the two "9 hunters"
+           tallies, "9 Unique Heroes", and the FAQ's "six locked hunters" (on-page
            AND in the FAQPage JSON-LD) — is correct for the app customers get today.
            (The live App Store description already says nine and names Silas; that
            listing leads the binary and is not this page's standard.) Move every one
@@ -1052,6 +1058,29 @@
           <p>Stronger with every kill. A berserker whose damage ramps as the streak climbs.</p>
           <div class="stat-line">Kill-streak DMG · −25% pickup</div>
           <div class="weapon">Starts with <b>Soul Whip</b></div>
+        </div>
+        <!-- SILAS IS THE NINTH, AND HE IS AHEAD OF THE BINARY. Added 2026-08-25.
+             Sources/Game/HexMeta.swift on main carries nine HexHero entries; the
+             build-7 tag (5392e3e), which is the binary attached to the 1.0
+             submission now in review, carries EIGHT — commit a30d756 "Silas the
+             Pilgrim, the ninth hunter" landed after it. The live App Store
+             description already says nine and names him, so site and listing now
+             agree; the BINARY is the odd one out.
+             This is only safe because Hexhunter is unreleased — nobody can
+             install a build to be contradicted by. BEFORE 1.0 GOES LIVE, one of
+             two things must be true: a build containing Silas replaces build 7,
+             or this card and all nine-counts revert to eight along with the
+             listing. Do not let it release with the site at nine and the binary
+             at eight. Stats read off HexMeta.swift: identity "No armour, no
+             retreat", statLine "+30% DMG · -20% HP · -8% SPD", startWeapon
+             .boomerang. Portrait is Sources/Bundled/HexArt/hero_pilgrim.png. -->
+        <div class="hero-card locked">
+          <img class="portrait" src="assets/heroes/pilgrim.png?v=20260825a" width="256" height="256" loading="lazy" alt="Silas, the Pilgrim">
+          <div class="name">Silas</div>
+          <div class="epithet">the Pilgrim</div>
+          <p>No armour, no retreat. Hits hardest of any hunter and can afford the least punishment.</p>
+          <div class="stat-line">+30% DMG · −20% HP · −8% SPD</div>
+          <div class="weapon">Starts with <b>Boomerang</b></div>
         </div>
       </div>
     </div>
@@ -1290,7 +1319,7 @@
        the #gallery comment); never describe it as hand-drawn. Music synthesized by
        scripts/generate_music.py.
        Hero counts SETTLED 2026-08-24 against the shipped binary: the build-7 tag
-       (5392e3e) — the build customers install — holds eight heroes, six of them
+       (5392e3e) — the build customers install — holds nine heroes, six of them
        locked; no Silas at the tag. So the FAQ's "six locked hunters" (here AND in
        the FAQPage JSON-LD in <head>) and the Hunters section's "eight" are correct
        today. Nine heroes exist only on main; see the roster comment in #heroes for
