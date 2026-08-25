@@ -43,6 +43,7 @@ NAMES = {
     "saffra": "Saffra", "storyvault": "StoryVault", "nightshelf": "Nightshelf",
     "hexhunter": "Hexhunter", "mythwright": "Mythwright", "rowan": "Rowan",
     "alder": "Alder", "waddleton": "Waddleton", "mythkin": "Mythkin",
+    "holohound": "Holohound", "hoardling": "Hoardling", "gemburrow": "Gemburrow",
 }
 
 
@@ -112,7 +113,7 @@ def build_html() -> str:
   <div class="og-left">
     <div class="og-brand">
       <img src="logo.png" alt="">
-      <div><div class="t1">Independent Product Studio</div><div class="t2">Hypersage AI Labs</div></div>
+      <div><div class="t1">Independent Product Studio</div><div class="t2">HyperSage AI Labs</div></div>
     </div>
     <h1>Software with<br><span class="grad">a point of view.</span></h1>
     <div class="rule"></div>
@@ -145,6 +146,9 @@ def inputs_digest() -> str:
     for part in (style, figure, "\n".join(products), h1, ogt.group(1) if ogt else ""):
         h.update(part.encode())
         h.update(b"\0")
+    # The brand mark is pixels in the card; a swapped logo.png must read as stale.
+    h.update((ROOT / "logo.png").read_bytes())
+    h.update(b"\0")
     return h.hexdigest()
 
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
-  <title id="title">Hypersage AI Labs — Software with a point of view.</title>
-  <desc id="description">Social preview for Hypersage, an independent product studio.</desc>
+  <title id="title">HyperSage AI Labs — Software with a point of view.</title>
+  <desc id="description">Social preview for HyperSage, an independent product studio.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#071317"/>
@@ -40,7 +40,7 @@
     <path d="M7 24C7 8 24 4 34 15L50 33C60 44 77 40 77 24S60 4 50 15L34 33C24 44 7 40 7 24Z"
           fill="none" stroke="url(#brand)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
     <text x="101" y="18" fill="#2dd4bf" font-family="JetBrains Mono, Menlo, monospace" font-size="14" font-weight="600" letter-spacing="3.2">INDEPENDENT PRODUCT STUDIO</text>
-    <text x="101" y="43" fill="#eaeef5" font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="19" font-weight="700">Hypersage AI Labs</text>
+    <text x="101" y="43" fill="#eaeef5" font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="19" font-weight="700">HyperSage AI Labs</text>
   </g>
 
   <g transform="translate(80 215)">
