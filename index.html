@@ -223,9 +223,13 @@
     section.hero { padding: 82px 0 64px; position: relative; }
     /* The engine spans every row of the right column, so the title and copy sit
        beside it and no desktop dead zone opens above the diagram. */
+    /* The engine column is pinned at 500px so the diagram's type can hold an 11px
+       floor; the two-column hero therefore only runs where 500px still leaves the
+       headline column WIDER than the art (vw > ~1086 — see the 1099px stack
+       breakpoint below). The headline always leads. */
     .hero-stage {
       display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(440px, .85fr);
+      grid-template-columns: minmax(0, 1.15fr) minmax(500px, .85fr);
       grid-template-areas:
         "eyebrow engine"
         "title engine"
@@ -253,9 +257,13 @@
     /* The Context Engine is explanatory art: a compact map of the system described
        by the semantic ordered list in #ai. It is deliberately decorative here so
        screen-reader users encounter the complete explanation only once. */
+    /* 500x368 is also the wire viewBox, so at the desktop size one SVG user unit
+       is exactly one CSS pixel and the preserveAspectRatio="none" stretch is the
+       identity. The aspect is constant at every width above 560px, so the stretch
+       stays uniform everywhere. */
     .context-engine {
       grid-area: engine; position: relative; isolation: isolate;
-      width: 100%; max-width: 500px; aspect-ratio: 1.62 / 1;
+      width: 100%; max-width: 500px; aspect-ratio: 500 / 368;
       justify-self: end; align-self: center; overflow: hidden;
       border: 1px solid var(--line-strong); border-radius: 24px;
       background:
@@ -274,15 +282,19 @@
       -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
     }
     .context-engine::after {
-      content: ''; position: absolute; width: 140px; height: 140px; left: 47%; top: 59%;
+      content: ''; position: absolute; width: 170px; height: 170px; left: 50%; top: 60%;
       z-index: -1; pointer-events: none; transform: translate(-50%,-50%);
-      border-radius: 50%; background: rgba(45,212,191,.07); filter: blur(28px);
+      border-radius: 50%; background: rgba(45,212,191,.07); filter: blur(30px);
     }
+    /* Type floor: no string inside this figure is set below .69rem / 11.04px, and
+       the core label sits at .86rem / 13.76px. Below ~12px Space Grotesk's
+       descenders (g j p q y) collapse into stubs, which is what "the g in
+       intelligence" was. Do not shrink these back. */
     .engine-head {
-      position: absolute; inset: 17px 18px auto; z-index: 4;
+      position: absolute; inset: 18px 20px auto; z-index: 4;
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
       font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: .59rem; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
+      font-size: .69rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
       color: var(--faint);
     }
     .engine-head span:first-child { color: var(--brand-a); }
@@ -302,13 +314,17 @@
     .pl-tl-stage { stroke: rgba(45,212,191,.5); stroke-width: 1.4; vector-effect: non-scaling-stroke; fill: none; }
     .pl-playhead { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
 
-    /* Transient carriers — labelled context tokens and signal pulses. Hidden at
-       rest, so reduced-motion / no-JS / print never show a half-told story. */
+    /* Transient carriers — context tokens and signal pulses. Hidden at rest, so
+       reduced-motion / no-JS / print never show a half-told story.
+       The tokens used to be labelled pills set in 8px mono. That text was both
+       below the legibility floor and a duplicate of the source card it fell out
+       of, and it could not grow to 11px without three 70px pills colliding in a
+       235px funnel. They are dot markers now; the tie back to the source is
+       carried by colour (teal for the two context feeds, violet for live task
+       state), matching each card's own .pl-dot. */
     .pl-tok { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
-    .pl-tok rect { fill: rgba(13,18,27,.94); stroke: rgba(45,212,191,.45); }
-    .pl-tok text { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .08em; fill: #8FE8DC; }
-    .pl-tok.violet rect { stroke: rgba(167,139,250,.5); }
-    .pl-tok.violet text { fill: #C9BAFD; }
+    .pl-tok circle { fill: #5FE3D2; }
+    .pl-tok.violet circle { fill: #C9BAFD; }
     .pl-pulse { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
 
     /* Three context sources feed the core from above. display:contents keeps the
@@ -316,49 +332,63 @@
     .pl-sources { display: contents; }
     .pl-src {
       position: absolute; z-index: 2; transform: translate(-50%,-50%);
-      display: flex; align-items: center; gap: 7px; padding: 7px 9px;
-      border: 1px solid rgba(255,255,255,.1); border-radius: 10px;
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.1); border-radius: 11px;
       background: rgba(15,20,29,.9); box-shadow: 0 8px 24px rgba(0,0,0,.24);
       white-space: nowrap;
     }
-    .pl-src .pl-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--brand-a); box-shadow: 0 0 10px rgba(45,212,191,.58); flex: 0 0 auto; }
+    .pl-src .pl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-a); box-shadow: 0 0 10px rgba(45,212,191,.58); flex: 0 0 auto; }
     .pl-src.src-3 .pl-dot { background: var(--brand-b); box-shadow: 0 0 10px rgba(167,139,250,.58); }
-    .pl-src strong { display: block; font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: .66rem; font-weight: 600; color: var(--fg); line-height: 1.2; }
-    .pl-src small { display: block; color: var(--faint); font-size: .54rem; line-height: 1.3; }
-    .src-1 { left: 22.3%; top: 23.5%; }
-    .src-2 { left: 47.2%; top: 23.5%; }
-    .src-3 { left: 72.1%; top: 23.5%; }
+    .pl-src strong { display: block; font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: .83rem; font-weight: 600; color: var(--fg); line-height: 1.22; }
+    .pl-src small { display: block; color: var(--faint); font-size: .69rem; line-height: 1.34; }
+    /* Symmetric about the core at 50%: the row leaves an equal margin each side. */
+    .src-1 { left: 17%; top: 25%; }
+    .src-2 { left: 50%; top: 25%; }
+    .src-3 { left: 83%; top: 25%; }
 
-    /* The utterance entering the pipeline. */
-    .pl-msg { position: absolute; z-index: 2; left: 13.2%; top: 57.4%; width: 21%; transform: translate(-50%,-50%); }
-    .pl-msg-tag { display: block; margin: 0 0 4px 2px; font-family: 'JetBrains Mono', monospace; font-size: .5rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+    /* The utterance entering the pipeline. The bubble is a 1x1 grid and all four
+       prompts share the single cell, so the box always sizes to the TALLEST of
+       them: rotating the prompt can never reflow the diagram or clip a line. */
+    .pl-msg { position: absolute; z-index: 2; left: 13.5%; top: 60%; width: 23%; transform: translate(-50%,-50%); }
+    .pl-msg-tag { display: block; margin: 0 0 5px 2px; font-family: 'JetBrains Mono', monospace; font-size: .69rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
     .pl-msg-bubble {
-      display: block; padding: 7px 9px; color: var(--fg); font-size: .63rem; line-height: 1.4;
-      border: 1px solid rgba(45,212,191,.32); border-radius: 11px 11px 11px 4px;
+      display: grid; align-items: center;
+      padding: 8px 10px; color: var(--fg); font-size: .8rem; line-height: 1.4;
+      border: 1px solid rgba(45,212,191,.32); border-radius: 12px 12px 12px 4px;
       background: rgba(45,212,191,.09); box-shadow: 0 8px 22px rgba(0,0,0,.22);
     }
+    .pl-prompt { grid-area: 1 / 1; }
+    /* Resting state = prompt 1 alone, fully composed. Prompts 2-4 only ever
+       surface while .pl-live is armed, so no-JS, reduced-motion and print all
+       show prompt 1 and nothing stacked behind it. */
+    .pl-prompt + .pl-prompt { opacity: 0; }
 
     /* The core — a processor block whose four faculties light as the message
        passes through. */
     .pl-core {
-      position: absolute; z-index: 3; left: 47.2%; top: 59.3%; width: 29%;
-      transform: translate(-50%,-50%); text-align: center; padding: 9px 9px 8px;
-      border: 1px solid rgba(255,255,255,.14); border-radius: 14px;
+      position: absolute; z-index: 3; left: 50%; top: 60%; width: 35%;
+      transform: translate(-50%,-50%); text-align: center; padding: 11px 10px 10px;
+      border: 1px solid rgba(255,255,255,.14); border-radius: 15px;
       background: linear-gradient(150deg, rgba(19,26,36,.98), rgba(9,13,20,.98));
       box-shadow: 0 14px 38px rgba(0,0,0,.42), inset 0 0 24px rgba(45,212,191,.05);
     }
     .pl-core::after {
-      content: ''; position: absolute; inset: -1px; border-radius: 15px;
+      content: ''; position: absolute; inset: -1px; border-radius: 16px;
       pointer-events: none; opacity: 0;
       box-shadow: 0 0 26px rgba(45,212,191,.4), inset 0 0 16px rgba(45,212,191,.18);
     }
-    .pl-core img { width: 20px; height: 22px; object-fit: contain; margin-bottom: 3px; }
-    .pl-core strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: .63rem; line-height: 1.15; white-space: nowrap; }
-    .pl-fac { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 7px; }
+    .pl-core img { width: 24px; height: 26px; object-fit: contain; margin-bottom: 4px; }
+    /* The core is 35% wide because that is what the four faculty pills actually
+       need: at the 11.04px floor "KNOWLEDGE" and "SAFEGUARDS" measure 67.6 and
+       74.5 JetBrains Mono pixels, so a two-column row needs 147px of content box.
+       Sizing the card to the type (rather than the type to the card) is the whole
+       point of this refit — do not narrow it back. */
+    .pl-core strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: .86rem; line-height: 1.18; text-wrap: balance; }
+    .pl-fac { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 9px; }
     .pl-fac span {
-      font-family: 'JetBrains Mono', monospace; font-size: .47rem; font-weight: 600;
-      letter-spacing: .05em; text-transform: uppercase; padding: 3.5px 2px;
-      border-radius: 6px; border: 1px solid rgba(45,212,191,.28);
+      font-family: 'JetBrains Mono', monospace; font-size: .69rem; font-weight: 600;
+      letter-spacing: .02em; text-transform: uppercase; padding: 4px 2px;
+      border-radius: 7px; border: 1px solid rgba(45,212,191,.28);
       background: rgba(45,212,191,.07); color: #86E7DB;
     }
     .pl-fac .fac-r, .pl-fac .fac-s { border-color: rgba(167,139,250,.32); background: rgba(167,139,250,.08); color: #C9BAFD; }
@@ -366,22 +396,27 @@
     /* The payoff — strongest treatment: brand-gradient text and a glow that
        answers the pulse arrival. */
     .pl-result {
-      position: absolute; z-index: 2; left: 85%; top: 59.3%; width: 24.5%;
-      transform: translate(-50%,-50%); text-align: center; padding: 9px 7px 8px;
-      border: 1px solid rgba(167,139,250,.36); border-radius: 12px;
+      position: absolute; z-index: 2; left: 85%; top: 60%; width: 24%;
+      transform: translate(-50%,-50%); text-align: center; padding: 10px 8px;
+      border: 1px solid rgba(167,139,250,.36); border-radius: 13px;
       background: linear-gradient(145deg, rgba(45,212,191,.13), rgba(167,139,250,.15));
       box-shadow: 0 10px 28px rgba(0,0,0,.26), 0 0 20px rgba(167,139,250,.12);
     }
     .pl-result::after {
-      content: ''; position: absolute; inset: -1px; border-radius: 13px;
+      content: ''; position: absolute; inset: -1px; border-radius: 14px;
       pointer-events: none; opacity: 0;
       box-shadow: 0 0 26px rgba(167,139,250,.45), inset 0 0 14px rgba(45,212,191,.2);
     }
-    .pl-result > span { display: block; margin-bottom: 3px; font-family: 'JetBrains Mono', monospace; color: var(--brand-a); font-size: .52rem; letter-spacing: .1em; text-transform: uppercase; }
-    .pl-result strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: .66rem; line-height: 1.28; text-wrap: balance; }
-    .pl-stamps { display: flex; justify-content: center; gap: 4px; margin-top: 6px; }
+    .pl-result > span { display: block; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; color: var(--brand-a); font-size: .69rem; letter-spacing: .08em; text-transform: uppercase; }
+    .pl-result strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: .86rem; line-height: 1.3; text-wrap: balance; }
+    /* The stamps used to span 88.66px inside an 88.08px content box — they were
+       overhanging the card, which is what "they don't fit perfectly" was.
+       On the desktop panel they now stack, one per row, so the clearance is a
+       fixed ~23px per side and can never come down to a knife edge as the type or
+       the card width drifts. The wide mobile card puts them back side by side. */
+    .pl-stamps { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-top: 8px; }
     .pl-stamp {
-      display: inline-block; font-size: .47rem; letter-spacing: .02em; padding: 2px 5px;
+      display: inline-block; font-size: .69rem; letter-spacing: .01em; padding: 3px 7px;
       border-radius: 999px; border: 1px solid rgba(45,212,191,.4);
       background: rgba(45,212,191,.1); color: #8FE8DC; white-space: nowrap;
     }
@@ -389,132 +424,171 @@
     /* Mobile-only plumbing, invisible on desktop. */
     .pl-conn { display: none; }
     .pl-rail { display: none; }
+    /* The asterisk on "Current task*" resolves HERE. This footnote must stay
+       visible inside the panel at every width. */
     .engine-foot {
-      position: absolute; left: 18px; right: 18px; bottom: 13px; z-index: 4;
-      color: var(--faint); font-size: .56rem; letter-spacing: .02em; text-align: right;
+      position: absolute; left: 20px; right: 20px; bottom: 12px; z-index: 4;
+      color: var(--faint); font-size: .69rem; letter-spacing: .01em; text-align: right;
     }
 
-    /* ===== Pipeline motion — one 8s narrative loop, armed only while motion is
+    /* ===== Pipeline motion — one 14s narrative loop, armed only while motion is
        welcome (.pl-live). The resting markup IS the finished frame, so no-JS,
-       reduced-motion and save-data users always see the composed diagram. ===== */
-    .context-engine.pl-live .pl-msg { animation: plMsgD 8s ease infinite; }
-    .context-engine.pl-live .tok-1 { animation: plTok1 8s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .tok-2 { animation: plTok2 8s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .tok-3 { animation: plTok3 8s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .pulse-in { animation: plPulseIn 8s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .pulse-out { animation: plPulseOut 8s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .pl-core::after { animation: plCharge 8s ease infinite; }
-    .context-engine.pl-live .fac-k { animation: plFacK 8s ease infinite; }
-    .context-engine.pl-live .fac-t { animation: plFacT 8s ease infinite; }
-    .context-engine.pl-live .fac-r { animation: plFacR 8s ease infinite; }
-    .context-engine.pl-live .fac-s { animation: plFacS 8s ease infinite; }
-    .context-engine.pl-live .pl-result { animation: plResD 8s ease infinite; }
-    .context-engine.pl-live .pl-result::after { animation: plResGlow 8s ease infinite; }
-    .context-engine.pl-live .pl-stamp:first-child { animation: plStamp1 8s ease infinite; }
-    .context-engine.pl-live .pl-stamp:last-child { animation: plStamp2 8s ease infinite; }
-    .context-engine.pl-live .pl-playhead { animation: plPlayhead 8s linear infinite; }
+       reduced-motion and save-data users always see the composed diagram.
+
+       Retimed from 8s: five stages in eight seconds was faster than the diagram
+       could be read. Every percentage below is recomputed for 14s, not rescaled —
+       the stage beats are spread, and the tail is spent HOLDING rather than
+       animating. 1% = 140ms.
+
+         0-6%    the question arrives
+         8-30%   three context tokens fall into the core
+         17-26%  the question enters the core
+         27-41%  knowledge / tools / rules / safeguards light in turn
+         44-53%  the answer leaves the core and the result card lights
+         54-61%  grounded, then checked
+         61-93%  HOLD — composed frame, 4.48s, the picture a glance should catch
+         93-100% the question clears so the next one can arrive
+    */
+    .context-engine.pl-live .pl-msg { animation: plMsgD 14s ease infinite; }
+    .context-engine.pl-live .tok-1 { animation: plTok1 14s cubic-bezier(.4,0,.2,1) infinite; }
+    .context-engine.pl-live .tok-2 { animation: plTok2 14s cubic-bezier(.4,0,.2,1) infinite; }
+    .context-engine.pl-live .tok-3 { animation: plTok3 14s cubic-bezier(.4,0,.2,1) infinite; }
+    .context-engine.pl-live .pulse-in { animation: plPulseIn 14s cubic-bezier(.4,0,.2,1) infinite; }
+    .context-engine.pl-live .pulse-out { animation: plPulseOut 14s cubic-bezier(.4,0,.2,1) infinite; }
+    .context-engine.pl-live .pl-core::after { animation: plCharge 14s ease infinite; }
+    .context-engine.pl-live .fac-k { animation: plFacK 14s ease infinite; }
+    .context-engine.pl-live .fac-t { animation: plFacT 14s ease infinite; }
+    .context-engine.pl-live .fac-r { animation: plFacR 14s ease infinite; }
+    .context-engine.pl-live .fac-s { animation: plFacS 14s ease infinite; }
+    .context-engine.pl-live .pl-result { animation: plResD 14s ease infinite; }
+    .context-engine.pl-live .pl-result::after { animation: plResGlow 14s ease infinite; }
+    .context-engine.pl-live .pl-stamp:first-child { animation: plStamp1 14s ease infinite; }
+    .context-engine.pl-live .pl-stamp:last-child { animation: plStamp2 14s ease infinite; }
+    .context-engine.pl-live .pl-playhead { animation: plPlayhead 14s linear infinite; }
+
+    /* Prompt rotation — one question per loop, four loops to a 56s master cycle.
+       Each prompt's turn is offset by a positive animation-delay, and fill-mode
+       stays `none`, so before its first turn a prompt shows its RESTING opacity
+       (0 for 2-4). The handover sits at 24.8-25.2% of the master = 13.888-14.112s,
+       squarely inside the window where the bubble itself is at opacity 0
+       (plMsgD is out from 96% = 13.44s to 1% of the next loop = 14.14s), so the
+       swap is never visible.
+       The four strings are true to four shipped apps and none of them is a claim. */
+    .context-engine.pl-live .pl-prompt { animation: plPrompt 56s ease infinite; }
+    .context-engine.pl-live .pl-prompt:nth-child(2) { animation-delay: 14s; }
+    .context-engine.pl-live .pl-prompt:nth-child(3) { animation-delay: 28s; }
+    .context-engine.pl-live .pl-prompt:nth-child(4) { animation-delay: 42s; }
+    @keyframes plPrompt {
+      0%, 24.8% { opacity: 1; }
+      25.2%, 99.8% { opacity: 0; }
+      100% { opacity: 1; }
+    }
 
     @keyframes plMsgD {
-      0%, 2.5% { opacity: 0; transform: translate(calc(-50% - 30px), -50%); }
-      8% { opacity: 1; transform: translate(-50%, -50%); }
-      96% { opacity: 1; transform: translate(-50%, -50%); }
-      100% { opacity: 0; transform: translate(-50%, -50%); }
+      0%, 1% { opacity: 0; transform: translate(calc(-50% - 30px), -50%); }
+      6% { opacity: 1; transform: translate(-50%, -50%); }
+      93% { opacity: 1; transform: translate(-50%, -50%); }
+      96%, 100% { opacity: 0; transform: translate(-50%, -50%); }
     }
     @keyframes plTok1 {
-      0%, 10% { opacity: 0; transform: translate(105px, 84px) scale(.5); }
-      13% { opacity: 1; transform: translate(105px, 90px) scale(1); }
-      19% { opacity: 1; transform: translate(150px, 106px) scale(1); }
-      24% { opacity: 1; transform: translate(192px, 117px) scale(.85); }
-      27%, 100% { opacity: 0; transform: translate(196px, 122px) scale(.3); }
+      0%, 8% { opacity: 0; transform: translate(85px, 112px) scale(.4); }
+      10% { opacity: 1; transform: translate(85px, 118px) scale(1); }
+      16% { opacity: 1; transform: translate(131px, 136px) scale(1); }
+      20% { opacity: 1; transform: translate(202px, 148px) scale(.85); }
+      22%, 100% { opacity: 0; transform: translate(220px, 153px) scale(.3); }
     }
     @keyframes plTok2 {
-      0%, 14% { opacity: 0; transform: translate(222px, 84px) scale(.5); }
-      17% { opacity: 1; transform: translate(222px, 92px) scale(1); }
-      28% { opacity: 1; transform: translate(222px, 117px) scale(.85); }
-      31%, 100% { opacity: 0; transform: translate(222px, 122px) scale(.3); }
+      0%, 11% { opacity: 0; transform: translate(250px, 112px) scale(.4); }
+      13% { opacity: 1; transform: translate(250px, 118px) scale(1); }
+      23% { opacity: 1; transform: translate(250px, 148px) scale(.85); }
+      26%, 100% { opacity: 0; transform: translate(250px, 153px) scale(.3); }
     }
     @keyframes plTok3 {
-      0%, 18% { opacity: 0; transform: translate(339px, 84px) scale(.5); }
-      21% { opacity: 1; transform: translate(339px, 90px) scale(1); }
-      27% { opacity: 1; transform: translate(294px, 106px) scale(1); }
-      32% { opacity: 1; transform: translate(252px, 117px) scale(.85); }
-      35%, 100% { opacity: 0; transform: translate(248px, 122px) scale(.3); }
+      0%, 14% { opacity: 0; transform: translate(415px, 112px) scale(.4); }
+      16% { opacity: 1; transform: translate(415px, 118px) scale(1); }
+      23% { opacity: 1; transform: translate(369px, 136px) scale(1); }
+      27% { opacity: 1; transform: translate(298px, 148px) scale(.85); }
+      30%, 100% { opacity: 0; transform: translate(280px, 153px) scale(.3); }
     }
     @keyframes plPulseIn {
-      0%, 20% { opacity: 0; transform: translate(114px, 172px); }
-      23% { opacity: 1; transform: translate(122px, 172px); }
-      30% { opacity: 1; transform: translate(146px, 172px); }
-      33%, 100% { opacity: 0; transform: translate(152px, 172px); }
+      0%, 17% { opacity: 0; transform: translate(126px, 221px); }
+      19% { opacity: 1; transform: translate(131px, 221px); }
+      24% { opacity: 1; transform: translate(155px, 221px); }
+      26%, 100% { opacity: 0; transform: translate(161px, 221px); }
     }
     @keyframes plCharge {
-      0%, 26% { opacity: 0; }
-      34% { opacity: .8; }
-      56% { opacity: .3; }
-      64%, 100% { opacity: 0; }
+      0%, 21% { opacity: 0; }
+      27% { opacity: .8; }
+      42% { opacity: .3; }
+      48%, 100% { opacity: 0; }
     }
     @keyframes plFacK {
       0% { opacity: 1; transform: scale(1); }
-      8%, 34% { opacity: .3; transform: scale(1); }
-      37% { opacity: 1; transform: scale(1.12); }
-      40%, 100% { opacity: 1; transform: scale(1); }
+      5%, 24% { opacity: .3; transform: scale(1); }
+      27% { opacity: 1; transform: scale(1.12); }
+      30%, 100% { opacity: 1; transform: scale(1); }
     }
     @keyframes plFacT {
       0% { opacity: 1; transform: scale(1); }
-      8%, 40% { opacity: .3; transform: scale(1); }
-      43% { opacity: 1; transform: scale(1.12); }
-      46%, 100% { opacity: 1; transform: scale(1); }
+      5%, 28.5% { opacity: .3; transform: scale(1); }
+      31.5% { opacity: 1; transform: scale(1.12); }
+      34.5%, 100% { opacity: 1; transform: scale(1); }
     }
     @keyframes plFacR {
       0% { opacity: 1; transform: scale(1); }
-      8%, 46% { opacity: .3; transform: scale(1); }
-      49% { opacity: 1; transform: scale(1.12); }
-      52%, 100% { opacity: 1; transform: scale(1); }
+      5%, 33% { opacity: .3; transform: scale(1); }
+      36% { opacity: 1; transform: scale(1.12); }
+      39%, 100% { opacity: 1; transform: scale(1); }
     }
     @keyframes plFacS {
       0% { opacity: 1; transform: scale(1); }
-      8%, 52% { opacity: .3; transform: scale(1); }
-      55% { opacity: 1; transform: scale(1.12); }
-      58%, 100% { opacity: 1; transform: scale(1); }
+      5%, 37.5% { opacity: .3; transform: scale(1); }
+      40.5% { opacity: 1; transform: scale(1.12); }
+      43.5%, 100% { opacity: 1; transform: scale(1); }
     }
     @keyframes plPulseOut {
-      0%, 57% { opacity: 0; transform: translate(292px, 172px); }
-      60% { opacity: 1; transform: translate(303px, 172px); }
-      65% { opacity: 1; transform: translate(336px, 172px); }
-      68%, 100% { opacity: 0; transform: translate(341px, 172px); }
+      0%, 44% { opacity: 0; transform: translate(339px, 221px); }
+      46% { opacity: 1; transform: translate(344px, 221px); }
+      49% { opacity: 1; transform: translate(358px, 221px); }
+      51%, 100% { opacity: 0; transform: translate(364px, 221px); }
     }
     @keyframes plResD {
       0% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
-      8%, 62% { opacity: .4; transform: translate(-50%,-50%) scale(.97); }
-      67% { opacity: 1; transform: translate(-50%,-50%) scale(1.02); }
-      71%, 100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+      5%, 47% { opacity: .4; transform: translate(-50%,-50%) scale(.97); }
+      50% { opacity: 1; transform: translate(-50%,-50%) scale(1.02); }
+      53%, 100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
     }
     @keyframes plResGlow {
-      0%, 63% { opacity: 0; }
-      68% { opacity: .95; }
-      84%, 100% { opacity: 0; }
+      0%, 47% { opacity: 0; }
+      51% { opacity: .95; }
+      66%, 100% { opacity: 0; }
     }
     @keyframes plStamp1 {
       0% { opacity: 1; transform: scale(1); }
-      8%, 68% { opacity: 0; transform: scale(.6); }
-      71% { opacity: 1; transform: scale(1.15); }
-      74%, 100% { opacity: 1; transform: scale(1); }
+      5%, 51% { opacity: 0; transform: scale(.6); }
+      54% { opacity: 1; transform: scale(1.15); }
+      57%, 100% { opacity: 1; transform: scale(1); }
     }
     @keyframes plStamp2 {
       0% { opacity: 1; transform: scale(1); }
-      8%, 73% { opacity: 0; transform: scale(.6); }
-      76% { opacity: 1; transform: scale(1.15); }
-      79%, 100% { opacity: 1; transform: scale(1); }
+      5%, 55% { opacity: 0; transform: scale(.6); }
+      58% { opacity: 1; transform: scale(1.15); }
+      61%, 100% { opacity: 1; transform: scale(1); }
     }
     @keyframes plPlayhead {
-      0%, 6% { opacity: 0; transform: translate(62px, 252px); }
-      9% { opacity: .9; transform: translate(72px, 252px); }
-      24% { opacity: .9; transform: translate(150px, 252px); }
-      42% { opacity: .9; transform: translate(222px, 252px); }
-      64% { opacity: .9; transform: translate(400px, 252px); }
-      68%, 100% { opacity: 0; transform: translate(400px, 252px); }
+      0%, 3% { opacity: 0; transform: translate(58px, 322px); }
+      6% { opacity: .9; transform: translate(68px, 322px); }
+      20% { opacity: .9; transform: translate(150px, 322px); }
+      34% { opacity: .9; transform: translate(250px, 322px); }
+      57% { opacity: .9; transform: translate(425px, 322px); }
+      61%, 100% { opacity: 0; transform: translate(438px, 322px); }
     }
 
-    @media (max-width: 980px) {
+    /* Stacks at 1099px, not 980px. The engine column is 500px wide now, and below
+       ~1086px viewport a 500px art column would be WIDER than what is left for the
+       headline. Rather than shrink the diagram back under its type floor, the hero
+       stacks a little earlier and the panel gets 560px of its own. */
+    @media (max-width: 1099px) {
       .hero-stage {
         grid-template-columns: 1fr; grid-template-areas: "eyebrow" "title" "copy" "engine";
       }
@@ -531,7 +605,9 @@
         aspect-ratio: auto; display: flex; flex-direction: column; align-items: center;
         padding: 42px 14px 34px 27px;
       }
-      .engine-head { inset: 13px 13px auto; font-size: .5rem; }
+      /* Tracking, not size, gives the two eyebrows room on a 350px panel — the
+         strings themselves are settled and stay whole. */
+      .engine-head { inset: 13px 13px auto; font-size: .69rem; letter-spacing: .02em; gap: 8px; }
       .engine-foot { left: 27px; right: 13px; bottom: 11px; }
       .pl-wires { display: none; }
       .pl-rail {
@@ -544,41 +620,48 @@
         background: linear-gradient(to bottom, rgba(45,212,191,0), rgba(45,212,191,.65));
         opacity: .5;
       }
-      .pl-sources { display: flex; gap: 6px; justify-content: center; width: 100%; }
-      .pl-src { position: static; transform: none; padding: 6px 6px; gap: 5px; flex: 1 1 0; min-width: 0; justify-content: center; }
-      .pl-src strong { font-size: clamp(.5rem, 2.5vw, .6rem); }
-      .pl-src small { font-size: clamp(.44rem, 2.2vw, .52rem); }
-      .pl-core { position: static; transform: none; width: min(100%, 250px); }
-      .pl-result { position: static; transform: none; width: min(100%, 240px); }
+      /* Three cards ACROSS a 350px panel cannot hold 11px type — at the old
+         clamp() sizes they were 8-9.6px, the worst strings on the page. They
+         stack instead: one full-width row each, same type scale as desktop.
+         The phone layout was already a vertical read, so this is in character. */
+      .pl-sources { display: flex; flex-direction: column; gap: 6px; align-items: stretch; width: 100%; }
+      .pl-src { position: static; transform: none; width: 100%; padding: 7px 10px; gap: 8px; justify-content: flex-start; }
+      .pl-core { position: static; transform: none; width: min(100%, 260px); }
+      .pl-result { position: static; transform: none; width: min(100%, 260px); }
+      /* The phone card is wide enough for both proofs on one row. */
+      .pl-stamps { flex-direction: row; flex-wrap: wrap; justify-content: center; }
       .context-engine.pl-live .pl-msg { animation-name: plMsgM; }
       .context-engine.pl-live .pl-result { animation-name: plResM; }
-      .context-engine.pl-live .pl-src { animation: plSrcM 8s ease infinite; }
-      .context-engine.pl-live .src-2 { animation-delay: .35s; }
-      .context-engine.pl-live .src-3 { animation-delay: .7s; }
-      .context-engine.pl-live .c1 { animation: plConnA 8s ease infinite; }
-      .context-engine.pl-live .c2 { animation: plConnB 8s ease infinite; }
-      .context-engine.pl-live .c3 { animation: plConnC 8s ease infinite; }
+      .context-engine.pl-live .pl-src { animation: plSrcM 14s ease infinite; }
+      .context-engine.pl-live .src-2 { animation-delay: .6s; }
+      .context-engine.pl-live .src-3 { animation-delay: 1.2s; }
+      .context-engine.pl-live .c1 { animation: plConnA 14s ease infinite; }
+      .context-engine.pl-live .c2 { animation: plConnB 14s ease infinite; }
+      .context-engine.pl-live .c3 { animation: plConnC 14s ease infinite; }
     }
+    /* Mobile beats, recomputed for 14s on the same story clock as the desktop
+       loop — the message clears in the same 93-100% window, so the prompt
+       handover stays invisible on a phone too. */
     @keyframes plMsgM {
-      0%, 2.5% { opacity: 0; transform: translateY(-10px); }
-      8% { opacity: 1; transform: none; }
-      96% { opacity: 1; transform: none; }
-      100% { opacity: 0; transform: none; }
+      0%, 1% { opacity: 0; transform: translateY(-10px); }
+      6% { opacity: 1; transform: none; }
+      93% { opacity: 1; transform: none; }
+      96%, 100% { opacity: 0; transform: none; }
     }
     @keyframes plResM {
       0% { opacity: 1; transform: scale(1); }
-      8%, 62% { opacity: .4; transform: scale(.97); }
-      67% { opacity: 1; transform: scale(1.02); }
-      71%, 100% { opacity: 1; transform: scale(1); }
+      5%, 47% { opacity: .4; transform: scale(.97); }
+      50% { opacity: 1; transform: scale(1.02); }
+      53%, 100% { opacity: 1; transform: scale(1); }
     }
     @keyframes plSrcM {
       0% { opacity: 1; }
-      8%, 15% { opacity: .55; }
-      21%, 100% { opacity: 1; }
+      5%, 12% { opacity: .55; }
+      18%, 100% { opacity: 1; }
     }
-    @keyframes plConnA { 0%, 8% { opacity: .5; } 12% { opacity: 1; } 18%, 100% { opacity: .5; } }
-    @keyframes plConnB { 0%, 20% { opacity: .5; } 26% { opacity: 1; } 34%, 100% { opacity: .5; } }
-    @keyframes plConnC { 0%, 56% { opacity: .5; } 62% { opacity: 1; } 70%, 100% { opacity: .5; } }
+    @keyframes plConnA { 0%, 5% { opacity: .5; } 9% { opacity: 1; } 14%, 100% { opacity: .5; } }
+    @keyframes plConnB { 0%, 14% { opacity: .5; } 19% { opacity: 1; } 26%, 100% { opacity: .5; } }
+    @keyframes plConnC { 0%, 43% { opacity: .5; } 48% { opacity: 1; } 56%, 100% { opacity: .5; } }
 
     /* ===== LOGO / WORDMARK STRIP ===== */
     .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 26px 0; margin-top: 40px; background: rgba(255,255,255,0.012); }
@@ -837,12 +920,24 @@
       }
       .context-engine .pl-tok, .context-engine .pl-pulse,
       .context-engine .pl-playhead { display: none !important; }
+      /* Paper gets the composed frame, not whichever frame the loop happened to be
+         on when Print was pressed: freeze every beat and show prompt 1 alone. */
+      .context-engine, .context-engine *, .context-engine *::before, .context-engine *::after {
+        animation: none !important; transition: none !important;
+      }
+      .context-engine .pl-msg, .context-engine .pl-result,
+      .context-engine .pl-src, .context-engine .pl-stamp,
+      .context-engine .pl-fac span { opacity: 1 !important; }
+      .context-engine .pl-stamp, .context-engine .pl-fac span { transform: none !important; }
+      .context-engine .pl-prompt + .pl-prompt { opacity: 0 !important; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation: none !important; transition: none !important; }
       .pl-tok, .pl-pulse, .pl-playhead { display: none; }
+      /* Prompts 2-4 rest at opacity 0, so killing the animation above leaves
+         prompt 1 alone in a fully composed diagram. */
       .product:hover, .btn:hover { transform: none !important; }
       .approach-row:hover::after { width: 0 !important; }
     }
@@ -929,43 +1024,60 @@
         <figure class="context-engine" aria-hidden="true">
           <div class="engine-head"><span>How a response is formed</span><span>Intelligence layer</span></div>
 
-          <svg class="pl-wires" viewBox="0 0 470 290" preserveAspectRatio="none" focusable="false">
+          <!-- Geometry is authored in a 500x368 space that matches the panel's own
+               aspect exactly, so preserveAspectRatio="none" stretches it uniformly
+               at every width. At the desktop size one user unit is one CSS pixel. -->
+          <svg class="pl-wires" viewBox="0 0 500 368" preserveAspectRatio="none" focusable="false">
             <defs>
-              <linearGradient id="plGradient" x1="0" y1="0" x2="1" y2="0">
+              <!-- userSpaceOnUse, not the default objectBoundingBox: the out-wire is a
+                   perfectly horizontal path, so its bounding box has zero height and an
+                   objectBoundingBox gradient paints nothing at all on it. The outgoing
+                   teal-to-violet wire was invisible until this was pinned to user space. -->
+              <linearGradient id="plGradient" gradientUnits="userSpaceOnUse" x1="338" y1="0" x2="365" y2="0">
                 <stop offset="0" stop-color="#2DD4BF" stop-opacity=".48"/>
                 <stop offset="1" stop-color="#A78BFA" stop-opacity=".58"/>
               </linearGradient>
             </defs>
-            <!-- pipeline lane -->
-            <path class="pl-wire glow" d="M0 172 L13 172"/>
-            <path class="pl-wire glow" d="M112 172 L153 172"/>
-            <path class="pl-wire out glow" d="M291 172 L341 172"/>
-            <path class="pl-wire" d="M0 172 L13 172"/>
-            <path class="pl-wire" d="M112 172 L153 172"/>
-            <path class="pl-wire out" d="M291 172 L341 172"/>
-            <!-- source drops, funnelling into the core inlet -->
-            <path class="pl-wire glow" d="M105 84 C105 106 150 106 196 121"/>
-            <path class="pl-wire glow" d="M222 84 L222 121"/>
-            <path class="pl-wire glow" d="M339 84 C339 106 294 106 248 121"/>
-            <path class="pl-wire" d="M105 84 C105 106 150 106 196 121"/>
-            <path class="pl-wire" d="M222 84 L222 121"/>
-            <path class="pl-wire" d="M339 84 C339 106 294 106 248 121"/>
-            <!-- timeline -->
-            <line class="pl-tl-base" x1="20" y1="252" x2="450" y2="252"/>
-            <path class="pl-tl-tick" d="M40 249 V255 M80 249 V255 M100 249 V255 M120 249 V255 M140 249 V255 M160 249 V255 M180 249 V255 M200 249 V255 M240 249 V255 M260 249 V255 M280 249 V255 M300 249 V255 M320 249 V255 M340 249 V255 M360 249 V255 M380 249 V255 M420 249 V255 M440 249 V255"/>
-            <path class="pl-tl-stage" d="M62 246 V258 M222 246 V258 M400 246 V258"/>
-            <circle class="pl-playhead" cx="0" cy="0" r="2.6" fill="#2DD4BF"/>
+            <!-- pipeline lane, y=221 = the 60% centre line the three cards sit on.
+                 Block edges at this size: msg 10-125, core 162.5-337.5, result 365-485 -->
+            <path class="pl-wire glow" d="M0 221 L8 221"/>
+            <path class="pl-wire glow" d="M127 221 L160 221"/>
+            <path class="pl-wire out glow" d="M340 221 L363 221"/>
+            <path class="pl-wire" d="M0 221 L8 221"/>
+            <path class="pl-wire" d="M127 221 L160 221"/>
+            <path class="pl-wire out" d="M340 221 L363 221"/>
+            <!-- source drops, funnelling into the core inlet at y=153 -->
+            <path class="pl-wire glow" d="M85 114 C85 136 130 136 220 152"/>
+            <path class="pl-wire glow" d="M250 114 L250 152"/>
+            <path class="pl-wire glow" d="M415 114 C415 136 370 136 280 152"/>
+            <path class="pl-wire" d="M85 114 C85 136 130 136 220 152"/>
+            <path class="pl-wire" d="M250 114 L250 152"/>
+            <path class="pl-wire" d="M415 114 C415 136 370 136 280 152"/>
+            <!-- timeline; the three bright ticks sit under msg / core / result -->
+            <line class="pl-tl-base" x1="20" y1="322" x2="480" y2="322"/>
+            <path class="pl-tl-tick" d="M40 319 V325 M90 319 V325 M110 319 V325 M130 319 V325 M150 319 V325 M170 319 V325 M190 319 V325 M210 319 V325 M230 319 V325 M270 319 V325 M290 319 V325 M310 319 V325 M330 319 V325 M350 319 V325 M370 319 V325 M390 319 V325 M440 319 V325 M460 319 V325"/>
+            <path class="pl-tl-stage" d="M68 316 V328 M250 316 V328 M425 316 V328"/>
+            <circle class="pl-playhead" cx="0" cy="0" r="2.8" fill="#2DD4BF"/>
             <!-- travelling context tokens + signal pulses -->
-            <g class="pl-tok tok-1"><rect x="-26" y="-8" width="52" height="16" rx="8"/><text y="3" text-anchor="middle">CONTEXT</text></g>
-            <g class="pl-tok tok-2"><rect x="-29" y="-8" width="58" height="16" rx="8"/><text y="3" text-anchor="middle">ACTIVITY</text></g>
-            <g class="pl-tok violet tok-3"><rect x="-19" y="-8" width="38" height="16" rx="8"/><text y="3" text-anchor="middle">TASK</text></g>
-            <circle class="pl-pulse pulse-in" cx="0" cy="0" r="3" fill="#2DD4BF"/>
-            <circle class="pl-pulse pulse-out" cx="0" cy="0" r="3.2" fill="#A78BFA"/>
+            <g class="pl-tok tok-1"><circle cx="0" cy="0" r="3.4"/></g>
+            <g class="pl-tok tok-2"><circle cx="0" cy="0" r="3.4"/></g>
+            <g class="pl-tok violet tok-3"><circle cx="0" cy="0" r="3.4"/></g>
+            <circle class="pl-pulse pulse-in" cx="0" cy="0" r="3.4" fill="#2DD4BF"/>
+            <circle class="pl-pulse pulse-out" cx="0" cy="0" r="3.6" fill="#A78BFA"/>
           </svg>
 
           <div class="pl-msg">
             <span class="pl-msg-tag">You ask</span>
-            <span class="pl-msg-bubble">What should I cook tonight?</span>
+            <!-- Four questions, one per loop, each true to a shipped app: Saffra,
+                 StoryVault, Nightshelf, Hexhunter. None of them makes a claim, and
+                 none touches a regulated category. Prompt 1 is the resting state.
+                 Do not add a health, finance, DBT or dating-outcome prompt here. -->
+            <span class="pl-msg-bubble">
+              <span class="pl-prompt">What should I cook tonight?</span>
+              <span class="pl-prompt">What happens if I side with the captain?</span>
+              <span class="pl-prompt">Read me something calm.</span>
+              <span class="pl-prompt">Which hunter counters the Plague Abbot?</span>
+            </span>
           </div>
 
           <div class="pl-conn c1"></div>
@@ -977,7 +1089,7 @@
 
           <div class="pl-conn c2"></div>
           <div class="pl-core">
-            <img src="logo.png" alt="" width="20" height="22">
+            <img src="logo.png" alt="" width="24" height="26">
             <strong>Product intelligence</strong>
             <div class="pl-fac">
               <span class="fac-k">knowledge</span><span class="fac-t">tools</span>
