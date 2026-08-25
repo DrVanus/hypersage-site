@@ -63,14 +63,45 @@ def site_parts() -> tuple[str, str, list[str]]:
     unknown = [i for i in seen if i not in NAMES]
     if unknown:
         sys.exit(f"product(s) on the page with no display name: {unknown} — add to NAMES")
-    return style.group(1), fig.group(1), [NAMES[i] for i in seen]
+    # Each product's icon comes off the card that DECLARES that product, in page
+    # order — never a hardcoded list, for the same reason the names are read out
+    # of the page: a second list is a second thing to forget. The bounded span
+    # stops a card with no icon from silently borrowing the next card's, and the
+    # filename check catches a mis-grab that a bounded regex could still make.
+    icons: dict[str, str] = {}
+    for m in re.finditer(
+        r'id="product-([a-z]+)"[^>]*>.{0,400}?class="app-icon" src="([^"]+)"', html, re.S
+    ):
+        icons.setdefault(m.group(1), m.group(2))
+    missing = [i for i in seen if i not in icons]
+    if missing:
+        sys.exit(f"product(s) on the page with no .app-icon image: {missing}")
+    for i in seen:
+        if i not in icons[i].rsplit("/", 1)[-1]:
+            sys.exit(f"icon for product-{i} is {icons[i]} — the file does not name "
+                     f"the product it was matched to; the card would show the wrong art")
+    # Each card's lifecycle chip, in page order. The card renders fifteen
+    # identical tiles, but the PAGE qualifies seven of them as unshipped — so a
+    # bare "15 apps and games" under a row of store-looking icons asserts a
+    # shipping portfolio nearly half of which you cannot get yet, to an audience
+    # that mostly never clicks through. The count of live products is read off
+    # the page's own `status live` marker rather than typed, so it moves on its
+    # own the day something ships; a hardcoded number here would rot at exactly
+    # the moment the news is good.
+    statuses = re.findall(r'class="status( live)?">([^<]*)<', html)
+    if len(statuses) != len(seen):
+        sys.exit(f"{len(seen)} product cards but {len(statuses)} status chips — "
+                 f"the card cannot say how many are live if the page's own "
+                 f"lifecycle markers do not line up with its products")
+    return (style.group(1), fig.group(1), [NAMES[i] for i in seen],
+            [icons[i] for i in seen], [t for _, t in statuses],
+            sum(1 for cls, _ in statuses if cls.strip() == "live"))
 
 
 def build_html() -> str:
-    style, figure, products = site_parts()
-    half = (len(products) + 1) // 2
-    row1 = " · ".join(products[:half])
-    row2 = " · ".join(products[half:])
+    style, figure, products, icons, _, live = site_parts()
+    tiles = "".join(f'<img src="{s}" alt="">' for s in icons)
+    cap = f"The portfolio · {len(products)} apps and games · {live} live now"
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <!-- The site's @font-face rules live HERE, not in index.html's <style> block, so
      lifting that block alone rendered the whole card — including the lifted
@@ -87,8 +118,12 @@ def build_html() -> str:
            radial-gradient(900px 460px at 12% -10%, rgba(45,212,191,.13), transparent 60%),
            radial-gradient(760px 420px at 96% 8%, rgba(167,139,250,.14), transparent 62%),
            #080B0F;
-         padding:48px 56px; box-sizing:border-box; display:flex; gap:24px; }}
-  .og-left {{ width:520px; flex:0 0 520px; }}
+         padding:48px 56px; box-sizing:border-box; display:flex; gap:20px; }}
+  /* 500 + a 20px gutter, tuned WITH the figure's scale below so the card has
+     even air on both sides — see that rule for the arithmetic. The floor on this
+     width is the tile strip: 8 tiles per row needs 477px of content box, and at
+     7 per row fifteen products spill into a third row that collides upward. */
+  .og-left {{ width:500px; flex:0 0 500px; display:flex; flex-direction:column; }}
   .og-right {{ flex:1; display:flex; align-items:center; justify-content:center; }}
   .og-brand {{ display:flex; align-items:center; gap:12px; margin-bottom:30px; }}
   /* object-fit, and a box that matches the ASSET's aspect rather than restating
@@ -102,26 +137,59 @@ def build_html() -> str:
                    letter-spacing:.22em; text-transform:uppercase; color:#5EEAD4; }}
   .og-brand .t2 {{ font: 700 17px/1.45 'Space Grotesk','Inter',sans-serif; color:#F2F6F8;
                    margin-top:3px; letter-spacing:-.01em; }}
-  .og h1 {{ font: 700 54px/1.14 'Space Grotesk','Inter',sans-serif;
-            color:#F2F6F8; margin:0 0 22px; letter-spacing:-.02em; padding-bottom:.1em; }}
+  /* 58px, not 54: the two lines are hard-broken, and at 58 the longer of them
+     ("a point of view.") still measures ~410px inside a 520px column. Sized up
+     with the portfolio strip below so the column reads as one filled composition
+     rather than two islands with a hole between them. */
+  .og h1 {{ font: 700 58px/1.14 'Space Grotesk','Inter',sans-serif;
+            color:#F2F6F8; margin:0 0 24px; letter-spacing:-.02em; padding-bottom:.1em; }}
   /* The SAME gradient the live headline uses — teal -> blue -> violet. The old
      preview flattened this to one teal, which is half the brand. */
   .og h1 .grad {{ background:linear-gradient(96deg,#2DD4BF 0%,#5AA9E6 52%,#A78BFA 100%);
                   -webkit-background-clip:text; background-clip:text; color:transparent; }}
   .og .rule {{ width:330px; height:2px; margin:0 0 22px;
                background:linear-gradient(90deg,#2DD4BF,#A78BFA); border-radius:2px; }}
-  .og p {{ font: 400 18px/1.5 'Inter',ui-sans-serif,-apple-system,sans-serif;
-           color:#B9C6CE; margin:0; max-width:470px; }}
-  .og .apps {{ position:absolute; left:56px; bottom:44px; font: 400 13px/1.75 'Inter',ui-sans-serif,sans-serif;
-               color:#7C8B95; letter-spacing:.005em; }}
+  .og p {{ font: 400 19px/1.55 'Inter',ui-sans-serif,-apple-system,sans-serif;
+           color:#B9C6CE; margin:0; max-width:477px; }}
+  /* THE PORTFOLIO, AS PICTURES. This column used to end with the fifteen product
+     NAMES set in two 13px rows, absolutely positioned at the bottom — and above
+     them sat a 204px hole, a third of the card's height, which is what Vanus saw
+     as "a lot of empty space". Both halves of that were the same mistake: a link
+     preview is drawn ~460px wide in a message bubble, where 13px becomes ~5px and
+     no name is ever read, so the card spent its whole lower third on type nobody
+     can see. Icons survive the downscale — each tile is still ~18px in that
+     bubble and reads as a portfolio at a glance. The label is the live page's own
+     strip label and the tiles are the live page's own icons, so this section
+     mirrors the site exactly like the figure does.
+     50px + 11px gap = 8 tiles per row inside 492px, so fifteen products land as
+     8 + 7. Check the arithmetic if the count changes; a third row would collide
+     with the paragraph above. */
+  .og-apps {{ margin-top:auto; }}
+  .og-apps .cap {{ font: 600 11px/1 'JetBrains Mono',ui-monospace,monospace;
+                   letter-spacing:.18em; text-transform:uppercase; color:#7C8B95;
+                   margin:0 0 16px; }}
+  .og-apps .tiles {{ display:flex; flex-wrap:wrap; gap:11px; max-width:477px; }}
+  .og-apps img {{ width:50px; height:50px; border-radius:13px; object-fit:cover;
+                  border:1px solid rgba(255,255,255,.14);
+                  background:rgba(255,255,255,.05);
+                  box-shadow:0 3px 10px rgba(0,0,0,.45); }}
   /* The figure is the site's, so pin only its BOX — never its internals.
      Scaled UP, and that is the whole point: a link preview is rendered ~460px
      wide in a message bubble, and at that size the pipeline's three input cards
      turned to mush. The old orbital art survived shrinking because it was one
      bold ring saying nothing; this one carries real labels, so it has to be
      big enough to still read them. Checked by downscaling to preview width, not
-     by looking at the 1200px render. */
-  .og-right .context-engine {{ transform:scale(1.24); transform-origin:center; margin:0; }}
+     by looking at the 1200px render.
+     1.17, retuned 2026-08-25 with the left column at 500: at 1.24 the 500px
+     figure rendered 620 wide inside a 544px column, overhanging its box by 38px
+     a side, so the card carried a 56px left margin against an 18px right one —
+     an asymmetry that reads as "not quite right" without announcing why. The
+     column is 568 wide now and 1.17 makes the figure 585, so it overhangs 8.5px
+     and the right margin lands at ~47 against the left's 56. That costs 5.6% of
+     the diagram's size, which at a 460px preview is 0.5px of glyph height on
+     strings that are marginal at either scale — the balance is worth more than
+     the half pixel. Re-derive both numbers together if either moves. */
+  .og-right .context-engine {{ transform:scale(1.17); transform-origin:center; margin:0; }}
 </style></head><body>
 <div class="og">
   <div class="og-left">
@@ -132,9 +200,12 @@ def build_html() -> str:
     <h1>Software with<br><span class="grad">a point of view.</span></h1>
     <div class="rule"></div>
     <p>Distinctive consumer apps and original games.<br>Context-aware AI where it improves the product.</p>
+    <div class="og-apps">
+      <div class="cap">{cap}</div>
+      <div class="tiles">{tiles}</div>
+    </div>
   </div>
   <div class="og-right">{figure}</div>
-  <div class="apps">{row1}<br>{row2}</div>
 </div>
 </body></html>"""
 
@@ -151,18 +222,25 @@ def inputs_digest() -> str:
     the left column: that is precisely why they belong. If the page's hero
     headline is rewritten, nothing about the lifted figure changes, and the
     preview would keep promising the old line in silence."""
-    style, figure, products = site_parts()
+    style, figure, products, icons, statuses, _ = site_parts()
     html = INDEX.read_text()
     h1 = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S)
     h1 = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", h1.group(1))).strip() if h1 else ""
     ogt = re.search(r'<meta property="og:title" content="([^"]*)"', html)
     h = hashlib.sha256()
-    for part in (style, figure, "\n".join(products), h1, ogt.group(1) if ogt else ""):
+    # Statuses are in here because the card COUNTS them. An app going live
+    # changes no style, no figure and no name — without this the preview would
+    # keep announcing the old number in silence, which is this stamp's whole job.
+    for part in (style, figure, "\n".join(products), "\n".join(icons),
+                 "\n".join(statuses), h1, ogt.group(1) if ogt else ""):
         h.update(part.encode())
         h.update(b"\0")
     # The brand mark is pixels in the card; a swapped logo.png must read as stale.
-    h.update((ROOT / "logo.png").read_bytes())
-    h.update(b"\0")
+    # The fifteen app icons are pixels in it too, for exactly the same reason —
+    # a redrawn icon changes what the card shows while every string stays put.
+    for rel in ["logo.png"] + [s.split("?", 1)[0] for s in icons]:
+        h.update((ROOT / rel).read_bytes())
+        h.update(b"\0")
     return h.hexdigest()
 
 
@@ -172,8 +250,8 @@ def main() -> None:
                     help="verify the product list resolves AND that og-image.png "
                          "was rendered from the page as it stands now; render nothing")
     args = ap.parse_args()
-    _, _, products = site_parts()
-    print(f"{len(products)} products from index.html: {', '.join(products)}")
+    _, _, products, _, _, live = site_parts()
+    print(f"{len(products)} products from index.html ({live} live): {', '.join(products)}")
     if args.check:
         # The failure this catches actually happened: the hero diagram's result
         # changed from "Fit to the task" to "The best possible answer", nobody
@@ -211,6 +289,14 @@ def main() -> None:
         # first paint can still be fallback metrics. Screenshotting through that
         # window is how a card ends up in a typeface the site does not use.
         pg.wait_for_function("document.fonts.status === 'loaded'", timeout=10_000)
+        # Every image must have actually DECODED. A missing icon still reports
+        # complete=true with naturalWidth 0, so without this the card ships with
+        # silent holes where products used to be — the failure mode this whole
+        # renderer exists to prevent, in pixels instead of prose. Timing out
+        # loudly is the correct outcome.
+        pg.wait_for_function(
+            "Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)",
+            timeout=10_000)
         pg.wait_for_timeout(700)          # let the figure's CSS animation settle
         shot = ROOT / "_og_2x.png"
         pg.screenshot(path=str(shot))
