@@ -203,7 +203,10 @@
     @media (max-width: 900px) { .hero-note { margin-left: auto; margin-right: auto; max-width: 460px; } }
 
     .hero-image { position: relative; }
-    .hero-image img { width: 100%; height: auto; max-width: 400px; display: block; margin: 0 auto; object-fit: contain; }
+    /* max-width is capped at the source's own 2x ceiling: rowan_welcome.png is
+       712px wide, so 712 / 2 = 356 is the widest slot it can fill 1:1 on a
+       Retina display. It was 400px, which the browser upscaled 1.12x. */
+    .hero-image img { width: 100%; height: auto; max-width: 356px; display: block; margin: 0 auto; object-fit: contain; }
     .hero-image::after {
       content: ''; position: absolute; inset: -30px;
       background: radial-gradient(ellipse at center, var(--primary-glow), transparent 65%);
@@ -253,9 +256,27 @@
     .section-block .lede { color: var(--muted-fg); font-size: 1.08rem; max-width: 645px; margin-bottom: 44px; }
 
     /* ===== HOW ===== */
-    .how-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 56px; align-items: center; }
+    /* Art column narrowed from 0.8fr to 0.7fr so the (deliberately smaller)
+       mascot sits snugly in its column instead of floating in dead space. */
+    .how-grid { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 56px; align-items: center; }
     @media (max-width: 900px) { .how-grid { grid-template-columns: 1fr; gap: 36px; } }
-    .how-image { width: 100%; max-width: 340px; display: block; margin: 0 auto; object-fit: contain; }
+    /* The 1024px master rowan_steady.png was cut from is gone from every repo
+       and from git history, so 398x700 is all the art that exists. The slot is
+       therefore sized to the pixels rather than the reverse: 398 / 2 = 199 is
+       the widest it can be and still cover a 2x display 1:1. It was 340px,
+       which the browser upscaled 1.71x — that was the soft-on-Retina bug.
+       Do NOT raise this without a genuinely higher-resolution source; a
+       regenerated mascot is a different character, not a sharper one. */
+    .how-figure { position: relative; }
+    /* Same radial-glow idiom as .hero-image::after — gives the mascot presence
+       at the smaller size. z-index:-1 is contained by .container's stacking
+       context, so it paints behind the art but above the section background. */
+    .how-figure::after {
+      content: ''; position: absolute; inset: -24px;
+      background: radial-gradient(ellipse at center, var(--primary-glow), transparent 65%);
+      pointer-events: none; z-index: -1;
+    }
+    .how-image { width: 100%; max-width: 199px; display: block; margin: 0 auto; object-fit: contain; }
     .how-steps { list-style: none; counter-reset: step; }
     .how-steps li { counter-increment: step; padding: 16px 0 16px 64px; position: relative; border-bottom: 1px solid var(--border); }
     .how-steps li:last-child { border-bottom: none; }
@@ -722,9 +743,9 @@
             </li>
           </ol>
         </div>
-        <div>
+        <div class="how-figure">
           <!-- No width/height attributes here on purpose: .how-image sets
-               width:100% / max-width:340px but no CSS height, so the height
+               width:100% / max-width:199px but no CSS height, so the height
                attribute's presentational hint would fix the box at the
                intrinsic pixel height and distort it. -->
           <img class="how-image" src="art/rowan_steady.png?v=20260731a" alt="Rowan resting steadily" loading="lazy">
@@ -831,28 +852,36 @@
 
       <div class="screens-grid">
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/home.webp?v=20260805a" data-light="shots/home.webp?v=20260805a" data-dark="shots/home-dark.webp?v=20260805a" alt="Rowan's Today screen — a greeting, the next appointment, and today's medications" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/home.webp?v=20260825a" data-light="shots/home.webp?v=20260825a" data-dark="shots/home-dark.webp?v=20260825a" alt="Rowan's Today screen — a greeting, the next appointment, and today's medications" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Today</strong>What's next, and what's due</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/chat.webp?v=20260805a" data-light="shots/chat.webp?v=20260805a" data-dark="shots/chat-dark.webp?v=20260805a" alt="Rowan's chat screen with an AI companion indicator" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/chat.webp?v=20260825a" data-light="shots/chat.webp?v=20260825a" data-dark="shots/chat-dark.webp?v=20260825a" alt="Rowan's chat screen with an AI companion indicator" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Chat</strong>Where a day becomes a log entry</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/log.webp?v=20260805a" data-light="shots/log.webp?v=20260805a" data-dark="shots/log-dark.webp?v=20260805a" alt="Rowan's quick log — pick a symptom, choose a severity band, and add what might matter" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/log.webp?v=20260825a" data-light="shots/log.webp?v=20260825a" data-dark="shots/log-dark.webp?v=20260825a" alt="Rowan's quick log — pick a symptom, choose a severity band, and add what might matter" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Quick log</strong>Thirty seconds, if you'd rather tap</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/trends.webp?v=20260805a" data-light="shots/trends.webp?v=20260805a" data-dark="shots/trends-dark.webp?v=20260805a" alt="Rowan's trends screen with sparklines and a noticed pattern" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/trends.webp?v=20260825a" data-light="shots/trends.webp?v=20260825a" data-dark="shots/trends-dark.webp?v=20260825a" alt="Rowan's trends screen — a per-day bar chart of headache severity with a 7-day average line over it, and a noticed pattern underneath" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Trends</strong>A pattern, not a diagnosis</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/conditions.webp?v=20260805a" data-light="shots/conditions.webp?v=20260805a" data-dark="shots/conditions-dark.webp?v=20260805a" alt="Rowan's conditions screen with diagnosed and suspected chips" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/conditions.webp?v=20260825a" data-light="shots/conditions.webp?v=20260825a" data-dark="shots/conditions-dark.webp?v=20260825a" alt="Rowan's conditions screen with diagnosed and suspected chips" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Conditions</strong>Diagnosed, or just suspected</div>
         </div>
         <div class="screen-card">
-          <!-- Alt describes co-occurrence, not cause; see PLAN §6. -->
-          <div class="screen-frame"><img class="shot-img" src="shots/recap.webp?v=20260805a" data-light="shots/recap.webp?v=20260805a" data-dark="shots/recap-dark.webp?v=20260805a" alt="Rowan's monthly recap — the month's most-logged symptom with its day count and how that compares with the month before, the number of entries and days noted, and the factor that ran alongside the rougher days. Every figure is computed from the entries in the record." width="780" height="1688" loading="lazy"></div>
+          <!-- Alt describes co-occurrence, not cause; see PLAN §6.
+               THE MONTH-OVER-MONTH CLAUSE IS GONE ON PURPOSE. The old capture
+               said "up from 4 in June" and the alt described that comparison.
+               buildRecap now withholds the baseline unless the record reaches
+               back to the 1st of the earlier month, because a half-observed
+               month invents the rise it reports — everyone installs mid-month,
+               so a new user's second month was being scored against a stub of
+               their first. No baseline beats a fake one, the picture no longer
+               shows one, and the alt must not promise one. -->
+          <div class="screen-frame"><img class="shot-img" src="shots/recap.webp?v=20260825a" data-light="shots/recap.webp?v=20260825a" data-dark="shots/recap-dark.webp?v=20260825a" alt="Rowan's monthly recap — the month's most-logged symptom with its day count, the number of entries and days noted, and the factor that ran alongside the rougher days. Every figure is computed from the entries in the record." width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Monthly recap</strong>One page of your month</div>
         </div>
       </div>
@@ -865,8 +894,15 @@
       <div class="spotlight-grid">
         <div class="spotlight-phone">
           <!-- Uses the derived brief (buildBrief), not the retired fixture:
-               every line counts entries the user wrote. Rationale in git. -->
-          <div class="screen-frame"><img src="shots/brief.webp?v=20260805a" alt="A Rowan visit brief for a neurology appointment — each line counts the user's own entries, such as “Knee pain: logged on 9 of 30 days, average 5.7, worst 7”" width="780" height="1688" loading="lazy"></div>
+               every line counts entries the user wrote. Rationale in git.
+               Re-shot 2026-08-25 against the app's own seed. Two things moved
+               and the alt moved with them: the clinician is "Dr. Reed", the
+               name mock-data.js actually seeds — NEVER hand-pick one here, and
+               never reinstate "Dr. Patel", which is the fabricated name from
+               the App Review incident — and the per-symptom lines are stat
+               blocks (DAYS / AVERAGE / WORST over per-day bars) since 627fa2e,
+               not the one-line sentences the old alt quoted. -->
+          <div class="screen-frame"><img src="shots/brief.webp?v=20260825a" alt="A Rowan visit brief for a neurology appointment — each symptom is a block counting the user's own entries, such as Headache logged on 14 of 30 days, average 4.4, worst 6, over a row of per-day bars" width="780" height="1688" loading="lazy"></div>
         </div>
         <div>
           <div class="section-eyebrow">The hero artifact</div>
@@ -997,7 +1033,7 @@
           <!-- No shot-img class or data-dark here: the light/dark toggle is
                scoped to the #screens section (whose backdrop darkens with it);
                this shot sits in a section that stays light, so it stays light. -->
-          <div class="screen-frame"><img src="shots/memory.webp?v=20260805a" alt="Rowan’s “What Rowan knows” card — the plain list of notes Rowan keeps about you, an “Edit these notes” button, “Clear everything Rowan knows” underneath, and an “Always in context” note listing everything Rowan sees — the notes, your conditions, medications and allergies, recent entries, your name, your device language and today’s date — and saying the notes are stored on the device, not kept on the server, but sent with each message and so reaching the AI provider" width="716" height="1772" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/memory.webp?v=20260825a" alt="Rowan’s “What Rowan knows” card — the plain list of notes Rowan keeps about you, an “Edit these notes” button, “Clear everything Rowan knows” underneath, and an “Always in context” note listing everything Rowan sees — the notes, your conditions, medications and allergies, recent entries, the name you gave Rowan, your device language and today’s date — and saying the notes are stored on the device, not kept on the server, but sent with each message and so reaching the AI provider" width="716" height="1772" loading="lazy"></div>
         </div>
       </div>
     </div>

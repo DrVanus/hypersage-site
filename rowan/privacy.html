@@ -69,8 +69,39 @@
 
   <main class="legal" id="main">
     <!-- ============================================================
-         DEPLOY GATE — DO NOT PUBLISH THIS FILE YET (added 2026-08-09)
+         DEPLOY GATE — CLEARED 2026-08-24. Kept, not deleted, because the
+         four conditions below are the standing re-check for this section.
          ============================================================
+         Re-verified 2026-08-24 against the RUNNING production service, not
+         against source:
+
+           GET https://rowan-api.fly.dev/v1/companion/healthz
+           -> "capabilities": { "speak": false, "transcribe": true }
+
+         (1) HOLDS. `POST /transcribe` is mounted at
+             rowan-api/app/companion/transcribe.py:170, and production reports
+             transcribe: true. Note app/config.py:201 still reads
+             `transcribe_enabled: bool = False` — that is the DEFAULT; the
+             deployed value comes from the TRANSCRIBE_ENABLED Fly secret, which
+             `flyctl secrets list -a rowan-api` shows Deployed. Do not read the
+             config default as the live answer.
+         (2) HOLDS. rowan-app/chatui.js:754 builds the mic button, deliberately
+             hidden until `capabilities()` says yes, failing closed.
+         (3) HOLDS. ios/App/App/Info.plist carries NSMicrophoneUsageDescription
+             and PrivacyInfo.xcprivacy declares AudioData.
+         (4) NOT VERIFIABLE FROM HERE — the App Store Connect App Privacy
+             questionnaire's Audio Data row is a web-only surface. Rowan 1.0
+             passed review and is live WITH transcribe on, so it was presumably
+             answered at submission; confirm it in ASC before the next
+             submission rather than assuming.
+
+         So publishing this file is CORRECT, and it is already live. The §4
+         voice text is accurate in both directions: voice INPUT is on, and the
+         cloud text-to-speech route is off (speak: false) — which is exactly
+         what §4 and §7 already say, with read-aloud running on-device.
+
+         The original gate text follows, unchanged, as the re-check list.
+         ------------------------------------------------------------
          The "4. Voice" section below now describes VOICE INPUT: a mic
          button in the composer, the recording going to OpenAI to be
          turned into text, and the text landing in the message box for
@@ -107,7 +138,7 @@
          back in.
          ============================================================ -->
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 2026-08-09</p>
+    <p class="updated">Last updated: 2026-08-15</p>
 
     <p>Rowan holds health information, which is about the most sensitive data a phone can carry. So this policy is written to be checkable rather than reassuring: every statement below about the app and its backend was checked against the code on the date above. Where a statement describes what a third party does with data we send them, it reports their published terms, which we do not control. Where something leaves your device, we say so plainly instead of burying it. Three are easy to miss, so they are stated here rather than buried: your <strong>recent conversation history</strong> — up to about 14,000 characters of it — is re-sent to the AI provider with each new message so the reply follows the thread; asking Rowan to read a reply aloud sends your device identifier and that message's id to our backend, though no text goes with it; and if you use the <strong>microphone button</strong> to speak instead of typing, that recording is sent to <strong>OpenAI</strong> to be turned into text.</p>
 
