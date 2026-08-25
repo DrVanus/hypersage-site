@@ -366,14 +366,7 @@
     @media (max-width: 480px) { .connections-showcase { grid-template-columns: minmax(0, 280px); } }
 
     /* ===== CONTEXT STACK (one card per connection) ===== */
-    .context-stack { max-width: 700px; margin: 0 auto 64px; }
-    .context-stack svg { display: block; width: 100%; height: auto; }
-    .context-stack figcaption { text-align: center; color: var(--faint); font-size: 0.84rem; margin-top: 14px; letter-spacing: 0.02em; }
-    .ctx-card { animation: ctxFloat 6.5s ease-in-out infinite alternate; }
-    .ctx-b { animation-delay: -2.2s; }
     .ctx-c { animation-delay: -4.4s; }
-    @keyframes ctxFloat { from { transform: translateY(0); } to { transform: translateY(-7px); } }
-    @media (prefers-reduced-motion: reduce) { .ctx-card { animation: none; } }
     /* ===== LIGHT / DARK PREVIEW TOGGLE (screens showcase) ===== */
     .theme-toggle { display: inline-flex; position: relative; padding: 4px; margin: 6px auto 10px; background: var(--card); border: 1px solid var(--line-strong); border-radius: 999px; -webkit-tap-highlight-color: transparent; }
     .theme-toggle button { flex: 1 0 auto; min-width: 104px; appearance: none; -webkit-appearance: none; border: 0; background: transparent; cursor: pointer; font: inherit; font-weight: 600; font-size: 0.88rem; color: var(--muted); padding: 9px 18px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; position: relative; z-index: 1; transition: color .25s ease; }
@@ -496,7 +489,7 @@
     @media (max-width: 420px) { .platform-cards { grid-template-columns: 1fr; max-width: 300px; margin: 0 auto; } }
     .platform-card {
       display: flex; flex-direction: column; align-items: center; text-align: center;
-      padding: 20px 14px 24px; background: var(--surface);
+      padding: 26px 14px 26px; background: var(--surface);
       border: 1px solid var(--line); border-radius: var(--radius);
       position: relative; overflow: hidden;
       transition: transform .22s ease, border-color .22s, box-shadow .22s;
@@ -508,10 +501,11 @@
     }
     .platform-card:hover { transform: translateY(-5px); border-color: rgba(232,168,56,0.3); box-shadow: 0 20px 46px rgba(0,0,0,0.35); }
     .platform-card:hover::before { opacity: 0.9; }
-    .platform-card svg { width: 100%; max-width: 172px; height: auto; display: block; margin-bottom: 14px; }
-    .platform-card .pc-you { transition: transform .25s ease; }
+    .pc-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--pc-hue);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--pc-hue) 18%, transparent);
+      margin-bottom: 16px; flex: none; transition: transform .22s ease; }
+    .platform-card:hover .pc-dot { transform: scale(1.25); }
     @media (prefers-reduced-motion: no-preference) {
-      .platform-card:hover .pc-you { transform: translateX(4px); }
     }
     .pc-name { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 700; font-size: 1.02rem; letter-spacing: -0.01em; color: var(--fg-strong); }
     .pc-rule { font-size: 0.8rem; color: var(--muted); margin-top: 4px; line-height: 1.45; }
@@ -935,63 +929,15 @@
         <p>Every person you're talking to gets a living profile — platform, stage, her dating-profile screenshots, your private notes, and what your coach has learned. Tap "Get coaching" and the advice already knows the whole story.</p>
       </div>
 
-      <figure class="context-stack">
-        <svg viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-          <ellipse cx="340" cy="150" rx="300" ry="115" fill="rgba(232,168,56,0.05)"/>
-          <g transform="translate(26,52) rotate(-2.5 99 104)"><g class="ctx-card">
-            <rect width="198" height="208" rx="16" fill="var(--surface)" stroke="var(--line-strong)"/>
-            <rect x="16" y="0" width="110" height="2.5" fill="var(--amber)" opacity="0.5"/>
-            <text x="18" y="32" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="11" letter-spacing="2" fill="var(--amber)">TINDER</text>
-            <rect x="18" y="48" width="88" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
-            <rect x="84" y="71" width="96" height="17" rx="8.5" fill="rgba(232,168,56,0.28)"/>
-            <rect x="18" y="94" width="64" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
-            <line x1="18" y1="130" x2="180" y2="130" stroke="var(--line)"/>
-            <text x="18" y="152" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">STAGE</text>
-            <circle cx="78" cy="149" r="3.2" fill="var(--amber)"/>
-            <circle cx="106" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
-            <circle cx="134" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
-            <circle cx="162" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
-            <text x="18" y="182" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">NOTES</text>
-            <rect x="70" y="174" width="110" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
-            <rect x="70" y="183" width="76" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
-          </g></g>
-          <g transform="translate(241,26)"><g class="ctx-card ctx-b">
-            <rect width="198" height="208" rx="16" fill="var(--card)" stroke="var(--line-strong)"/>
-            <rect x="16" y="0" width="110" height="2.5" fill="var(--amber)" opacity="0.7"/>
-            <text x="18" y="32" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="11" letter-spacing="2" fill="var(--amber)">HINGE</text>
-            <rect x="18" y="48" width="104" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
-            <rect x="76" y="71" width="104" height="17" rx="8.5" fill="rgba(232,168,56,0.28)"/>
-            <rect x="18" y="94" width="76" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
-            <line x1="18" y1="130" x2="180" y2="130" stroke="var(--line)"/>
-            <text x="18" y="152" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">STAGE</text>
-            <circle cx="78" cy="149" r="3.2" fill="var(--amber)"/>
-            <circle cx="106" cy="149" r="3.2" fill="var(--amber)"/>
-            <circle cx="134" cy="149" r="3.2" fill="var(--amber)"/>
-            <circle cx="162" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
-            <text x="18" y="182" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">NOTES</text>
-            <rect x="70" y="174" width="110" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
-            <rect x="70" y="183" width="88" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
-          </g></g>
-          <g transform="translate(456,52) rotate(2.5 99 104)"><g class="ctx-card ctx-c">
-            <rect width="198" height="208" rx="16" fill="var(--surface)" stroke="var(--line-strong)"/>
-            <rect x="16" y="0" width="110" height="2.5" fill="var(--amber)" opacity="0.5"/>
-            <text x="18" y="32" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="11" letter-spacing="2" fill="var(--amber)">BUMBLE</text>
-            <rect x="18" y="48" width="96" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
-            <rect x="18" y="71" width="72" height="17" rx="8.5" fill="rgba(255,255,255,0.08)"/>
-            <rect x="84" y="94" width="96" height="17" rx="8.5" fill="rgba(232,168,56,0.28)"/>
-            <line x1="18" y1="130" x2="180" y2="130" stroke="var(--line)"/>
-            <text x="18" y="152" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">STAGE</text>
-            <circle cx="78" cy="149" r="3.2" fill="var(--amber)"/>
-            <circle cx="106" cy="149" r="3.2" fill="var(--amber)"/>
-            <circle cx="134" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
-            <circle cx="162" cy="149" r="3.2" fill="none" stroke="rgba(255,255,255,0.18)"/>
-            <text x="18" y="182" font-family="'Inter',sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="var(--faint)">NOTES</text>
-            <rect x="70" y="174" width="110" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
-            <rect x="70" y="183" width="64" height="4.5" rx="2.25" fill="rgba(255,255,255,0.07)"/>
-          </g></g>
-        </svg>
-        <figcaption>Each connection gets its own living profile — platform, stage from matching to exclusive, and private notes.</figcaption>
-      </figure>
+      <!-- REMOVED 2026-08-24: a hand-drawn SVG of three cards, each captioned with one of the
+           competitor wordmarks that appear in the app's own platform filter.
+           Two reasons, either one sufficient. (1) It set three competitor wordmarks in our own
+           accent colour as decorative graphics — COPY-LAW bans competitor names and logos, and a
+           drawn mark is not the same as a screenshot that happens to show the app's real platform
+           picker (which is a shipped feature and stays). (2) It stood in for the product with grey
+           placeholder bars that read as a skeleton loader, directly above the REAL Connections
+           captures below, which show the same idea honestly. Its figcaption only restated the
+           section lede. Do not reinstate: show the real screens. -->
 
       <!-- These three cards used to be a fixed light/dark/dark mix because only
            one of the three screens had ever been captured in both appearances.
@@ -1174,65 +1120,42 @@
         <p>Every app has its own rules. Your coach adjusts their advice to how each one actually works — not one-size-fits-all tips.</p>
       </div>
       <div class="platform-cards">
-
-        <!-- Tinder — "short and punchy": a quick thread of short bubbles -->
+        <!-- Each card used to carry a small SVG diagramming that platform's conversation
+             shape (Bumble: her bubble first; Hinge: a prompt card then your reply). The
+             idea was sound and the execution was not — at card size the rounded grey
+             rects read as a loading skeleton, not as a conversation, and the owner read
+             this section and the Connections one as the same unfinished thing. The rule
+             line underneath already states what the diagram was trying to draw, so the
+             diagram was redundant as well as unclear.
+             The dot is the platform's OWN hue from the app (Platform.swift darkHue),
+             which is contrast-verified against a #1A1D24 card: tinder 6.03, hinge 4.34,
+             bumble 8.10, ig 5.59, text 7.88. It identifies the card without drawing a
+             competitor's mark. If a platform is added, take its hue from that file. -->
         <div class="platform-card">
-          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <rect x="16" y="12" width="56" height="16" rx="8" fill="rgba(255,255,255,0.08)"/>
-            <rect class="pc-you" x="128" y="38" width="56" height="16" rx="8" fill="rgba(232,168,56,0.28)"/>
-            <rect x="16" y="64" width="42" height="16" rx="8" fill="rgba(255,255,255,0.08)"/>
-          </svg>
+          <span class="pc-dot" style="--pc-hue: #FF6B5A;" aria-hidden="true"></span>
           <span class="pc-name">Tinder</span>
           <span class="pc-rule">Short and punchy</span>
         </div>
-
-        <!-- Hinge — "prompt-based": a prompt card, then your reply -->
         <div class="platform-card">
-          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <rect x="16" y="8" width="122" height="44" rx="10" fill="var(--card)" stroke="var(--line-strong)"/>
-            <rect x="28" y="20" width="82" height="5" rx="2.5" fill="rgba(255,255,255,0.16)"/>
-            <rect x="28" y="31" width="58" height="5" rx="2.5" fill="rgba(255,255,255,0.10)"/>
-            <rect class="pc-you" x="112" y="64" width="72" height="16" rx="8" fill="rgba(232,168,56,0.28)"/>
-          </svg>
+          <span class="pc-dot" style="--pc-hue: #C8607A;" aria-hidden="true"></span>
           <span class="pc-name">Hinge</span>
           <span class="pc-rule">Prompt-based</span>
         </div>
-
-        <!-- Bumble — "she messages first": her bubble opens the thread -->
         <div class="platform-card">
-          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <circle cx="23" cy="26" r="3" fill="var(--amber)"/>
-            <rect x="33" y="18" width="92" height="16" rx="8" fill="rgba(255,255,255,0.10)" stroke="rgba(232,168,56,0.55)"/>
-            <rect class="pc-you" x="112" y="62" width="72" height="16" rx="8" fill="rgba(232,168,56,0.28)"/>
-          </svg>
+          <span class="pc-dot" style="--pc-hue: #E8A838;" aria-hidden="true"></span>
           <span class="pc-name">Bumble</span>
           <span class="pc-rule">She messages first</span>
         </div>
-
-        <!-- Instagram — "story replies, not pickup lines": a story ring, then your reply -->
         <div class="platform-card">
-          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <circle cx="40" cy="34" r="18" fill="none" stroke="var(--amber)" stroke-width="2.2" opacity="0.7"/>
-            <circle cx="40" cy="34" r="11.5" fill="rgba(255,255,255,0.10)"/>
-            <path d="M60 46q22 14 40 18" fill="none" stroke="var(--line-strong)" stroke-dasharray="3 4"/>
-            <rect class="pc-you" x="104" y="60" width="80" height="16" rx="8" fill="rgba(232,168,56,0.28)"/>
-          </svg>
+          <span class="pc-dot" style="--pc-hue: #B57BE8;" aria-hidden="true"></span>
           <span class="pc-name">Instagram</span>
           <span class="pc-rule">Story replies, not pickup lines</span>
         </div>
-
-        <!-- Texting — "its own game": a longer back-and-forth thread -->
         <div class="platform-card">
-          <svg viewBox="0 0 200 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <rect x="16" y="6" width="72" height="15" rx="7.5" fill="rgba(255,255,255,0.08)"/>
-            <rect class="pc-you" x="112" y="28" width="72" height="15" rx="7.5" fill="rgba(232,168,56,0.28)"/>
-            <rect x="16" y="50" width="58" height="15" rx="7.5" fill="rgba(255,255,255,0.08)"/>
-            <rect class="pc-you" x="126" y="72" width="58" height="15" rx="7.5" fill="rgba(232,168,56,0.28)"/>
-          </svg>
+          <span class="pc-dot" style="--pc-hue: #4FC77F;" aria-hidden="true"></span>
           <span class="pc-name">Texting</span>
           <span class="pc-rule">Its own game</span>
         </div>
-
       </div>
     </div>
   </section>
