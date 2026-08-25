@@ -514,7 +514,14 @@
       transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
     }
     .screen-card:hover .screen-frame { transform: translateY(-6px); border-color: var(--primary); box-shadow: 0 30px 64px rgba(0,0,0,0.65), 0 0 44px var(--violet-glow); }
-    .screen-frame img { width: 100%; display: block; border-radius: 19px; aspect-ratio: 620 / 1347; object-fit: cover; }
+    /* height:auto is LOAD-BEARING, do not drop it. Every capture carries HTML
+       width/height attributes, which map to a presentational `height` of the
+       intrinsic pixel value. aspect-ratio only computes a dimension when the
+       other one is auto, so without this the frames rendered their images at
+       full intrinsic height — 1560px and 1799px tall in a 126-250px column,
+       spilling down the page. Fixed 2026-08-24; it had been live since these
+       captures were wired in. */
+    .screen-frame img { width: 100%; height: auto; display: block; border-radius: 19px; aspect-ratio: 620 / 1347; object-fit: cover; }
     .screen-kind { font-family: 'Cinzel', serif; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin: 18px 0 3px; }
     .screen-name { font-size: 1.02rem; font-weight: 700; color: var(--fg); }
 
