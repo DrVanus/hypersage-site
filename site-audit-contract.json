@@ -64,6 +64,20 @@
         "We design the products, run the systems behind them, and stay directly accountable for what ships",
         "The products themselves remain distinct"
       ]
+    },
+    {
+      "id": "us_spelling_practice",
+      "value": "Practice DBT skills",
+      "evidence": [
+        "Site copy is US English; Vanus flagged the British spelling 2026-08-26. A capitalised instance survived the first fix because the check was case-sensitive."
+      ],
+      "surfaces": [
+        "index.html"
+      ],
+      "forbidden_values": [
+        "practise",
+        "Practise"
+      ]
     }
   ],
   "contract_notes": "Corrected 2026-08-06. This file certifies absolute claims made on the FRONT PAGE. It previously cited rowan-site/, quietoak-site/ and alder-site/ paths, which no longer exist — those sites are now subfolders of this repo. Re-verify against the app repos under /Users/dee/Developer/DrVanus/, not against sibling site repos."
