@@ -49,6 +49,21 @@
         "OpenAI leads the rest",
         "We build on Claude and OpenAI"
       ]
+    },
+    {
+      "id": "studio_section_wording",
+      "value": "We build, operate, and support everything we ship.",
+      "evidence": [
+        "Studio headline reworded 2026-08-26; the retired object duplicated the products eyebrow and the retired sentence duplicated the headline triplet."
+      ],
+      "surfaces": [
+        "index.html"
+      ],
+      "forbidden_values": [
+        "support the portfolio",
+        "We design the products, run the systems behind them, and stay directly accountable for what ships",
+        "The products themselves remain distinct"
+      ]
     }
   ],
   "contract_notes": "Corrected 2026-08-06. This file certifies absolute claims made on the FRONT PAGE. It previously cited rowan-site/, quietoak-site/ and alder-site/ paths, which no longer exist — those sites are now subfolders of this repo. Re-verify against the app repos under /Users/dee/Developer/DrVanus/, not against sibling site repos."
