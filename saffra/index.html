@@ -2088,22 +2088,7 @@
   </div>
 </footer>
 
-<!-- Firebase compat SDKs (used only for the early-access waitlist write).
-     Reuses the existing TheOne Firebase project; signups land in the same
-     `early_access` collection but are tagged source: 'saffra-website' so
-     they can be filtered separately. -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-  firebase.initializeApp({
-    apiKey: "AIzaSyBKkYiae50y-uZN7gGm97Bu-5iXNv9P5fE",
-    authDomain: "theone-dating-app.firebaseapp.com",
-    projectId: "theone-dating-app",
-    storageBucket: "theone-dating-app.firebasestorage.app",
-    messagingSenderId: "777335450044",
-    appId: "1:777335450044:ios:d8f1673935c1b0251de3b9"
-  });
-  var db = firebase.firestore();
 
   // Mobile nav
   document.getElementById('navToggle').addEventListener('click', function() {
@@ -2237,51 +2222,6 @@
     document.getElementById('toggleYearly').classList.toggle('active', mode === 'yearly');
   }
 
-  // Signup — writes to the shared `early_access` Firestore collection,
-  // tagged with source 'saffra-website' so signups can be separated from
-  // TheOne's waitlist. Falls back to a friendly error if the write fails
-  // (offline, blocked extension, Firestore unreachable).
-  function handleSignup(e) {
-    e.preventDefault();
-    var email = document.getElementById('signupEmail').value.trim();
-    var btn = e.target.querySelector('button');
-    if (!email) return;
-
-    btn.textContent = 'Saving...';
-    btn.style.opacity = '0.7';
-
-    // These three fields, and only these three, are what privacy.html promises
-    // under "Early-access waitlist" — "only the email you type into the signup
-    // form on this site, plus a timestamp and the source label". A fourth field
-    // (`userAgent: navigator.userAgent`) used to ride along here, which made that
-    // "only" false and falsifiable from view-source. Nothing in the stated purpose
-    // — one message when TestFlight opens — needs it. Do not add fields here
-    // without adding them to the policy in the same change.
-    db.collection('early_access').add({
-      email: email,
-      source: 'saffra-website',
-      timestamp: new Date().toISOString()
-    }).then(function() {
-      btn.textContent = "You're on the list!";
-      btn.style.background = 'rgba(224,130,48,0.15)';
-      btn.style.color = '#F5C088';
-      btn.style.boxShadow = 'none';
-      btn.style.opacity = '1';
-      document.getElementById('signupEmail').value = '';
-    }).catch(function(err) {
-      console.error('Signup error:', err);
-      btn.textContent = 'Error — try again';
-      btn.style.background = '';
-      btn.style.opacity = '1';
-    });
-
-    setTimeout(function() {
-      btn.innerHTML = 'Join the waitlist <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-      btn.style.background = '';
-      btn.style.color = '';
-      btn.style.boxShadow = '';
-    }, 4000);
-  }
 </script>
 
 </body>
