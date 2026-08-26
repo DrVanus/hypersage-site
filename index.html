@@ -797,7 +797,7 @@
       .section-head p { max-width: 640px; margin-left: auto; margin-right: auto; }
     }
     .section-head .eyebrow { display: block; margin-bottom: 16px; }
-    .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; line-height: 1.22; margin-bottom: 16px; }
+    .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; line-height: 1.22; padding-bottom: 0.12em; margin-bottom: 16px; }
     .section-head p { color: var(--muted); font-size: 1.08rem; }
     @media (max-width: 560px) {
       section.block { padding: 68px 0; }
@@ -822,7 +822,7 @@
       font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
       color: var(--faint); padding-top: 0.5em;
     }
-    .approach-row h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 10px; line-height: 1.28; }
+    .approach-row h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 10px; line-height: 1.28; padding-bottom: 0.08em; }
     .approach-row p { color: var(--muted); font-size: 1rem; max-width: 64ch; }
     @media (max-width: 820px) {
       .approach-row { grid-template-columns: 1fr; gap: 10px; }
@@ -892,7 +892,7 @@
       box-shadow: 0 6px 18px rgba(0,0,0,0.45);
     }
     .product .titleblock { flex: 1 1 auto; min-width: 145px; }
-    .product .titleblock h3 { font-size: 1.28rem; font-weight: 600; line-height: 1.22; }
+    .product .titleblock h3 { font-size: 1.28rem; font-weight: 600; line-height: 1.22; padding-bottom: 0.08em; }
     .product .cat { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
     /* Lifecycle chip — an honest status beats a visitor searching the App Store and
        finding nothing. Update these when a product goes live. */
@@ -913,7 +913,17 @@
     .product ul { list-style: none; margin-bottom: 18px; }
     .product ul li { position: relative; padding: 5px 0 5px 20px; font-size: 0.9rem; color: var(--muted); text-wrap: pretty; }
     .product ul li::before { content: ''; position: absolute; left: 2px; top: 0.95em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-    .product .foot { margin-top: auto; display: flex; align-items: center; gap: 16px; padding-top: 4px; }
+    .product .foot { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding-top: 4px; }
+    .foot .btn-store { white-space: nowrap; }
+    /* Phones: the two actions stop competing for one 284px row. The store
+       button takes the full width and centres, the text link sits under it.
+       Without this the label broke as "Download on the / App Store" and each
+       card rendered a different width, because the row was nowrap and the
+       sibling "Visit <product>" label varies in length per card. */
+    @media (max-width: 560px) {
+      .foot { flex-direction: column; align-items: stretch; gap: 10px; }
+      .foot .btn-store { width: 100%; justify-content: center; }
+    }
     .product .btn-store {
       /* Filled counterpart to .product .link. Deliberately NOT .btn-primary:
          that hardcodes the global brand gradient and would repaint every card
