@@ -1016,6 +1016,13 @@
     footer .f-links { display: flex; gap: 56px; flex-wrap: wrap; }
     footer .f-col h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 14px; }
     footer .f-col a { display: block; color: var(--muted); font-size: 0.92rem; padding: 5px 0; transition: color .2s; }
+    /* Touch targets. On a phone these links measured 34px tall and the wordmark
+       28px, under the 44pt minimum, so neighbouring footer links were easy to
+       mis-tap. Only the hit box grows -- type size and colour are unchanged. */
+    @media (max-width: 560px) {
+      .f-col a { min-height: 44px; display: flex; align-items: center; padding: 4px 0; }
+      footer.site .foot-brand, nav.site .brand { min-height: 44px; display: inline-flex; align-items: center; }
+    }
     footer .f-col a:hover { color: var(--fg); }
     footer .f-bottom { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 24px; color: var(--faint); font-size: 0.82rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 
@@ -1458,7 +1465,7 @@
               <h3>Saffra</h3>
               <div class="cat">AI Cooking Assistant</div>
             </div>
-            <span class="status">iOS · Coming soon</span>
+            <span class="status live">iOS · Live</span>
           </div>
           <!-- Recipe generation and checks are automated; no human-chef review is claimed. -->
           <p class="desc">Tell it what&rsquo;s in your kitchen and it rewrites a complete recipe around it &mdash; every amount measured, prep noted, equipment listed. Recipes declare their allergens, and anything you can&rsquo;t eat is filtered out before it is ever suggested.</p>
@@ -1467,6 +1474,7 @@
             <li>Diet- and allergen-aware substitutions with hands-free cooking mode</li>
           </ul>
           <div class="foot">
+            <a class="btn-store" aria-label="Download Saffra on the App Store" href="https://apps.apple.com/us/app/id6792760857" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
             <a class="link" aria-label="Visit the Saffra site" href="saffra/">Visit Saffra <span aria-hidden="true">→</span></a>
           </div>
         </article>
@@ -1590,7 +1598,7 @@
               <h3>Hexhunter</h3>
               <div class="cat">Gothic Horde-Survivor</div>
             </div>
-            <span class="status">iOS · Coming soon</span>
+            <span class="status live">iOS · Live</span>
           </div>
           <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor built around distinct heroes, illustrated upgrades, and escalating chaos.</p>
           <ul role="list">
@@ -1605,6 +1613,7 @@
             <!-- Art is generated; do not describe it as hand-drawn or hand-illustrated. -->
           </ul>
           <div class="foot">
+            <a class="btn-store" aria-label="Download Hexhunter on the App Store" href="https://apps.apple.com/us/app/id6792798732" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
             <a class="link" aria-label="Visit the Hexhunter site" href="hexhunter/">Visit Hexhunter <span aria-hidden="true">→</span></a>
           </div>
         </article>
