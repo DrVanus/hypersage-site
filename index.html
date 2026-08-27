@@ -1008,6 +1008,15 @@
       text-transform: uppercase; color: var(--accent-text);
     }
     .proof-card p { color: var(--muted); font-size: 0.92rem; line-height: 1.6; text-wrap: pretty; }
+    /* Four of these products have not shipped. The card still describes what the
+       layer does there, exactly as the product grid already does, but it says so
+       on the card — an unmarked case reads as something you can go and use. */
+    .proof-head .soon {
+      margin-left: 6px; padding: 1px 5px; border-radius: 999px;
+      border: 1px solid var(--line-strong); color: var(--faint);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.74rem;
+      letter-spacing: .04em; text-transform: none; white-space: nowrap;
+    }
     .proof-card .link { margin-top: auto; display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent-text); transition: gap .2s; }
     .proof-card .link:hover { gap: 11px; }
     @media (max-width: 860px) { .layer-proof { grid-auto-columns: 84%; gap: 12px; } }
@@ -1859,6 +1868,31 @@
           <span class="proof-head"><img src="icons/cryptosage.png" alt="" width="26" height="26" loading="lazy"><span>In CryptoSage&nbsp;AI</span></span>
           <p>Ask why your portfolio moved and the answer is built from your own holdings and cost basis &mdash; not a market recap that would read the same for everyone.</p>
           <a class="link" href="#product-cryptosage">See CryptoSage&nbsp;AI <span aria-hidden="true">&uarr;</span></a>
+        </li>
+              <li class="proof-card" style="--accent: var(--c-night);">
+          <span class="proof-head"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy"><span>In Nightshelf</span></span>
+          <p>Pick a place, a mood and a length &mdash; tonight&rsquo;s story is written to those three, and the cover is painted to match.</p>
+          <a class="link" href="#product-nightshelf">See Nightshelf <span aria-hidden="true">&uarr;</span></a>
+        </li>
+        <li class="proof-card" style="--accent: var(--c-quietoak);">
+          <span class="proof-head"><img src="icons/quietoak.png" alt="" width="26" height="26" loading="lazy"><span>In Quietoak</span> <span class="soon">Coming soon</span></span>
+          <p>It carries your diary cards and recent conversations as context &mdash; down to what it already knows not to ask you twice.</p>
+          <a class="link" href="#product-quietoak">See Quietoak <span aria-hidden="true">&uarr;</span></a>
+        </li>
+        <li class="proof-card" style="--accent: var(--c-alder);">
+          <span class="proof-head"><img src="icons/alder.png" alt="" width="26" height="26" loading="lazy"><span>In Alder</span> <span class="soon">Coming soon</span></span>
+          <p>A lapse starts a debrief, not a lecture: what happened, what came before it, and what you&rsquo;d want next time, held in your own words.</p>
+          <a class="link" href="#product-alder">See Alder <span aria-hidden="true">&uarr;</span></a>
+        </li>
+        <li class="proof-card" style="--accent: var(--c-mythkin);">
+          <span class="proof-head"><img src="icons/mythkin.png" alt="" width="26" height="26" loading="lazy"><span>In Mythkin</span> <span class="soon">Coming soon</span></span>
+          <p>Each of 470 figures is written at length before you ever speak to one, so the reply comes from that history rather than a one-line persona.</p>
+          <a class="link" href="#product-mythkin">See Mythkin <span aria-hidden="true">&uarr;</span></a>
+        </li>
+        <li class="proof-card" style="--accent: var(--c-myth);">
+          <span class="proof-head"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy"><span>In Mythwright</span> <span class="soon">Coming soon</span></span>
+          <p>Describe a card and a model writes its stats and ability and paints the art &mdash; with the prompt moderated before anything is generated.</p>
+          <a class="link" href="#product-mythwright">See Mythwright <span aria-hidden="true">&uarr;</span></a>
         </li>
       </ul>
       </div>
