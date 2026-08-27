@@ -990,7 +990,10 @@
     /* Uncapped this ran the full container: 164 characters per line at 1440 and
        150 at 1024 — the worst measure on the page. It is a footnote, so it sits
        left under the flow and stops at a readable width. */
-    .model-note { color: var(--faint); font-size: 0.82rem; margin-top: 18px; max-width: 62ch; }
+    /* The section head and the proof grid are both centred; this note had a
+       62ch cap and no auto margins, so it hugged the left edge under three
+       centred cards and read as an unfinished column. Centre the block. */
+    .model-note { color: var(--faint); font-size: 0.82rem; margin: 18px auto 0; max-width: 62ch; text-align: center; }
 
     /* ===== CTA ===== */
     .cta {
@@ -1760,7 +1763,7 @@
              The providers are still disclosed in the first sentence of the paragraph
              below, which is where the verified claim belongs. Do not move them up. -->
         <h2>Anyone can call the same models. The layer around them is ours.</h2>
-        <p>Where a product uses AI, it runs on models from Anthropic and OpenAI: Claude is the primary model in most of the products that write to you, OpenAI leads in others and makes every image a product generates while you use it. What we build is the layer around them — the part that decides what to ask, what the product already knows about your situation, and what it checks before you see an answer.</p>
+        <p>Where a product uses AI, the models come from Anthropic and OpenAI: Claude in most of the products that write to you, OpenAI in others and for any image a product generates as you use it. What we build is the layer around them — what to ask, what the product already knows about your situation, and what it checks before you see an answer.</p>
       </div>
 
       <!-- The four stages of the pipeline are DRAWN in the hero's context-engine
@@ -1805,7 +1808,7 @@
         </li>
       </ul>
 
-      <p class="model-note">Not every product uses AI. Where one does, the provider, data path, memory, on-device versus cloud processing, and safety controls vary by product and feature — and most artwork ships with the app rather than being generated while you use it.</p>
+      <p class="model-note">Not every product uses AI. Where one does, the provider, what leaves your device, what is remembered, and the safeguards vary by product and feature. Most artwork ships with the app rather than being generated while you use it.</p>
     </div>
   </section>
 

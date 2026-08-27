@@ -36,7 +36,7 @@
   "facts": [
     {
       "id": "ai_provider_wording",
-      "value": "OpenAI leads in others",
+      "value": "OpenAI in others",
       "evidence": [
         "Provider map established 2026-08-05 by reading every repo in the fleet; Saffra re-verified OpenAI-only 2026-08-19.",
         "index.html #ai paragraph is the studio's only public provider claim."
