@@ -990,6 +990,15 @@
     /* Uncapped this ran the full container: 164 characters per line at 1440 and
        150 at 1024 — the worst measure on the page. It is a footnote, so it sits
        left under the flow and stops at a readable width. */
+    /* The three cards are examples, not a catalogue. Without a way back to the
+       grid a reader cannot tell whether three is three-of-three or three-of-many.
+       A carousel was considered and rejected: anything behind an arrow is seen by
+       almost nobody, so more cases would end up LESS visible than three shown at
+       once, and this page ships no carousel to borrow. Each card already links up
+       into the grid; this is the same move for the set. */
+    .proof-more { display: flex; justify-content: center; margin: 0; }
+    .proof-more a { display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--muted); transition: gap .2s, color .2s; }
+    .proof-more a:hover { gap: 11px; color: var(--fg); }
     /* The section head and the proof grid are both centred; this note had a
        62ch cap and no auto margins, so it hugged the left edge under three
        centred cards and read as an unfinished column. Centre the block. */
@@ -1808,6 +1817,7 @@
         </li>
       </ul>
 
+      <p class="proof-more"><a href="#products">See all products <span aria-hidden="true">↑</span></a></p>
       <p class="model-note">Not every product uses AI. Where one does, the provider, what leaves your device, what is remembered, and the safeguards vary by product and feature. Most artwork ships with the app rather than being generated while you use it.</p>
     </div>
   </section>
