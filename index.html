@@ -1058,6 +1058,15 @@
     @media (max-width: 560px) {
       .f-col a { min-height: 44px; display: flex; align-items: center; padding: 4px 0; }
       footer.site .foot-brand, nav.site .brand { min-height: 44px; display: inline-flex; align-items: center; }
+      /* The same defect, missed the first time: the contact routes above the
+         footer (Investors / Press / Press kit / Product support) sat at 36px.
+         They are a wrapping flex row, so inline-flex keeps them on their line. */
+      .cta-routes a { min-height: 44px; display: inline-flex; align-items: center; }
+      /* The 30 product-card labels rendered at 10.9px on a phone, under the
+         12px most guidance treats as a floor for real text. Measured across
+         all 15 cards at 390px: nothing wraps, nothing overflows, cards grow
+         2px. Desktop keeps its original size. */
+      .product .cat, .product .status { font-size: 0.74rem; }
     }
     footer .f-col a:hover { color: var(--fg); }
     footer .f-bottom { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 24px; color: var(--faint); font-size: 0.82rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
