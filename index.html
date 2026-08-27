@@ -952,10 +952,34 @@
        the four stages is the sr-only <ol> in the markup. Each case card borrows
        the product's own accent, so the tie back to the portfolio is carried the
        same way the cards above carry it. */
+    /* A rail, not a grid: five cases do not fit three columns, and a carousel that
+       HIDES slides was rejected. Everything sits in one native overflow-x scroller, so
+       touch swipe and trackpad work with no JS at all; the buttons are an extra
+       affordance, not the only way through. Cards are sized so the next one always
+       peeks — that is what tells a reader there is more, without needing the arrow. */
     .layer-proof {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-      margin: 0 0 24px; padding: 0; list-style: none;
+      display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 32px) / 3);
+      gap: 16px; margin: 0 0 16px; padding: 2px 2px 6px; list-style: none;
+      overflow-x: auto; overscroll-behavior-x: contain;
+      scroll-snap-type: x proximity; scrollbar-width: none;
     }
+    .layer-proof::-webkit-scrollbar { display: none; }
+    .layer-proof > * { scroll-snap-align: start; }
+    /* The rail is keyboard-scrollable, so it has to show where focus is. */
+    .layer-proof:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 3px; border-radius: 14px; }
+    .rail-controls { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .rail-nav { display: flex; gap: 8px; }
+    /* [hidden] loses to display:flex — say it, or the buttons never hide. */
+    .rail-nav[hidden] { display: none; }
+    .rail-btn {
+      width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 50%; border: 1px solid var(--line-strong); background: var(--panel);
+      color: var(--fg); font-size: 1rem; line-height: 1; cursor: pointer;
+      transition: border-color .2s, opacity .2s;
+    }
+    .rail-btn:hover:not(:disabled) { border-color: var(--brand-a); }
+    .rail-btn:disabled { opacity: .32; cursor: default; }
+
     .proof-card {
       --accent: var(--brand-a);
       --accent-text: var(--accent);
@@ -986,7 +1010,7 @@
     .proof-card p { color: var(--muted); font-size: 0.92rem; line-height: 1.6; text-wrap: pretty; }
     .proof-card .link { margin-top: auto; display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent-text); transition: gap .2s; }
     .proof-card .link:hover { gap: 11px; }
-    @media (max-width: 860px) { .layer-proof { grid-template-columns: 1fr; gap: 12px; } }
+    @media (max-width: 860px) { .layer-proof { grid-auto-columns: 84%; gap: 12px; } }
     /* Uncapped this ran the full container: 164 characters per line at 1440 and
        150 at 1024 — the worst measure on the page. It is a footnote, so it sits
        left under the flow and stops at a readable width. */
@@ -1063,25 +1087,26 @@
     .js-reveal .section-head,
     .js-reveal .approach-row,
     .js-reveal .product,
-    .js-reveal .proof-card,
+    .js-reveal .proof-rail,
     .js-reveal .cta .container {
       opacity: 0; transform: translateY(20px);
       transition: opacity .6s cubic-bezier(.16,.8,.3,1), transform .6s cubic-bezier(.16,.8,.3,1);
     }
     .js-reveal .is-in { opacity: 1 !important; transform: none !important; }
     .js-reveal .products-grid > *:nth-child(2n) { transition-delay: .07s; }
-    .js-reveal .layer-proof > *:nth-child(2),
     .js-reveal .approach-ledger > *:nth-child(2) { transition-delay: .06s; }
-    .js-reveal .layer-proof > *:nth-child(3),
     .js-reveal .approach-ledger > *:nth-child(3) { transition-delay: .12s; }
     .js-reveal .approach-ledger > *:nth-child(4) { transition-delay: .18s; }
 
     /* Print never fires IntersectionObserver — force everything visible on paper. */
     @media print {
       .js-reveal .section-head, .js-reveal .approach-row, .js-reveal .product,
-      .js-reveal .proof-card, .js-reveal .cta .container {
+      .js-reveal .proof-rail, .js-reveal .cta .container {
         opacity: 1 !important; transform: none !important;
       }
+      /* Paper cannot scroll: unwrap the rail so every case prints. */
+      .layer-proof { grid-auto-flow: row; grid-auto-columns: auto; overflow: visible; }
+      .rail-nav { display: none; }
       .context-engine .pl-tok, .context-engine .pl-pulse,
       .context-engine .pl-playhead { display: none !important; }
       /* Paper gets the composed frame, not whichever frame the loop happened to be
@@ -1799,7 +1824,8 @@
            for the same reason they stay out of the hero's "You ask" prompts:
            their regulatory copy law should not be dragged onto the studio
            homepage for no gain. -->
-      <ul class="layer-proof" role="list" aria-label="The intelligence layer at work in three shipped products">
+      <div class="proof-rail">
+        <ul class="layer-proof" id="layer-proof" tabindex="0" role="group" aria-label="How the layer works, product by product" role="list" aria-label="The intelligence layer at work in three shipped products">
         <li class="proof-card" style="--accent: var(--c-wingmate);">
           <span class="proof-head"><img src="icons/wingmate.png" alt="" width="26" height="26" loading="lazy"><span>In Wingmate</span></span>
           <p>Before a reply is suggested, the coach has read the whole thread &mdash; not just the last message &mdash; and what all four coaches remember about the person you&rsquo;re talking to.</p>
@@ -1815,9 +1841,27 @@
           <p>Tap an offered choice or type your own move &mdash; the story follows, and it remembers, so the next beat fits the adventure you&rsquo;ve actually had.</p>
           <a class="link" href="#product-storyvault">See StoryVault&nbsp;AI <span aria-hidden="true">↑</span></a>
         </li>
+              <li class="proof-card" style="--accent: var(--c-rowan);">
+          <span class="proof-head"><img src="icons/rowan.png" alt="" width="26" height="26" loading="lazy"><span>In Rowan</span></span>
+          <p>Say how the day went in your own words &mdash; it comes back as symptom logs, a medication list and a brief you can hand your doctor, with an independent safety check running on its own separate model.</p>
+          <a class="link" href="#product-rowan">See Rowan <span aria-hidden="true">&uarr;</span></a>
+        </li>
+        <li class="proof-card" style="--accent: var(--c-crypto);">
+          <span class="proof-head"><img src="icons/cryptosage.png" alt="" width="26" height="26" loading="lazy"><span>In CryptoSage&nbsp;AI</span></span>
+          <p>Ask why your portfolio moved and the answer is built from your own holdings and cost basis &mdash; not a market recap that would read the same for everyone.</p>
+          <a class="link" href="#product-cryptosage">See CryptoSage&nbsp;AI <span aria-hidden="true">&uarr;</span></a>
+        </li>
       </ul>
+      </div>
+      <div class="rail-controls">
+        <div class="rail-nav" hidden>
+          <button type="button" class="rail-btn" data-dir="-1" aria-controls="layer-proof" aria-label="Previous example">&larr;</button>
+          <button type="button" class="rail-btn" data-dir="1" aria-controls="layer-proof" aria-label="Next example">&rarr;</button>
+        </div>
+        <p class="proof-more"><a href="#products">See all products <span aria-hidden="true">&uarr;</span></a></p>
+      </div>
+      
 
-      <p class="proof-more"><a href="#products">See all products <span aria-hidden="true">↑</span></a></p>
       <p class="model-note">Not every product uses AI. Where one does, the provider, what leaves your device, what is remembered, and the safeguards vary by product and feature. Most artwork ships with the app rather than being generated while you use it.</p>
     </div>
   </section>
@@ -1968,7 +2012,7 @@
     (function () {
       if (!document.documentElement.classList.contains('js-reveal') || !('IntersectionObserver' in window)) return;
       var els = document.querySelectorAll(
-        '.section-head, .approach-row, .product, .proof-card, .cta .container'
+        '.section-head, .approach-row, .product, .proof-rail, .cta .container'
       );
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
@@ -1976,6 +2020,36 @@
         });
       }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
       els.forEach(function (e) { io.observe(e); });
+
+      /* Fail OPEN. Every element above sits at opacity:0 until something adds
+         .is-in, so if IntersectionObserver never fires this page paints blank
+         with JavaScript ENABLED — which is worse than no animation at all. It
+         does not fire in every context: some embedded webviews and readers, and
+         any renderer that never composites the page. saffra/index.html already
+         carried this guard; this page did not. A plain rect check needs no
+         observer, so it works wherever getBoundingClientRect does. */
+      function revealVisible() {
+        els.forEach(function (e) {
+          if (e.classList.contains('is-in')) return;
+          var r = e.getBoundingClientRect();
+          if (r.top < window.innerHeight && r.bottom > 0) {
+            e.classList.add('is-in');
+            io.unobserve(e);
+          }
+        });
+      }
+      window.addEventListener('scroll', revealVisible, { passive: true });
+      window.addEventListener('resize', revealVisible);
+      revealVisible();
+
+      /* Last resort: if nothing at all has revealed shortly after load, neither
+         route is working — drop the effect rather than keep the page hidden. */
+      window.setTimeout(function () {
+        if (!document.querySelector('.is-in')) {
+          io.disconnect();
+          document.documentElement.classList.remove('js-reveal');
+        }
+      }, 1500);
 
       var motionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
       if (motionQuery) {
@@ -1988,6 +2062,52 @@
         if (motionQuery.addEventListener) motionQuery.addEventListener('change', revealEverything);
         else if (motionQuery.addListener) motionQuery.addListener(revealEverything);
       }
+    })();
+
+    /* Rail controls. The rail is a native overflow-x scroller, so swipe, trackpad
+       and keyboard arrows already work with NO JS — these buttons are an extra
+       affordance, which is why they ship hidden and are revealed here rather than
+       being the only way through. They hide themselves again whenever every case
+       already fits, so a wide desktop never shows two dead arrows. */
+    (function () {
+      var rail = document.getElementById('layer-proof');
+      var nav = document.querySelector('.rail-nav');
+      if (!rail || !nav) return;
+      var btns = nav.querySelectorAll('.rail-btn');
+      if (btns.length !== 2) return;
+      nav.hidden = false;
+
+      function stepSize() {
+        var card = rail.querySelector('.proof-card');
+        if (!card) return rail.clientWidth;
+        var gap = parseFloat(getComputedStyle(rail).columnGap) || 0;
+        return card.getBoundingClientRect().width + gap;
+      }
+      function reduced() {
+        return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      }
+      /* The rail carries 2px of padding and snaps, so "scrolled to the start"
+         rests at scrollLeft 2, not 0 — a 1px epsilon left the back arrow live
+         with nowhere to go. 6px is well under a card step (~415px), so it can
+         only ever absorb the padding. */
+      var EDGE = 6;
+      function sync() {
+        var max = rail.scrollWidth - rail.clientWidth;
+        nav.hidden = max <= EDGE;
+        btns[0].disabled = rail.scrollLeft <= EDGE;
+        btns[1].disabled = rail.scrollLeft >= max - EDGE;
+      }
+      Array.prototype.forEach.call(btns, function (b) {
+        b.addEventListener('click', function () {
+          var by = stepSize() * Number(b.getAttribute('data-dir'));
+          /* Older engines have scrollBy without the options object. */
+          try { rail.scrollBy({ left: by, behavior: reduced() ? 'auto' : 'smooth' }); }
+          catch (e) { rail.scrollLeft += by; }
+        });
+      });
+      rail.addEventListener('scroll', sync, { passive: true });
+      window.addEventListener('resize', sync);
+      sync();
     })();
 
     /* The <details> menu never closes itself — close it after a link is tapped,
