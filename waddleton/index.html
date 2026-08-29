@@ -115,7 +115,7 @@
         "name": "Are the leaderboards legit?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Fourteen of the fifteen games have a shared board; the exception is Lazy Floe, which has no score to beat. A score goes up only when you beat your own personal best, so an ordinary run won't appear, and a board that looks quiet usually is: most are new. Teens and adults post under the name they chose, so pick one you're happy being public. Players under 13 never publish a name they picked — the board is given a penguin name the game generates instead, and the score still counts. Nothing you can buy affects a score or a rank."
+          "text": "Yes. Fifteen of the sixteen games have a shared board; the exception is Lazy Floe, which has no score to beat. A score goes up only when you beat your own personal best, so an ordinary run won't appear, and a board that looks quiet usually is: most are new. Teens and adults post under the name they chose, so pick one you're happy being public. Players under 13 never publish a name they picked — the board is given a penguin name the game generates instead, and the score still counts. Nothing you can buy affects a score or a rank."
         }
       },
       {
@@ -565,19 +565,20 @@
       </div>
 
       <div class="stats">
-        <!-- COUNT TRAP: 15 games, not 14 — PenguinArcade/js/ui.js:1920-1940 is the addGame
-             registry the map directory is built from; BONKBERG (js/ui.js:1934) was the one
-             missed. The 15 do NOT split 13/2, and the split is stated in the arcade section
+        <!-- COUNT TRAP: 16 games, not 15 — PenguinArcade/js/ui.js:1920-1949 is the addGame
+             registry the map directory is built from; IGLOO FORT (js/ui.js:1936) is the
+             newest. The 16 do NOT split 14/2, and the split is stated in the arcade section
              below. ELEVEN carry a painted sign out on the island — the props with an
              action.game in js/rooms.js (drift 2220, bonkberg 2247, fishing 2260, surf 2269,
              peakling 2391, sled 2404, escape 2435, dash 2457, snowball 2674, leap 2684,
              thinice 2692). FOUR are Floe Arcade cartridges: PenguinArcade/index.html's
              #arcadeList (AURORA ALLEY, ARCTIC HOCKEY, MELTDOWN, JET PACK ADVENTURE), reached
              from the two cabinets js/interiors.js:340-341 installs. MELTDOWN is in both, which
-             is why 11 + 4 is 14 and not 15. The fifteenth, CAVERN RESCUE, has NO in-world
-             entry at all: nothing in js/rooms.js, js/interiors.js or js/scene-landmarks.js
-             opens it, only the map directory. Re-count from those files before changing. -->
-        <div class="stat"><div class="n">15</div><div class="l">arcade games</div></div>
+             is why 11 + 4 is 14 and not 15. The fifteenth and sixteenth, CAVERN RESCUE and
+             IGLOO FORT, have NO in-world entry at all: nothing in js/rooms.js, js/interiors.js
+             or js/scene-landmarks.js opens either, only the map directory. Re-count from those
+             files before changing. -->
+        <div class="stat"><div class="n">16</div><div class="l">arcade games</div></div>
         <div class="stat"><div class="n">7</div><div class="l">island areas</div></div>
         <div class="stat"><div class="n">154</div><div class="l">things to wear &amp; place</div></div>
         <div class="stat"><div class="n">$0</div><div class="l">free to play, no ads</div></div>
@@ -660,8 +661,8 @@
       <div class="split">
         <div>
           <div class="section-eyebrow">The arcade</div>
-          <h2>Fifteen games. <em>Most have a door.</em></h2>
-          <p style="color: var(--muted-fg); font-size: 1.04rem;">Eleven of them live behind a painted sign out on the island — you walk up to the dock, the trailhead, the fort, the shore ice, and go in. Four are cartridges in the Floe Arcade, the room in Aurora City: Aurora Alley, Arctic Hockey, Meltdown and Jet Pack Adventure. Meltdown is on both lists — it has a fort of its own at Snow Forts as well as a slot in the cabinet — which leaves Cavern Rescue, the one game with no way in from the world at all. The only door to it is the directory the map carries, and that will take you straight to any of the fifteen. Snowflakes you earn playing them buy hats you'll wear back outside.</p>
+          <h2>Sixteen games. <em>Most have a door.</em></h2>
+          <p style="color: var(--muted-fg); font-size: 1.04rem;">Eleven of them live behind a painted sign out on the island — you walk up to the dock, the trailhead, the fort, the shore ice, and go in. Four are cartridges in the Floe Arcade, the room in Aurora City: Aurora Alley, Arctic Hockey, Meltdown and Jet Pack Adventure. Meltdown is on both lists — it has a fort of its own at Snow Forts as well as a slot in the cabinet — which leaves Cavern Rescue and Igloo Fort, the two games with no way in from the world at all. The only door to them is the directory the map carries, and that will take you straight to any of the sixteen. Snowflakes you earn playing them buy hats you'll wear back outside.</p>
           <ul class="split-points" role="list">
             <li><strong>Every game keeps your personal best</strong> on the device you played it on.</li>
             <li><strong>Play together</strong> — start a party and launch a game as a group.</li>
@@ -889,7 +890,7 @@
         </details>
         <details class="faq">
           <summary>Are the leaderboards legit?</summary>
-          <p>Yes. Fourteen of the fifteen games have a shared board; the exception is Lazy Floe, which has no score to beat. A score goes up only when you beat your own personal best, so an ordinary run won't appear, and a board that looks quiet usually is: most are new. Teens and adults post under the name they chose, so pick one you're happy being public. Players under 13 never publish a name they picked — the board is given a penguin name the game generates instead, and the score still counts. Nothing you can buy affects a score or a rank.</p>
+          <p>Yes. Fifteen of the sixteen games have a shared board; the exception is Lazy Floe, which has no score to beat. A score goes up only when you beat your own personal best, so an ordinary run won't appear, and a board that looks quiet usually is: most are new. Teens and adults post under the name they chose, so pick one you're happy being public. Players under 13 never publish a name they picked — the board is given a penguin name the game generates instead, and the score still counts. Nothing you can buy affects a score or a rank.</p>
         </details>
         <details class="faq">
           <summary>What do you collect about me?</summary>
