@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Holohound — real prices, and an AI that knows your binder</title>
-<meta name="description" content="Scan Pokémon and Magic cards on-device, track five TCGs with every price source named, and ask Hound — an AI companion who already knows your binder. Unlimited free scanning, no account.">
+<meta name="description" content="Scan Pokémon and Magic cards on-device, track five TCGs, see every price beside the feed that supplied it. Ask Hound, an AI that knows your binder. No account.">
 <link rel="canonical" href="https://hypersage.ai/holohound/">
 <meta property="og:title" content="Holohound — real prices, and an AI that knows your binder">
-<meta property="og:description" content="Scan Pokémon and Magic cards on-device, track five TCGs with every price source named, and ask Hound — an AI companion who already knows your binder. Unlimited free scanning, no account.">
+<meta property="og:description" content="Scan Pokémon and Magic cards on-device, track five TCGs, see every price beside the feed that supplied it. Ask Hound, an AI that knows your binder. No account.">
 <meta property="og:url" content="https://hypersage.ai/holohound/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="HyperSage">
@@ -104,7 +104,16 @@
 <div class="container">
   <div class="stats-strip">
     <div class="stat"><div class="n">124,248</div><div class="l">card printings recognized on-device — Pokémon &amp; Magic</div></div>
-    <div class="stat"><div class="n">5</div><div class="l">TCGs tracked, every price with its source named</div></div>
+    <!-- Corrected 2026-08-31. This stat used to put 5 over a clause promising a
+         sourced price for each of them. Both halves were true and the sentence
+         still was not: Gundam has no price feed at all — the app itself says so
+         (MKT_SOURCES.gundam) — so the count promised a price for a game the app
+         deliberately refuses to price. The number now counts what is actually
+         priced. The retired wording is NOT quoted here on purpose: it is a
+         forbidden_value in site-audit-contract.json, and this file is the
+         surface that gate reads, so quoting it to explain it would republish
+         the claim and fail the check. (It did, on the first attempt.) -->
+    <div class="stat"><div class="n">4</div><div class="l">of the 5 TCGs priced, every price with its source named</div></div>
     <div class="stat"><div class="n">3</div><div class="l">free Hound questions a day</div></div>
     <div class="stat"><div class="n">0</div><div class="l">accounts required</div></div>
   </div>
@@ -130,7 +139,9 @@
         <p>No daily cap, no lifetime cap, no account to create. Card recognition runs entirely
         on your phone against a bundled index — nothing you point the camera at leaves the
         device. The scanner reads Pokémon and Magic cards today; Yu-Gi-Oh!, Lorcana and Gundam
-        are searchable and priceable from the catalogue.</p>
+        are searchable from the catalogue and go into the same binder. Yu-Gi-Oh! and Lorcana
+        carry a price; Gundam has no price feed yet, and the app says so rather than showing
+        a number it cannot source.</p>
       </div>
       <div class="feature">
         <h3>Prices come with receipts.</h3>

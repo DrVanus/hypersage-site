@@ -29,7 +29,7 @@
 <header class="site"><img class="mark" src="app-icon.png" alt="" width="30" height="30"><a class="brand" href="./">Holohound</a></header>
 <main class="wrap">
 <h1>Privacy</h1>
-<p class="updated">Last updated 24 August 2026</p>
+<p class="updated">Last updated 31 August 2026</p>
 
 <div class="card">
 <h2 style="margin-top:0">The short version</h2>
@@ -40,8 +40,8 @@ third-party tracking</strong>. We cannot see your binder.</p>
 
 <h2>What stays on your device</h2>
 <p>Everything you create in the app: the cards in your binder, what you paid, your want
-list, your price watches, your notification choices, and the value history the app records
-over time. This lives in the app's own storage on your phone. Deleting the app deletes it.</p>
+list, your price watches, and the value history the app records over time. This lives in
+the app's own storage on your phone. Deleting the app deletes it.</p>
 <p>When you scan a card, the app also keeps a rectified photo of it on your device, capped at
 your newest 40 captures so the library can't grow without bound. These photos are never
 uploaded anywhere; the card-matching step that reads them runs entirely on the phone.</p>
@@ -51,14 +51,38 @@ lose the device or delete the app. Backup is not implemented in this version.</p
 <h2>What leaves your device</h2>
 
 <h3>Card images and card data</h3>
-<p>Card artwork and card details are fetched from <a href="https://tcgdex.dev"
-rel="noopener">TCGdex</a> as you browse. Like any request to any website, TCGdex receives
-your IP address and can see which card images were requested. We do not send them your
-collection, and the requests carry no identifier from us.</p>
+<p>Card artwork and card details are fetched as you browse, from a different catalogue for
+each game: <a href="https://tcgdex.dev" rel="noopener">TCGdex</a> for Pokémon,
+<a href="https://scryfall.com" rel="noopener">Scryfall</a> for Magic,
+<a href="https://ygoprodeck.com" rel="noopener">YGOPRODeck</a> for Yu-Gi-Oh!,
+<!-- Lorcast is NAMED but deliberately NOT LINKED. The disclosure obligation is to
+     name the recipient, and that is met by the text. The link is omitted because it
+     could not be verified from the machine that wrote this page: lorcast.com resolves
+     into a Charter/CUJO network block from here, so a HEAD probe cannot distinguish
+     "the site is down" from "this network refuses it", and site_audit.py --probe-links
+     correctly fails it either way. api.lorcast.com answers, so the FEED is alive; it is
+     an API endpoint, not a page to send a reader to. Add the link the day it probes
+     green from an unfiltered network — do not add it on the assumption that it will. -->
+Lorcast for Lorcana, and
+<a href="https://gcgapi.com" rel="noopener">gcg-api</a> for Gundam. Like any request to any
+website, whichever catalogue you are browsing receives your IP address and can see which
+cards were requested. We do not send any of them your collection, and the requests carry no
+identifier from us.</p>
+<p>Holohound also links out to graders and marketplaces — PSA, Beckett, CGC, SGC, TCGplayer
+and eBay — when you tap a certificate or a listing. Those open outside the app and are
+covered by their own privacy policies, not this one. Nothing is sent to them unless you tap.</p>
 
 <h3>Prices</h3>
-<p>Prices shown in the app are TCGplayer market prices supplied through TCGdex. Holohound
-is not endorsed or certified by TCGplayer.</p>
+<p>Every price in the app names the feed it came from, on the card itself, because the feeds
+are not the same and do not mean the same thing. <strong>Pokémon:</strong> TCGplayer market
+prices in US dollars and Cardmarket prices in euro, both supplied through TCGdex, never
+converted into one another. <strong>Magic:</strong> TCGplayer prices in dollars, supplied
+through Scryfall. <strong>Yu-Gi-Oh!:</strong> TCGplayer's lowest-printing figure, supplied
+through YGOPRODeck — a floor, not a market price. <strong>Lorcana:</strong> Lorcast, in
+dollars; Lorcast names no marketplace behind its numbers, so neither do we.
+<strong>Gundam:</strong> no price feed exists yet, so the app shows no price at all rather
+than an invented one. Holohound is not endorsed or certified by TCGplayer, Cardmarket,
+TCGdex, Scryfall, YGOPRODeck, Lorcast or gcg-api.</p>
 
 <h3>Hound, the AI companion</h3>
 <p><strong>Hound has been live since 18 August 2026.</strong> Until that date its answers

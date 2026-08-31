@@ -15,8 +15,8 @@
       "approved": true,
       "evidence": [
         "holohound/ios/project.yml lists only first-party Swift sources for the Holohound target (HolohoundApp, Haptics, Recognition, Scanner, Grading, PrivacyInfo.xcprivacy) and zero package dependencies — no analytics or attribution SDK (Firebase, Amplitude, Mixpanel, PostHog, AppsFlyer, Adjust) is linked.",
-        "Card recognition is on-device: DESIGN.md and the app's own NSCameraUsageDescription ('Recognition runs entirely on this device') describe a bundled pHash index (tools/build_phash_index.py, 21,775 EN cards) matched locally, with no image or video sent anywhere.",
-        "The only network calls in the prototype are to api.tcgdex.net (public card/price data, no identifier attached — mock-data.js:2221) and to holohound-api for Hound chat, LIVE since 2026-08-18 (index.html 'HOUND, LIVE' block; default HOUND_API = https://holohound-api.fly.dev). That call carries an install-scoped device id and is metered per day and per IP (holohound-api/src/middleware/meter.js) — metering, not tracking: it is joined to nothing, and holohound-api stores no message content."
+        "Card recognition is on-device: DESIGN.md and the app's own NSCameraUsageDescription ('Recognition runs entirely on this device') describe a bundled pHash index (tools/build_phash_index.py --games pokemon,mtg, 124,248 EN paper printings: 19,502 Pokemon + 104,746 Magic, read from the HHX2 header of ios/Holohound/Resources/hhindex.bin) matched locally, with no image or video sent anywhere.",
+        "The only network calls in the prototype are to the five game catalogues — api.tcgdex.net + assets.tcgdex.net (Pokemon), api.scryfall.com (Magic), db.ygoprodeck.com (Yu-Gi-Oh!), api.lorcast.com (Lorcana), api.gcgapi.com (Gundam) — all public card/price data with no identifier attached (FEED_NAME_OF, mock-data.js) and to holohound-api for Hound chat, LIVE since 2026-08-18 (index.html 'HOUND, LIVE' block; default HOUND_API = https://holohound-api.fly.dev). That call carries an install-scoped device id and is metered per day and per IP (holohound-api/src/middleware/meter.js) — metering, not tracking: it is joined to nothing, and holohound-api stores no message content."
       ]
     },
     "no_ads": {
@@ -52,6 +52,98 @@
       "source_revision": "6807055",
       "capture_command": "python3 tools/nav_walk.py . --out <scratch> --scheme dark --scale 2  (in ~/Developer/DrVanus/holohound; 390x844 CSS @2x -> 780x1688px). Shoot into a SCRATCH dir and copy only these four across: the walk writes all 14 screens, hound.png among them, and that frame is withdrawn.",
       "journey": "market > set — master-set completion"
+    }
+  ],
+  "facts": [
+    {
+      "id": "index_card_count",
+      "value": "124,248",
+      "evidence": [
+        "HHX2 header of holohound/ios/Holohound/Resources/hhindex.bin, count field = 124248",
+        "holohound/tools/check_index_count.py re-derives it from the binary on every run"
+      ],
+      "surfaces": [
+        "index.html"
+      ],
+      "forbidden_values": [
+        "21,775",
+        "21775"
+      ],
+      "_why_not_19502": "19,502 is the RETIRED TOTAL and also the TRUE Pokemon subset, and a substring gate cannot tell the two apart. Forbidding it would fail an honest sentence ('19,502 Pokemon and 104,746 Magic'), and a gate that fails honest copy is a gate that gets switched off. Only figures that are false in every reading are listed."
+    },
+    {
+      "id": "hound_free_daily",
+      "value": "free Hound questions a day",
+      "evidence": [
+        "holohound/mock-data.js profile.houndMsgsPerDay = 3",
+        "holohound-api fly.toml HH_FREE_DAILY=3; live /health meter.freeDaily:3"
+      ],
+      "surfaces": [
+        "index.html"
+      ],
+      "forbidden_values": [
+        "10 free Hound",
+        "10 Hound questions",
+        "10 questions a day",
+        "10 a day",
+        "10 messages a day",
+        "10 free questions"
+      ]
+    },
+    {
+      "id": "gundam_is_unpriced",
+      "value": "Gundam has no price feed yet",
+      "evidence": [
+        "holohound/index.html:12686 MKT_SOURCES.gundam — 'No price feed exists for Gundam yet.'",
+        "holohound/index.html:9123 PRICE_VOICE.gundam — tile: null, noFeed: true",
+        "holohound/mock-data.js:4424 fetchLivePrices skips ygo/lorcana/gundam by name"
+      ],
+      "surfaces": [
+        "index.html"
+      ],
+      "forbidden_values": [
+        "priceable",
+        "TCGs tracked, every price"
+      ],
+      "_why": "Added 2026-08-31. The 2026-08-31 sweep that removed the phantom price alerts wrote 'Yu-Gi-Oh!, Lorcana and Gundam are searchable and priceable' and a '5 TCGs tracked, every price with its source named' stat in the same pass — a fix that authored the next false claim. Both halves of that stat were true and the sentence still was not."
+    },
+    {
+      "id": "privacy_names_every_feed",
+      "value": "no price feed exists yet",
+      "evidence": [
+        "The five catalogues in holohound/mock-data.js FEED_NAME_OF, each of which receives the user's IP"
+      ],
+      "surfaces": [
+        "privacy.html"
+      ],
+      "forbidden_values": [
+        "your notification choices",
+        "Prices shown in the app are TCGplayer market prices supplied through TCGdex"
+      ],
+      "_why": "Two live-legal-document defects, fixed 2026-08-31. (1) 'your notification choices' outlived the feature: the binary has ZERO notification capability — no UNUserNotification, no registerForRemoteNotifications, no aps-environment anywhere in the Swift or the project spec — so the policy listed a choice the user cannot make. It is the phantom-alerts claim surviving in the legal page after the landing page was cleaned, which is why a claims sweep has to cover every surface and not just the loudest one. (2) The page named TCGdex as the only recipient of card requests while four more catalogues receive the user's IP."
+    }
+  ],
+  "data_flows": [
+    {
+      "id": "catalogue-browsing",
+      "_why": "Each game's catalogue is a separate third party receiving the user's IP and the identity of the cards they looked at. Naming one of five is a materially incomplete disclosure, and it is the shape the page had until 2026-08-31.",
+      "disclosure_terms": [
+        "TCGdex",
+        "Scryfall",
+        "YGOPRODeck",
+        "Lorcast",
+        "gcg-api",
+        "IP address"
+      ]
+    },
+    {
+      "id": "hound-chat",
+      "_why": "The only outbound flow carrying anything the user wrote.",
+      "disclosure_terms": [
+        "Anthropic",
+        "our server",
+        "midnight UTC"
+      ]
     }
   ]
 }
