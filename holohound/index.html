@@ -144,10 +144,20 @@
         a number it cannot source.</p>
       </div>
       <div class="feature">
+        <!-- SCOPED 2026-08-31, the last single-feed sentence on this page. The listing
+             spread — cheapest current listing and middle of the book — comes only from the
+             TCGdex reader; index.html:9595 in the app says so outright ("Only the TCGdex
+             reader fills these; the other four set them null by design"). So the three-number
+             promise is a Pokémon promise, and naming TCGplayer-via-TCGdex as the source of
+             all of it was the same error the stats strip, terms.html and support.html each
+             carried in their own wording. -->
         <h3>Prices come with receipts.</h3>
-        <p>Market price, the cheapest current listing, and the middle of the book — from
-        TCGplayer via TCGdex, dated and sourced. Sold-price history isn't connected yet, and
-        the app says exactly that instead of showing you a number and letting you assume.</p>
+        <p>Every price names the feed that supplied it, dated, on the card itself — and the
+        feeds differ by game, so the app never quietly reads one market's number under
+        another's name. For Pokémon that also means the full spread: market price, the
+        cheapest current listing and the middle of the book. Sold-price history isn't
+        connected for any game yet, and the app says exactly that instead of showing you a
+        number and letting you assume.</p>
       </div>
       <div class="feature">
         <!-- CORRECTED TWICE ON 2026-08-31, and the second correction is the interesting
