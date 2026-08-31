@@ -150,15 +150,38 @@
         the app says exactly that instead of showing you a number and letting you assume.</p>
       </div>
       <div class="feature">
+        <!-- CORRECTED TWICE ON 2026-08-31, and the second correction is the interesting
+             one. This was scoped DOWN to "four Pokémon sets" on the belief that completion
+             still read SET_POOLS (mock-data.js:569, four hand-typed Pokémon fixtures). That
+             was true this morning and is not true now: the pre-launch review's #1 deferred
+             item shipped the same day (DESIGN.md "Set completion leaves the fixture",
+             PLAN.md item 1), deriving completion from the BINDER for every set you own cards
+             in, in all five games. Under-claiming is a defect too, so the scope came back up.
+             What did NOT survive is "secrets and reverses included": reverse-holo printings
+             are still not tracked as separate cards in any game (PLAN.md item 1c), and the
+             app's own set note says so. The trailing "watch the prices for you" is also gone
+             — the watchlist evaluates thresholds, but this build cannot notify anyone. -->
         <h3>Master-set completion, done right.</h3>
-        <p>Every printing counted — secrets and reverses included — what's missing, and what
-        finishing it would actually cost, with a straight line to Hound to watch the prices for
-        you.</p>
+        <p>Every set you own cards in, across all five games — what you hold, what's missing,
+        and a costed head on the gap. Owned is counted on your phone and stays exact with every
+        feed down; the totals come from each game's own catalogue and the app says when one
+        cannot be reached. Reverse-holo printings are not counted separately yet, and the set
+        screen says so.</p>
       </div>
+      <!-- Corrected 2026-08-31. This said notifications were opt-in and capped under four a
+           month, in a binary that has NO notification capability of any kind: zero hits for
+           UNUserNotification, registerForRemoteNotifications or aps-environment across every
+           Swift file and the project spec. It is the same phantom-alerts claim that was
+           removed from the stats strip and from privacy.html, surviving in a third place —
+           which is why a claims sweep has to enumerate surfaces rather than fix the one it
+           was pointed at. The honest version is stronger for this feature anyway: the app
+           does not notify at all. Restore a capped-frequency promise only alongside the
+           capability, not before it. -->
       <div class="feature">
         <h3>No streaks. No guilt. No noise.</h3>
-        <p>No manufactured urgency and no loss framing. Notifications are opt-in, capped under
-        four a month, and limited to things you'd actually want to hear from a friend by text.</p>
+        <p>No manufactured urgency and no loss framing — and today, no notifications at all:
+        this build cannot send one. When that changes, what it may interrupt you for will be
+        stated here before it ships, not after.</p>
       </div>
     </div>
   </div>
@@ -219,7 +242,7 @@
         <ul>
           <li>Unlimited card scanning</li>
           <li>Full binder, wishlist and want-list tracking</li>
-          <li>Master-set completion tracking</li>
+          <li>Master-set completion tracking, all five games</li>
           <li>3 Hound messages a day</li>
           <li>CSV export, no subscription required</li>
         </ul>
