@@ -39,11 +39,34 @@ FONTS = {
     'mythkin': '',
     'hexhunter': 'family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800',
     'gemburrow': 'family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800',
+    'loam': '',
 }
 
 # Per-site card: colors are the site's own :root values, copy is the page's own
 # hero/og copy (shortened, never reworded into new claims), art ships with the site.
 CARDS = {
+    "loam": {
+        "art": "art/loam_steady.png",
+        "css": """
+  /* Every hex is copied verbatim from loam/index.html :root (the app's own
+     tokens.json, light scheme) — warm paper, green ink, sienna pencil. */
+  .og { background:
+        radial-gradient(ellipse 70% 60% at 82% 30%, rgba(231,233,218,0.9), transparent 65%),
+        radial-gradient(ellipse 60% 55% at 20% 90%, rgba(246,232,220,0.8), transparent 70%),
+        #F5EFE3; }
+  .kicker { color: #A25B2F; }
+  h1 { font-family: ui-serif, 'New York', Charter, Georgia, serif; font-weight: 700;
+       font-size: 72px; color: #292317; -webkit-text-fill-color: #292317; background: none; }
+  h1 em { font-style: italic; color: #59683D; -webkit-text-fill-color: #59683D; }
+  .sub { color: #756B58; }
+  .art { width: 430px; height: auto; border-radius: 0;
+         filter: drop-shadow(0 22px 44px rgba(41,35,23,0.22)); }
+""",
+        "kicker_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13C12 9.5 9.5 7 6 7c0 3.5 2.5 6 6 6z"/><path d="M12 13c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6z"/></svg>',
+        "kicker": "Notes, tended \u00b7 Coming to iOS",
+        "h1": "The notes companion<br>that <em>asks first.</em>",
+        "sub": "Tidies your slips in place, never rephrases you \u2014 and writes every action into a Ledger you can undo.",
+    },
     "nightshelf": {
         "art": "app-icon.png",
         "css": """

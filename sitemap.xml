@@ -5,7 +5,7 @@
      folders (rowan, alder, waddleton) while hexhunter, mythkin, mythwright, nightshelf,
      quietoak, saffra, storyvault and wingmate all shipped a valid sitemap.xml that
      nothing pointed at. holohound, hoardling and hoardling3d were added later as each
-     shipped its own sitemap.xml. All 15 are listed below; add the sixteenth when it arrives.
+     shipped its own sitemap.xml. All 16 are listed below; add the seventeenth when it arrives.
      CryptoSage AI and The One are NOT here on purpose — they are served from other
      origins (cryptosageai.io, drvanus.github.io/theone-app), and a sitemap index may
      only reference sitemaps on its own host.
@@ -16,6 +16,10 @@
   <sitemap>
     <loc>https://hypersage.ai/sitemap-main.xml</loc>
     <lastmod>2026-08-24</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hypersage.ai/loam/sitemap.xml</loc>
+    <lastmod>2026-08-31</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://hypersage.ai/alder/sitemap.xml</loc>

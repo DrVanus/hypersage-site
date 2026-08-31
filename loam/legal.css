@@ -1,0 +1,67 @@
+/* Shared stylesheet for /loam/privacy.html and /loam/support.html — keeps the
+   brand consistent without duplicating the landing-page CSS. Tokens re-keyed
+   from loam-app/tokens.json (light scheme), same as loam/index.html :root. */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #F5EFE3;
+  --surface: #FFFCF5;
+  --surface-soft: #EFE7D6;
+  --fg: #292317;
+  --muted-fg: #756B58;
+  --tint: #59683D;
+  --tint-ink: #46522F;
+  --tint-soft: #E7E9DA;
+  --companion: #A25B2F;
+  --companion-soft: #F6E8DC;
+  --border: #E2D8C2;
+  --radius: 14px;
+  --shadow-card: 0 1px 2px rgba(41,35,23,.05), 0 8px 28px rgba(41,35,23,.10);
+}
+
+html { color-scheme: only light; background: var(--bg); }
+
+body {
+  font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+
+.crumb { font-size: 0.9rem; margin-bottom: 28px; }
+.crumb a { color: var(--tint-ink); text-decoration: none; font-weight: 600; }
+.crumb a:hover { color: var(--tint); }
+
+h1, h2 { font-family: ui-serif, 'New York', Charter, Georgia, 'Times New Roman', serif; letter-spacing: -0.01em; }
+h1 { font-size: 2rem; margin-bottom: 6px; }
+.updated { color: var(--muted-fg); font-size: 0.9rem; margin-bottom: 30px; }
+
+h2 { font-size: 1.25rem; margin: 34px 0 10px; }
+p, li { color: var(--fg); font-size: 0.98rem; }
+p + p { margin-top: 12px; }
+ul { padding-left: 22px; margin: 10px 0; }
+li { margin-bottom: 8px; }
+
+a { color: var(--tint-ink); font-weight: 600; text-decoration: none; }
+a:hover { color: var(--tint); }
+
+.callout {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-card); padding: 18px 22px; margin: 22px 0;
+}
+.callout.sienna { background: var(--companion-soft); border-color: #E8CDB7; }
+
+.email-link { font-weight: 700; }
+
+footer.legal {
+  margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border);
+  color: var(--muted-fg); font-size: 0.88rem;
+  display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: space-between;
+}
+footer.legal a { color: var(--muted-fg); }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

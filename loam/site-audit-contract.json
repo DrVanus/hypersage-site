@@ -1,0 +1,37 @@
+{
+  "schema": "static-site-audit-contract/v1",
+  "canonical_url": "https://hypersage.ai/loam/",
+  "approved_absolute_claims": {
+    "no_account": {
+      "approved": true,
+      "evidence": [
+        "loam-app ships no sign-up, sign-in, or password surface anywhere (index.html has no auth screens; store.js state has no account fields).",
+        "loam-api: identity is a client-minted pseudonymous device id sent as the x-device-id header (loam-app/store.js ensureDeviceId, crypto.randomUUID); no user table exists — the server keeps only an in-memory per-device daily counter (loam-api/app/main.py _daily defaultdict)."
+      ]
+    },
+    "no_tracking": {
+      "approved": true,
+      "evidence": [
+        "loam-app package.json dependencies are @capacitor/haptics, @capacitor/status-bar, @capacitor/keyboard, @capacitor/local-notifications — no analytics or tracking SDK.",
+        "loam-api/app/main.py has no analytics, no request-body logging, and no persistence of content; it meters requests in memory per pseudonymous device id and forwards to Anthropic."
+      ]
+    },
+    "no_ads": {
+      "approved": true,
+      "evidence": [
+        "No advertising SDK is present in loam-app or loam-api (package.json / pyproject dependencies).",
+        "The app renders no ad surface; monetization is a planned subscription only (loam-app/HANDOFF.md pricing law), never advertising."
+      ]
+    }
+  },
+  "data_flows": [
+    {
+      "id": "companion-chat",
+      "disclosure_terms": ["Anthropic", "Claude", "device identifier", "30 days"]
+    },
+    {
+      "id": "dictation",
+      "disclosure_terms": ["Apple", "speech recognition"]
+    }
+  ]
+}
