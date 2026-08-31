@@ -65,12 +65,7 @@
       "surfaces": [
         "index.html"
       ],
-      "forbidden_values": [
-        "<div class=\"n\">21,775</div>",
-        "<div class=\"n\">19,502</div>"
-      ],
-      "_why_not_19502": "19,502 is the RETIRED TOTAL and also the TRUE Pokemon subset, and a substring gate cannot tell the two apart. Forbidding it would fail an honest sentence ('19,502 Pokemon and 104,746 Magic'), and a gate that fails honest copy is a gate that gets switched off. Only figures that are false in every reading are listed.",
-      "_why_forbidden_shape": "FORBIDDEN VALUES ARE MARKUP-COUPLED OR FULL PHRASES, NEVER BARE FRAGMENTS, AND THAT IS THIS FILE'S OWN BUG BEING FIXED. This contract is SERVED — hypersage.ai/holohound/site-audit-contract.json returns 200 — so every literal written here is published. The first version of these gates listed bare '21,775' and '10 a day', which put the retired claims back on the very origin they were removed from: a grep of the live site reported them as live again, which is exactly the trap that cost this sweep an hour. A literal that only occurs inside markup, or a phrase long enough to be unmistakable, gates the same regression without republishing the claim. Numeric drift is caught by the positive `value` arm anyway, which fails the moment the shipped number stops matching."
+      "_no_forbidden_values": "Deliberately none. This contract is SERVED (200 at hypersage.ai/holohound/site-audit-contract.json), and a substring gate has to contain its own substring — so listing a retired count here, in any wrapping, publishes it on the origin it was removed from. The first version did exactly that and the verification sweep reported the retired figure as live again. The `value` assertion above is the stronger gate anyway: it fails on ANY number that is not the one in hhindex.bin, not merely on the handful someone thought to enumerate. Mutation-tested 2026-08-31."
     },
     {
       "id": "hound_free_daily",
@@ -85,7 +80,7 @@
       "forbidden_values": [
         "<div class=\"n\">10</div><div class=\"l\">free Hound questions a day"
       ],
-      "_why_forbidden_shape": "The number and its label are separate elements, so the only exact literal for this regression is the markup-coupled one. It is also unmistakably markup rather than a claim, which is the property this file needs. See index_card_count's note."
+      "_why_forbidden_shape": "Markup-coupled on purpose. The number and its label are separate elements, so an exact literal for this regression has to span the markup between them — which also means it cannot be mistaken for prose by a sweep of the live site. Same reason index_card_count carries no forbidden values at all: see its note."
     },
     {
       "id": "gundam_is_unpriced",
