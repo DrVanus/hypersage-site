@@ -50,6 +50,12 @@
       --radius: 14px;
       --radius-lg: 22px;
       --shadow-card: 0 1px 2px rgba(41,35,23,.05), 0 8px 28px rgba(41,35,23,.10);
+      /* The app's own faces (loam-app tokens.json font.display / the Handwritten
+         dress stack) — no webfont: every step is on the reader's device. */
+      --serif: 'Iowan Old Style', 'New York', ui-serif, 'Palatino Linotype', Palatino, Charter, Georgia, 'Times New Roman', serif;
+      --hand: 'Bradley Hand', 'Noteworthy', 'Segoe Print', cursive;
+      --companion-ink: #8C4A21; /* sienna darkened for small text — 5.9:1 on the paper */
+      --good: #4C7A4C;          /* tokens.json color.good.light */
     }
 
     html { scroll-behavior: smooth; color-scheme: only light; background: var(--bg); }
@@ -63,7 +69,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    h1, h2, h3 { font-family: ui-serif, 'New York', Charter, Georgia, 'Times New Roman', serif; letter-spacing: -0.01em; }
+    h1, h2, h3 { font-family: var(--serif); letter-spacing: -0.015em; }
 
     /* The app's paper, as page atmosphere: a faint ruled wash. */
     body::before {
@@ -74,6 +80,29 @@
         radial-gradient(ellipse 70% 45% at 90% 8%, rgba(246,232,220,0.75), transparent 65%);
       pointer-events: none; z-index: 0;
     }
+    /* Paper tooth over the whole desk: ink-toned SVG noise at 5% — texture you
+       feel more than see. Zero raster bytes, crisp at any DPI. */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .05;
+      /* base64, not URL-encoding: the SVG's internal url(#p) filter ref would
+         otherwise read as a local-file reference to the site auditor. */
+      background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNjAnIGhlaWdodD0nMTYwJz48ZmlsdGVyIGlkPSdwJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC44JyBudW1PY3RhdmVzPScyJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PGZlQ29sb3JNYXRyaXggdmFsdWVzPScwIDAgMCAwIDAuMTYgMCAwIDAgMCAwLjE0IDAgMCAwIDAgMC4wOSAwIDAgMCAwLjYgMCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxNjAnIGhlaWdodD0nMTYwJyBmaWx0ZXI9J3VybCgjcCknLz48L3N2Zz4=") repeat;
+      background-size: 160px 160px;
+    }
+    /* A fresh sheet laid on the desk (replaces the inline tint on #features
+       and #boundary), deckle-edged. The strips sit fully OUTSIDE the box so
+       the translucent layers never overlap and double-darken. */
+    .section-block.sheet { position: relative; background: rgba(255,252,245,0.72); }
+    .section-block.sheet::before,
+    .section-block.sheet::after {
+      content: '';
+      position: absolute; left: 0; right: 0; height: 12px; pointer-events: none;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='12' viewBox='0 0 240 12' preserveAspectRatio='none'%3E%3Cpath d='M0 12 L0 7.2 Q12 3.4 24 6.1 T48 5.2 T72 7.8 T96 4.4 T120 6.9 T144 5.1 T168 7.6 T192 4.6 T216 6.4 T240 6.9 L240 12 Z' fill='%23FFFCF5' fill-opacity='0.72'/%3E%3C/svg%3E") repeat-x;
+      background-size: 240px 12px;
+    }
+    .section-block.sheet::before { top: -12px; }
+    .section-block.sheet::after  { top: 100%; transform: scaleY(-1); }
 
     a { color: var(--tint-ink); text-decoration: none; transition: color .2s; }
     a:hover { color: var(--tint); }
@@ -91,7 +120,7 @@
     nav.site .container { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 14px; padding-bottom: 14px; }
     nav.site .brand {
       display: flex; align-items: center; gap: 12px;
-      font-family: ui-serif, 'New York', Charter, Georgia, serif;
+      font-family: var(--serif);
       font-weight: 700; color: var(--fg); font-size: 1.25rem;
     }
     nav.site .brand img { width: 36px; height: 36px; border-radius: 9px; }
@@ -125,15 +154,40 @@
     }
 
     /* ===== HERO ===== */
-    .hero { padding: 72px 0 40px; }
+    .hero { padding: clamp(52px, 4vw + 36px, 84px) 0 clamp(30px, 4vw, 48px); }
     .hero-layout { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: center; }
     .eyebrow {
-      display: inline-block; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--companion); margin-bottom: 16px;
+      display: inline-block; font-size: 0.76rem; font-weight: 650; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--companion-ink); margin-bottom: 16px;
     }
-    .hero h1 { font-size: clamp(2.3rem, 5vw, 3.4rem); line-height: 1.12; margin-bottom: 18px; font-weight: 700; }
+    /* A pencil tick leads each eyebrow — the app's date-eyebrow, on the page. */
+    .hero .eyebrow::before,
+    #how .section-eyebrow::before,
+    #boundary .section-eyebrow::before,
+    #faq .section-eyebrow::before {
+      content: ''; display: inline-block; vertical-align: middle;
+      width: 22px; height: 2px; border-radius: 2px;
+      background: var(--companion); opacity: 0.5; margin: -1px 10px 0 0;
+    }
+    #contract .section-eyebrow::before, #contract .section-eyebrow::after,
+    #features .section-eyebrow::before, #features .section-eyebrow::after,
+    #screens .section-eyebrow::before, #screens .section-eyebrow::after {
+      content: ''; display: inline-block; vertical-align: middle;
+      width: 22px; height: 2px; border-radius: 2px;
+      background: var(--companion); opacity: 0.5; margin: -1px 10px;
+    }
+    /* Centered eyebrows keep their inline text-align by staying block. */
+    #contract .section-eyebrow, #features .section-eyebrow, #screens .section-eyebrow { display: block; }
+    .hero h1 {
+      font-size: clamp(2.55rem, 1.05rem + 6.6vw, 4.15rem);
+      line-height: 1.06;
+      letter-spacing: -0.024em;
+      font-weight: 700;
+      margin: 0 0 20px -0.04em; /* optical hang: the T's serif sits on the margin */
+      text-wrap: balance;
+    }
     .hero h1 .soft { color: var(--tint); font-style: italic; }
-    .lede { font-size: 1.13rem; color: var(--muted-fg); max-width: 56ch; }
+    .lede { font-size: clamp(1.08rem, 1rem + 0.45vw, 1.2rem); line-height: 1.62; color: var(--muted-fg); max-width: 56ch; }
     .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; margin: 26px 0 14px; }
     .btn-warm {
       display: inline-flex; align-items: center; gap: 8px;
@@ -150,9 +204,19 @@
       transition: transform .15s, border-color .2s;
     }
     .btn-outline:hover { transform: translateY(-1px); border-color: var(--tint); }
-    .hero-note { font-size: 0.88rem; color: var(--muted-fg); max-width: 58ch; }
-    .hero-image { text-align: center; }
-    .hero-image img { max-width: min(88%, 380px); height: auto; filter: drop-shadow(0 18px 40px rgba(41,35,23,0.18)); }
+    /* The AI-companion disclosure stays SOBER on purpose — upright, muted,
+       system sans, set apart like a footnote. A disclosure, not an annotation. */
+    .hero-note { font-size: 0.86rem; color: var(--muted-fg); max-width: 52ch; border-top: 1px solid var(--rule); padding-top: 12px; margin-top: 6px; }
+    /* The hedgehog stands ON the desk instead of floating: softer shadow up
+       high, a contact ellipse under his feet. */
+    .hero-image { text-align: center; position: relative; }
+    .hero-image img { max-width: min(88%, 380px); height: auto; filter: drop-shadow(0 10px 18px rgba(41,35,23,0.14)); }
+    .hero-image::after {
+      content: '';
+      position: absolute; left: 50%; bottom: 4px; width: 56%; height: 24px;
+      transform: translateX(-50%); z-index: -1;
+      background: radial-gradient(ellipse closest-side, rgba(41,35,23,.14), transparent 72%);
+    }
     @media (max-width: 860px) {
       .hero-layout { grid-template-columns: 1fr; gap: 28px; }
       .hero-image { order: -1; }
@@ -162,12 +226,37 @@
     /* ===== HERO FLOW (jot -> proposal -> ledger, drawn) ===== */
     .hero-flow {
       list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
-      margin-top: 46px;
+      margin-top: clamp(40px, 5vw, 60px);
     }
+    /* Three index cards taped to the desk: ruled at the app's cadence, a sienna
+       margin line inside the left padding (it can never touch the text), a washi
+       strip up top, each stuck a little differently. --tilt is the resting pose
+       the reveal returns to. */
     .hero-flow li {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 20px 22px; box-shadow: var(--shadow-card); position: relative;
+      background:
+        linear-gradient(to right, transparent 19px, rgba(162,91,47,.28) 19px 20px, transparent 20px),
+        repeating-linear-gradient(to bottom, transparent 0, transparent 25px, var(--rule) 25px, var(--rule) 26px),
+        var(--surface);
+      background-position: 0 0, 0 12px, 0 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 22px 20px 34px;
+      box-shadow: 0 1px 2px rgba(41,35,23,.05), 0 7px 18px rgba(41,35,23,.08);
+      position: relative;
+      transform: rotate(var(--tilt, 0deg));
     }
+    .hero-flow li:nth-child(1) { --tilt: -0.55deg; }
+    .hero-flow li:nth-child(2) { --tilt: 0.4deg; }
+    .hero-flow li:nth-child(3) { --tilt: -0.3deg; }
+    .hero-flow li::before {
+      content: '';
+      position: absolute; top: -10px; left: 50%; width: 70px; height: 20px;
+      transform: translateX(-50%) rotate(-2deg);
+      background: linear-gradient(100deg, rgba(226,216,194,.5), rgba(233,224,203,.85) 28% 72%, rgba(226,216,194,.5));
+      box-shadow: 0 1px 2px rgba(41,35,23,.08);
+    }
+    .hero-flow li:nth-child(2)::before { transform: translateX(-50%) rotate(1.6deg); }
+    .hero-flow li:nth-child(3)::before { transform: translateX(-50%) rotate(-1deg); }
     .flow-glyph {
       width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
       background: var(--tint-soft); color: var(--tint-ink); margin-bottom: 10px;
@@ -178,18 +267,33 @@
     @media (max-width: 720px) { .hero-flow { grid-template-columns: 1fr; } }
 
     /* ===== SECTIONS ===== */
-    .section-block { padding: 72px 0; }
-    .section-block.tight { padding: 36px 0; }
-    .section-eyebrow {
-      font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--companion); margin-bottom: 12px;
+    /* Notebook rhythm: sections breathe as a phrase, not a metronome. */
+    .section-block { padding: clamp(60px, 5vw + 42px, 100px) 0; }
+    .section-block.tight { padding: clamp(30px, 2.5vw + 20px, 48px) 0; }
+
+    /* A hairline that fades at both ends, punctured by a small rotated square
+       in companion ink — the bookish section break, built from CSS so it is
+       the same mark on every engine. */
+    hr.notebook-rule {
+      border: 0; height: 1px; width: calc(100% - 48px); max-width: 1052px;
+      margin: 0 auto; position: relative;
+      background: linear-gradient(90deg, transparent, var(--border) 18%, var(--border) 82%, transparent);
     }
-    .section-block h2 { font-size: clamp(1.7rem, 3.6vw, 2.4rem); line-height: 1.2; margin-bottom: 14px; }
+    hr.notebook-rule::after {
+      content: ''; position: absolute; left: 50%; top: 50%;
+      width: 7px; height: 7px; transform: translate(-50%, -50%) rotate(45deg);
+      background: var(--bg); border: 1.5px solid var(--companion); opacity: 0.55;
+    }
+    .section-eyebrow {
+      font-size: 0.76rem; font-weight: 650; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--companion-ink); margin-bottom: 10px;
+    }
+    .section-block h2 { font-size: clamp(1.9rem, 1.15rem + 3.3vw, 2.8rem); line-height: 1.12; letter-spacing: -0.02em; margin-bottom: 16px; text-wrap: balance; }
     .section-block h2 em { color: var(--tint); }
 
     /* ===== HOW ===== */
     .how-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 48px; align-items: center; }
-    .how-steps { list-style: none; counter-reset: step; margin-top: 26px; display: grid; gap: 20px; }
+    .how-steps { list-style: none; counter-reset: step; margin-top: clamp(24px, 3vw, 34px); display: grid; gap: 20px; }
     .how-steps li {
       counter-increment: step; position: relative; padding-left: 58px;
     }
@@ -199,9 +303,9 @@
       width: 40px; height: 40px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
       background: var(--companion-soft); color: var(--companion);
-      font-weight: 700; font-family: ui-serif, Georgia, serif; font-size: 1.15rem;
+      font-weight: 700; font-family: var(--serif); font-size: 1.15rem;
     }
-    .how-steps h3 { font-size: 1.12rem; margin-bottom: 4px; }
+    .how-steps h3 { font-size: 1.18rem; margin-bottom: 4px; }
     .how-steps p { color: var(--muted-fg); font-size: 0.97rem; }
     .how-figure { text-align: center; }
     .how-figure img { width: 100%; max-width: 210px; height: auto; }
@@ -213,52 +317,158 @@
       background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
       box-shadow: var(--shadow-card); padding: 26px 28px;
     }
-    .said { font-style: italic; color: var(--muted-fg); font-size: 1.02rem; }
-    .arrow { color: var(--companion); font-size: 1.5rem; }
-    .logged { font-size: 0.95rem; }
-    .chip {
-      display: inline-block; padding: 4px 12px; border-radius: 999px;
-      background: var(--tint-soft); color: var(--tint-ink); font-weight: 650; font-size: 0.86rem;
-      margin: 0 6px 6px 0;
+    /* The jot is written in the app's Handwritten dress, on the app's ruled
+       paper, right of a sienna margin line — your hand goes in. The typed
+       layer shares the jot's grid cell so the demo can never reflow the card.
+       Ruling period must equal line-height on this element (the app's trick). */
+    .said {
+      position: relative; display: grid; align-content: center;
+      font-family: var(--hand);
+      color: var(--fg); font-size: 1.04rem; line-height: 1.65;
+      padding: 6px 8px 8px 34px;
+      background-image:
+        linear-gradient(to right, transparent 19px, rgba(162,91,47,.3) 19px 20px, transparent 20px),
+        repeating-linear-gradient(to bottom, transparent 0, transparent calc(1.65em - 1px), var(--rule) calc(1.65em - 1px), var(--rule) 1.65em);
+      background-origin: padding-box, content-box;
+      background-clip: padding-box, content-box;
+      border-radius: 10px;
     }
-    .chip.sienna { background: var(--companion-soft); color: var(--companion); }
-    .logged .note { color: var(--muted-fg); margin-top: 8px; }
+    .said-typed, .said-jot { grid-area: 1 / 1; }
+    .said-typed { display: none; white-space: pre-wrap; }
+    /* Static truth = today's audited jot: slips shown, mends hidden. The demo
+       (and only the demo) swaps a .mend to its mended half. Neutral spans, not
+       del/ins: on the static page nothing has been edited, so the a11y tree
+       must read as plain text — the script adds role="deletion"/"insertion"
+       only when a mend actually happens. */
+    .said .d { display: inline; }
+    .said .i { display: none; background: var(--tint-soft); border-radius: 3px; padding: 0 2px; }
+    .said .mend.mended .d { display: none; }
+    .said .mend.mended .i { display: inline; }
+    .arrow { color: var(--companion); font-size: 0; }
+    .arrow svg { width: 56px; height: auto; display: block; }
+    .logged { font-size: 0.95rem; }
+    /* Clean lines, not SaaS pills: a line of your ink with a quiet tint settle.
+       The companion's contribution stays a sienna margin mark, never dressed
+       as your text. */
+    .chip {
+      display: inline-block; margin: 0 8px 8px 0;
+      background: var(--tint-soft); color: var(--fg);
+      font-weight: 500; font-size: 0.95rem;
+      border-radius: 4px; padding: 2px 8px;
+    }
+    .chip.sienna {
+      background: transparent; color: var(--companion-ink);
+      border-left: 2px solid var(--companion); border-radius: 0;
+      padding: 1px 0 1px 8px; font-style: italic;
+    }
+    .logged .note { font-family: var(--serif); font-style: italic; font-size: 0.95rem; color: var(--muted-fg); margin-top: 10px; }
     @media (max-width: 720px) {
       .translate { grid-template-columns: 1fr; }
-      .arrow { transform: rotate(90deg); width: fit-content; }
+      .arrow { transform: rotate(90deg); width: fit-content; margin: 2px auto; }
     }
+    /* The mend lands in a Ledger row (the app's .ledger-row idiom): sienna
+       scope pill, tint undo button; undone = faded strike, green button. */
+    .ledger-mini { max-width: 560px; margin: 14px auto 0; }
+    .ledger-row-demo {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 8px 10px 8px 14px;
+      box-shadow: var(--shadow-card); font-size: 0.92rem;
+    }
+    .ledger-row-demo .scope {
+      flex: none; font-size: 0.78rem; font-weight: 650; letter-spacing: .02em;
+      padding: 2px 9px; border-radius: 999px;
+      background: var(--companion-soft); color: var(--companion-ink);
+    }
+    .ledger-row-demo .what { flex: 1; min-width: 0; line-height: 1.4; }
+    .ledger-row-demo .when { display: block; font-size: 0.78rem; color: var(--muted-fg); margin-top: 1px; }
+    .ledger-row-demo .undo-btn {
+      flex: none; min-height: 44px; padding: 4px 16px;
+      font: inherit; font-size: 0.88rem; font-weight: 650;
+      color: var(--tint-ink); background: var(--tint-soft);
+      border: 0; border-radius: 10px; cursor: pointer;
+    }
+    .ledger-row-demo .undo-btn:focus-visible { outline: 2px solid var(--tint); outline-offset: 2px; }
+    /* Undone visuals only exist while the demo rig is live — the static page
+       never shows a struck row. */
+    .js-reveal .ledger-row-demo.undone .what { text-decoration: line-through; opacity: .55; }
+    .js-reveal .ledger-row-demo.undone .undo-btn { background: none; color: var(--good); cursor: default; }
+    /* Without the motion gate the demo never runs — the button would be inert,
+       so hide it and let the row stand as a static illustration. */
+    html:not(.js-reveal) .ledger-row-demo .undo-btn { display: none; }
 
     /* ===== FEATURES ===== */
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 36px; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: clamp(32px, 4vw, 48px); }
+    /* Journal entries with a true margin: icon in a margin column, a faint
+       sienna rule between margin and text — the app's law made layout. */
     .feature-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 24px; box-shadow: var(--shadow-card);
+      position: relative;
+      display: grid; grid-template-columns: 42px 1fr; column-gap: 18px;
+      align-items: start;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: 0 1px 2px rgba(41,35,23,.05), 0 4px 14px rgba(41,35,23,.06);
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; left: 75px; top: 20px; bottom: 20px; width: 1px;
+      background: rgba(162,91,47,.22);
     }
     .icon-box {
-      width: 42px; height: 42px; border-radius: 12px;
+      grid-column: 1; grid-row: 1; margin: 0;
+      width: 42px; height: 42px; border-radius: 999px;
       display: flex; align-items: center; justify-content: center;
-      background: var(--companion-soft); color: var(--companion); margin-bottom: 14px;
+      background: var(--companion-soft); color: var(--companion);
     }
     .icon-box svg { width: 22px; height: 22px; }
-    .feature-card h3 { font-size: 1.1rem; margin-bottom: 6px; }
-    .feature-card p { font-size: 0.95rem; color: var(--muted-fg); }
+    .feature-card h3 { grid-column: 2; grid-row: 1; align-self: center; font-size: 1.18rem; margin: 0; }
+    .feature-card p { grid-column: 2; grid-row: 2; margin-top: 6px; font-size: 0.95rem; color: var(--muted-fg); }
     @media (max-width: 900px) { .features-grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 620px) { .features-grid { grid-template-columns: 1fr; } }
 
     /* ===== SCREENS ===== */
-    .screens-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 36px; }
-    .screen-fig { margin: 0; }
-    .screen-fig img {
-      width: 100%; height: auto; border-radius: 26px;
-      border: 1px solid var(--border); box-shadow: var(--shadow-card);
+    .screens-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: clamp(32px, 4vw, 48px); }
+    /* Photos taped into the fieldbook: a paper mat, tape over the top corners,
+       a penciled italic caption beneath, a resting tilt alternating down the row. */
+    .screen-fig {
+      position: relative; margin: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 10px 10px 12px;
+      box-shadow: 0 1px 2px rgba(41,35,23,.06), 0 10px 22px rgba(41,35,23,.08);
+      transform: rotate(var(--tilt, 0deg));
     }
-    .screen-fig figcaption { font-size: 0.86rem; color: var(--muted-fg); margin-top: 10px; text-align: center; }
+    .screens-row .screen-fig:nth-child(1) { --tilt: -0.8deg; }
+    .screens-row .screen-fig:nth-child(2) { --tilt: 0.55deg; }
+    .screens-row .screen-fig:nth-child(3) { --tilt: -0.45deg; }
+    .screens-row .screen-fig:nth-child(4) { --tilt: 0.7deg; }
+    .screen-fig img {
+      width: 100%; height: auto; display: block;
+      border-radius: 14px; border: 1px solid var(--rule);
+    }
+    .screen-fig figcaption {
+      font-family: var(--serif); font-style: italic; font-size: 0.92rem;
+      color: var(--companion-ink); margin-top: 10px; text-align: center;
+    }
+    .screen-fig::before,
+    .screen-fig::after {
+      content: '';
+      position: absolute; top: -9px; width: 54px; height: 19px;
+      background: linear-gradient(105deg, rgba(226,216,194,.5), rgba(233,224,203,.85) 28% 72%, rgba(226,216,194,.5));
+      box-shadow: 0 1px 2px rgba(41,35,23,.1);
+    }
+    .screen-fig::before { left: -12px; transform: rotate(-42deg); }
+    .screen-fig::after  { right: -12px; transform: rotate(42deg); }
     @media (max-width: 900px) { .screens-row { grid-template-columns: 1fr 1fr; } }
 
     /* ===== BOUNDARY ===== */
     .boundary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 32px; }
     .boundary-card {
-      background: var(--surface-soft); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      background: var(--surface-soft); border: 1px solid var(--border);
+      border-left: 3px solid var(--tint);
+      border-radius: 6px var(--radius) var(--radius) 6px;
       padding: 24px;
     }
     .boundary-card h3 { font-size: 1.05rem; margin-bottom: 6px; color: var(--tint-ink); }
@@ -271,16 +481,37 @@
       background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
       padding: 16px 20px; box-shadow: var(--shadow-card);
     }
-    .faq-list summary { cursor: pointer; font-weight: 700; font-size: 1rem; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 28px; }
+    .faq-list summary { cursor: pointer; font-family: var(--serif); font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 28px; }
     .faq-list summary::-webkit-details-marker { display: none; }
     .faq-list summary::after { content: '+'; color: var(--companion); font-size: 1.3rem; font-weight: 400; }
     .faq-list details[open] summary::after { content: '–'; }
     .faq-list details p { margin-top: 10px; color: var(--muted-fg); font-size: 0.96rem; }
 
-    /* ===== CTA ===== */
-    .cta-band { text-align: center; padding: 72px 0 84px; }
+    /* ===== CTA: the closing note, paperclipped ===== */
+    .cta-band { text-align: center; padding: clamp(72px, 8vw, 112px) 0 clamp(88px, 9vw, 128px); }
     .cta-band h2 { margin-bottom: 10px; }
     .cta-band .lede { margin: 0 auto 26px; }
+    .cta-note {
+      --tilt: 0.4deg;
+      position: relative; max-width: 600px; margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 46px 30px 42px;
+      box-shadow: var(--shadow-card);
+      transform: rotate(var(--tilt));
+    }
+    .cta-clip { position: absolute; top: -24px; left: 42px; transform: rotate(6deg); color: #A79B7E; }
+    /* The companion's pencil stroke under the headline: fully drawn by default;
+       the reveal spine animates the draw only when motion is welcome. */
+    .pencil-line { display: block; margin: 2px auto 16px; color: var(--companion); }
+    /* The tagline drops its caps costume — written out in the pencil hand. */
+    .cta-band .section-eyebrow {
+      font-family: var(--serif); font-style: italic;
+      font-size: 1.45rem; font-weight: 500; letter-spacing: 0.01em;
+      text-transform: none; color: var(--companion-ink);
+      transform: rotate(-1.4deg); /* static pose, not motion */
+      margin-bottom: 6px;
+    }
 
     /* ===== FOOTER ===== */
     footer.site {
@@ -299,11 +530,138 @@
       font-weight: 700;
     }
     .skip-link:focus { left: 0; }
+
+    /* ===== INK (static: fully drawn; motion only redraws it) ===== */
+    /* A two-pass pencil stroke under the promise. Data-URI so it clones per
+       line fragment if the phrase wraps at phone widths. */
+    .swash {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 14' preserveAspectRatio='none'%3E%3Cpath d='M3 9.5C38 4 88 10.5 128 7S198 4.5 217 8' fill='none' stroke='%23A25B2F' stroke-width='3.6' stroke-linecap='round'/%3E%3Cpath d='M10 12C60 8.5 120 12.5 211 10' fill='none' stroke='%23A25B2F' stroke-width='2' stroke-linecap='round' opacity='.45'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 0 100%;
+      background-size: 100% 0.3em;
+      padding-bottom: 0.16em;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+    /* A pencil circle around the contract's key phrase. */
+    .circled { position: relative; display: inline-block; padding: 0 0.14em; }
+    .circled .circle-ink {
+      position: absolute; left: -0.3em; top: -0.26em;
+      width: calc(100% + 0.6em); height: calc(100% + 0.52em);
+      overflow: visible; pointer-events: none;
+    }
+    .circled .circle-ink path {
+      fill: none; stroke: var(--companion);
+      stroke-width: 3.2; stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
+      opacity: 0.85;
+    }
+    /* The companion's margin mark beside left-aligned section headings —
+       a sienna stroke in the gutter, never touching the text. */
+    #how h2, #boundary h2, #faq h2 { position: relative; }
+    #how h2::before, #boundary h2::before, #faq h2::before {
+      content: ''; position: absolute; left: -16px; top: .16em;
+      height: calc(100% - .3em); width: 3px; border-radius: 2px;
+      background: var(--companion); opacity: .85;
+    }
+
+    /* ===== MOTION (only under html.js-reveal, set pre-paint in <head> when
+       motion is welcome AND IntersectionObserver exists — no-JS, reduced
+       motion, and print always get the fully composed page). Must stay LAST:
+       the hide-state has to outrank the static tilt rules above. ===== */
+    /* Paper settles onto the desk: drop, fade, take its resting tilt. */
+    .js-reveal :is(.hero-flow li, .how-steps li, .feature-card, .screen-fig, .boundary-card, .translate, .cta-note) {
+      opacity: 0; transform: translateY(14px) rotate(var(--tilt, 0deg));
+      transition: opacity .55s cubic-bezier(.2,.7,.3,1), transform .55s cubic-bezier(.2,.7,.3,1);
+    }
+    .js-reveal :is(.hero-flow li, .how-steps li, .feature-card, .screen-fig, .boundary-card, .translate, .cta-note).is-in {
+      opacity: 1; transform: translateY(0) rotate(var(--tilt, 0deg));
+    }
+    .js-reveal :is(.hero-flow li, .boundary-card):nth-child(2),
+    .js-reveal .feature-card:nth-child(3n+2),
+    .js-reveal .how-steps li:nth-child(2),
+    .js-reveal .screen-fig:nth-child(2) { transition-delay: .08s; }
+    .js-reveal :is(.hero-flow li, .boundary-card):nth-child(3),
+    .js-reveal .feature-card:nth-child(3n),
+    .js-reveal .how-steps li:nth-child(3),
+    .js-reveal .screen-fig:nth-child(3) { transition-delay: .16s; }
+    .js-reveal .screen-fig:nth-child(4) { transition-delay: .24s; }
+    /* Ink draws itself in. */
+    .js-reveal .swash { background-size: 0% 0.3em; transition: background-size .8s cubic-bezier(.6,0,.25,1) .3s; }
+    .js-reveal .swash.is-in { background-size: 100% 0.3em; }
+    .js-reveal .circle-ink path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.1s cubic-bezier(.55,0,.2,1) .25s; }
+    .js-reveal .is-in .circle-ink path { stroke-dashoffset: 0; }
+    .js-reveal :is(#how, #boundary, #faq) h2::before { transform: scaleY(0); transform-origin: top; transition: transform .6s cubic-bezier(.2,.7,.3,1) .2s; }
+    .js-reveal :is(#how, #boundary, #faq) h2.is-in::before { transform: scaleY(1); }
+    .js-reveal .cta-note .pencil-line path { stroke-dasharray: 230; stroke-dashoffset: 230; transition: stroke-dashoffset .9s ease .35s; }
+    .js-reveal .cta-note.is-in .pencil-line path { stroke-dashoffset: 0; }
+    /* The Tidy vignette: typing layer, mend flashes, chip cascade, Ledger
+       entrance. Hiding is keyed to classes the vignette script itself sets,
+       so a script failure leaves the composed static card. */
+    .js-reveal .said.demo-armed .said-typed { display: block; }
+    .js-reveal .said.demo-armed .said-jot { visibility: hidden; }
+    .js-reveal .said.demo-armed .said-typed::after {
+      content: ''; display: inline-block; width: 2px; height: 1.05em;
+      margin-left: 2px; vertical-align: -0.18em; background: var(--fg);
+      animation: loam-caret 1.05s steps(1) infinite;
+    }
+    @keyframes loam-caret { 50% { opacity: 0; } }
+    @keyframes loam-mend-flash { 0% { background: rgba(76,122,76,.30); } 100% { background: var(--tint-soft); } }
+    .js-reveal .mend-flash { animation: loam-mend-flash .9s ease-out; }
+    @keyframes loam-slip-flash { 0% { background: var(--companion-soft); } 100% { background: transparent; } }
+    .js-reveal .slip-flash { animation: loam-slip-flash .9s ease-out; border-radius: 3px; }
+    .js-reveal .translate .chip, .js-reveal .translate .logged .note { transition: opacity .45s cubic-bezier(.2,.7,.3,1), transform .45s cubic-bezier(.2,.7,.3,1); }
+    .js-reveal .translate .arrow { transition: opacity .45s cubic-bezier(.2,.7,.3,1); }
+    .js-reveal .translate.demo-armed:not(.demo-logged) .logged .chip,
+    .js-reveal .translate.demo-armed:not(.demo-logged) .logged .note { opacity: 0; transform: translateY(6px); }
+    .js-reveal .translate.demo-armed:not(.demo-logged) .arrow { opacity: 0; }
+    .js-reveal .translate.demo-logged .logged .chip:nth-of-type(2) { transition-delay: .12s; }
+    .js-reveal .translate.demo-logged .logged .chip:nth-of-type(3) { transition-delay: .24s; }
+    .js-reveal .translate.demo-logged .logged .note { transition-delay: .4s; }
+    .js-reveal .ledger-mini { transition: opacity .5s cubic-bezier(.2,.7,.3,1), transform .5s cubic-bezier(.2,.7,.3,1), visibility .5s; }
+    .js-reveal .translate.demo-armed:not(.demo-done) + .ledger-mini { opacity: 0; transform: translateY(10px); visibility: hidden; }
+    /* The Undo only means something once the demo has tidied the jot. */
+    .js-reveal .translate:not(.demo-done) + .ledger-mini .undo-btn { visibility: hidden; }
+
+    /* Print never runs the observer — force all paper and ink onto the page. */
+    @media print {
+      .js-reveal :is(.hero-flow li, .how-steps li, .feature-card, .screen-fig, .boundary-card, .translate, .cta-note) { opacity: 1 !important; transform: none !important; transition: none !important; animation: none !important; }
+      .swash { background-size: 100% 0.3em !important; }
+      .circle-ink path { stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
+      .js-reveal :is(#how, #boundary, #faq) h2::before { transform: none !important; }
+      .js-reveal .cta-note .pencil-line path { stroke-dashoffset: 0 !important; }
+      .js-reveal .said.demo-armed .said-typed { display: none !important; }
+      .js-reveal .said.demo-armed .said-jot { visibility: visible !important; }
+      .js-reveal .translate .chip, .js-reveal .translate .logged .note, .js-reveal .translate .arrow { opacity: 1 !important; transform: none !important; }
+      .js-reveal .ledger-mini { opacity: 1 !important; visibility: visible !important; transform: none !important; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      * { transition: none !important; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   </style>
+  <script>
+    /* Motion gate (estate pattern): the class lands only when motion is
+       welcome AND IntersectionObserver exists, before first paint. */
+    (function () {
+      try {
+        var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduce && 'IntersectionObserver' in window) {
+          document.documentElement.classList.add('js-reveal');
+          /* Self-contained fail-open: if the body script never runs (truncated
+             transfer, future edit losing the tag), nothing would ever reveal —
+             so the same head that hides content also un-hides it. In the
+             healthy page the 120ms sweep marks .is-in long before this fires. */
+          setTimeout(function () {
+            if (!document.querySelector('.is-in')) {
+              document.documentElement.classList.remove('js-reveal');
+            }
+          }, 1800);
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
 
@@ -348,7 +706,7 @@
       <div class="hero-layout">
         <div class="hero-text">
           <span class="eyebrow">Coming to iOS</span>
-          <h1>The notes companion that <span class="soft">asks before it acts.</span></h1>
+          <h1>The notes companion that <span class="soft swash">asks before it acts.</span></h1>
           <p class="lede">Write, ramble, record. Loam fixes your slips in place, shapes rambly jots into clean lines, files and flags what matters — and shows you every change before or after it happens. Nothing is ever silent, and everything can be undone.</p>
           <div class="hero-buttons">
             <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Loam%20launches" class="btn-warm">
@@ -386,6 +744,8 @@
     </div>
   </section>
 
+  <hr class="notebook-rule" aria-hidden="true">
+
   <!-- ===== HOW ===== -->
   <section class="section-block" id="how">
     <div class="container">
@@ -416,14 +776,23 @@
     </div>
   </section>
 
+  <hr class="notebook-rule" aria-hidden="true">
+
   <!-- ===== TIDY STRIP: the contract, demonstrated ===== -->
   <section class="section-block tight" id="contract">
     <div class="container">
       <div class="section-eyebrow" style="text-align:center;">The Tidy contract</div>
-      <h2 style="text-align:center; margin-bottom:26px;">Slips fixed. Voice untouched. <em>Never rephrased.</em></h2>
+      <h2 style="text-align:center; margin-bottom:26px;">Slips fixed. Voice untouched. <em class="circled">Never rephrased.<svg class="circle-ink" viewBox="0 0 300 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M243 16 C 168 -6 38 2 22 46 C 8 86 118 108 200 98 C 272 89 292 52 252 28" pathLength="1"/></svg></em></h2>
       <div class="translate">
-        <div class="said">“call w/ tom — he can start demo on the 14th if we confrim by fri, cabinets are 3wk lead time…”</div>
-        <div class="arrow" aria-hidden="true">→</div>
+        <!-- The audited jot, character-identical when static: del halves shown,
+             ins halves hidden. Only the demo swaps a .mend to its mended form —
+             exactly the two mends the note below already claims. The typed
+             layer is aria-hidden and empty until the script arms it. -->
+        <div class="said">
+          <span class="said-typed" aria-hidden="true"></span>
+          <span class="said-jot">“call <span class="mend"><span class="d">w/</span><span class="i">with</span></span> tom — he can start demo on the 14th if we <span class="mend"><span class="d">confrim</span><span class="i">confirm</span></span> by fri, cabinets are 3wk lead time…”</span>
+        </div>
+        <div class="arrow" aria-hidden="true"><svg viewBox="0 0 84 24" fill="none"><path d="M4 14 C 26 9 48 9 72 12.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M60 5.5 C 65 8.5 69 10.5 76 12.6 C 68.5 14.5 64 16.5 59.5 19.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="logged">
           <span class="chip">Call with tom.</span>
           <span class="chip">…if we confirm by Friday.</span>
@@ -431,11 +800,25 @@
           <div class="note">A rambly jot becomes clean lines; “confrim” and “w/” are mended in place. Written paragraphs are never restructured — and your words are never rewritten. The original stays one tap away.</div>
         </div>
       </div>
+      <!-- Mini Ledger row — every visible phrase quotes copy already on this
+           page verbatim: "Tidy" (features), "Slips fixed. Voice untouched."
+           (the h2 above), "written down, attributed" (hero flow), "Undo"
+           (How-it-works h3), "The Ledger keeps it" (hero flow, as the aside's
+           accessible name). The Undo genuinely reverts the demo's mend. -->
+      <aside class="ledger-mini" aria-label="The Ledger keeps it" id="tidy-ledger">
+        <div class="ledger-row-demo">
+          <span class="scope">Tidy</span>
+          <span class="what">Slips fixed. Voice untouched.
+            <span class="when">written down, attributed</span>
+          </span>
+          <button type="button" class="undo-btn" id="tidy-undo">Undo</button>
+        </div>
+      </aside>
     </div>
   </section>
 
   <!-- ===== FEATURES ===== -->
-  <section class="section-block" id="features" style="background: rgba(255,252,245,0.55);">
+  <section class="section-block sheet" id="features">
     <div class="container">
       <div class="section-eyebrow" style="text-align:center;">Features</div>
       <h2 style="text-align:center;">Proactive <em>and</em> consented.</h2>
@@ -510,7 +893,7 @@
   </section>
 
   <!-- ===== BOUNDARY ===== -->
-  <section class="section-block" id="boundary" style="background: rgba(255,252,245,0.55);">
+  <section class="section-block sheet" id="boundary">
     <div class="container">
       <div class="section-eyebrow">What Loam isn't</div>
       <h2>Three things it will <em>never</em> be.</h2>
@@ -565,16 +948,27 @@
     </div>
   </section>
 
-  <!-- ===== CTA ===== -->
+  <hr class="notebook-rule" aria-hidden="true">
+
+  <!-- ===== CTA: the closing note. Copy is character-for-character the same;
+       only wrappers and two aria-hidden decorative SVGs are new. ===== -->
   <section class="cta-band">
     <div class="container">
-      <div class="section-eyebrow">Notes, tended.</div>
-      <h2>Your words, with a gardener.</h2>
-      <p class="lede">Be first to hear when Loam reaches the App Store.</p>
-      <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Loam%20launches" class="btn-warm">
-        <span>Get notified at launch</span>
-        <span aria-hidden="true">↗</span>
-      </a>
+      <div class="cta-note">
+        <svg class="cta-clip" aria-hidden="true" viewBox="0 0 28 64" width="24" height="56" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <path d="M9 18 V47 a8 8 0 0 0 16 0 V12 a6.5 6.5 0 0 0 -13 0 v32 a3.5 3.5 0 0 0 7 0 V18"/>
+        </svg>
+        <div class="section-eyebrow">Notes, tended.</div>
+        <h2>Your words, with a gardener.</h2>
+        <svg class="pencil-line" aria-hidden="true" viewBox="0 0 220 12" width="200" height="12" fill="none">
+          <path pathLength="230" d="M6 8.5 C 56 3.5, 152 2.8, 214 6.8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity="0.75"/>
+        </svg>
+        <p class="lede">Be first to hear when Loam reaches the App Store.</p>
+        <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Loam%20launches" class="btn-warm">
+          <span>Get notified at launch</span>
+          <span aria-hidden="true">↗</span>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -592,6 +986,209 @@
       </div>
     </div>
   </footer>
+
+  <script>
+  /* Reveal spine: estate-canonical observer with the fail-open guards. */
+  (function () {
+    'use strict';
+    var root = document.documentElement;
+    if (!root.classList.contains('js-reveal') || !('IntersectionObserver' in window)) return;
+    var els = Array.prototype.slice.call(document.querySelectorAll(
+      '.hero-flow li, .how-steps li, .feature-card, .screen-fig, .boundary-card, ' +
+      '.translate, .cta-note, .swash, #contract h2, #how h2, #boundary h2, #faq h2'
+    ));
+    var io, remaining = els.length;
+    function detach() {
+      window.removeEventListener('scroll', revealVisible);
+      window.removeEventListener('resize', revealVisible);
+    }
+    /* One doorway for every reveal, so the listeners can retire when the
+       last element is in. */
+    function mark(e) {
+      if (e.classList.contains('is-in')) return;
+      e.classList.add('is-in');
+      io.unobserve(e);
+      if (--remaining <= 0) detach();
+    }
+    try {
+      io = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].isIntersecting) mark(entries[i].target);
+        }
+      }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+      els.forEach(function (e) { io.observe(e); });
+    } catch (e) { root.classList.remove('js-reveal'); return; }
+
+    /* Fail OPEN: some webviews never fire IO — reveal by rect instead. */
+    function revealVisible() {
+      els.forEach(function (e) {
+        if (e.classList.contains('is-in')) return;
+        var r = e.getBoundingClientRect();
+        if (r.top < window.innerHeight && r.bottom > 0) mark(e);
+      });
+    }
+    window.addEventListener('scroll', revealVisible, { passive: true });
+    window.addEventListener('resize', revealVisible);
+    /* 120ms lets first paint show the pre-state so above-the-fold ink draws on. */
+    window.setTimeout(revealVisible, 120);
+    /* Last resort: nothing revealed shortly after load — drop the effect. */
+    window.setTimeout(function () {
+      if (!document.querySelector('.is-in')) { io.disconnect(); root.classList.remove('js-reveal'); }
+    }, 1500);
+    /* User flips to reduced motion mid-session: show everything, kill the rig. */
+    var mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    if (mq) {
+      var everything = function (ev) {
+        if (!ev.matches) return;
+        io.disconnect(); root.classList.remove('js-reveal'); detach();
+        els.forEach(function (e) { e.classList.add('is-in'); });
+      };
+      if (mq.addEventListener) mq.addEventListener('change', everything);
+      else if (mq.addListener) mq.addListener(everything);
+    }
+  })();
+
+  /* The Tidy vignette: types the audited jot, mends "w/" -> "with" and
+     "confrim" -> "confirm" in place, logs the clean lines, reveals the Ledger
+     row. The typed string is DERIVED from the on-page del/ins markup — the
+     script carries no copy of its own, so the audited sentence stays the
+     single source of truth. */
+  (function () {
+    'use strict';
+    var root = document.documentElement;
+    var live = function () { return root.classList.contains('js-reveal'); };
+    if (!live()) return;
+    var strip = document.querySelector('#contract .translate');
+    var said = strip && strip.querySelector('.said');
+    var jot = said && said.querySelector('.said-jot');
+    var typed = said && said.querySelector('.said-typed');
+    var ledger = document.getElementById('tidy-ledger');
+    var undoBtn = document.getElementById('tidy-undo');
+    if (!strip || !said || !jot || !typed) return;
+    var mends = jot.querySelectorAll('.mend');
+    var timers = [];
+    /* Arm the strip NOW, not at first intersection: the card reveals with its
+       chips and Ledger row already held back, so nothing flashes and is then
+       yanked away on a fast arrival. The vio catch below disarms if the
+       observer cannot be built, restoring the composed static card. */
+    strip.classList.add('demo-armed');
+
+    function later(fn, ms) {
+      timers.push(setTimeout(function () {
+        if (!live()) { bail(); return; }
+        fn();
+      }, ms));
+    }
+    /* Reduced motion arrived (before, during, or after the run): clear timers
+       and restore the audited static truth — slips shown, no demo residue. */
+    function bail() {
+      while (timers.length) clearTimeout(timers.pop());
+      said.classList.remove('demo-armed');
+      strip.classList.remove('demo-armed', 'demo-logged', 'demo-done');
+      for (var i = 0; i < mends.length; i++) mends[i].classList.remove('mended');
+      var row = ledger && ledger.querySelector('.ledger-row-demo');
+      if (row) row.classList.remove('undone');
+      if (undoBtn) undoBtn.disabled = false;
+    }
+    function flash(el, cls) {
+      if (!el) return;
+      el.classList.remove(cls);
+      void el.offsetWidth; /* restart the animation */
+      el.classList.add(cls);
+    }
+    /* The pre-mend jot, read out of the audited markup itself. */
+    function slipString() {
+      var clone = jot.cloneNode(true);
+      var ms = clone.querySelectorAll('.mend');
+      for (var i = 0; i < ms.length; i++) {
+        var slip = ms[i].querySelector('.d');
+        ms[i].parentNode.replaceChild(
+          document.createTextNode(slip ? slip.textContent : ''), ms[i]);
+      }
+      return clone.textContent;
+    }
+
+    function runDemo() {
+      var text;
+      try { text = slipString(); } catch (e) { return; }
+      strip.classList.add('demo-armed');
+      said.classList.add('demo-armed');
+      typed.textContent = '';
+      var i = 0;
+      (function tick() {
+        if (!live()) { bail(); return; }
+        if (i >= text.length) { later(swap, 420); return; }
+        var ch = text.charAt(i++);
+        typed.textContent += ch;
+        var pause = 18 + Math.random() * 24;
+        if (ch === '—') pause += 240;      /* breathe at the em dash */
+        else if (ch === ',') pause += 150;
+        timers.push(setTimeout(tick, pause));
+      })();
+    }
+    function swap() {
+      /* Same visible text, real markup — the layer swap is invisible. */
+      said.classList.remove('demo-armed');
+      later(function () { mendAt(0); }, 520);
+    }
+    function mendAt(idx) {
+      if (idx >= mends.length) { later(logChips, 460); return; }
+      /* An edit now exists — give the halves their edit semantics. */
+      var slip = mends[idx].querySelector('.d'), fix = mends[idx].querySelector('.i');
+      if (slip) slip.setAttribute('role', 'deletion');
+      if (fix) fix.setAttribute('role', 'insertion');
+      mends[idx].classList.add('mended');
+      flash(fix, 'mend-flash');
+      later(function () { mendAt(idx + 1); }, 430);
+    }
+    function logChips() {
+      strip.classList.add('demo-logged');
+      later(function () { strip.classList.add('demo-done'); }, 650);
+    }
+
+    /* Run once, when the strip is properly on screen — and only if the rig
+       is still live when it gets there. */
+    try {
+      var ran = false;
+      var vio = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].isIntersecting && !ran) {
+            ran = true; vio.disconnect();
+            if (!live()) { bail(); return; }
+            runDemo();
+          }
+        }
+      }, { threshold: 0.25 });
+      vio.observe(strip);
+    } catch (e) { strip.classList.remove('demo-armed'); }
+
+    /* A reduced-motion flip at ANY time returns the card to the audited
+       static state — the spine only strips js-reveal; the vignette's own
+       residue (mends, demo classes, a struck row) is its own to clean. */
+    var vmq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    if (vmq) {
+      var restore = function (ev) { if (ev.matches) bail(); };
+      if (vmq.addEventListener) vmq.addEventListener('change', restore);
+      else if (vmq.addListener) vmq.addListener(restore);
+    }
+
+    /* The Ledger's per-row undo: genuinely reverts the mend — one way, like
+       the copy claims. No redo is offered because none is claimed. */
+    if (undoBtn && ledger) {
+      undoBtn.addEventListener('click', function () {
+        if (!live() || !strip.classList.contains('demo-done')) return;
+        var row = ledger.querySelector('.ledger-row-demo');
+        if (!row || row.classList.contains('undone')) return;
+        row.classList.add('undone');
+        undoBtn.disabled = true;
+        for (var i = 0; i < mends.length; i++) {
+          mends[i].classList.remove('mended');
+          flash(mends[i].querySelector('.d'), 'slip-flash');
+        }
+      });
+    }
+  })();
+  </script>
 
 </body>
 </html>
