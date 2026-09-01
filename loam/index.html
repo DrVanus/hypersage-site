@@ -469,11 +469,20 @@
     /* The live take, taped in at the top of the screens spread. */
     .tend-stage { display: flex; justify-content: center; margin-top: clamp(32px, 4vw, 48px); }
     .tend-stage .screen-fig { max-width: 300px; width: 100%; --tilt: -0.5deg; }
-    .tend-stage video {
-      width: 100%; height: auto; display: block;
+    /* Six real frames stacked; the tended one (.rest) stands until — and unless —
+       the crossfade rig takes over. .playing is set by JS only under js-reveal. */
+    .tend-player { position: relative; aspect-ratio: 497 / 1080; }
+    .tend-player img {
+      position: absolute; inset: 0; width: 100%; height: auto; display: block;
       border-radius: 14px; border: 1px solid var(--rule);
       background: var(--surface);
+      opacity: 0; transition: opacity 0.45s ease;
     }
+    .tend-player img.rest { opacity: 1; }
+    .tend-player.playing img.rest:not(.on) { opacity: 0; }
+    .tend-player.playing img.on { opacity: 1; }
+    /* Captions swap per frame; hold two lines so the page below never shifts. */
+    .tend-stage figcaption { min-height: 2.6em; }
     @media (max-width: 900px) { .screens-row { grid-template-columns: 1fr 1fr; } }
 
     /* ===== BOUNDARY ===== */
@@ -881,16 +890,27 @@
       <div class="section-eyebrow">The app</div>
       <h2>Warm paper. Quiet ink.</h2>
       <p class="lede" style="margin: 0 auto;">A fieldbook, not a filing cabinet — serif headings, cream paper, and a companion who writes in sienna pencil.</p>
-      <!-- A REAL capture: one unedited simulator take of the shipped build —
-           a rambly jot written with its slips, Done, and the Tidy landing
-           with its banner and Tended-here receipt. The caption's "nothing
-           rephrased" is the banner's own on-screen wording. Poster = the
-           take's final frame; playback starts only under the js-reveal gate,
-           so reduced-motion and no-JS readers get the honest still. -->
+      <!-- REAL frames, animated in CSS: six stills pulled from ONE continuous
+           simulator take of the shipped build (2026-09-01 re-shoot; the .mp4
+           itself was retired — an 80s 9fps capture froze for 12s at the top and
+           read as broken, and <video> playback dies quietly under Low Power
+           Mode and autoplay policy where a DOM crossfade cannot). Every frame
+           is an untouched screenshot; only the PACING between them is authored.
+           The caption's "2 clean lines · 4 fixes, nothing rephrased" is the
+           banner's own on-screen wording in frame 5. The tended frame is the
+           default: no-JS and reduced-motion readers get the honest payoff
+           still, and the crossfade runs only under the js-reveal gate. -->
       <div class="tend-stage">
         <figure class="screen-fig">
-          <video id="tend-video" src="shots/tend.mp4?v=20260901a" poster="shots/tend-poster.jpg?v=20260901a" muted loop playsinline preload="metadata" width="497" height="1080" aria-label="Screen recording: a rambly note is typed with its slips, then Loam tidies it in place — the Tidied by Loam banner reports two clean lines and three fixes, nothing rephrased"></video>
-          <figcaption>One real take — written rambly, tended in place, nothing rephrased</figcaption>
+          <div class="tend-player" id="tend-player" role="img" aria-label="Six real frames from one take: a blank page, a title jotted, a rambly note written with its slips left in, then Done — the Tidied by Loam banner reports 2 clean lines and 4 fixes, nothing rephrased — and the kept original one tap away">
+            <img src="shots/tend-1.jpg?v=20260901c" alt="" width="497" height="1080" decoding="async">
+            <img src="shots/tend-2.jpg?v=20260901c" alt="" width="497" height="1080" loading="lazy" decoding="async">
+            <img src="shots/tend-3.jpg?v=20260901c" alt="" width="497" height="1080" loading="lazy" decoding="async">
+            <img src="shots/tend-4.jpg?v=20260901c" alt="" width="497" height="1080" loading="lazy" decoding="async">
+            <img src="shots/tend-5.jpg?v=20260901c" alt="" width="497" height="1080" class="rest" decoding="async">
+            <img src="shots/tend-6.jpg?v=20260901c" alt="" width="497" height="1080" loading="lazy" decoding="async">
+          </div>
+          <figcaption id="tend-caption">One real take, six frames — written rambly, tended in place, nothing rephrased</figcaption>
         </figure>
       </div>
       <div class="screens-row">
@@ -1054,19 +1074,42 @@
     /* 120ms lets first paint show the pre-state so above-the-fold ink draws on. */
     window.setTimeout(revealVisible, 120);
 
-    /* The real-take video plays only here — under the same motion gate — and
-       pauses offscreen. Reduced-motion and no-JS readers keep the poster. */
-    var tendVideo = document.getElementById('tend-video');
-    if (tendVideo) {
+    /* The tend crossfade runs only here — under the same motion gate — and
+       pauses offscreen. Reduced-motion and no-JS readers keep the tended frame.
+       Every frame is a real screenshot; this rig only paces them. */
+    var tendPlayer = document.getElementById('tend-player');
+    if (tendPlayer && root.classList.contains('js-reveal')) {
       try {
-        var tvio = new IntersectionObserver(function (entries) {
+        var tFrames = tendPlayer.querySelectorAll('img');
+        var tCaption = document.getElementById('tend-caption');
+        var tSteps = [
+          { hold: 1300, say: 'A blank page…' },
+          { hold: 1500, say: '…a title jotted…' },
+          { hold: 1500, say: '…then the ramble, slips and all…' },
+          { hold: 2100, say: '“confrim by fri”, “3wk lead time” — left exactly as typed' },
+          { hold: 3400, say: 'Done → Tidied by Loam. 2 clean lines · 4 fixes, nothing rephrased' },
+          { hold: 2600, say: 'And the original? Kept — one tap away, forever undoable' }
+        ];
+        var tStep = -1, tTimer = null;
+        var tAdvance = function () {
+          tStep = (tStep + 1) % tSteps.length;
+          for (var i = 0; i < tFrames.length; i++) {
+            tFrames[i].classList.toggle('on', i === tStep);
+          }
+          if (tCaption) { tCaption.textContent = tSteps[tStep].say; }
+          tTimer = window.setTimeout(tAdvance, tSteps[tStep].hold);
+        };
+        var tpio = new IntersectionObserver(function (entries) {
           entries.forEach(function (en) {
-            if (en.isIntersecting) { tendVideo.play().catch(function () {}); }
-            else { tendVideo.pause(); }
+            if (en.isIntersecting) {
+              if (tTimer === null) { tendPlayer.classList.add('playing'); tAdvance(); }
+            } else if (tTimer !== null) {
+              window.clearTimeout(tTimer); tTimer = null;
+            }
           });
         }, { threshold: 0.35 });
-        tvio.observe(tendVideo);
-      } catch (e) { /* poster stands */ }
+        tpio.observe(tendPlayer);
+      } catch (e) { /* the tended frame stands */ }
     }
     /* Last resort: nothing revealed shortly after load — drop the effect. */
     window.setTimeout(function () {
