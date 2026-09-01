@@ -332,6 +332,17 @@
     .center .lede { margin-left: auto; margin-right: auto; }
 
     /* ===== PLACES ===== */
+    .tour-stage {
+      margin: 36px auto 40px; max-width: 980px;
+      border-radius: var(--radius-lg); overflow: hidden;
+      border: 1px solid var(--border-strong); background: var(--surface);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(79,208,192,0.08);
+    }
+    .tour-stage video { width: 100%; height: auto; display: block; aspect-ratio: 1100 / 732; }
+    .tour-stage figcaption {
+      padding: 14px 18px 16px; color: var(--muted-fg); font-size: 0.92rem;
+      border-top: 1px solid var(--border);
+    }
     .places { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
     @media (max-width: 900px) { .places { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 560px) { .places { grid-template-columns: 1fr; } }
@@ -551,17 +562,25 @@
       <p class="hero-note">Works on a phone, tablet, or computer. Nothing to install.</p>
 
       <!-- ROOM-SHOT PROVENANCE. Every rooms/*.jpg is an IN-GAME CAPTURE taken by
-           PenguinArcade/tools/site_shots.py on 2026-08-11 and staged in
+           PenguinArcade/tools/site_shots.py (last re-shot 2026-09-01 against the
+           deployed game, v74 in the corner of every frame) and staged in
            PenguinArcade/store/site-shots/; its manifest.json records the audit each
            frame passed (no footwear, no glasses, no capes, no vest_tux, nobody
            facing away, no speech bubbles, no event banner). They replaced the raw
            painted backgrounds, which had gone stale as claims — the old arcade
            plate showed FOUR cabinets, and js/interiors.js:332-341 removed all four
-           and installed exactly two. So alt text here describes the CAPTURE, HUD and
-           penguins included, not a painting. Re-cut from that directory, never from
-           PenguinArcade/art/, and keep every rooms/ query on ONE version token. -->
+           and installed exactly two. The 2026-09-01 re-shoot caught the same rot in
+           reverse: the Shore's diving bell is now signed GLIMMER DEEP and the Snow
+           Forts pavilion's painted sign reads THIN ICE (js/rooms.js:2725 — the map
+           directory still calls that game MELTDOWN, ui.js:1718), so the alts moved
+           with the frames. Alt text here describes the CAPTURE, HUD and penguins
+           included, not a painting. shots/tour.mp4 is the same discipline in motion:
+           one continuous site_shots-driven take (scratchpad wadl_tour.py choreography,
+           head/tail-trimmed only, never spliced), poster = its own final frame.
+           Re-cut from that directory, never from PenguinArcade/art/, and keep every
+           rooms/ and shots/ query on ONE version token. -->
       <div class="hero-shot">
-        <img src="rooms/plaza.jpg?v=20260824a" width="1100" height="733" fetchpriority="high" alt="Waddleton's Town Square in play: four penguins, two of them in beanies and red scarves, standing on the oval ice rink under a green-and-violet aurora, a glowing ice sculpture of a penguin behind them, lit signs reading COZY BEAK, SHOP and GOLDEN KRILL on the buildings around the square, wooden signposts pointing to the Slopes, the Shore and Snow Forts, and the game's own chat bar along the bottom of the screen">
+        <img src="rooms/plaza.jpg?v=20260901a" width="1100" height="733" fetchpriority="high" alt="Waddleton's Town Square in play: four penguins, two of them in beanies and red scarves, standing on the oval ice rink under a green-and-violet aurora, a glowing ice sculpture of a penguin behind them, lit signs reading COZY BEAK, SHOP and GOLDEN KRILL on the buildings around the square, wooden signposts pointing to the Slopes, the Shore and Snow Forts, and the game's own chat bar along the bottom of the screen">
       </div>
 
       <div class="stats">
@@ -595,10 +614,19 @@
         <h2>Seven places to be. <em>One of them has no name.</em></h2>
         <p class="lede">Every area is a painting, not a tileset — and each one has doors, games, and penguins standing around in it. The Town Square at the top of this page is one of them: coffee on one side, dinner on the other, the shop in the middle. Here is the rest of the island. Walk between them, or take the map.</p>
       </div>
+      <!-- TOUR PROVENANCE: one continuous capture of the deployed game driven through
+           the same site_shots rig as the stills (see the ROOM-SHOT PROVENANCE note
+           above) — head/tail-trimmed, never spliced, poster = its own final frame.
+           The caption describes only what the take shows. Playback is a progressive
+           enhancement: no JS or reduced motion = the poster, a real frame itself. -->
+      <figure class="tour-stage">
+        <video src="shots/tour.mp4?v=20260901a" poster="shots/tour-poster.jpg?v=20260901a" width="1100" height="732" muted loop playsinline preload="metadata" aria-label="A continuous capture of Waddleton being played: four penguins on the Town Square rink, the player waddling across the ice, the island map opening, and the walk coming out at the Shore beside a driftwood campfire"></video>
+        <figcaption>That walk, live: the Town Square, two waddles across the rink, the map — and out at the Shore, by the bonfire. One continuous capture of the game, straight through.</figcaption>
+      </figure>
       <div class="places">
         <figure class="place">
           <span class="tag" aria-hidden="true">The Shore</span>
-          <img src="rooms/shore.jpg?v=20260824a" width="1100" height="733" alt="The Shore in play: five penguins standing together on the snow, a glass-domed aquarium glowing turquoise on the left, painted signs reading AQUARIUM, LAZY FLOE, BONKBERG, ICE FISHING and WADDLE WAVES around the bay, a red-and-white lighthouse and a moonlit sea of drifting ice behind" loading="lazy">
+          <img src="rooms/shore.jpg?v=20260901a" width="1100" height="733" alt="The Shore in play: five penguins gathered at a driftwood campfire on the snow — one in a pirate hat, one in a horned helmet — a glass-domed aquarium glowing turquoise on the left, painted signs reading AQUARIUM, LAZY FLOE, GLIMMER DEEP, ICE FISHING and WADDLE WAVES around the bay, a red-and-white lighthouse and a moonlit sea of drifting ice behind" loading="lazy">
           <figcaption class="cap">
             <h3>The Shore</h3>
             <p>Fishing, surfing, a lazy drift down the floe — and the way into the aquarium.</p>
@@ -606,7 +634,7 @@
         </figure>
         <figure class="place">
           <span class="tag" aria-hidden="true">The Slopes</span>
-          <img src="rooms/slopes.jpg?v=20260824a" width="1100" height="733" alt="The Slopes in play: three penguins on the snow below a peak with a trail winding to the summit, painted signs reading SLED RUSH, PEAKLING, AVALANCHE ESCAPE, AVALANCHE DASH, MOUNTAIN PEAK and MY IGLOO, a timber lodge with a sled ramp on the left and a cluster of lit igloos on the right" loading="lazy">
+          <img src="rooms/slopes.jpg?v=20260901a" width="1100" height="733" alt="The Slopes in play: three penguins and a scarf-wearing snowman on the snow below a peak with a trail winding to the summit, painted signs reading SLED RUSH, PEAKLING, AVALANCHE ESCAPE, AVALANCHE DASH, MOUNTAIN PEAK and MY IGLOO, a timber lodge with a sled ramp on the left and a cluster of lit igloos on the right" loading="lazy">
           <figcaption class="cap">
             <h3>The Slopes</h3>
             <p>Sledding, climbing, outrunning an avalanche. Your igloo's up here too.</p>
@@ -614,7 +642,7 @@
         </figure>
         <figure class="place">
           <span class="tag" aria-hidden="true">Snow Forts</span>
-          <img src="rooms/forts.jpg?v=20260824a" width="1100" height="733" alt="Snow Forts in play: three penguins in the middle of an open snow arena, a turreted fort with a blue flag signed SNOWBALL FIGHT on the left, a bunting-strung archway signed PENGUIN LEAP in the middle, and a domed ice pavilion signed MELTDOWN on the right" loading="lazy">
+          <img src="rooms/forts.jpg?v=20260901a" width="1100" height="733" alt="Snow Forts in play: three penguins in the middle of an open snow arena, a turreted fort with a blue flag signed SNOWBALL FIGHT on the left, a bunting-strung archway signed PENGUIN LEAP in the middle, and a domed ice pavilion flying a red flag, its painted sign reading THIN ICE, on the right" loading="lazy">
           <figcaption class="cap">
             <h3>Snow Forts</h3>
             <p>Built for exactly one purpose. Snowball fights, leaping, and very thin ice.</p>
@@ -622,7 +650,7 @@
         </figure>
         <figure class="place">
           <span class="tag" aria-hidden="true">Aurora City</span>
-          <img src="rooms/aurora.jpg?v=20260824a" width="1100" height="733" alt="Aurora City in play: three penguins by a glowing pillar in a neon-lit night square, a driftwood-timbered building signed DRIFTWOOD on the left, a venue signed FLOE ARCADE in the middle and a domed hall edged in pink neon signed CLUB AURORA on the right, strung lights overhead" loading="lazy">
+          <img src="rooms/aurora.jpg?v=20260901a" width="1100" height="733" alt="Aurora City in play: three penguins by a glowing pillar in a neon-lit night square, a driftwood-timbered building signed DRIFTWOOD on the left, a venue signed FLOE ARCADE in the middle and a domed hall edged in pink neon signed CLUB AURORA on the right, strung lights overhead" loading="lazy">
           <figcaption class="cap">
             <h3>Aurora City</h3>
             <p>Where the island stays up late — the arcade, the lounge, and the club.</p>
@@ -630,7 +658,7 @@
         </figure>
         <figure class="place">
           <span class="tag" aria-hidden="true">Step inside</span>
-          <img src="rooms/coffee.jpg?v=20260824a" width="1100" height="733" alt="Inside the Cozy Beak coffee house: two penguins standing on the wooden floor, deep armchairs in green, red, blue and mustard around little round tables and patterned rugs, a stone fireplace burning under a framed mountain painting, tall bookshelves with a sliding ladder, and a brass espresso machine steaming on a counter lined with mugs" loading="lazy">
+          <img src="rooms/coffee.jpg?v=20260901a" width="1100" height="733" alt="Inside the Cozy Beak coffee house: two penguins standing on the wooden floor, deep armchairs in green, red, blue and mustard around little round tables and patterned rugs, a stone fireplace burning under a framed mountain painting, tall bookshelves with a sliding ladder, and a brass espresso machine steaming on a counter lined with mugs" loading="lazy">
           <figcaption class="cap">
             <h3>The Cozy Beak</h3>
             <p>Not an area — an interior. Doors like this one are cut into the areas around them, and there are seven of them.</p>
@@ -645,7 +673,7 @@
                badge list until a penguin finds it". A heading or an alt string that
                prints the name spoils it before the player has walked there — which
                is exactly what js/ui.js:1934's comment says a map row once did. -->
-          <img src="rooms/iceberg.jpg?v=20260824a" width="1100" height="733" alt="Five penguins standing together on the wide snowy plateau of a flat-topped floe, two driftwood logs and a wooden crate beside them, ice cliffs glowing turquoise where they meet the dark ocean, and the moon and a green-and-violet aurora behind" loading="lazy">
+          <img src="rooms/iceberg.jpg?v=20260901a" width="1100" height="733" alt="Four penguins standing together on the wide snowy plateau of a flat-topped floe, two snow-capped driftwood logs and a wooden crate beside them, ice cliffs glowing turquoise where they meet the dark ocean, and the moon and a green-and-violet aurora behind" loading="lazy">
           <figcaption class="cap">
             <h3>The place with no name</h3>
             <p>On the map it's only an unnamed shimmer out on the water. Click it once and it finally gets a name — which this page isn't going to spoil.</p>
@@ -671,7 +699,7 @@
           </ul>
         </div>
         <div>
-          <img src="rooms/arcade.jpg?v=20260824a" width="1100" height="733" alt="Inside the Floe Arcade: a penguin in a horned helmet standing on the pale ice floor between two lit cabinets, the left one captioned PLAY FLOE ARCADE and the right one ARCTIC HOCKEY, a stone archway between them, and four round porthole windows showing the aurora across the blue ice wall above" loading="lazy">
+          <img src="rooms/arcade.jpg?v=20260901a" width="1100" height="733" alt="Inside the Floe Arcade: a penguin in a horned helmet standing on the pale ice floor between two lit cabinets, the left one captioned PLAY FLOE ARCADE and the right one ARCTIC HOCKEY, a stone archway between them, and four round porthole windows showing the aurora across the blue ice wall above" loading="lazy">
         </div>
       </div>
 
@@ -944,5 +972,19 @@
     <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Waddleton — mind the thin ice.</div>
   </footer>
 
+  <script>
+    // Tour playback is opt-in by circumstance: motion welcome + the figure on
+    // screen. Anyone else keeps the poster, which is a real frame of the take.
+    (function () {
+      var v = document.querySelector('.tour-stage video');
+      if (!v || window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+          !('IntersectionObserver' in window)) return;
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { v.play().catch(function () {}); } else { v.pause(); }
+        });
+      }, { threshold: 0.25 }).observe(v);
+    })();
+  </script>
 </body>
 </html>

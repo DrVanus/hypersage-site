@@ -33,6 +33,7 @@ import argparse
 import importlib.util
 import json
 import os
+import re
 import sys
 
 REPO = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
@@ -74,15 +75,28 @@ def load_auditor(path):
 
 
 def discover_sites(repo):
-    """Root plus every immediate subdirectory that ships its own index.html."""
-    subsites = sorted(
-        name
-        for name in os.listdir(repo)
-        if not name.startswith(".")
-        and os.path.isdir(os.path.join(repo, name))
-        and os.path.isfile(os.path.join(repo, name, "index.html"))
-    )
-    return ["."] + subsites
+    """Root plus every immediate subdirectory that ships its own index.html.
+
+    A subdirectory whose index.html opts itself out of indexing
+    (<meta name="robots" … noindex …>) is an internal page — the Harbormaster
+    fleet board is one — not a product site, and the product-site contract
+    does not apply to it. Skips are AUDIBLE: they come back as a second list
+    and every run prints them, so a product page that grows a stray noindex
+    cannot vanish from the audit in silence."""
+    subsites, skipped = [], []
+    for name in sorted(os.listdir(repo)):
+        if name.startswith("."):
+            continue
+        index = os.path.join(repo, name, "index.html")
+        if not (os.path.isdir(os.path.join(repo, name)) and os.path.isfile(index)):
+            continue
+        with open(index, "r", encoding="utf-8", errors="replace") as fh:
+            head = fh.read(4096)
+        if re.search(r'<meta[^>]+name=["\']robots["\'][^>]+noindex', head, re.I):
+            skipped.append(name)
+        else:
+            subsites.append(name)
+    return ["."] + subsites, skipped
 
 
 CONTRACTS_DIR = os.path.join(
@@ -125,13 +139,15 @@ def main():
     args = parser.parse_args()
 
     module = load_auditor(find_auditor(args.auditor))
-    all_sites = discover_sites(REPO)
-    subsites = [name for name in all_sites if name != "."]
+    all_sites, skipped = discover_sites(REPO)
+    # Internal pages are still excluded from the root sweep, just never judged.
+    subsites = [name for name in all_sites if name != "."] + skipped
 
     selected = args.sites or all_sites
     unknown = [name for name in selected if name.rstrip("/") not in all_sites]
     if unknown:
-        raise SystemExit("unknown site(s): %s\nknown: %s" % (", ".join(unknown), ", ".join(all_sites)))
+        raise SystemExit("unknown site(s): %s\nknown: %s\ninternal (noindex, never audited): %s"
+                         % (", ".join(unknown), ", ".join(all_sites), ", ".join(skipped) or "none"))
     selected = [name.rstrip("/") for name in selected]
 
     results = [audit_site(module, REPO, site, subsites) for site in selected]
@@ -143,6 +159,7 @@ def main():
             "repo": REPO,
             "ok": total == 0,
             "failures": total,
+            "skipped_noindex": skipped,
             "sites": results,
         }, indent=2))
         return 1 if total else 0
@@ -158,6 +175,9 @@ def main():
         if args.warnings:
             for finding in item["warnings"]:
                 print("       WARN %-26s %s" % (finding["scope"], finding["message"]))
+
+    for name in skipped:
+        print("skip %-12s internal page (noindex) — not a product site, never audited" % name)
 
     print("\n%d site(s) audited, %d failure(s)" % (len(results), total))
     return 1 if total else 0
