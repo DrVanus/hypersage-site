@@ -372,6 +372,26 @@
       border-radius: var(--radius-lg); padding: 30px 32px; max-width: 900px; margin: 0 auto;
     }
     @media (max-width: 780px) { .translate { grid-template-columns: 1fr; gap: 16px; text-align: center; } }
+    /* The flow player: six real frames of one session, crossfaded. The logged
+       frame (.rest) stands for no-JS and reduced-motion; .playing is added by
+       JS only when motion is welcome. Chrome mirrors .screen-frame. */
+    .flow-player-fig { max-width: 300px; margin: 0 auto; }
+    .flow-player {
+      position: relative; aspect-ratio: 780 / 1688;
+      border-radius: 22px; overflow: hidden; border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(59,45,79,0.11); background: #fff;
+    }
+    .flow-player img {
+      position: absolute; inset: 0; width: 100%; height: auto; display: block;
+      opacity: 0; transition: opacity 0.45s ease;
+    }
+    .flow-player img.rest { opacity: 1; }
+    .flow-player.playing img.rest:not(.on) { opacity: 0; }
+    .flow-player.playing img.on { opacity: 1; }
+    .flow-player-fig figcaption {
+      margin-top: 12px; text-align: center; color: var(--muted, #6b5f7a);
+      font-size: 0.92rem; min-height: 2.8em;
+    }
     .translate .said { font-family: ui-serif, Georgia, serif; font-size: 1.15rem; line-height: 1.5; color: var(--fg); }
     .translate .arrow { color: var(--primary); font-size: 1.6rem; font-weight: 700; }
     @media (max-width: 780px) { .translate .arrow { transform: rotate(90deg); } }
@@ -767,6 +787,31 @@
           <div style="margin-top:8px;">Logged as structured data — so it can show up in a trend, and in the brief you hand your doctor.</div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===== THE FLOW, LIVE ===== -->
+  <!-- FLOW-PLAYER PROVENANCE: six untouched screenshots from ONE continuous
+       Playwright session of the app (www/ build 172cd7ce40, ?demo=1, the rigs'
+       shared frozen instant 2026-08-25T14:20) — the sentence typed, sent, the
+       app's own "Reading what you wrote" wait line, the live-streamed reply
+       from the real rowan-api service, the log card it wrote, and the entry in
+       the Log. Nothing is mocked and nothing is spliced; only the PACING
+       between frames is authored (loam .tend-player pattern). The logged frame
+       is the no-JS / reduced-motion default. Captions quote the pixels. -->
+  <section class="section-block tight">
+    <div class="container">
+      <figure class="flow-player-fig">
+        <div class="flow-player" id="flow-player" role="img" aria-label="Six real frames of Rowan in use: the chat invitation, the sentence Really dizzy this morning after a bad night about a 6 typed and sent, Rowan's Reading what you wrote wait line, the reply streaming in, the log card reading Dizziness 6 out of 10 with the bad night noted as a possible factor, and the entry sitting in the Log">
+          <img src="shots/flow-1.webp?v=20260901a" alt="" width="780" height="1688" decoding="async">
+          <img src="shots/flow-2.webp?v=20260901a" alt="" width="780" height="1688" loading="lazy" decoding="async">
+          <img src="shots/flow-3.webp?v=20260901a" alt="" width="780" height="1688" loading="lazy" decoding="async">
+          <img src="shots/flow-4.webp?v=20260901a" alt="" width="780" height="1688" loading="lazy" decoding="async">
+          <img src="shots/flow-5.webp?v=20260901a" alt="" width="780" height="1688" class="rest" decoding="async">
+          <img src="shots/flow-6.webp?v=20260901a" alt="" width="780" height="1688" loading="lazy" decoding="async">
+        </div>
+        <figcaption id="flow-caption">One real session, six frames — a rough sentence in, a structured entry out</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -1170,6 +1215,38 @@
   </footer>
 
   <script>
+    /* The flow player paces six real frames of one session. Runs only when
+       motion is welcome and the figure is on screen; everyone else keeps the
+       logged frame. Captions quote what each frame shows. */
+    (function () {
+      var player = document.getElementById('flow-player');
+      if (!player || !('IntersectionObserver' in window) ||
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var frames = player.querySelectorAll('img');
+      var cap = document.getElementById('flow-caption');
+      var steps = [
+        { hold: 1600, say: '“Tell me in your own words — a rough sentence is plenty.”' },
+        { hold: 1900, say: 'Said like you’d say it out loud: “Really dizzy this morning after a bad night, about a 6.”' },
+        { hold: 1700, say: 'Sent. “Reading what you wrote” — Rowan’s own wait line.' },
+        { hold: 1900, say: 'The reply streams in, plain language first.' },
+        { hold: 3600, say: 'And the entry is already written: Dizziness · 6/10, the bad night noted — Edit if it’s not right.' },
+        { hold: 2600, say: 'There it is in the Log — structured, trend-ready, brief-ready.' }
+      ];
+      var step = -1, timer = null;
+      function advance() {
+        step = (step + 1) % steps.length;
+        for (var i = 0; i < frames.length; i++) frames[i].classList.toggle('on', i === step);
+        if (cap) cap.textContent = steps[step].say;
+        timer = window.setTimeout(advance, steps[step].hold);
+      }
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            if (timer === null) { player.classList.add('playing'); advance(); }
+          } else if (timer !== null) { window.clearTimeout(timer); timer = null; }
+        });
+      }, { threshold: 0.3 }).observe(player);
+    })();
     (function () {
       var section = document.getElementById('screens');
       if (!section) return;

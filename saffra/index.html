@@ -833,6 +833,18 @@
       filter: blur(26px); pointer-events: none;
     }
     .fd-shot { position: relative; text-align: center; }
+    /* The cook player: five real frames of one session, crossfaded. The
+       counting-down frame (.rest) stands for no-JS and reduced-motion. */
+    .cook-player-fig { max-width: 320px; margin: 0 auto; }
+    .cook-player { position: relative; aspect-ratio: 834 / 1812; }
+    .cook-player img {
+      position: absolute; inset: 0; width: 100%; height: auto; display: block;
+      opacity: 0; transition: opacity 0.45s ease;
+    }
+    .cook-player img.rest { opacity: 1; }
+    .cook-player.playing img.rest:not(.on) { opacity: 0; }
+    .cook-player.playing img.on { opacity: 1; }
+    .cook-player-fig .fd-shot-caption { min-height: 2.6em; }
 
     /* Device frame. The screenshots are now clean 968x2088 captures (iPhone
        1:2.157) with no baked-in bezel, so the phone is drawn here instead of
@@ -1583,18 +1595,24 @@
           </li>
         </ul>
       </div>
-      <div class="fd-shots pair anim">
-        <div class="fd-shot">
-          <img src="screenshots-raw/02-cooking-mode-light.jpg?v=20260828a" width="417" height="900" loading="lazy"
-               alt="Cooking Mode step 1 — Saffra reads the step aloud with ingredient chips and a suggested 15-minute timer">
-          <div class="fd-shot-caption">Step 1 — she's reading it aloud</div>
+      <!-- COOK-PLAYER PROVENANCE: five untouched simulator screenshots from ONE
+           continuous Cooking Mode session (the store rig's own pose chain —
+           SHOT_ROUTE=cooking, demo fixtures, Aglio e Olio, status bar 9:41) —
+           step 1 with its suggested timer, the timer genuinely counting down,
+           steps 2 and 3 arriving, and the step-4 "I'm done · Photo optional"
+           finish. Nothing is mocked and nothing is spliced; only the pacing
+           between frames is authored (loam .tend-player pattern). The counting
+           frame is the no-JS / reduced-motion default. -->
+      <figure class="fd-shot cook-player-fig anim">
+        <div class="cook-player" id="cook-player" role="img" aria-label="Five real frames of one Cooking Mode session: step 1 of 4 read aloud with a suggested 15-minute timer, the timer counting down at 13:35, step 2 with the garlic in the skillet and its own 5-minute timer, step 3, and step 4 with the I'm done button, photo optional">
+          <img src="screenshots-raw/cook-live-1.jpg?v=20260901a" alt="" width="417" height="906" decoding="async">
+          <img src="screenshots-raw/cook-live-2.jpg?v=20260901a" alt="" width="417" height="906" class="rest" decoding="async">
+          <img src="screenshots-raw/cook-live-3.jpg?v=20260901a" alt="" width="417" height="906" loading="lazy" decoding="async">
+          <img src="screenshots-raw/cook-live-4.jpg?v=20260901a" alt="" width="417" height="906" loading="lazy" decoding="async">
+          <img src="screenshots-raw/cook-live-5.jpg?v=20260901a" alt="" width="417" height="906" loading="lazy" decoding="async">
         </div>
-        <div class="fd-shot">
-          <img src="screenshots-raw/14-cooking-step2-dark.jpg?v=20260828a" width="417" height="900" loading="lazy"
-               alt="Cooking Mode mid-recipe — the dish photo on the step card with progress bar and hands-free controls">
-          <div class="fd-shot-caption">Mid-recipe, dark mode</div>
-        </div>
-      </div>
+        <figcaption class="fd-shot-caption" id="cook-caption">One real cook, five frames — read aloud, timed, hands-free to "I'm done"</figcaption>
+      </figure>
     </div>
 
     <div class="cook-flow">
@@ -2149,6 +2167,37 @@
     document.getElementById('toggleYearly').classList.toggle('active', mode === 'yearly');
   }
 
+  /* The cook player paces five real frames of one Cooking Mode session.
+     Runs only when motion is welcome and on screen; everyone else keeps the
+     counting-down frame. Captions quote the pixels. */
+  (function () {
+    var player = document.getElementById('cook-player');
+    if (!player || !('IntersectionObserver' in window) ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var frames = player.querySelectorAll('img');
+    var cap = document.getElementById('cook-caption');
+    var steps = [
+      { hold: 2400, say: 'Step 1 of 4, read aloud — and "saffra suggests this timer: 15 min".' },
+      { hold: 2600, say: 'One tap: 13:35 and counting down, hands free.' },
+      { hold: 2400, say: 'Step 2 — garlic in the skillet, its own 5-minute timer waiting.' },
+      { hold: 2200, say: 'Step 3 — still listening for "hey saffra, next".' },
+      { hold: 3000, say: 'Step 4, almost there — "I\'m done", photo optional.' }
+    ];
+    var step = -1, timer = null;
+    function advance() {
+      step = (step + 1) % steps.length;
+      for (var i = 0; i < frames.length; i++) frames[i].classList.toggle('on', i === step);
+      if (cap) cap.textContent = steps[step].say;
+      timer = window.setTimeout(advance, steps[step].hold);
+    }
+    new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          if (timer === null) { player.classList.add('playing'); advance(); }
+        } else if (timer !== null) { window.clearTimeout(timer); timer = null; }
+      });
+    }, { threshold: 0.3 }).observe(player);
+  })();
 </script>
 
 </body>

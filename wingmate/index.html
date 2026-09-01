@@ -172,6 +172,22 @@
     }
 
     /* ===== DEVICE FRAME (shared) ===== */
+    /* The analyze player: six real frames of one session, crossfaded in the
+       device bezel. The insights frame (.rest) stands for no-JS and
+       reduced-motion; .playing is added by JS only when motion is welcome. */
+    .analyze-player-fig { max-width: 320px; margin: 0 auto; }
+    .analyze-player { position: relative; aspect-ratio: 828 / 1799; border-radius: 34px; overflow: hidden; }
+    .analyze-player img {
+      position: absolute; inset: 0; width: 100%; height: auto; display: block;
+      opacity: 0; transition: opacity 0.45s ease;
+    }
+    .analyze-player img.rest { opacity: 1; }
+    .analyze-player.playing img.rest:not(.on) { opacity: 0; }
+    .analyze-player.playing img.on { opacity: 1; }
+    .analyze-caption {
+      margin-top: 14px; text-align: center; color: var(--muted, #9aa0ae);
+      font-size: 0.92rem; min-height: 2.8em;
+    }
     .device {
       position: relative;
       padding: 10px;
@@ -748,6 +764,43 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===== THE ANALYZE FLOW, LIVE ===== -->
+  <!-- ANALYZE-PLAYER PROVENANCE: six untouched simulator frames of ONE
+       continuous session in the shipped app (Debug 1.2 build, the committed
+       store/seed_site_demo.py demo corpus — the same fictional thread the App
+       Store frames use). The screenshot is picked from Photos through the real
+       PhotosPicker, the question typed and sent, and the coach's breakdown
+       STREAMED through the app's real SSE client from a local stand-in server
+       replaying the seeded coach reply VERBATIM with authored pacing — no new
+       coach content was written for this capture, and the app's own states
+       (streaming dots, "Writing replies you can send…", TAP TO COPY, the
+       Conversation Insights card) are what the frames show. Frames 2-6 were
+       pulled from a screen recording of the session. Only the pacing between
+       frames is authored (loam .tend-player pattern). The insights frame is
+       the no-JS / reduced-motion default. -->
+  <section class="block" id="analyze-live">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">The core loop</span>
+        <h2>Drop a screenshot. <span class="grad-text">Watch the read.</span></h2>
+        <p>Six real frames of one session — the thread dropped in, the question asked, and Ava's breakdown streaming to a tap-to-copy reply.</p>
+      </div>
+      <figure class="analyze-player-fig">
+        <div class="device">
+          <div class="analyze-player" id="analyze-player" role="img" aria-label="Six real frames of one Wingmate session: Ava's empty coach screen with a Read this screenshot for me chip, a conversation screenshot staged above the composer with the question What do you make of this, the message sent, Ava's numbered breakdown streaming in, the Writing replies beat ending in a tap-to-copy calibrated line, and the Conversation Insights card reading the interest level as Warm with two suggested next moves">
+            <img width="828" height="1799" src="assets/screens/analyze-live-1.jpg?v=20260901a" alt="" decoding="async">
+            <img width="828" height="1799" src="assets/screens/analyze-live-2.jpg?v=20260901a" alt="" loading="lazy" decoding="async">
+            <img width="828" height="1799" src="assets/screens/analyze-live-3.jpg?v=20260901a" alt="" loading="lazy" decoding="async">
+            <img width="828" height="1799" src="assets/screens/analyze-live-4.jpg?v=20260901a" alt="" loading="lazy" decoding="async">
+            <img width="828" height="1799" src="assets/screens/analyze-live-5.jpg?v=20260901a" alt="" loading="lazy" decoding="async">
+            <img width="828" height="1799" src="assets/screens/analyze-live-6.jpg?v=20260901a" alt="" class="rest" decoding="async">
+          </div>
+        </div>
+        <figcaption class="analyze-caption" id="analyze-caption">One real session, six frames — a screenshot in, a calibrated reply out</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -1388,6 +1441,40 @@
           if (btn) setTheme(btn.getAttribute('data-theme'));
         });
       });
+    })();
+  </script>
+  <script>
+    /* The analyze player paces six real frames of one session. Runs only when
+       motion is welcome and on screen; everyone else keeps the insights frame.
+       Captions quote the pixels. */
+    (function () {
+      var player = document.getElementById('analyze-player');
+      if (!player || !('IntersectionObserver' in window) ||
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var frames = player.querySelectorAll('img');
+      var cap = document.getElementById('analyze-caption');
+      var steps = [
+        { hold: 2200, say: '"Send me a conversation and I\'ll break down exactly what\'s happening."' },
+        { hold: 2200, say: 'The thread staged from Photos, the question typed: "What do you make of this?"' },
+        { hold: 1800, say: 'Sent — screenshot and all.' },
+        { hold: 2600, say: 'Ava\'s breakdown streams in, signal by signal.' },
+        { hold: 2800, say: 'Then the part you keep: a calibrated line under TAP TO COPY.' },
+        { hold: 3400, say: 'And the read: interest level Warm, two suggested next moves.' }
+      ];
+      var step = -1, timer = null;
+      function advance() {
+        step = (step + 1) % steps.length;
+        for (var i = 0; i < frames.length; i++) frames[i].classList.toggle('on', i === step);
+        if (cap) cap.textContent = steps[step].say;
+        timer = window.setTimeout(advance, steps[step].hold);
+      }
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            if (timer === null) { player.classList.add('playing'); advance(); }
+          } else if (timer !== null) { window.clearTimeout(timer); timer = null; }
+        });
+      }, { threshold: 0.3 }).observe(player);
     })();
   </script>
 

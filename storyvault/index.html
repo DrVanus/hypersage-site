@@ -434,6 +434,22 @@
       border-radius: 36px;
       background: var(--bg-deeper);
     }
+    /* The turn player: five real frames of one streamed turn, crossfaded
+       inside the device bezel. The settled page (.rest) stands for no-JS and
+       reduced-motion; .playing is added by JS only when motion is welcome. */
+    .device .turn-player { position: relative; aspect-ratio: 720 / 1564; }
+    .device .turn-player img {
+      position: absolute; inset: 0;
+      opacity: 0; transition: opacity 0.45s ease;
+    }
+    .device .turn-player img.rest { opacity: 1; }
+    .device .turn-player.playing img.rest:not(.on) { opacity: 0; }
+    .device .turn-player.playing img.on { opacity: 1; }
+    .turn-player-caption {
+      margin-top: 14px; text-align: center; color: var(--muted, #9b8ec4);
+      font-size: 0.9rem; min-height: 2.6em; max-width: 320px;
+      margin-left: auto; margin-right: auto;
+    }
     /* Side buttons — titanium rails */
     .device::before,
     .device::after {
@@ -1634,28 +1650,47 @@
       <h2 style="text-align:center;" class="reveal">AI Adventure. <em class="grad">Your move.</em></h2>
       <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Every turn, the AI writes the next page in the voice of the world you're in — then hands you the pen. Pick a branch or type anything at all, and it remembers: your choices carry forward turn after turn, so a single run can unfold for hours and never repeat itself. Here's one turn.</p>
 
+      <!-- TURN-PLAYER PROVENANCE: five untouched simulator frames of ONE live
+           streamed Dracula turn against the production storyvault-api
+           (2026-09-01, free tier — no Pro scene art in frame, the free-turns
+           pill visible and honest: 10 before the move, 9 after). The states are
+           the app's real machinery: choice tiles up, the composer's own "The
+           storyteller is writing…", the chosen move as a bubble under
+           "Continuing the story…", the prose revealing mid-stream, and the
+           settled page with three fresh choices. Frames 2-4 were pulled from a
+           screen recording of the same session — never re-posed. The typeset
+           panel beside the phone quotes the FINAL frame verbatim; if the
+           frames are ever re-shot, the panel moves with them. Only the pacing
+           is authored (loam .tend-player pattern). -->
       <div class="adv-hero-grid">
         <div class="reveal">
           <div class="device-stage">
             <div class="device">
-              <img data-allow-duplicate="true" src="screenshots/adventure-turn.jpg?v=20260811b" width="720" height="1564" alt="A live AI Adventure turn — The Prismshard Heist, Chapter 1: a scene painting for the turn, the story written in a vivid heist-noir voice, and a 'Type a custom move' box" loading="lazy">
+              <div class="turn-player" id="turn-player" role="img" aria-label="Five real frames of one streamed AI Adventure turn in Dracula: three choices offered with 10 free turns left, the storyteller writing, the chosen move — Write to Mina before you lose your nerve — held on screen, the next page streaming in, and the finished page with three fresh choices and 9 free turns left">
+                <img data-allow-duplicate="true" src="screenshots/adventure-live-1.jpg?v=20260901a" width="720" height="1564" alt="" decoding="async">
+                <img data-allow-duplicate="true" src="screenshots/adventure-live-2.jpg?v=20260901a" width="720" height="1564" alt="" loading="lazy" decoding="async">
+                <img data-allow-duplicate="true" src="screenshots/adventure-live-3.jpg?v=20260901a" width="720" height="1564" alt="" loading="lazy" decoding="async">
+                <img data-allow-duplicate="true" src="screenshots/adventure-live-4.jpg?v=20260901a" width="720" height="1564" alt="" loading="lazy" decoding="async">
+                <img data-allow-duplicate="true" src="screenshots/adventure-live-5.jpg?v=20260901a" width="720" height="1564" alt="" class="rest" decoding="async">
+              </div>
             </div>
+            <div class="turn-player-caption" id="turn-caption">One live turn, five real frames — your move, then the next page</div>
           </div>
         </div>
         <div class="turn-panel reveal">
-          <div class="turn-kicker">The Prismshard Heist · Chapter 1 · Approach</div>
-          <p class="prose">Three bells past midnight, and Halen breathes the kind of quiet that belongs only to cats and thieves. The mist sits low on the canal, smelling of brine and old rope, and <em>the cold of the tiles seeps through your boots like a slow debt.</em></p>
+          <div class="turn-kicker">Dracula · a live turn · your move</div>
+          <p class="prose">You press your forehead briefly against the cold window glass. Below, the square is empty. A wisp of cloud moves across the bone-pale moon. And then — at the far edge of the market square, quite still among the shadow — something. <em>A shape that may be a driver. A shape that may be a coach.</em></p>
           <div class="turn-choices">
-            <div class="turn-choice"><span class="n">1</span> Cross by the bridge and go in at ground level</div>
-            <div class="turn-choice"><span class="n">2</span> Signal Mora to test the wards with a prayer before moving</div>
-            <div class="turn-choice"><span class="n">3</span> Send Pell to shadow the errant sentry first</div>
+            <div class="turn-choice"><span class="n">1</span> Take the landlady's crucifix and board the midnight coach</div>
+            <div class="turn-choice"><span class="n">2</span> Refuse to board until daylight; demand another night at the inn</div>
+            <div class="turn-choice"><span class="n">3</span> Slip out and speak directly to the driver before departing</div>
           </div>
-          <div class="turn-custom">Or type your own — "What if I refused the invitation?"</div>
+          <div class="turn-custom">Or type your own — "Type a custom move, or ask a what-if…"</div>
           <!-- Per-turn scene art is Pro-only: EntitlementStore.swift:43-44 sets the free
                tier to imageGenerationsPerMonth/PerDay = 0, and AdventureView.swift:4222
                sends `wantImage: purchase.isPremiumUser`. Free users get zero scene art,
                ever — do not drop the "with Pro" qualifier here, at :1288, or in the FAQ. -->
-          <p class="turn-note">The turn shown on the phone, set in readable type — a live run of the real Prismshard Heist scenario. With Pro, turns are illustrated with a scene the app paints for them — up to 10 a day; every branch is written fresh, so no two runs are the same.</p>
+          <p class="turn-note">The final frame on the phone, set in readable type — a live streamed run of the real Dracula scenario, played on the free tier. With Pro, turns are illustrated with a scene the app paints for them — up to 10 a day, 100 a month; every branch is written fresh, so no two runs are the same.</p>
         </div>
       </div>
 
@@ -2143,6 +2178,39 @@
     document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
       if (io) io.observe(el); else el.classList.add('in');
     });
+  </script>
+  <script>
+    /* The turn player paces five real frames of one streamed Dracula turn.
+       Runs only when motion is welcome and on screen; everyone else keeps the
+       settled page. Captions quote the pixels. */
+    (function () {
+      var player = document.getElementById('turn-player');
+      if (!player || !('IntersectionObserver' in window) ||
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var frames = player.querySelectorAll('img');
+      var cap = document.getElementById('turn-caption');
+      var steps = [
+        { hold: 2600, say: 'Your move — three branches, or type anything. 10 free turns on the pill.' },
+        { hold: 2000, say: '"The storyteller is writing…" — the composer\'s own words.' },
+        { hold: 2000, say: 'Your choice holds on screen: "Write to Mina before you lose your nerve."' },
+        { hold: 2600, say: 'The next page streams in, live.' },
+        { hold: 3400, say: 'And it ends on fresh choices — the horses are already there.' }
+      ];
+      var step = -1, timer = null;
+      function advance() {
+        step = (step + 1) % steps.length;
+        for (var i = 0; i < frames.length; i++) frames[i].classList.toggle('on', i === step);
+        if (cap) cap.textContent = steps[step].say;
+        timer = window.setTimeout(advance, steps[step].hold);
+      }
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            if (timer === null) { player.classList.add('playing'); advance(); }
+          } else if (timer !== null) { window.clearTimeout(timer); timer = null; }
+        });
+      }, { threshold: 0.3 }).observe(player);
+    })();
   </script>
 
 </body>
