@@ -29,7 +29,7 @@
 <header class="site"><img class="mark" src="app-icon.png" alt="" width="30" height="30"><a class="brand" href="./">Holohound</a></header>
 <main class="wrap">
 <h1>Privacy</h1>
-<p class="updated">Last updated 31 August 2026</p>
+<p class="updated">Last updated 1 September 2026</p>
 
 <div class="card">
 <h2 style="margin-top:0">The short version</h2>
@@ -92,7 +92,10 @@ it, the last few messages of that conversation, and the specific card rows relev
 question are sent to our server and forwarded to
 <a href="https://www.anthropic.com/" rel="noopener">Anthropic</a> to generate the reply.
 Your whole collection is not sent, no account is created, and we do not store the
-conversation on our servers.</p>
+conversation on our servers. Anthropic retains API inputs and outputs for a limited
+period under its trust-and-safety policy before deleting them; that retention is theirs,
+not ours, and it is why the App Store privacy label declares Hound messages and attached
+photos as collected — not linked to you, and never used for tracking.</p>
 <p>Two things are counted so the daily message allowance can be enforced: a random id the
 app generates for your install, and the IP address the request arrives from. Neither is a
 login and neither is joined to anything else — they are a running count for the day, which
@@ -102,7 +105,9 @@ resets at midnight UTC. The app ships no password, no email address and no profi
 <ul>
   <li>No name, email address or phone number — there is nothing to sign up for.</li>
   <li>No advertising identifiers, no ad networks, no cross-app tracking.</li>
-  <li>No analytics or crash-reporting SDK is present in this build.</li>
+  <li>No analytics or crash-reporting SDK is present in this build. If something breaks,
+      Profile offers a "Share diagnostics" report — it is assembled on your phone, you can
+      read every line before sharing it, and the app never transmits it anywhere itself.</li>
   <li>No location, contacts, photos library, or microphone access is requested.</li>
 </ul>
 
