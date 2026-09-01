@@ -136,7 +136,17 @@
     // reason is recorded at the restock in update().
     junkRatio: 0.26,
     freeLode: 0.06,       // lodestone rate in FREE and DAILY jars
-    freeShale: 0.05,      // shale rate in FREE and DAILY jars
+    // SHALE IS OFF IN FREE AND DAILY, BECAUSE ITS VERB CANNOT FIRE THERE.
+    // The collapse gate is `fill() < CFG.fillTarget - 0.04` = 0.66; free and
+    // daily restock at `restockBelow` 0.68; and the largest single body is
+    // pi*29^2/JAR_AREA = 0.0172 of the jar. So one extraction floors fill at
+    // 0.6628 > 0.66 and the slab cannot bring anything down: measured 194
+    // shale digs across 400 shifts, 0 collapses, min observed fill 0.66295.
+    // It was a sixth grey rock pretending to be a special. Career keeps it —
+    // `cc.restockBelow` is 0.66, which is exactly the gate, so it fires there.
+    // Do NOT "fix" this by lowering restockBelow: that dial pair was settled
+    // by a 500-day search (see junkRatio) and 0.66 shipped 3 dead boards.
+    freeShale: 0,         // shale rate in FREE and DAILY jars (see above)
     // THE PRISM WAS 7.5x OVERSUPPLIED AND ITS DECISION ALMOST NEVER FIRED.
     // Measured over 200 free shifts: 10.4% of gems poured, 1.4% demanded, and
     // because almost nothing consumed them they silted the working surface —
@@ -149,6 +159,13 @@
     // oversupplied ON PURPOSE — a prism is mostly dragon food, and the hoard
     // ladder is what it feeds.
     rareChance: 0.07,
+    // What fraction of rock_l bodies are a GREAT GEM instead. 0.12 of rock_l
+    // is 4.0% of rocks and 1.04% of all bodies: measured 1.27 seen and 0.54
+    // dug per free shift, so roughly one great stone a shift is visible and
+    // half of them are worth the slot. Raising this is safe for the pour (the
+    // radius is held) but not for the economy — each one is three gems for one
+    // swing, the best rate in the game alongside the crust.
+    greatGem: 0.12,
   };
   var VIEW_H = 720;       // reference world height (world units)
   // Portrait zoom knob. scale = min(ch/VIEW_H, cw/VIEW_MIN_W): in portrait the
@@ -278,6 +295,20 @@
     { k: 'prism',    col: '#b56fe0', hi: '#f2d7ff', r: 22, rare: true },
   ];
   var HEART = { k: 'heartstone', col: '#c9a0f0', hi: '#ffffff', r: 56 };
+  // A great gem's radius. It MUST stay equal to rock_l's — it is the radius
+  // the area-budgeted pour already spent on the body being replaced, and the
+  // moment it differs every seed in the game repours.
+  var GREAT_R = 29;
+  // How many cut gems a great stone breaks into. Same shape as the crusted
+  // rock's payout — one swing, several gems, several satchel slots — but this
+  // one you can SEE coming, which is the difference between a surprise and a
+  // decision.
+  var GREAT_YIELD = 3;
+  // Crust rate and payload BY ROCK SIZE. The rates average to the flat 0.13
+  // they replace (ROCKS is picked uniformly), so this redistributes the crust
+  // budget toward the big rocks rather than adding to it.
+  var CRUST_RATE  = { rock_s: 0.06, rock_m: 0.13, rock_l: 0.20 };
+  var CRUST_YIELD = { rock_s: 1,    rock_m: 2,    rock_l: 3    };
   // What the colossus pays. See the note at the sell/hoard resolution: it
   // costs ~46 of 55 swings to reach, so these are priced against most of a
   // shift, not against a single dig.
@@ -356,8 +387,54 @@
     } else {
       t = TYPE[ORDER_POOL[Math.floor(noise2(p, 4, (seed ^ 0x0B0D4) >>> 0) * ORDER_POOL.length)]];
     }
-    var geode = t.k.indexOf('rock') === 0 &&
-                noise2(p, 8, (seed ^ 0x0B0D8) >>> 0) < 0.13;
+    // THE GREAT GEM — the answer to "what happened to the bigger gems".
+    //
+    // Every gem you can be asked for is r15-21 and every rock is r16-29, so
+    // the physically largest object in the jar has always been a ROCK, and all
+    // three specials the game ever shipped (crust, lodestone, shale) ride on
+    // rocks. There was no big-gem tier at all; there was one r56 colossus and
+    // nothing between it and a 21px sapphire.
+    //
+    // A new radius is what made that expensive: `pour()` breaks on
+    // `fill() >= targetFill` and `fill()` sums pi*r^2, so any r outside
+    // {15,16,17,19,21,22,29,56} terminates the pour at a different index and
+    // repours every seed in the game — 40 CAREER_REROLL entries invalid, a
+    // 500-day daily re-screen, every store frame re-shot. That cost is why the
+    // cheap slot was rock-shaped, and it is why the content went there.
+    //
+    // So this takes a body that is ALREADY r29 and swaps its KEY. A great gem
+    // is a rock_l-sized gem: `r` is held at 29, the pour is byte-identical, and
+    // the whole class of cost above is simply not paid. Nothing in the Jar
+    // prototype reads `.key` — physics, fill(), pour(), _solvePair, exposed()
+    // and blockersOf() all read `r` — so a settled pile is unchanged.
+    //
+    // It ties rock_l at 59.7px of ink; it does not beat it. Only the colossus
+    // (115px) is bigger. Do not claim otherwise in a caption.
+    var great = t.k === 'rock_l' &&
+                noise2(p, 13, (seed ^ 0x0B0DD) >>> 0) < CFG.greatGem;
+    if (great) {
+      // Weighted, so the four order gems stop being interchangeable: a great
+      // stone is usually a sapphire and almost never an amber. This is the
+      // first thing in the game that distinguishes them at all.
+      var gu = noise2(p, 15, (seed ^ 0x0B0DF) >>> 0);
+      t = TYPE[gu < 0.45 ? 'sapphire' : gu < 0.75 ? 'emerald'
+             : gu < 0.95 ? 'ruby' : 'amber'];
+    }
+    // A CRUST IS WORTH WHAT THE ROCK IS BIG.
+    //
+    // This was a flat 0.13 on every rock with a flat payload of two, so a
+    // pebble and a boulder were the same lottery ticket and nothing about the
+    // picture told you which rock to crack. Splitting it by size gives the
+    // biggest rocks a reason to be tapped and pairs with the great gem: the
+    // r29 class goes from ~13% reward to ~30%.
+    //
+    // The rates are the SAME DRAW re-thresholded, not a new one, and `ROCKS`
+    // is picked uniformly, so (0.06 + 0.13 + 0.20) / 3 = 0.1300 — the mean
+    // crust rate is conserved exactly and redistributed by size rather than
+    // inflated. (rock_l loses a little to the great-gem roll above it, which
+    // is why the measured mean lands a shade under 0.13.)
+    var geode = !great && t.k.indexOf('rock') === 0 &&
+                noise2(p, 8, (seed ^ 0x0B0D8) >>> 0) < CRUST_RATE[t.k];
     // spawn stagger above the jar: pure fn, so a pour is replayable
     var lane = Math.floor(noise2(p, 5, (seed ^ 0x0B0D5) >>> 0) * 8);
     var sx = JAR.l + 30 + lane * ((JAR.r - JAR.l - 60) / 7)
@@ -365,21 +442,29 @@
     var sy = JAR.top - 40 - Math.floor(i / 8) * 64 - (i % 8) * 7;
     var inner = null;
     if (geode) {
+      // ...and it holds as many gems as the rock is big: 1 / 2 / 3. The third
+      // gem needs a fresh index — 9 and 10 are the existing two, and 1-13,15
+      // are taken, so 17 is the next free (y, salt) pair.
       inner = [
         ORDER_POOL[Math.floor(noise2(p, 9, (seed ^ 0x0B0D9) >>> 0) * ORDER_POOL.length)],
-        ORDER_POOL[Math.floor(noise2(p, 10, (seed ^ 0x0B0DA) >>> 0) * ORDER_POOL.length)],
       ];
+      if (CRUST_YIELD[t.k] > 1) inner.push(
+        ORDER_POOL[Math.floor(noise2(p, 10, (seed ^ 0x0B0DA) >>> 0) * ORDER_POOL.length)]);
+      if (CRUST_YIELD[t.k] > 2) inner.push(
+        ORDER_POOL[Math.floor(noise2(p, 17, (seed ^ 0x0B0E1) >>> 0) * ORDER_POOL.length)]);
     }
     // A rock is at most ONE special. Order matters and is fixed: geode wins,
     // then lode, then shale — otherwise a rock could be a crusted lodestone
     // and the tells would have to composite.
-    var isRock = t.k.indexOf('rock') === 0;
+    var isRock = !great && t.k.indexOf('rock') === 0;
     var lodeF = isRock && !geode && lode > 0 &&
                 noise2(p, 11, (seed ^ 0x0B0DB) >>> 0) < lode;
     var shaleF = isRock && !geode && !lodeF && shale > 0 &&
                  noise2(p, 12, (seed ^ 0x0B0DC) >>> 0) < shale;
-    return { key: t.k, r: t.r, x: sx, y: sy, geode: inner,
-             lode: lodeF, shale: shaleF };
+    // `r` is GREAT_R, not t.r — that is the whole trick. Holding the radius
+    // at the rock_l value the pour already budgeted is what keeps this free.
+    return { key: t.k, r: great ? GREAT_R : t.r, x: sx, y: sy, geode: inner,
+             lode: lodeF, shale: shaleF, great: great };
   }
   // Order refill k of slot s. POSITIONAL on (slot, k): players who complete
   // orders in different sequences still see identical refill content.
@@ -491,7 +576,7 @@
   var CAREER_REROLL = { 5: 0, 6: 9, 7: 1, 8: 7, 9: 5, 10: 8, 11: 1, 12: 1,
                         14: 3, 15: 8, 16: 3, 17: 7, 18: 1, 19: 8, 20: 4, 21: 6, 22: 2,
                         23: 5, 24: 3, 25: 0, 26: 6, 27: 1, 28: 5, 29: 8,
-                        30: 6, 31: 4, 32: 7, 34: 4, 35: 5, 36: 2, 37: 9,
+                        30: 6, 31: 6, 32: 7, 34: 4, 35: 5, 36: 2, 37: 8,
                         38: 4, 39: 0, 40: 6 };
   // The ladder ends where the SCREENING ends. careerCfg(n) happily returns a
   // config for any n, but past the screened range the swing budget decays
@@ -628,10 +713,40 @@
     this.nextId = 1;
     this.batches = 0;
     if (heart) {
+      // THE COLOSSUS FALLS WITH THE POUR, NOT AHEAD OF IT.
+      //
+      // This spawned at `JAR.top - 60`, which is pour index 3's spawn height
+      // (`JAR.top - 40 - floor(i/8)*64 - (i%8)*7`, jarBodySpec). The headline
+      // object was therefore the third thing into the jar and every one of the
+      // other ~81 bodies landed on top of it. Under the top-down cover rule
+      // that is not "deep", it is SEALED: measured over 120 heart jars it sat
+      // under 23.5 bodies (p90 27), and the restock refills the jar as fast as
+      // you dig, so the cover set is a FIXED POINT, not a cost. A bot that
+      // spent every one of its 55 swings on nothing but the colossus's own
+      // column moved it 25 -> 21 and left the jar exactly as full as it found
+      // it. Across every probe and sweep in this repo the Heartstone had been
+      // extracted ZERO times, ever, while the game painted it 99% un-occluded
+      // and told the player "23 rocks still pin the Heartstone" — a true and
+      // actionable-sounding instruction for an impossible task.
+      //
+      // -488 is pour index 56's spawn height (40 + floor(56/8)*64), so the
+      // colossus arrives in the rain when body 56 does and lands INSIDE the
+      // pile instead of under it. Blockers 23.5 -> 5.7 (p90 8, max 11).
+      //
+      // THIS DOES NOT REPOUR ANYTHING. `fill()` sums pi*r^2 and never reads y,
+      // and the colossus is pushed before `pour()`, so its area is already in
+      // the budget at any spawn height: `pour()` breaks at the identical index
+      // with an identical (key, r, x, y) list. Verified at dy 60/424/488/552 —
+      // 81.35 bodies/jar and the same pour hash at all four. Only the SETTLE
+      // of a heart-bearing jar changes, so the gates re-run; they do not
+      // re-screen, and no CAREER_REROLL entry moves.
+      //
+      // Do not push it further. At -552 the colossus is already exposed at
+      // t=0 on 3 of 72 jars — a free 600c on the first tap.
       var hx = JAR.l + 60 + noise01(7, (this.seed ^ 0x4EA47) >>> 0) * (JAR.r - JAR.l - 120);
       this.bodies.push({
         id: this.nextId++, key: 'heartstone', r: HEART.r,
-        x: hx, y: JAR.top - 60, px: hx, py: JAR.top - 60, vx: 0, vy: 0,
+        x: hx, y: JAR.top - 488, px: hx, py: JAR.top - 488, vx: 0, vy: 0,
         rest: 0, asleep: false, pry: 0,
       });
     }
@@ -658,7 +773,7 @@
                           this.lode, this.shale);
       this.bodies.push({
         id: this.nextId++, key: s.key, r: s.r, geode: s.geode || null,
-        lode: !!s.lode, shale: !!s.shale,
+        lode: !!s.lode, shale: !!s.shale, great: !!s.great,
         // WHERE THIS BODY WAS POURED FROM — the one pair of numbers that names
         // a body identically for every player on a shared seed. `id` is a
         // creation counter and is NOT that (see the shale collapse). Nothing
@@ -909,15 +1024,13 @@
     return out.slice(0, limit);
   };
 
-  // The lodestone no longer HOLDS anything — under the cover rule it blocks by
-  // simply being above you, like every other body. Kept as a null-returning
-  // stub so the tap handler's two-reason branch still compiles and reads
-  // truthfully; nothing may resurrect a grip without re-screening the ladder.
-  Jar.prototype.lodeHolding = function () { return null; };
-
-  // Every body a given lodestone is currently gripping — used to draw the
-  // grip and to tell the player what to clear.
-  Jar.prototype.heldBy = function () { return []; };
+  // THE LODESTONE'S GRIP IS GONE, AND SO IS THE CODE THAT DREW IT.
+  // `lodeHolding()` and `heldBy()` were kept as null/[] stubs when the cover
+  // rule replaced the grip (bc82081), which left a violet grip-arc renderer
+  // and a refusal toast in the file that no input could ever reach. Dead
+  // spectacle is how this project got `rock_crusted_hit` — 91KB of art nothing
+  // could draw. Nothing may resurrect a grip without re-screening the ladder;
+  // the reason it went is recorded above `COVER_X`.
 
   Jar.prototype.bodyAt = function (wx, wy) {
     var best = null, bestD = 1e9;
@@ -1513,7 +1626,14 @@
                  // look and most players do not need this; on, it stamps a small
                  // shape on every gem in the jar AND on the order-card icons, so
                  // matching works on silhouette alone.
-                 marks: 0 };
+                 marks: 0,
+                 // ---- IAP -------------------------------------------------
+                 // `full` is the one purchasable entitlement (see
+                 // store/iap-catalog.json). `iapSeen` is the exactly-once
+                 // journal, keyed by a hash of platform:transactionId, so a
+                 // purchase interrupted mid-fulfilment retries on the next
+                 // launch without granting twice.
+                 full: 0, iapSeen: {} };
     var hadLocal = false;
     // IS THE LOCAL COPY PROVISIONAL? A session that could not read the native
     // backup still writes localStorage — with `data` at DEFAULTS if the read
@@ -1658,6 +1778,166 @@
   // The publishable key SHIPS BY DESIGN (RLS is the boundary; probed against
   // the live project: 401 wrong-day OR missing privilege, 400 implausible
   // payload). All network is fire-and-forget cosmetic — the sim never waits.
+  // ===== IAP — one non-consumable, and a hard wall between it and the sim ===
+  //
+  // THE MODEL, in full: the game is free, and ONE purchase unlocks career
+  // levels 11-40 plus the 14-day archive. No subscription (there is no account
+  // and no server to renew against), no consumable, no currency pack, no ads.
+  // Coins are dug, never sold. store/iap-catalog.json is the source of truth
+  // and its `_LAW` is the one to read first: a product id is PERMANENT.
+  //
+  // THE LINE THIS MUST NEVER CROSS. The daily is one seed shared by every
+  // player on earth, and the forty career seeds are hand-screened against a
+  // fixed swing budget. An entitlement that changed swings, satchel size, jar
+  // content or the restock valve would fork the daily between buyers and
+  // non-buyers — and the divergence would correlate exactly with who paid,
+  // which is indistinguishable from cheating on the leaderboard. So the gate is
+  // CONTENT (which levels you may enter) and never POWER, and no seeded draw
+  // may sit on a branch that reads this entitlement. tools/probe_iap_fairness.js
+  // proves the daily is byte-identical for a fresh save and an owns-everything
+  // save; tools/validate.py fails the build if a seeded call appears near one.
+  var FULL_PRODUCT = 'gemburrow.full.unlock';
+  var FREE_CAREER_LEVELS = 10;
+
+  var Ent = (function () {
+    // FNV-1a over `platform:transactionId`. Play purchase tokens run to
+    // hundreds of characters and have no business sitting in the save; the hash
+    // dedupes just as well. Keyed on the TRANSACTION, not the product, so a
+    // non-consumable restored five times still grants once.
+    function receiptKey(platform, txId) {
+      var h = 2166136261 >>> 0, str = platform + ':' + txId;
+      for (var i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619) >>> 0;
+      }
+      return h.toString(16);
+    }
+    function owned() { return !!Meta.data.full; }
+    // THE DEFER-FINISH HANDSHAKE's middle step. Native verifies the transaction
+    // and hands it over WITHOUT finishing it; we journal 'fulfilling', grant,
+    // then journal 'fulfilled'. Only then may the caller finalize. If the app
+    // dies anywhere in here the transaction is still unfinished, so the next
+    // launch re-yields it and this runs again — idempotently.
+    function fulfill(platform, txId, productId) {
+      if (productId !== FULL_PRODUCT) return { granted: false, reason: 'unknown product' };
+      var key = receiptKey(platform, txId);
+      if (!Meta.data.iapSeen) Meta.data.iapSeen = {};
+      if (Meta.data.iapSeen[key] === 'fulfilled' && owned()) {
+        return { granted: false, reason: 'already fulfilled', key: key };
+      }
+      Meta.data.iapSeen[key] = 'fulfilling';
+      Meta.save();
+      var was = owned();
+      Meta.data.full = 1;
+      Meta.data.iapSeen[key] = 'fulfilled';
+      Meta.save();
+      return { granted: !was, key: key };
+    }
+    return { owned: owned, fulfill: fulfill, receiptKey: receiptKey, PRODUCT: FULL_PRODUCT };
+  })();
+
+  // How far up the ladder this save may go. The ONLY thing the entitlement
+  // changes anywhere in the game.
+  function careerCap() {
+    // NO STORE, NO WALL. On a build where the player physically cannot pay —
+    // the web build, and any platform whose native store plugin does not exist
+    // — walling them at level 10 is not a paywall, it is a dead end with no
+    // door. The paywall already told the truth about this ("This build has no
+    // store — the full ladder ships with the app"); careerCap did not, and
+    // asking for level 11 quietly handed back level 10. A promise printed on
+    // the screen is a claim, and this is the code that has to honour it.
+    //
+    // The revenue risk runs the other way — if the iOS plugin ever failed to
+    // register, the ladder would be given away — so check_release_bundle.py
+    // asserts GemburrowStore is in the shipped registration list.
+    if (!Store.available()) return CAREER_MAX;
+    return Ent.owned() ? CAREER_MAX : FREE_CAREER_LEVELS;
+  }
+
+  // The native bridge. Absent on the web build and in any browser, where the
+  // game stays free and the paywall says so rather than pretending to sell.
+  var Store = (function () {
+    function plugin() {
+      var C = window.Capacitor;
+      return (C && C.Plugins && C.Plugins.GemburrowStore) || null;
+    }
+    var api = {
+      available: function () { return !!plugin(); },
+      // The localized price string from the storefront, or null. NEVER a
+      // number we made up: a hardcoded "$4.99" is a 3.1.2 rejection on every
+      // non-USD storefront, so the paywall prints "Price unavailable" instead.
+      price: null,
+      busy: false,
+      note: null,
+    };
+    function handle(rows, done) {
+      var granted = false;
+      rows = rows || [];
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        var res = Ent.fulfill(r.platform || 'ios', r.transactionId, r.productId);
+        if (res.granted) granted = true;
+        // finalize LAST — this is what lets native call finish()/acknowledge
+        var p = plugin();
+        if (p && p.finalize) { try { p.finalize({ transactionId: r.transactionId }); } catch (e) {} }
+      }
+      if (done) done(granted);
+    }
+    api.load = function () {
+      var p = plugin(); if (!p || !p.products) return;
+      try {
+        p.products({ ids: [FULL_PRODUCT] }).then(function (r) {
+          var list = (r && r.products) || [];
+          for (var i = 0; i < list.length; i++) {
+            if (list[i].id === FULL_PRODUCT) api.price = list[i].displayPrice || null;
+          }
+        }).catch(function () {});
+      } catch (e) {}
+    };
+    // Silent, on launch: re-yields anything verified but not finished.
+    api.recover = function () {
+      var p = plugin(); if (!p || !p.recover) return;
+      try { p.recover().then(function (r) { handle(r && r.transactions); }).catch(function () {}); } catch (e) {}
+    };
+    api.buy = function (done) {
+      var p = plugin();
+      if (!p || !p.purchase) { api.note = 'The store is not available here.'; if (done) done(false); return; }
+      api.busy = true; api.note = null;
+      try {
+        p.purchase({ id: FULL_PRODUCT }).then(function (r) {
+          api.busy = false;
+          if (r && r.cancelled) { if (done) done(false); return; }
+          handle(r && r.transactions, function (g) {
+            api.note = g ? null : 'Nothing to unlock.';
+            if (done) done(g || Ent.owned());
+          });
+        }).catch(function (e) {
+          api.busy = false; api.note = 'The purchase did not go through.';
+          if (done) done(false);
+        });
+      } catch (e) { api.busy = false; api.note = 'The purchase did not go through.'; if (done) done(false); }
+    };
+    // Loud, user-tapped. Apple REQUIRES this for a non-consumable (3.1.1), and
+    // finding the entitlement already present is a SUCCESS, not a no-op.
+    api.restore = function (done) {
+      var p = plugin();
+      if (!p || !p.restore) { api.note = 'The store is not available here.'; if (done) done(false); return; }
+      api.busy = true; api.note = null;
+      try {
+        p.restore().then(function (r) {
+          api.busy = false;
+          handle(r && r.transactions, function () {
+            api.note = Ent.owned() ? 'Purchase restored.' : 'No purchase found on this Apple ID.';
+            if (done) done(Ent.owned());
+          });
+        }).catch(function () {
+          api.busy = false; api.note = 'Could not reach the store.'; if (done) done(false);
+        });
+      } catch (e) { api.busy = false; api.note = 'Could not reach the store.'; if (done) done(false); }
+    };
+    return api;
+  })();
+
   var Lb = (function () {
     var URL = 'https://lrnupqottbfjfzsgtciq.supabase.co/rest/v1/gemburrow_daily_scores';
     var RPC = 'https://lrnupqottbfjfzsgtciq.supabase.co/rest/v1/rpc/gemburrow_submit_score';
@@ -2312,7 +2592,15 @@
     this.isDaily = this.mode === 'daily';
     this.archiveDay = (this.isDaily && archiveDay && archiveDay !== dayNumber())
                     ? archiveDay : null;
-    var reached = Math.min(CAREER_MAX, Meta.data.careerLevel || 1);
+    // THE ENTITLEMENT GATE, AND THE ONLY PLACE IT EXISTS.
+    //
+    // careerCap() is FREE_CAREER_LEVELS on a free save and CAREER_MAX on a
+    // bought one, so the purchase decides WHICH LEVELS YOU MAY ENTER and
+    // nothing else. It cannot reach the jar: `cc` below is careerCfg(want), a
+    // pure function of the level number, so level 7's jar is byte-identical
+    // for a buyer and a non-buyer, and the daily never consults it at all.
+    // Keep it that way — see the note above Ent.
+    var reached = Math.min(careerCap(), Meta.data.careerLevel || 1);
     var want = level ? Math.max(1, Math.min(reached, level | 0)) : reached;
     // clamped: past CAREER_MAX the seeds are unscreened and often unclearable
     var cc = this.mode === 'career' ? careerCfg(want) : null;
@@ -2400,8 +2688,8 @@
     if (cc && cc.intro && Meta.data.tutorialDone) {
       // IT MUST NAME THE RULE THE GAME ACTUALLY RUNS. This described the GRIP —
       // "pins everything under it, lift it off first" — and the grip was
-      // deleted: Jar.lodeHolding is a null-returning stub and heldBy returns [],
-      // because the top-down cover rule made a grip redundant (a stone above you
+      // deleted outright, because the top-down cover rule made a grip
+      // redundant (a stone above you
       // already blocks you by being above you). What a lodestone does now is
       // cost TWO swings, and the only sentence in the game that says so lives in
       // _route's _teach('lode', ...) LONG form — which this line then made
@@ -2673,14 +2961,16 @@
           // refusal reasons and this only ever spoke one of them, so a
           // heartstone held purely by a lodestone printed the sentence
           // "0 rocks still pin the Heartstone" — a count of nothing, offered
-          // as an instruction. Ask for the rock count first and fall through
-          // to the grip when there is no rock to name.
+          // as an instruction. The old fallback named a lodestone GRIP that
+          // has not existed since the cover rule, so it could never fire and
+          // could never have been true. A refused tap on an unblocked body is
+          // not reachable; if it ever becomes so, say something honest.
           b.wiggle = 1; Snd.thunk();
           var hb = this._heartBlockers(b);
           this.toast = {
             text: hb > 0
               ? hb + (hb === 1 ? ' rock still pins' : ' rocks still pin') + ' the Heartstone'
-              : 'A lodestone has the Heartstone — lift that off first.',
+              : 'Clear the pile off the Heartstone first.',
             until: this.worldT + 2,
           };
           continue;
@@ -2699,7 +2989,23 @@
           this.shakeT = 0.5;
           Hap.heavy();
           Snd.fanfare(300);
-          this.choice = { key: 'heartstone', slot: -1, until: this.worldT + CHOICE_SECS, x: b.x, y: b.y };
+          // CAREER HAS NO SELL, AND MUST NOT DRAW ONE.
+          //
+          // `_resolveChoice` forced the hoard lane only on an untouched
+          // TIMEOUT (`&& !tapped`), so a career player who actually reached
+          // for SELL banked 600c — six times at or before L30 (heart levels
+          // are n%5===0). `sweep_career --econ` fails the build when income at
+          // L30 reaches the shop's 22,000c stock and the headroom is 3,143c,
+          // so six sells is 3,600c and a red gate. The bot could never see it:
+          // it always gifts. Now that the colossus is reachable this stops
+          // being theoretical.
+          //
+          // Resolving straight to the dragon is also the honest shape: on a
+          // replay the plate already said "no coins on a replay", so in career
+          // the second plate was either unaffordable or a lie. Free and daily
+          // keep the real dilemma.
+          if (this.career) { this._resolveChoice('hoard'); }
+          else this.choice = { key: 'heartstone', slot: -1, until: this.worldT + CHOICE_SECS, x: b.x, y: b.y };
           if (this.swings <= 0 && this.state === 'playing') this._endShift();
         }
         continue;
@@ -3060,6 +3366,43 @@
     this._bumpCombo();
     if (this.tutStep === 0) this.tutStep = 1;
     this._fly(b, 'bag', this.bag.length - 1);
+    // A GREAT STONE BREAKS INTO THREE CUT GEMS.
+    //
+    // Same payout shape as the crusted rock — one swing, several gems,
+    // several satchel slots — and deliberately so: the crust is the best rate
+    // in the game and it was the ONLY thing in the jar that paid like that.
+    // The difference is that a crust is a surprise inside a rock and this is a
+    // prize you can see from across the jar, so it is a decision rather than a
+    // reward: three slots of a seven-slot satchel is most of your working room.
+    //
+    // Overflow rolls back into the pile on the crust's own degrade path rather
+    // than being destroyed — and at GREAT_R, not TYPE[key].r, or the gem
+    // visibly shrinks as it falls back in.
+    if (b.great) {
+      for (var gq = 1; gq < GREAT_YIELD; gq++) {
+        if (this.bag.length < this.bagCap) {
+          this.bag.push(key);
+          this._bumpCombo();
+          this._fly(b, 'bag', this.bag.length - 1);
+        } else {
+          this.jar.bodies.push({
+            id: this.jar.nextId++, key: key, r: TYPE[key].r, geode: null,
+            lode: false, shale: false, great: false,
+            x: b.x + (gq === 1 ? -9 : 9), y: b.y - 4, px: b.x, py: b.y,
+            vx: (gq === 1 ? -1 : 1) * 95, vy: -165,
+            rest: 0, asleep: false,
+          });
+        }
+      }
+      this.hitStop = 0.06;
+      this.shakeT = Math.max(this.shakeT, 0.16);
+      Hap.medium();
+      this.toast = { text: this.bag.length >= this.bagCap
+        ? 'A GREAT ' + key.toUpperCase() + '! Bag full — the rest rolled back in.'
+        : 'A GREAT ' + key.toUpperCase() + '! Three gems from one swing.',
+        until: this.worldT + 2 };
+      this._burst(b.x, b.y, 14, 250, 235, 2, 2.6, 0.7, TYPE[key].hi);
+    }
     Snd.fill(this.combo);                // ladder climbs the LIVE music chord
     this._checkDeliveries();
   };
@@ -3298,15 +3641,17 @@
       var hFrom = { x: VIEW_MIN_W / 2, y: JAR.top + 48, r: 34, key: 'gem_prism_big' };
       // career banks no coins, so an untouched timeout must not "sell" the
       // colossus into nothing — the dragon takes it
-      if (this.career && dest !== 'hoard' && !tapped) dest = 'hoard';
+      if (this.career) dest = 'hoard';       // career banks no colossus coins — see the pry
       if (dest === 'hoard') {
-        // PRICED AGAINST WHAT IT COSTS. Measured with tools/probe_heart.cjs
-        // over 60 heartstone jars using an optimal transitive excavator:
-        // reaching and prying the colossus takes a mean of 46.3 swings (p50
-        // 47, p90 51) out of 55. The dig is not wasted — it banks ~29 gems on
-        // the way down — but it commits most of a shift, and +4 hoard against
-        // a rank ladder that steps every 15 was not an answer to that. The
-        // sweep bot pried it ZERO times across all eight career band finales.
+        // PRICED AGAINST WHAT IT COSTS. The 46.3-swing figure this comment
+        // used to quote was measured BEFORE the top-down cover rule
+        // (bc82081); against that rule the true cost was unbounded — 0 of 120
+        // jars reached at any budget up to 800 swings — so the payout was
+        // tripled on the strength of a number the game had already invalidated.
+        // With the colossus poured into the pile rather than under it, reach +
+        // pry costs 9-15 swings against 18.2 leftover, so it is spent out of
+        // slack rather than traded against orders. Say that plainly: this is
+        // "the headline object becomes obtainable", not "a hard decision".
         //
         // Cosmetic by construction, so this carries no fairness constraint:
         // hoard buys ranks and dragon growth, never swings, bag slots or jar
@@ -3922,6 +4267,7 @@
     if (this.state === 'shop') { this._drawShop(); this._drawSettings(); ctx.restore(); return; }
     if (this.state === 'records') { this._drawRecords(); this._drawSettings(); ctx.restore(); return; }
     if (this.state === 'levels') { this._drawLevels(); this._drawSettings(); ctx.restore(); return; }
+    if (this.state === 'paywall') { this._drawPaywall(); this._drawSettings(); ctx.restore(); return; }
 
     // lantern breath: the backdrop's lamp flickers (smoothed lane-3 noise)
     this._lampT = (this._lampT || 0.5) + (Math.random() - 0.5) * 0.08;
@@ -4302,28 +4648,9 @@
       // the sprite.
       if (b.geode) this._crustGlint(x, y, b);
       if (b.shale) this._shaleDust(x, y, b);
-      // A LODESTONE MUST SHOW ITS GRIP. The rule is invisible otherwise —
-      // exactly the mistake the crusted rock made for the whole life of the
-      // project — and an unexplained refused tap reads as a broken game, not
-      // as a puzzle. Short violet arcs reach from the stone to each body it is
-      // holding, so "clear this one first" is legible without a word of UI.
-      if (b.lode) {
-        var held = this.jar.heldBy(b);
-        if (held.length) {
-          var pul = 0.35 + 0.25 * Math.sin(this.worldT * 3 + b.id);
-          ctx.strokeStyle = 'rgba(196,150,255,' + pul.toFixed(2) + ')';
-          ctx.lineWidth = 2;
-          for (var hi = 0; hi < held.length; hi++) {
-            var h = held[hi];
-            var vx = h.x - b.x, vy = h.y - b.y;
-            var d = Math.sqrt(vx * vx + vy * vy) || 1;
-            ctx.beginPath();
-            ctx.moveTo(x + (vx / d) * b.r * 0.85, y + (vy / d) * b.r * 0.85);
-            ctx.lineTo(x + (vx / d) * (d - h.r * 0.6), y + (vy / d) * (d - h.r * 0.6));
-            ctx.stroke();
-          }
-        }
-      }
+      // (The lodestone's grip-arc renderer lived here. `heldBy()` has returned
+      // [] since the cover rule landed, so this drew nothing for its entire
+      // life — see the note where the stubs were deleted.)
       return;
     }
     var t = TYPE[b.key];
@@ -5051,8 +5378,17 @@
     // dig-light: which gems are reachable is the game's core readability, not
     // a hint, and turning THAT off would recreate the bug this whole pass
     // exists to fix.
+    // RESTORE IS NOT OPTIONAL. Apple rejects any app with a non-consumable IAP
+    // that lacks an explicit, user-tapped Restore Purchases control (3.1.1).
+    // It also has to be FINDABLE by someone who has already bought — such a
+    // player never opens the paywall again, so the paywall's own restore button
+    // is not enough on its own. Hidden once owned, because there is then
+    // nothing left to restore and a dead control invites a support email.
+    var canRestore = Store.available() && !Ent.owned();
     var ids = inShift ? ['music', 'sound', 'hints', 'marks', 'resume', 'quit']
-                      : ['music', 'sound', 'hints', 'marks', 'done'];
+                      : ['music', 'sound', 'hints', 'marks']
+                          .concat(canRestore ? ['restore'] : [])
+                          .concat(['done']);
     var ph = SET_HEAD + SET_PAD + ids.length * SET_ROW_H + (ids.length - 1) * SET_GAP + SET_FOOT;
     var px = VIEW_MIN_W / 2 - SET_W / 2;
     var py = Math.round(VIEW_H / 2 - ph / 2);
@@ -5147,8 +5483,11 @@
         var armed = r.id === 'quit' && this._quitArmed > nowMs();
         var label = r.id === 'resume' ? 'RESUME'
                   : r.id === 'quit' ? (armed ? 'TAP AGAIN TO QUIT' : 'QUIT SHIFT')
+                  : r.id === 'restore' ? (Store.busy ? 'RESTORING\u2026' : 'RESTORE PURCHASE')
                   : 'DONE';
-        this._menuBtn(label, r.y, { w: r.w, h: r.h, quiet: r.id === 'quit' && !armed });
+        this._menuBtn(label, r.y, { w: r.w, h: r.h,
+                                    quiet: (r.id === 'quit' && !armed) || r.id === 'restore',
+                                    disabled: r.id === 'restore' && Store.busy });
       }
     }
 
@@ -5163,6 +5502,13 @@
     for (var i = 0; i < R.rows.length; i++) {
       var r = R.rows[i];
       if (!inRect(w, r)) continue;
+      if (r.id === 'restore') {
+        // Loud and user-tapped, as 3.1.1 requires. Finding the entitlement
+        // already present is a SUCCESS, not a no-op — say so either way.
+        Snd.pop();
+        Store.restore(function (got) { if (got) { Snd.fanfare(150); Hap.medium(); } });
+        return;
+      }
       if (r.id === 'music') { Snd.setMusicMuted(!Snd.musicMuted); Snd.pop(); }
       else if (r.id === 'sound') { Snd.setSfxMuted(!Snd.sfxMuted); Snd.pop(); }
       else if (r.id === 'hints') {
@@ -5396,7 +5742,15 @@
   // and `careerStars` was write-once with no way back in: a 1-star clear was
   // permanent, which quietly removed the reason to replay the best content in
   // the game. One authored grid, read by the draw and the hit test.
-  var LV_COLS = 5, LV_CELL = 52, LV_GAPX = 9, LV_GAPY = 9, LV_TOP = 164;
+  // LV_GAPY was 9 and the eighth row ran to y=643, straight through the
+  // "Levels 1-N are free" line at 622 — the hint was printed across the
+  // bottom row of tiles. Nothing could catch it by looking at either piece
+  // alone; it is the SUM (LV_TOP + 8 cells + 7 gaps) that collides, so
+  // validate.py now computes that sum. VIEW_H is 720 and BACK already ends
+  // at 712, so the space has to come out of the grid, not the bottom.
+  // LV_CELL stays 52: at the SE3 scale that is 46.4pt, and 48 would put the
+  // tap target under the 44pt floor.
+  var LV_COLS = 5, LV_CELL = 52, LV_GAPX = 9, LV_GAPY = 6, LV_TOP = 164;
   var LV_X0 = VIEW_MIN_W / 2 - (LV_COLS * LV_CELL + (LV_COLS - 1) * LV_GAPX) / 2;
   var LEVELS_BACK_Y = 656;
   function levelRect(i) {                    // i is 0-based; level = i + 1
@@ -6609,16 +6963,25 @@
     ctx.fillText(total + ' / ' + (CAREER_MAX * 3), cx - 18, 142);
     ctx.textAlign = 'center';
 
-    var reached = Math.min(CAREER_MAX, Meta.data.careerLevel || 1);
+    // THE LADDER IS DRAWN IN FULL, ALWAYS — all forty nodes, on a free save
+    // too. A storefront that hides what it sells is both worse selling and
+    // worse manners: a player should be able to see the shape of the thing
+    // before deciding, and the levels past the wall look locked rather than
+    // absent so nobody wonders whether the game just ends at ten.
+    var reached = Math.min(careerCap(), Meta.data.careerLevel || 1);
+    var wall = careerCap();                       // last level this save may enter
     for (var i = 0; i < CAREER_MAX; i++) {
       var b = levelRect(i), lv = i + 1;
       var got = stars[lv] || 0;
+      var paywalled = lv > wall;
       var open = lv <= reached, cur = lv === reached && got === 0;
       var band = lv % 5 === 0;                       // band finale: heartstone
-      ctx.fillStyle = !open ? 'rgba(30,22,16,0.55)'
+      ctx.fillStyle = paywalled ? 'rgba(46,32,58,0.62)'
+                    : !open ? 'rgba(30,22,16,0.55)'
                     : got > 0 ? 'rgba(74,58,40,0.95)' : 'rgba(90,70,42,0.95)';
       rr(ctx, b.x, b.y, b.w, b.h, 11); ctx.fill();
       ctx.strokeStyle = cur ? '#ffd75e'
+                      : paywalled ? 'rgba(232,201,255,0.38)'
                       : !open ? 'rgba(140,120,100,0.22)'
                       : band ? 'rgba(232,201,255,0.55)' : 'rgba(201,168,106,0.5)';
       ctx.lineWidth = cur ? 2.5 : 1.5;
@@ -6631,11 +6994,25 @@
           drawStar(ctx, b.x + b.w / 2 - 11 + s * 11, b.y + 38, 4.5,
                    s < got ? '#ffd75e' : 'rgba(255,255,255,0.16)');
         }
+      } else if (paywalled) {
+        // a small violet key, the same colour the hoard and the prism use for
+        // "this is a thing you keep" — not a padlock, which reads as punishment
+        ctx.strokeStyle = 'rgba(232,201,255,0.55)'; ctx.lineWidth = 1.6;
+        var kx = b.x + b.w / 2, ky = b.y + 36;
+        ctx.beginPath(); ctx.arc(kx, ky - 3, 3.4, 0, 6.283); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(kx, ky); ctx.lineTo(kx, ky + 7);
+        ctx.moveTo(kx, ky + 5); ctx.lineTo(kx + 3, ky + 5); ctx.stroke();
       } else if (band && SPR.gem_prism) {
         ctx.globalAlpha = 0.30;
         ctx.drawImage(SPR.gem_prism, b.x + b.w / 2 - 8, b.y + 30, 16, 16);
         ctx.globalAlpha = 1;
       }
+    }
+    // ONE honest line under the ladder, and only when there IS a wall.
+    if (wall < CAREER_MAX) {
+      ctx.fillStyle = 'rgba(232,201,255,0.85)'; ctx.font = fT(12, 'bold');
+      ctx.fillText('Levels 1-' + wall + ' are free. Tap a locked level to see the rest.',
+                   cx, LEVELS_BACK_Y - 18, VIEW_MIN_W - 40);
     }
     this._menuBtn('BACK', LEVELS_BACK_Y);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
@@ -6747,6 +7124,124 @@
   // 'DAILY DIG' on the finale while the handler ran the generic career branch
   // and restarted level 40. The label promised one mode and the tap gave
   // another — on the single screen a player reaches by finishing the game.
+  // ===== THE PAYWALL =======================================================
+  // Reached only by tapping a locked level or the wall on the results screen —
+  // it is never thrown at anyone unprompted, never interrupts a run, and never
+  // appears on the daily or a free dig. The free half of this game is meant to
+  // be playable forever by someone who never intends to pay.
+  // NOT `PAY` — that name is taken, 6800 lines up, by the order payout table
+  // `{ easy: 30, med: 60, big: 150, timed: 90 }`. Both were `var` in the same
+  // function scope, so there was only ever ONE binding: this assignment ran
+  // later, won, and every order card in the game drew "undefinedc" and paid
+  // nothing. No gate caught it — the sweeps drive `Jar` directly and never
+  // read a card's payout — and it took looking at the running screen.
+  var PAY_RECTS = {
+    buy:     { x: VIEW_MIN_W / 2 - 122, y: 500, w: 244, h: 60 },
+    restore: { x: VIEW_MIN_W / 2 - 122, y: 572, w: 244, h: 44 },
+    back:    { x: VIEW_MIN_W / 2 - 122, y: 630, w: 244, h: 52 },
+  };
+  Game.prototype.paywallRects = function () { return PAY_RECTS; };
+
+  Game.prototype.openPaywall = function () {
+    this.state = 'paywall';
+    Store.note = null;
+    Store.load();                 // refresh displayPrice while the player reads
+  };
+
+  Game.prototype._drawPaywall = function () {
+    var ctx = this.ctx, v = this.view, cx = VIEW_MIN_W / 2;
+    ctx.fillStyle = '#241a12';
+    ctx.fillRect(-v.ox, -v.uiTop, v.w, v.h + v.uiTop);
+    var bg = SPR.backdrop_burrow;
+    if (bg) {
+      ctx.globalAlpha = 0.22;
+      var sc = Math.max(v.w / bg.width, v.h / bg.height);
+      ctx.drawImage(bg, -v.ox + (v.w - bg.width * sc) / 2, -v.uiTop, bg.width * sc, bg.height * sc);
+      ctx.globalAlpha = 1;
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+
+    ctx.fillStyle = '#ffe9a8'; ctx.font = fD(28);
+    ctx.fillText('THE FULL BURROW', cx, 96, VIEW_MIN_W - 40);
+    ctx.fillStyle = 'rgba(232,220,200,0.8)'; ctx.font = fT(13);
+    ctx.fillText('One purchase. No subscription, nothing else to buy.', cx, 134, VIEW_MIN_W - 40);
+
+    // WHAT YOU GET, and — just as important — what you already have.
+    var yy = 178;
+    var give = ['Career levels ' + (FREE_CAREER_LEVELS + 1) + '-' + CAREER_MAX + ' — the rest of the ladder',
+                'Every past daily jar, still playable'];
+    ctx.font = fT(13); ctx.textAlign = 'left';
+    for (var i = 0; i < give.length; i++) {
+      ctx.fillStyle = '#ffd75e';
+      ctx.fillText('+', cx - 128, yy);
+      ctx.fillStyle = '#f0e2c8';
+      fitT(ctx, give[i], cx - 108, yy, 236, 13);
+      yy += 24;
+    }
+    yy += 8;
+    var keep = ['Free digs, the daily jar and its board stay free',
+                'No ads, no energy, no timers — same as before'];
+    for (var k = 0; k < keep.length; k++) {
+      ctx.fillStyle = 'rgba(232,201,255,0.75)';
+      ctx.fillText('\u2713', cx - 128, yy);
+      ctx.fillStyle = 'rgba(232,220,200,0.72)';
+      fitT(ctx, keep[k], cx - 108, yy, 236, 12);
+      yy += 22;
+    }
+    ctx.textAlign = 'center';
+
+    // THE LADDER ITSELF, because "levels 11-40" is a sentence and this is the
+    // thing it describes. 222 world units sat empty between the copy and the
+    // buttons — on the one screen in the game that has to make a case for
+    // itself. Forty tiles at a glance: ten lit, thirty locked, and the shape of
+    // what is missing is the whole argument.
+    //
+    // Geometry only — no seeded draw, no entitlement read beyond the same
+    // careerCap() the levels screen uses.
+    var pw = careerCap();
+    var mC = 10, mS = 15, mG = 4;
+    var mX = cx - (mC * mS + (mC - 1) * mG) / 2, mY = 322;
+    for (var t = 0; t < CAREER_MAX; t++) {
+      var mc = t % mC, mr = (t / mC) | 0;
+      var tx = mX + mc * (mS + mG), ty = mY + mr * (mS + mG);
+      var locked = t + 1 > pw;
+      ctx.fillStyle = locked ? 'rgba(120,88,150,0.34)' : 'rgba(255,215,94,0.82)';
+      rr(ctx, tx, ty, mS, mS, 4); ctx.fill();
+      if (locked) {
+        ctx.strokeStyle = 'rgba(200,170,230,0.30)'; ctx.lineWidth = 1;
+        rr(ctx, tx + 0.5, ty + 0.5, mS - 1, mS - 1, 4); ctx.stroke();
+      }
+    }
+    ctx.fillStyle = 'rgba(232,220,200,0.5)'; ctx.font = fT(11);
+    ctx.fillText(pw + ' of ' + CAREER_MAX + ' levels open', cx, mY + 4 * (mS + mG) + 8,
+                 VIEW_MIN_W - 40);
+
+    // THE PRICE COMES FROM THE STOREFRONT OR IT DOES NOT COME AT ALL.
+    // A hardcoded figure is wrong on every non-USD storefront and is an App
+    // Review 3.1.2 rejection; saying so plainly beats inventing a number.
+    var have = Ent.owned();
+    var label = have ? 'ALREADY YOURS'
+              : Store.busy ? 'ONE MOMENT\u2026'
+              : Store.price ? 'UNLOCK  \u00b7  ' + Store.price
+              : 'PRICE UNAVAILABLE';
+    this._menuBtn(label, PAY_RECTS.buy.y, { w: PAY_RECTS.buy.w, h: PAY_RECTS.buy.h, tone: 'career',
+                                      icon: 'gem_prism',
+                                      disabled: have || Store.busy || !Store.price });
+    this._menuBtn('RESTORE PURCHASE', PAY_RECTS.restore.y,
+                  { w: PAY_RECTS.restore.w, h: PAY_RECTS.restore.h, quiet: true, disabled: Store.busy });
+    this._menuBtn('NOT NOW', PAY_RECTS.back.y, { w: PAY_RECTS.back.w, h: PAY_RECTS.back.h, quiet: true });
+
+    if (Store.note) {
+      ctx.fillStyle = 'rgba(232,220,200,0.8)'; ctx.font = fT(12);
+      ctx.fillText(Store.note, cx, PAY_RECTS.back.y + PAY_RECTS.back.h + 10, VIEW_MIN_W - 40);
+    } else if (!Store.available()) {
+      ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fT(11);
+      ctx.fillText('This build has no store — the full ladder ships with the app.',
+                   cx, PAY_RECTS.back.y + PAY_RECTS.back.h + 10, VIEW_MIN_W - 40);
+    }
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  };
+
   Game.prototype.careerFinale = function () {
     return !!(this.career && this.careerResult && this.careerResult.won &&
               this.career.level >= CAREER_MAX);
@@ -6836,7 +7331,12 @@
                       490, { disabled: !canAfford });
       }
       var RB = resultsRects(this);
-      this._menuBtn(last ? 'DAILY DIG' : cr.won ? 'NEXT LEVEL' : 'RETRY', RB.again);
+      // The label has to tell the truth about where the button goes: on a free
+      // save that just cleared its last free level, it opens the paywall.
+      var atWall = !!(cr.won && this.career && this.career.level + 1 > careerCap());
+      this._menuBtn(last ? 'DAILY DIG'
+                  : atWall ? 'UNLOCK TO CONTINUE'
+                  : cr.won ? 'NEXT LEVEL' : 'RETRY', RB.again);
       this._menuBtn('MENU', RB.menu);
       ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
       return;
@@ -7083,6 +7583,17 @@
   var game = new Game(canvas);
   // AFTER the native restore settles — the queued payload lives in Meta, and
   // a payload from a day that has already turned can never be accepted.
+  // IAP boot: load the storefront price, and silently re-yield any transaction
+  // that was verified but never finished — the app can be killed between the
+  // grant and the finish, and the retry is what makes the handshake
+  // exactly-once rather than best-effort. Both are no-ops without the plugin.
+  Meta.ready(function () { Store.load(); Store.recover(); });
+  // ...and again on resume: a purchase completed while the app was backgrounded
+  // (Ask to Buy, a slow Apple ID prompt) arrives with no launch to catch it.
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) Store.recover();
+  });
+
   Meta.ready(function () {
     var p = Meta.data.pendingScore;
     if (!p) return;
@@ -7153,6 +7664,9 @@
           if (w.y >= ay && w.y < ay + PAST_ROW_H &&
               w.x > VIEW_MIN_W / 2 - 150 && w.x < VIEW_MIN_W / 2 + 150) {
             uiTick();
+            // The archive is part of the unlock (store/iap-catalog.json).
+            // Today's daily is always free — only the PAST jars are behind it.
+            if (!Ent.owned()) { uiTick(); game.openPaywall(); return; }
             game.start(0, 'daily', 0, ar[ai].day);
             return;
           }
@@ -7258,14 +7772,35 @@
     if (game.state === 'levels') {
       if (inRect(w, SHOP_GEAR)) { uiTick(); game.openSettings(); return; }
       if (hitBtn(w, LEVELS_BACK_Y)) { uiTick(); game.state = 'menu'; return; }
-      var reachedLv = Math.min(CAREER_MAX, Meta.data.careerLevel || 1);
+      var payWall = careerCap();
+      var reachedLv = Math.min(payWall, Meta.data.careerLevel || 1);
       for (var li = 0; li < CAREER_MAX; li++) {
         if (!inRect(w, levelRect(li))) continue;
-        if (li + 1 > reachedLv) { Snd.thunk(); return; }     // not reached yet
+        // A LOCKED LEVEL IS THE STOREFRONT. Tapping one past the wall is the
+        // only unprompted route to the paywall in the whole game — the player
+        // asked what is over there, so answer.
+        if (li + 1 > payWall) { uiTick(); game.openPaywall(); return; }
+        if (li + 1 > reachedLv) { Snd.thunk(); return; }     // reachable, not reached yet
         uiTick();
         game.start(0, 'career', li + 1);
         return;
       }
+      return;
+    }
+    if (game.state === 'paywall') {
+      if (inRect(w, SHOP_GEAR)) { uiTick(); game.openSettings(); return; }
+      var PR = game.paywallRects();
+      if (hitBtn(w, PR.buy.y) && !Ent.owned() && !Store.busy && Store.price) {
+        uiTick();
+        Store.buy(function (got) { if (got) { Snd.fanfare(300); Hap.heavy(); } });
+        return;
+      }
+      if (hitBtn(w, PR.restore.y) && !Store.busy) {
+        uiTick();
+        Store.restore(function (got) { if (got) { Snd.fanfare(150); Hap.medium(); } });
+        return;
+      }
+      if (hitBtn(w, PR.back.y)) { uiTick(); game.state = 'levels'; return; }
       return;
     }
     if (game.state === 'menu') {
@@ -7344,10 +7879,20 @@
         if (game.careerFinale()) {
           game.start(dailySeed(), 'daily');
         } else if (game.career) {
-          // RETRY MEANS THIS LEVEL. Same defect as the deeper pick above, for
-          // free: `game.career ? 0 : ...` supplied a SEED and no level, so
-          // retrying a replayed level jumped to the frontier.
-          game.start(0, 'career', game.career.level);
+          // ONE BUTTON, TWO VERBS — and it only ever did one of them.
+          //
+          // The label is NEXT LEVEL on a win and RETRY on a loss, and this
+          // branch passed `game.career.level` for both, so NEXT LEVEL replayed
+          // the level just cleared. I introduced that fixing RETRY: RETRY MEANS
+          // THIS LEVEL was right, and I applied it to a handler both labels
+          // share without checking what the other one needed.
+          var wonIt = !!(game.careerResult && game.careerResult.won);
+          var nextLv = game.career.level + (wonIt ? 1 : 0);
+          // ...and the wall is exactly here. A free save that just cleared its
+          // last free level would otherwise be handed level 10 again, forever,
+          // with a button that says NEXT LEVEL. Ask instead.
+          if (wonIt && nextLv > careerCap()) { game.openPaywall(); return; }
+          game.start(0, 'career', nextLv);
         } else if (game.archiveDay) {
           // AN ARCHIVE RUN'S AGAIN MUST RE-DEAL *THAT* DAY'S JAR. start() takes
           // archiveDay as its fourth argument and this call never passed it, so
