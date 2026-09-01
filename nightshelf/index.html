@@ -468,6 +468,41 @@
       font-style: italic; font-size: 1.02rem; color: var(--muted-fg); line-height: 1.6;
     }
 
+    /* The listen card: one real render from the app's own narration service.
+       Tap to play — audio never starts itself. */
+    .listen-card {
+      max-width: 560px; margin: 46px auto 0; padding: 20px 22px;
+      background: var(--card); border: 1px solid var(--gold-border);
+      border-radius: var(--radius); box-shadow: var(--shadow-md);
+    }
+    .listen-row { display: flex; align-items: center; gap: 16px; }
+    .listen-play {
+      flex: 0 0 auto; width: 54px; height: 54px; border-radius: 50%;
+      border: 1px solid var(--gold-border); background: rgba(232,177,92,0.13);
+      color: var(--accent-bright); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .2s;
+    }
+    .listen-play:hover { background: rgba(232,177,92,0.22); transform: scale(1.04); }
+    .listen-play svg { width: 24px; height: 24px; }
+    .listen-play .i-pause { display: none; }
+    .listen-play.playing .i-play { display: none; }
+    .listen-play.playing .i-pause { display: block; }
+    .listen-meta { flex: 1; min-width: 0; }
+    .listen-title { font-family: var(--font-serif); font-weight: 600; font-size: 1.08rem; }
+    .listen-sub { color: var(--muted-fg); font-size: 0.88rem; margin-top: 2px; }
+    .listen-bar {
+      margin-top: 10px; height: 4px; border-radius: 2px;
+      background: rgba(243,239,230,0.12); overflow: hidden;
+    }
+    .listen-bar i {
+      display: block; width: 0%; height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+      border-radius: 2px;
+    }
+    .listen-time { flex: 0 0 auto; color: var(--tertiary-fg); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+    .listen-card .wd-cap { margin-top: 16px; font-size: 0.92rem; }
+
     /* ====================== FREE / PRO SHELF ========================
        The shelf itself, as spines: 82 books = 13 free (gold) + 69 with
        Pro (dim). Counts mirror the stat strip and the "A Shelf for the
@@ -776,6 +811,32 @@
         <div class="shelf-axis" aria-hidden="true"><span class="a">13 free</span><span class="b">69 more with Nightshelf Pro</span></div>
         <figcaption class="wd-cap">Eighty-two complete classics on one shelf — thirteen are free, and Nightshelf Pro opens the other sixty-nine.</figcaption>
       </figure>
+
+      <!-- LISTEN-CARD PROVENANCE: audio/nova-alice.mp3 was rendered 2026-09-01
+           by the app's OWN narration service (storyvault-api /v1/voice/tts,
+           gpt-4o-mini-tts) with the exact request the shipped app sends —
+           voice nova, the verbatim bedtimeInstructions string from
+           NightshelfVoices.swift:111-121, X-App: nightshelf — over the first
+           paragraph of alice_wonderland.txt, a free-tier book. Nothing was
+           edited or post-processed. The caption keeps the tier truth: Nova is
+           one of the six Pro narrators; free books are read by the on-device
+           voice. Never autoplay; preload=none. -->
+      <figure class="listen-card reveal" id="listen">
+        <div class="listen-row">
+          <button type="button" class="listen-play" id="listen-play" aria-label="Play the narration sample">
+            <svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.6z"/></svg>
+          </button>
+          <div class="listen-meta">
+            <div class="listen-title">Hear a narrator</div>
+            <div class="listen-sub">Nova · the opening lines of <em>Alice's Adventures in Wonderland</em></div>
+            <div class="listen-bar" aria-hidden="true"><i id="listen-fill"></i></div>
+          </div>
+          <div class="listen-time" id="listen-time">0:20</div>
+        </div>
+        <audio id="listen-audio" preload="none" src="audio/nova-alice.mp3?v=20260901a"></audio>
+        <figcaption class="wd-cap">Nova — one of the six warm AI narrators in Nightshelf Pro — rendered by the app's own narration service with its bedtime instructions. The on-device voice reads all thirteen free books aloud free and offline.</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -924,6 +985,32 @@
         entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
       }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
       document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    })();
+  </script>
+  <script>
+    /* The listen card. Play/pause on tap only — audio never starts itself. */
+    (function () {
+      var audio = document.getElementById('listen-audio');
+      var btn = document.getElementById('listen-play');
+      var fill = document.getElementById('listen-fill');
+      var time = document.getElementById('listen-time');
+      if (!audio || !btn) return;
+      function fmt(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+      btn.addEventListener('click', function () {
+        if (audio.paused) { audio.play().catch(function () {}); } else { audio.pause(); }
+      });
+      audio.addEventListener('play', function () { btn.classList.add('playing'); btn.setAttribute('aria-label', 'Pause the narration sample'); });
+      audio.addEventListener('pause', function () { btn.classList.remove('playing'); btn.setAttribute('aria-label', 'Play the narration sample'); });
+      audio.addEventListener('timeupdate', function () {
+        if (audio.duration) {
+          fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+          time.textContent = fmt(audio.duration - audio.currentTime);
+        }
+      });
+      audio.addEventListener('ended', function () {
+        fill.style.width = '0%'; time.textContent = fmt(audio.duration || 20);
+        btn.classList.remove('playing');
+      });
     })();
   </script>
 </body>

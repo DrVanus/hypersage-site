@@ -494,6 +494,48 @@
       transition: transform .2s, box-shadow .2s;
     }
     .companion-card:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(33,53,59,0.08); }
+    /* Voice samples: real audition clips from the app bundle, tap to play. */
+    .comp-hear {
+      margin-top: 12px; display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 14px; min-height: 36px; border-radius: 999px;
+      border: 1px solid rgba(62,125,138,0.35); background: rgba(62,125,138,0.08);
+      color: var(--primary); font-weight: 600; font-size: 0.86rem; cursor: pointer;
+      transition: background .2s;
+    }
+    .comp-hear:hover { background: rgba(62,125,138,0.16); }
+    .comp-hear svg { width: 14px; height: 14px; }
+    .comp-hear.playing { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .comp-hear-note {
+      text-align: center; color: var(--tertiary-fg); font-size: 0.9rem;
+      max-width: 620px; margin: 26px auto 0; line-height: 1.6;
+    }
+    /* The guided player card, under the guided-audio points. */
+    .guided-player {
+      margin-top: 26px; padding: 18px 20px; max-width: 480px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(33,53,59,0.07);
+    }
+    .gp-row { display: flex; align-items: center; gap: 14px; }
+    .gp-play {
+      flex: 0 0 auto; width: 50px; height: 50px; border-radius: 50%;
+      border: 1px solid rgba(62,125,138,0.35); background: rgba(62,125,138,0.10);
+      color: var(--primary); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .2s;
+    }
+    .gp-play:hover { background: rgba(62,125,138,0.18); transform: scale(1.04); }
+    .gp-play svg { width: 22px; height: 22px; }
+    .gp-play .i-pause { display: none; }
+    .gp-play.playing .i-play { display: none; }
+    .gp-play.playing .i-pause { display: block; }
+    .gp-meta { flex: 1; min-width: 0; }
+    .gp-title { font-weight: 700; font-size: 1rem; }
+    .gp-sub { color: var(--muted-fg); font-size: 0.85rem; margin-top: 2px; }
+    .gp-disclosure { color: var(--tertiary-fg); }
+    .gp-bar { margin-top: 9px; height: 4px; border-radius: 2px; background: var(--card-soft); overflow: hidden; }
+    .gp-bar i { display: block; width: 0%; height: 100%; background: var(--primary); border-radius: 2px; }
+    .gp-time { flex: 0 0 auto; color: var(--tertiary-fg); font-size: 0.83rem; font-variant-numeric: tabular-nums; }
+    .gp-cap { margin-top: 12px; color: var(--tertiary-fg); font-size: 0.86rem; line-height: 1.55; }
     /* Companion sits on a soft accent disc — same treatment as the in-app avatar. */
     /* The same squircle tile the app draws (CompanionAvatar.cornerFraction =
        0.30). It was `border-radius: 50%`, and a circle is the wrong container
@@ -869,38 +911,52 @@
           <div class="name">Willow</div>
           <div class="role">Grounding</div>
           <p>Warm and quiet. Starts with your body — feet on the floor, one slow breath — before anything else.</p>
+          <button type="button" class="comp-hear" data-audio="audio/sample-willow.m4a?v=20260901a" aria-label="Hear Willow’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Willow</span></button>
         </div>
         <div class="companion-card sage">
           <img src="companions/sage-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="Sage, an owl">
           <div class="name">Sage</div>
           <div class="role">Clear</div>
           <p>Calm and plainspoken. Explains what's actually happening, so the thing stops being a mystery.</p>
+          <button type="button" class="comp-hear" data-audio="audio/sample-sage.m4a?v=20260901a" aria-label="Hear Sage’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Sage</span></button>
         </div>
         <div class="companion-card river">
           <img src="companions/river-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="River, an otter">
           <div class="name">River</div>
           <div class="role">Flowing</div>
           <p>Curious and easy to talk to. Asks before assuming — more of a conversation than a lesson.</p>
+          <button type="button" class="comp-hear" data-audio="audio/sample-river.m4a?v=20260901a" aria-label="Hear River’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear River</span></button>
         </div>
         <div class="companion-card sol">
           <img src="companions/sol-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="Sol, a fox">
           <div class="name">Sol</div>
           <div class="role">Hopeful</div>
           <p>Warm and low-light, never peppy. Finds the one true thing you already did, without talking you out of the hard part.</p>
+          <button type="button" class="comp-hear" data-audio="audio/sample-sol.m4a?v=20260901a" aria-label="Hear Sol’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Sol</span></button>
         </div>
         <div class="companion-card stone">
           <img src="companions/stone-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="Stone, a tortoise">
           <div class="name">Stone</div>
           <div class="role">Steady</div>
           <p>Unhurried and immovable. Sits with it instead of reaching for a fix, and says the least of any of them.</p>
+          <button type="button" class="comp-hear" data-audio="audio/sample-stone.m4a?v=20260901a" aria-label="Hear Stone’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Stone</span></button>
         </div>
         <div class="companion-card fern">
           <img src="companions/fern-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="Fern, a rabbit">
           <div class="name">Fern</div>
           <div class="role">Tender</div>
           <p>Soft and permission-giving. Takes the obligation off you first, before anything else gets discussed.</p>
+          <button type="button" class="comp-hear" data-audio="audio/sample-fern.m4a?v=20260901a" aria-label="Hear Fern’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Fern</span></button>
         </div>
       </div>
+      <!-- The six sample-*.m4a files are copied VERBATIM from the app bundle
+           (Resources/CompanionSamples, sha256s in its manifest.json) — the
+           same audition clips the in-app picker plays, each companion
+           introducing themselves in their own distinct voice. The note below
+           carries the tier truth from Companion.swift:397: in chat that full
+           voice is part of Plus; otherwise companions speak with the device
+           voice. Guided audio stays free in these voices either way. -->
+      <p class="comp-hear-note">Real samples from the app — each companion introduces themselves in their own voice. AI companions, not human. In chat, the full voice is part of Plus — guided audio is in these voices for everyone, free.</p>
 
       <!-- These two frames used to sit in the 3-column `.screens-grid` at
            max-width 620px with no heading: two cards in a three-column track,
@@ -1083,6 +1139,32 @@
             <li><strong>Free — not a trial, not a teaser.</strong> Guided audio isn't part of Plus. A paying subscriber and someone who has never spent a penny hear exactly the same recordings.</li>
             <li><strong>Works with no signal.</strong> The audio lives inside the app, so a hard moment on the tube or in a hospital corridor plays the same as one at home.</li>
           </ul>
+          <!-- GUIDED-PLAYER PROVENANCE: audio/guided-bodyscan-willow.m4a is the
+               body scan's first two cues COPIED from the app bundle
+               (Resources/GuidedAudio/guided-body_scan-00/01-shimmer.m4a,
+               sha256s in the bundle manifest), joined with the corpus's own
+               3.0s pauseAfter (GuidedAudioCorpus.swift:202-210) — the same
+               recording and the same silence a user hears. Attribution law
+               (GuidedNarratorIdentity.swift): the face credits the voice, it
+               does not author the words — "Willow reads", never "Willow's
+               advice" — and the "AI companion · not human" line ships with the
+               name as ONE unit, exactly as in the app. Never autoplay. -->
+          <figure class="guided-player">
+            <div class="gp-row">
+              <button type="button" class="gp-play" id="guided-play" aria-label="Play the body scan opening, read by Willow, an AI companion, not human">
+                <svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+                <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.6z"/></svg>
+              </button>
+              <div class="gp-meta">
+                <div class="gp-title">The body scan, opening</div>
+                <div class="gp-sub">Guided by Willow · <span class="gp-disclosure">AI companion · not human</span></div>
+                <div class="gp-bar" aria-hidden="true"><i id="guided-fill"></i></div>
+              </div>
+              <div class="gp-time" id="guided-time">0:17</div>
+            </div>
+            <audio id="guided-audio" preload="none" src="audio/guided-bodyscan-willow.m4a?v=20260901a"></audio>
+            <figcaption class="gp-cap">The first two cues and the pause between them, exactly as the app plays them — including the line that puts you in charge of where your attention goes.</figcaption>
+          </figure>
         </div>
         <div class="spotlight-phone">
           <div class="screen-frame"><img class="shot-img" src="screenshots/18-guided-voice.jpg?v=20260815a" data-light="screenshots/18-guided-voice.jpg?v=20260815a" data-dark="screenshots/18-guided-voice-dark.jpg?v=20260815a" width="1200" height="2607" alt="Quietoak guided audio — paced breathing narrated by Willow, marked as an AI companion, with play controls and a route to the crisis kit" loading="lazy"></div>
@@ -1669,6 +1751,51 @@
       });
     }
     render('willow');
+  })();
+  </script>
+  <script>
+  /* Voice players: the six audition clips and the guided body-scan opening.
+     Tap to play only — audio never starts itself, and starting one clip
+     stops whichever other was playing. */
+  (function () {
+    var current = null, currentBtn = null;
+    function stop() {
+      if (current) { current.pause(); current.currentTime = 0; }
+      if (currentBtn) currentBtn.classList.remove('playing');
+      current = null; currentBtn = null;
+    }
+    document.querySelectorAll('.comp-hear').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (currentBtn === btn) { stop(); return; }
+        stop();
+        var ga = document.getElementById('guided-audio');
+        if (ga && !ga.paused) ga.pause();
+        var a = new Audio(btn.getAttribute('data-audio'));
+        current = a; currentBtn = btn;
+        btn.classList.add('playing');
+        a.addEventListener('ended', function () { if (currentBtn === btn) stop(); });
+        a.play().catch(function () { stop(); });
+      });
+    });
+    var g = document.getElementById('guided-audio');
+    var gb = document.getElementById('guided-play');
+    var gf = document.getElementById('guided-fill');
+    var gt = document.getElementById('guided-time');
+    if (g && gb) {
+      function fmt(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+      gb.addEventListener('click', function () {
+        if (g.paused) { stop(); g.play().catch(function () {}); } else { g.pause(); }
+      });
+      g.addEventListener('play', function () { gb.classList.add('playing'); });
+      g.addEventListener('pause', function () { gb.classList.remove('playing'); });
+      g.addEventListener('timeupdate', function () {
+        if (g.duration) {
+          gf.style.width = (g.currentTime / g.duration * 100) + '%';
+          gt.textContent = fmt(g.duration - g.currentTime);
+        }
+      });
+      g.addEventListener('ended', function () { gf.style.width = '0%'; gt.textContent = fmt(g.duration || 17); gb.classList.remove('playing'); });
+    }
   })();
   </script>
 </body>
