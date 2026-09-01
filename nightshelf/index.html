@@ -510,9 +510,12 @@
       border-radius: var(--radius); box-shadow: var(--shadow-md);
     }
     .ambient-head { margin-bottom: 14px; }
-    .ambient-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    /* Grid, not flex: "Thunderstorm" is wide enough that flex wrapping broke the
+       six tiles into a 3/1/2 stagger. Auto-fit keeps the rows even (3+3 on the
+       card, 2+2+2 on a phone) no matter how long a preset's name is. */
+    .ambient-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
     .amb-btn {
-      flex: 1 1 0; min-width: 120px; min-height: 44px;
+      min-width: 0; min-height: 44px;
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       padding: 10px 14px; border-radius: 999px;
       border: 1px solid var(--gold-border); background: rgba(232,177,92,0.10);
@@ -525,7 +528,7 @@
     .amb-btn.playing { background: var(--accent); color: var(--ink); border-color: var(--accent); }
     .ambient-card .listen-bar { margin-top: 14px; }
     .ambient-card .wd-cap { margin-top: 14px; font-size: 0.9rem; }
-    @media (max-width: 520px) { .amb-btn { flex-basis: 100%; } }
+
 
     /* ====================== FREE / PRO SHELF ========================
        The shelf itself, as spines: 82 books = 13 free (gold) + 69 with
@@ -862,7 +865,7 @@
         <figcaption class="wd-cap">Nova — one of the six warm AI narrators in Nightshelf Pro — rendered by the app's own narration service with its bedtime instructions. The on-device voice reads all thirteen free books aloud free and offline.</figcaption>
       </figure>
 
-      <!-- AMBIENT-SAMPLE PROVENANCE. These three clips are the OUTPUT OF THE
+      <!-- AMBIENT-SAMPLE PROVENANCE. These six clips are the OUTPUT OF THE
            APP'S OWN AmbientEngine, not a recording and not a re-implementation:
            there is no ambient audio file anywhere in Nightshelf (AmbientEngine
            .swift:5-9 — "implemented entirely in code via AVAudioEngine +
@@ -878,7 +881,7 @@
            the bit.
            WHAT WAS DONE TO THEM, in full: a 20-second excerpt trimmed at zero
            crossings (so nothing clicks), and ONE GAIN CONSTANT per clip to bring
-           all three to the same −16 dBFS RMS. No EQ, no compression, no fades, no
+           them to the same −16 dBFS RMS. No EQ, no compression, no fades, no
            noise reduction. The gain is only what the app's own volume slider does:
            at the engine's native levels rain sits ~13 dB under ocean, which reads
            as a broken button rather than a quieter preset. Rendered at 44.1 kHz;
@@ -923,10 +926,18 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15.5a4 4 0 0 1 .6-7.96 5 5 0 0 1 9.5 1.05A3.5 3.5 0 0 1 17 15.5z"/><path d="M12.5 17l-2.2 3.2h3L11 23.5"/></svg>
             <span>Thunderstorm</span>
           </button>
+          <button type="button" class="amb-btn" data-audio="audio/ambient-wind.m4a?v=20260901b" aria-label="Play the Wind soundscape">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h10a2.6 2.6 0 1 0-2.6-2.6"/><path d="M3 12.5h14a2.6 2.6 0 1 1-2.6 2.6"/><path d="M3 16.5h7a2.2 2.2 0 1 1-2.2 2.2"/></svg>
+            <span>Wind</span>
+          </button>
+          <button type="button" class="amb-btn" data-audio="audio/ambient-stream.m4a?v=20260901b" aria-label="Play the Stream soundscape">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5c0 3.5 3 4.5 3 8s-3 4.5-3 8"/><path d="M13 3.5c0 3.5 3 4.5 3 8s-3 4.5-3 8"/></svg>
+            <span>Stream</span>
+          </button>
         </div>
         <div class="listen-bar" aria-hidden="true"><i id="ambient-fill"></i></div>
         <audio id="ambient-audio" preload="none"></audio>
-        <figcaption class="wd-cap">Ten soundscapes are generated in the app itself — no audio files ship with it, so no two nights sound the same. The storm is longer because it had to be: strikes come 30 to 90 seconds apart, and this one rolls in six seconds in. In the app they all sit quietly under the narrator, and the sleep timer fades voice and room out together.</figcaption>
+        <figcaption class="wd-cap">Nine soundscapes are generated in the app itself — no audio files ship with it, so no two nights sound the same. Six of them are here. The storm is the long one because it had to be: strikes come 30 to 90 seconds apart, and this one rolls in six seconds in. In the app they all sit quietly under the narrator, and the sleep timer fades voice and room out together.</figcaption>
       </figure>
     </div>
   </section>
