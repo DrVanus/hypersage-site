@@ -17,14 +17,14 @@
   <meta property="og:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and writes every action into a Ledger you can undo.">
   <meta property="og:url" content="https://hypersage.ai/loam/">
   <meta property="og:site_name" content="Loam">
-  <meta property="og:image" content="https://hypersage.ai/loam/og-image.png?v=20260901a">
+  <meta property="og:image" content="https://hypersage.ai/loam/og-image.png?v=20260901b">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Loam — notes, tended">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Loam — notes, tended.">
   <meta name="twitter:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and writes every action into a Ledger you can undo.">
-  <meta name="twitter:image" content="https://hypersage.ai/loam/og-image.png?v=20260901a">
+  <meta name="twitter:image" content="https://hypersage.ai/loam/og-image.png?v=20260901b">
   <meta name="twitter:image:alt" content="Loam — notes, tended">
 
   <link rel="icon" type="image/png" href="loam-icon.png?v=20260831a">
@@ -237,10 +237,10 @@
         linear-gradient(to right, transparent 19px, rgba(162,91,47,.28) 19px 20px, transparent 20px),
         repeating-linear-gradient(to bottom, transparent 0, transparent 25px, var(--rule) 25px, var(--rule) 26px),
         var(--surface);
-      background-position: 0 0, 0 12px, 0 0;
+      background-position: 0 0, 0 14px, 0 0;
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 22px 22px 20px 34px;
+      padding: 14px 20px 14px 34px;
       box-shadow: 0 1px 2px rgba(41,35,23,.05), 0 7px 18px rgba(41,35,23,.08);
       position: relative;
       transform: rotate(var(--tilt, 0deg));
@@ -257,13 +257,18 @@
     }
     .hero-flow li:nth-child(2)::before { transform: translateX(-50%) rotate(1.6deg); }
     .hero-flow li:nth-child(3)::before { transform: translateX(-50%) rotate(-1deg); }
+    /* Card interiors sit ON the 26px ruling (Vanus: "the text could fit
+       better"): the head row and every body line are 26px boxes, and the
+       rules start exactly at the content top — no dead gap under the tape. */
+    .flow-head { display: flex; align-items: center; gap: 10px; height: 26px; }
     .flow-glyph {
-      width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-      background: var(--tint-soft); color: var(--tint-ink); margin-bottom: 10px;
+      width: 26px; height: 26px; border-radius: 8px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--tint-soft); color: var(--tint-ink);
     }
-    .flow-glyph svg { width: 20px; height: 20px; }
-    .flow-name { display: block; font-size: 1.02rem; margin-bottom: 4px; }
-    .hero-flow p { font-size: 0.92rem; color: var(--muted-fg); line-height: 1.55; }
+    .flow-glyph svg { width: 15px; height: 15px; }
+    .flow-name { font-size: 1.02rem; line-height: 26px; }
+    .hero-flow p { font-size: 0.95rem; color: var(--muted-fg); line-height: 26px; }
     @media (max-width: 720px) { .hero-flow { grid-template-columns: 1fr; } }
 
     /* ===== SECTIONS ===== */
@@ -461,6 +466,14 @@
     }
     .screen-fig::before { left: -12px; transform: rotate(-42deg); }
     .screen-fig::after  { right: -12px; transform: rotate(42deg); }
+    /* The live take, taped in at the top of the screens spread. */
+    .tend-stage { display: flex; justify-content: center; margin-top: clamp(32px, 4vw, 48px); }
+    .tend-stage .screen-fig { max-width: 300px; width: 100%; --tilt: -0.5deg; }
+    .tend-stage video {
+      width: 100%; height: auto; display: block;
+      border-radius: 14px; border: 1px solid var(--rule);
+      background: var(--surface);
+    }
     @media (max-width: 900px) { .screens-row { grid-template-columns: 1fr 1fr; } }
 
     /* ===== BOUNDARY ===== */
@@ -726,18 +739,15 @@
            semantics when the marker is removed. -->
       <ol class="hero-flow" role="list" aria-label="How a jot becomes a tended note you can always undo">
         <li>
-          <div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19.5 7.5a2.1 2.1 0 0 0-3-3L5 16z"/><path d="M14 6l3 3"/></svg></div>
-          <strong class="flow-name">You write</strong>
+          <div class="flow-head"><div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19.5 7.5a2.1 2.1 0 0 0-3-3L5 16z"/><path d="M14 6l3 3"/></svg></div><strong class="flow-name">You write</strong></div>
           <p>Type it, say it, or sketch it — capture is instant and never metered.</p>
         </li>
         <li>
-          <div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13C12 9.5 9.5 7 6 7c0 3.5 2.5 6 6 6z"/><path d="M12 13c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6z"/></svg></div>
-          <strong class="flow-name">Loam proposes</strong>
+          <div class="flow-head"><div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13C12 9.5 9.5 7 6 7c0 3.5 2.5 6 6 6z"/><path d="M12 13c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6z"/></svg></div><strong class="flow-name">Loam proposes</strong></div>
           <p>Tidies, filings, links, and flags arrive as previews — you approve, or dial a power to act on its own.</p>
         </li>
         <li>
-          <div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V7H7"/><path d="M12 8v4l3 2"/></svg></div>
-          <strong class="flow-name">The Ledger keeps it</strong>
+          <div class="flow-head"><div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V7H7"/><path d="M12 8v4l3 2"/></svg></div><strong class="flow-name">The Ledger keeps it</strong></div>
           <p>Every action is written down, attributed, and one tap from undone.</p>
         </li>
       </ol>
@@ -871,6 +881,18 @@
       <div class="section-eyebrow">The app</div>
       <h2>Warm paper. Quiet ink.</h2>
       <p class="lede" style="margin: 0 auto;">A fieldbook, not a filing cabinet — serif headings, cream paper, and a companion who writes in sienna pencil.</p>
+      <!-- A REAL capture: one unedited simulator take of the shipped build —
+           a rambly jot written with its slips, Done, and the Tidy landing
+           with its banner and Tended-here receipt. The caption's "nothing
+           rephrased" is the banner's own on-screen wording. Poster = the
+           take's final frame; playback starts only under the js-reveal gate,
+           so reduced-motion and no-JS readers get the honest still. -->
+      <div class="tend-stage">
+        <figure class="screen-fig">
+          <video id="tend-video" src="shots/tend.mp4?v=20260901a" poster="shots/tend-poster.jpg?v=20260901a" muted loop playsinline preload="metadata" width="497" height="1080" aria-label="Screen recording: a rambly note is typed with its slips, then Loam tidies it in place — the Tidied by Loam banner reports two clean lines and three fixes, nothing rephrased"></video>
+          <figcaption>One real take — written rambly, tended in place, nothing rephrased</figcaption>
+        </figure>
+      </div>
       <div class="screens-row">
         <figure class="screen-fig">
           <img src="shots/L-home.png?v=20260831a" alt="The Notes pile: pinned notes lead, sections label the day, a digest reports what Loam tended" loading="lazy" width="780" height="1688">
@@ -1031,6 +1053,21 @@
     window.addEventListener('resize', revealVisible);
     /* 120ms lets first paint show the pre-state so above-the-fold ink draws on. */
     window.setTimeout(revealVisible, 120);
+
+    /* The real-take video plays only here — under the same motion gate — and
+       pauses offscreen. Reduced-motion and no-JS readers keep the poster. */
+    var tendVideo = document.getElementById('tend-video');
+    if (tendVideo) {
+      try {
+        var tvio = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) { tendVideo.play().catch(function () {}); }
+            else { tendVideo.pause(); }
+          });
+        }, { threshold: 0.35 });
+        tvio.observe(tendVideo);
+      } catch (e) { /* poster stands */ }
+    }
     /* Last resort: nothing revealed shortly after load — drop the effect. */
     window.setTimeout(function () {
       if (!document.querySelector('.is-in')) { io.disconnect(); root.classList.remove('js-reveal'); }
