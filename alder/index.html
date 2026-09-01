@@ -864,7 +864,11 @@
              Payload/App.app/public/). The store frames hit this same defect and
              were re-shot on 2026-08-20; the SITE set has not been re-shot yet.
              DO NOT restore a SOS tile until shots/sos*.webp are re-captured
-             against a build whose contact rows carry no relationship label. -->
+             against a build whose contact rows carry no relationship label.
+             (2026-09-01: the false sos.webp / sos-dark.webp / you-dark.webp
+             files were DELETED from the tree — they were unreferenced by live
+             markup but still publicly served. A re-capture starts from the
+             app, not from any surviving file.) -->
         <div class="screen-card">
           <div class="screen-frame"><img data-shot="toolbox" src="shots/toolbox-dark.webp?v=20260804a" alt="Alder's toolbox of short practical things to do during an urge, each labelled with how long it takes" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Toolbox</strong>Something to do with your hands</div>
@@ -1082,7 +1086,7 @@
         </details>
         <details class="faq">
           <summary>What does it cost?</summary>
-          <!-- Prices must match terms.html:78 and support.html:122 (US$9.99/mo,
+          <!-- Prices must match terms.html:86 and support.html:141 (US$9.99/mo,
                US$59.99/yr) and the products in alder-app/ios/App/App/AlderPlus.swift:31-32
                (com.hypersage.alder.plus.monthly / .annual). This answer previously said
                "nothing is for sale yet" while our own Terms quoted the price — do not
@@ -1164,9 +1168,11 @@
   </footer>
 
   <!-- The appearance switch. The only script on the page: it swaps the src of
-       the six screen tiles between `<stem>-dark.webp` and `<stem>.webp`. The
-       light set is never in the markup, so a visitor who stays on dark never
-       downloads it. -->
+       the five screen tiles (six until the SOS tile was pulled — see the NO SOS
+       TILE note in #screens-grid) between `<stem>-dark.webp` and `<stem>.webp`.
+       The light set is never in the markup, so a visitor who stays on dark never
+       downloads it — which also means a grep for shots/*.webp UNDERCOUNTS the
+       served set: the light files are runtime-built references. -->
   <script>
     (function () {
       var grid = document.getElementById('screens-grid');

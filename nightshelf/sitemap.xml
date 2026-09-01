@@ -2,21 +2,21 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://hypersage.ai/nightshelf/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-09-01</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://hypersage.ai/nightshelf/privacy.html</loc>
-    <lastmod>2026-08-08</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://hypersage.ai/nightshelf/terms.html</loc>
-    <lastmod>2026-08-06</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://hypersage.ai/nightshelf/support.html</loc>
-    <lastmod>2026-08-06</lastmod>
+    <lastmod>2026-08-25</lastmod>
   </url>
 </urlset>

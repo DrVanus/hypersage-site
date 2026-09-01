@@ -17,14 +17,14 @@
   <meta property="og:description" content="A gothic illustrated horde-survivor for iOS. Pick a hero, draft upgrades, evolve weapons, and survive the horde.">
   <meta property="og:url" content="https://hypersage.ai/hexhunter/">
   <meta property="og:site_name" content="Hexhunter">
-  <meta property="og:image" content="https://hypersage.ai/hexhunter/og-image.png?v=20260811a">
+  <meta property="og:image" content="https://hypersage.ai/hexhunter/og-image.png?v=20260901a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Hexhunter — a gothic illustrated horde-survivor">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Hexhunter — Survive the Horde. Draft Your Doom.">
   <meta name="twitter:description" content="A gothic illustrated horde-survivor for iOS. Draft upgrades, evolve weapons, survive the horde.">
-  <meta name="twitter:image" content="https://hypersage.ai/hexhunter/og-image.png?v=20260811a">
+  <meta name="twitter:image" content="https://hypersage.ai/hexhunter/og-image.png?v=20260901a">
   <meta name="twitter:image:alt" content="Hexhunter — a gothic illustrated horde-survivor">
 
   <link rel="icon" type="image/png" href="app-icon-512.png?v=20260711a">
@@ -868,7 +868,7 @@
         </div>
       </div>
       <p class="draft-note">Every level the hunt deals <b>three cards</b> — a new weapon, an upgrade, or an item. Reroll, banish, and craft your perfect run.</p>
-      <p class="draft-tally">9 hunters · 18 weapons · 3 biomes</p>
+      <p class="draft-tally">8 hunters · 18 weapons · 3 biomes</p>
     </div>
   </section>
 
@@ -881,9 +881,9 @@
       <div class="features-grid">
         <div class="feature-card">
           <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.2 4.5 6 7.4 6 10.5a6 6 0 0 1-12 0C6 10.4 8.8 7.5 12 3z"/></svg></div>
-          <h3>9 Unique Heroes</h3>
+          <h3>8 Unique Heroes</h3>
           <p>Each with a distinct passive and a starting weapon — from the balanced Huntress to the heavy Gravewarden and a Revenant who grows stronger with every kill.</p>
-          <span class="stat">9 hunters</span>
+          <span class="stat">8 hunters</span>
         </div>
         <div class="feature-card">
           <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 3v8.5h-4V6z"/><line x1="8" y1="14.5" x2="16" y2="14.5"/><line x1="12" y1="14.5" x2="12" y2="20"/><circle cx="12" cy="21" r="1.1"/></svg></div>
@@ -938,7 +938,7 @@
       <div class="showcase reverse">
         <div class="showcase-copy">
           <div class="section-eyebrow">The Hunters</div>
-          <h2>Nine ways to <em>face the dark.</em></h2>
+          <h2>Eight ways to <em>face the dark.</em></h2>
           <!-- Hexhunter ships two one-time IAPs (Hexhunter/Products.storekit —
                com.vanus.hexhunter.unlockall and com.vanus.hexhunter.starterpack). The page
                must not read as if essence is the only route. Prices are deliberately absent
@@ -1062,29 +1062,24 @@
           <div class="stat-line">Kill-streak DMG · −25% pickup</div>
           <div class="weapon">Starts with <b>Soul Whip</b></div>
         </div>
-        <!-- SILAS IS THE NINTH, AND HE IS AHEAD OF THE BINARY. Added 2026-08-25.
-             Sources/Game/HexMeta.swift on main carries nine HexHero entries; the
-             build-7 tag (5392e3e), which is the binary attached to the 1.0
-             submission now in review, carries EIGHT — commit a30d756 "Silas the
-             Pilgrim, the ninth hunter" landed after it. The live App Store
-             description already says nine and names him, so site and listing now
-             agree; the BINARY is the odd one out.
-             This is only safe because Hexhunter is unreleased — nobody can
-             install a build to be contradicted by. BEFORE 1.0 GOES LIVE, one of
-             two things must be true: a build containing Silas replaces build 7,
-             or this card and all nine-counts revert to eight along with the
-             listing. Do not let it release with the site at nine and the binary
-             at eight. Stats read off HexMeta.swift: identity "No armour, no
-             retreat", statLine "+30% DMG · -20% HP · -8% SPD", startWeapon
-             .boomerang. Portrait is Sources/Bundled/HexArt/hero_pilgrim.png. -->
-        <div class="hero-card locked">
-          <img class="portrait" src="assets/heroes/pilgrim.png?v=20260825a" width="256" height="256" loading="lazy" alt="Silas, the Pilgrim">
-          <div class="name">Silas</div>
-          <div class="epithet">the Pilgrim</div>
-          <p>No armour, no retreat. Hits hardest of any hunter and can afford the least punishment.</p>
-          <div class="stat-line">+30% DMG · −20% HP · −8% SPD</div>
-          <div class="weapon">Starts with <b>Boomerang</b></div>
-        </div>
+        <!-- SILAS, THE NINTH, WAS PULLED FROM THIS PAGE 2026-09-01. The 08-25
+             card here was premised on "this is only safe because Hexhunter is
+             unreleased" — and then 1.0 RELEASED 2026-08-26 with the build-7 tag
+             (5392e3e), whose HexMeta.swift holds exactly EIGHT HexHero entries;
+             no build-8 tag exists. A live page selling nine hunters to customers
+             whose installed app has eight is a false claim, so the card and every
+             nine-count reverted to eight, as the roster comment above always
+             ordered. (The App Store listing still says nine and names Silas —
+             that listing can only be corrected with the next version submission,
+             which should simply BE the Silas build.) RESTORE the card and move
+             every count to nine — and "other six"/"six locked" to seven — only
+             when a binary containing Silas ships. Card recipe, read off
+             HexMeta.swift main: name Silas, epithet the Pilgrim, identity "No
+             armour, no retreat", copy "Hits hardest of any hunter and can afford
+             the least punishment.", statLine "+30% DMG · −20% HP · −8% SPD",
+             starts with Boomerang, portrait Sources/Bundled/HexArt/
+             hero_pilgrim.png (re-copy to assets/heroes/pilgrim.png — the site
+             copy was removed with the card so the tree serves no ghost). -->
       </div>
     </div>
   </section>
@@ -1322,11 +1317,13 @@
        the #gallery comment); never describe it as hand-drawn. Music synthesized by
        scripts/generate_music.py.
        Hero counts SETTLED 2026-08-24 against the shipped binary: the build-7 tag
-       (5392e3e) — the build customers install — holds nine heroes, six of them
+       (5392e3e) — the build customers install — holds EIGHT heroes, six of them
        locked; no Silas at the tag. So the FAQ's "six locked hunters" (here AND in
        the FAQPage JSON-LD in <head>) and the Hunters section's "eight" are correct
        today. Nine heroes exist only on main; see the roster comment in #heroes for
-       the proof and the conditions for moving these counts. -->
+       the proof and the conditions for moving these counts. (A half-executed
+       migration once flipped the word above to "nine" while the tag still held
+       eight — reverted 2026-09-01.) -->
   <section class="section-block panel" id="faq">
     <div class="container">
       <div class="section-eyebrow" style="text-align:center;">Common questions</div>
@@ -1408,7 +1405,10 @@
         <a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a>
       </div>
     </div>
-    <!-- No App Store age rating exists yet — Hexhunter is unreleased. Do not print a
+    <!-- No age-rating number is printed here. Hexhunter released 2026-08-26, so
+         Apple has now assigned a rating — but this page has never verified it
+         against the live listing, and the old citations below were already
+         rotten before release. Do not print a
          number here until Apple has actually assigned one. Re-checked 2026-08-24: the
          citation this note used to carry, Hexhunter/store/listing.md:80 "expects 12+",
          does not resolve — that line is now the Game Center achievements bullet, and the

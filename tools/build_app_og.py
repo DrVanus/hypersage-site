@@ -484,7 +484,9 @@ CARDS = {
   .art { width: 340px; height: 340px; border-radius: 76px;
          box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(157,139,255,0.22); }
 """,
-        "kicker": "Pok\u00e9mon card scanner + AI companion \u00b7 Coming to iOS",
+        # Mirrors the page's own hero eyebrow verbatim \u2014 it moved to multi-TCG
+        # "In development" positioning on 2026-09-01 and the card lagged it.
+        "kicker": "TCG scanner + AI companion \u00b7 In development",
         "h1": "Hound knows your binder \u2014<br>and the market.",
         "sub": "Ask what you\u2019re missing, what\u2019s worth flipping, or what a card is really worth \u2014 sources named every time. Scanning stays free and unlimited.",
     },
@@ -512,7 +514,9 @@ CARDS = {
          -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 100%);
          mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 100%); }
 """,
-        "kicker": "Gothic horde-survivor · Coming to iOS",
+        # "Coming to iOS" outlived the 2026-08-26 release by six days of link
+        # previews; the page's own hero eyebrow is the source of this string.
+        "kicker": "Gothic horde-survivor · Out now on iOS",
         "h1": 'Survive the Horde.<br>Draft Your <span class="grad">Doom.</span>',
         "sub": "Pick a hero, draft upgrades every level, evolve your weapons into ascended forms, and fight to survive the endless dark.",
     },
