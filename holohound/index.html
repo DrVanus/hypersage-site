@@ -90,9 +90,9 @@
       <div class="device-stage">
         <div class="device">
           <div class="hero-carousel">
-            <img data-allow-duplicate="true" src="screenshots/home.png?v=20260831a" width="780" height="1688" fetchpriority="high" alt="Holohound home screen — binder value with today's movers, Scan and Ask Hound quick actions">
-            <img data-allow-duplicate="true" src="screenshots/report.png?v=20260831a" width="780" height="1688" loading="lazy" alt="A card report — the TCGplayer market price with the cheapest listing and the middle of the book beside it, and Cardmarket's European prices read separately">
-            <img data-allow-duplicate="true" src="screenshots/set.png?v=20260831a" width="780" height="1688" loading="lazy" alt="Master-set completion — a completion ring, the cards still needed, and what finishing the set would cost">
+            <img data-allow-duplicate="true" src="screenshots/home.png?v=20260901a" width="780" height="1688" fetchpriority="high" alt="Holohound home screen — binder value with today's movers, Scan and Ask Hound quick actions">
+            <img data-allow-duplicate="true" src="screenshots/report.png?v=20260901a" width="780" height="1688" loading="lazy" alt="A card report — the TCGplayer market price with the cheapest listing and the middle of the book beside it, and Cardmarket's European prices read separately">
+            <img data-allow-duplicate="true" src="screenshots/set.png?v=20260901a" width="780" height="1688" loading="lazy" alt="Master-set completion — a completion ring, the cards still needed, and what finishing the set would cost">
           </div>
         </div>
       </div>
@@ -205,32 +205,35 @@
     <p class="lede">The prototype below is what's actually on the phone today — not mockups.</p>
     <div class="screens-rail">
       <div class="screen-card">
-        <div class="device"><img data-allow-duplicate="true" src="screenshots/home.png?v=20260831a" width="780" height="1688" loading="lazy" alt="Home — binder value over time, with today's movers underneath"></div>
+        <div class="device"><img data-allow-duplicate="true" src="screenshots/home.png?v=20260901a" width="780" height="1688" loading="lazy" alt="Home — binder value over time, with today's movers underneath"></div>
         <p>Binder value at a glance, with today's movers.</p>
       </div>
       <div class="screen-card">
-        <div class="device"><img src="screenshots/scan.png?v=20260831a" width="780" height="1688" loading="lazy" alt="Scan — a full-screen viewfinder that identifies a card on-device"></div>
+        <div class="device"><img src="screenshots/scan.png?v=20260901a" width="780" height="1688" loading="lazy" alt="Scan — a full-screen viewfinder that identifies a card on-device"></div>
         <p>Point the camera. Recognition runs on your phone.</p>
       </div>
       <div class="screen-card">
-        <div class="device"><img data-allow-duplicate="true" src="screenshots/report.png?v=20260831a" width="780" height="1688" loading="lazy" alt="Report — market price, cheapest listing, the middle of the book, and Cardmarket's observed European prices"></div>
+        <div class="device"><img data-allow-duplicate="true" src="screenshots/report.png?v=20260901a" width="780" height="1688" loading="lazy" alt="Report — market price, cheapest listing, the middle of the book, and Cardmarket's observed European prices"></div>
         <p>Every price sourced. Every market named.</p>
       </div>
       <div class="screen-card">
-        <div class="device"><img data-allow-duplicate="true" src="screenshots/set.png?v=20260831a" width="780" height="1688" loading="lazy" alt="Set — a master-set completion ring with the exact cards still needed"></div>
+        <div class="device"><img data-allow-duplicate="true" src="screenshots/set.png?v=20260901a" width="780" height="1688" loading="lazy" alt="Set — a master-set completion ring with the exact cards still needed"></div>
         <p>What's missing, and what it costs to finish.</p>
       </div>
-      <!-- NO HOUND FRAME HERE, AND IT MAY NOT COME BACK UNTIL IT IS RE-SHOT.
-           screenshots/hound.png was byte-identical to holohound/shots-dark/hound.png,
-           which captured the seeded transcript answer "Sell into strength — these three
-           sit furthest above their own 30-day average…" sitting directly under the app's
-           own "Hound is AI — it can be wrong, and it isn't financial advice" banner.
-           That is buy/sell/hold advice, which holohound-api/src/prompts/hound.js rule 4
-           forbids outright. The fixture that produced it (holohound/mock-data.js, the
-           "/chat" seeded transcript) was fixed on 2026-08-24; a replacement frame has to
-           be captured from the FIXED fixture and read before it is published here.
-           The same applies to the hero carousel above, which is now three frames — see
-           the nth-child delays in style.css, which move with the frame count. -->
+      <!-- THE HOUND FRAME IS BACK (2026-09-01), on the exact terms its removal
+           set: re-shot from the FIXED fixture (the seeded sell-advice transcript
+           died 2026-08-24) and READ before publishing — the frame shows the
+           clean opening screen: the AI disclosure banner, two capability
+           questions, and the 3-a-day meter. Nothing in it advises anything.
+           If this frame is ever regenerated, read it again first; the ban
+           returns with the first frame that breaks rule 4.
+           (Unchanged and still true: the HERO carousel above is three frames,
+           and style.css's nth-child delays move with that count — touch one,
+           touch both.) -->
+      <div class="screen-card">
+        <div class="device"><img src="screenshots/hound.png?v=20260901a" width="780" height="1688" loading="lazy" alt="Hound — the AI companion's opening screen, with its AI disclosure, two starter questions, and the free daily meter"></div>
+        <p>An AI that knows your binder — and says what it can't know.</p>
+      </div>
     </div>
   </div>
 </section>
