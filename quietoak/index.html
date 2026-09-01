@@ -647,33 +647,6 @@
     footer.site .links a:hover { color: var(--primary); }
     footer.site .copyright { margin-top: 10px; }
 
-    /* ===== FOOTER: MORE FROM HYPERSAGE ===== */
-    /* Sibling-app strip. Pills wrap freely so a 390px phone never scrolls
-       sideways; every colour comes from the footer's own tokens. */
-    .qo-more {
-      max-width: 820px; margin: 26px auto 22px; padding-top: 24px;
-      border-top: 1px solid var(--border);
-    }
-    .qo-more-title {
-      font-weight: 800; font-size: 0.95rem; color: var(--fg);
-      letter-spacing: -0.01em; margin-bottom: 14px;
-    }
-    .qo-more-list {
-      list-style: none; display: flex; flex-wrap: wrap;
-      justify-content: center; gap: 8px 10px;
-    }
-    .qo-more-list li { max-width: 100%; min-width: 0; }
-    .qo-more-list a {
-      display: block; padding: 6px 12px;
-      color: var(--muted-fg); font-weight: 600; font-size: 0.84rem; line-height: 1.45;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); transition: color .2s, background .2s, border-color .2s;
-    }
-    .qo-more-list a:hover {
-      color: var(--primary-dark); background: var(--card-soft);
-      border-color: var(--border-strong);
-    }
-
     /* ===== ACCESSIBILITY ===== */
     /* Visible keyboard focus on every interactive element (WCAG 2.4.7) — the
        gradient button + list-style-none summaries hide the default UA ring. */
@@ -1594,35 +1567,6 @@
       <a href="safety.html">Safety</a>
       <a href="mailto:support@hypersage.ai">Contact</a>
     </div>
-    <nav class="qo-more" aria-labelledby="qo-more-title">
-      <h3 class="qo-more-title" id="qo-more-title">More from HyperSage AI Labs</h3>
-      <!-- CURATED FOR THIS AUDIENCE, not a full catalogue dump. A reader of this
-           page may be managing self-harm urges or suicidality; the footer is the
-           last thing they see. Care-adjacent siblings lead, gentler entertainment
-           follows, and two were pulled:
-             * Mythwright (Strategy Card Game) — Vanus, 2026-08-10.
-             * Hexhunter (Gothic Horde-Survivor) — same reasoning, arguably
-               stronger: a violent action game advertised directly under a crisis
-               band about 988 is the most jarring item the page could end on.
-           Both still ship and both sites are live (all 10 links verified 200 on
-           2026-08-10); they simply do not belong in THIS footer. They remain on
-           the hypersage.ai portfolio and in every other app's footer. -->
-      <ul class="qo-more-list">
-        <li><a href="https://hypersage.ai/alder/">Alder — Recovery Companion</a></li>
-        <li><a href="https://hypersage.ai/rowan/">Rowan — Chronic-Condition Companion</a></li>
-        <li><a href="https://hypersage.ai/nightshelf/">Nightshelf — Sleep Stories</a></li>
-        <li><a href="https://hypersage.ai/saffra/">Saffra — AI Personal Chef</a></li>
-        <li><a href="https://hypersage.ai/storyvault/">StoryVault AI — Interactive Fiction</a></li>
-        <li><a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a></li>
-        <li><a href="https://hypersage.ai/waddleton/">Waddleton — Social World / Arcade</a></li>
-        <li><a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a></li>
-        <!-- Hexhunter and Mythwright were the two the other ten footers list and
-             this one did not — an 8-of-10 grid reads as a complete set, so the
-             omission is invisible until you count it. -->
-        <li><a href="https://hypersage.ai/hexhunter/">Hexhunter — Gothic Horde-Survivor</a></li>
-        <li><a href="https://hypersage.ai/mythwright/">Mythwright — Strategy Card Game</a></li>
-      </ul>
-    </nav>
     <div class="copyright">
       <a class="studio-mark" href="https://hypersage.ai/" target="_blank" rel="noopener"
          aria-label="Quietoak is made by HyperSage AI Labs — visit hypersage.ai">

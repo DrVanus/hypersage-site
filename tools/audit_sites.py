@@ -85,15 +85,32 @@ def discover_sites(repo):
     return ["."] + subsites
 
 
+CONTRACTS_DIR = os.path.join(
+    os.path.expanduser(os.environ.get("FLEET_ROOT", "~/Developer/DrVanus")),
+    "fleet", "site-contracts")
+
+
+def contract_path_for(site):
+    """Contracts live OUTSIDE the deployed tree (fleet/site-contracts/) because
+    GitHub Pages serves every file in this repo — the in-folder contracts were
+    publicly reachable (internal paths, retracted-claim history) until
+    2026-08-31, when all 17 moved out. The root site's contract is _root.json."""
+    slug = "_root" if site == "." else site
+    return os.path.join(CONTRACTS_DIR, slug + ".json")
+
+
 def audit_site(module, repo, site, subsites):
     root = repo if site == "." else os.path.join(repo, site)
     # Only the root audit needs exclusions; a subsite has no nested sites.
     exclude = subsites if site == "." else []
-    audit = module.SiteAudit(root, None, exclude)
+    contract = contract_path_for(site)
+    if not os.path.isfile(contract):
+        contract = None
+    audit = module.SiteAudit(root, contract, exclude)
     findings = audit.run()
     return {
         "site": site,
-        "contract": os.path.isfile(os.path.join(root, "site-audit-contract.json")),
+        "contract": contract is not None,
         "failures": [item for item in findings if item["level"] == "FAIL"],
         "warnings": [item for item in findings if item["level"] == "WARN"],
     }
