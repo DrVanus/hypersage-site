@@ -788,9 +788,10 @@
        test config. Do not add card counts to this section: the client bundles 256 but
        the live server resolves 244 (the 12 Vault ids are missing server-side), and
        "Vault cards come from Mystery Packs" is FALSE against the deployed pool.
-       Forge models are OpenAI (config.py:74,90 — the README's "Sonnet" is stale);
+       Forge models are OpenAI end to end (config.py:78,94 — gpt-4o for stats/ability
+       JSON, gpt-image-2 for art; no Anthropic call anywhere);
        the match engine is deterministic, no LLM (engine.py:14-16). Bot fallback after
-       15s in Ranked (config.py:139); don't claim the UI labels bots — only the wire
+       15s in Ranked (config.py:143); don't claim the UI labels bots — only the wire
        flag is verified. iPhone AND iPad (project.yml:97). -->
   <section id="faq">
     <div class="container">
