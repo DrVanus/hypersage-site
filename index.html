@@ -862,15 +862,12 @@
       .products-grid > aside { grid-column: auto; }
       .products-grid > article:last-of-type:nth-of-type(even) ~ aside { grid-column: 1 / -1; }
 
-      /* THE SAME-SIZE LAW (Vanus, 2026-09-01): every product card stays the
-         same size, always — no card ever stretches except the games grid's
-         portfolio aside (the one card Vanus wants wide, and only when its
-         grid's app count is even, via the rule above). The APPS grid instead
-         carries its own aside that fills an odd count's hole at NORMAL card
-         size and hides itself entirely when the count is even. Both grids
-         therefore self-heal in every direction: adding or removing an app
-         must never require touching these rules or the asides. */
-      .products-grid > article:last-of-type:nth-of-type(even) ~ aside.on-odd-only { display: none; }
+      /* THE GRID LAW (Vanus, 2026-09-01): ONE continuous grid, apps then
+         games, every product card the same size always. The portfolio CTA
+         aside closes the grid and is the only element allowed to stretch —
+         full row while the product count is even (the rule above), a normal
+         cell when an odd count leaves it a hole to fill. Adding an app:
+         add the article anywhere in the flow and touch nothing else. */
     }
     /* The two invitation cards (portfolio contact, layer teaser): product-card
        chrome, centered, a gentle brand halo at rest. Their copy is verbatim
@@ -1451,7 +1448,6 @@
         <p>Each product is designed around a clear audience and job, with its own identity and way of working.</p>
       </div>
 
-      <div class="grid-label"><span>Apps</span></div>
       <div class="products-grid">
 
         <!-- HOLOHOUND -->
@@ -1686,22 +1682,6 @@
           </div>
         </article>
 
-        <!-- Fills the hole ONLY when the app count above is odd, at normal
-             card size (the same-size law); hides itself when the count is
-             even. Adding an app: just add the article — never touch this.
-             Every string here is verbatim from the #ai section/footer. -->
-        <aside class="product aside-card on-odd-only" aria-label="Our intelligence layer" style="--accent: var(--brand-a);">
-          <div class="inner">
-            <div class="cat">Our intelligence layer</div>
-            <h3>Anyone can call the same models.</h3>
-            <p class="desc">The layer around them is ours.</p>
-            <a class="btn btn-ghost" href="#ai">Intelligence layer</a>
-          </div>
-        </aside>
-      </div>
-
-      <div class="grid-label"><span>Original games</span></div>
-      <div class="products-grid">
 
         <!-- HEXHUNTER -->
         <article class="product" id="product-hexhunter" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
