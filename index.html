@@ -861,6 +861,30 @@
     @media (min-width: 701px) {
       .products-grid > aside { grid-column: auto; }
       .products-grid > article:last-of-type:nth-of-type(even) ~ aside { grid-column: 1 / -1; }
+
+      /* An odd APP count strands the last card beside a raw void (mythkin
+         today, whoever lands 13th tomorrow). The stranded card widens into a
+         deliberate spotlight — full row, copy left, feature list right — and
+         flips back to a normal cell by itself the moment an even count
+         returns. Same zero-maintenance contract as the aside rule above;
+         grids that end in an aside (the games grid) are excluded because the
+         aside already fills their hole. Engines without :has() simply keep
+         the plain orphan — layout intact, just unspotlit. */
+      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) {
+        grid-column: 1 / -1;
+        display: grid; grid-template-columns: 1.1fr 0.9fr;
+        column-gap: 44px; grid-template-rows: auto auto 1fr;
+        align-items: start;
+      }
+      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) > .top { grid-column: 1; }
+      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) > .desc { grid-column: 1; }
+      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) > ul {
+        grid-column: 2; grid-row: 1 / span 2; align-self: center;
+        border-left: 1px solid var(--line); padding-left: 40px; margin: 0;
+      }
+      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) > .foot {
+        grid-column: 1 / -1; align-self: end;
+      }
     }
     .product {
       --accent: var(--brand-a);
