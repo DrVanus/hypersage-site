@@ -862,30 +862,30 @@
       .products-grid > aside { grid-column: auto; }
       .products-grid > article:last-of-type:nth-of-type(even) ~ aside { grid-column: 1 / -1; }
 
-      /* An odd APP count strands the last card beside a raw void (mythkin
-         today, whoever lands 13th tomorrow). The stranded card widens into a
-         deliberate spotlight — full row, copy left, feature list right — and
-         flips back to a normal cell by itself the moment an even count
-         returns. Same zero-maintenance contract as the aside rule above;
-         grids that end in an aside (the games grid) are excluded because the
-         aside already fills their hole. Engines without :has() simply keep
-         the plain orphan — layout intact, just unspotlit. */
-      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) {
-        grid-column: 1 / -1;
-        display: grid; grid-template-columns: 1.1fr 0.9fr;
-        column-gap: 44px; grid-template-rows: auto auto 1fr;
-        align-items: start;
-      }
-      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) > .top { grid-column: 1; }
-      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) > .desc { grid-column: 1; }
-      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) > ul {
-        grid-column: 2; grid-row: 1 / span 2; align-self: center;
-        border-left: 1px solid var(--line); padding-left: 40px; margin: 0;
-      }
-      .products-grid:not(:has(> aside)) > article:last-of-type:nth-of-type(odd):not(:first-of-type) > .foot {
-        grid-column: 1 / -1; align-self: end;
-      }
+      /* THE SAME-SIZE LAW (Vanus, 2026-09-01): every product card stays the
+         same size, always — no card ever stretches except the games grid's
+         portfolio aside (the one card Vanus wants wide, and only when its
+         grid's app count is even, via the rule above). The APPS grid instead
+         carries its own aside that fills an odd count's hole at NORMAL card
+         size and hides itself entirely when the count is even. Both grids
+         therefore self-heal in every direction: adding or removing an app
+         must never require touching these rules or the asides. */
+      .products-grid > article:last-of-type:nth-of-type(even) ~ aside.on-odd-only { display: none; }
     }
+    /* The two invitation cards (portfolio contact, layer teaser): product-card
+       chrome, centered, a gentle brand halo at rest. Their copy is verbatim
+       reuse of audited on-page strings — restyle freely, reword never. */
+    .aside-card { justify-content: center; align-items: center; text-align: center; }
+    .aside-card .inner {
+      display: flex; flex-direction: column; align-items: center; gap: 13px;
+      padding: 12px 0; max-width: 46ch; margin: 0 auto;
+    }
+    .aside-card .cat { margin-top: 0; }
+    .aside-card h3 { font-size: 1.42rem; font-weight: 700; line-height: 1.25; padding-bottom: 0.08em; }
+    .aside-card .desc { margin-bottom: 4px; }
+    .aside-card::after { opacity: 0.35; }
+    .aside-card:hover::after { opacity: 0.7; }
+
     .product {
       --accent: var(--brand-a);
       /* Text tone for links. Cards whose accent is too dark to read on --panel override
@@ -1685,6 +1685,19 @@
             <a class="link" aria-label="Visit the Mythkin site" href="mythkin/">Visit Mythkin <span aria-hidden="true">→</span></a>
           </div>
         </article>
+
+        <!-- Fills the hole ONLY when the app count above is odd, at normal
+             card size (the same-size law); hides itself when the count is
+             even. Adding an app: just add the article — never touch this.
+             Every string here is verbatim from the #ai section/footer. -->
+        <aside class="product aside-card on-odd-only" aria-label="Our intelligence layer" style="--accent: var(--brand-a);">
+          <div class="inner">
+            <div class="cat">Our intelligence layer</div>
+            <h3>Anyone can call the same models.</h3>
+            <p class="desc">The layer around them is ours.</p>
+            <a class="btn btn-ghost" href="#ai">Intelligence layer</a>
+          </div>
+        </aside>
       </div>
 
       <div class="grid-label"><span>Original games</span></div>
@@ -1820,11 +1833,15 @@
         <!-- No inline grid-column: it would beat the stylesheet, and which
              column this card spans depends on whether the product count is odd
              or even. That decision lives in the .products-grid rules above. -->
-        <aside class="product" aria-label="Portfolio contact" style="--accent: var(--brand-b); justify-content: center; text-align: center;">
-          <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding: 10px 0;">
-            <h3 style="font-size:1.3rem;">Interested in the portfolio?</h3>
-            <p class="desc" style="margin-bottom: 6px;">We welcome conversations with investors, product partners, press, and early users.</p>
-            <a class="btn btn-ghost" href="#contact">Contact the studio</a>
+        <!-- The one card allowed to go wide (Vanus's call): it spans the full
+             row when this grid's game count is even, and sits at normal card
+             size when odd. Copy is audited — do not reword. -->
+        <aside class="product aside-card" aria-label="Portfolio contact" style="--accent: var(--brand-b);">
+          <div class="inner">
+            <div class="cat">The studio</div>
+            <h3>Interested in the portfolio?</h3>
+            <p class="desc">We welcome conversations with investors, product partners, press, and early users.</p>
+            <a class="btn btn-primary" href="#contact">Contact the studio</a>
           </div>
         </aside>
 
