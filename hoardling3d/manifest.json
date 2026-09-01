@@ -1,7 +1,7 @@
 {
   "name": "Hoardling",
   "short_name": "Hoardling",
-  "description": "Defend the sleeping dragon's hoard. Hold the chokepoints, recover every stolen coin.",
+  "description": "Defend the sleeping dragon's hoard. Hold the chokepoints; kill the carrier and the coins fly home.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
