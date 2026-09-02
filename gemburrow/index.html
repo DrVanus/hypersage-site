@@ -430,7 +430,15 @@
 
     @media (max-width: 980px) {
       .hero .container { grid-template-columns: 1fr; gap: 40px; }
-      .jarwrap { grid-template-columns: 1fr; gap: 26px; }
+      /* minmax(0, 1fr), not 1fr: layout() sets the canvas's width ATTRIBUTE
+         from its measured box, which then gives the element an intrinsic
+         min-content width. A plain `1fr` track has an `auto` minimum, so it
+         could never shrink back below whatever width the canvas last had —
+         a one-way ratchet that pushed the jar 27px past a 320px viewport.
+         The zero minimum lets the track shrink; #jar is width:100% and
+         re-measures itself, and its hit-testing already reads
+         getBoundingClientRect(), so clicks stay aligned at any size. */
+      .jarwrap { grid-template-columns: minmax(0, 1fr); gap: 26px; }
       .dragon-row { grid-template-columns: 1fr; gap: 30px; }
       .grid-3, .modes, .screens { grid-template-columns: repeat(2, 1fr); }
     }
@@ -442,6 +450,18 @@
       .about-card { grid-template-columns: 1fr; text-align: center; justify-items: center; }
       #jar { height: 380px; }
       .hud-row { grid-template-columns: 1fr; }
+      /* Below ~400px the demo HUD could not fit: the satchel is a nowrap row of
+         seven 34px slots (262px of min-content) which pinned .hud-stack, which
+         pinned the .hud-row track, which pushed the page 27px sideways. Let the
+         slots wrap onto a second line and give the tracks a zero minimum so they
+         can actually shrink. Seven slots either way — only their arrangement
+         changes, and nothing here alters what the demo claims. */
+      @media (max-width: 400px) {
+        .hud-row { grid-template-columns: minmax(0, 1fr); }
+        .hud-card, .hud-stack { min-width: 0; }
+        .bag { flex-wrap: wrap; }
+        .jar-actions { flex-wrap: wrap; }
+      }
       .bag li { width: 34px; height: 34px; }
       .bag li img { width: 25px; height: 25px; }
     }

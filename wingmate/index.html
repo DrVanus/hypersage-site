@@ -128,6 +128,12 @@
       box-shadow: 0 8px 28px rgba(232,168,56,0.28), inset 0 1px 0 rgba(255,255,255,0.20);
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(232,168,56,0.40), inset 0 1px 0 rgba(255,255,255,0.20); }
+    /* "Download on the App Store" is nowrap with 28px of side padding, so at
+       320px it ran 12px wider than its container and widened the page. Trim the
+       padding and the gap at that width only — the label still fits on one line. */
+    @media (max-width: 360px) {
+      .btn { padding-left: 16px; padding-right: 16px; gap: 8px; font-size: 0.92rem; }
+    }
     .btn-ghost {
       color: var(--fg); background: rgba(255,255,255,0.05);
       border: 1px solid var(--line-strong);

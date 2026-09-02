@@ -267,6 +267,14 @@
       nav.site .brand { font-size: 1rem; }
       nav.site .brand img { width: 32px; height: 32px; }
     }
+    /* 320px is tighter still: the brand, the Download pill and the menu
+       together were 13px over. Shrink the nav pill rather than dropping it —
+       it is the page's only above-the-fold store link. */
+    @media (max-width: 340px) {
+      nav.site .container { padding-left: 12px; padding-right: 12px; gap: 8px; }
+      .btn-nav { padding: 8px 12px; font-size: 0.82rem; }
+      nav.site .brand { font-size: 0.94rem; gap: 8px; }
+    }
 
     /* ===== BUTTONS ===== */
     .btn-warm {
