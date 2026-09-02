@@ -317,6 +317,17 @@
     .fleuron { text-align: center; color: var(--accent); opacity: .8; font-size: 1.05rem; letter-spacing: 1.1em; text-indent: 1.1em; line-height: 1; margin: 6px 0 0; user-select: none; }
 
     /* ====================== SCREENSHOT GALLERY ====================== */
+    /* The edge fades below are deliberately pulled 26px OUTSIDE this shell so
+       the cards appear to slide under the page's own margin. That bleed widened
+       the document by exactly 2px at every viewport under ~1144px: the container
+       is viewport-bound there with 24px of padding, so a 26px bleed lands 2px
+       past the edge. The max-width:700px rule further down already fixed it for
+       phones and states the law — "decorative glows may bleed visually, but they
+       must not widen the page" — it just never covered tablets and small laptops.
+       Clipping the section enforces that law at EVERY width with no breakpoint
+       to keep in sync: `clip` (not `hidden`) does not create a scroll container,
+       so the rail inside still scrolls and nothing sticky is trapped. */
+    #screens { overflow-x: clip; }
     .gallery-shell { position: relative; }
     .gallery-shell::before, .gallery-shell::after {
       content: ''; position: absolute; top: 0; bottom: 26px; width: 70px; z-index: 2; pointer-events: none;

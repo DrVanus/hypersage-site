@@ -394,6 +394,13 @@
     .shot-img { transition: opacity .25s ease; }
 
     /* When Light is chosen the showcase brightens, selling the theme */
+    /* Decorative glows may bleed visually, but they must not widen the page.
+       The .fr-art::after glow sits at left/right: -30px, which pushed the document 6px past the
+       viewport at every width where the container is viewport-bound. This
+       section spans the full viewport, so `clip` removes only the part that
+       was already off-screen — nothing visible changes. `clip` (not `hidden`)
+       creates no scroll container, so sticky and inner scrollers still work. */
+    #screens { overflow-x: clip; }
     #screens.theme-light { background: linear-gradient(180deg, #F8F4EC, #F3EDE2); border-color: rgba(20,20,25,0.08); }
     #screens.theme-light .section-head h2 { color: #201E28; }
     #screens.theme-light .section-head p { color: #5D5A66; }

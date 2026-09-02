@@ -173,6 +173,13 @@
     }
 
     /* ===== HERO ===== */
+    /* Decorative glows may bleed visually, but they must not widen the page.
+       The .hero-image::after glow sits at left/right: -30px, which pushed the document 6px past the
+       viewport at every width where the container is viewport-bound. This
+       section spans the full viewport, so `clip` removes only the part that
+       was already off-screen — nothing visible changes. `clip` (not `hidden`)
+       creates no scroll container, so sticky and inner scrollers still work. */
+    section.hero { overflow-x: clip; }
     section.hero { padding: 72px 0 64px; position: relative; }
     .hero-layout {
       display: grid; grid-template-columns: 1.05fr 0.95fr;

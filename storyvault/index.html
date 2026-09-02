@@ -258,6 +258,15 @@
       nav.site .links { display: none; }
       .mobile-menu { display: block; }
     }
+    /* On a 360px phone the brand wordmark (nowrap), the CTA and the menu
+       together ran ~10px wider than the viewport and widened the whole page —
+       the nav was the last thing on the estate still doing it. Tighten only the
+       nav's own padding and gap at that width; no other element uses these. */
+    @media (max-width: 400px) {
+      nav.site .container { padding-left: 16px; padding-right: 16px; gap: 12px; }
+      nav.site .brand { font-size: 1rem; }
+      nav.site .brand img { width: 32px; height: 32px; }
+    }
 
     /* ===== BUTTONS ===== */
     .btn-warm {
@@ -308,6 +317,13 @@
     }
 
     /* ===== HERO ===== */
+    /* Decorative glows may bleed visually, but they must not widen the page.
+       The .hero-image::after glow sits at left/right: -70px, which pushed the document 46px past the
+       viewport at every width where the container is viewport-bound. This
+       section spans the full viewport, so `clip` removes only the part that
+       was already off-screen — nothing visible changes. `clip` (not `hidden`)
+       creates no scroll container, so sticky and inner scrollers still work. */
+    section.hero { overflow-x: clip; }
     section.hero {
       padding: 88px 0 96px;
       position: relative;
