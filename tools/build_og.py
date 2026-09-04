@@ -44,6 +44,7 @@ NAMES = {
     "hexhunter": "Hexhunter", "mythwright": "Mythwright", "rowan": "Rowan",
     "alder": "Alder", "waddleton": "Waddleton", "mythkin": "Mythkin",
     "holohound": "Holohound", "hoardling": "Hoardling", "gemburrow": "Gemburrow",
+    "loam": "Loam",
 }
 
 
