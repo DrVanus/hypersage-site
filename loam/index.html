@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Loam's marketing site mirrors the app's Fieldbook light scheme: warm
-       paper and ink. Declare it so a dark-mode OS doesn't auto-invert it. -->
+  
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#F5EFE3">
   <title>Loam — the notes companion that asks before it acts</title>
@@ -689,7 +688,6 @@
 
   <a class="skip-link" href="#main">Skip to main content</a>
 
-  <!-- ===== NAV ===== -->
   <nav class="site" id="top">
     <div class="container">
       <a class="brand" href="#top" aria-label="Loam — back to top">
@@ -722,7 +720,6 @@
 
   <main id="main">
 
-  <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="container">
       <div class="hero-layout">
@@ -743,9 +740,7 @@
           <img src="art/loam_steady.png?v=20260831a" alt="Loam, a plush hedgehog companion holding a pencil" width="542" height="700" fetchpriority="high">
         </div>
       </div>
-      <!-- The lede, drawn. Every phrase restates copy that already appears on
-           this page — no new claims. role="list": Safari/VoiceOver drops list
-           semantics when the marker is removed. -->
+      
       <ol class="hero-flow" role="list" aria-label="How a jot becomes a tended note you can always undo">
         <li>
           <div class="flow-head"><div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19.5 7.5a2.1 2.1 0 0 0-3-3L5 16z"/><path d="M14 6l3 3"/></svg></div><strong class="flow-name">You write</strong></div>
@@ -765,7 +760,6 @@
 
   <hr class="notebook-rule" aria-hidden="true">
 
-  <!-- ===== HOW ===== -->
   <section class="section-block" id="how">
     <div class="container">
       <div class="how-grid">
@@ -797,16 +791,12 @@
 
   <hr class="notebook-rule" aria-hidden="true">
 
-  <!-- ===== TIDY STRIP: the contract, demonstrated ===== -->
   <section class="section-block tight" id="contract">
     <div class="container">
       <div class="section-eyebrow" style="text-align:center;">The Tidy contract</div>
       <h2 style="text-align:center; margin-bottom:26px;">Slips fixed. Voice untouched. <em class="circled">Never rephrased.<svg class="circle-ink" viewBox="0 0 300 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M243 16 C 168 -6 38 2 22 46 C 8 86 118 108 200 98 C 272 89 292 52 252 28" pathLength="1"/></svg></em></h2>
       <div class="translate">
-        <!-- The audited jot, character-identical when static: del halves shown,
-             ins halves hidden. Only the demo swaps a .mend to its mended form —
-             exactly the two mends the note below already claims. The typed
-             layer is aria-hidden and empty until the script arms it. -->
+        
         <div class="said">
           <span class="said-typed" aria-hidden="true"></span>
           <span class="said-jot">“call <span class="mend"><span class="d">w/</span><span class="i">with</span></span> tom — he can start demo on the 14th if we <span class="mend"><span class="d">confrim</span><span class="i">confirm</span></span> by fri, cabinets are 3wk lead time…”</span>
@@ -819,11 +809,7 @@
           <div class="note">A rambly jot becomes clean lines; “confrim” and “w/” are mended in place. Written paragraphs are never restructured — and your words are never rewritten. The original stays one tap away.</div>
         </div>
       </div>
-      <!-- Mini Ledger row — every visible phrase quotes copy already on this
-           page verbatim: "Tidy" (features), "Slips fixed. Voice untouched."
-           (the h2 above), "written down, attributed" (hero flow), "Undo"
-           (How-it-works h3), "The Ledger keeps it" (hero flow, as the aside's
-           accessible name). The Undo genuinely reverts the demo's mend. -->
+      
       <aside class="ledger-mini" aria-label="The Ledger keeps it" id="tidy-ledger">
         <div class="ledger-row-demo">
           <span class="scope">Tidy</span>
@@ -836,7 +822,6 @@
     </div>
   </section>
 
-  <!-- ===== FEATURES ===== -->
   <section class="section-block sheet" id="features">
     <div class="container">
       <div class="section-eyebrow" style="text-align:center;">Features</div>
@@ -884,22 +869,12 @@
     </div>
   </section>
 
-  <!-- ===== SCREENS ===== -->
   <section class="section-block" id="screens">
     <div class="container" style="text-align:center;">
       <div class="section-eyebrow">The app</div>
       <h2>Warm paper. Quiet ink.</h2>
       <p class="lede" style="margin: 0 auto;">A fieldbook, not a filing cabinet — serif headings, cream paper, and a companion who writes in sienna pencil.</p>
-      <!-- REAL frames, animated in CSS: six stills pulled from ONE continuous
-           simulator take of the shipped build (2026-09-01 re-shoot; the .mp4
-           itself was retired — an 80s 9fps capture froze for 12s at the top and
-           read as broken, and <video> playback dies quietly under Low Power
-           Mode and autoplay policy where a DOM crossfade cannot). Every frame
-           is an untouched screenshot; only the PACING between them is authored.
-           The caption's "2 clean lines · 4 fixes, nothing rephrased" is the
-           banner's own on-screen wording in frame 5. The tended frame is the
-           default: no-JS and reduced-motion readers get the honest payoff
-           still, and the crossfade runs only under the js-reveal gate. -->
+      
       <div class="tend-stage">
         <figure class="screen-fig">
           <div class="tend-player" id="tend-player" role="img" aria-label="Six real frames from one take: a blank page, a title jotted, a rambly note written with its slips left in, then Done — the Tidied by Loam banner reports 2 clean lines and 4 fixes, nothing rephrased — and the kept original one tap away">
@@ -934,7 +909,6 @@
     </div>
   </section>
 
-  <!-- ===== BOUNDARY ===== -->
   <section class="section-block sheet" id="boundary">
     <div class="container">
       <div class="section-eyebrow">What Loam isn't</div>
@@ -956,7 +930,6 @@
     </div>
   </section>
 
-  <!-- ===== FAQ ===== -->
   <section class="section-block" id="faq">
     <div class="container">
       <div class="section-eyebrow">FAQ</div>
@@ -992,8 +965,6 @@
 
   <hr class="notebook-rule" aria-hidden="true">
 
-  <!-- ===== CTA: the closing note. Copy is character-for-character the same;
-       only wrappers and two aria-hidden decorative SVGs are new. ===== -->
   <section class="cta-band">
     <div class="container">
       <div class="cta-note">
@@ -1016,7 +987,6 @@
 
   </main>
 
-  <!-- ===== FOOTER ===== -->
   <footer class="site">
     <div class="container">
       <div>© 2026 HyperSage AI Labs LLC · Loam</div>

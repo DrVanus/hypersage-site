@@ -14,9 +14,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FBF6EC" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#170F0C" media="(prefers-color-scheme: dark)">
-<!-- BLOCKING and in <head>: a deferred script runs after first paint, so a
-     reader who chose Light watches a dark page render and flip. Same key the
-     landing page writes, so one choice covers the whole site. -->
+
 <script>
 (function(){try{var t=localStorage.getItem('mythkin.theme');
 if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();

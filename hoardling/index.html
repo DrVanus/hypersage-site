@@ -2,35 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- viewport-fit=cover is REQUIRED for env(safe-area-inset-*) to resolve on
-       notched phones and under Android's forced edge-to-edge (targetSdk 35+). -->
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <!-- "RECOVER EVERY STOLEN COIN" WAS FALSE AND IS NOT COMING BACK. A laden
-       raider that reaches the exit escapes permanently into `stolenLost`
-       (game.js:4211-4215) and the run is GRADED on that number — two stars
-       tolerates 28 coins lost forever (game.js:5149). Only the CONDITIONAL
-       form is true: killing a carrier credits the full carried amount back to
-       the pile (game.js:5054-5058). Any copy on this surface must keep the
-       "if you kill it" clause. -->
+  
   <meta name="description" content="Hoardling — defend the sleeping dragon's hoard. Hold the chokepoints; kill the carrier and the coins fly home.">
   <title>Hoardling</title>
   <meta name="theme-color" content="#17100e">
-  <!-- LINK PREVIEWS WERE BLANK, and og-image.png (1200x630) had been sitting in
-       the deployed tree since 2026-08-18 referenced by nothing. A shared link to
-       this page rendered as a bare URL everywhere. -->
+  
   <link rel="canonical" href="https://hypersage.ai/hoardling/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="HyperSage">
   <meta property="og:title" content="Hoardling">
   <meta property="og:description" content="Too young for dragonfire. Built his own. Defend the sleeping dragon's hoard — hold the chokepoints, kill the carrier and the coins fly home.">
   <meta property="og:url" content="https://hypersage.ai/hoardling/">
-  <!-- RESOLVED 2026-09-01: the plate is rendered by tools/build_app_og.py
-       ("hoardling" card, hash-locked via og-image.inputs.sha256) from this
-       page's own splash palette and its meta-description copy — the refuted
-       "recover every stolen coin" subhead is gone; the subhead now carries the
-       conditional truth ("kill the carrier and the coins fly home",
-       game.js:5054-5058). Never hand-edit the PNG: rerun the tool, and bump
-       ?v= on BOTH og:image and twitter:image together. -->
+  
   <meta property="og:image" content="https://hypersage.ai/hoardling/og-image.png?v=20260901a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -38,18 +23,14 @@
   <meta name="twitter:title" content="Hoardling">
   <meta name="twitter:description" content="Too young for dragonfire. Built his own.">
   <meta name="twitter:image" content="https://hypersage.ai/hoardling/og-image.png?v=20260901a">
-  <!-- installable PWA: "Add to Home Screen" gives a fullscreen portrait app -->
+  
   <link rel="manifest" href="manifest.json?v=20260824a">
   <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=85d6295b91">
   <link rel="apple-touch-icon" href="art/icon-180.png?v=85d6295b91">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Hoardling">
-  <!-- The splash is INLINE, above the stylesheet link, because it has to paint
-       on the very first frame. The game used to show its chunky procedural
-       fallback shapes for the whole download — a flat blue-roofed box where the
-       painted keep goes — and players read that as broken/old art. Nothing is
-       drawn now until the art is decoded, so this is what fills the gap. -->
+  
   <style>
     html,body{margin:0;height:100%;background:#17100e;overflow:hidden}
     #boot{position:fixed;inset:0;z-index:9;display:flex;flex-direction:column;
@@ -94,14 +75,11 @@
 </head>
 <body>
   <div id="game-wrap">
-    <!-- canvas cannot read env(); this probe div carries the safe-area insets
-         as real pixel paddings the game reads at boot/resize -->
+    
     <div id="safe-probe" style="position:absolute;visibility:hidden;pointer-events:none;
          padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);"></div>
     <canvas id="game-canvas" aria-label="Hoardling game area"></canvas>
-    <!-- The whole game is drawn on <canvas>. Any HUD/menus/touch controls you add
-         go here as a DOM overlay (see bunny-bus-hop index.html for the pattern):
-         position them with top:max(10px, env(safe-area-inset-top)) etc. -->
+    
   </div>
   <div id="boot" role="status" aria-live="polite">
     <div id="boot-ember"></div>
@@ -113,7 +91,7 @@
       <a href="privacy.html">Privacy</a><span>·</span><a href="terms.html">Terms</a>
     </div>
   </div>
-  <!-- optional leaderboard config; a 404 here is fine (board stays off) -->
+  
   <script>window.__BUILD__="85d6295b91";window.__ART_EXT__="webp";</script>
   <script>(function(){var B=window.__BUILD__;function chk(){fetch("build.txt?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(t){t=(t||"").trim();if(!t||t===B)return;try{if(sessionStorage.getItem("hl.rl")===t)return;sessionStorage.setItem("hl.rl",t);}catch(e){}location.reload();}).catch(function(){});}chk();document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});})();</script>
   <script src="lb-config.js?v=85d6295b91"></script>

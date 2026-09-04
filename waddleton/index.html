@@ -29,8 +29,6 @@
   <link rel="icon" type="image/png" href="waddleton-icon.png?v=20260731a">
   <link rel="apple-touch-icon" href="waddleton-icon.png?v=20260731a">
 
-  <!-- Every value below restates a claim already on this page (free, browser,
-       multiplayer, 15 games); the org @id matches the studio homepage's node. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -63,8 +61,6 @@
   }
   </script>
 
-  <!-- FAQPage schema: questions and answers are verbatim plain-text copies of the
-       on-page FAQ section (#faq) below. Keep the two in sync. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -510,7 +506,6 @@
 
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- ===== NAV ===== -->
   <nav class="site" id="top">
     <div class="container">
       <a class="brand" href="#top" aria-label="Waddleton — back to top">
@@ -541,16 +536,12 @@
 
   <main id="main">
 
-  <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="snowfall" aria-hidden="true"></div>
     <div class="container">
       <span class="eyebrow">Free · Plays in your browser</span>
       <h1>A snowy island to <span class="grad">waddle around.</span></h1>
-      <!-- AI-DISCLOSURE TRAP: the rooms, furniture, buildings and island tiles under
-           PenguinArcade/art/ are generated through the artcore batch driver (26 install
-           manifests, 153 installed assets). "Painted" describes the style honestly;
-           "hand-painted" is a claim about how they were made, and it is not true. -->
+      
       <p class="lede">Make a penguin, wander a painted arctic island, throw snowballs at strangers who become friends, and duck into a door when you feel like an arcade game. No download, no sign-up, no cost.</p>
       <div class="hero-buttons">
         <a href="https://waddleton.pages.dev/" class="btn-play" target="_blank" rel="noopener">
@@ -561,43 +552,12 @@
       </div>
       <p class="hero-note">Works on a phone, tablet, or computer. Nothing to install.</p>
 
-      <!-- ROOM-SHOT PROVENANCE. Every rooms/*.jpg is an IN-GAME CAPTURE taken by
-           PenguinArcade/tools/site_shots.py (last re-shot 2026-09-01 against the
-           deployed game, v74 in the corner of every frame) and staged in
-           PenguinArcade/store/site-shots/; its manifest.json records the audit each
-           frame passed (no footwear, no glasses, no capes, no vest_tux, nobody
-           facing away, no speech bubbles, no event banner). They replaced the raw
-           painted backgrounds, which had gone stale as claims — the old arcade
-           plate showed FOUR cabinets, and js/interiors.js:332-341 removed all four
-           and installed exactly two. The 2026-09-01 re-shoot caught the same rot in
-           reverse: the Shore's diving bell is now signed GLIMMER DEEP and the Snow
-           Forts pavilion's painted sign reads THIN ICE (js/rooms.js:2725 — the map
-           directory still calls that game MELTDOWN, ui.js:1718), so the alts moved
-           with the frames. Alt text here describes the CAPTURE, HUD and penguins
-           included, not a painting. shots/tour.mp4 is the same discipline in motion:
-           one continuous site_shots-driven take (scratchpad wadl_tour.py choreography,
-           head/tail-trimmed only, never spliced), poster = its own final frame.
-           Re-cut from that directory, never from PenguinArcade/art/, and keep every
-           rooms/ and shots/ query on ONE version token. -->
       <div class="hero-shot">
         <img src="rooms/plaza.jpg?v=20260901a" width="1100" height="733" fetchpriority="high" alt="Waddleton's Town Square in play: four penguins, two of them in beanies and red scarves, standing on the oval ice rink under a green-and-violet aurora, a glowing ice sculpture of a penguin behind them, lit signs reading COZY BEAK, SHOP and GOLDEN KRILL on the buildings around the square, wooden signposts pointing to the Slopes, the Shore and Snow Forts, and the game's own chat bar along the bottom of the screen">
       </div>
 
       <div class="stats">
-        <!-- COUNT TRAP: 17 games, not 16 — the addGame registry in PenguinArcade/js/ui.js is
-             what the map directory is built from; GLIMMER DEEP (Shore diving bell) is the
-             newest. The 17 do NOT split 15/2, and the split is stated in the arcade section
-             below. ELEVEN carry a painted sign out on the island — the props with an
-             action.game in js/rooms.js (drift 2220, bonkberg 2247, fishing 2260, surf 2269,
-             peakling 2391, sled 2404, escape 2435, dash 2457, snowball 2674, leap 2684,
-             thinice 2692). FOUR are Floe Arcade cartridges: PenguinArcade/index.html's
-             #arcadeList (AURORA ALLEY, ARCTIC HOCKEY, MELTDOWN, JET PACK ADVENTURE), reached
-             from the two cabinets js/interiors.js:340-341 installs. MELTDOWN is in both, which
-             is why 12 + 4 is 15 and not 16 (the twelfth in-world door is GLIMMER DEEP's
-             diving bell at the Shore, js/rooms.js ~2279). CAVERN RESCUE and IGLOO FORT have
-             NO in-world entry at all: nothing in js/rooms.js, js/interiors.js or
-             js/scene-landmarks.js opens either, only the map directory — 15 + 2 = 17.
-             Re-count from those files before changing. -->
+        
         <div class="stat"><div class="n">17</div><div class="l">arcade games</div></div>
         <div class="stat"><div class="n">7</div><div class="l">island areas</div></div>
         <div class="stat"><div class="n">154</div><div class="l">things to wear &amp; place</div></div>
@@ -606,7 +566,6 @@
     </div>
   </section>
 
-  <!-- ===== ISLAND ===== -->
   <section class="section-block" id="island">
     <div class="container">
       <div class="center">
@@ -614,11 +573,7 @@
         <h2>Seven places to be. <em>One of them has no name.</em></h2>
         <p class="lede">Every area is a painting, not a tileset — and each one has doors, games, and penguins standing around in it. The Town Square at the top of this page is one of them: coffee on one side, dinner on the other, the shop in the middle. Here is the rest of the island. Walk between them, or take the map.</p>
       </div>
-      <!-- TOUR PROVENANCE: one continuous capture of the deployed game driven through
-           the same site_shots rig as the stills (see the ROOM-SHOT PROVENANCE note
-           above) — head/tail-trimmed, never spliced, poster = its own final frame.
-           The caption describes only what the take shows. Playback is a progressive
-           enhancement: no JS or reduced motion = the poster, a real frame itself. -->
+      
       <figure class="tour-stage">
         <video src="shots/tour.mp4?v=20260901a" poster="shots/tour-poster.jpg?v=20260901a" width="1100" height="732" muted loop playsinline preload="metadata" aria-label="A continuous capture of Waddleton being played: four penguins on the Town Square rink, the player waddling across the ice, the island map opening, and the walk coming out at the Shore beside a driftwood campfire"></video>
         <figcaption>That walk, live: the Town Square, two waddles across the rink, the map — and out at the Shore, by the bonfire. One continuous capture of the game, straight through.</figcaption>
@@ -666,13 +621,7 @@
         </figure>
         <figure class="place">
           <span class="tag secret" aria-hidden="true">Somewhere else</span>
-          <!-- DO NOT NAME IT. PenguinArcade/js/ui.js:1750 keeps this room out of
-               AREA_SPOTS as `const SECRET`, drawn as an unnamed shimmer until
-               Profile.data.stats.seen_iceberg is set, and js/news.js:47 records the
-               rule in one line: it "is never named in the UI, on the map, or in the
-               badge list until a penguin finds it". A heading or an alt string that
-               prints the name spoils it before the player has walked there — which
-               is exactly what js/ui.js:1934's comment says a map row once did. -->
+          
           <img src="rooms/iceberg.jpg?v=20260901a" width="1100" height="733" alt="Four penguins standing together on the wide snowy plateau of a flat-topped floe, two snow-capped driftwood logs and a wooden crate beside them, ice cliffs glowing turquoise where they meet the dark ocean, and the moon and a green-and-violet aurora behind" loading="lazy">
           <figcaption class="cap">
             <h3>The place with no name</h3>
@@ -684,7 +633,6 @@
     </div>
   </section>
 
-  <!-- ===== ARCADE ===== -->
   <section class="section-block band" id="arcade">
     <div class="container">
       <div class="split">
@@ -710,11 +658,7 @@
         <li class="game"><div class="g-name">Snowball Fight</div><div class="g-kind">Aim and duck</div></li>
         <li class="game"><div class="g-name">Ice Fishing</div><div class="g-kind">Patience, mostly</div></li>
         <li class="game"><div class="g-name">Jet Pack Adventure</div><div class="g-kind">Fly and collect</div></li>
-        <!-- NAME TRAP: every g-name below must match what the player is shown in
-             PenguinArcade/js/ui.js:1920-1940. "Thin Ice" is the internal key; the game is
-             called MELTDOWN. Likewise CAVERN RESCUE (never "Puffle Rescue" — "Puffle" is
-             Disney's Club Penguin mark and appears nowhere in the shipped game) and
-             ARCTIC HOCKEY (not "Arctic Hockey Shootout"). -->
+        
         <li class="game"><div class="g-name">Meltdown</div><div class="g-kind">Puzzle, carefully</div></li>
         <li class="game"><div class="g-name">Aurora Alley</div><div class="g-kind">Under the lights</div></li>
         <li class="game"><div class="g-name">Arctic Hockey</div><div class="g-kind">Take the shot</div></li>
@@ -728,36 +672,12 @@
     </div>
   </section>
 
-  <!-- ===== TOGETHER ===== -->
   <section class="section-block" id="together">
     <div class="container">
       <div class="center">
         <div class="section-eyebrow">Together</div>
         <h2>Other penguins are <em>actually other people.</em></h2>
-        <!-- COPPA / Play-Families TRAP. PenguinArcade/js/agegate.js holds a full bracketed
-             policy table, and a row may only be DESCRIBED on this site once something in the
-             app actually calls it. Re-verified 2026-08-24 against the working tree. Rows with
-             a live consumer, and therefore describable:
-               free-text-chat .......... js/ui.js:3297-3343 applyChatMode() REMOVES #chatInput
-               read-free-text .......... js/hub.js:1159-1164 readableChat() drops inbound text
-               custom-display-name ..... js/ui.js:1442-1489 applyNameMode() removes #nameInput
-                                         and REPLACES a held name (nameIsPermitted), called at
-                                         js/ui.js:3413 before Hub.start() broadcasts it
-               public-leaderboard-name . js/leaderboard.js:58-97 publicName() substitutes a
-                                         generated name at enqueue AND at send
-               third-party-auth ........ js/ui.js:2006 and 2925
-               purchases, external-links, share-invite-link ... js/gate.js keypad
-             Rows STILL WITH NO CALLER, so still not describable here: multiplayer,
-             friend-code, friend-request-stranger, quick-match, friend-room-location,
-             personalised-ads. Do NOT write that under-13s get a bot island or gated
-             friending. The 2025 COPPA amendments weigh the operator's own marketing as
-             evidence.
-             SHIP GATE: none of the modules above is on PenguinArcade's `main`, and the web
-             build deploys from main (.github/workflows/deploy-pages.yml). Everything this
-             page says about the age screen, the chat tier and the substituted name is true
-             of the app source and the iOS bundle, and is NOT yet true of
-             waddleton.pages.dev. Land the safety modules on main before this page is right
-             about the thing the Play button opens. -->
+        
         <p class="lede">Waddleton is a live world. The penguins wandering past you are players, and the island is better when it's busy — though how you talk to them, and what your penguin is allowed to be called, depends on your age, which the island asks about before you arrive.</p>
       </div>
       <div class="features-grid">
@@ -795,7 +715,6 @@
     </div>
   </section>
 
-  <!-- ===== YOUR PENGUIN ===== -->
   <section class="section-block band">
     <div class="container">
       <div class="center">
@@ -803,15 +722,7 @@
         <h2>Twenty-six colours is <em>only the start.</em></h2>
         <p class="lede">A hundred and fifty-four things across the catalogue: body colours, hats, glasses, scarves, capes, vests, feet, eye styles — and the furniture, wallpaper, and flooring for your igloo.</p>
       </div>
-      <!-- NO PICTURE HERE ON PURPOSE. This block used to be illustrated with
-           rooms/coffee.jpg — the Cozy Beak, a room with no wardrobe, no shop and no
-           igloo in it. A picture is a claim about the sentence above it, and a
-           coffee house is not a claim about 154 wearable and placeable items. None
-           of the eight approved captures in PenguinArcade/store/site-shots/ shows
-           the wardrobe, the shop or a decorated igloo, so the image was removed
-           rather than swapped for another room that would be just as untrue. Put
-           one back only when tools/site_shots.py has posed a capture of the
-           wardrobe panel or a furnished igloo. -->
+      
       <ul class="split-points" role="list" style="max-width: 720px; margin: 26px auto 0;">
         <li><strong>Snowflakes</strong> ❄ are earned by playing, and buy 135 of the 154 — everything except a handful of premium pieces.</li>
         <li><strong>A weekly rotation</strong> brings limited items through the shop.</li>
@@ -821,7 +732,6 @@
     </div>
   </section>
 
-  <!-- ===== HONEST ===== -->
   <section class="section-block" id="honest">
     <div class="container">
       <div class="center">
@@ -829,10 +739,7 @@
         <h2>Free, and honest about <em>what that means.</em></h2>
         <p class="lede">Games for kids have a long history of being sold as free. Here's exactly what Waddleton is.</p>
       </div>
-      <!-- Decorative restatement of the split described in the card below and in the
-           "Is it really free?" FAQ: 135 Snowflake items + 15 Goldfish + 4 Club = 154,
-           and 15 + 4 = the 19 cosmetic premium pieces. Change those sentences first
-           if these numbers ever move. -->
+      
       <div class="shop-bar" aria-hidden="true">
         <div class="shop-bar-title">135 of the shop's 154 items — drawn to scale</div>
         <div class="shop-track">
@@ -851,28 +758,14 @@
       <div class="honest">
         <div class="honest-card">
           <h3>No ads. Nothing you have to buy.</h3>
-          <p>There are no advertisements in Waddleton, and nothing you need to buy to play any of it. Nearly all of the shop — 135 of the 154 items — is bought with Snowflakes you earned by playing. The other 19 are cosmetics priced in Goldfish, a premium currency, or reserved for Waddleton Club members. Both will be optional purchases when the mobile app ships; neither is buyable in the browser today. Both are purely decorative, and neither one makes a penguin faster, stronger, or higher on a leaderboard.<!-- Do not write "in the mobile app" in the present tense: the FAQ on this same page says there is no App Store or Play build yet, and PenguinArcade/js/storefront.js:19 available() returns false without a release-build Capacitor bridge, so nothing on the web can transact. --></p>
+          <p>There are no advertisements in Waddleton, and nothing you need to buy to play any of it. Nearly all of the shop — 135 of the 154 items — is bought with Snowflakes you earned by playing. The other 19 are cosmetics priced in Goldfish, a premium currency, or reserved for Waddleton Club members. Both will be optional purchases when the mobile app ships; neither is buyable in the browser today. Both are purely decorative, and neither one makes a penguin faster, stronger, or higher on a leaderboard.</p>
         </div>
         <div class="honest-card">
           <h3>No sign-up needed, and no tracking.</h3>
           <p>You can play the whole game without creating anything — a guest penguin appears the moment you arrive. Signing in is optional and exists only so your penguin can follow you to another device. There are no third-party analytics and no ad networks in the game at all.</p>
         </div>
         <div class="honest-card">
-          <!-- Only claims with a live consumer belong in this card. Verified 2026-08-24:
-               AgeGate.ensure() is awaited inside bootApp() before Hub.start()
-               (js/ui.js:3383 and 3415); js/ui.js:3297-3343 applyChatMode() REMOVES the chat
-               input for the child bracket rather than disabling it; js/hub.js:1159-1164 drops
-               inbound free text for that bracket; js/ui.js:1442-1489 applyNameMode() removes
-               the name field and replaces a held name; js/gate.js's keypad challenges every
-               store route and every outbound anchor. js/safechat.js is required by both the
-               browser and the ws server.
-               THE BAND IS STORED, AND THE SENTENCE BELOW MUST KEEP SAYING SO. The month and
-               year never leave agegate.js's stack frame, but mirrorToProfile()
-               (js/agegate.js:618-622) writes the band to Profile.data.ageBracket, and
-               js/cloud.js writeProfile() upserts the whole profile object as
-               waddleton_profiles.state — so the band reaches the server on the next save
-               anybody makes. agegate.js:292-303 spells this out precisely because "nothing
-               leaves your device" was not true of the band. Do not shorten it back. -->
+          
           <h3>An age screen runs before the island does.</h3>
           <p>Waddleton asks the month and year you were born before you set foot on the ice. Those two numbers are never written down and never sent anywhere. What is kept is the band they put you in — child, teen or adult — saved beside your penguin on this device and carried with your penguin's record to our database, because it is what decides how chat works and what your penguin may be called. Under 13, the typing box isn't disabled — it isn't there: those players talk with a list of ready-made phrases, typed messages from other players never reach their screen, and they pick a penguin name from a generated list instead of typing one. Anything that costs money or opens a page outside the game sits behind a parental keypad, for every player.</p>
         </div>
@@ -884,7 +777,6 @@
     </div>
   </section>
 
-  <!-- ===== FAQ ===== -->
   <section class="section-block" id="faq">
     <div class="container">
       <div class="center">
@@ -898,11 +790,7 @@
         </details>
         <details class="faq">
           <summary>Do I have to make an account?</summary>
-          <!-- Precision matters here. PenguinArcade/js/agegate.js:291-303: the month and year
-               never leave the function — not to storage, not to the profile, not to a server.
-               The resulting BRACKET does ride along on the next profile save into the
-               waddleton_profiles row, and that is deliberate. Do not simplify this to "nothing
-               leaves your device". -->
+          
           <p>No. One screen asks the month and year you were born, and then you're a penguin. The month and year themselves are never stored and never sent anywhere. What is kept is the band they put you in — child, teen or adult — because that is what decides chat, what your penguin may be called, and who can reach you; it is saved on this device and it travels with your penguin's record to our database. A guest identity is created for you automatically so other players can see you moving around the island, but there's no email, no password, and nothing to sign up for.</p>
         </details>
         <details class="faq">
@@ -933,7 +821,6 @@
     </div>
   </section>
 
-  <!-- ===== CTA ===== -->
   <section class="cta-strip">
     <h2>The island's already busy.</h2>
     <p>No download, no sign-up, no cost. Pick a colour and go and stand on the ice.</p>
@@ -945,7 +832,6 @@
 
   </main>
 
-  <!-- ===== FOOTER ===== -->
   <footer class="site">
     <div class="links">
       <a href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play</a>

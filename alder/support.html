@@ -85,17 +85,7 @@
         <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
         <div class="body">
           <strong>My clock is wrong / I need to change my start date</strong>
-          <!-- NOT "still marked soon". No "soon" marking exists anywhere in the
-               shipping build: on 2026-08-09 every placeholder row was removed
-               from You, because a button that answers no tap and says "soon" is
-               a Guideline 2.1 rejection reviewers find by tapping. "What I'm
-               quitting" survived as a STATIC row — `<div class="setting-row
-               setting-row--static">` with the chosen targets in its subtitle
-               (app.js: `$("you-targets").textContent = p.targets.map(t => t.label)
-               .join(" · ")`), no chevron, no handler, no marking. Verified in the
-               retained build-6 artifact, not the source tree. Describe the row as
-               it is — visible but inert — and do not reintroduce the word "soon"
-               unless the app starts printing it again. -->
+          
           <p>You choose what you're stepping away from, and when you started, the first time you open Alder. What isn't built yet is <em>changing</em> those afterwards: the "What I'm quitting" row shows what you picked but doesn't open — there's no editor yet. It's designed so that correcting a date recalculates your count and your milestones without costing you your total time across all attempts, and it's near the front of the queue. Email us if a wrong clock is blocking you.</p>
         </div>
       </div>
@@ -130,14 +120,7 @@
     </div>
 
     <h2>Billing and subscriptions</h2>
-    <!-- The benefit sentence below is four-way pinned: it must stay identical
-         here, in terms.html's Purchases section, in index.html's "What does it
-         cost?" FAQ answer, and in that answer's copy inside the FAQPage JSON-LD.
-         Both of its claims are server-enforced — alder-api/app/config.py:143
-         (free daily cap; Plus uncapped) and app/config.py:61-62 (haiku free vs
-         sonnet plus). The never-paywalled list is the app's own paywall wording.
-         Do NOT print the free-tier number on this site: the binary reads it from
-         the server, so a digit here goes stale silently. -->
+    
     <p>Alder is free to use. There is an optional subscription, <strong>Alder Plus</strong> (US$9.99/month or US$59.99/year, auto-renewing, billed by Apple). Plus lifts the daily limit on everyday conversation and answers with Alder's most capable model. Your counter, check-ins, urge log, milestones and the slip debrief are never paywalled. To restore a purchase on a new device, open Alder&rsquo;s settings and tap Restore Purchases. To cancel, go to Settings &rsaquo; your name &rsaquo; Subscriptions on your device &mdash; cancelling stops the next renewal and Plus stays active until the period you paid for ends. Billing questions Apple handles (refunds, payment methods) go through <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>; anything else, email us.</p>
     <p><strong>The SOS screen, the crisis numbers, and every safety conversation stay outside Plus &mdash; always.</strong> A crisis, an overdose or withdrawal concern, an active craving, or telling Alder you used is never metered or paywalled, whether or not you subscribe.</p>
 

@@ -8,7 +8,7 @@
   <title>HyperSage AI Labs — Independent iOS App &amp; Game Studio</title>
   <meta name="description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta name="robots" content="index, follow">
-  <!-- hypersage.ai is the canonical origin for the studio and hosted product sites. -->
+  
   <link rel="canonical" href="https://hypersage.ai/">
   <meta name="google-site-verification" content="gEnJ87FMGiWFMezIOM3-cQJglW4p7FMGRHx5fbQWmBk">
 
@@ -31,7 +31,6 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
-  <!-- Product schemas state authorship only; availability and pricing vary. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -70,8 +69,6 @@
   }
   </script>
 
-  <!-- Fonts are self-hosted (fonts/fonts.css) — no request leaves this origin, which
-       is also what the privacy page now promises. -->
   <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/space-grotesk.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter.woff2">
   <link rel="stylesheet" href="fonts/fonts.css">
@@ -1206,7 +1203,6 @@
 
   <a class="skip-link" href="#top">Skip to content</a>
 
-  <!-- ===== NAV ===== -->
   <nav class="site">
     <div class="container">
       <a class="brand" href="#top" aria-label="HyperSage AI Labs home">
@@ -1233,11 +1229,8 @@
     </div>
   </nav>
 
-  <!-- #top is the main landmark itself (not an empty span), so the skip link and the
-       brand "home" link move keyboard focus with the scroll. -->
   <main id="top" tabindex="-1">
 
-  <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="container">
       <div class="hero-stage">
@@ -1255,41 +1248,34 @@
         <figure class="context-engine" aria-hidden="true">
           <div class="engine-head"><span>How a response is formed</span><span>Intelligence layer</span></div>
 
-          <!-- Geometry is authored in a 500x368 space that matches the panel's own
-               aspect exactly, so preserveAspectRatio="none" stretches it uniformly
-               at every width. At the desktop size one user unit is one CSS pixel. -->
           <svg class="pl-wires" viewBox="0 0 500 368" preserveAspectRatio="none" focusable="false">
             <defs>
-              <!-- userSpaceOnUse, not the default objectBoundingBox: the out-wire is a
-                   perfectly horizontal path, so its bounding box has zero height and an
-                   objectBoundingBox gradient paints nothing at all on it. The outgoing
-                   teal-to-violet wire was invisible until this was pinned to user space. -->
+              
               <linearGradient id="plGradient" gradientUnits="userSpaceOnUse" x1="338" y1="0" x2="365" y2="0">
                 <stop offset="0" stop-color="#2DD4BF" stop-opacity=".48"/>
                 <stop offset="1" stop-color="#A78BFA" stop-opacity=".58"/>
               </linearGradient>
             </defs>
-            <!-- pipeline lane, y=221 = the 60% centre line the three cards sit on.
-                 Block edges at this size: msg 6-136, core 162.5-337.5, result 365-485 -->
+            
             <path class="pl-wire glow" d="M0 221 L8 221"/>
             <path class="pl-wire glow" d="M138 221 L160 221"/>
             <path class="pl-wire out glow" d="M340 221 L363 221"/>
             <path class="pl-wire" d="M0 221 L8 221"/>
             <path class="pl-wire" d="M138 221 L160 221"/>
             <path class="pl-wire out" d="M340 221 L363 221"/>
-            <!-- source drops, funnelling into the core inlet at y=153 -->
+            
             <path class="pl-wire glow" d="M85 114 C85 136 130 136 220 152"/>
             <path class="pl-wire glow" d="M250 114 L250 152"/>
             <path class="pl-wire glow" d="M415 114 C415 136 370 136 280 152"/>
             <path class="pl-wire" d="M85 114 C85 136 130 136 220 152"/>
             <path class="pl-wire" d="M250 114 L250 152"/>
             <path class="pl-wire" d="M415 114 C415 136 370 136 280 152"/>
-            <!-- timeline; the three bright ticks sit under msg / core / result -->
+            
             <line class="pl-tl-base" x1="20" y1="322" x2="480" y2="322"/>
             <path class="pl-tl-tick" d="M40 319 V325 M90 319 V325 M110 319 V325 M130 319 V325 M150 319 V325 M170 319 V325 M190 319 V325 M210 319 V325 M230 319 V325 M270 319 V325 M290 319 V325 M310 319 V325 M330 319 V325 M350 319 V325 M370 319 V325 M390 319 V325 M440 319 V325 M460 319 V325"/>
             <path class="pl-tl-stage" d="M68 316 V328 M250 316 V328 M425 316 V328"/>
             <circle class="pl-playhead" cx="0" cy="0" r="2.8" fill="#2DD4BF"/>
-            <!-- travelling context tokens + signal pulses -->
+            
             <g class="pl-tok tok-1"><circle cx="0" cy="0" r="3.4"/></g>
             <g class="pl-tok tok-2"><circle cx="0" cy="0" r="3.4"/></g>
             <g class="pl-tok violet tok-3"><circle cx="0" cy="0" r="3.4"/></g>
@@ -1299,60 +1285,9 @@
 
           <div class="pl-msg">
             <span class="pl-msg-tag">You ask</span>
-            <!-- Eleven scenarios, one per loop — one for EVERY product with an
-                 assistant to ask (owner ask 2026-08-25: "you don't have prompt
-                 examples for each app i have ai in"). None of them makes a
-                 claim. Prompt 1 is the resting state. -->
+            
             <span class="pl-msg-bubble">
-              <!-- EVERY PROMPT HERE MUST BE A REAL ASK IN A SHIPPED APP, and must
-                   make NO claim: no outcome promised, no diagnosis, no treatment,
-                   no trade advice, no dating result. Verified 2026-08-25:
-                     1 Saffra      - chef chat. The app's own core interaction.
-                     2 StoryVault  - Dracula is a bundled classic with its own AI Adventure
-                                     scenario (AdventureArrivalUITests drives a Dracula run);
-                                     HomeView.swift:859 is the "Write a Story" entry.
-                     3 Nightshelf  - generated bedtime stories: CustomStory.swift, backend
-                                     /v1/nightshelf/story, "Write a bedtime story" on Home.
-                     4 Wingmate    - CoachChatView.swift:1517 placeholder is "Ask {coach}…",
-                                     and the coach reads the whole thread.
-                     5 Mythkin     - talking with roster characters IS the app; Athena is a
-                                     real roster character (mythkin/index.html has an
-                                     "Ask Them About Athena" block, generated from the
-                                     roster by tools/build_mythkin.py, never hand-typed).
-                     6 Quietoak    - the skills companion chat; spelled "practice" (US), as the
-                                     product card spells it 18 times. The ask requests practice,
-                                     never crisis care.
-                     7 Holohound   - Hound is live (claude-sonnet-5 via holohound-api);
-                                     master-set completion is a shipped screen and the
-                                     binder rides houndContext.
-                     8 Rowan       - the visit brief is the app's core output ("a visit
-                                     brief you can hand your doctor" — this page's card).
-                                     The ask requests the brief, not a diagnosis.
-                     9 Alder       - progress clocks per goal ("keeps the count"). The ask
-                                     reads the count, promises nothing about recovery.
-                    10 CryptoSage  - this page's own card sentence as a question ("Ask why
-                                     your portfolio moved…"); the card beside it carries
-                                     the consent + not-investment-advice disclosures.
-                    11 Mythwright  - the AI Forge takes any free-form description; the
-                                     sea-witch is an example INPUT, not a roster claim.
-                   OWNER OVERRIDE 2026-08-25: the old rule keeping health / recovery /
-                   DBT / markets prompts off this page is retired — Vanus asked for every
-                   AI product to be represented. What still binds is the sentence above:
-                   a REAL ask that makes NO claim. Keep each ask on the safe side of its
-                   category (brief not diagnosis, count not cure, why-it-moved not
-                   what-to-buy, practice not therapy).
-                   TWO PROMPTS WERE REMOVED long before this and must not be restored. One
-                   addressed a question to Hexhunter, which is a horde-survivor game with
-                   NO assistant to ask - the prompt invented a feature. The other named a
-                   character who appears in no shipped scenario. The exact strings are in
-                   git history and not repeated here: this comment is served verbatim, so
-                   quoting a retired string re-publishes it. Games without an assistant
-                   (Hexhunter, Waddleton, Hoardling, Gemburrow) stay out for that reason.
-                   The .pl-of tag names the APP only — never the model vendor. Per-prompt
-                   vendor tags were considered 2026-08-25 and rejected: Saffra's chat runs
-                   on OpenAI (not Claude — see fleet provider map), StoryVault's vendor is
-                   a deploy-time secret (LLM_PROVIDER), so a per-app vendor label is wrong
-                   or unstable. The accurate, hedged vendor sentence lives in #ai, only. -->
+              
               <span class="pl-prompt"><span class="pl-q">What should I cook tonight?</span><span class="pl-of" style="--app: var(--c-saffra);"><img src="icons/saffra.png" alt="" width="16" height="16">Saffra</span></span>
               <span class="pl-prompt"><span class="pl-q">Start an adventure in Dracula&rsquo;s castle.</span><span class="pl-of" style="--app: var(--c-story);"><img src="icons/storyvault.png" alt="" width="16" height="16">StoryVault&nbsp;AI</span></span>
               <span class="pl-prompt"><span class="pl-q">Write me a bedtime story about the sea.</span><span class="pl-of" style="--app: var(--c-night);"><img src="icons/nightshelf.png" alt="" width="16" height="16">Nightshelf</span></span>
@@ -1368,17 +1303,7 @@
           </div>
 
           <div class="pl-conn c1"></div>
-          <!-- Captions roll per app in prompt order (owner ask 2026-08-25: "the
-               different apps change the different sections on top"). Order:
-               Saffra, StoryVault AI, Nightshelf, Wingmate, Mythkin, Quietoak,
-               Holohound, Rowan, Alder, CryptoSage AI, Mythwright. Every caption
-               RESTATES a claim already on this page's product cards or the
-               sr-only stage list in #ai (e.g. Rowan "conditions · meds" from
-               the card's medication list + the list's "conditions"; Alder "the
-               count" verbatim from its card; Holohound "your binder" from the
-               scanning/binder card; CryptoSage holdings/watchlists/live prices
-               from its card). Keep each caption <= 18 characters: the cards are
-               absolutely positioned and size to the widest span. -->
+          
           <div class="pl-sources">
             <div class="pl-src src-1"><i class="pl-dot"></i><span><strong>Your context</strong><small class="pl-roll"><span class="pl-ctx">diet · allergies</span><span class="pl-ctx">the chosen classic</span><span class="pl-ctx">narrator · timer</span><span class="pl-ctx">the connection</span><span class="pl-ctx">the kin you chose</span><span class="pl-ctx">goals · boundaries</span><span class="pl-ctx">your binder</span><span class="pl-ctx">conditions · meds</span><span class="pl-ctx">your reasons</span><span class="pl-ctx">your holdings</span><span class="pl-ctx">your collection</span></small></span></div>
             <div class="pl-src src-2"><i class="pl-dot"></i><span><strong>Recent activity</strong><small class="pl-roll"><span class="pl-ctx">recent chats</span><span class="pl-ctx">your turns so far</span><span class="pl-ctx">your saved place</span><span class="pl-ctx">the whole thread</span><span class="pl-ctx">the conversation</span><span class="pl-ctx">diary · check-ins</span><span class="pl-ctx">recent scans</span><span class="pl-ctx">recent symptoms</span><span class="pl-ctx">recent check-ins</span><span class="pl-ctx">your watchlists</span><span class="pl-ctx">recent duels</span></small></span></div>
@@ -1398,12 +1323,7 @@
           <div class="pl-conn c3"></div>
           <div class="pl-result">
             <span>Result</span>
-            <!-- "The best possible answer" is the OWNER'S wording — restored 2026-08-25
-                 after a polish pass swapped it for "An answer, in context" on the theory
-                 that COPY-LAW's superlative ban covers site prose. COPY-LAW.md scopes
-                 itself to ad images, post copy and headlines; whether it binds studio
-                 prose was an open owner question, and Vanus ruled: keep the original.
-                 Do not re-"fix" this line without asking him. -->
+            
             <strong class="grad-text">The best possible answer</strong>
             <div class="pl-stamps"><span class="pl-stamp">✓&nbsp;grounded</span><span class="pl-stamp">✓&nbsp;checked</span></div>
           </div>
@@ -1415,7 +1335,6 @@
     </div>
   </section>
 
-  <!-- ===== WORDMARK STRIP ===== -->
   <div class="strip">
     <div class="container">
       <span class="label">The portfolio</span>
@@ -1438,21 +1357,17 @@
     </div>
   </div>
 
-  <!-- ===== PRODUCTS ===== -->
   <section class="block" id="products">
     <div class="container">
       <div class="section-head">
         <span class="eyebrow">The portfolio</span>
         <h2>Focused products for different parts of life.</h2>
-        <!-- "What we learn carries across the portfolio" cut 2026-08-25 at
-             Vanus's call; the studio ledger's "Shared learning" row already
-             carries that idea. -->
+        
         <p>Each product is designed around a clear audience and job, with its own identity and way of working.</p>
       </div>
 
       <div class="products-grid">
 
-        <!-- HOLOHOUND -->
         <article class="product" id="product-holohound" style="--accent: var(--c-holohound);">
           <div class="top">
             <img class="app-icon" src="icons/holohound.png" alt="" width="58" height="58" loading="lazy">
@@ -1472,7 +1387,6 @@
           </div>
         </article>
 
-        <!-- WINGMATE -->
         <article class="product" id="product-wingmate" style="--accent: var(--c-wingmate);">
           <div class="top">
             <img class="app-icon" src="icons/wingmate.png" alt="" width="58" height="58" loading="lazy">
@@ -1493,8 +1407,7 @@
           </div>
         </article>
 
-        <!-- QUIETOAK -->
-        <!-- LOAM -->
+        
         <article class="product" id="product-loam" style="--accent: var(--c-loam);">
           <div class="top">
             <img class="app-icon" src="icons/loam.png?v=20260831a" alt="" width="58" height="58" loading="lazy">
@@ -1533,7 +1446,6 @@
           </div>
         </article>
 
-        <!-- CRYPTOSAGE -->
         <article class="product" id="product-cryptosage" style="--accent: var(--c-crypto);">
           <div class="top">
             <img class="app-icon" src="icons/cryptosage.png" alt="" width="58" height="58" loading="lazy">
@@ -1543,7 +1455,7 @@
             </div>
             <span class="status live">iOS · Live</span>
           </div>
-          <!-- Portfolio context is consent-controlled; output is not investment advice. -->
+          
           <p class="desc">Ask why your portfolio moved and get an answer built from your own holdings and cost basis, not a generic market recap. Portfolio sharing is on by default and can be switched off. Not investment advice.</p>
           <ul role="list">
             <li>Portfolio-aware chat when portfolio sharing is enabled</li>
@@ -1555,7 +1467,6 @@
           </div>
         </article>
 
-        <!-- SAFFRA -->
         <article class="product" id="product-saffra" style="--accent: var(--c-saffra);">
           <div class="top">
             <img class="app-icon" src="icons/saffra.png" alt="" width="58" height="58" loading="lazy">
@@ -1565,7 +1476,7 @@
             </div>
             <span class="status live">iOS · Live</span>
           </div>
-          <!-- Recipe generation and checks are automated; no human-chef review is claimed. -->
+          
           <p class="desc">Tell it what&rsquo;s in your kitchen and it rewrites a complete recipe around it &mdash; every amount measured, prep noted, equipment listed. Recipes declare their allergens, and anything you can&rsquo;t eat is filtered out before it is ever suggested.</p>
           <ul role="list">
             <li>Recipes adapted to your kitchen and constraints</li>
@@ -1577,13 +1488,11 @@
           </div>
         </article>
 
-        <!-- STORYVAULT -->
         <article class="product" id="product-storyvault" style="--accent: var(--c-story);">
           <div class="top">
             <img class="app-icon" src="icons/storyvault.png" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <!-- "StoryVault AI" is the App Store listing name — canonical per
-                   press.html's own rule; matches the strip and the legal pages. -->
+              
               <h3>StoryVault AI</h3>
               <div class="cat">Interactive Fiction</div>
             </div>
@@ -1592,9 +1501,7 @@
           <p class="desc">Step inside a classic and take it somewhere the author never did, or write a world from a single line. Tap one of the offered choices or type your own move instead &mdash; the story follows, and it remembers.</p>
           <ul role="list">
             <li>A library of complete classics, bundled and readable offline</li>
-            <!-- "hand-curated AI scenario", never "hand-written": the scenarios
-                 are AI-generated with human curation (the subsite says exactly
-                 this), and claiming human authorship is a provenance overclaim. -->
+            
             <li>A hand-curated AI scenario behind every classic in the library</li>
           </ul>
           <div class="foot">
@@ -1603,7 +1510,6 @@
           </div>
         </article>
 
-        <!-- NIGHTSHELF -->
         <article class="product" id="product-nightshelf" style="--accent: var(--c-night);">
           <div class="top">
             <img class="app-icon" src="icons/nightshelf.png" alt="" width="58" height="58" loading="lazy">
@@ -1624,7 +1530,6 @@
           </div>
         </article>
 
-        <!-- ROWAN -->
         <article class="product" id="product-rowan" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
           <div class="top">
             <img class="app-icon" src="icons/rowan.png" alt="" width="58" height="58" loading="lazy">
@@ -1645,7 +1550,6 @@
           </div>
         </article>
 
-        <!-- ALDER -->
         <article class="product" id="product-alder" style="--accent: var(--c-alder);">
           <div class="top">
             <img class="app-icon" src="icons/alder.png" alt="" width="58" height="58" loading="lazy">
@@ -1684,8 +1588,7 @@
           </div>
         </article>
 
-
-        <!-- HEXHUNTER -->
+        
         <article class="product" id="product-hexhunter" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
           <div class="top">
             <img class="app-icon" src="icons/hexhunter.png" alt="" width="58" height="58" loading="lazy">
@@ -1697,15 +1600,10 @@
           </div>
           <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor built around distinct heroes, illustrated upgrades, and escalating chaos.</p>
           <ul role="list">
-            <!-- NINE matches the hexhunter subsite and the live App Store listing
-                 (both name Silas the ninth). The in-review build-7 binary carries
-                 eight — the subsite's #heroes comment documents why nine is the
-                 page standard while the app is unreleased, and the revert
-                 condition: if a build without Silas goes LIVE, this and the
-                 subsite's nine-counts drop to eight together. -->
+            
             <li>9 heroes with distinct playstyles</li>
             <li>18 weapons, secret evolutions, and 3 escalating biomes</li>
-            <!-- Art is generated; do not describe it as hand-drawn or hand-illustrated. -->
+            
           </ul>
           <div class="foot">
             <a class="btn-store" aria-label="Download Hexhunter on the App Store" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
@@ -1713,7 +1611,6 @@
           </div>
         </article>
 
-        <!-- MYTHWRIGHT -->
         <article class="product" id="product-mythwright" style="--accent: var(--c-myth);">
           <div class="top">
             <img class="app-icon" src="icons/mythwright.png" alt="" width="58" height="58" loading="lazy">
@@ -1733,7 +1630,6 @@
           </div>
         </article>
 
-        <!-- WADDLETON -->
         <article class="product" id="product-waddleton" style="--accent: var(--c-waddle);">
           <div class="top">
             <img class="app-icon" src="icons/waddleton.png" alt="" width="58" height="58" loading="lazy">
@@ -1743,7 +1639,7 @@
             </div>
             <span class="status live">Live on the web</span>
           </div>
-          <!-- Free/no-purchase claims are scoped to the web build; game count is 15. -->
+          
           <p class="desc">A snowy social world in the browser: make a penguin, explore six snowy districts, meet other players, and enter fifteen arcade games.</p>
           <ul role="list">
             <li>Multiplayer with chat, friends, parties, and snowballs</li>
@@ -1755,7 +1651,6 @@
           </div>
         </article>
 
-        <!-- HOARDLING -->
         <article class="product" id="product-hoardling" style="--accent: var(--c-hoard);">
           <div class="top">
             <img class="app-icon" src="icons/hoardling.png" alt="" width="58" height="58" loading="lazy">
@@ -1765,11 +1660,7 @@
             </div>
             <span class="status live">Live on the web</span>
           </div>
-          <!-- "Recover every stolen coin" is FALSE and must never come back: a laden
-               raider that reaches the exit escapes permanently (hoardling/game.js:4211-4215)
-               and the run is GRADED on that loss. Only the CONDITIONAL form is true —
-               killing a carrier credits the coins back. The duel is ONE cavern split down
-               the middle, not rival caves (hoardling/game.js:754). -->
+          
           <p class="desc">Defend the sleeping dragon&rsquo;s hoard. Hold the chokepoints; kill the carrier and the coins fly home &mdash; a keep-by-keep campaign run from Wick&rsquo;s workshop.</p>
           <ul role="list">
             <li>A campaign of keeps, plus a Daily Siege with no finish line</li>
@@ -1780,7 +1671,6 @@
           </div>
         </article>
 
-        <!-- GEMBURROW -->
         <article class="product" id="product-gemburrow" style="--accent: var(--c-gem);">
           <div class="top">
             <img class="app-icon" src="icons/gemburrow.png" alt="" width="58" height="58" loading="lazy">
@@ -1793,17 +1683,9 @@
           <p class="desc">Dig gems out of a jar where every gem and rock is real physics, assemble full sets in a seven-slot satchel to fill the orders on the line, and decide which rare finds the shop dragon keeps forever.</p>
           <ul role="list">
             <li>A 40-level career, plus one shared Daily Dig for everyone</li>
-            <!-- "no in-app purchases" is a DEAD STRING: gemburrow.full.unlock
-                 shipped 2026-08-22 (gemburrow/store/iap-catalog.json, game.js
-                 FULL_PRODUCT / careerCap). This card links the BROWSER build,
-                 which carries no store code at all (play/game.js has no Store,
-                 no careerCap, no paywall), so the line is scoped to that.
-                 Never quote a price here: iap-catalog _price_is_a_hint says
-                 planned_price_usd is a console crib and nothing else. And do
-                 not say the shop sells colour only: DEEPER_PICK_COST 250 buys
-                 +8 swings out of the same wallet. -->
+            
             <li>No ads and no sign-in; free to play in your browser</li>
-            <!-- Art is generated; do not describe it as hand-painted or hand-drawn. -->
+            
           </ul>
           <div class="foot">
             <a class="btn-store" aria-label="Play Gemburrow free in your browser" href="gemburrow/play/">Play free <span aria-hidden="true">↗</span></a>
@@ -1811,13 +1693,8 @@
           </div>
         </article>
 
-        <!-- PORTFOLIO CONTACT -->
-        <!-- No inline grid-column: it would beat the stylesheet, and which
-             column this card spans depends on whether the product count is odd
-             or even. That decision lives in the .products-grid rules above. -->
-        <!-- The one card allowed to go wide (Vanus's call): it spans the full
-             row when this grid's game count is even, and sits at normal card
-             size when odd. Copy is audited — do not reword. -->
+        
+        
         <aside class="product aside-card" aria-label="Portfolio contact" style="--accent: var(--brand-b);">
           <div class="inner">
             <div class="cat">The studio</div>
@@ -1831,46 +1708,15 @@
     </div>
   </section>
 
-  <!-- ===== INTELLIGENCE LAYER =====
-       Implementations, memory, controls, and safety paths vary by product. -->
   <section class="block systems" id="ai">
     <div class="container">
       <div class="section-head">
         <span class="eyebrow">Our intelligence layer</span>
-        <!-- Every sentence here was adversarially fact-checked against the shipped
-             configs 2026-08-09. Three wordings were REJECTED as false and must not
-             come back; they are listed verbatim in site-audit-contract.json under
-             fact ai_provider_wording -> forbidden_values, so site_audit.py fails
-             this page if any of them reappears. They are NOT quoted here, because a
-             comment ships in the served bytes and a claims sweep grepping the live
-             page cannot tell a quoted counter-example from a live claim.
-
-             Why each was rejected: one assigned voice to OpenAI (Nightshelf sells an
-             OpenAI narrator as a Pro upgrade over a FREE on-device voice, Quietoak's
-             on-device voice is free, Rowan's cloud TTS route is off); one closed the
-             set of products after Claude, which wrongly assigns Mythwright, whose
-             text vendor cannot be determined; and one made a universal claim about
-             every product, when two of them call no model at all. "Most", "others"
-             and "several" are load-bearing, not throat-clearing.
-
-             The headline deliberately does NOT name the two vendors. It did until
-             2026-08-26, which gave the largest type on the section to two other
-             companies' brands and led with what we rent rather than what we build.
-             The providers are still disclosed in the first sentence of the paragraph
-             below, which is where the verified claim belongs. Do not move them up. -->
+        
         <h2>Anyone can call the same models. The layer around them is ours.</h2>
         <p>Where a product uses AI, the models come from Anthropic and OpenAI: Claude in most of the products that write to you, OpenAI in others and for any image a product generates as you use it. What we build is the layer around them — what to ask, what the product already knows about your situation, and what it checks before you see an answer.</p>
       </div>
 
-      <!-- The four stages of the pipeline are DRAWN in the hero's context-engine
-           figure, which is aria-hidden decorative art. This sr-only list is the
-           page's one accessible description of that system — never remove it
-           without giving the diagram a spoken equivalent. The four VISIBLE cards
-           that used to stand here repeated the diagram's stages word for word;
-           Vanus called the repeat out 2026-08-25 and they were replaced with the
-           .layer-proof cases below. "The best possible answer" is the owner's
-           wording (twin of the diagram RESULT box — moves with it, per the ruling
-           above); it lives on here and in the hero. -->
       <h3 class="sr-only">How a response is formed</h3>
       <ol class="sr-only">
         <li>Your context — goals, preferences, conditions, and boundaries you provide within the product.</li>
@@ -1879,14 +1725,6 @@
         <li>The best possible answer — an answer, brief, recipe, story beat, or next action, grounded in your context and checked before you see it.</li>
       </ol>
 
-      <!-- One card per product that ships the layer (eleven as of 2026-09-01 —
-           the original three-only rule was overridden when the rail grew): every
-           sentence here RESTATES the already-verified claim on that product's own
-           card in #products — if a card claim changes, its restatement here moves
-           with it, and a product with no layer claim on its card gets NO card
-           here. Regulated products may appear, but only with the exact wording
-           their own card already carries — never a new health/DBT/markets claim
-           minted for this row. -->
       <div class="proof-rail">
         <ul class="layer-proof" id="layer-proof" tabindex="0" role="list" aria-label="The intelligence layer at work, product by product">
         <li class="proof-card" style="--accent: var(--c-wingmate);">
@@ -1953,30 +1791,12 @@
         </div>
         <p class="proof-more"><a href="#products">See all products <span aria-hidden="true">&uarr;</span></a></p>
       </div>
-      
 
       <p class="model-note">Not every product uses AI. Where one does, the provider, what leaves your device, what is remembered, and the safeguards vary by product and feature. Most artwork ships with the app rather than being generated while you use it.</p>
     </div>
   </section>
 
-  <!-- ===== STUDIO ===== -->
-  <!-- The headline named the products section's own eyebrow as its object
-       until 2026-08-26 -- borrowing the label for the grid above, and reading
-       as an internal word for a set of holdings rather than the apps a visitor
-       has just scrolled past. It now names them in plain words.
-
-       The paragraph's second sentence went at the same time: it restated this
-       headline's triplet (build / operate / support) one line lower in
-       different verbs. The substance survives in the rows below -- Direct
-       ownership carries the accountability half, Say only what ships carries
-       the rest -- which is the same reason the "Founder-run, end to end" row
-       came out on 2026-08-10. Do not restate the headline here, and keep team
-       size off this section.
-
-       Both retired wordings are listed verbatim in site-audit-contract.json
-       under fact studio_section_wording -> forbidden_values, NOT quoted here:
-       a comment ships in the served bytes, so quoting a retired string
-       reinstates it for every grep that reads the live page. -->
+  
   <section class="block" id="about">
     <div class="container">
       <div class="section-head">
@@ -2013,18 +1833,11 @@
             <p>Copy is checked against the products themselves &mdash; the counts, capabilities, and prices a page claims are audited against the shipped build, and corrected when they drift.</p>
           </div>
         </div>
-        <!-- "Who we are / Founder-run, end to end" removed 2026-08-10 at Vanus's
-             call. Two reasons it was not load-bearing: the row directly above
-             ("Direct ownership — feedback reaches us directly") already carries
-             the substance a reader cares about, and once the founder's name came
-             off the page the row was asserting a team size rather than a benefit.
-             "One person does everything" is also a risk signal to some readers of
-             a consumer app, and it bought nothing the support promise did not. -->
+        
       </div>
     </div>
   </section>
 
-  <!-- ===== CTA / CONTACT ===== -->
   <section class="cta" id="contact">
     <div class="container">
       <span class="eyebrow">Contact</span>
@@ -2042,7 +1855,6 @@
 
   </main>
 
-  <!-- ===== FOOTER ===== -->
   <footer class="site">
     <div class="container">
       <div class="f-brand">

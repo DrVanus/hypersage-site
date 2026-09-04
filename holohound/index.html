@@ -39,7 +39,6 @@
 </head>
 <body>
 
-<!-- ===== NAV ===== -->
 <nav class="site">
   <div class="container">
     <a class="brand" href="#top"><img class="mark" src="app-icon.png" alt="" width="30" height="30">Holohound</a>
@@ -65,7 +64,6 @@
   </div>
 </nav>
 
-<!-- ===== HERO ===== -->
 <section class="hero" id="top">
   <div class="container">
     <div class="hero-layout">
@@ -102,26 +100,16 @@
   </div>
 </section>
 
-<!-- ===== STATS STRIP ===== -->
 <div class="container">
   <div class="stats-strip">
     <div class="stat"><div class="n">131,507</div><div class="l">card printings recognized on-device — Pokémon (English &amp; Japanese) &amp; Magic</div></div>
-    <!-- Corrected 2026-08-31. This stat used to put 5 over a clause promising a
-         sourced price for each of them. Both halves were true and the sentence
-         still was not: Gundam has no price feed at all — the app itself says so
-         (MKT_SOURCES.gundam) — so the count promised a price for a game the app
-         deliberately refuses to price. The number now counts what is actually
-         priced. The retired wording is NOT quoted here on purpose: it is a
-         forbidden_value in site-audit-contract.json, and this file is the
-         surface that gate reads, so quoting it to explain it would republish
-         the claim and fail the check. (It did, on the first attempt.) -->
+    
     <div class="stat"><div class="n">4</div><div class="l">of the 5 TCGs priced, every price with its source named</div></div>
     <div class="stat"><div class="n">3</div><div class="l">free Hound questions a day</div></div>
     <div class="stat"><div class="n">0</div><div class="l">accounts required</div></div>
   </div>
 </div>
 
-<!-- ===== FEATURES ===== -->
 <section class="section" id="features">
   <div class="container">
     <div class="section-eyebrow center">What it does</div>
@@ -147,13 +135,7 @@
         a number it cannot source.</p>
       </div>
       <div class="feature">
-        <!-- SCOPED 2026-08-31, the last single-feed sentence on this page. The listing
-             spread — cheapest current listing and middle of the book — comes only from the
-             TCGdex reader; index.html:9595 in the app says so outright ("Only the TCGdex
-             reader fills these; the other four set them null by design"). So the three-number
-             promise is a Pokémon promise, and naming TCGplayer-via-TCGdex as the source of
-             all of it was the same error the stats strip, terms.html and support.html each
-             carried in their own wording. -->
+        
         <h3>Prices come with receipts.</h3>
         <p>Every price names the feed that supplied it, dated, on the card itself — and the
         feeds differ by game, so the app never quietly reads one market's number under
@@ -163,17 +145,7 @@
         number and letting you assume.</p>
       </div>
       <div class="feature">
-        <!-- CORRECTED TWICE ON 2026-08-31, and the second correction is the interesting
-             one. This was scoped DOWN to "four Pokémon sets" on the belief that completion
-             still read SET_POOLS (mock-data.js:569, four hand-typed Pokémon fixtures). That
-             was true this morning and is not true now: the pre-launch review's #1 deferred
-             item shipped the same day (DESIGN.md "Set completion leaves the fixture",
-             PLAN.md item 1), deriving completion from the BINDER for every set you own cards
-             in, in all five games. Under-claiming is a defect too, so the scope came back up.
-             What did NOT survive is "secrets and reverses included": reverse-holo printings
-             are still not tracked as separate cards in any game (PLAN.md item 1c), and the
-             app's own set note says so. The trailing "watch the prices for you" is also gone
-             — the watchlist evaluates thresholds, but this build cannot notify anyone. -->
+        
         <h3>Master-set completion, done right.</h3>
         <p>Every set you own cards in, across all five games — what you hold, what's missing,
         and a costed head on the gap. Owned is counted on your phone and stays exact with every
@@ -181,15 +153,7 @@
         cannot be reached. Reverse-holo printings are not counted separately yet, and the set
         screen says so.</p>
       </div>
-      <!-- Corrected 2026-08-31. This said notifications were opt-in and capped under four a
-           month, in a binary that has NO notification capability of any kind: zero hits for
-           UNUserNotification, registerForRemoteNotifications or aps-environment across every
-           Swift file and the project spec. It is the same phantom-alerts claim that was
-           removed from the stats strip and from privacy.html, surviving in a third place —
-           which is why a claims sweep has to enumerate surfaces rather than fix the one it
-           was pointed at. The honest version is stronger for this feature anyway: the app
-           does not notify at all. Restore a capped-frequency promise only alongside the
-           capability, not before it. -->
+      
       <div class="feature">
         <h3>No streaks. No guilt. No noise.</h3>
         <p>No manufactured urgency and no loss framing — and today, no notifications at all:
@@ -200,7 +164,6 @@
   </div>
 </section>
 
-<!-- ===== SCREENS ===== -->
 <section class="section" id="screens">
   <div class="container">
     <div class="section-eyebrow">Screens</div>
@@ -223,16 +186,7 @@
         <div class="device"><img data-allow-duplicate="true" src="screenshots/set.png?v=20260901a" width="780" height="1688" loading="lazy" alt="Set — a master-set completion ring with the exact cards still needed"></div>
         <p>What's missing, and what it costs to finish.</p>
       </div>
-      <!-- THE HOUND FRAME IS BACK (2026-09-01), on the exact terms its removal
-           set: re-shot from the FIXED fixture (the seeded sell-advice transcript
-           died 2026-08-24) and READ before publishing — the frame shows the
-           clean opening screen: the AI disclosure banner, two capability
-           questions, and the 3-a-day meter. Nothing in it advises anything.
-           If this frame is ever regenerated, read it again first; the ban
-           returns with the first frame that breaks rule 4.
-           (Unchanged and still true: the HERO carousel above is three frames,
-           and style.css's nth-child delays move with that count — touch one,
-           touch both.) -->
+      
       <div class="screen-card">
         <div class="device"><img src="screenshots/hound.png?v=20260901a" width="780" height="1688" loading="lazy" alt="Hound — the AI companion's opening screen, with its AI disclosure, two starter questions, and the free daily meter"></div>
         <p>An AI that knows your binder — and says what it can't know.</p>
@@ -241,7 +195,6 @@
   </div>
 </section>
 
-<!-- ===== PRICING ===== -->
 <section class="section" id="pricing" style="background:var(--bg-2)">
   <div class="container">
     <div class="section-eyebrow center">Holohound Pro</div>
@@ -295,7 +248,6 @@
   </div>
 </section>
 
-<!-- ===== INDEPENDENT & UNOFFICIAL ===== -->
 <section class="section">
   <div class="container" style="max-width:var(--maxw)">
     <h2 class="title" style="font-size:20px">Independent and unofficial</h2>
@@ -311,7 +263,6 @@
   </div>
 </section>
 
-<!-- ===== FAQ ===== -->
 <section class="section" id="faq">
   <div class="container" style="max-width:var(--maxw)">
     <div class="section-eyebrow center">Common questions</div>
@@ -361,7 +312,6 @@
   </div>
 </section>
 
-<!-- ===== CTA STRIP ===== -->
 <section class="cta-strip">
   <h2>Want to know when it ships?</h2>
   <p>No spam, no list you can't leave — just one email, the day it's live.</p>
@@ -371,7 +321,6 @@
   </a>
 </section>
 
-<!-- ===== FOOTER ===== -->
 <footer class="site-marketing">
   <div class="footer-inner">
     <div class="footer-top">

@@ -10,10 +10,7 @@
 <meta property="og:description" content="What Mythkin collects, where it goes, and how to delete all of it.">
 <meta property="og:url" content="https://hypersage.ai/mythkin/privacy.html">
 <meta property="og:type" content="article">
-<!-- ?v=20260816a is Mythkin's ONE og-image token, shared with index.html,
-     terms.html and support.html. Regenerating og-image.png means bumping it in
-     all four in the same edit. safety.html deliberately carries no og:image
-     today — if one is added there, it takes this same token. -->
+
 <meta property="og:image" content="https://hypersage.ai/mythkin/og-image.png?v=20260816a">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -22,9 +19,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FBF6EC" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#170F0C" media="(prefers-color-scheme: dark)">
-<!-- BLOCKING and in <head>: a deferred script runs after first paint, so a
-     reader who chose Light watches a dark page render and flip. Same key the
-     landing page writes, so one choice covers the whole site. -->
+
 <script>
 (function(){try{var t=localStorage.getItem('mythkin.theme');
 if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();
@@ -79,7 +74,7 @@ we want to hear about it.</p>
 <tr><td><strong>Age confirmation</strong> — that you confirmed you are 18+.</td><td>Legal requirement.</td><td>Our server, as a dated event against your device ID.</td></tr>
 <tr><td><strong>Crisis referral counts</strong> — that a referral was shown, and when. <em>Not what was said.</em> The row also holds a salted hash of the network the request came from — never an address, and it cannot be turned back into one.</td><td>California SB 243 requires operators to report these annually from July 2027. The network hash is what stops one caller looking like a crowd: crisis turns skip the free-tier limit, and without it anyone could mint a fresh device ID per message and take unlimited free replies.</td><td>Our server.</td></tr>
 <tr><td><strong>Subscription status</strong> — an Apple- or Google-signed receipt.</td><td>To unlock Plus. We never see your payment details; the store handles payment.</td><td>Verified in memory per request; not stored as a payment record.</td></tr>
-<!-- NOT ON SALE YET, SO EVERY VERB HERE IS CONDITIONAL. This row read "Sparks you buy … We store … your remaining balance", which describes a purchase nobody can make and a balance nobody can hold: the two consumables sit in MISSING_METADATA at App Store Connect, so StoreKit prices neither and the shipped 1.0 build cannot sell one. terms.html has said "not on sale yet" since 2026-08-15 and this page contradicted it. Move this row back to the present tense ONLY when the consumables have a price schedule and the store returns them — and change support.html in the same edit. -->
+
 <tr><td><strong>Sparks, if they go on sale</strong> — sparks are a planned one-off purchase that would pay for paintings, and they are <strong>not on sale yet</strong>. If they are offered, we would store the store's transaction ID, which pack it was, and your remaining balance.</td><td>The transaction ID is how the same receipt could not be redeemed twice. The balance is what you would still own.</td><td>Our server. <strong>A balance would survive "Delete everything"</strong>, still keyed to your device — deleting it would destroy something you had paid for and we cannot refund it. See below.</td></tr>
 <tr><td><strong>Usage counts</strong> — how many messages you have sent in the current window.</td><td>To enforce the free tier fairly.</td><td>Our server.</td></tr>
 <tr><td><strong>What you heart, borrow, block and report</strong> — one row per action, holding your device ID, what it pointed at, and when. A report also holds the reason, anything you typed into it, and a salted hash of the network it came from, for the same reason the crisis row does — so one reporter cannot look like a crowd.</td><td>Hearts and borrows are how the shelves rank and how your library knows what is in it. Blocks are how a creator stays hidden from you. Reports are how a human can review something you flagged.</td><td>Our server. Hearts and borrows appear as counts on the creator's card, never as your identity. All of it is in your export. Hearts, borrows and blocks are deleted when you delete everything; a report you filed stays open with your identifier removed, because it is evidence about someone else's content.</td></tr>
@@ -184,8 +179,7 @@ visible to whoever has the link.</p>
   finish reviewing.</li>
   <li><strong>Rate-limit counters</strong> for the window you are currently in. They
   hold a request count and nothing else.</li>
-  <!-- Conditional for the same reason as the Sparks row above: sparks are not
-       on sale, so no redemption record and no balance can exist yet. -->
+  
   <li><strong>A record that a spark purchase was redeemed</strong>, if sparks go on
   sale — kept, with your identifier removed, so the same store receipt could not be
   redeemed twice.</li>

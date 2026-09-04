@@ -46,19 +46,6 @@
     </div>
   </nav>
 
-  <!-- Every route promised here exists in the shipped build: the gear opens
-       settings with two independent mutes (music / sfx) from the playing and
-       paused screens; the Deeper Pick is offered on the career FAIL screen for
-       250 coins and adds 8 swings to ONE retry.
-       THERE IS A RESTORE PURCHASE BUTTON — this comment used to say there was
-       none "because there are no purchases", and that went false on 2026-08-22
-       when gemburrow.full.unlock shipped. game.js draws the row in the settings
-       panel (label RESTORE PURCHASE, "RESTORING…" while busy) and the same
-       button on the paywall; it is shown only while Store.available() is true
-       and the unlock is NOT already owned, which is why the answer below says it
-       disappears once owned. The two outcome strings quoted below are the app's
-       own: "Purchase restored." / "No purchase found on this Apple ID."
-       Do not add a step the app cannot perform. -->
   <main class="legal">
     <h1>Support</h1>
     <p class="updated">We answer email. Usually within a day or two.</p>

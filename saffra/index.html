@@ -4,62 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Saffra — AI recipe app that adapts to your pantry</title>
-  <!-- THIRD PASS 2026-08-19 (later same day). The gen-3 replacement below kept a
-       claim gen 2 had smuggled through: "food-safety ... validation pass".
-       A case-insensitive sweep for food.safety across ALL of saffra-api returns
-       ZERO hits — no validation agent, no gate, no column. The app's own
-       first-launch consent screen says the opposite ("Follow USDA food-safety
-       temperatures"). Removed from all five surfaces here. Also removed: the
-       $149.99 Lifetime card (no non-consumable exists — inAppPurchasesV2
-       returns []), two wrong prices, three "consensus-built catalog" strings,
-       the "real chef persona" heading, and "no message limit" (Pro is still
-       bounded by rate_limit_chat_per_day = 300).
-       This is the THIRD generation of this claim. Each fix authored the next
-       one. Do not describe sourcing OR safety-checking unless you can point at
-       the code that does it. -->
-  <!-- CLAIM GUARD, rewritten 2026-08-19. READ THIS BEFORE TOUCHING ANY COPY BELOW.
-       This page has now carried a false sourcing claim in TWO generations:
-         gen 1 (until 2026-08-06): a human-vetting claim about who checked recipes
-         gen 2 (until 2026-08-19): a source-consensus + weighting claim, with
-               CORE/VARIATION/OUTLIER scoring and independently-drafting personas.
-       The exact retracted wordings live in x-ads/saffra/AUDIT.json
-       forbidden_claims and are deliberately NOT quoted here: an HTML comment is
-       served to every visitor, so quoting one republishes the string it retires.
-       Gen 2 was written HERE as the safe replacement for gen 1. It was not safe.
-       Commit saffra-ios 968d2db (2026-08-18) removed it from the app after
-       grepping the whole backend: saffra-api issues NO request to any recipe
-       publication, and those weights were never computed. The three named
-       personas appear nowhere in saffra-api; panel_agreement_score / merge_notes
-       / common_mistakes are written only by a backfill from a research workspace,
-       and the iOS app renders none of them.
 
-       THE RULE, not a word list: do not describe where a recipe came from unless
-       the HTTP request that fetches it exists in code. There is no such request.
-       A word list gets routed around by the next rewrite — that is exactly how
-       gen 2 happened. If you cannot point at the call, say nothing about sourcing.
-
-       What this page may claim instead is completeness, measured 2026-08-19 over
-       the shipped catalogue (2,340 recipes / 21,934 ingredients / 15,534 steps):
-       amounts 99.8%, units 97.7%, prep notes 97.2%, equipment lists 100%,
-       sensory finish cues 99.3% — plus real adaptation (adaptation.py rules
-       1/4/5). Gated by saffra-ios store/check_frame_claims.py. Re-measure before
-       requoting. See branding/BRAND_VOICE_AND_NARRATIVE.md (amended 2026-08-19).
-
-       REMOVED 2026-08-19, second pass: the "230,000-recipe semantic search index"
-       (six places, incl. two stat tiles and the JSON-LD FAQ). It does not exist.
-       Production holds 2,323 recipes, ALL of them source='maestro' and all with an
-       embedding — measured against masterchef-api the same day, and independently
-       corroborated by the docstring of saffra-api scripts/audit_hands_on_time.py.
-       The 230,000 was the Food.com CC0 Kaggle set that scripts/seed_foodcom.py CAN
-       load; it was never loaded into production, so zero CC0 rows have ever been
-       searchable. Do not requote it unless `_count_search_eligible` says otherwise.
-
-       AND NOTE THE TWO POPULATIONS, which is why the page now says 2,300+ rather
-       than a precise figure: the bundled catalogue a GUEST sees (DemoFixtures.swift)
-       measures 2,340, while the server a SIGNED-IN user searches holds 2,323. Both
-       are real; they are not the same number, and 2,300+ is true of each. The
-       percentages above were measured over the 2,340 bundle and are left as the
-       record of that measurement — do not lift 2,340 back out into user-facing copy. -->
   <meta name="description" content="Your personal AI chef. Every recipe arrives complete — measured amounts, prep notes, the equipment you need and a cue for what done looks like — then adapts to your pantry, allergies, and time.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/saffra/">
@@ -85,14 +30,11 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Async font loading: preload the stylesheet, apply it via the media-swap
-       trick so it never blocks first paint; <noscript> keeps fonts with JS off. -->
+  
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet"></noscript>
-  <!-- Stamps `js` on <html> before first paint. Every rule that HIDES content
-       pending a script must hang off this class, so that with JS off the page
-       renders fully instead of blank. See the `.js .anim` rule below. -->
+  
   <script>document.documentElement.classList.add('js');</script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1030,14 +972,7 @@
       .hsx-more ul { gap: 10px 20px; }
     }
   </style>
-<!-- app-schema:start (generated by appdev/tools/app_schema.py — edit apps.json, not this) -->
-<!-- The `description` below was corrected AGAIN on 2026-08-19. The 2026-08-06 pass
-     removed the gen-1 human-vetting claim and replaced it with
-     a gen-2 source-consensus claim — which was ALSO false
-     and shipped here for 13 days (see the head claim guard). It now describes
-     completeness, which is measurable. The generator source —
-     gamedev-harness/appdev/tools/apps.json — was corrected to match on 2026-08-19, so
-     regenerating with app_schema.py is now idempotent; keep the two in sync. -->
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -1057,10 +992,7 @@
   }
 }
 </script>
-<!-- app-schema:end -->
-<!-- FAQPage schema: plain-text copies of the on-page #faq section below.
-     Keep in sync with the visible FAQ — Google requires the markup to match
-     the rendered text. -->
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -1168,7 +1100,6 @@
 </head>
 <body>
 
-<!-- Navbar -->
 <nav class="navbar">
   <div class="container">
     <a href="#" class="nav-logo">
@@ -1176,8 +1107,7 @@
       <span>Saffra</span>
     </a>
     <div class="nav-links" id="navLinks">
-      <!-- #concept, not #screenshots: no element on this page has id="screenshots",
-           so both this link and the matching footer link were dead. -->
+      
       <a href="#concept">Inside</a>
       <a href="#time-aware">Time-Aware</a>
       <a href="#intelligence">The AI</a>
@@ -1193,7 +1123,6 @@
   </div>
 </nav>
 
-<!-- Hero -->
 <section class="hero">
   <div class="container">
     <div class="hero-layout">
@@ -1208,8 +1137,7 @@
       </div>
       <div class="hero-screenshot">
         <div class="hero-phone-wrap">
-          <!-- A user-controlled tour of the app's signature surfaces. Light and
-               dark captures alternate, but the visitor chooses when to advance. -->
+          
           <div class="hero-phone-frame" id="heroRotator" aria-roledescription="carousel" aria-label="Saffra app walkthrough">
             <img class="hero-phone-img is-active"
                  src="screenshots-raw/01-chef-tab-light.jpg?v=20260828a"
@@ -1258,19 +1186,11 @@
   </div>
 </section>
 
-<!-- Stats -->
 <div class="stats">
   <div class="container">
     <div class="stats-grid">
       <div class="stat-item"><div class="stat-number gradient-text-warm">2,300+</div><div class="stat-label">Recipes, Every One Searchable</div></div>
-      <!-- REPLACED 2026-08-19. This slot read "3 / Independent Drafts Per Recipe",
-           citing the three AI chef personas at RecipeDetailView.swift:3287. Those
-           personas appear NOWHERE in saffra-api, and the app renders none of the
-           panel fields (common_mistakes / merge_notes / panel_agreement_score), so
-           the number could not be supported. A stat is the most load-bearing kind of
-           claim on a page — it reads as audited. 99.8% is measured over the shipped
-           catalogue (21,894 of 21,934 ingredients, 2026-08-19) and is gated by
-           saffra-ios store/check_frame_claims.py. Re-measure before changing it. -->
+      
       <div class="stat-item"><div class="stat-number gradient-text-warm">99.8%</div><div class="stat-label">Ingredients With A Measured Amount</div></div>
       <div class="stat-item"><div class="stat-number gradient-text-warm">25+</div><div class="stat-label">Cuisines, Regional Depth</div></div>
       <div class="stat-item"><div class="stat-number gradient-text-warm">100%</div><div class="stat-label">Hands-Free Voice</div></div>
@@ -1280,7 +1200,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Concept Section -->
 <section class="concept-section" id="concept">
   <div class="container">
     <div class="anim">
@@ -1315,9 +1234,7 @@
         <div class="chat-bubble chat-chef" style="margin-bottom:0">The cilantro's going yellow — perfect time to use it. Want me to walk you through it hands-free?</div>
       </div>
     </div>
-    <!-- The adaptation flow — the intro's closing line as a picture. Labels
-         restate on-page copy only (concept intro, context chips, allergen
-         rule, "Adapted for you"); arrows are decorative and aria-hidden. -->
+    
     <div class="adapt-flow anim anim-d2">
       <div class="chat-label">Then she rewrites it for you</div>
       <div class="adapt-track">
@@ -1352,9 +1269,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Time-aware home — the Recipes tab re-organizes around the meal you're
-     actually about to cook. Light shots for morning/midday, dark for
-     evening/night: the strip itself reads like a day passing. -->
 <section id="time-aware">
   <div class="container">
     <div style="text-align:center" class="anim">
@@ -1405,7 +1319,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Built like a chef — the AI / intelligence layer -->
 <section id="intelligence">
   <div class="container">
     <div style="text-align:center" class="anim">
@@ -1414,8 +1327,6 @@
       <p class="section-desc" style="margin:14px auto 0">Generic "AI cooking" tools paste a recipe into a chatbot and call it a day. Every layer of Saffra is built for cooking specifically — with knowledge, memory, and rules a general-purpose AI doesn't have.</p>
     </div>
 
-    <!-- The context layer: what Saffra can actually see when you ask her
-         something. One real chat, annotated. -->
     <div class="fd-grid">
       <div class="fd-copy anim">
         <span class="section-label">Full App Context</span>
@@ -1449,12 +1360,7 @@
       <div class="intelligence-card anim anim-d2">
         <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
         <h3>A catalog written in advance — not improvised at the stove</h3>
-        <!-- ~900 is the real flagship count. Sources: saffra-ios/branding/
-             BRAND_VOICE_AND_NARRATIVE.md:110 "~915 flagship recipes";
-             saffra-api/app/meal_plans/generator.py:50 "~915"; app/recipes/
-             dietary_classifier.py:10 "917 flagship rows". The live chef prompt
-             (app/chat/prompts/chef_system.md:92,175) says less still. The old
-             "2,100+" here matched nothing on disk. -->
+        
         <p>No Saffra recipe is improvised the moment you ask. The catalog is written in advance and reviewed in-house, with allergen flags on every recipe — and it is written to be cooked from: <strong>99.8%</strong> of ingredients carry a measured amount, <strong>97.2%</strong> say how to prep it, every recipe lists the equipment it needs, and <strong>99.3%</strong> name a cue for what done looks like. Saffra's catalog: <strong>2,300+ recipes</strong> across 25+ cuisines, and <strong>every one of them is semantically searchable</strong> (vector embeddings). Then she adapts it to your pantry, your skill, your equipment.</p>
       </div>
       <div class="intelligence-card anim anim-d3">
@@ -1474,30 +1380,12 @@
       </div>
       <div class="intelligence-card anim anim-d2">
         <div class="icon-box green"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></div>
-        <!-- VOICE DATA FLOW - Apple is the baseline, Whisper is not accuracy-gated.
-             saffra-ios MasterChef/Voice/SpeechRecognizer.swift:161 `r.requiresOnDeviceRecognition = false`
-             (server-backed Apple STT); MasterChef/Cooking/CookingSessionModel.swift:901-919 uploads the
-             recorded clip to OpenAI Whisper for EVERY .askChef question even when Apple's transcript
-             succeeded, plus :845-849 (empty transcript) and :879-891 (unparsed intent). The old
-             "falls back to on-device recognition offline" clause was deleted 2026-08-24: no shipped
-             code implements it. Full reasoning in privacy.html, VOICE DATA FLOW comment. Same wording
-             lives in the two FAQ answers and their JSON-LD twins - change all five together. -->
+        
         <h3>A voice built for a real kitchen</h3>
         <p>Streaming <strong>neural TTS</strong> — Saffra's signature voice — served from a content-addressed cache so the same line never re-renders twice. Speech recognition uses <strong>Apple's Speech framework</strong>, which is server-backed — audio goes to Apple, not to us. Every question you speak in Cooking Mode is also re-transcribed by <strong>OpenAI's Whisper</strong> for accuracy, then discarded. The wake phrase "hey saffra" is only armed inside Cooking Mode, never app-wide. Voice timers land in Live Activities, including the Dynamic Island.</p>
       </div>
     </div>
 
-    <!-- REPLACED 2026-08-19. This diagram used to draw the sourcing pipeline:
-         a sourcing-and-weighting stage that drew three
-         fabricated weighted bars, then CORE/VARIATION/
-         OUTLIER scoring, then an independently-drafting personas stage.
-         None of that exists — see the head claim guard. The weights were the
-         worst of it: fabricated numbers rendered as pixel bars, which reads as
-         evidence precisely because it is drawn rather than asserted.
-         The bars below are now REAL measurements over the shipped catalogue
-         (the 2,340-recipe bundle, measured 2026-08-19), and their --w values are the
-         measured rates. If you re-measure and the numbers move, move the bars.
-         Do not draw a stage this site cannot point at in code. -->
     <div class="adapt-flow anim anim-d2">
       <div class="chat-label">What's in every Saffra recipe — before you ever ask</div>
       <div class="build-track">
@@ -1565,7 +1453,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Cooking Mode — the signature surface, explained step by step. -->
 <section id="cooking-mode">
   <div class="container">
     <div style="text-align:center" class="anim">
@@ -1595,14 +1482,7 @@
           </li>
         </ul>
       </div>
-      <!-- COOK-PLAYER PROVENANCE: five untouched simulator screenshots from ONE
-           continuous Cooking Mode session (the store rig's own pose chain —
-           SHOT_ROUTE=cooking, demo fixtures, Aglio e Olio, status bar 9:41) —
-           step 1 with its suggested timer, the timer genuinely counting down,
-           steps 2 and 3 arriving, and the step-4 "I'm done · Photo optional"
-           finish. Nothing is mocked and nothing is spliced; only the pacing
-           between frames is authored (loam .tend-player pattern). The counting
-           frame is the no-JS / reduced-motion default. -->
+      
       <figure class="fd-shot cook-player-fig anim">
         <div class="cook-player" id="cook-player" role="img" aria-label="Five real frames of one Cooking Mode session: step 1 of 4 read aloud with a suggested 15-minute timer, the timer counting down at 13:35, step 2 with the garlic in the skillet and its own 5-minute timer, step 3, and step 4 with the I'm done button, photo optional">
           <img src="screenshots-raw/cook-live-1.jpg?v=20260901a" alt="" width="417" height="906" decoding="async">
@@ -1626,7 +1506,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Ask Saffra — the chat surface. -->
 <section id="ask-saffra">
   <div class="container">
     <div class="fd-grid fd-flip">
@@ -1667,7 +1546,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Pantry — scan / snap / barcode. -->
 <section id="pantry">
   <div class="container">
     <div class="fd-grid">
@@ -1678,13 +1556,7 @@
         <ul class="fd-points">
           <li>
             <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-            <!-- The shelf photo is the ONE image that leaves the phone — it is uploaded
-                 to /v1/pantry/ingest/photo and read by a vision model (saffra-ios/
-                 MasterChef/Pantry/IngredientCameraScanView.swift:4-5; saffra-api/app/
-                 pantry/photo_vision.py). Receipts and cookbook pages really are read
-                 on-device via Apple Vision. Keep the parenthesis — without it this card
-                 contradicts the "photos never leave your phone" lines elsewhere on the
-                 page and the App Store privacy disclosure. -->
+            
             <div><h3>Snap your fridge</h3><p>Photograph a shelf and she identifies what's on it. Items land categorized, no typing. This one photo is sent to our server to be read; receipts and cookbook pages are read on your phone.</p></div>
           </li>
           <li>
@@ -1714,7 +1586,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Search — semantic, filterable. -->
 <section id="search">
   <div class="container">
     <div class="fd-grid fd-flip">
@@ -1731,23 +1602,7 @@
             <div class="icon-box green"><svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
             <div><h3>Filters that matter</h3><p>Under 30 minutes. Vegetarian. Thai. Stack refinements and the results re-rank instantly.</p></div>
           </li>
-          <!-- REMOVED 2026-08-24 — third bullet, verbatim: <h3>Flagship first</h3>
-               "Flagship recipes from the prepared catalog rank above the wider index,
-               so the most complete recipes surface first."
-               BOTH halves are false. There is no "wider index": the catalog is one
-               Recipe table (saffra-api/app/recipes/routes.py:523-623). And nothing
-               ranks flagship rows above anything — the ORDER BY is title_boost, then
-               Reciprocal Rank Fusion (k=60) over the full-text and vector CTEs, then
-               Recipe.quality_score; `flagship` appears nowhere in the ordering, and a
-               repo-wide grep for it in saffra-api/app finds only comments and a
-               one-shot generator script. Named as a surviving forbidden claim in
-               x-ads/saffra/AUDIT.json (survivor of the deleted 230,000-recipe /
-               two-population framing).
-               DELETED, not reworded: no file on disk determines a replacement
-               sentence, and the two bullets above already carry the true search
-               story. .fd-points is `display:flex; flex-direction:column` (line ~894),
-               so dropping to two items needs no layout change — cf. the 2026-08-19
-               Lifetime-card removal that stranded a third grid column. -->
+          
         </ul>
       </div>
       <div class="fd-shots anim">
@@ -1763,7 +1618,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Recipe detail — what a recipe looks like up close. -->
 <section id="recipe-detail">
   <div class="container">
     <div class="fd-grid">
@@ -1808,7 +1662,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Features -->
 <section id="features">
   <div class="container">
     <div style="text-align:center" class="anim">
@@ -1863,7 +1716,6 @@
 
 <div class="section-divider"></div>
 
-<!-- How It Works -->
 <section id="how-it-works">
   <div class="container">
     <div style="text-align:center" class="anim">
@@ -1881,7 +1733,6 @@
 
 <div class="section-divider"></div>
 
-<!-- Pricing -->
 <section id="pricing">
   <div class="container">
     <div style="text-align:center" class="anim">
@@ -1901,14 +1752,7 @@
         <div class="price-amount gradient-text-warm">$0</div><div class="price-period">forever</div>
         <ul class="price-features">
           <li>A free account is required to open Saffra (Sign in with Apple or Google)</li>
-          <!-- TRUE AS OF 2026-08-06: 10 is a LIFETIME cap, not a daily one.
-               saffra-api/app/config.py:146 `free_chat_lifetime: int = 10`;
-               app/ratelimit/limiter.py:54 keys it `rl:chat:lifetime:{user_id}`
-               with NO TTL and :83 reports `reset_seconds=-1` ("lifetime cap, no
-               time-based reset"). Client agrees — saffra-ios/MasterChef/Billing/
-               EntitlementStore.swift:30 `chatLifetime = 10`. Likewise the recipe
-               adaptation below: `free_adapt_lifetime: int = 1`, also lifetime.
-               Do NOT write "a day" here — it advertises 3,650/year for 10 ever. -->
+          
           <li>10 chef messages to try her out</li>
           <li>Browse the recipe library</li>
           <li>1 recipe adaptation</li>
@@ -1942,7 +1786,6 @@
 
 <div class="section-divider"></div>
 
-<!-- FAQ -->
 <section id="faq">
   <div class="container">
     <div style="text-align:center" class="anim">
@@ -1979,7 +1822,6 @@
 
 <div class="section-divider"></div>
 
-<!-- CTA -->
 <section class="cta-section" id="signup">
   <div class="container">
     <h2 class="section-title anim">Ready for recipes you can <span class="gradient-text-warm">actually trust?</span></h2>
@@ -1991,12 +1833,10 @@
   </div>
 </section>
 
-<!-- Scroll to Top -->
 <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">
   <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
 </button>
 
-<!-- Footer -->
 <footer>
   <div class="container">
     <div class="footer-grid">

@@ -6,9 +6,7 @@
   <title>Privacy Policy — StoryVault AI</title>
   <meta name="description" content="The full data flow for the StoryVault AI iOS app — what we collect, what we don't, and what happens to your story input.">
   <link rel="canonical" href="https://hypersage.ai/storyvault/privacy.html">
-  <!-- ?v=20260821a is StoryVault's ONE og-image token, shared with index.html,
-       terms.html and support.html. Regenerating og-image.png means bumping it in
-       all four in the same edit. -->
+  
   <meta property="og:type" content="website">
   <meta property="og:title" content="Privacy Policy — StoryVault AI">
   <meta property="og:description" content="The full data flow for the StoryVault AI iOS app — what we collect, what we don't, and what happens to your story input.">
@@ -91,19 +89,14 @@
     <ul>
       <li><strong>Apple App Store</strong>: purchases and Sign in with Apple. <a href="https://www.apple.com/legal/privacy/en-ww/" rel="noopener">apple.com/legal/privacy</a></li>
       <li><strong>Google</strong>: Sign in with Google, only if you use it. <a href="https://policies.google.com/privacy" rel="noopener">policies.google.com/privacy</a></li>
-      <!-- These two were the wrong way round. Anthropic is the PRIMARY narrative provider,
-           OpenAI the failover — matching the app's own 5.1.2(i) disclosure in
-           SettingsView.swift:613 and `_service_for` in
-           storyvault-api/app/adventure/routes.py:31. Illustrations and voice are OpenAI. -->
+      
       <li><strong>Anthropic</strong>: primary provider for narrative generation. <a href="https://www.anthropic.com/legal/privacy" rel="noopener">anthropic.com/legal/privacy</a></li>
       <li><strong>OpenAI</strong>: failover provider for narrative, and the provider for illustrations and voice narration. <a href="https://openai.com/policies/privacy-policy" rel="noopener">openai.com/policies/privacy-policy</a></li>
       <li><strong>Fly.io</strong>: hosts our backend infrastructure. <a href="https://fly.io/legal/privacy-policy" rel="noopener">fly.io/legal/privacy-policy</a></li>
     </ul>
 
     <h2>Children</h2>
-    <!-- 13+, not 12+ (SHIP.md:131,147 — the Tales community feed forces the social-media
-         answer, which sets a 13+ floor). And the prompt excludes content that SEXUALIZES
-         MINORS (system.md:18-19), not child endangerment generally. -->
+    
     <p>StoryVault AI is rated 13+. The bundled library is public-domain literature, and the AI Adventure system prompt explicitly excludes explicit sexual content and any content that sexualizes minors. We do not knowingly collect data from children under 13. If you believe we have, please contact us at <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>.</p>
 
     <h2>Your rights</h2>

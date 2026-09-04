@@ -46,21 +46,6 @@
     </div>
   </nav>
 
-  <!-- DERIVED FROM THE SHIPPED BUILD, not from a template. Sources:
-       game.js Meta (localStorage key gb_meta_v1 mirrored to Capacitor
-       Preferences), Lb (the ONE network client — Supabase REST, daily only),
-       package.json (Capacitor core/ios/android/haptics/preferences and nothing
-       else: no analytics, no ads).
-       STOREKIT IS NOW IN THE BUILD — that line used to say "no StoreKit" and
-       went false on 2026-08-22. native/ios/GemburrowStore.swift is a StoreKit 2
-       handler and gemburrow.full.unlock is a real non-consumable
-       (store/iap-catalog.json). It changes what this page must say only in one
-       place: the save gains `full` and `iapSeen` (game.js Meta DEFAULTS), which
-       is a hashed transaction id and a flag, never a payment detail — Apple runs
-       the transaction and we never see a card. "No in-app purchases" and "no
-       purchases" are DEAD STRINGS here.
-       If any of those change, this page and the App Store Connect App Privacy
-       answers change together. -->
   <main class="legal">
     <h1>Privacy Policy</h1>
     <p class="updated">Last updated: August 24, 2026</p>

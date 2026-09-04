@@ -7,10 +7,7 @@
   <meta name="description" content="How Saffra handles your data. Plain English, no dark patterns.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/saffra/privacy.html">
-  <!-- The og-image token below is Saffra's ONE token: index.html, privacy.html,
-       terms.html and support.html must all carry the same ?v=. If og-image.png is
-       regenerated, bump it in all four or the old card stays cached on some
-       scrapers and not others. -->
+  
   <meta property="og:type" content="website">
   <meta property="og:title" content="Privacy Policy — Saffra">
   <meta property="og:description" content="How Saffra handles your data. Plain English, no dark patterns.">
@@ -81,17 +78,7 @@
     <ul>
       <li><strong>Items you add manually, via barcode scan, via receipt scan, or by photographing a shelf</strong> — including names, quantities, expirations, brand, and allergens.</li>
       <li><strong>Receipt and cookbook photos</strong>: OCR runs on your iPhone via Apple's Vision framework. The <strong>image never leaves your device</strong>. Only the extracted text is sent to us for parsing.</li>
-      <!-- REQUIRED DISCLOSURE — do not delete. The ingredient/shelf photo is the ONE
-           image path that leaves the phone. saffra-ios/MasterChef/Pantry/
-           IngredientCameraScanView.swift:4-5: "upload to /v1/pantry/ingest/photo where
-           the vision model identifies them". saffra-api/app/pantry/photo_vision.py:1-7
-           sends the image to `utility_model()` = `llm_utility_model` (config.py:23,
-           default gpt-4o-mini) through `get_llm()`, which is an AsyncOpenAI client and
-           can only be OpenAI or a local Ollama (infra/llm_client.py:1-46) — so on the
-           deployed service this is OpenAI. app/pantry/routes.py:380-420 writes nothing
-           to the database or object storage; the response is a preview list the user
-           confirms. This clause is what makes the receipt/cookbook "never leaves your
-           device" sentence above safe to keep. -->
+      
       <li><strong>Ingredient photos (fridge, counter, or shelf)</strong>: this one is different. When you photograph a shelf so Saffra can identify what's on it, <strong>the image is uploaded to our server and passed to OpenAI's vision model</strong>, which returns a list of the foods it thinks it can see. We show you that list to confirm before anything is added to your pantry. We do not store the image — it is held in memory for the request, and neither we nor OpenAI use it to train models. Receipt and cookbook pages are not sent this way; only the shelf photo is.</li>
     </ul>
 
@@ -106,21 +93,7 @@
     </ul>
 
     <h3>Community content (opt-in)</h3>
-    <!-- SOFTENED 2026-08-24. Every bullet below was written in the present tense, as
-         a description of data we collect today. We do not collect any of it, because
-         nothing can be posted:
-           * saffra-ios MasterChef/Social/SocialStore.swift:701-703 ships
-             shareToCommunityEnabled / communityFeedEnabled / feedTabVisible all
-             false in the submitted build;
-           * production https://masterchef-api.fly.dev/readyz returns
-             {"status":"degraded", ... "r2":"degraded: not configured"} (curl,
-             2026-08-24) — /posts/upload-url 503s, photo_key is required on
-             CookPostCreateIn, and app/social/moderation.py can never reach
-             state = "live".
-         The bullets are KEPT and made conditional rather than deleted: a privacy
-         policy that under-declares a category it later starts collecting is the worse
-         failure, and the schema is already in the shipped app. Do not restore the
-         present tense until the flags flip AND the four R2 secrets are set. -->
+    
     <p><strong>Community sharing is not available in the current version of Saffra</strong>, so none of the following is collected today. It describes what would be collected if community sharing becomes available and you opt in.</p>
     <ul>
       <li><strong>Public handle &amp; display name</strong> — only if you opt into the Community and pick a handle.</li>
@@ -131,28 +104,7 @@
     </ul>
 
     <h3>Voice</h3>
-    <!-- VOICE DATA FLOW - two claims, both from shipped source; do not soften either.
-         (1) Apple is the BASELINE, not the fallback: saffra-ios
-         MasterChef/Voice/SpeechRecognizer.swift:161 sets `r.requiresOnDeviceRecognition = false`
-         ("Was true."), so SFSpeechRecognizer routes voice-mode audio through Apple's servers.
-         The file's own doc comment at :5-6 still claims the old on-device default - it is stale,
-         do not cite it. The former "falls back to on-device recognition when you are offline"
-         clause was DELETED on 2026-08-24: nothing in the app implements that fallback (no
-         `supportsOnDeviceRecognition` check, no retry with the flag flipped), it rested only on
-         the inline comment at :160, and a privacy policy must not promise audio stays on the
-         phone on evidence that thin.
-         (2) Whisper is NOT accuracy-triggered. MasterChef/Cooking/CookingSessionModel.swift:901-919
-         uploads the clip for EVERY .askChef question even when Apple's transcript succeeded
-         ("prefer Whisper's transcription over Apple's even when both succeeded"); :845-849 uploads
-         when Apple returned an empty transcript; :879-891 uploads when the intent parses .unknown.
-         Only a cleanly parsed nav command escapes the upload (Networking/Endpoints.swift:1304:
-         "we only call it for the question path, not for nav"). The parallel recorder is armed for
-         .command mode only, at Voice/SpeechRecognizer.swift:241-243. Chat/ChefChatView.swift:2658
-         starts .command for composer dictation but never calls consumeCommandAudioURL() or
-         transcribeAudio(), so that path uploads nothing. saffra-api/app/voice/routes.py:330 carries
-         the same stale "when on-device STT confidence is low" docstring - the server does not gate
-         on confidence, it transcribes whatever iOS sends. If any of this changes, change the code
-         first and this section second. -->
+    
     <ul>
       <li>When you use voice mode, audio is transcribed by <strong>Apple's Speech framework</strong>. The app does not request on-device recognition, so Apple's server-backed service is what runs and the audio reaches Apple; it does not reach us.</li>
       <li>In Cooking Mode the recorded clip is <em>also</em> sent to our server and forwarded to <strong>OpenAI's Whisper</strong> for a second transcription. This is not a rare backstop: it runs for every spoken question, because Whisper reads question-length kitchen speech more accurately than Apple's transcript, and it also runs whenever Apple returns nothing or returns something the app cannot parse. A navigation command Apple recognizes cleanly (&ldquo;next&rdquo;, &ldquo;back&rdquo;) is not sent, and dictation in the chat composer is never sent. We do not retain the audio; it is processed and discarded.</li>
@@ -161,10 +113,7 @@
 
     <h3>Usage</h3>
     <ul>
-      <!-- "lifetime and daily" is load-bearing: the free chat allowance is a LIFETIME
-           counter of 10 with no reset (saffra-api/app/config.py:146
-           `free_chat_lifetime`, app/ratelimit/limiter.py:54 key `rl:chat:lifetime:` with
-           no TTL). Saying only "daily limits" here contradicts the pricing page. -->
+      
       <li>Per-user counters of chat messages, recipe adaptations, photo scans, voice characters, and Whisper seconds, used to enforce lifetime, monthly and daily limits and for aggregate cost monitoring. Not shared externally.</li>
     </ul>
 
@@ -185,25 +134,10 @@
     <h2>Third-party services</h2>
     <p>We share data with these service providers only to the extent needed to run the app:</p>
     <ul>
-      <!-- Apple receives AUDIO, not just an auth token. saffra-ios
-           MasterChef/Voice/SpeechRecognizer.swift:161 sets
-           `r.requiresOnDeviceRecognition = false` ("Was true."), so SFSpeechRecognizer
-           routes voice-mode audio through Apple's servers. Added 2026-08-24 —
-           the "Voice" section above (audio is transcribed by Apple's Speech
-           framework, which is server-backed) had said so since 2026-08-23 while this
-           vendor list still read "Sign in with Apple" only. The offline/on-device
-           clause that used to end this bullet was deleted 2026-08-24 for the reason
-           given in the VOICE DATA FLOW comment above. If the code ever goes
-           back to on-device, change the code first and both places second. -->
+      
       <li><strong>Apple</strong> — Sign in with Apple, and <strong>speech recognition</strong>: the audio you speak in voice mode is transcribed by Apple's Speech framework. The app does not request on-device recognition, so the service runs server-backed and the audio reaches Apple. It does not reach us.</li>
       <li><strong>Google</strong> — Sign in with Google, only if you use it. Governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
-      <!-- VENDOR CLAIM — path (6) must name whoever actually moderates community
-           photos. It was "Anthropic (Claude)" in its own bullet until 2026-08-08,
-           when saffra-api/app/social/moderation.py moved off the Anthropic SDK onto
-           `get_llm()` + `utility_model()` (app/infra/llm_client.py), the same OpenAI
-           client paths (1)-(5) use. ANTHROPIC_API_KEY has never been set on the
-           masterchef-api Fly app. If moderation ever moves again, this line and the
-           support.html "Where your data goes" list move with it. -->
+      
       <li><strong>OpenAI</strong> — six paths. (1) <strong>Chef chat</strong>: your messages, along with a summary of your profile and pantry, are sent to OpenAI to generate and adapt the chef's replies. (2) <strong>Vision</strong>: when you photograph a shelf to add ingredients, that image is sent to OpenAI's vision model to identify the foods in it. (3) <strong>Whisper</strong>: the audio of every question you ask in Cooking Mode, re-transcribed for accuracy — see <em>Voice</em> above for exactly when a clip is sent. (4) <strong>Text-to-speech</strong>: text you want spoken aloud. (5) <strong>Search</strong>: your recipe searches and imported recipe text are converted to embeddings to power search over Saffra's own recipe catalog — there is no external web-search provider. (6) <strong>Community photo review</strong>: if community sharing becomes available and you share a cook photo to it, that photo would be sent to OpenAI's vision model for the "is this food / is this safe" check before it goes live. This path does not run today — community sharing is not available in the current version. Governed by <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's privacy policy</a>. Neither the shelf image nor the audio is retained by us, and none of your content is used to train models.</li>
       <li><strong>USDA FoodData Central</strong> — ingredient names are sent to look up nutrition information. No personal data.</li>
       <li><strong>Open Food Facts</strong> — barcode lookups send just the barcode number. No personal data.</li>

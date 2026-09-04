@@ -18,9 +18,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FBF6EC" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#170F0C" media="(prefers-color-scheme: dark)">
-<!-- BLOCKING and in <head>: a deferred script runs after first paint, so a
-     reader who chose Light watches a dark page render and flip. Same key the
-     landing page writes, so one choice covers the whole site. -->
+
 <script>
 (function(){try{var t=localStorage.getItem('mythkin.theme');
 if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();
@@ -90,13 +88,7 @@ feed immediately.</p>
 <p>Subscriptions are billed by Apple, so they are cancelled there, not by us. On
 iPhone: Settings → your name → Subscriptions → Mythkin → Cancel. Refunds are
 handled by the store under its own policy.</p>
-<!-- SPARKS ARE NOT ON SALE. This parenthetical read "Sparks are a separate one-off
-     purchase … an unspent balance just stays yours", present tense, about a
-     consumable the shipped 1.0 build cannot sell: both spark products sit in
-     MISSING_METADATA at App Store Connect, so StoreKit prices neither. terms.html
-     says "not on sale yet"; this page has to say the same thing. Restore the
-     present tense only alongside privacy.html, and only once there is a price
-     schedule. -->
+
 <p>Sparks are a planned second purchase and are <strong>not on sale yet</strong>. If
 they are offered they would be a one-off purchase rather than a subscription, so
 there would be nothing to cancel — an unspent balance would simply stay yours. See

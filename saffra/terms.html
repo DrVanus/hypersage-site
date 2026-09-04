@@ -75,21 +75,7 @@
     </ul>
 
     <h3>5a. Community content rules (objectionable-content policy)</h3>
-    <!-- SOFTENED 2026-08-24 — this section is written in the future conditional on
-         purpose, and the rules themselves are deliberately KEPT.
-         Community sharing does not work and cannot work in the submitted build:
-           * saffra-ios MasterChef/Social/SocialStore.swift:701-703 ships
-             shareToCommunityEnabled = false, communityFeedEnabled = false,
-             feedTabVisible = false;
-           * production https://masterchef-api.fly.dev/readyz returns
-             {"status":"degraded", ... "r2":"degraded: not configured"} (curl,
-             2026-08-24), so /posts/upload-url 503s, photo_key is required on
-             CookPostCreateIn, and app/social/moderation.py can never set
-             state = "live". The feed is empty BY CONSTRUCTION, not slow.
-         The rules stay written because they are the Guideline 1.2 answer the day the
-         flags flip and the four R2 secrets are set; asserting the feed WORKS is the
-         part that was false. Do not restore the present tense, and do not name a
-         date. -->
+    
     <p><strong>Community sharing is not available in the current version of Saffra</strong> — there is no feed and no way to publish a post. The rules in this section apply if and when community sharing becomes available. They exist so everyone can enjoy the feature, and so we can comply with the App Store's user-generated-content guidelines.</p>
     <p>If community sharing becomes available and you opt into it, additional rules apply to anything you post (photos, captions, comments, display name, bio).</p>
     <p>You <strong>will not</strong> post:</p>
@@ -125,35 +111,11 @@
     <p>Parts of the Service depend on third parties (OpenAI, Apple, Google, USDA FoodData Central, Open Food Facts, Fly.io). Those providers have their own terms. We're not responsible for their downtime or policy changes.</p>
 
     <h2>9. Subscriptions and payment</h2>
-    <!-- "unlimited chef chat" removed 2026-08-24. Pro chat is bounded on the
-         server: saffra-api/app/config.py:131-132 sets rate_limit_chat_per_hour = 60
-         and rate_limit_chat_per_day = 300, enforced at app/ratelimit/limiter.py:122
-         (HTTP 429 "chat_daily_limit"); the iOS mirror is
-         EntitlementStore.swift proDefault (chatPerHour 60, chatPerDay 300). What Pro
-         actually removes is the FREE cap — config.py:140 free_chat_lifetime = 10,
-         a lifetime counter with no reset. index.html already prints this honest
-         shape ("the 10-message starter cap lifted"); this page was missed.
-         The trailing sentence "The free tier gives you a full taste of each feature
-         before you decide to pay" was DELETED, not reworded: free is 0 receipt scans
-         and 0 recipe imports (EntitlementStore.swift freeDefault:
-         pantryReceiptPerMonth = 0, recipeImportPerMonth = 0), so two of the five
-         features named in this very sentence get no taste at all. -->
+    
     <p>Saffra is free to try. <strong>Saffra Pro</strong> is an optional paid tier that lifts the free tier's 10-message chef-chat cap (fair-use rate limits still apply), and unlocks per-recipe adaptation, hands-free voice cooking, recipe imports, and pantry scanning (barcode + receipt).</p>
 
     <h3>9.1 Products, pricing, and billing</h3>
-    <!-- TWO products, not three. "Lifetime Founders — single non-consumable
-         purchase, grants Pro forever on the Apple ID that bought it" was deleted
-         2026-08-24: App Store Connect inAppPurchasesV2 for app 6792760857 returns an
-         EMPTY list, and saffra-ios MasterChef/Billing/StoreKitManager.swift:23-26
-         says the same in source — the `lifetime` case is annotated "Not in ASC — no
-         non-consumable was ever created, so StoreKit returns nothing for it and
-         `orderedPlans` drops the row." A buyer could never have bought it. index.html
-         removed its $149.99 Lifetime card on 2026-08-19; the legal pages were never
-         swept. Do not re-add it here before the IAP exists in ASC.
-         The annual 7-day trial below stays — it is real and ASC-verified
-         (saffra-ios/APP_STORE_LAUNCH.md:262: FREE_TRIAL, ONE_WEEK, 175 territories,
-         checked 2026-08-08; the monthly product carries zero offers, which is why
-         "New subscribers only" and the annual attribution must stay attached). -->
+    
     <p>Saffra Pro is sold exclusively through the App Store in two forms:</p>
     <ul>
       <li><strong>Pro Monthly</strong> — billed every month.</li>

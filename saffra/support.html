@@ -76,11 +76,7 @@
     <p>The export needs <strong>Reminders</strong> access in iPhone Settings → Saffra. You can also share the list as plain text, or send it to Instacart if that app is installed.</p>
 
     <h3>I got a "too many requests" or limit message</h3>
-    <!-- "lifetime" first, deliberately: chef chat and recipe adaptation on the free
-         tier are ONE-TIME allowances (saffra-api/app/config.py:146,152
-         `free_chat_lifetime = 10`, `free_adapt_lifetime = 1`; the Redis key
-         `rl:chat:lifetime:{user}` carries no TTL). Saying only "daily and monthly"
-         tells a free user to wait for a reset that never comes. -->
+    
     <p>Saffra applies lifetime, daily and monthly limits on the free tier, and rate limits on everyone, so one person can't exhaust the service for everybody. The app tells you which limit you hit and offers the upgrade that removes it. Waiting clears the time-based ones; the free chef-chat and recipe-adaptation allowances are one-time, so those only reset by upgrading.</p>
 
     <h3>My pantry and chats disappeared when I made an account</h3>
@@ -90,22 +86,7 @@
     <p>Saffra uses <strong>Sign in with Apple</strong> and <strong>Sign in with Google</strong>. If sign-in fails repeatedly, check that you're connected, then try the other provider. Note that the two create <em>separate</em> accounts — signing in with Google won't show you data saved under Apple.</p>
 
     <h2>Saffra Pro and restoring purchases</h2>
-    <!-- TWO products, not three. App Store Connect inAppPurchasesV2 for app
-         6792760857 returns an EMPTY list — the only products are the two
-         subscriptions com.vanus.saffra.pro.monthly ($4.99) and .annual ($29.99).
-         saffra-ios MasterChef/Billing/StoreKitManager.swift:23-26 carries the same
-         fact in the source: the `lifetime` case is commented "not in ASC — no
-         non-consumable was ever created". index.html dropped its $149.99 Lifetime
-         card on 2026-08-19 (see its .pricing-grid comment); this page was missed.
-         Do not re-add a Lifetime tier unless it exists in StoreKit first.
-         NOTE on the trial clause that came out with it: the 7-day annual free trial
-         is REAL — saffra-ios/APP_STORE_LAUNCH.md:262 records an ASC-API check
-         (2026-08-08) finding a FREE_TRIAL / ONE_WEEK introductory offer on
-         com.vanus.saffra.pro.annual in 175 territories, and zero offers on the
-         monthly product. It was dropped here only to reduce this sentence to the two
-         products that exist; the full trial disclosure lives in Terms §9.1 and §9.3.
-         If you put it back, keep "annual only" attached to it — an unattributed
-         trial promise is Guideline 3.1.2 exposure. -->
+    
     <p>Saffra is free to use with limits. <strong>Saffra Pro</strong> is optional and is sold only through the App Store, in two forms: a <strong>monthly</strong> subscription and an <strong>annual</strong> subscription. Prices are shown in-app on the upgrade screen, in your local currency, before you buy anything.</p>
 
     <h3>Restoring a purchase</h3>
@@ -136,21 +117,7 @@
     <p>To be explicit about it: the chef is an AI, and it can make mistakes. <strong>You are responsible for verifying ingredients, allergens, cooking temperatures, and food-safety practices</strong> for anyone you feed, including yourself. Saffra is <strong>not a substitute for medical, nutritional, or dietary advice</strong> — if you have a medical condition, consult a qualified professional. See <a href="terms.html">Terms</a> section 4.</p>
 
     <h2>Community</h2>
-    <!-- SOFTENED 2026-08-24. This section used to walk the reader through reporting
-         a post and blocking a member, as if a feed existed. It does not, on either
-         side of the wire:
-           * saffra-ios MasterChef/Social/SocialStore.swift:701-703 ships
-             shareToCommunityEnabled = false, communityFeedEnabled = false and
-             feedTabVisible = false in the submitted build;
-           * production https://masterchef-api.fly.dev/readyz returns
-             {"status":"degraded", ... "r2":"degraded: not configured"} — verified by
-             curl on 2026-08-24 — so /posts/upload-url 503s, photo_key is required on
-             CookPostCreateIn, and no post can ever reach moderation state "live".
-         Do NOT restore the report/block how-to and do NOT promise a date. Turn this
-         section back on in the same release that flips those three flags AND sets the
-         four R2 secrets (r2_endpoint, r2_bucket, r2_access_key_id,
-         r2_secret_access_key — R2_ACCOUNT_ID is not in the gate). The posting rules
-         stay in Terms §5a deliberately, so they are already written when it ships. -->
+    
     <p><strong>Community sharing is not available in the current version of Saffra.</strong> There is no feed to browse and no way to publish a cook photo — the photos you take of your own cooking stay on your device. If community sharing becomes available in a future version, the rules for what may be posted, and the report, block and delete controls that go with them, are set out in <a href="terms.html">Terms</a> section 5a.</p>
 
     <h2>Your account and your data</h2>
@@ -169,10 +136,7 @@
     <ul>
       <li><strong>OpenAI (chat)</strong> — your chat messages, plus a summary of your profile and pantry, are sent to OpenAI to generate and adapt the chef's replies. Your recipe searches and imported recipe text also go to OpenAI to create the embeddings that power recipe search — there is no external web-search provider.</li>
       <li><strong>OpenAI (text-to-speech)</strong> — the text you want spoken aloud, for the premium voice. You can turn premium voice off in Settings and use on-device iOS voices only, in which case no text leaves your device to be spoken.</li>
-      <!-- The shelf-photo line is a required disclosure, not a nicety: it is the one
-           image path that leaves the device (saffra-api/app/pantry/photo_vision.py,
-           reached from IngredientCameraScanView.swift). Deleting it puts this page
-           back in conflict with the App Store privacy label. -->
+      
       <li><strong>Apple (speech recognition)</strong> — the audio you speak in voice mode. The app does not request on-device recognition, so Apple's Speech framework runs server-backed and the audio reaches Apple; it does not reach us.</li>
       <li><strong>OpenAI (Whisper)</strong> — the audio you speak in Cooking Mode, sent for a second, more accurate transcription. It runs for <em>every</em> spoken question, not only when Apple's transcript is poor, and also whenever Apple returns nothing or something Saffra can't parse; a cleanly recognized &ldquo;next&rdquo; or &ldquo;back&rdquo; is not sent, and composer dictation is never sent. The audio is not retained.</li>
       <li><strong>OpenAI (vision)</strong> — the photo you take of a fridge or pantry shelf when you ask Saffra to identify what's on it. It is read to produce the list of items you then confirm, and it is not retained. Receipt and cookbook photos do not go this way.</li>
@@ -180,19 +144,7 @@
       <li><strong>USDA FoodData Central</strong> (ingredient names, for nutrition) and <strong>Open Food Facts</strong> (just the barcode number). No personal data either way.</li>
       <li><strong>Fly.io, Cloudflare R2, Upstash Redis</strong> — hosting infrastructure.</li>
     </ul>
-    <!-- ONE thing, not two. Voice transcription was struck from this list on
-         2026-08-24: saffra-ios MasterChef/Voice/SpeechRecognizer.swift:161 sets
-         `r.requiresOnDeviceRecognition = false` (inline comment: "Was true."), so
-         SFSpeechRecognizer uses Apple's servers and the audio leaves the phone. The
-         file's own doc comment 156 lines above still claims the old default — do not
-         take it as evidence. The "falls back to on-device when offline" clause was
-         deleted from the Apple bullet on 2026-08-24: no shipped code implements that
-         fallback, only an inline comment at SpeechRecognizer.swift:160 asserts it.
-         The Whisper bullet is not accuracy-gated either — Cooking/CookingSessionModel.swift:901-919
-         uploads the clip for every spoken question even when Apple succeeded.
-         Receipt/cookbook OCR is the only genuinely on-device path left, and it is
-         real (Apple Vision, image never uploaded). If voice ever
-         goes back on-device, change the code first and this line second. -->
+    
     <p>One thing stays on your iPhone: <strong>receipt and cookbook OCR</strong> runs on-device via Apple's Vision framework — those images never leave your phone, only the extracted text is sent for parsing.</p>
     <p>We do not sell your data, we do not use it to train models, and we do not share it with advertisers. None of the providers above are authorized to use your data for their own purposes.</p>
 

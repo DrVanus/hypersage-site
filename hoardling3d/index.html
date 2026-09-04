@@ -2,14 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- viewport-fit=cover is REQUIRED for env(safe-area-inset-*) to resolve on
-       notched phones and under Android's forced edge-to-edge (targetSdk 35+). -->
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <!-- "recover every stolen coin" was refuted for the whole family on
-       2026-08 (a laden raider that reaches the exit escapes for good,
-       Hoardling game.js:4211-4215) but this sibling's meta kept the line —
-       a sweep that fixes one surface must cover every slot. Only the
-       conditional form is true: kill the carrier and the coins fly home. -->
+  
   <meta name="description" content="Hoardling 3D — an experimental real-time 3D preview of Hoardling. Defend the sleeping dragon's hoard, hold the chokepoints; kill the carrier and the coins fly home.">
   <title>Hoardling 3D</title>
   <link rel="canonical" href="https://hypersage.ai/hoardling3d/">
@@ -25,18 +20,14 @@
   <meta name="twitter:image" content="https://hypersage.ai/hoardling3d/og-image.png?v=20260818a">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#17100e">
-  <!-- installable PWA: "Add to Home Screen" gives a fullscreen portrait app -->
+  
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png">
   <link rel="apple-touch-icon" href="art/icon-180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Hoardling">
-  <!-- The splash is INLINE, above the stylesheet link, because it has to paint
-       on the very first frame. The game used to show its chunky procedural
-       fallback shapes for the whole download — a flat blue-roofed box where the
-       painted keep goes — and players read that as broken/old art. Nothing is
-       drawn now until the art is decoded, so this is what fills the gap. -->
+  
   <style>
     html,body{margin:0;height:100%;background:#17100e;overflow:hidden}
     #boot{position:fixed;inset:0;z-index:9;display:flex;flex-direction:column;
@@ -69,14 +60,11 @@
 </head>
 <body>
   <div id="game-wrap">
-    <!-- canvas cannot read env(); this probe div carries the safe-area insets
-         as real pixel paddings the game reads at boot/resize -->
+    
     <div id="safe-probe" style="position:absolute;visibility:hidden;pointer-events:none;
          padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);"></div>
     <canvas id="game-canvas" aria-label="Hoardling game area"></canvas>
-    <!-- The whole game is drawn on <canvas>. Any HUD/menus/touch controls you add
-         go here as a DOM overlay (see bunny-bus-hop index.html for the pattern):
-         position them with top:max(10px, env(safe-area-inset-top)) etc. -->
+    
   </div>
   <div id="boot" role="status" aria-live="polite">
     <div id="boot-ember"></div>
@@ -85,12 +73,7 @@
     <div id="boot-track"><div id="boot-fill"></div></div>
     <div id="boot-note">stoking the forge</div>
   </div>
-  <!-- optional leaderboard config; a 404 here is fine (board stays off) -->
-  <!-- ?v= is load-bearing, not decoration. Neither script was versioned, so a
-       returning player keeps the CACHED copy — and the cached copy is the one
-       that shares hoardling.save.v2 with the shipping /hoardling/ build and
-       submits to its leaderboard. Without this bump the storage-isolation fix
-       below reaches only cold caches. Bump on any change to either file. -->
+
   <script>window.__ART_EXT__="webp";</script>
   <script src="lb-config.js?v=20260814-isolate"></script>
   <script src="game.js?v=20260814-isolate" defer></script>

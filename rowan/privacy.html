@@ -1,31 +1,5 @@
 <!DOCTYPE html>
-<!-- =====================================================================
-     THIS PAGE EXISTS IN TWO TREES. ONE OF THEM IS THE MIRROR.
 
-       LIVE   hypersage-site/rowan/privacy.html
-              -> published under /rowan/ on the hypersage.ai origin
-              This is the copy the App Store listing links to
-              (rowan-app/store/listing.md) and the copy the app opens
-              from Settings > Health data policy (rowan-app/links.js
-              BASE). If it is wrong, the wrong thing is public.
-
-       MIRROR rowan-site/privacy.html
-              rowan-site DOES NOT PUBLISH ITSELF. Editing only this
-              copy changes nothing a user can read. That exact failure
-              happened on 2026-08-01: a correction sat committed in
-              rowan-site while the live page still carried the false
-              sentence.
-
-     The two files are byte-identical apart from self-referencing URLs
-     (canonical, og:url, og:image, twitter:image), which the deploy
-     form rewrites. EDIT BOTH, with the same words, in the same change,
-     and prove it with:
-
-         python3 rowan-site/tools/check_deploy_parity.py
-
-     Do NOT rsync the trees: a blind sync re-adds rowan/robots.txt,
-     which the origin-root robots.txt forbids.
-     ===================================================================== -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -68,75 +42,7 @@
   </nav>
 
   <main class="legal" id="main">
-    <!-- ============================================================
-         DEPLOY GATE — CLEARED 2026-08-24. Kept, not deleted, because the
-         four conditions below are the standing re-check for this section.
-         ============================================================
-         Re-verified 2026-08-24 against the RUNNING production service, not
-         against source:
-
-           GET https://rowan-api.fly.dev/v1/companion/healthz
-           -> "capabilities": { "speak": false, "transcribe": true }
-
-         (1) HOLDS. `POST /transcribe` is mounted at
-             rowan-api/app/companion/transcribe.py:170, and production reports
-             transcribe: true. Note app/config.py:201 still reads
-             `transcribe_enabled: bool = False` — that is the DEFAULT; the
-             deployed value comes from the TRANSCRIBE_ENABLED Fly secret, which
-             `flyctl secrets list -a rowan-api` shows Deployed. Do not read the
-             config default as the live answer.
-         (2) HOLDS. rowan-app/chatui.js:754 builds the mic button, deliberately
-             hidden until `capabilities()` says yes, failing closed.
-         (3) HOLDS. ios/App/App/Info.plist carries NSMicrophoneUsageDescription
-             and PrivacyInfo.xcprivacy declares AudioData.
-         (4) NOT VERIFIABLE FROM HERE — the App Store Connect App Privacy
-             questionnaire's Audio Data row is a web-only surface. Rowan 1.0
-             passed review and is live WITH transcribe on, so it was presumably
-             answered at submission; confirm it in ASC before the next
-             submission rather than assuming.
-
-         So publishing this file is CORRECT, and it is already live. The §4
-         voice text is accurate in both directions: voice INPUT is on, and the
-         cloud text-to-speech route is off (speak: false) — which is exactly
-         what §4 and §7 already say, with read-aloud running on-device.
-
-         The original gate text follows, unchanged, as the re-check list.
-         ------------------------------------------------------------
-         The "4. Voice" section below now describes VOICE INPUT: a mic
-         button in the composer, the recording going to OpenAI to be
-         turned into text, and the text landing in the message box for
-         the person to read and send.
-
-         That build is NOT live yet. Publishing this page before it is
-         makes the policy promise a feature the app does not have —
-         which is the same FTC HBNR problem as hiding one it does. An
-         inaccurate statement about health-data practices is itself the
-         violation, in EITHER direction; over-disclosure is not the
-         safe side of the line.
-
-         PUBLISH ONLY WHEN ALL FOUR ARE TRUE:
-           1. rowan-api ships POST /v1/companion/transcribe and
-              `transcribe_enabled` is defined in app/config.py.
-           2. rowan-app's shared composer (chatui.js attachComposer)
-              actually renders the mic button, on BOTH chat surfaces.
-           3. ios/App/App/Info.plist carries NSMicrophoneUsageDescription
-              and PrivacyInfo.xcprivacy declares AudioData — otherwise
-              the app is terminated by iOS on the first recording and
-              this page describes a feature nobody can reach.
-           4. The App Store Connect App Privacy questionnaire has the
-              Audio Data row (web-only flow, a hard submission gate).
-
-         `rowan-site/tools/claims_audit.py` pins this section to
-         `transcribe_enabled` in rowan-api/app/config.py, so the gate
-         goes RED until (1) lands. That red is this comment, in code.
-         Do not "fix" it by deleting the pin.
-
-         If the voice-input build is abandoned, REVERT this whole file
-         rather than trimming it — the old §4 sentence ("there is no
-         recording path in the app or the backend") is registered in
-         claims_audit.py's FORBIDDEN list and cannot simply be typed
-         back in.
-         ============================================================ -->
+    
     <h1>Privacy Policy</h1>
     <p class="updated">Last updated: 2026-08-15</p>
 

@@ -65,14 +65,6 @@
     <h3>Your penguin</h3>
     <p>When you first play, a <strong>guest identity is created for you automatically</strong> — a random identifier, with no email address or password attached. Against that identifier we store the <strong>display name your penguin is carrying</strong>, your penguin's state — colours, clothing, items, coins, level, badges, pets, and igloo — and the <strong>age band</strong> described below. That's what makes your penguin still be there tomorrow.</p>
 
-    <!-- THIS SECTION IS THE DATA-FLOW ARGUMENT, AND IT MUST NOT SHRINK.
-         PenguinArcade/js/agegate.js:292-303 states it exactly: the month and year
-         never leave that file's stack frame, but mirrorToProfile() (agegate.js:618)
-         writes the band to Profile.data.ageBracket, and js/cloud.js writeProfile()
-         upserts the entire profile object into waddleton_profiles.state — so the
-         BAND does reach the server on the next save anybody makes. An earlier
-         version of this page said the game "never asks a child for ... age", which
-         was false in both halves: it asks everybody, and it keeps the band. -->
     <h3 id="age-band">Your age band</h3>
     <p>Before the island loads, Waddleton asks the <strong>month and year you were born</strong>. Those two numbers stay inside the screen that asked for them: they are not written to storage, not attached to your penguin, and not sent to us. What we do keep is the single band they put you in — <strong>child, teen, or adult</strong>. It is saved on your device, and it travels with your penguin's profile record to our database. We keep the band and not the date on purpose: a band is not a date of birth, and the band is what decides whether you can type in chat, whether you can read what other players type, and whether a name you picked may go on a public board.</p>
 
@@ -81,12 +73,7 @@
 
     <h3>Your scores</h3>
     <p>When you set a personal best in a mini-game, we store the <strong>board, the score, the name published against it, and the time</strong> so it can appear on the shared leaderboard for that game, along with a short-lived run token used to check the score came from a real play session. For a teen or adult, that name is the one you chose, and <strong>it is visible to every other player on that board</strong> — so please don't make it your real full name.</p>
-    <!-- js/leaderboard.js:58-97. 'public-leaderboard-name' is DENY for the child
-         band, and the denial is a SUBSTITUTION, not a refusal: the score always
-         posts and the name is replaced by SafeName.suggest() seeded from the
-         account id. It runs at enqueue AND at send, so a body sitting in the
-         localStorage retry queue cannot carry an older name onto a board. Failing
-         closed: an absent, unreachable or throwing AgeGate also substitutes. -->
+    
     <p><strong>For a player in the under-13 band, nothing they picked is published.</strong> The game does not give those players a name field at all, and the board is handed a penguin name the game generates instead — which is why a child's row will not match the name over their penguin's head. The substitution happens both when the score is queued and again when it is sent, so a score that waited offline cannot carry an older name onto a board. Either way the score itself still counts. Your best score is also kept in your own browser.</p>
 
     <h3>If you buy something (mobile app only)</h3>

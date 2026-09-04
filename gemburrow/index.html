@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Gemburrow's site is committed-warm-dark (lantern light in a burrow) —
-       declare it so a light-mode OS never tries to auto-lighten it. -->
+  
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#17100A">
   <title>Gemburrow — cozy gem-digging puzzle for iPhone</title>
@@ -479,7 +478,6 @@
     })();
   </script>
 
-  <!-- app-schema:start -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -495,9 +493,7 @@
     }
   }
   </script>
-  <!-- app-schema:end -->
-  <!-- FAQPage schema: questions and answers are verbatim plain-text copies of
-       the on-page FAQ section (#faq) below. Keep the two in sync. -->
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -573,7 +569,6 @@
 </head>
 <body>
 
-  <!-- ===== NAV ===== -->
   <nav class="site" id="top">
     <div class="container">
       <a class="brand" href="#top" aria-label="Gemburrow — back to top">
@@ -607,7 +602,6 @@
     </div>
   </nav>
 
-  <!-- ===== HERO ===== -->
   <header class="hero">
     <div class="container">
       <div>
@@ -635,11 +629,6 @@
     </div>
   </header>
 
-  <!-- ===== THE PLAYABLE JAR =====
-       This runs the SAME four rules the app does, ported rather than
-       approximated — see the comments on EXPOSED/dig() in the script below.
-       If a rule changes in game.js, it changes here, or the page is teaching a
-       game that does not exist. -->
   <section class="jarband" id="jar-band">
     <div class="container">
       <div class="jar-intro">
@@ -701,7 +690,6 @@
     </div>
   </section>
 
-  <!-- ===== HOW IT PLAYS ===== -->
   <section class="section-block panel" id="play">
     <div class="container">
       <div class="section-eyebrow">How it plays</div>
@@ -770,7 +758,6 @@
     </div>
   </section>
 
-  <!-- ===== DRAGON ===== -->
   <section class="section-block" id="dragon">
     <div class="container dragon-row">
       <div class="dragon-art reveal">
@@ -804,7 +791,6 @@
     </div>
   </section>
 
-  <!-- ===== MODES ===== -->
   <section class="section-block panel" id="modes">
     <div class="container">
       <div class="section-eyebrow">Three ways to dig</div>
@@ -844,7 +830,6 @@
     </div>
   </section>
 
-  <!-- ===== SCREENS ===== -->
   <section class="section-block" id="screens">
     <div class="container">
       <div class="section-eyebrow center">Screens</div>
@@ -878,43 +863,7 @@
     </div>
   </section>
 
-  <!-- ===== HONEST ===== -->
-  <!-- CLAIMS: every line below is checked against the shipped build and the
-       approvals in site-audit-contract.json. No ad or analytics SDK is linked
-       (package.json ships only @capacitor/core|ios|android|haptics|preferences);
-       there is no sign-in surface.
-       THERE IS ONE IN-APP PURCHASE AND IT SHIPPED 2026-08-22. It is
-       gemburrow.full.unlock, a non-consumable that opens career levels 11-40 and
-       the 14-day dig archive — store/iap-catalog.json is the source of truth,
-       game.js declares FULL_PRODUCT in the "IAP — one non-consumable" block, and
-       the entitlement is read by exactly two gates: careerCap() (which career
-       levels this save may enter) and the archive-row tap
-       (game.js "if (!Ent.owned()) { uiTick(); game.openPaywall(); return; }").
-       It touches nothing in the sim. So "no in-app
-       purchases", "nothing to buy" and "no purchase path" are DEAD STRINGS on
-       this page: store/frames.json _forbidden_strings already fails the
-       store-frame build on "Nothing to buy", and this page must not restore the
-       family either. The browser build under play/ carries no store code at all,
-       so the whole 40-level ladder is open there — when that is the fact being
-       claimed, say "in your browser" and scope it.
-       NEVER PUBLISH A PRICE. store/iap-catalog.json marks planned_price_usd with
-       _price_is_a_hint: "planned_price_usd is a console-setup crib and NOTHING
-       else." A US dollar figure was written into the FAQ answer and its JSON-LD
-       twin and was removed on 2026-08-24 — it is not repeated here, because an
-       HTML comment ships to every reader who views source. The app never prints
-       a number either:
-       game.js Store.load() takes displayPrice from the storefront and the
-       paywall label falls back to "PRICE UNAVAILABLE" rather than inventing one
-       (a hardcoded figure is an App Review 3.1.2 rejection off USD). Describe
-       WHAT the unlock opens, never what it costs.
-       "No timers" is a DEAD STRING for the same reason: CFG.timedDur is 45 and
-       SLOT_CLS is ['easy','med','med','big','timed'], so a timed Rush order is in
-       EVERY shift, and the FAQ below says so. "No energy meter" is the true half
-       and is the one to keep — nothing recharges on a clock.
-       The ONE thing that leaves the device is a Daily Dig score — stated here
-       and on privacy.html rather than glossed. Do not soften the purchase line
-       into "no pay-to-win" or harden the offline line into
-       "nothing ever leaves your device". -->
+  
   <section class="section-block panel" id="honest">
     <div class="container">
       <div class="section-eyebrow">The deal</div>
@@ -935,16 +884,6 @@
     </div>
   </section>
 
-  <!-- ===== FAQ =====
-       Every answer here is mirrored verbatim in the FAQPage JSON-LD in <head>.
-       Edit the two together. Sources: no ad or analytics SDK
-       (gemburrow/package.json); the ONE in-app purchase and its boundary, never
-       its price (gemburrow/store/iap-catalog.json, game.js FULL_PRODUCT /
-       FREE_CAREER_LEVELS / careerCap); wallet + six WALL_SKINS 0..11,100c
-       (22,000c for all six) and DEEPER_PICK_COST
-       250 / +8 swings (game.js); CAREER_MAX 40; CFG.swings 55; CFG.timedDur 45;
-       daily seed shared, leaderboard payload day/seed/player/coins/pops/client_id;
-       art generated through artcore, music rendered by tools/generate_music.py. -->
   <section class="section-block" id="faq">
     <div class="container">
       <div class="section-eyebrow center">Common questions</div>
@@ -986,7 +925,6 @@
     </div>
   </section>
 
-  <!-- ===== ABOUT ===== -->
   <section class="section-block" id="about">
     <div class="container">
       <div class="about-card">
@@ -1000,7 +938,6 @@
     </div>
   </section>
 
-  <!-- ===== CTA ===== -->
   <section class="cta-strip" id="notify">
     <h2>The jar is full. Grandpa left you the shop.</h2>
     <p>The whole game is playable free in your browser right now. Gemburrow is coming to iPhone too &mdash; leave us a line and we'll tell you the day the lantern goes on.</p>
@@ -1010,7 +947,6 @@
     </a>
   </section>
 
-  <!-- ===== FOOTER ===== -->
   <footer class="site">
     <div class="foot-brand">Gemburrow</div>
     <div class="links">
@@ -1035,9 +971,7 @@
         <a href="https://hypersage.ai/alder/">Alder — Recovery Companion</a>
       </div>
     </div>
-    <!-- No App Store age rating exists yet — Gemburrow is unreleased and the ASC
-         questionnaire has not been filed. Do not print a number here until Apple
-         has actually assigned one. -->
+    
     <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Dig responsibly; the dragon is watching.</div>
   </footer>
 

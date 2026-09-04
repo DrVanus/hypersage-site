@@ -117,27 +117,12 @@
     </div>
 
     <h2>For clinicians, reviewers &amp; press</h2>
-    <!-- No clinician's name on this page. A named originator on a clinician-facing
-         page reads as affiliation or endorsement, which we do not have; the modality
-         is the honest claim and it is the one terms.html:49 already makes ("skills
-         based on the Dialectical Behavior Therapy (DBT) model"). Changed 2026-08-24.
-         Never re-introduce a personal name here. -->
+    
     <p>If you're a DBT-informed clinician, a reviewer, or a journalist evaluating Quietoak, reach out at <a href="mailto:support@hypersage.ai?subject=Review%20request">support@hypersage.ai</a>. Quietoak is a self-help adjunct based on the DBT (Dialectical Behavior Therapy) model — not therapy — with prominent disclaimers, an always-free crisis kit, and an independent crisis-safety layer.</p>
     <p>Read the published <a href="safety.html">self-harm safety protocol</a> for details on the AI-companion safeguards and crisis-referral process.</p>
 
     <h2>Where your data goes</h2>
-    <!-- MIRRORS the site FAQ's "Is my data private?" answer word for word
-         (the rendered FAQ answer at index.html:1553, with its JSON-LD copy at
-         index.html:760 — line numbers as of this edit; grep "short recap" if they
-         have moved) — the three copies must
-         never drift. This page previously said the diary "stays on your device" and
-         stopped there, which is false: DiaryStore.companionDiaryPayload(limit: 7)
-         (anchor-ios/Anchor/Diary/DiaryStore.swift:454-472) builds the last 7 logged
-         days with urge / si_urge / self_harm_urge and String(notes.prefix(120)), and
-         CompanionChatScreen.swift:595 attaches it as `recent_diary` on EVERY chat
-         turn. The recap sentence is not optional garnish — it is the disclosure.
-         Corrected 2026-08-24. The training sentence is retained from the previous
-         wording. -->
+    
     <p>The full data flow is in our <a href="privacy.html">privacy policy</a> — short version: your diary and practice are stored on your device, and we keep no diary on our servers. There's no account and no login. We don't run ads or third-party trackers against your diary or chat. To generate replies, your messages are sent to our backend and an AI provider — together with a short recap of your last 7 logged diary days, including your urge ratings and the first 120 characters of each day's note, so the reply fits your week. Under that provider's current API terms, those messages aren't used to train their models.</p>
   </main>
 
