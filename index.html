@@ -115,6 +115,7 @@
          The card's top-border accent is left unchanged. */
       --c-hex-text:   #A98CFB;
       --c-rowan-text: #9A87E8;
+      --c-loam-text:  #798D53;
 
       --radius: 16px;
       --radius-sm: 12px;
@@ -1091,6 +1092,8 @@
          footer (Investors / Press / Press kit / Product support) sat at 36px.
          They are a wrapping flex row, so inline-flex keeps them on their line. */
       .cta-routes a { min-height: 44px; display: inline-flex; align-items: center; }
+      .cta-routes span[aria-hidden="true"] { display: none; }
+      .cta-routes { gap: 4px 22px; }
       /* The 30 product-card labels rendered at 10.9px on a phone, under the
          12px most guidance treats as a floor for real text. Measured across
          all 15 cards at 390px: nothing wraps, nothing overflows, cards grow
@@ -1408,7 +1411,7 @@
         </article>
 
         
-        <article class="product" id="product-loam" style="--accent: var(--c-loam);">
+        <article class="product" id="product-loam" style="--accent: var(--c-loam); --accent-text: var(--c-loam-text);">
           <div class="top">
             <img class="app-icon" src="icons/loam.png?v=20260831a" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
