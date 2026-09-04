@@ -785,6 +785,10 @@
     /* ===== SECTION SCAFFOLD ===== */
     section.block { padding: 88px 0; position: relative; }
     .section-head { max-width: 680px; margin-bottom: 52px; }
+    /* Progressive: browsers without text-wrap ignore it. Stops the section head and
+       the ledger paragraphs ending on a one-word line at phone widths. */
+    .section-head h2 { text-wrap: balance; }
+    .section-head p, .approach-row p { text-wrap: pretty; }
     .section-head.center { margin-left: auto; margin-right: auto; text-align: center; }
     /* Desktop: center the section heads so wide viewports don't read as a full-width
        band with an empty right half. Phones keep the left-aligned reading flow. */
@@ -816,7 +820,9 @@
       background: linear-gradient(90deg, var(--brand-a), transparent);
       transition: width .45s ease;
     }
-    .approach-row:hover::after { width: 100%; }
+    /* Hover-only: iOS Safari applies :hover on tap and keeps it until the next tap,
+       which left the wipe stuck under a row a reader tapped to scroll. */
+    @media (hover: hover) { .approach-row:hover::after { width: 100%; } }
     .approach-row .k {
       font-family: 'JetBrains Mono', ui-monospace, monospace;
       font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
@@ -963,7 +969,7 @@
     @media (prefers-reduced-motion: reduce) { .product .btn-store { transition: none; } .product .btn-store:hover { transform: none; } }
     .product .link { display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent-text); transition: gap .2s; }
     .product .link:hover { gap: 11px; }
-    /* ===== SHARED INTELLIGENCE ===== */
+    /* ===== INTELLIGENCE LAYER ===== */
     .systems { background: linear-gradient(180deg, var(--bg-2), var(--bg)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
                overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
@@ -1717,7 +1723,7 @@
         <span class="eyebrow">Our intelligence layer</span>
         
         <h2>Anyone can call the same models. The layer around them is ours.</h2>
-        <p>Where a product uses AI, the models come from Anthropic and OpenAI: Claude in most of the products that write to you, OpenAI in others and for any image a product generates as you use it. What we build is the layer around them — what to ask, what the product already knows about your situation, and what it checks before you see an answer.</p>
+        <p>Where a product uses AI, the models come from Anthropic and OpenAI: Claude in most of the products that write to you, OpenAI in others and for any image a product generates as you use it. What we build, for each product, is the layer around them — what to ask, what the product already knows about your situation, and what it checks before you see an answer.</p>
       </div>
 
       <h3 class="sr-only">How a response is formed</h3>
@@ -1816,13 +1822,6 @@
           </div>
         </div>
         <div class="approach-row">
-          <div class="k">Shared engineering</div>
-          <div>
-            <h3>Build the hard parts once</h3>
-            <p>Memory, voice, replies that stream in, safety checks, the context behind a good answer &mdash; that engineering carries between products, and each adapts it to its own domain.</p>
-          </div>
-        </div>
-        <div class="approach-row">
           <div class="k">Kept running</div>
           <div>
             <h3>The servers are ours too</h3>
@@ -1830,7 +1829,7 @@
           </div>
         </div>
         <div class="approach-row">
-          <div class="k">Direct ownership</div>
+          <div class="k">Direct support</div>
           <div>
             <h3>Feedback reaches us directly</h3>
             <p>Questions and reported problems come directly to us, keeping the path from a user observation to a product decision short.</p>
