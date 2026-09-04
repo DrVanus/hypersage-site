@@ -76,8 +76,8 @@
     <h3>3. Purchases</h3>
     <p>If you subscribe to Quietoak Plus, the App Store sends us a signed transaction (JWS) that we verify on our backend. We store only the entitlement state needed to unlock Plus features. The App Store handles billing, refunds, and your Apple ID — we never see your payment method.</p>
 
-    <h3>4. Voice dictation (optional)</h3>
-    <p>If you tap to dictate a diary entry, the microphone is used only during that recording. The audio is sent to our backend and on to <strong>OpenAI</strong> for transcription, used only to produce the text, and is not stored after transcription.</p>
+    <h3>4. Voice (optional)</h3>
+    <p>If you tap to dictate a diary entry, or speak with your companion in hands-free voice mode, the microphone is used only during that recording. The audio is sent to our backend and on to <strong>OpenAI</strong> for transcription, used only to produce the text, and is not stored after transcription.</p>
 
     <h3>5. Photos you attach (optional)</h3>
     <p>You can attach a photo or screenshot to a message — most often a conversation you want help replying to. Quietoak removes embedded metadata and downscales the image to at most 1568 pixels on its long edge, then sends it through our backend to <strong>Anthropic</strong> twice: first for an automated safety check and then, only if cleared, to write the reply. <strong>We do not store the image on our servers</strong> — the saved server conversation records that an image was attached, not the pixels. The protected on-device conversation keeps the downscaled JPEG plus a small thumbnail so you can reopen it; both are removed when you delete that conversation or use "Delete all my data". Quietoak receives only the specific photos you pick: it does <strong>not</strong> request broad photo-library access, and there is no in-app camera.</p>
@@ -104,7 +104,7 @@
     <ul>
       <li><strong>Apple App Store</strong> — purchases and Apple ID. <a href="https://www.apple.com/legal/privacy/en-ww/" rel="noopener">apple.com/legal/privacy</a></li>
       <li><strong>Anthropic</strong> — primary AI provider for companion replies. <a href="https://www.anthropic.com/legal/privacy" rel="noopener">anthropic.com/legal/privacy</a></li>
-      <li><strong>OpenAI</strong> — fallback AI provider, optional companion voice, and voice-dictation transcription. <a href="https://openai.com/policies/privacy-policy" rel="noopener">openai.com/policies/privacy-policy</a></li>
+      <li><strong>OpenAI</strong> — fallback AI provider, optional companion voice, and transcription of dictation and hands-free voice conversations. <a href="https://openai.com/policies/privacy-policy" rel="noopener">openai.com/policies/privacy-policy</a></li>
       <li><strong>Fly.io</strong> — hosts our backend. <a href="https://fly.io/legal/privacy-policy" rel="noopener">fly.io/legal/privacy-policy</a></li>
     </ul>
 
