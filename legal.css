@@ -119,3 +119,10 @@ footer.legal-footer {
 }
 footer.legal-footer a { color: var(--muted); margin: 0 12px; font-weight: 500; }
 footer.legal-footer a:hover { color: var(--brand-a); }
+
+/* Tap targets (44px) for the nav and footer links, mirroring index.html's contact-route
+   rule; and at <=340px the brand text hides so Privacy/Terms/Support fit the 272px column
+   (the logo stays as the home link — each page's brand <a> carries an aria-label). */
+.legal-nav .links a, footer.legal-footer a { display: inline-flex; align-items: center; min-height: 44px; }
+.legal-nav .brand { min-height: 44px; }
+@media (max-width: 340px) { .legal-nav .brand > span { display: none; } }

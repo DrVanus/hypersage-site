@@ -13,11 +13,11 @@
   <meta property="og:description" content="Studio boilerplate, fact sheet, product one-liners, and downloadable logos and icons.">
   <meta property="og:url" content="https://hypersage.ai/press.html">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260825d">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260904b">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260825d">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260904b">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="stylesheet" href="fonts/fonts.css">
@@ -27,6 +27,8 @@
     .facts { width: 100%; border-collapse: collapse; margin: 18px 0 8px; }
     .facts th, .facts td { text-align: left; padding: 10px 14px 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); vertical-align: top; }
     .facts th { color: #8894A8; font-weight: 500; white-space: nowrap; width: 11em; }
+    .facts td { overflow-wrap: anywhere; }
+    @media (max-width: 560px) { .facts th { width: 7em; white-space: normal; padding-right: 10px; } }
     .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; margin: 18px 0; padding: 0; list-style: none; }
     .asset-grid li { border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; text-align: center; }
     .asset-grid img { width: 56px; height: 56px; object-fit: contain; border-radius: 12px; display: block; margin: 0 auto 10px; }
@@ -40,7 +42,7 @@
 
   <nav class="legal-nav">
     <div class="container">
-      <a href="index.html" class="brand">
+      <a href="index.html" class="brand" aria-label="HyperSage AI Labs home">
         <img src="logo.png" alt="" width="30" height="20">
         <span>HyperSage<span class="co-sub"> AI Labs</span></span>
       </a>
@@ -54,7 +56,7 @@
 
   <main class="legal" id="main" tabindex="-1">
     <h1>Press Kit</h1>
-    <p class="updated">Last updated: 2026-08-24 · For anything not covered here, write to <a href="mailto:support@hypersage.ai?subject=Press%20inquiry">support@hypersage.ai</a>.</p>
+    <p class="updated">Last updated: 2026-09-04 · For anything not covered here, write to <a href="mailto:support@hypersage.ai?subject=Press%20inquiry">support@hypersage.ai</a>.</p>
 
     <h2>Boilerplate</h2>
     <p>HyperSage AI Labs is an independent product studio building distinctive consumer apps for relationships, health, recovery, food, stories, markets, and sleep — alongside original games. Where AI belongs, its products add a product-specific intelligence layer that combines information a person provides and relevant in-product context with domain knowledge, tools, and safeguards. The studio designs, builds, and operates the entire portfolio in-house.</p>
@@ -73,22 +75,22 @@
 
     <h2>The portfolio in one line each</h2>
     <ul class="oneliners">
-      <li><strong>Wingmate</strong> — an AI dating coach that organizes context by connection. <a href="wingmate/index.html">Site ↗</a></li>
-      <li><strong>Quietoak</strong> — a companion for practicing DBT skills; not therapy or crisis care. <a href="quietoak/index.html">Site ↗</a></li>
-      <li><strong>CryptoSage AI</strong> — a market-research workspace; informational, not investment advice. <a href="https://cryptosageai.io/" rel="noopener">Site ↗</a></li>
-      <li><strong>Saffra</strong> — an AI cooking companion that adapts prepared recipes to your kitchen. <a href="saffra/index.html">Site ↗</a></li>
-      <li><strong>StoryVault AI</strong> — interactive fiction where story state shapes each new page. <a href="storyvault/index.html">Site ↗</a></li>
-      <li><strong>Nightshelf</strong> — a wind-down experience of calming books, narration, and ambient sound. <a href="nightshelf/index.html">Site ↗</a></li>
-      <li><strong>Hexhunter</strong> — a gothic horde-survivor with distinct heroes and escalating chaos. <a href="hexhunter/index.html">Site ↗</a></li>
-      <li><strong>Mythwright</strong> — a fast tactical card battler with hundreds of cards. <a href="mythwright/index.html">Site ↗</a></li>
-      <li><strong>Rowan</strong> — a chronic-condition companion that turns conversations into structured records. <a href="rowan/index.html">Site ↗</a></li>
-      <li><strong>Alder</strong> — a recovery companion for cravings, lapses, and progress. <a href="alder/index.html">Site ↗</a></li>
-      <li><strong>Waddleton</strong> — a snowy social world in the browser, free to play. <a href="https://waddleton.pages.dev/" rel="noopener">Play ↗</a></li>
-      <li><strong>Mythkin</strong> — original AI characters plus figures from history, myth, literature and scripture. <a href="mythkin/index.html">Site ↗</a></li>
-      <li><strong>Hoardling</strong> — hoard defence: hold the chokepoints, and killing a carrier flies the coins home. <a href="hoardling/index.html">Play ↗</a></li>
-      <li><strong>Gemburrow</strong> — a cozy gem-digging puzzle where every gem and rock is real physics. <a href="gemburrow/index.html">Site ↗</a></li>
-      <li><strong>Holohound</strong> — a trading-card scanner for Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam, with uncapped on-device scanning and prices that name their source. <a href="holohound/index.html">Site ↗</a></li>
-      <li><strong>Loam</strong> — a notes companion that tidies typos in place and shapes rambly jots into clean lines, with every change previewed and undoable. <a href="loam/index.html">Site ↗</a></li>
+      <li><strong>Wingmate</strong> — an AI dating coach that organizes context by connection. <a href="wingmate/index.html" aria-label="Wingmate site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Quietoak</strong> — a companion for practicing DBT skills; not therapy or crisis care. <a href="quietoak/index.html" aria-label="Quietoak site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>CryptoSage AI</strong> — a market-research workspace; informational, not investment advice. <a href="https://cryptosageai.io/" rel="noopener" aria-label="CryptoSage AI site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Saffra</strong> — an AI cooking companion that adapts prepared recipes to your kitchen. <a href="saffra/index.html" aria-label="Saffra site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>StoryVault AI</strong> — interactive fiction where story state shapes each new page. <a href="storyvault/index.html" aria-label="StoryVault AI site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Nightshelf</strong> — a wind-down experience of calming books, narration, and ambient sound. <a href="nightshelf/index.html" aria-label="Nightshelf site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Hexhunter</strong> — a gothic horde-survivor with distinct heroes and escalating chaos. <a href="hexhunter/index.html" aria-label="Hexhunter site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Mythwright</strong> — a fast tactical card battler with hundreds of cards. <a href="mythwright/index.html" aria-label="Mythwright site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Rowan</strong> — a chronic-condition companion that turns conversations into structured records. <a href="rowan/index.html" aria-label="Rowan site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Alder</strong> — a recovery companion for cravings, lapses, and progress. <a href="alder/index.html" aria-label="Alder site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Waddleton</strong> — a snowy social world in the browser, free to play. <a href="https://waddleton.pages.dev/" rel="noopener" aria-label="Play Waddleton">Play <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Mythkin</strong> — original AI characters plus figures from history, myth, literature and scripture. <a href="mythkin/index.html" aria-label="Mythkin site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Hoardling</strong> — hoard defence: hold the chokepoints, and killing a carrier flies the coins home. <a href="hoardling/index.html" aria-label="Play Hoardling">Play <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Gemburrow</strong> — a cozy gem-digging puzzle where every gem and rock is real physics. <a href="gemburrow/index.html" aria-label="Gemburrow site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Holohound</strong> — a trading-card scanner for Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam, with uncapped on-device scanning and prices that name their source. <a href="holohound/index.html" aria-label="Holohound site">Site <span aria-hidden="true">↗</span></a></li>
+      <li><strong>Loam</strong> — a notes companion that tidies typos in place and shapes rambly jots into clean lines, with every change previewed and undoable. <a href="loam/index.html" aria-label="Loam site">Site <span aria-hidden="true">↗</span></a></li>
     </ul>
 
     <h2>Logos &amp; key art</h2>

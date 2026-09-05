@@ -1,4 +1,4 @@
-# Hypersage AI Labs — studio site
+# HyperSage AI Labs — studio site
 
 > **This file is served publicly at `https://hypersage.ai/README.md`.** GitHub Pages
 > serves every tracked file in the branch, including this one. Nothing in here may
@@ -6,21 +6,19 @@
 > pages do not quote. If you need to write something internal, write it somewhere that
 > is not in this tree.
 
-Static, no-build site for **Hypersage AI Labs**, the parent studio, plus the eleven
-product sites that live under it as subfolders.
+Static, no-build site for **HyperSage AI Labs**, the parent studio, plus the product
+sites that live under it as subfolders.
 
-Thirteen products: Wingmate, Quietoak, CryptoSage AI, Saffra, StoryVault AI, Nightshelf,
-Hexhunter, Mythwright, The One, Rowan, Alder, Waddleton and Mythkin.
-
-Eleven of the thirteen currently have iOS app code. **Waddleton is a browser game**,
-played at <https://waddleton.pages.dev/>; **The One is currently a landing-page concept**.
-Portfolio copy should say "consumer products" unless it is intentionally describing a
-specific platform.
+Sixteen products: Holohound, Wingmate, Loam, Quietoak, CryptoSage AI, Saffra, StoryVault AI,
+Nightshelf, Rowan, Alder, Mythkin, Hexhunter, Mythwright, Waddleton, Hoardling and Gemburrow.
+Thirteen are iOS apps; **Waddleton, Hoardling and Gemburrow are browser games**. Portfolio
+copy should say "consumer products" unless it is intentionally describing a specific
+platform. The page's own `id="product-*"` anchors are the count of record.
 
 ## Two names, and they are not interchangeable
 
-- **`Hypersage`** — one capital H, lowercase `s` — is the trading style. It is what the
-  wordmark, `<title>`s, JSON-LD `name`, nav and body copy use.
+- **`HyperSage`** — capital H and capital S, one word — is the wordmark. It is what the
+  `<title>`s, JSON-LD `name`, nav and body copy use (press.html's fact sheet is canonical).
 - **`HyperSage AI Labs LLC`** — capital S, **no comma before LLC** — is the registered
   Delaware entity. It belongs in copyright lines, liability clauses, indemnity clauses
   and the JSON-LD `legalName`, and nowhere else. `index.html`'s footer and
@@ -47,11 +45,12 @@ Every self-referencing URL — `<link rel="canonical">`, `og:url`, `og:image`,
 
 ## Layout
 
-The eleven app sites are **subfolders of this repo**, not separate origins: `/alder/`,
-`/hexhunter/`, `/mythkin/`, `/mythwright/`, `/nightshelf/`, `/quietoak/`, `/rowan/`,
-`/saffra/`, `/storyvault/`, `/waddleton/`, `/wingmate/`. One domain and one certificate
-serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
-(`drvanus.github.io/theone-app/`) are still on their own origins.
+The product sites are **subfolders of this repo**, not separate origins — one folder per
+product on the studio page (`/alder/`, `/gemburrow/`, `/hexhunter/`, `/hoardling/`,
+`/holohound/`, `/loam/`, `/mythkin/`, `/mythwright/`, `/nightshelf/`, `/quietoak/`,
+`/rowan/`, `/saffra/`, `/storyvault/`, `/waddleton/`, `/wingmate/`). One domain and one
+certificate serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) is the one product
+still on its own origin.
 
 ### Studio pages
 
@@ -59,8 +58,8 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
   step. Section order is `hero → products → ai → about → contact`; the desktop and
   mobile navigation must point to those public sections in the same order.
 - `privacy.html` — studio-site privacy policy. Scoped to the studio pages by name,
-  because the subfolders are now the same origin and `/saffra/` runs a Firebase-backed
-  email form.
+  because the subfolders are the same origin and each product page has its own
+  policy.
 - `terms.html` — website-only terms.
 - `support.html` — contact, per-product site index, billing/refunds, security reporting.
 - `404.html` — branded not-found page (noindex, links home). The eight nested `404.html`
@@ -68,17 +67,18 @@ serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) and The One
 
 ## Assets
 
-- `logo.png` / `favicon.png` / `apple-touch-icon.png` — the Hypersage mark (teal→violet
+- `logo.png` / `favicon.png` / `apple-touch-icon.png` — the HyperSage mark (teal→violet
   infinity). Source in `brand/`.
-- `icons/` — 256px app icons for all 13 products (hero strip + product grid). All 13 are
-  referenced by `index.html`.
-- `og-image.png` — 1200×630 social card, referenced with the `?v=20260811a` cache-buster
-  on all four studio pages. Bump the suffix whenever the bytes change, in all four —
+- `icons/` — 256px app icons for all 16 products, as `.png` (the press-kit downloads)
+  and `.webp` (what `index.html` displays: the hero strip, the grid and the rail).
+- `og-image.png` — 1200×630 social card, referenced with a `?v=` cache-buster on all
+  five studio pages (index, press, privacy, support, terms) and in index.html's JSON-LD.
+  Bump the suffix whenever the bytes change, in all of them —
   and **only** when they change; a new `?v=` on identical bytes just forces a pointless
   refetch, while changed bytes under an old `?v=` keep the stale picture forever.
 - **Every og-image in this repo is GENERATED. Never hand-draw or hand-edit one.**
   `tools/build_og.py` renders the studio card by lifting the page's own `<style>` and
-  hero figure; `tools/build_app_og.py` renders all eleven product cards from each
+  hero figure; `tools/build_app_og.py` renders every product card from each
   subsite's own `:root` tokens, webfont stack, hero words and shipped art. Seven were
   hand-made until 2026-08-11 and every one had drifted from its page — see the
   header comment in each tool for what that cost.
@@ -94,14 +94,14 @@ reads robots.txt from an origin root only. Eight subfolders still carry an inert
 delete them when convenient and do not add more.
 
 `sitemap.xml` is a sitemap **index**. Every product subfolder that has a `sitemap.xml`
-needs a child entry there or its pages go undeclared — all eleven are listed today.
+needs a child entry there or its pages go undeclared.
 
 ## Availability copy
 
 The studio homepage deliberately does not rank products by launch state. Availability
 belongs on each product page and in the destination of its call to action. A product card
 may link to a live experience when one exists, but studio-level copy should explain the
-portfolio and its shared product architecture rather than compare release status.
+portfolio rather than compare release status.
 
 ## Audit tooling
 
@@ -110,7 +110,7 @@ cheap:
 
 ```bash
 python3 tools/build_og.py --check        # studio card still matches the studio page
-python3 tools/build_app_og.py --check    # all eleven product cards still match their pages
+python3 tools/build_app_og.py --check    # every product card still matches its page
 ```
 
 They fail when a page moves under its card (CSS tokens, `<h1>`, `og:title`,

@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260904a">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260904b">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260904a">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260904b">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260904a",
+        "image": "https://hypersage.ai/og-image.png?v=20260904b",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -326,6 +326,13 @@
       color: var(--faint);
     }
     .engine-head span:first-child { color: var(--brand-a); }
+    /* Under ~377px both header labels wrap to two lines and the second line lands on the
+       YOU ASK tag (8px overlap measured at 320 and 360). The right-hand label repeats the
+       section name, so it goes rather than the panel growing. */
+    @media (max-width: 380px) { .engine-head span:last-child { display: none; } }
+    /* 320px: the eyebrow pill wrapped to two lines. (The h1 size for this width lives
+       beside the 1099px h1 rule, which would otherwise override it.) */
+    @media (max-width: 360px) { .hero .eyebrow { letter-spacing: .14em; } }
     /* Wire layer — geometry lives in a fixed 470×290 space stretched to the panel;
        the panel keeps the same 1.62 aspect, so the stretch stays uniform. */
     .pl-wires { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; overflow: visible; }
@@ -682,6 +689,10 @@
         grid-template-columns: 1fr; grid-template-areas: "eyebrow" "title" "copy" "engine";
       }
       .hero h1 { max-width: 880px; font-size: clamp(2.5rem, 6vw, 4.4rem); }
+      /* 320px: at the 40px floor "a point of view." is 283px of text in a 272px column, so
+         the headline broke to three lines ending on "view.". Nested here so it wins over
+         the rule above. */
+      @media (max-width: 360px) { .hero h1 { font-size: clamp(2.2rem, 11.5vw, 2.5rem); } }
       .hero-copy { max-width: 720px; }
       .context-engine { justify-self: start; max-width: 560px; margin-top: 42px; }
     }
@@ -760,7 +771,7 @@
        is what read as a hole. One owner for that gap now: the hero's padding. */
     .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 26px 0; background: rgba(255,255,255,0.012); }
     .strip .container { display: flex; align-items: center; gap: 14px 27px; flex-wrap: wrap; justify-content: center; }
-    .strip .label { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); }
+    .strip .label { font-family: 'JetBrains Mono', monospace; font-size: 0.69rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); }
     /* Desktop: the label heads its own centered line so the 15 marks wrap in balanced
        rows instead of stranding the two newest games on a third row. */
     @media (min-width: 701px) { .strip .label { flex-basis: 100%; text-align: center; } }
@@ -783,7 +794,9 @@
     }
 
     /* ===== SECTION SCAFFOLD ===== */
-    section.block { padding: 88px 0; position: relative; }
+    /* scroll-margin: the sticky nav is 73px tall on phones and the block's phone padding is
+       68px, so a menu tap landed each eyebrow 4-5px under the nav's bottom rule. */
+    section.block { padding: 88px 0; position: relative; scroll-margin-top: 20px; }
     .section-head { max-width: 680px; margin-bottom: 52px; }
     /* Progressive: browsers without text-wrap ignore it. Stops the section head and
        the ledger paragraphs ending on a one-word line at phone widths. */
@@ -918,9 +931,12 @@
       border: 1px solid var(--line-strong);
       box-shadow: 0 6px 18px rgba(0,0,0,0.45);
     }
-    .product .titleblock { flex: 1 1 auto; min-width: 145px; }
+    /* basis 145px, not auto: with auto the basis is the sub-line's max-content width, so a
+       long sub-line (Rowan at 390, four cards at 360) pushed the whole block under the icon
+       instead of wrapping the sub-line. */
+    .product .titleblock { flex: 1 1 145px; min-width: 145px; }
     .product .titleblock h3 { font-size: 1.28rem; font-weight: 600; line-height: 1.22; padding-bottom: 0.08em; }
-    .product .cat { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
+    .product .cat { font-family: 'JetBrains Mono', monospace; font-size: 0.69rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
     /* Lifecycle chip — an honest status beats a visitor searching the App Store and
        finding nothing. Update these when a product goes live. */
     .product .status {
@@ -985,7 +1001,7 @@
        affordance, not the only way through. Cards are sized so the next one always
        peeks — that is what tells a reader there is more, without needing the arrow. */
     .layer-proof {
-      display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 32px) / 3);
+      display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 32px - 72px) / 3);
       gap: 16px; margin: 0 0 16px; padding: 2px 2px 6px; list-style: none;
       overflow-x: auto; overscroll-behavior-x: contain;
       scroll-snap-type: x proximity; scrollbar-width: none;
@@ -999,6 +1015,7 @@
     /* [hidden] loses to display:flex — say it, or the buttons never hide. */
     .rail-nav[hidden] { display: none; }
     .rail-btn {
+      font: inherit; /* <button> defaults to Arial; the arrows were the only glyphs on the page not in the site's own faces */
       width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
       border-radius: 50%; border: 1px solid var(--line-strong); background: var(--panel);
       color: var(--fg); font-size: 1rem; line-height: 1; cursor: pointer;
@@ -1067,7 +1084,7 @@
     /* ===== CTA ===== */
     .cta {
       /* 88, not 84 — every other section band on the page is 88/88. */
-      text-align: center; padding: 88px 24px; margin: 0;
+      text-align: center; padding: 88px 0; margin: 0;
       background:
         radial-gradient(ellipse 60% 100% at 50% 0%, rgba(45,212,191,0.12), transparent 70%),
         radial-gradient(ellipse 60% 100% at 50% 100%, rgba(167,139,250,0.10), transparent 70%);
@@ -1075,18 +1092,20 @@
     }
     .cta h2 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; margin-bottom: 16px; line-height: 1.22; }
     .cta p { color: var(--muted); font-size: 1.1rem; max-width: 560px; margin: 0 auto 30px; }
-    .cta-routes { margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 14px; flex-wrap: wrap; color: var(--faint); font-size: 0.9rem; }
+    /* .cta p (0,1,1) outranked .cta-routes (0,1,0): the routes rendered at 1.1rem in --muted
+       with no gap above the button. Qualify the selector so the designed values apply. */
+    .cta p.cta-routes { margin: 20px auto 0; display: flex; justify-content: center; align-items: center; gap: 14px; flex-wrap: wrap; color: var(--faint); font-size: 0.9rem; }
     .cta-routes a { color: var(--muted); padding: 4px 0; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line-strong); transition: color .2s; }
     .cta-routes a:hover { color: var(--fg); }
 
     /* ===== FOOTER ===== */
-    footer.site { border-top: 1px solid var(--line); padding: 54px 24px 46px; }
+    footer.site { border-top: 1px solid var(--line); padding: 54px 0 46px; }
     footer.site .container { display: flex; justify-content: space-between; gap: 30px; flex-wrap: wrap; }
     footer .f-brand { max-width: 320px; }
     footer .f-brand .brand { margin-bottom: 12px; }
     footer .f-brand p { color: var(--faint); font-size: 0.88rem; }
     footer .f-links { display: flex; gap: 56px; flex-wrap: wrap; }
-    footer .f-col h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 14px; }
+    footer .f-col h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.69rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 14px; }
     footer .f-col a { display: block; color: var(--muted); font-size: 0.92rem; padding: 5px 0; transition: color .2s; }
     /* Touch targets. On a phone these links measured 34px tall and the wordmark
        28px, under the 44pt minimum, so neighbouring footer links were easy to
@@ -1099,7 +1118,7 @@
          They are a wrapping flex row, so inline-flex keeps them on their line. */
       .cta-routes a { min-height: 44px; display: inline-flex; align-items: center; }
       .cta-routes span[aria-hidden="true"] { display: none; }
-      .cta-routes { gap: 4px 22px; }
+      .cta p.cta-routes { gap: 4px 22px; }
       /* The 30 product-card labels rendered at 10.9px on a phone, under the
          12px most guidance treats as a floor for real text. Measured across
          all 15 cards at 390px: nothing wraps, nothing overflows, cards grow
@@ -1107,12 +1126,14 @@
       .product .cat, .product .status { font-size: 0.74rem; }
     }
     footer .f-col a:hover { color: var(--fg); }
-    footer .f-bottom { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 24px; color: var(--faint); font-size: 0.82rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    /* flex: 1 1 100% — footer.site .container is itself a wrapping flex row, so without
+       this the bottom rule shrink-wraps to 619px and stops under the Products column. */
+    footer .f-bottom { flex: 1 1 100%; border-top: 1px solid var(--line); margin-top: 40px; padding-top: 24px; color: var(--faint); font-size: 0.82rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 
     /* ===== A11Y ===== */
     /* No border-radius override here — the outline traces each control's own shape,
        so pills stay pills when focused. */
-    a:focus-visible, summary:focus-visible, .btn:focus-visible {
+    a:focus-visible, summary:focus-visible, .btn:focus-visible, .rail-btn:focus-visible {
       outline: 2px solid var(--brand-a); outline-offset: 3px;
     }
     /* Keyboard users land here first; the sticky nav is 62px tall, so park it below. */
@@ -1192,7 +1213,7 @@
         color: CanvasText; background: Canvas; border-color: CanvasText;
       }
       .btn-primary { color: ButtonText; background: ButtonFace; border: 1px solid ButtonText; box-shadow: none; }
-      a:focus-visible, summary:focus-visible, .btn:focus-visible { outline-color: Highlight; }
+      a:focus-visible, summary:focus-visible, .btn:focus-visible, .rail-btn:focus-visible { outline-color: Highlight; }
     }
   </style>
   <script>
@@ -1249,13 +1270,13 @@
           <p class="lede">HyperSage builds distinctive consumer apps for relationships, health, recovery, food, stories, markets, and sleep — alongside original games. Where AI belongs, we add a <strong>product-specific intelligence layer</strong>. It combines information you provide and relevant in-product context with domain knowledge, tools, and safeguards.</p>
           <div class="hero-cta">
             <a href="#products" class="btn btn-primary"><span>Explore the products</span><span aria-hidden="true">→</span></a>
-            <a href="#ai" class="btn btn-ghost">Intelligence layer</a>
+            <a href="#ai" class="btn btn-ghost">Product intelligence</a>
             <a class="hero-try" href="https://waddleton.pages.dev/" target="_blank" rel="noopener" aria-label="Play Waddleton free in your browser"><span class="u">Or play Waddleton free</span> <span aria-hidden="true">↗</span></a>
           </div>
         </div>
 
         <figure class="context-engine" aria-hidden="true">
-          <div class="engine-head"><span>How a response is formed</span><span>Intelligence layer</span></div>
+          <div class="engine-head"><span>How a response is formed</span><span>Product intelligence</span></div>
 
           <svg class="pl-wires" viewBox="0 0 500 368" preserveAspectRatio="none" focusable="false">
             <defs>
@@ -1297,17 +1318,17 @@
             
             <span class="pl-msg-bubble">
               
-              <span class="pl-prompt"><span class="pl-q">What should I cook tonight?</span><span class="pl-of" style="--app: var(--c-saffra);"><img src="icons/saffra.png" alt="" width="16" height="16">Saffra</span></span>
-              <span class="pl-prompt"><span class="pl-q">Start an adventure in Dracula&rsquo;s castle.</span><span class="pl-of" style="--app: var(--c-story);"><img src="icons/storyvault.png" alt="" width="16" height="16">StoryVault&nbsp;AI</span></span>
-              <span class="pl-prompt"><span class="pl-q">Write me a bedtime story about the sea.</span><span class="pl-of" style="--app: var(--c-night);"><img src="icons/nightshelf.png" alt="" width="16" height="16">Nightshelf</span></span>
-              <span class="pl-prompt"><span class="pl-q">What should I say back to her?</span><span class="pl-of" style="--app: var(--c-wingmate);"><img src="icons/wingmate.png" alt="" width="16" height="16">Wingmate</span></span>
-              <span class="pl-prompt"><span class="pl-q">Athena, what makes a hero?</span><span class="pl-of" style="--app: var(--c-mythkin);"><img src="icons/mythkin.png" alt="" width="16" height="16">Mythkin</span></span>
-              <span class="pl-prompt"><span class="pl-q">Which skill should I practice tonight?</span><span class="pl-of" style="--app: var(--c-quietoak);"><img src="icons/quietoak.png?v=20260810w" alt="" width="16" height="16">Quietoak</span></span>
-              <span class="pl-prompt"><span class="pl-q">What do I need to finish this set?</span><span class="pl-of" style="--app: var(--c-holohound);"><img src="icons/holohound.png" alt="" width="16" height="16">Holohound</span></span>
-              <span class="pl-prompt"><span class="pl-q">What should I tell my doctor on Friday?</span><span class="pl-of" style="--app: var(--c-rowan-text);"><img src="icons/rowan.png" alt="" width="16" height="16">Rowan</span></span>
-              <span class="pl-prompt"><span class="pl-q">How long have I been on track?</span><span class="pl-of" style="--app: var(--c-alder);"><img src="icons/alder.png" alt="" width="16" height="16">Alder</span></span>
-              <span class="pl-prompt"><span class="pl-q">Why did my portfolio move today?</span><span class="pl-of" style="--app: var(--c-crypto);"><img src="icons/cryptosage.png" alt="" width="16" height="16">CryptoSage&nbsp;AI</span></span>
-              <span class="pl-prompt"><span class="pl-q">Forge me a card: a cunning sea-witch.</span><span class="pl-of" style="--app: var(--c-myth);"><img src="icons/mythwright.png" alt="" width="16" height="16">Mythwright</span></span>
+              <span class="pl-prompt"><span class="pl-q">What should I cook tonight?</span><span class="pl-of" style="--app: var(--c-saffra);"><img src="icons/saffra.webp" alt="" width="16" height="16">Saffra</span></span>
+              <span class="pl-prompt"><span class="pl-q">Start an adventure in Dracula&rsquo;s castle.</span><span class="pl-of" style="--app: var(--c-story);"><img src="icons/storyvault.webp" alt="" width="16" height="16">StoryVault&nbsp;AI</span></span>
+              <span class="pl-prompt"><span class="pl-q">Write me a bedtime story about the sea.</span><span class="pl-of" style="--app: var(--c-night);"><img src="icons/nightshelf.webp" alt="" width="16" height="16">Nightshelf</span></span>
+              <span class="pl-prompt"><span class="pl-q">What should I say back to her?</span><span class="pl-of" style="--app: var(--c-wingmate);"><img src="icons/wingmate.webp" alt="" width="16" height="16">Wingmate</span></span>
+              <span class="pl-prompt"><span class="pl-q">Athena, what makes a hero?</span><span class="pl-of" style="--app: var(--c-mythkin);"><img src="icons/mythkin.webp" alt="" width="16" height="16">Mythkin</span></span>
+              <span class="pl-prompt"><span class="pl-q">Which skill should I practice tonight?</span><span class="pl-of" style="--app: var(--c-quietoak);"><img src="icons/quietoak.webp" alt="" width="16" height="16">Quietoak</span></span>
+              <span class="pl-prompt"><span class="pl-q">What do I need to finish this set?</span><span class="pl-of" style="--app: var(--c-holohound);"><img src="icons/holohound.webp" alt="" width="16" height="16">Holohound</span></span>
+              <span class="pl-prompt"><span class="pl-q">What should I tell my doctor on Friday?</span><span class="pl-of" style="--app: var(--c-rowan-text);"><img src="icons/rowan.webp" alt="" width="16" height="16">Rowan</span></span>
+              <span class="pl-prompt"><span class="pl-q">How long have I been on track?</span><span class="pl-of" style="--app: var(--c-alder);"><img src="icons/alder.webp" alt="" width="16" height="16">Alder</span></span>
+              <span class="pl-prompt"><span class="pl-q">Why did my portfolio move today?</span><span class="pl-of" style="--app: var(--c-crypto);"><img src="icons/cryptosage.webp" alt="" width="16" height="16">CryptoSage&nbsp;AI</span></span>
+              <span class="pl-prompt"><span class="pl-q">Forge me a card: a cunning sea-witch.</span><span class="pl-of" style="--app: var(--c-myth);"><img src="icons/mythwright.webp" alt="" width="16" height="16">Mythwright</span></span>
             </span>
           </div>
 
@@ -1347,22 +1368,22 @@
   <div class="strip">
     <div class="container">
       <span class="label">The portfolio</span>
-      <a class="word" href="#product-holohound"><img src="icons/holohound.png" alt="" width="26" height="26" loading="lazy">Holohound</a>
-      <a class="word" href="#product-wingmate"><img src="icons/wingmate.png" alt="" width="26" height="26" loading="lazy">Wingmate</a>
-      <a class="word" href="#product-loam"><img src="icons/loam.png?v=20260831a" alt="" width="26" height="26" loading="lazy">Loam</a>
-      <a class="word" href="#product-quietoak"><img src="icons/quietoak.png?v=20260810w" alt="" width="26" height="26" loading="lazy">Quietoak</a>
-      <a class="word" href="#product-cryptosage"><img src="icons/cryptosage.png" alt="" width="26" height="26" loading="lazy">CryptoSage&nbsp;AI</a>
-      <a class="word" href="#product-saffra"><img src="icons/saffra.png" alt="" width="26" height="26" loading="lazy">Saffra</a>
-      <a class="word" href="#product-storyvault"><img src="icons/storyvault.png" alt="" width="26" height="26" loading="lazy">StoryVault&nbsp;AI</a>
-      <a class="word" href="#product-nightshelf"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
-      <a class="word" href="#product-rowan"><img src="icons/rowan.png" alt="" width="26" height="26" loading="lazy">Rowan</a>
-      <a class="word" href="#product-alder"><img src="icons/alder.png" alt="" width="26" height="26" loading="lazy">Alder</a>
-      <a class="word" href="#product-mythkin"><img src="icons/mythkin.png" alt="" width="26" height="26" loading="lazy">Mythkin</a>
-      <a class="word" href="#product-hexhunter"><img src="icons/hexhunter.png" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
-      <a class="word" href="#product-mythwright"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy">Mythwright</a>
-      <a class="word" href="#product-waddleton"><img src="icons/waddleton.png" alt="" width="26" height="26" loading="lazy">Waddleton</a>
-      <a class="word" href="#product-hoardling"><img src="icons/hoardling.png" alt="" width="26" height="26" loading="lazy">Hoardling</a>
-      <a class="word" href="#product-gemburrow"><img src="icons/gemburrow.png" alt="" width="26" height="26" loading="lazy">Gemburrow</a>
+      <a class="word" href="#product-holohound"><img src="icons/holohound.webp" alt="" width="26" height="26" loading="lazy">Holohound</a>
+      <a class="word" href="#product-wingmate"><img src="icons/wingmate.webp" alt="" width="26" height="26" loading="lazy">Wingmate</a>
+      <a class="word" href="#product-loam"><img src="icons/loam.webp" alt="" width="26" height="26" loading="lazy">Loam</a>
+      <a class="word" href="#product-quietoak"><img src="icons/quietoak.webp" alt="" width="26" height="26" loading="lazy">Quietoak</a>
+      <a class="word" href="#product-cryptosage"><img src="icons/cryptosage.webp" alt="" width="26" height="26" loading="lazy">CryptoSage&nbsp;AI</a>
+      <a class="word" href="#product-saffra"><img src="icons/saffra.webp" alt="" width="26" height="26" loading="lazy">Saffra</a>
+      <a class="word" href="#product-storyvault"><img src="icons/storyvault.webp" alt="" width="26" height="26" loading="lazy">StoryVault&nbsp;AI</a>
+      <a class="word" href="#product-nightshelf"><img src="icons/nightshelf.webp" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
+      <a class="word" href="#product-rowan"><img src="icons/rowan.webp" alt="" width="26" height="26" loading="lazy">Rowan</a>
+      <a class="word" href="#product-alder"><img src="icons/alder.webp" alt="" width="26" height="26" loading="lazy">Alder</a>
+      <a class="word" href="#product-mythkin"><img src="icons/mythkin.webp" alt="" width="26" height="26" loading="lazy">Mythkin</a>
+      <a class="word" href="#product-hexhunter"><img src="icons/hexhunter.webp" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
+      <a class="word" href="#product-mythwright"><img src="icons/mythwright.webp" alt="" width="26" height="26" loading="lazy">Mythwright</a>
+      <a class="word" href="#product-waddleton"><img src="icons/waddleton.webp" alt="" width="26" height="26" loading="lazy">Waddleton</a>
+      <a class="word" href="#product-hoardling"><img src="icons/hoardling.webp" alt="" width="26" height="26" loading="lazy">Hoardling</a>
+      <a class="word" href="#product-gemburrow"><img src="icons/gemburrow.webp" alt="" width="26" height="26" loading="lazy">Gemburrow</a>
     </div>
   </div>
 
@@ -1379,7 +1400,7 @@
 
         <article class="product" id="product-holohound" style="--accent: var(--c-holohound);">
           <div class="top">
-            <img class="app-icon" src="icons/holohound.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/holohound.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Holohound</h3>
               <div class="cat">Trading Card Scanner</div>
@@ -1398,7 +1419,7 @@
 
         <article class="product" id="product-wingmate" style="--accent: var(--c-wingmate);">
           <div class="top">
-            <img class="app-icon" src="icons/wingmate.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/wingmate.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Wingmate</h3>
               <div class="cat">AI Dating Coach</div>
@@ -1419,7 +1440,7 @@
         
         <article class="product" id="product-loam" style="--accent: var(--c-loam); --accent-text: var(--c-loam-text);">
           <div class="top">
-            <img class="app-icon" src="icons/loam.png?v=20260831a" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/loam.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Loam</h3>
               <div class="cat">AI Notes Companion</div>
@@ -1438,7 +1459,7 @@
 
         <article class="product" id="product-quietoak" style="--accent: var(--c-quietoak);">
           <div class="top">
-            <img class="app-icon" src="icons/quietoak.png?v=20260810w" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/quietoak.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Quietoak</h3>
               <div class="cat">DBT Skills Companion</div>
@@ -1457,7 +1478,7 @@
 
         <article class="product" id="product-cryptosage" style="--accent: var(--c-crypto);">
           <div class="top">
-            <img class="app-icon" src="icons/cryptosage.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/cryptosage.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>CryptoSage AI</h3>
               <div class="cat">Portfolio Intelligence</div>
@@ -1478,7 +1499,7 @@
 
         <article class="product" id="product-saffra" style="--accent: var(--c-saffra);">
           <div class="top">
-            <img class="app-icon" src="icons/saffra.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/saffra.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Saffra</h3>
               <div class="cat">AI Cooking Assistant</div>
@@ -1486,7 +1507,7 @@
             <span class="status live">iOS · Live</span>
           </div>
           
-          <p class="desc">Tell it what&rsquo;s in your kitchen and it rewrites a complete recipe around it &mdash; every amount measured, prep noted, equipment listed. Recipes declare their allergens, and anything you can&rsquo;t eat is filtered out before it is ever suggested.</p>
+          <p class="desc">Tell it what&rsquo;s in your kitchen and it rewrites a complete recipe around it &mdash; every amount measured, prep noted, equipment listed. Recipes declare their allergens; when something you can&rsquo;t eat is in the way, Saffra names a substitution or passes on the recipe.</p>
           <ul role="list">
             <li>Recipes adapted to your kitchen and constraints</li>
             <li>Diet- and allergen-aware substitutions with hands-free cooking mode</li>
@@ -1499,7 +1520,7 @@
 
         <article class="product" id="product-storyvault" style="--accent: var(--c-story);">
           <div class="top">
-            <img class="app-icon" src="icons/storyvault.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/storyvault.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               
               <h3>StoryVault AI</h3>
@@ -1521,7 +1542,7 @@
 
         <article class="product" id="product-nightshelf" style="--accent: var(--c-night);">
           <div class="top">
-            <img class="app-icon" src="icons/nightshelf.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/nightshelf.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Nightshelf</h3>
               <div class="cat">Sleep Stories</div>
@@ -1541,7 +1562,7 @@
 
         <article class="product" id="product-rowan" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
           <div class="top">
-            <img class="app-icon" src="icons/rowan.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/rowan.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Rowan</h3>
               <div class="cat">Chronic-Condition Companion</div>
@@ -1561,7 +1582,7 @@
 
         <article class="product" id="product-alder" style="--accent: var(--c-alder);">
           <div class="top">
-            <img class="app-icon" src="icons/alder.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/alder.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Alder</h3>
               <div class="cat">Recovery Companion</div>
@@ -1580,14 +1601,14 @@
 
         <article class="product" id="product-mythkin" style="--accent: var(--c-mythkin);">
           <div class="top">
-            <img class="app-icon" src="icons/mythkin.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/mythkin.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Mythkin</h3>
               <div class="cat">AI Characters &amp; Legends</div>
             </div>
             <span class="status">iOS · Coming soon</span>
           </div>
-          <p class="desc">Talk with 470 painted characters across 85 collections &mdash; history, storybook, legend and scripture &mdash; or author your own with a temperament, a history and an opening line.</p>
+          <p class="desc">Talk with 470 painted characters across 85 sets &mdash; history, storybook, legend and scripture &mdash; or author your own with a temperament, a history and an opening line.</p>
           <ul role="list">
             <li>Start a Hearth: two or three characters in one room together</li>
             <li>44 stories to step into, each cast with kin from the roster</li>
@@ -1600,7 +1621,7 @@
         
         <article class="product" id="product-hexhunter" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
           <div class="top">
-            <img class="app-icon" src="icons/hexhunter.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/hexhunter.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Hexhunter</h3>
               <div class="cat">Gothic Horde-Survivor</div>
@@ -1610,7 +1631,7 @@
           <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor built around distinct heroes, illustrated upgrades, and escalating chaos.</p>
           <ul role="list">
             
-            <li>9 heroes with distinct playstyles</li>
+            <li>8 heroes with distinct playstyles</li>
             <li>18 weapons, secret evolutions, and 3 escalating biomes</li>
             
           </ul>
@@ -1622,7 +1643,7 @@
 
         <article class="product" id="product-mythwright" style="--accent: var(--c-myth);">
           <div class="top">
-            <img class="app-icon" src="icons/mythwright.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/mythwright.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Mythwright</h3>
               <div class="cat">Strategy Card Game</div>
@@ -1641,7 +1662,7 @@
 
         <article class="product" id="product-waddleton" style="--accent: var(--c-waddle);">
           <div class="top">
-            <img class="app-icon" src="icons/waddleton.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/waddleton.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Waddleton</h3>
               <div class="cat">Social World · Arcade</div>
@@ -1662,7 +1683,7 @@
 
         <article class="product" id="product-hoardling" style="--accent: var(--c-hoard);">
           <div class="top">
-            <img class="app-icon" src="icons/hoardling.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/hoardling.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Hoardling</h3>
               <div class="cat">Hoard Defence</div>
@@ -1676,13 +1697,13 @@
             <li>Duels in one shared cavern, the same waves down both roads</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Play Hoardling free in your browser" href="hoardling/">Play free <span aria-hidden="true">↗</span></a>
+            <a class="btn-store" aria-label="Play Hoardling free in your browser" href="hoardling/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
         <article class="product" id="product-gemburrow" style="--accent: var(--c-gem);">
           <div class="top">
-            <img class="app-icon" src="icons/gemburrow.png" alt="" width="58" height="58" loading="lazy">
+            <img class="app-icon" src="icons/gemburrow.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               <h3>Gemburrow</h3>
               <div class="cat">Cozy Gem-Digging Puzzle</div>
@@ -1697,7 +1718,7 @@
             
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Play Gemburrow free in your browser" href="gemburrow/play/">Play free <span aria-hidden="true">↗</span></a>
+            <a class="btn-store" aria-label="Play Gemburrow free in your browser" href="gemburrow/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
             <a class="link" aria-label="Visit the Gemburrow site" href="gemburrow/">Visit Gemburrow <span aria-hidden="true">→</span></a>
           </div>
         </article>
@@ -1720,7 +1741,7 @@
   <section class="block systems" id="ai">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow">Our intelligence layer</span>
+        <span class="eyebrow">Product intelligence</span>
         
         <h2>Anyone can call the same models. The layer around them is ours.</h2>
         <p>Where a product uses AI, the models come from Anthropic and OpenAI: Claude in most of the products that write to you, OpenAI in others and for any image a product generates as you use it. What we build, for each product, is the layer around them — what to ask, what the product already knows about your situation, and what it checks before you see an answer.</p>
@@ -1735,59 +1756,59 @@
       </ol>
 
       <div class="proof-rail">
-        <ul class="layer-proof" id="layer-proof" tabindex="0" role="list" aria-label="The intelligence layer at work, product by product">
+        <ul class="layer-proof" id="layer-proof" tabindex="0" role="list" aria-label="Product intelligence at work, one product at a time">
         <li class="proof-card" style="--accent: var(--c-wingmate);">
-          <span class="proof-head"><img src="icons/wingmate.png" alt="" width="26" height="26" loading="lazy"><span>In Wingmate</span></span>
+          <span class="proof-head"><img src="icons/wingmate.webp" alt="" width="26" height="26" loading="lazy"><span>In Wingmate</span></span>
           <p>Before a reply is suggested, the coach has read the whole thread &mdash; not just the last message &mdash; and what all four coaches remember about the person you&rsquo;re talking to.</p>
           <a class="link" href="#product-wingmate">See Wingmate <span aria-hidden="true">↑</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-saffra);">
-          <span class="proof-head"><img src="icons/saffra.png" alt="" width="26" height="26" loading="lazy"><span>In Saffra</span></span>
+          <span class="proof-head"><img src="icons/saffra.webp" alt="" width="26" height="26" loading="lazy"><span>In Saffra</span></span>
           <p>Tell it what&rsquo;s in your kitchen and the recipe is rewritten around exactly that &mdash; with anything you can&rsquo;t eat filtered out before it&rsquo;s ever suggested.</p>
           <a class="link" href="#product-saffra">See Saffra <span aria-hidden="true">↑</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-story);">
-          <span class="proof-head"><img src="icons/storyvault.png" alt="" width="26" height="26" loading="lazy"><span>In StoryVault&nbsp;AI</span></span>
+          <span class="proof-head"><img src="icons/storyvault.webp" alt="" width="26" height="26" loading="lazy"><span>In StoryVault&nbsp;AI</span></span>
           <p>Tap an offered choice or type your own move &mdash; the story follows, and it remembers, so the next beat fits the adventure you&rsquo;ve actually had.</p>
           <a class="link" href="#product-storyvault">See StoryVault&nbsp;AI <span aria-hidden="true">↑</span></a>
         </li>
-              <li class="proof-card" style="--accent: var(--c-rowan);">
-          <span class="proof-head"><img src="icons/rowan.png" alt="" width="26" height="26" loading="lazy"><span>In Rowan</span></span>
+              <li class="proof-card" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
+          <span class="proof-head"><img src="icons/rowan.webp" alt="" width="26" height="26" loading="lazy"><span>In Rowan</span></span>
           <p>Say how the day went in your own words &mdash; it comes back as symptom logs, a medication list and a brief you can hand your doctor, with an independent safety check running on its own separate model.</p>
           <a class="link" href="#product-rowan">See Rowan <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-crypto);">
-          <span class="proof-head"><img src="icons/cryptosage.png" alt="" width="26" height="26" loading="lazy"><span>In CryptoSage&nbsp;AI</span></span>
+          <span class="proof-head"><img src="icons/cryptosage.webp" alt="" width="26" height="26" loading="lazy"><span>In CryptoSage&nbsp;AI</span></span>
           <p>Ask why your portfolio moved and the answer is built from your own holdings and cost basis &mdash; not a market recap that would read the same for everyone.</p>
           <a class="link" href="#product-cryptosage">See CryptoSage&nbsp;AI <span aria-hidden="true">&uarr;</span></a>
         </li>
               <li class="proof-card" style="--accent: var(--c-night);">
-          <span class="proof-head"><img src="icons/nightshelf.png" alt="" width="26" height="26" loading="lazy"><span>In Nightshelf</span></span>
-          <p>Pick a place, a mood and a length &mdash; tonight&rsquo;s story is written to those three, and the cover is painted to match.</p>
+          <span class="proof-head"><img src="icons/nightshelf.webp" alt="" width="26" height="26" loading="lazy"><span>In Nightshelf</span></span>
+          <p>With Pro, pick a place, a mood and a length &mdash; tonight&rsquo;s story is written to those three, and the cover is painted to match.</p>
           <a class="link" href="#product-nightshelf">See Nightshelf <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-quietoak);">
-          <span class="proof-head"><img src="icons/quietoak.png" alt="" width="26" height="26" loading="lazy"><span>In Quietoak</span> <span class="soon">Coming soon</span></span>
+          <span class="proof-head"><img src="icons/quietoak.webp" alt="" width="26" height="26" loading="lazy"><span>In Quietoak</span> <span class="soon">Coming soon</span></span>
           <p>It carries your diary cards and recent conversations as context &mdash; down to what it already knows not to ask you twice.</p>
           <a class="link" href="#product-quietoak">See Quietoak <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-alder);">
-          <span class="proof-head"><img src="icons/alder.png" alt="" width="26" height="26" loading="lazy"><span>In Alder</span> <span class="soon">Coming soon</span></span>
+          <span class="proof-head"><img src="icons/alder.webp" alt="" width="26" height="26" loading="lazy"><span>In Alder</span> <span class="soon">Coming soon</span></span>
           <p>A lapse starts a debrief, not a lecture: what happened, what came before it, and what you&rsquo;d want next time, held in your own words.</p>
           <a class="link" href="#product-alder">See Alder <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-mythkin);">
-          <span class="proof-head"><img src="icons/mythkin.png" alt="" width="26" height="26" loading="lazy"><span>In Mythkin</span> <span class="soon">Coming soon</span></span>
+          <span class="proof-head"><img src="icons/mythkin.webp" alt="" width="26" height="26" loading="lazy"><span>In Mythkin</span> <span class="soon">Coming soon</span></span>
           <p>Each of 470 figures is written at length before you ever speak to one, so the reply comes from that history rather than a one-line persona.</p>
           <a class="link" href="#product-mythkin">See Mythkin <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-myth);">
-          <span class="proof-head"><img src="icons/mythwright.png" alt="" width="26" height="26" loading="lazy"><span>In Mythwright</span> <span class="soon">Coming soon</span></span>
-          <p>Describe a card and a model writes its stats and ability and paints the art &mdash; with the prompt moderated before anything is generated.</p>
+          <span class="proof-head"><img src="icons/mythwright.webp" alt="" width="26" height="26" loading="lazy"><span>In Mythwright</span> <span class="soon">Coming soon</span></span>
+          <p>In Pro&rsquo;s Card Forge, describe a card and a model writes its stats and ability and paints the art &mdash; with the prompt moderated before anything is generated.</p>
           <a class="link" href="#product-mythwright">See Mythwright <span aria-hidden="true">&uarr;</span></a>
         </li>
-        <li class="proof-card" style="--accent: var(--c-loam);">
-          <span class="proof-head"><img src="icons/loam.png?v=20260831a" alt="" width="26" height="26" loading="lazy"><span>In Loam</span> <span class="soon">Coming soon</span></span>
+        <li class="proof-card" style="--accent: var(--c-loam); --accent-text: var(--c-loam-text);">
+          <span class="proof-head"><img src="icons/loam.webp" alt="" width="26" height="26" loading="lazy"><span>In Loam</span> <span class="soon">Coming soon</span></span>
           <p>Before Loam proposes a margin mark, the layer has read your note against your collections, your recent Ledger, and your dials &mdash; and a verifier has checked that every quoted span appears verbatim on your page.</p>
           <a class="link" href="#product-loam">See Loam <span aria-hidden="true">&uarr;</span></a>
         </li>
@@ -1873,7 +1894,7 @@
         </div>
         <div class="f-col">
           <h3>Studio</h3>
-          <a href="#ai">Intelligence layer</a>
+          <a href="#ai">Product intelligence</a>
           <a href="#about">Studio</a>
           <a href="press.html">Press kit</a>
           <a href="#contact">Contact</a>
