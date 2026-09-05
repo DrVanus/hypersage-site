@@ -7,13 +7,13 @@
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#F5EFE3">
   <title>Loam — the notes companion that asks before it acts</title>
-  <meta name="description" content="Write anything — Loam tidies typos in place, shapes rambly jots into clean lines, files and flags what matters. Every change is previewed, attributed, and undoable.">
+  <meta name="description" content="Write anything — Loam tidies typos in place, shapes rambly jots into clean lines, files and flags what matters. Every change is previewed, attributed, undoable — and redoable.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/loam/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Loam — notes, tended.">
-  <meta property="og:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and writes every action into a Ledger you can undo.">
+  <meta property="og:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and writes every action into a Ledger you can undo and redo.">
   <meta property="og:url" content="https://hypersage.ai/loam/">
   <meta property="og:site_name" content="Loam">
   <meta property="og:image" content="https://hypersage.ai/loam/og-image.png?v=20260901b">
@@ -22,7 +22,7 @@
   <meta property="og:image:alt" content="Loam — notes, tended">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Loam — notes, tended.">
-  <meta name="twitter:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and writes every action into a Ledger you can undo.">
+  <meta name="twitter:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and writes every action into a Ledger you can undo and redo.">
   <meta name="twitter:image" content="https://hypersage.ai/loam/og-image.png?v=20260901b">
   <meta name="twitter:image:alt" content="Loam — notes, tended">
 
@@ -396,7 +396,8 @@
     /* Undone visuals only exist while the demo rig is live — the static page
        never shows a struck row. */
     .js-reveal .ledger-row-demo.undone .what { text-decoration: line-through; opacity: .55; }
-    .js-reveal .ledger-row-demo.undone .undo-btn { background: none; color: var(--good); cursor: default; }
+    /* undone does not mean spent: the button is Redo now, and still a button */
+    .js-reveal .ledger-row-demo.undone .undo-btn { background: none; color: var(--good); }
     /* Without the motion gate the demo never runs — the button would be inert,
        so hide it and let the row stand as a static illustration. */
     html:not(.js-reveal) .ledger-row-demo .undo-btn { display: none; }
@@ -726,7 +727,7 @@
         <div class="hero-text">
           <span class="eyebrow">Coming to iOS</span>
           <h1>The notes companion that <span class="soft swash">asks before it acts.</span></h1>
-          <p class="lede">Write, ramble, record. Loam fixes your slips in place, shapes rambly jots into clean lines, files and flags what matters — and shows you every change before or after it happens. Nothing is ever silent, and everything can be undone.</p>
+          <p class="lede">Write, ramble, record. Loam fixes your slips in place, shapes rambly jots into clean lines, files and flags what matters — and shows you every change before or after it happens. Nothing is ever silent, everything can be undone — and put back.</p>
           <div class="hero-buttons">
             <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Loam%20launches" class="btn-warm">
               <span>Be first to hear</span>
@@ -741,7 +742,7 @@
         </div>
       </div>
       
-      <ol class="hero-flow" role="list" aria-label="How a jot becomes a tended note you can always undo">
+      <ol class="hero-flow" role="list" aria-label="How a jot becomes a tended note you can always undo, and put back">
         <li>
           <div class="flow-head"><div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19.5 7.5a2.1 2.1 0 0 0-3-3L5 16z"/><path d="M14 6l3 3"/></svg></div><strong class="flow-name">You write</strong></div>
           <p>Type it, say it, or sketch it — capture is instant and never metered.</p>
@@ -752,7 +753,7 @@
         </li>
         <li>
           <div class="flow-head"><div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V7H7"/><path d="M12 8v4l3 2"/></svg></div><strong class="flow-name">The Ledger keeps it</strong></div>
-          <p>Every action is written down, attributed, and one tap from undone.</p>
+          <p>Every action is written down, attributed, and one tap from undone — or back again.</p>
         </li>
       </ol>
     </div>
@@ -777,8 +778,8 @@
               <p>Loam proposes tidies, filings, links between related notes, and flags on the commitments it spots — each one shown as a preview in the review desk, or applied automatically if you've dialed that power to Auto.</p>
             </li>
             <li>
-              <h3>Undo anything, anytime</h3>
-              <p>Every companion action lands in the Ledger with its own undo. Undoing an old tidy never clobbers a newer filing — undo is surgical, and history is never paywalled.</p>
+              <h3>Undo anything, redo anything</h3>
+              <p>Every action lands in the Ledger with its own undo, and an undone row offers Redo. Undoing an old tidy never clobbers a newer filing — both directions are surgical, and history is never paywalled.</p>
             </li>
           </ol>
         </div>
@@ -838,7 +839,7 @@
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V7H7"/><path d="M12 8v4l3 2"/></svg></div>
           <h3>The Ledger</h3>
-          <p>Everything the companion does is written down here — what changed, when, and why — with a per-line undo and an undo-all for the day. Your history is never trimmed, and never paywalled.</p>
+          <p>Every change to your notes is written down here — the companion’s and your own, each named: what changed, when, and why. Undo and redo sit in the header of every page that can use them, with a per-line undo and an undo-all for the day. Your history is never trimmed, and never paywalled.</p>
         </div>
 
         <div class="feature-card">
@@ -953,7 +954,7 @@
         </details>
         <details>
           <summary>What's free?</summary>
-          <p>Notes, capture, search, history, and undo — forever, without limits. The companion's actions draw on a daily allowance on the free tier; your archive is never held hostage.</p>
+          <p>Notes, capture, search, history, undo and redo — forever, without limits. The companion's actions draw on a daily allowance on the free tier; your archive is never held hostage.</p>
         </details>
         <details>
           <summary>Can I get my notes out?</summary>
@@ -1058,7 +1059,7 @@
           { hold: 1500, say: '…then the ramble, slips and all…' },
           { hold: 2100, say: '“confrim by fri”, “3wk lead time” — left exactly as typed' },
           { hold: 3400, say: 'Done → Tidied by Loam. 2 clean lines · 4 fixes, nothing rephrased' },
-          { hold: 2600, say: 'And the original? Kept — one tap away, forever undoable' }
+          { hold: 2600, say: 'And the original? Kept — one tap away, undoable and redoable, forever' }
         ];
         var tStep = -1, tTimer = null;
         var tAdvance = function () {
@@ -1135,10 +1136,12 @@
       while (timers.length) clearTimeout(timers.pop());
       said.classList.remove('demo-armed');
       strip.classList.remove('demo-armed', 'demo-logged', 'demo-done');
-      for (var i = 0; i < mends.length; i++) mends[i].classList.remove('mended');
+      for (var i = 0; i < mends.length; i++) { mends[i].classList.remove('mended'); editSemantics(mends[i], false); }
       var row = ledger && ledger.querySelector('.ledger-row-demo');
       if (row) row.classList.remove('undone');
-      if (undoBtn) undoBtn.disabled = false;
+      // the label is vignette residue like any other: a reduced-motion flip
+      // mid-demo must not leave a button reading "Redo" over an unmended jot
+      if (undoBtn) { undoBtn.disabled = false; undoBtn.textContent = 'Undo'; }
     }
     function flash(el, cls) {
       if (!el) return;
@@ -1181,12 +1184,22 @@
       said.classList.remove('demo-armed');
       later(function () { mendAt(0); }, 520);
     }
+    /* del/ins semantics belong to the STATE, not to the history. They are added
+       when a mend happens and taken away when it is undone — otherwise, after
+       an undo, the visible original still carries role="deletion" and a screen
+       reader announces "deleted" over text that is currently the live version.
+       That is the same defect the neutral-span comment above exists to prevent,
+       one step further along; bail() clears them too. */
+    function editSemantics(mend, on) {
+      var slip = mend.querySelector('.d'), fix = mend.querySelector('.i');
+      if (slip) { if (on) slip.setAttribute('role', 'deletion'); else slip.removeAttribute('role'); }
+      if (fix) { if (on) fix.setAttribute('role', 'insertion'); else fix.removeAttribute('role'); }
+    }
     function mendAt(idx) {
       if (idx >= mends.length) { later(logChips, 460); return; }
       /* An edit now exists — give the halves their edit semantics. */
-      var slip = mends[idx].querySelector('.d'), fix = mends[idx].querySelector('.i');
-      if (slip) slip.setAttribute('role', 'deletion');
-      if (fix) fix.setAttribute('role', 'insertion');
+      var fix = mends[idx].querySelector('.i');
+      editSemantics(mends[idx], true);
       mends[idx].classList.add('mended');
       flash(fix, 'mend-flash');
       later(function () { mendAt(idx + 1); }, 430);
@@ -1222,18 +1235,27 @@
       else if (vmq.addListener) vmq.addListener(restore);
     }
 
-    /* The Ledger's per-row undo: genuinely reverts the mend — one way, like
-       the copy claims. No redo is offered because none is claimed. */
+    /* The Ledger's per-row control, both ways — because the app's row does
+       exactly this: undo it and the button becomes Redo. This was deliberately
+       ONE-WAY while the product had no redo, on the rule that the page may not
+       demonstrate a capability nobody ships. It ships now (loam-app 966b47d),
+       so the demo goes back to matching the product rather than under-claiming
+       it. Everything the toggle touches is JS-only residue that bail() clears,
+       and the button is display:none without js-reveal, so the static page is
+       unchanged in either direction. */
     if (undoBtn && ledger) {
       undoBtn.addEventListener('click', function () {
         if (!live() || !strip.classList.contains('demo-done')) return;
         var row = ledger.querySelector('.ledger-row-demo');
-        if (!row || row.classList.contains('undone')) return;
-        row.classList.add('undone');
-        undoBtn.disabled = true;
+        if (!row) return;
+        var undoing = !row.classList.contains('undone');
+        row.classList.toggle('undone', undoing);
+        undoBtn.textContent = undoing ? 'Redo' : 'Undo';
         for (var i = 0; i < mends.length; i++) {
-          mends[i].classList.remove('mended');
-          flash(mends[i].querySelector('.d'), 'slip-flash');
+          mends[i].classList.toggle('mended', !undoing);
+          editSemantics(mends[i], !undoing);
+          flash(mends[i].querySelector(undoing ? '.d' : '.i'),
+                undoing ? 'slip-flash' : 'mend-flash');
         }
       });
     }

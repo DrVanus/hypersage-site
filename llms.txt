@@ -13,7 +13,7 @@
 - [Holohound](https://hypersage.ai/holohound/): trading-card scanner and binder for Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam; every price names its source (iOS, in development)
 - [Wingmate](https://hypersage.ai/wingmate/): AI dating coach that organizes context by connection (iOS, live — [App Store](https://apps.apple.com/app/id6792772729))
 - [Quietoak](https://hypersage.ai/quietoak/): companion for practicing DBT skills; not therapy or crisis care (iOS, coming soon)
-- [Loam](https://hypersage.ai/loam/): consent-first AI notes companion — every change previewed, attributed, and undoable (iOS, coming soon)
+- [Loam](https://hypersage.ai/loam/): consent-first AI notes companion — every change previewed, attributed, undoable and redoable (iOS, coming soon)
 - [CryptoSage AI](https://cryptosageai.io/): market-research workspace; informational, not investment advice (iOS, live — [App Store](https://apps.apple.com/app/id6792761331))
 - [Saffra](https://hypersage.ai/saffra/): AI cooking companion that adapts prepared recipes to your kitchen (iOS, live — [App Store](https://apps.apple.com/app/id6792760857))
 - [StoryVault AI](https://hypersage.ai/storyvault/): interactive fiction where story state shapes each new page (iOS, live — [App Store](https://apps.apple.com/app/id6792759454))
