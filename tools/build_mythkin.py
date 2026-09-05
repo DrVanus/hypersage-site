@@ -224,6 +224,7 @@ def load_limits() -> dict[str, int]:
         "free_max_borrowed_characters", "free_max_memories",
         "plus_max_created_characters", "moment_paint_free", "moment_paint_plus",
         "moment_paint_window_hours",
+        "group_max_kin",  # a Hearth is 2..group_max_kin kin; routes.py enforces it
     }
     got: dict[str, int] = {}
     for node in ast.walk(ast.parse(src.read_text())):
@@ -287,6 +288,15 @@ def count_stories() -> int:
         return 0
     return len(re.findall(r'^\s*"slug":', src.read_text(), re.M)) or \
         len(re.findall(r'^\s*"title":', src.read_text(), re.M))
+
+
+def story_titles(n: int) -> list[str]:
+    """The first n seeded story titles, read from the seed so the page can name
+    stories that exist. A title typed here would outlive the story it names."""
+    src = API / "app" / "stories" / "seed.py"
+    if not src.exists():
+        return []
+    return re.findall(r'^\s*"title":\s*"([^"]+)"', src.read_text(), re.M)[:n]
 
 
 FLEET_STATE = Path.home() / "Developer" / "DrVanus" / "fleet" / "state" / "current.json"
@@ -610,11 +620,14 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
     # missing field must stop the build rather than print a blank number.
     L = load_limits()
     shots = shot_figures()
+    titles = [html.escape(t) for t in story_titles(4)]
+    titles_line = (", ".join(titles[:-1]) + " and " + titles[-1]) if len(titles) > 1 \
+        else (titles[0] if titles else "")
 
     faq = [
         ("Is this free?",
          "Yes, and the free plan is the whole app rather than a demo — every kin, "
-         "the collections, the stories, memory, and one character of your own. "
+         "the collections, the stories, Hearths, memory, and one character of your own. "
          f"What it limits is volume: {_w(L['free_window_messages'])} replies every "
          f"{_w(L['free_window_hours'])} hours, {_w(L['free_max_borrowed_characters'])} "
          f"borrowed kin, {_w(L['free_max_memories'])} remembered facts, and "
@@ -914,6 +927,32 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
   of those takes her out of the other two.</p>
   <div class="setlist">{sets}</div>
   {setrest}
+</div></section>
+
+<!-- TWO WAYS IN THAT THE STUDIO CARD PROMISED AND THIS PAGE NEVER MENTIONED
+     (found 2026-09-04: the card said "Start a Hearth" and "44 stories", the
+     page said neither, and the 44 was already counted by this generator and
+     thrown away). Every number here is derived: {stories} from the seed,
+     the Hearth cap from config.py's group_max_kin (routes.py enforces it),
+     the titles from the seed. Neither feature is Plus-gated — the Hearth
+     route checks a CLIENT capability ("can this app render a room"), not a
+     plan, and stories list and read without one; only publishing a story
+     as shared requires Plus (_require_plus_to_publish). -->
+<section id="together"><div class="wrap">
+  <h2>A Hearth, or one of {stories} stories</h2>
+  <p class="sub">Two more ways in besides a one-to-one chat, and both are on
+  the free plan.</p>
+  <div class="feat">
+    <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1.6 3 5 5.2 5 9.2a5 5 0 0 1-10 0c0-2 1-3.2 1-3.2s.4 2.2 2 2.2c0-3 2-5.2 2-8.2Z"/></svg></span><h3>Start a Hearth</h3>
+      <p>Pick two to {_w(L['group_max_kin'])} kin to share one room. They answer
+      you &mdash; and each other &mdash; so two voices can disagree in front of
+      you instead of in separate chats.</p></div>
+    <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4V5Z"/><path d="M20 5h-7a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7V5Z"/></svg></span><h3>{stories} stories to step into</h3>
+      <p>Each one has a premise and a cast drawn from the roster &mdash;
+      {titles_line} among them &mdash; and reads chapter by chapter. Write your
+      own with the same tools; sharing one with other readers is a Plus
+      feature.</p></div>
+  </div>
 </div></section>
 
 <!-- A SCREENSHOT IS A CLAIM. These are captures of the RUNNING app, posed by
