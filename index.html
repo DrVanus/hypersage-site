@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907g">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907h">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907g">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907h">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260907g",
+        "image": "https://hypersage.ai/og-image.png?v=20260907h",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -558,72 +558,57 @@
     }
     .product:hover { transform: translateY(-5px); border-color: var(--line-strong); box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
     .product:hover::after { opacity: 0.7; }
-    .product .top { display: flex; align-items: flex-start; gap: 10px 15px; margin-bottom: 16px; flex-wrap: wrap; }
+    .product .top { display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: start; gap: 8px 15px; margin-bottom: 18px; }
     /* Real iOS app icons, framed as rounded-square tiles. */
     .product .app-icon {
-      width: 58px; height: 58px; flex: 0 0 auto; border-radius: 14px;
+      width: 58px; height: 58px; grid-row: 1 / 3; border-radius: 14px;
       object-fit: cover; display: block; background: rgba(255,255,255,0.04);
       border: 1px solid var(--line-strong);
       box-shadow: 0 6px 18px rgba(0,0,0,0.45);
     }
-    /* basis 145px, not auto: with auto the basis is the sub-line's max-content width, so a
-       long sub-line (Rowan at 390, four cards at 360) pushed the whole block under the icon
-       instead of wrapping the sub-line. */
-    .product .titleblock { flex: 1 1 145px; min-width: 145px; }
+    .product .titleblock { min-width: 0; }
     .product .titleblock h3 { font-size: 1.28rem; font-weight: 600; line-height: 1.22; padding-bottom: 0.08em; }
     .product .cat { font-family: 'JetBrains Mono', monospace; font-size: 0.69rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
-    /* Lifecycle chip — an honest status beats a visitor searching the App Store and
-       finding nothing. Update these when a product goes live. */
+    /* Availability belongs to the product identity, with the same position at every width. */
     .product .status {
-      margin-left: auto; align-self: flex-start; flex: 0 0 auto;
-      font-family: 'JetBrains Mono', monospace; font-size: 0.69rem; font-weight: 600;
-      /* 0.62rem was 9.92px. This estate's legibility floor is 11px: small status text is the one string
-         on a product card a visitor MUST be able to read (it says whether the app
-         is downloadable). 0.69rem = 11.04px, the same floor the hero diagram holds. */
-      /* No text-transform — "iOS" must keep its casing. */
-      letter-spacing: 0.07em; white-space: nowrap;
-      color: var(--faint); padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: 999px;
+      grid-column: 2; justify-self: start; display: inline-flex; align-items: center; gap: 7px;
+      max-width: 100%; font-size: .75rem; font-weight: 500; line-height: 1.4;
+      color: #ADB7C8; padding: 3px 8px; border: 1px solid var(--line-strong); border-radius: 6px;
+      background: rgba(255,255,255,.025);
     }
-    .product .status.live { color: #06110F; background: var(--brand-a); border-color: transparent; }
-    @media (max-width: 560px) { .product .status { margin-left: 0; margin-right: auto; } }
+    .product .status::before {
+      content: ''; width: 5px; height: 5px; flex: 0 0 auto; border-radius: 50%;
+      border: 1px solid currentColor;
+    }
+    .product .status.live { color: #75DCC4; background: rgba(45,212,191,.07); border-color: rgba(45,212,191,.18); }
+    .product .status.live::before { background: currentColor; border-color: transparent; }
     .product > p.desc { color: var(--muted); font-size: 0.98rem; margin-bottom: 16px; text-wrap: pretty; }
     .product ul { list-style: none; margin-bottom: 18px; }
     .product ul li { position: relative; padding: 5px 0 5px 20px; font-size: 0.9rem; color: var(--muted); text-wrap: pretty; }
     .product ul li::before { content: ''; position: absolute; left: 2px; top: 0.95em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-    .product .foot { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding-top: 4px; }
-    .foot .btn-store { white-space: nowrap; }
-    /* Phones: the two actions stop competing for one 284px row. The store
-       button takes the full width and centres, the text link sits under it.
-       Without this the label broke as "Download on the / App Store" and each
-       card rendered a different width, because the row was nowrap and the
-       sibling "Visit <product>" label varies in length per card. */
-    @media (max-width: 560px) {
-      .foot { flex-direction: column; align-items: stretch; gap: 10px; }
-      .foot .btn-store { width: 100%; justify-content: center; }
+    .product .foot {
+      margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+      padding-top: 14px; border-top: 1px solid var(--line);
     }
-    .product .btn-store {
-      /* Filled counterpart to .product .link. Deliberately NOT .btn-primary:
-         that hardcodes the global brand gradient and would repaint every card
-         the same teal, erasing the per-card --accent identity. Fills with
-         --accent-text (the tone already guaranteed legible on --panel) so a
-         dark ink is always safe on top. */
-      display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
-      padding: 0 18px; border-radius: 999px;
-      font-weight: 700; font-size: 0.9rem; letter-spacing: -0.01em;
-      background: var(--accent-text); color: #0B0E13;
-      box-shadow: 0 8px 22px -12px var(--accent-text);
-      transition: transform .18s ease, box-shadow .18s ease;
+    /* Use Apple's original artwork at its native 40px height inside a 44px tap target. */
+    .product .app-store { display: inline-flex; align-items: center; min-height: 44px; flex: 0 0 auto; border-radius: 6px; }
+    .product .app-store img { display: block; width: 120px; height: 40px; }
+    .product .btn-store, .product .link {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px;
+      padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 8px;
+      font-weight: 600; font-size: .85rem; line-height: 1.4; white-space: nowrap;
+      transition: background .18s ease, border-color .18s ease, color .18s ease;
     }
-    .product .btn-store:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -12px var(--accent-text); }
-    .product .btn-store:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; }
-    @media (prefers-reduced-motion: reduce) { .product .btn-store { transition: none; } .product .btn-store:hover { transform: none; } }
+    .product .link { color: var(--fg); background: rgba(255,255,255,.025); }
+    .product .link:hover { color: var(--accent-text); border-color: var(--accent-text); background: rgba(255,255,255,.055); }
+    .product .btn-store { color: #0B0E13; background: var(--accent-text); border-color: transparent; }
+    .product .btn-store:hover { background: color-mix(in srgb, var(--accent-text) 85%, white); }
+    .product .foot a:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 4px; }
+    @media (prefers-reduced-motion: reduce) { .product .btn-store, .product .link { transition: none; } }
     @media (max-width: 560px) {
       .product { padding: 20px; }
       .product .top { column-gap: 12px; }
-      .product .btn-store { padding: 0 12px; }
     }
-    .product .link { display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent-text); transition: gap .2s; }
-    .product .link:hover { gap: 11px; }
     /* ===== INTELLIGENCE LAYER ===== */
     .systems { background: linear-gradient(180deg, var(--bg-2), var(--bg)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -1019,7 +1004,7 @@
             <li>Master-set completion, pre-grade triage, and flip P&amp;L</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit Holohound" href="holohound/">Visit Holohound <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Holohound" href="holohound/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1030,7 +1015,7 @@
               <h3>Wingmate</h3>
               <div class="cat">AI Dating Coach</div>
             </div>
-            <span class="status live">iOS · Live</span>
+            <span class="status live">iOS · Available</span>
           </div>
           <p class="desc">Screenshot a conversation and get replies you can actually send. Four coaches work from the conversation you share, and all four share one memory of the person you&rsquo;re talking about.</p>
           <ul role="list">
@@ -1038,8 +1023,8 @@
             <li>Guidance for Tinder, Hinge, Bumble, Instagram, and texting</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download on the App Store: Wingmate" href="https://apps.apple.com/app/id6792772729" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit Wingmate" href="wingmate/">Visit Wingmate <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Wingmate" href="https://apps.apple.com/app/id6792772729" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
+            <a class="link" aria-label="Explore Wingmate" href="wingmate/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1059,7 +1044,7 @@
             <li>A Ledger of every action — surgical undo and redo, never paywalled</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit Loam" href="loam/">Visit Loam <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Loam" href="loam/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1078,7 +1063,7 @@
             <li>Practice DBT skills, track progress, and reach an offline crisis kit</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit Quietoak" href="quietoak/">Visit Quietoak <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Quietoak" href="quietoak/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1089,7 +1074,7 @@
               <h3>CryptoSage AI</h3>
               <div class="cat">Portfolio Intelligence</div>
             </div>
-            <span class="status live">iOS · Live</span>
+            <span class="status live">iOS · Available</span>
           </div>
           
           <p class="desc">Ask why your portfolio moved and get an answer built from your own holdings and cost basis, not a generic market recap. Portfolio sharing is on by default and can be switched off. Not investment advice.</p>
@@ -1098,8 +1083,8 @@
             <li>Live prices, watchlists, sentiment, and market maps</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download on the App Store: CryptoSage AI" href="https://apps.apple.com/app/id6792761331" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit CryptoSage AI" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit CryptoSage AI <span aria-hidden="true">↗</span></a>
+            <a class="app-store" aria-label="Download on the App Store: CryptoSage AI" href="https://apps.apple.com/app/id6792761331" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
+            <a class="link" aria-label="Explore CryptoSage AI" href="https://cryptosageai.io/" target="_blank" rel="noopener">Explore <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -1110,7 +1095,7 @@
               <h3>Saffra</h3>
               <div class="cat">AI Cooking Assistant</div>
             </div>
-            <span class="status live">iOS · Live</span>
+            <span class="status live">iOS · Available</span>
           </div>
           
           <p class="desc">Tell it what&rsquo;s in your kitchen and it adapts a complete recipe around it &mdash; with measured ingredients, prep notes, and equipment listed. Recipes flag allergens, and declared dietary restrictions guide substitutions and recipe selection.</p>
@@ -1119,8 +1104,8 @@
             <li>Diet- and allergen-aware substitutions with hands-free cooking mode</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download on the App Store: Saffra" href="https://apps.apple.com/app/id6792760857" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit Saffra" href="saffra/">Visit Saffra <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Saffra" href="https://apps.apple.com/app/id6792760857" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
+            <a class="link" aria-label="Explore Saffra" href="saffra/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1132,7 +1117,7 @@
               <h3>StoryVault AI</h3>
               <div class="cat">Interactive Fiction</div>
             </div>
-            <span class="status live">iOS · Live</span>
+            <span class="status live">iOS · Available</span>
           </div>
           <p class="desc">Step inside a classic and take it somewhere the author never did, or write a world from a single line. Tap one of the offered choices or type your own move instead &mdash; the story follows, and it remembers.</p>
           <ul role="list">
@@ -1141,8 +1126,8 @@
             <li>A hand-curated AI scenario behind every classic in the library</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download on the App Store: StoryVault AI" href="https://apps.apple.com/app/id6792759454" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit StoryVault AI" href="storyvault/">Visit StoryVault&nbsp;AI <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: StoryVault AI" href="https://apps.apple.com/app/id6792759454" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
+            <a class="link" aria-label="Explore StoryVault AI" href="storyvault/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1153,7 +1138,7 @@
               <h3>Nightshelf</h3>
               <div class="cat">Sleep Stories</div>
             </div>
-            <span class="status live">iOS · Live</span>
+            <span class="status live">iOS · Available</span>
           </div>
           <p class="desc">Unabridged classics read aloud in a soft, sleepy voice, with ambient sound underneath and a timer that fades you out. Pro adds custom AI bedtime stories and more narrators.</p>
           <ul role="list">
@@ -1161,8 +1146,8 @@
             <li>Layered ambient sound under the narration, and your place saved to the paragraph</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download on the App Store: Nightshelf" href="https://apps.apple.com/app/id6792761643" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit Nightshelf" href="nightshelf/">Visit Nightshelf <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Nightshelf" href="https://apps.apple.com/app/id6792761643" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
+            <a class="link" aria-label="Explore Nightshelf" href="nightshelf/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1173,7 +1158,7 @@
               <h3>Rowan</h3>
               <div class="cat">Chronic Illness Diary</div>
             </div>
-            <span class="status live">iOS · Live</span>
+            <span class="status live">iOS · Available</span>
           </div>
           <p class="desc">Say how the day went in your own words. Rowan turns your words into symptom logs and brings those entries together with the medications you entered in a visit brief for your doctor. It does not diagnose or treat &mdash; that stays with your care team.</p>
           <ul role="list">
@@ -1181,8 +1166,8 @@
             <li>No account, ads, or third-party health-data tracking</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download on the App Store: Rowan" href="https://apps.apple.com/app/id6797693737" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit Rowan" href="rowan/">Visit Rowan <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Rowan" href="https://apps.apple.com/app/id6797693737" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
+            <a class="link" aria-label="Explore Rowan" href="rowan/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1201,7 +1186,7 @@
             <li>The SOS screen and crisis lines are never metered or paywalled</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit Alder" href="alder/">Visit Alder <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Alder" href="alder/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1220,7 +1205,7 @@
             <li>44 stories to step into, each cast with kin from the roster</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit Mythkin" href="mythkin/">Visit Mythkin <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Mythkin" href="mythkin/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1232,7 +1217,7 @@
               <h3>Hexhunter</h3>
               <div class="cat">Gothic Horde-Survivor</div>
             </div>
-            <span class="status live">iOS · Live</span>
+            <span class="status live">iOS · Available</span>
           </div>
           <p class="desc">Survive the horde. Draft your doom. A gothic horde-survivor built around distinct heroes, illustrated upgrades, and escalating chaos.</p>
           <ul role="list">
@@ -1242,8 +1227,8 @@
             
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download on the App Store: Hexhunter" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit Hexhunter" href="hexhunter/">Visit Hexhunter <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Hexhunter" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
+            <a class="link" aria-label="Explore Hexhunter" href="hexhunter/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1262,7 +1247,7 @@
             <li>A seasonal ladder that climbs from Recruit to Infinite</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit Mythwright" href="mythwright/">Visit Mythwright <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Mythwright" href="mythwright/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1273,7 +1258,7 @@
               <h3>Waddleton</h3>
               <div class="cat">Social World · Arcade</div>
             </div>
-            <span class="status live">Live on the web</span>
+            <span class="status live">Web · Available</span>
           </div>
           
           <p class="desc">A snowy social world in the browser: make a penguin, explore seven island areas, meet other players, and enter seventeen arcade games.</p>
@@ -1283,7 +1268,7 @@
           </ul>
           <div class="foot">
             <a class="btn-store" aria-label="Play free: Waddleton" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit Waddleton" href="waddleton/">Visit Waddleton <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Waddleton" href="waddleton/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1294,7 +1279,7 @@
               <h3>Hoardling</h3>
               <div class="cat">Hoard Defence</div>
             </div>
-            <span class="status live">Live on the web</span>
+            <span class="status live">Web · Available</span>
           </div>
           
           <p class="desc">Defend the sleeping dragon&rsquo;s hoard. Hold the chokepoints; kill the carrier and the coins fly home &mdash; a keep-by-keep campaign run from Wick&rsquo;s workshop.</p>
@@ -1314,7 +1299,7 @@
               <h3>Gemburrow</h3>
               <div class="cat">Cozy Gem-Digging Puzzle</div>
             </div>
-            <span class="status live">Live on the web</span>
+            <span class="status live">Web · Available</span>
           </div>
           <p class="desc">Dig gems out of a jar where every gem and rock is real physics, assemble full sets in a seven-slot satchel to fill the orders on the line, and decide which rare finds the shop dragon keeps forever.</p>
           <ul role="list">
@@ -1325,7 +1310,7 @@
           </ul>
           <div class="foot">
             <a class="btn-store" aria-label="Play free: Gemburrow" href="gemburrow/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit Gemburrow" href="gemburrow/">Visit Gemburrow <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Gemburrow" href="gemburrow/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
