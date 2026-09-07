@@ -150,7 +150,7 @@ def build_html() -> str:
                   -webkit-background-clip:text; background-clip:text; color:transparent; }}
   .og .rule {{ width:330px; height:2px; margin:0 0 22px;
                background:linear-gradient(90deg,#2DD4BF,#A78BFA); border-radius:2px; }}
-  .og p {{ font: 400 19px/1.55 'Inter',ui-sans-serif,-apple-system,sans-serif;
+  .og-left > p {{ font: 400 19px/1.55 'Inter',ui-sans-serif,-apple-system,sans-serif;
            color:#B9C6CE; margin:0; max-width:477px; }}
   /* THE PORTFOLIO, AS PICTURES. This column used to end with the fifteen product
      NAMES set in two 13px rows, absolutely positioned at the bottom — and above
@@ -174,9 +174,9 @@ def build_html() -> str:
                   border:1px solid rgba(255,255,255,.14);
                   background:rgba(255,255,255,.05);
                   box-shadow:0 3px 10px rgba(0,0,0,.45); }}
-  /* The complete product walkthrough is taller than the retired diagram.
-     Fit its unchanged contents inside the 630px social card. */
-  .og-right .context-engine {{ transform:scale(.95); transform-origin:center; margin:0; }}
+  /* The compact flow keeps the page’s own typography and geometry.
+     Scale it as one unit inside the social card’s right column. */
+  .og-right .context-engine {{ transform:scale(1.08); transform-origin:center; margin:0; }}
 </style></head><body>
 <div class="og">
   <div class="og-left">
