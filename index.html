@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907e">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907f">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907e">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907f">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260907e",
+        "image": "https://hypersage.ai/og-image.png?v=20260907f",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -69,9 +69,8 @@
   }
   </script>
 
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/space-grotesk.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter.woff2">
-  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="fonts/fonts.css?v=20260907f">
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -149,7 +148,7 @@
 
     .container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 
-    h1, h2, h3, .display { font-family: 'Space Grotesk', 'Inter', sans-serif; letter-spacing: -0.02em; }
+    h1, h2, h3, .display { font-family: 'Inter', sans-serif; letter-spacing: -0.02em; }
 
     .eyebrow {
       font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -190,7 +189,7 @@
       border-bottom: 1px solid var(--line);
     }
     nav.site .container { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; }
-    .brand { display: flex; align-items: center; gap: 11px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.08rem; letter-spacing: -0.01em; }
+    .brand { display: flex; align-items: center; gap: 11px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.08rem; letter-spacing: -0.01em; }
     /* 36x24 matches the 2026-08-25 re-derived logo.png (342x228, trimmed +
        centered — the old 333x372 canvas held the mark at half size). Keep these
        pins in step with the attrs on all three logo <img>s. */
@@ -223,6 +222,7 @@
     }
 
     /* ===== HERO ===== */
+    #top { scroll-margin-top: 74px; }
     section.hero { padding: 64px 0; position: relative; }
     /* Keep both columns inside the shared page rail. Stack before the
        walkthrough would take more width than the headline. */
@@ -273,7 +273,7 @@
     .example-app { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .example-app > img { width: 32px; height: 32px; flex: 0 0 auto; border-radius: 9px; border: 1px solid var(--line-strong); }
     .example-choice { position: relative; min-width: 0; flex: 1; }
-    .example-choice select { display: block; width: max-content; max-width: 100%; height: 44px; margin: 0; padding: 0 22px 15px 0; appearance: none; -webkit-appearance: none; border: 0; border-radius: 4px; background: transparent; color: var(--example-accent); font: 600 1rem/1.15 'Space Grotesk', sans-serif; cursor: pointer; }
+    .example-choice select { display: block; width: max-content; max-width: 100%; height: 44px; margin: 0; padding: 0 22px 15px 0; appearance: none; -webkit-appearance: none; border: 0; border-radius: 4px; background: transparent; color: var(--example-accent); font: 600 1rem/1.4 'Inter', sans-serif; cursor: pointer; }
     .example-choice select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='m1 1 4 4 4-4' fill='none' stroke='%23A4AFC1' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat; background-size: 10px 6px; background-position: right 2px top 12px;
@@ -288,7 +288,7 @@
     .example-controls[hidden] { display: none; }
     .example-scene { margin-top: 10px; }
     .example-label { display: block; font: 500 .69rem/1.4 'JetBrains Mono', monospace; letter-spacing: .075em; text-transform: uppercase; color: var(--muted); }
-    .example-prompt { margin-top: 3px; min-height: 22px; font: 500 .98rem/1.4 'Space Grotesk', sans-serif; color: var(--fg); text-wrap: pretty; }
+    .example-prompt { margin-top: 3px; min-height: 22px; font: 500 .98rem/1.4 'Inter', sans-serif; color: var(--fg); text-wrap: pretty; }
     .example-flow { position: relative; margin-top: 8px; height: 128px; }
     .engine-wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
     .engine-wire { fill: none; stroke: rgba(129,181,196,.37); stroke-width: 1; vector-effect: non-scaling-stroke; }
@@ -299,19 +299,21 @@
     .example-context > div { display: flex; align-items: center; gap: 7px; min-width: 0; padding: 5px 8px; border: 1px solid rgba(255,255,255,.09); border-radius: 8px; background: #101923; }
     .example-context dt { flex: 0 0 81px; font-size: .69rem; line-height: 1.3; color: var(--muted); }
     .example-context dd { min-width: 0; font-size: .74rem; line-height: 1.35; color: #D0DCE9; }
-    .example-processor { position: absolute; right: 0; top: 0; width: 32%; height: 102px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 9px; text-align: center; border: 1px solid rgba(167,139,250,.33); border-radius: 12px; background: linear-gradient(145deg,#17202E,#121721); }
+    .example-processor { position: absolute; right: 0; top: 0; width: 32%; height: 102px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px; text-align: center; border: 1px solid rgba(167,139,250,.33); border-radius: 12px; background: linear-gradient(145deg,#17202E,#121721); }
     .example-processor::after { content: ''; position: absolute; inset: 0; border-radius: inherit; opacity: 0; box-shadow: 0 0 20px rgba(94,234,212,.22), inset 0 0 16px rgba(167,139,250,.13); pointer-events: none; }
+    /* Keep the diagram's text at its natural height inside the compact core. */
+    .example-processor > * { flex-shrink: 0; }
     .example-processor img { width: 27px; height: 18px; object-fit: contain; }
-    .example-processor strong { font: 500 .82rem/1.25 'Space Grotesk', sans-serif; }
+    .example-processor strong { font: 500 .82rem/1.35 'Inter', sans-serif; }
     .engine-faculties { font-size: .69rem; line-height: 1.45; color: #A7B8CD; }
     .engine-faculties span { display: block; }
     .example-result { position: relative; padding: 11px 14px; min-height: 94px; border: 1px solid rgba(45,212,191,.3); border-radius: 12px; background: linear-gradient(115deg,rgba(45,212,191,.08),rgba(167,139,250,.055)); }
-    .example-status { display: flex; align-items: center; gap: 9px; color: #A0EBDC; font: 600 1.05rem/1.3 'Space Grotesk', sans-serif; }
+    .example-status { display: flex; align-items: center; gap: 9px; color: #A0EBDC; font: 600 1.05rem/1.3 'Inter', sans-serif; }
     .example-check { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 auto; border: 1px solid rgba(45,212,191,.4); border-radius: 50%; background: rgba(45,212,191,.1); font-size: .72rem; }
     .example-detail { font-size: .82rem; line-height: 1.5; color: #BDCADB; margin-top: 7px; min-height: 3em; }
     .engine-foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0 8px; margin-top: 2px; }
     .engine-foot small { color: var(--muted); font-size: .69rem; }
-    .engine-counter { margin-left: 8px; color: #A4AFC1; font: .69rem/1.3 'JetBrains Mono', monospace; }
+    .engine-counter { margin-left: 8px; color: #A4AFC1; font: .69rem/1.5 'JetBrains Mono', monospace; }
     .example-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--example-accent); font-size: .75rem; font-weight: 600; }
     .example-link:hover { text-decoration: underline; text-underline-offset: 4px; }
     .engine-progress { position: absolute; left: 18px; right: 18px; bottom: 6px; height: 1px; background: rgba(255,255,255,.04); overflow: hidden; opacity: 0; }
@@ -364,7 +366,8 @@
       .context-engine { justify-self: start; max-width: 560px; margin-top: 30px; }
     }
     @media (max-width: 560px) {
-      section.hero { padding: 40px 0 44px; }
+      #top { scroll-margin-top: 74px; }
+    section.hero { padding: 40px 0 44px; }
       .context-engine { padding: 14px 14px 10px; border-radius: 18px; margin-top: 24px; }
       .example-controls #example-prev, .example-controls #example-next { display: none; }
       .example-choice select { font-size: .98rem; }
@@ -404,7 +407,7 @@
     /* Desktop: the label heads its own centered line so the 15 marks wrap in balanced
        rows instead of stranding the two newest games on a third row. */
     @media (min-width: 701px) { .strip .label { flex-basis: 100%; text-align: center; } }
-    .strip .word { display: inline-flex; align-items: center; padding: 9px 0; gap: 9px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1rem; color: var(--muted); transition: color .2s, transform .2s; }
+    .strip .word { display: inline-flex; align-items: center; padding: 9px 0; gap: 9px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1rem; color: var(--muted); transition: color .2s, transform .2s; }
     .strip .word:hover { color: var(--fg); transform: translateY(-1px); }
     .strip .word img {
       width: 26px; height: 26px; border-radius: 7px; flex: 0 0 auto; object-fit: cover;
@@ -450,14 +453,25 @@
       .section-head { margin-bottom: 36px; }
     }
 
+    /* A compact summary with separate number and label baselines. */
     .section-head .portfolio-facts {
-      display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
-      gap: 8px 24px; margin: 22px auto 0; color: var(--muted); font-size: .85rem;
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      max-width: 520px; margin: 26px auto 0; padding: 16px 0;
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      list-style: none; text-align: center;
     }
-    .portfolio-facts { list-style: none; padding: 0; }
-    .portfolio-facts li { white-space: nowrap; }
-    .portfolio-facts strong { color: var(--fg); font: 600 1rem/1.4 'Space Grotesk', sans-serif; }
-    @media (max-width: 860px) { .section-head .portfolio-facts { justify-content: flex-start; margin-left: 0; gap: 8px 18px; } }
+    .portfolio-facts li { display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 0 12px; }
+    .portfolio-facts li + li { border-left: 1px solid var(--line); }
+    .portfolio-facts strong { color: var(--fg); font: 600 1.5rem/1.4 'Inter', sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -.025em; }
+    .portfolio-facts .platforms { font-size: 1.08rem; line-height: 1.94; letter-spacing: -.015em; white-space: nowrap; }
+    .portfolio-facts span { color: var(--muted); font-size: .75rem; line-height: 1.5; }
+    @media (max-width: 860px) { .section-head .portfolio-facts { margin-left: 0; } }
+    @media (max-width: 560px) {
+      .portfolio-facts li { padding: 0 6px; }
+      .portfolio-facts strong { font-size: 1.3rem; }
+      .portfolio-facts .platforms { font-size: .94rem; }
+      .portfolio-facts span { font-size: .69rem; }
+    }
 
     /* ===== STUDIO — operating principles ===== */
     .approach-ledger { border-top: 1px solid var(--line-strong); }
@@ -564,8 +578,7 @@
     .product .status {
       margin-left: auto; align-self: flex-start; flex: 0 0 auto;
       font-family: 'JetBrains Mono', monospace; font-size: 0.69rem; font-weight: 600;
-      /* 0.62rem was 9.92px. This estate's legibility floor is 11px: below ~12px
-         Space Grotesk's descenders collapse, and a status chip is the one string
+      /* 0.62rem was 9.92px. This estate's legibility floor is 11px: small status text is the one string
          on a product card a visitor MUST be able to read (it says whether the app
          is downloadable). 0.69rem = 11.04px, the same floor the hero diagram holds. */
       /* No text-transform — "iOS" must keep its casing. */
@@ -670,7 +683,7 @@
       font-size: 0.69rem; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--accent-text);
     }
-    .proof-card h3 { color: var(--fg); font: 600 1.15rem/1.3 'Space Grotesk', sans-serif; text-wrap: balance; }
+    .proof-card h3 { color: var(--fg); font: 600 1.15rem/1.4 'Inter', sans-serif; text-wrap: balance; }
     .proof-card p { color: var(--muted); font-size: 0.92rem; line-height: 1.6; text-wrap: pretty; }
     /* State the availability of each demonstrated feature, including Pro. */
     .proof-head .availability {
@@ -974,7 +987,7 @@
         <h2>Focused products for different parts of life.</h2>
         
         <p>Each product is designed around a clear audience and job, with its own identity and way of working.</p>
-        <ul class="portfolio-facts" aria-label="Portfolio at a glance"><li><strong data-portfolio-total>16</strong> products</li><li><strong data-portfolio-live>10</strong> live now</li><li><strong>iOS + web</strong></li></ul>
+        <ul class="portfolio-facts" aria-label="Portfolio at a glance"><li><strong data-portfolio-total>16</strong><span>Apps &amp; games</span></li><li><strong data-portfolio-live>10</strong><span>Available now</span></li><li><strong class="platforms">iOS + Web</strong><span>Platforms</span></li></ul>
       </div>
 
       <div class="products-grid">
@@ -1600,11 +1613,11 @@
     "prompt": "What should I say back to her?",
     "context": [
       "the connection",
-      "the whole thread",
+      "shared conversation",
       "your next reply"
     ],
     "result": "Reply ready to copy",
-    "detail": "Replies shaped by the full thread and the connection. Choose one to copy and send.",
+    "detail": "Replies shaped by the conversation you share and the connection. Choose one to copy and send.",
     "url": "/wingmate/",
     "icon": "icons/wingmate.webp",
     "inputLabel": "You ask"

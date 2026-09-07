@@ -30,6 +30,7 @@ import hashlib
 import pathlib
 import re
 import sys
+from urllib.parse import unquote, urlsplit
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 INDEX = ROOT / "index.html"
@@ -136,13 +137,13 @@ def build_html() -> str:
   .og-brand img {{ width:38px; height:26px; object-fit:contain; }}
   .og-brand .t1 {{ font: 600 11px/1.1 'JetBrains Mono',ui-monospace,monospace;
                    letter-spacing:.22em; text-transform:uppercase; color:#5EEAD4; }}
-  .og-brand .t2 {{ font: 700 17px/1.45 'Space Grotesk','Inter',sans-serif; color:#F2F6F8;
+  .og-brand .t2 {{ font: 700 17px/1.45 'Inter',sans-serif; color:#F2F6F8;
                    margin-top:3px; letter-spacing:-.01em; }}
   /* 58px, not 54: the two lines are hard-broken, and at 58 the longer of them
      ("a point of view.") still measures ~410px inside a 520px column. Sized up
      with the portfolio strip below so the column reads as one filled composition
      rather than two islands with a hole between them. */
-  .og h1 {{ font: 700 58px/1.14 'Space Grotesk','Inter',sans-serif;
+  .og h1 {{ font: 700 58px/1.14 'Inter',sans-serif;
             color:#F2F6F8; margin:0 0 24px; letter-spacing:-.02em; padding-bottom:.1em; }}
   /* The SAME gradient the live headline uses — teal -> blue -> violet. The old
      preview flattened this to one teal, which is half the brand. */
@@ -227,6 +228,21 @@ def inputs_digest() -> str:
     # a redrawn icon changes what the card shows while every string stays put.
     for rel in ["logo.png"] + [s.split("?", 1)[0] for s in icons]:
         h.update((ROOT / rel).read_bytes())
+        h.update(b"\0")
+    # The renderer supplies its own layout overrides, and the linked font CSS
+    # and local font files supply the actual type. Changes to any of them must
+    # invalidate the preview even when the homepage itself has not changed.
+    font_css = ROOT / "fonts/fonts.css"
+    render_files = [pathlib.Path(__file__).resolve(), font_css]
+    for ref in re.findall(r"url\(\s*['\"]?([^'\"\s)]+)['\"]?\s*\)", font_css.read_text()):
+        url = urlsplit(ref)
+        if url.scheme or url.netloc:
+            continue
+        path = unquote(url.path)
+        render_files.append(ROOT / path.lstrip("/") if path.startswith("/")
+                            else font_css.parent / path)
+    for path in dict.fromkeys(render_files):
+        h.update(path.read_bytes())
         h.update(b"\0")
     return h.hexdigest()
 
