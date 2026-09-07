@@ -218,8 +218,8 @@ CARDS = {
   .art { width: 506px; height: 310px; }
 """,
         "kicker": 'Quiet<span class="oak">oak</span>',
-        "h1": 'A calmer way to<br><em>practice DBT&nbsp;skills.</em>',
-        "sub": "Choose a companion. Real DBT skills. A crisis kit that's always free.",
+        "h1": 'Talk it through.<br><em>Find a next step.</em>',
+        "sub": "A companion who listens. Mood logging, DBT tools, and a daily diary.",
     },
     "rowan": {
         "art": "art/rowan_welcome.png",
