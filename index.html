@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907j">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907k">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907j">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907k">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260907j",
+        "image": "https://hypersage.ai/og-image.png?v=20260907k",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -752,36 +752,52 @@
     .cta-routes a:hover { color: var(--fg); }
 
     /* ===== FOOTER ===== */
-    footer.site { border-top: 1px solid var(--line); padding: 54px 0 46px; }
-    footer.site .container { display: flex; justify-content: space-between; gap: 30px; flex-wrap: wrap; }
-    footer .f-brand { max-width: 320px; }
-    footer .f-brand .brand { margin-bottom: 12px; }
-    footer .f-brand p { color: var(--faint); font-size: 0.88rem; }
-    footer .f-links { display: flex; gap: 56px; flex-wrap: wrap; }
-    footer .f-col h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.69rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 14px; }
-    footer .f-col a { display: block; color: var(--muted); font-size: 0.92rem; padding: 5px 0; transition: color .2s; }
-    /* Touch targets. On a phone these links measured 34px tall and the wordmark
-       28px, under the 44pt minimum, so neighbouring footer links were easy to
-       mis-tap. Only the hit box grows -- type size and colour are unchanged. */
+    footer.site { border-top: 1px solid var(--line); padding: 40px 0 28px; }
+    footer.site > .container:first-child {
+      display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 390px);
+      justify-content: space-between; align-items: start; gap: 32px 48px;
+    }
+    footer .f-brand { min-width: 0; }
+    footer .f-brand .brand { display: inline-flex; min-height: 44px; margin-bottom: 8px; }
+    footer .f-brand p { color: var(--faint); font-size: .88rem; max-width: 38ch; }
+    footer .f-links {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 32px;
+    }
+    footer .f-col { min-width: 0; }
+    footer .f-col h3 {
+      font-family: 'JetBrains Mono', monospace; font-size: .69rem;
+      letter-spacing: .16em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px;
+    }
+    footer .f-col a {
+      display: flex; align-items: center; min-height: 44px; padding: 5px 0;
+      color: var(--muted); font-size: .92rem; line-height: 1.5; overflow-wrap: anywhere;
+      transition: color .2s;
+    }
+    footer .f-col a:hover, footer .f-legal a:hover { color: var(--fg); }
+    footer .f-bottom {
+      border-top: 1px solid var(--line); margin-top: 28px; padding-top: 16px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 24px;
+      color: var(--faint); font-size: .78rem; line-height: 1.6;
+    }
+    footer .f-bottom p { text-wrap: pretty; overflow-wrap: anywhere; }
+    footer .f-legal { display: flex; align-items: center; flex-wrap: wrap; gap: 0 24px; }
+    footer .f-legal a { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted); font-size: .82rem; }
+    @media (max-width: 860px) {
+      footer.site > .container:first-child { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+      footer .f-brand { max-width: 420px; }
+      footer .f-links { grid-template-columns: repeat(auto-fit, minmax(min(100%, 7.5rem), 1fr)); max-width: 480px; column-gap: 20px; }
+    }
     @media (max-width: 560px) {
-      .f-col a { min-height: 44px; display: flex; align-items: center; padding: 4px 0; }
-      footer.site .foot-brand, nav.site .brand { min-height: 44px; display: inline-flex; align-items: center; }
-      /* The same defect, missed the first time: the contact routes above the
-         footer (Investors / Press / Press kit / Product support) sat at 36px.
-         They are a wrapping flex row, so inline-flex keeps them on their line. */
+      footer.site { padding-top: 28px; padding-bottom: 24px; }
+      footer .f-brand .brand { font-size: 1rem; }
+      footer .f-bottom { margin-top: 20px; padding-top: 12px; align-items: flex-start; }
+      /* Keep the header and contact routes comfortable to tap. */
+      nav.site .brand { min-height: 44px; display: inline-flex; align-items: center; }
       .cta-routes a { min-height: 44px; display: inline-flex; align-items: center; }
       .cta-routes span[aria-hidden="true"] { display: none; }
       .cta p.cta-routes { gap: 4px 22px; }
-      /* The 30 product-card labels rendered at 10.9px on a phone, under the
-         12px most guidance treats as a floor for real text. Measured across
-         all 15 cards at 390px: nothing wraps, nothing overflows, cards grow
-         2px. Desktop keeps its original size. */
-      .product .cat, .product .status { font-size: 0.74rem; }
+      .product .cat, .product .status { font-size: .74rem; }
     }
-    footer .f-col a:hover { color: var(--fg); }
-    /* flex: 1 1 100% — footer.site .container is itself a wrapping flex row, so without
-       this the bottom rule shrink-wraps to 619px and stops under the Products column. */
-    footer .f-bottom { flex: 1 1 100%; border-top: 1px solid var(--line); margin-top: 40px; padding-top: 24px; color: var(--faint); font-size: 0.82rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 
     /* ===== A11Y ===== */
     /* No border-radius override here — the outline traces each control's own shape,
@@ -1515,36 +1531,34 @@
   <footer class="site">
     <div class="container">
       <div class="f-brand">
-        <div class="brand">
+        <a class="brand" href="#top" aria-label="HyperSage AI Labs — back to top">
           <img class="mark" src="logo.png" alt="" width="36" height="24">
           <span>HyperSage<span class="co-sub"> AI Labs</span></span>
-        </div>
+        </a>
         <p>An independent studio building distinctive consumer apps and original games.</p>
       </div>
-      <div class="f-links">
+      <nav class="f-links" aria-label="Footer">
         <div class="f-col">
-          <h3>Products</h3>
-          <a href="#products">Explore the portfolio</a>
+          <h3>Explore</h3>
+          <a href="#products">Products</a>
+          <a href="#ai">Intelligence</a>
+          <a href="#about">Studio</a>
         </div>
         <div class="f-col">
-          <h3>Studio</h3>
-          <a href="#ai">Product intelligence</a>
-          <a href="#about">Studio</a>
+          <h3>Company</h3>
           <a href="press.html">Press kit</a>
           <a href="#contact">Contact</a>
-        </div>
-        <div class="f-col">
-          <h3>Legal</h3>
-          <a href="privacy.html">Privacy</a>
-          <a href="terms.html">Terms</a>
           <a href="support.html">Support</a>
         </div>
-      </div>
+      </nav>
     </div>
     <div class="container">
       <div class="f-bottom">
-        <span>© 2026 HyperSage AI Labs LLC · Delaware, USA. All rights reserved.</span>
-        <span>Software with a point of view.</span>
+        <p>© 2026 HyperSage AI Labs LLC · Delaware, USA. All rights reserved.</p>
+        <nav class="f-legal" aria-label="Legal">
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
       </div>
     </div>
   </footer>
