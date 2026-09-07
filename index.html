@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907b">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907c">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907b">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907c">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260907b",
+        "image": "https://hypersage.ai/og-image.png?v=20260907c",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -257,7 +257,7 @@
     /* Compact, complete examples: motion explains the flow, while text stays
        readable throughout. The unenhanced figure is the finished frame. */
     .context-engine {
-      --example-accent: #F2BB61;
+      --example-accent: #E2C565;
       grid-area: engine; position: relative; isolation: isolate; min-width: 0;
       width: 100%; max-width: 500px; justify-self: end; align-self: center;
       padding: 16px 18px 12px; overflow: hidden;
@@ -272,19 +272,19 @@
     }
     .example-app { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .example-app > img { width: 32px; height: 32px; flex: 0 0 auto; border-radius: 9px; border: 1px solid var(--line-strong); }
-    .example-choice { min-width: 0; flex: 1; }
-    .example-choice select { display: block; width: 100%; height: 34px; margin: -3px 0 -1px; padding: 3px 22px 3px 0; border: 0; border-radius: 4px; background: transparent; color: var(--example-accent); font: 600 1rem/1.3 'Space Grotesk', sans-serif; cursor: pointer; }
+    .example-choice { position: relative; min-width: 0; flex: 1; }
+    .example-choice select { display: block; width: max-content; max-width: 100%; height: 44px; margin: 0; padding: 0 22px 15px 0; border: 0; border-radius: 4px; background: transparent; color: var(--example-accent); font: 600 1rem/1.15 'Space Grotesk', sans-serif; cursor: pointer; }
     .example-choice option { background: var(--panel); color: var(--fg); }
-    .example-availability { display: block; color: var(--muted); font-size: .69rem; line-height: 1.35; }
+    .example-availability { position: absolute; left: 0; bottom: 4px; pointer-events: none; color: var(--muted); font-size: .69rem; line-height: 1.2; }
     .example-controls { display: flex; gap: 3px; }
     .example-button { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; padding: 0 8px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.018); color: var(--fg); font: 500 .75rem/1 'Inter', sans-serif; cursor: pointer; }
     .example-button:hover { border-color: var(--example-accent); background: rgba(255,255,255,.055); }
     .example-button:focus-visible, .example-choice select:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 3px; }
     .example-controls[hidden] { display: none; }
-    .example-scene { margin-top: 14px; }
+    .example-scene { margin-top: 10px; }
     .example-label { display: block; font: 500 .69rem/1.4 'JetBrains Mono', monospace; letter-spacing: .075em; text-transform: uppercase; color: var(--muted); }
-    .example-prompt { margin-top: 4px; min-height: 44px; font: 500 .98rem/1.4 'Space Grotesk', sans-serif; color: var(--fg); text-wrap: pretty; }
-    .example-flow { position: relative; margin-top: 6px; height: 128px; }
+    .example-prompt { margin-top: 3px; min-height: 22px; font: 500 .98rem/1.4 'Space Grotesk', sans-serif; color: var(--fg); text-wrap: pretty; }
+    .example-flow { position: relative; margin-top: 8px; height: 128px; }
     .engine-wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
     .engine-wire { fill: none; stroke: rgba(129,181,196,.37); stroke-width: 1; vector-effect: non-scaling-stroke; }
     .engine-wire.output { stroke: rgba(167,139,250,.48); }
@@ -300,11 +300,11 @@
     .example-processor strong { font: 500 .82rem/1.25 'Space Grotesk', sans-serif; }
     .engine-faculties { font-size: .69rem; line-height: 1.45; color: #A7B8CD; }
     .engine-faculties span { display: block; }
-    .example-result { position: relative; padding: 12px 14px; min-height: 98px; border: 1px solid rgba(45,212,191,.3); border-radius: 12px; background: linear-gradient(115deg,rgba(45,212,191,.08),rgba(167,139,250,.055)); }
+    .example-result { position: relative; padding: 11px 14px; min-height: 94px; border: 1px solid rgba(45,212,191,.3); border-radius: 12px; background: linear-gradient(115deg,rgba(45,212,191,.08),rgba(167,139,250,.055)); }
     .example-status { display: flex; align-items: center; gap: 9px; color: #A0EBDC; font: 600 1.05rem/1.3 'Space Grotesk', sans-serif; }
     .example-check { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 auto; border: 1px solid rgba(45,212,191,.4); border-radius: 50%; background: rgba(45,212,191,.1); font-size: .72rem; }
     .example-detail { font-size: .82rem; line-height: 1.5; color: #BDCADB; margin-top: 7px; min-height: 3em; }
-    .engine-foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0 8px; margin-top: 5px; }
+    .engine-foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0 8px; margin-top: 2px; }
     .engine-foot small { color: var(--muted); font-size: .69rem; }
     .engine-counter { margin-left: 8px; color: #A4AFC1; font: .69rem/1.3 'JetBrains Mono', monospace; }
     .example-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--example-accent); font-size: .75rem; font-weight: 600; }
@@ -360,10 +360,11 @@
       section.hero { padding: 40px 0 44px; }
       .context-engine { padding: 14px 14px 10px; border-radius: 18px; margin-top: 24px; }
       .example-controls #example-prev, .example-controls #example-next { display: none; }
-      .example-choice select { height: 44px; margin-top: -7px; margin-bottom: -6px; font-size: .98rem; }
+      .example-choice select { font-size: .98rem; }
       .example-app { gap: 8px; }
       .example-app > img { width: 30px; height: 30px; }
-      .example-flow { height: 166px; }
+      .example-prompt { min-height: 44px; }
+      .example-flow { height: 166px; margin-top: 4px; }
       .example-context { height: 132px; }
       .example-context > div { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; padding: 4px 7px; }
       .example-context dt { flex: 0 0 auto; font-size: .69rem; }
@@ -878,7 +879,7 @@
         <span class="eyebrow">Independent Product Studio</span>
         <h1><span class="hero-line">Software with</span> <span class="grad-text hero-line">a point of view.</span></h1>
         <div class="hero-copy">
-          <p class="lede">We build consumer apps and original games. Our <strong>product-specific intelligence</strong> turns your context into a recipe for your kitchen, a brief for your doctor, or a reply that sounds like you.</p>
+          <p class="lede">HyperSage builds distinctive consumer apps for crypto markets, relationships, health, recovery, food, stories, and sleep — alongside original games. Where AI belongs, our <strong>product-specific intelligence layer</strong> brings together your context, relevant in-app activity, domain knowledge, tools, and safeguards.</p>
           <div class="hero-cta">
             <a href="#products" class="btn btn-primary"><span>Explore the products</span><span aria-hidden="true">→</span></a>
             <a class="hero-try" href="https://waddleton.pages.dev/" target="_blank" rel="noopener" aria-label="Play Waddleton free in your browser"><span class="u">Or play Waddleton free</span> <span aria-hidden="true">↗</span></a>
@@ -887,16 +888,16 @@
 
         <figure class="context-engine" aria-label="Product intelligence: from context to action">
           <div class="example-app">
-            <img id="example-icon" src="icons/saffra.webp" alt="" width="36" height="36">
+            <img id="example-icon" src="icons/cryptosage.webp" alt="" width="36" height="36">
             <div class="example-choice">
               <label class="sr-only" for="example-product">Choose a product walkthrough</label>
-              <select id="example-product" disabled>
+              <select id="example-product" aria-describedby="example-availability" disabled>
+                  <option value="cryptosage">CryptoSage AI</option>
                   <option value="saffra">Saffra</option>
                   <option value="rowan">Rowan</option>
                   <option value="loam">Loam</option>
                   <option value="wingmate">Wingmate</option>
                   <option value="quietoak">Quietoak</option>
-                  <option value="cryptosage">CryptoSage AI</option>
                   <option value="storyvault">StoryVault AI</option>
                   <option value="nightshelf">Nightshelf</option>
                   <option value="alder">Alder</option>
@@ -904,7 +905,7 @@
                   <option value="mythkin">Mythkin</option>
                   <option value="mythwright">Mythwright</option>
               </select>
-              <span class="example-availability">Live on iOS</span>
+              <span class="example-availability" id="example-availability">Live on iOS</span>
             </div>
             <div class="example-controls" hidden>
               <button type="button" class="example-button" id="example-prev" aria-label="Previous product walkthrough">←</button>
@@ -914,7 +915,7 @@
           </div>
           <div class="example-scene" id="example-scene">
             <span class="example-label">You ask</span>
-            <p class="example-prompt">“What can I make with chickpeas and spinach?”</p>
+            <p class="example-prompt">“Why did my portfolio move today?”</p>
             <div class="example-flow">
               <svg class="engine-wires" viewBox="0 0 464 128" preserveAspectRatio="none" aria-hidden="true">
                 <path class="engine-wire" d="M255 16H273C300 16 292 51 316 51"/>
@@ -927,19 +928,19 @@
                 <path class="engine-signal output" pathLength="100" d="M390 102V108Q390 116 382 116H240Q232 116 232 124V128"/>
               </svg>
             <dl class="example-context">
-              <div><dt>Your context</dt><dd>dairy-free · pantry</dd></div>
-              <div><dt>Relevant inputs</dt><dd>cook history</dd></div>
-              <div><dt>Current task</dt><dd>tonight’s dinner</dd></div>
+              <div><dt>Your context</dt><dd>shared holdings</dd></div>
+              <div><dt>Relevant inputs</dt><dd>your watchlists</dd></div>
+              <div><dt>Current task</dt><dd>today’s move</dd></div>
             </dl>
             <div class="example-processor"><img src="logo.png" alt="" width="27" height="18"><strong>Product intelligence</strong><div class="engine-faculties"><span>Knowledge · tools</span><span>Rules · safeguards</span></div></div>
             </div>
             <div class="example-result">
-              <div class="example-status"><span class="example-check" aria-hidden="true">✓</span><span id="example-result-status">Recipe adapted</span></div>
-              <p class="example-detail">A chickpea &amp; spinach skillet, adapted to your pantry and dairy-free preferences.</p>
+              <div class="example-status"><span class="example-check" aria-hidden="true">✓</span><span id="example-result-status">Portfolio move explained</span></div>
+              <p class="example-detail">The drivers behind your portfolio’s move, using shared holdings and market context.</p>
             </div>
           </div>
           <figcaption>
-            <div class="engine-foot"><small>Illustrative example <span class="engine-counter" aria-hidden="true">01 / 12</span></small><a class="example-link" href="/saffra/">Explore Saffra <span aria-hidden="true">&nbsp;↗</span></a></div>
+            <div class="engine-foot"><small>Illustrative example <span class="engine-counter" aria-hidden="true">01 / 12</span></small><a class="example-link" href="https://cryptosageai.io/">Explore CryptoSage AI <span aria-hidden="true">&nbsp;↗</span></a></div>
           </figcaption>
           <div class="engine-progress" aria-hidden="true"></div>
           <span class="sr-only" id="example-announcement" aria-live="polite" aria-atomic="true"></span>
@@ -1506,6 +1507,23 @@
       if (!engine) return;
       var cases = [
   {
+    "id": "cryptosage",
+    "name": "CryptoSage AI",
+    "color": "#E2C565",
+    "availability": "Live on iOS",
+    "prompt": "Why did my portfolio move today?",
+    "context": [
+      "shared holdings",
+      "your watchlists",
+      "today’s move"
+    ],
+    "result": "Portfolio move explained",
+    "detail": "The drivers behind your portfolio’s move, using shared holdings and market context.",
+    "url": "https://cryptosageai.io/",
+    "icon": "icons/cryptosage.webp",
+    "inputLabel": "You ask"
+  },
+  {
     "id": "saffra",
     "name": "Saffra",
     "color": "#F2BB61",
@@ -1588,23 +1606,6 @@
     "detail": "A DBT skill to practice, informed by your diary cards and recent conversations.",
     "url": "/quietoak/",
     "icon": "icons/quietoak.webp",
-    "inputLabel": "You ask"
-  },
-  {
-    "id": "cryptosage",
-    "name": "CryptoSage AI",
-    "color": "#E2C565",
-    "availability": "Live on iOS",
-    "prompt": "Why did my portfolio move today?",
-    "context": [
-      "shared holdings",
-      "your watchlists",
-      "today’s move"
-    ],
-    "result": "Portfolio move explained",
-    "detail": "The drivers behind your portfolio’s move, using shared holdings and market context.",
-    "url": "https://cryptosageai.io/",
-    "icon": "icons/cryptosage.webp",
     "inputLabel": "You ask"
   },
   {
