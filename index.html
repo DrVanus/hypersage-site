@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907i">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907j">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907i">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907j">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260907i",
+        "image": "https://hypersage.ai/og-image.png?v=20260907j",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -544,11 +544,13 @@
       /* Text tone for links. Cards whose accent is too dark to read on --panel override
          it with a lighter tone of the same hue. */
       --accent-text: var(--accent);
-      position: relative; padding: 28px; border: 1px solid var(--line); border-radius: var(--radius);
+      --card-padding: 28px;
+      position: relative; padding: var(--card-padding); border: 1px solid var(--line); border-radius: var(--radius);
       background: var(--panel); overflow: clip;
       transition: transform .2s, border-color .2s, box-shadow .2s;
       display: flex; flex-direction: column; scroll-margin-top: max(88px, 5.5rem);
     }
+    .products-grid > article { container: portfolio-card / inline-size; }
     .product::before {
       content: ''; position: absolute; inset: 0 0 auto 0; height: 3px;
       background: linear-gradient(90deg, var(--accent), transparent 80%);
@@ -589,28 +591,46 @@
     .product ul { list-style: none; margin-bottom: 18px; }
     .product ul li { position: relative; padding: 5px 0 5px 20px; font-size: 0.9rem; color: var(--muted); text-wrap: pretty; }
     .product ul li::before { content: ''; position: absolute; left: 2px; top: 0.95em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    /* The action band is part of the card frame, with downloading and visiting separated. */
     .product .foot {
-      margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
-      padding-top: 14px; border-top: 1px solid var(--line);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px;
+      margin: auto calc(-1 * var(--card-padding)) calc(-1 * var(--card-padding));
+      padding: 16px var(--card-padding); border-top: 1px solid var(--line);
+      background: #0B1018;
+      background: linear-gradient(110deg, color-mix(in srgb, var(--accent) 6%, #0B1018), #0B1018 80%);
     }
-    /* Use Apple's original artwork at its native 40px height inside a 44px tap target. */
-    .product .app-store { display: inline-flex; align-items: center; min-height: 44px; flex: 0 0 auto; border-radius: 6px; }
-    .product .app-store img { display: block; width: 120px; height: 40px; }
-    .product .btn-store, .product .link {
+    /* Preserve Apple's original artwork and proportions inside a 44px tap target. */
+    .product .app-store { display: inline-flex; align-items: center; min-height: 44px; flex: 0 0 auto; border-radius: 7px; }
+    .product .app-store img { display: block; width: auto; height: 44px; }
+    .product .btn-store {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px;
-      padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 8px;
-      font-weight: 600; font-size: .85rem; line-height: 1.4; white-space: nowrap;
-      transition: background .18s ease, border-color .18s ease, color .18s ease;
+      padding: 0 18px; border: 1px solid transparent; border-radius: 8px;
+      color: #0B0E13; background: var(--accent-text); font-weight: 600; font-size: .9rem; line-height: 1.4;
+      transition: background .18s ease;
     }
-    .product .link { color: var(--fg); background: rgba(255,255,255,.025); }
-    .product .link:hover { color: var(--fg); border-color: var(--accent-text); background: rgba(255,255,255,.055); }
-    .product .btn-store { color: #0B0E13; background: var(--accent-text); border-color: transparent; }
     .product .btn-store:hover { background: color-mix(in srgb, var(--accent-text) 85%, white); }
+    .product .link {
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px;
+      color: var(--fg); font-weight: 600; font-size: .9rem; line-height: 1.4; border-radius: 5px;
+    }
+    .product .link > span { color: var(--accent-text); transition: transform .18s ease; }
+    .product .link:hover { text-decoration: underline; text-underline-offset: 5px; text-decoration-color: var(--accent-text); }
+    .product .link:hover > span { transform: translateX(2px); }
+    .product .link:only-child { width: 100%; justify-content: space-between; }
     .product .foot a:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 4px; }
-    @media (prefers-reduced-motion: reduce) { .product .btn-store, .product .link { transition: none; } }
+    @container portfolio-card (min-width: 26.875rem) {
+      .product .top { grid-template-columns: 58px minmax(0, 1fr) auto; column-gap: 15px; }
+      .product .app-icon { grid-row: 1; }
+      .product .status { grid-column: 3; grid-row: 1; margin-top: 2px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .product .btn-store, .product .link > span { transition: none; }
+      .product .link:hover > span { transform: none; }
+    }
     @media (max-width: 560px) {
-      .product { padding: 20px; }
+      .product { --card-padding: 20px; }
       .product .top { column-gap: 12px; }
+      .product .foot { column-gap: 12px; }
     }
     /* ===== INTELLIGENCE LAYER ===== */
     .systems { background: linear-gradient(180deg, var(--bg-2), var(--bg)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -1009,7 +1029,7 @@
             <li>Master-set completion, pre-grade triage, and flip P&amp;L</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Explore Holohound" href="holohound/">Explore <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Website: Holohound" href="holohound/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1028,8 +1048,8 @@
             <li>Guidance for Tinder, Hinge, Bumble, Instagram, and texting</li>
           </ul>
           <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Wingmate" href="https://apps.apple.com/app/id6792772729" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
-            <a class="link" aria-label="Explore Wingmate" href="wingmate/">Explore <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Wingmate" href="https://apps.apple.com/app/id6792772729" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Wingmate" href="wingmate/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1049,7 +1069,7 @@
             <li>A Ledger of every action — surgical undo and redo, never paywalled</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Explore Loam" href="loam/">Explore <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Website: Loam" href="loam/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1068,7 +1088,7 @@
             <li>Practice DBT skills, track progress, and reach an offline crisis kit</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Explore Quietoak" href="quietoak/">Explore <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Website: Quietoak" href="quietoak/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1088,8 +1108,8 @@
             <li>Live prices, watchlists, sentiment, and market maps</li>
           </ul>
           <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: CryptoSage AI" href="https://apps.apple.com/app/id6792761331" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
-            <a class="link" aria-label="Explore CryptoSage AI" href="https://cryptosageai.io/" target="_blank" rel="noopener">Explore <span aria-hidden="true">↗</span></a>
+            <a class="app-store" aria-label="Download on the App Store: CryptoSage AI" href="https://apps.apple.com/app/id6792761331" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: CryptoSage AI" href="https://cryptosageai.io/" target="_blank" rel="noopener">Website <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -1109,8 +1129,8 @@
             <li>Diet- and allergen-aware substitutions with hands-free cooking mode</li>
           </ul>
           <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Saffra" href="https://apps.apple.com/app/id6792760857" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
-            <a class="link" aria-label="Explore Saffra" href="saffra/">Explore <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Saffra" href="https://apps.apple.com/app/id6792760857" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Saffra" href="saffra/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1131,8 +1151,8 @@
             <li>A hand-curated AI scenario behind every classic in the library</li>
           </ul>
           <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: StoryVault AI" href="https://apps.apple.com/app/id6792759454" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
-            <a class="link" aria-label="Explore StoryVault AI" href="storyvault/">Explore <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: StoryVault AI" href="https://apps.apple.com/app/id6792759454" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: StoryVault AI" href="storyvault/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1151,8 +1171,8 @@
             <li>Layered ambient sound under the narration, and your place saved to the paragraph</li>
           </ul>
           <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Nightshelf" href="https://apps.apple.com/app/id6792761643" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
-            <a class="link" aria-label="Explore Nightshelf" href="nightshelf/">Explore <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Nightshelf" href="https://apps.apple.com/app/id6792761643" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Nightshelf" href="nightshelf/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1171,8 +1191,8 @@
             <li>No account, ads, or third-party health-data tracking</li>
           </ul>
           <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Rowan" href="https://apps.apple.com/app/id6797693737" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
-            <a class="link" aria-label="Explore Rowan" href="rowan/">Explore <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Rowan" href="https://apps.apple.com/app/id6797693737" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Rowan" href="rowan/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1191,7 +1211,7 @@
             <li>The SOS screen and crisis lines are never metered or paywalled</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Explore Alder" href="alder/">Explore <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Website: Alder" href="alder/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1210,7 +1230,7 @@
             <li>44 stories to step into, each cast with kin from the roster</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Explore Mythkin" href="mythkin/">Explore <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Website: Mythkin" href="mythkin/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1232,8 +1252,8 @@
             
           </ul>
           <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Hexhunter" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="120" height="40" loading="lazy"></a>
-            <a class="link" aria-label="Explore Hexhunter" href="hexhunter/">Explore <span aria-hidden="true">→</span></a>
+            <a class="app-store" aria-label="Download on the App Store: Hexhunter" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Hexhunter" href="hexhunter/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1252,7 +1272,7 @@
             <li>A seasonal ladder that climbs from Recruit to Infinite</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Explore Mythwright" href="mythwright/">Explore <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Website: Mythwright" href="mythwright/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1273,7 +1293,7 @@
           </ul>
           <div class="foot">
             <a class="btn-store" aria-label="Play free: Waddleton" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Explore Waddleton" href="waddleton/">Explore <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Website: Waddleton" href="waddleton/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1315,7 +1335,7 @@
           </ul>
           <div class="foot">
             <a class="btn-store" aria-label="Play free: Gemburrow" href="gemburrow/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Explore Gemburrow" href="gemburrow/">Explore <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Website: Gemburrow" href="gemburrow/">Website <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
