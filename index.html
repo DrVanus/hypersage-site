@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260904b">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260904b">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260904b",
+        "image": "https://hypersage.ai/og-image.png?v=20260907",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -119,14 +119,7 @@
 
       --radius: 16px;
       --radius-sm: 12px;
-      --maxw: 1300px; /* 1120 -> 1300 on 2026-08-25. The hero pins its art column at
-      500px so the diagram's type can hold an 11px floor; at a 1120 rail that left
-      the lede at 46 characters per line over 7 ragged lines. Widening the SHARED
-      rail buys the measure (64 cpl, 5 lines, at 1280 and above) while every band
-      keeps the same left and right edges — the alternative, bleeding the hero
-      rightward on its own, put the diagram past the nav CTA above it and the
-      portfolio strip below it by up to 150px. Verified at 1100-2560: rails
-      aligned, h1 stays 2 lines, diagram min font-size 11.04px, zero overflow. */;
+      --maxw: 1300px;
     }
 
     html { scroll-behavior: smooth; background: var(--bg); }
@@ -230,32 +223,13 @@
     }
 
     /* ===== HERO ===== */
-    /* 72px below, not 64: the strip's own 40px margin-top is gone (see .strip), so
-       this padding is now the WHOLE gap from the last hero control to the strip's
-       rule. 82 above / 72 below reads as one bracketed band instead of a hole. */
-    section.hero { padding: 82px 0 72px; position: relative; }
-    /* The hero's right column is PINNED at 500px so the diagram's type can hold
-       its 11px floor, which used to be paid for out of the headline column — the
-       lede fell to 46 characters per line. The fix is to widen the page rail for
-       EVERY band symmetrically (--maxw below), not to bleed the hero rightward.
-       An earlier attempt spent the spare viewport off the hero's right margin
-       only: it bought the measure, but the diagram's right edge then overhung the
-       nav's "Get in touch" button directly above it, and the portfolio strip
-       below it, by up to 150px. Protecting the left rail and silently spending
-       the right one is not a trade worth making — the nav CTA sits over the
-       diagram exactly as the logo sits over the h1. */
-    /* The engine spans every row of the right column, so the title and copy sit
-       beside it and no desktop dead zone opens above the diagram. */
-    /* The engine column is pinned at 500px so the diagram's type can hold an 11px
-       floor; the two-column hero therefore only runs where 500px still leaves the
-       headline column WIDER than the art (vw > ~1086 — see the 1099px stack
-       breakpoint below). The headline always leads. */
-    /* Gutter capped at 44px, not 60: between a text column and a bordered art
-       panel with its own 24px radius and drop shadow, 60px was buying separation
-       the panel already had, and paying for it in measure. */
+    section.hero { padding: 64px 0; position: relative; }
+    /* Keep both columns inside the shared page rail. Stack before the
+       walkthrough would take more width than the headline. */
     .hero-stage {
       display: grid;
       grid-template-columns: minmax(0, 1.15fr) minmax(500px, .85fr);
+      grid-template-rows: min-content min-content 1fr;
       grid-template-areas:
         "eyebrow engine"
         "title engine"
@@ -263,7 +237,7 @@
       align-items: center;
       column-gap: clamp(28px, 2.8vw, 44px);
     }
-    .hero .eyebrow { grid-area: eyebrow; justify-self: start; align-self: end; }
+    .hero .eyebrow { grid-area: eyebrow; justify-self: start; align-self: start; }
     .hero h1 { grid-area: title; }
     .hero-copy { grid-area: copy; align-self: start; }
     .hero .eyebrow { display: inline-block; margin-bottom: 22px; padding: 7px 15px; border: 1px solid var(--line-strong); border-radius: 999px; background: rgba(45,212,191,0.06); }
@@ -272,7 +246,7 @@
     .hero .lede { font-size: clamp(1.05rem, 2.2vw, 1.28rem); color: var(--muted); max-width: 660px; margin-bottom: 34px; }
     .hero .lede strong { color: var(--fg); font-weight: 600; }
     .hero-cta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-    /* Quiet third affordance: the one product a visitor can touch right now. */
+    /* A direct route into a browser game alongside the portfolio CTA. */
     .hero-try {
       display: inline-flex; align-items: center; gap: 7px; min-height: 44px;
       color: var(--muted); font-weight: 500; font-size: 0.94rem; transition: color .2s;
@@ -280,490 +254,94 @@
     .hero-try .u { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(45,212,191,.45); }
     .hero-try:hover { color: var(--fg); }
 
-    /* The Context Engine is explanatory art: a compact map of the system described
-       by the sr-only ordered list in #ai (the visible cards that used to repeat
-       these stages were replaced by the .layer-proof cases, 2026-08-25). It is
-       deliberately decorative here so screen-reader users encounter the complete
-       explanation only once. */
-    /* 500x368 is also the wire viewBox, so at the desktop size one SVG user unit
-       is exactly one CSS pixel and the preserveAspectRatio="none" stretch is the
-       identity. The aspect is constant at every width above 560px, so the stretch
-       stays uniform everywhere. */
+    /* Product walkthrough: one complete, accessible example at a time.
+       All copy changes atomically; controls pause rotation on interaction. */
     .context-engine {
-      grid-area: engine; position: relative; isolation: isolate;
-      width: 100%; max-width: 500px; aspect-ratio: 500 / 368;
-      justify-self: end; align-self: center; overflow: hidden;
-      border: 1px solid var(--line-strong); border-radius: 24px;
-      background:
-        radial-gradient(circle at 54% 52%, rgba(45,212,191,.13), transparent 23%),
-        radial-gradient(circle at 68% 42%, rgba(167,139,250,.11), transparent 35%),
-        linear-gradient(145deg, rgba(19,26,36,.92), rgba(10,14,22,.9));
-      box-shadow: 0 30px 80px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.04);
+      --example-accent: #F2BB61;
+      grid-area: engine; position: relative; isolation: isolate; min-width: 0;
+      width: 100%; max-width: 500px; justify-self: end; align-self: center;
+      border: 1px solid rgba(167,139,250,.27); border-radius: 24px;
+      background: radial-gradient(ellipse at 90% 0, rgba(167,139,250,.12), transparent 55%), #0D131D;
+      box-shadow: 0 28px 80px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+      padding: 20px; overflow: hidden;
     }
     .context-engine::before {
-      content: ''; position: absolute; inset: 0; z-index: -2; pointer-events: none;
-      background-image:
-        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-      background-size: 28px 28px;
-      mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
-      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+      content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 24px 24px; mask-image: linear-gradient(#000, transparent 75%);
     }
-    .context-engine::after {
-      content: ''; position: absolute; width: 170px; height: 170px; left: 50%; top: 60%;
-      z-index: -1; pointer-events: none; transform: translate(-50%,-50%);
-      border-radius: 50%; background: rgba(45,212,191,.07); filter: blur(30px);
-    }
-    /* Type floor: no string inside this figure is set below .69rem / 11.04px, and
-       the core label sits at .86rem / 13.76px. Below ~12px Space Grotesk's
-       descenders (g j p q y) collapse into stubs, which is what "the g in
-       intelligence" was. Do not shrink these back. */
-    .engine-head {
-      position: absolute; inset: 18px 20px auto; z-index: 4;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: .69rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--faint);
-    }
-    .engine-head span:first-child { color: var(--brand-a); }
-    /* Under ~377px both header labels wrap to two lines and the second line lands on the
-       YOU ASK tag (8px overlap measured at 320 and 360). The right-hand label repeats the
-       section name, so it goes rather than the panel growing. */
-    @media (max-width: 380px) { .engine-head span:last-child { display: none; } }
-    /* 320px: the eyebrow pill wrapped to two lines. (The h1 size for this width lives
-       beside the 1099px h1 rule, which would otherwise override it.) */
-    @media (max-width: 360px) { .hero .eyebrow { letter-spacing: .14em; } }
-    /* Wire layer — geometry lives in a fixed 470×290 space stretched to the panel;
-       the panel keeps the same 1.62 aspect, so the stretch stays uniform. */
-    .pl-wires { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; overflow: visible; }
-    .pl-wire { fill: none; stroke: rgba(152,166,187,.55); stroke-width: 1.3; vector-effect: non-scaling-stroke; }
-    .pl-wire.out { stroke: url(#plGradient); stroke-width: 1.6; }
-    /* Soft under-glow twins of the wires — same geometry, blurred, brand-tinted. */
-    .pl-wire.glow { stroke: rgba(45,212,191,.15); stroke-width: 4; filter: blur(2.2px); }
-    .pl-wire.out.glow { stroke: rgba(167,139,250,.2); }
-
-    /* The timeline grounds the left-to-right read: hairline, faint ticks, and a
-       brighter tick under each of the three stages. */
-    .pl-tl-base { stroke: rgba(255,255,255,.09); stroke-width: 1; vector-effect: non-scaling-stroke; }
-    .pl-tl-tick { stroke: rgba(255,255,255,.14); stroke-width: 1; vector-effect: non-scaling-stroke; fill: none; }
-    .pl-tl-stage { stroke: rgba(45,212,191,.5); stroke-width: 1.4; vector-effect: non-scaling-stroke; fill: none; }
-    .pl-playhead { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
-
-    /* Transient carriers — context tokens and signal pulses. Hidden at rest, so
-       reduced-motion / no-JS / print never show a half-told story.
-       The tokens used to be labelled pills set in 8px mono. That text was both
-       below the legibility floor and a duplicate of the source card it fell out
-       of, and it could not grow to 11px without three 70px pills colliding in a
-       235px funnel. They are dot markers now; the tie back to the source is
-       carried by colour (teal for the two context feeds, violet for live task
-       state), matching each card's own .pl-dot. */
-    .pl-tok { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
-    .pl-tok circle { fill: #5FE3D2; }
-    .pl-tok.violet circle { fill: #C9BAFD; }
-    .pl-pulse { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
-
-    /* Three context sources feed the core from above. display:contents keeps the
-       wrapper out of the way on desktop; on phones it becomes the sources row. */
-    .pl-sources { display: contents; }
-    .pl-src {
-      position: absolute; z-index: 2; transform: translate(-50%,-50%);
-      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
-      border: 1px solid rgba(255,255,255,.1); border-radius: 11px;
-      background: rgba(15,20,29,.9); box-shadow: 0 8px 24px rgba(0,0,0,.24);
-      white-space: nowrap;
-    }
-    .pl-src .pl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-a); box-shadow: 0 0 10px rgba(45,212,191,.58); flex: 0 0 auto; }
-    .pl-src.src-3 .pl-dot { background: var(--brand-b); box-shadow: 0 0 10px rgba(167,139,250,.58); }
-    .pl-src strong { display: block; font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: .83rem; font-weight: 600; color: var(--fg); line-height: 1.22; padding-bottom: 0.09em;}
-    .pl-src small { display: block; color: var(--faint); font-size: .69rem; line-height: 1.34; }
-    /* Symmetric about the core at 50%: the row leaves an equal margin each side. */
-    .src-1 { left: 17%; top: 25%; }
-    .src-2 { left: 50%; top: 25%; }
-    .src-3 { left: 83%; top: 25%; }
-
-    /* The utterance entering the pipeline. The bubble is a 1x1 grid and all four
-       prompts share the single cell, so the box always sizes to the TALLEST of
-       them: rotating the prompt can never reflow the diagram or clip a line. */
-    /* 26% wide, not 23: "StoryVault AI" is the longest app tag and the mono-caps
-       first cut of it overflowed the bubble's right border on the live site
-       (Vanus caught it). The wire that used to start at x=127 now starts at 138
-       — keep the msg right edge (27.2% of width) left of it. */
-    .pl-msg { position: absolute; z-index: 2; left: 14.2%; top: 60%; width: 26%; transform: translate(-50%,-50%); }
-    .pl-msg-tag { display: block; margin: 0 0 5px 2px; font-family: 'JetBrains Mono', monospace; font-size: .69rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
-    .pl-msg-bubble {
-      display: grid; align-items: center;
-      padding: 9px 11px 10px; color: var(--fg); font-size: .8rem; line-height: 1.4;
-      border: 1px solid rgba(45,212,191,.32); border-radius: 12px 12px 12px 4px;
-      background: rgba(45,212,191,.09); box-shadow: 0 8px 22px rgba(0,0,0,.22);
-    }
-    /* Balanced wraps: a two-line question breaks near its middle instead of
-       stranding one word on the second line. */
-    .pl-q { display: block; text-wrap: balance; }
-    .pl-prompt { grid-area: 1 / 1; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; }
-    /* Resting state = prompt 1 alone, fully composed. Prompts 2-11 only ever
-       surface while .pl-live is armed, so no-JS, reduced-motion and print all
-       show prompt 1 and nothing stacked behind it. */
-    .pl-prompt + .pl-prompt { opacity: 0; }
-    /* App attribution inside the bubble — swaps atomically with its prompt
-       because it is part of the .pl-prompt element. Colored with the product's
-       own accent so the tie to the portfolio cards is carried the same way
-       everywhere on the page. Owner ask 2026-08-25: "put the name of the app in
-       that specific style/color... can put logo too". */
-    .pl-of {
-      display: inline-flex; align-items: center; gap: 5px;
-      /* Space Grotesk mixed case, like the product-card titles — the app NAME,
-         not a label. Mono caps at .08em tracking needed ~119px for
-         "StoryVault AI" against a 93px content box and overflowed the bubble.
-         .72rem = 11.52px, above the estate's 11px floor — do not shrink.
-         Zero tracking and the 5px gap are load-bearing: the longest tag,
-         "CryptoSage AI", clears the bubble's content box by ~6px, measured.
-         Adding tracking or a wider gap re-opens the overflow Vanus caught. */
-      font-family: 'Space Grotesk', 'Inter', sans-serif;
-      font-size: .72rem; font-weight: 600; letter-spacing: 0;
-      color: var(--app, var(--brand-a));
-    }
-    .pl-of img {
-      width: 16px; height: 16px; border-radius: 5px; flex: 0 0 auto;
-      object-fit: cover; border: 1px solid var(--line-strong);
-      background: rgba(255,255,255,.05);
-    }
-    /* The source-card captions roll with the prompts: each <small> is a 1x1
-       grid of eleven .pl-ctx spans (one per app, same order as the prompts), so
-       the card always sizes to the WIDEST caption and can never breathe as the
-       scenario changes. Resting state = caption 1 (Saffra), matching prompt 1. */
-    .pl-src small.pl-roll { display: grid; }
-    .pl-src .pl-ctx { grid-area: 1 / 1; }
-    .pl-src .pl-ctx + .pl-ctx { opacity: 0; }
-
-    /* The core — a processor block whose four faculties light as the message
-       passes through. */
-    .pl-core {
-      position: absolute; z-index: 3; left: 50%; top: 60%; width: 35%;
-      transform: translate(-50%,-50%); text-align: center; padding: 11px 10px 10px;
-      border: 1px solid rgba(255,255,255,.14); border-radius: 15px;
-      background: linear-gradient(150deg, rgba(19,26,36,.98), rgba(9,13,20,.98));
-      box-shadow: 0 14px 38px rgba(0,0,0,.42), inset 0 0 24px rgba(45,212,191,.05);
-    }
-    .pl-core::after {
-      content: ''; position: absolute; inset: -1px; border-radius: 16px;
-      pointer-events: none; opacity: 0;
-      box-shadow: 0 0 26px rgba(45,212,191,.4), inset 0 0 16px rgba(45,212,191,.18);
-    }
-    .pl-core img { width: 24px; height: 16px; object-fit: contain; margin-bottom: 4px; }
-    /* The core is 35% wide because that is what the four faculty pills actually
-       need: at the 11.04px floor "KNOWLEDGE" and "SAFEGUARDS" measure 67.6 and
-       74.5 JetBrains Mono pixels, so a two-column row needs 147px of content box.
-       Sizing the card to the type (rather than the type to the card) is the whole
-       point of this refit — do not narrow it back. */
-    .pl-core strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: .86rem; line-height: 1.18; text-wrap: balance; padding-bottom: 0.09em;}
-    .pl-fac { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 9px; }
-    .pl-fac span {
-      font-family: 'JetBrains Mono', monospace; font-size: .69rem; font-weight: 600;
-      letter-spacing: .02em; text-transform: uppercase; padding: 4px 2px;
-      border-radius: 7px; border: 1px solid rgba(45,212,191,.28);
-      background: rgba(45,212,191,.07); color: #86E7DB;
-    }
-    .pl-fac .fac-r, .pl-fac .fac-s { border-color: rgba(167,139,250,.32); background: rgba(167,139,250,.08); color: #C9BAFD; }
-
-    /* The payoff — strongest treatment: brand-gradient text and a glow that
-       answers the pulse arrival. */
-    .pl-result {
-      position: absolute; z-index: 2; left: 85%; top: 60%; width: 24%;
-      transform: translate(-50%,-50%); text-align: center; padding: 10px 8px;
-      border: 1px solid rgba(167,139,250,.36); border-radius: 13px;
-      background: linear-gradient(145deg, rgba(45,212,191,.13), rgba(167,139,250,.15));
-      box-shadow: 0 10px 28px rgba(0,0,0,.26), 0 0 20px rgba(167,139,250,.12);
-    }
-    .pl-result::after {
-      content: ''; position: absolute; inset: -1px; border-radius: 14px;
-      pointer-events: none; opacity: 0;
-      box-shadow: 0 0 26px rgba(167,139,250,.45), inset 0 0 14px rgba(45,212,191,.2);
-    }
-    .pl-result > span { display: block; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; color: var(--brand-a); font-size: .69rem; letter-spacing: .08em; text-transform: uppercase; }
-    .pl-result strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: .86rem; line-height: 1.3; text-wrap: balance; }
-    /* The stamps used to span 88.66px inside an 88.08px content box — they were
-       overhanging the card, which is what "they don't fit perfectly" was.
-       On the desktop panel they now stack, one per row, so the clearance is a
-       fixed ~23px per side and can never come down to a knife edge as the type or
-       the card width drifts. The wide mobile card puts them back side by side. */
-    .pl-stamps { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-top: 8px; }
-    .pl-stamp {
-      display: inline-block; font-size: .69rem; letter-spacing: .01em; padding: 3px 7px;
-      border-radius: 999px; border: 1px solid rgba(45,212,191,.4);
-      background: rgba(45,212,191,.1); color: #8FE8DC; white-space: nowrap;
-    }
-
-    /* Mobile-only plumbing, invisible on desktop. */
-    .pl-conn { display: none; }
-    .pl-rail { display: none; }
-    /* The asterisk on "Current task*" resolves HERE. This footnote must stay
-       visible inside the panel at every width. */
-    .engine-foot {
-      position: absolute; left: 20px; right: 20px; bottom: 12px; z-index: 4;
-      color: var(--faint); font-size: .69rem; letter-spacing: .01em; text-align: right;
-    }
-
-    /* ===== Pipeline motion — one 14s narrative loop, armed only while motion is
-       welcome (.pl-live). The resting markup IS the finished frame, so no-JS,
-       reduced-motion and save-data users always see the composed diagram.
-
-       Retimed from 8s: five stages in eight seconds was faster than the diagram
-       could be read. Every percentage below is recomputed for 14s, not rescaled —
-       the stage beats are spread, and the tail is spent HOLDING rather than
-       animating. 1% = 140ms.
-
-         0-6%    the question arrives
-         8-30%   three context tokens fall into the core
-         17-26%  the question enters the core
-         27-41%  knowledge / tools / rules / safeguards light in turn
-         44-53%  the answer leaves the core and the result card lights
-         54-61%  grounded, then checked
-         61-93%  HOLD — composed frame, 4.48s, the picture a glance should catch
-         93-100% the question clears so the next one can arrive
-    */
-    .context-engine.pl-live .pl-msg { animation: plMsgD 14s ease infinite; }
-    .context-engine.pl-live .tok-1 { animation: plTok1 14s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .tok-2 { animation: plTok2 14s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .tok-3 { animation: plTok3 14s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .pulse-in { animation: plPulseIn 14s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .pulse-out { animation: plPulseOut 14s cubic-bezier(.4,0,.2,1) infinite; }
-    .context-engine.pl-live .pl-core::after { animation: plCharge 14s ease infinite; }
-    .context-engine.pl-live .fac-k { animation: plFacK 14s ease infinite; }
-    .context-engine.pl-live .fac-t { animation: plFacT 14s ease infinite; }
-    .context-engine.pl-live .fac-r { animation: plFacR 14s ease infinite; }
-    .context-engine.pl-live .fac-s { animation: plFacS 14s ease infinite; }
-    .context-engine.pl-live .pl-result { animation: plResD 14s ease infinite; }
-    .context-engine.pl-live .pl-result::after { animation: plResGlow 14s ease infinite; }
-    .context-engine.pl-live .pl-stamp:first-child { animation: plStamp1 14s ease infinite; }
-    .context-engine.pl-live .pl-stamp:last-child { animation: plStamp2 14s ease infinite; }
-    .context-engine.pl-live .pl-playhead { animation: plPlayhead 14s linear infinite; }
-
-    /* Scenario rotation — one APP per loop, eleven loops to a 154s master cycle
-       (one scenario for every product with an assistant to ask, owner ask
-       2026-08-25). Each prompt (and each source-card caption, see .pl-ctx
-       below) turns over on the same clock: element n gets a (n-1)*14s
-       animation-delay, fill-mode stays `none`, so before its first turn it
-       shows its RESTING opacity (0 for 2-11). Percentages are the SAME absolute
-       times as the old 70s clock, re-expressed for 154s (1% = 1.54s): the
-       prompt handover sits at 9-9.18% of the master = 13.86-14.14s, inside the
-       window where the bubble itself is at opacity 0 (plMsgD is out from 96% =
-       13.44s; the next loop's fade-in runs 14.14-14.84s), so the prompt swap is
-       never visible. The source captions ARE visible at the handover — they get
-       a deliberate ~0.3s crossfade, which reads as the diagram loading the next
-       product's context.
-       The eleven prompts are true to eleven shipped apps; none is a claim. */
-    .context-engine.pl-live .pl-prompt,
-    .context-engine.pl-live .pl-ctx { animation: plRoll 154s ease infinite; }
-    .context-engine.pl-live .pl-prompt:nth-child(2),
-    .context-engine.pl-live .pl-ctx:nth-child(2) { animation-delay: 14s; }
-    .context-engine.pl-live .pl-prompt:nth-child(3),
-    .context-engine.pl-live .pl-ctx:nth-child(3) { animation-delay: 28s; }
-    .context-engine.pl-live .pl-prompt:nth-child(4),
-    .context-engine.pl-live .pl-ctx:nth-child(4) { animation-delay: 42s; }
-    .context-engine.pl-live .pl-prompt:nth-child(5),
-    .context-engine.pl-live .pl-ctx:nth-child(5) { animation-delay: 56s; }
-    .context-engine.pl-live .pl-prompt:nth-child(6),
-    .context-engine.pl-live .pl-ctx:nth-child(6) { animation-delay: 70s; }
-    .context-engine.pl-live .pl-prompt:nth-child(7),
-    .context-engine.pl-live .pl-ctx:nth-child(7) { animation-delay: 84s; }
-    .context-engine.pl-live .pl-prompt:nth-child(8),
-    .context-engine.pl-live .pl-ctx:nth-child(8) { animation-delay: 98s; }
-    .context-engine.pl-live .pl-prompt:nth-child(9),
-    .context-engine.pl-live .pl-ctx:nth-child(9) { animation-delay: 112s; }
-    .context-engine.pl-live .pl-prompt:nth-child(10),
-    .context-engine.pl-live .pl-ctx:nth-child(10) { animation-delay: 126s; }
-    .context-engine.pl-live .pl-prompt:nth-child(11),
-    .context-engine.pl-live .pl-ctx:nth-child(11) { animation-delay: 140s; }
-    @keyframes plRoll {
-      0% { opacity: 0; }
-      0.27%, 9% { opacity: 1; }
-      9.18%, 100% { opacity: 0; }
-    }
-
-    @keyframes plMsgD {
-      0%, 1% { opacity: 0; transform: translate(calc(-50% - 30px), -50%); }
-      6% { opacity: 1; transform: translate(-50%, -50%); }
-      93% { opacity: 1; transform: translate(-50%, -50%); }
-      96%, 100% { opacity: 0; transform: translate(-50%, -50%); }
-    }
-    @keyframes plTok1 {
-      0%, 8% { opacity: 0; transform: translate(85px, 112px) scale(.4); }
-      10% { opacity: 1; transform: translate(85px, 118px) scale(1); }
-      16% { opacity: 1; transform: translate(131px, 136px) scale(1); }
-      20% { opacity: 1; transform: translate(202px, 148px) scale(.85); }
-      22%, 100% { opacity: 0; transform: translate(220px, 153px) scale(.3); }
-    }
-    @keyframes plTok2 {
-      0%, 11% { opacity: 0; transform: translate(250px, 112px) scale(.4); }
-      13% { opacity: 1; transform: translate(250px, 118px) scale(1); }
-      23% { opacity: 1; transform: translate(250px, 148px) scale(.85); }
-      26%, 100% { opacity: 0; transform: translate(250px, 153px) scale(.3); }
-    }
-    @keyframes plTok3 {
-      0%, 14% { opacity: 0; transform: translate(415px, 112px) scale(.4); }
-      16% { opacity: 1; transform: translate(415px, 118px) scale(1); }
-      23% { opacity: 1; transform: translate(369px, 136px) scale(1); }
-      27% { opacity: 1; transform: translate(298px, 148px) scale(.85); }
-      30%, 100% { opacity: 0; transform: translate(280px, 153px) scale(.3); }
-    }
-    @keyframes plPulseIn {
-      0%, 17% { opacity: 0; transform: translate(126px, 221px); }
-      19% { opacity: 1; transform: translate(131px, 221px); }
-      24% { opacity: 1; transform: translate(155px, 221px); }
-      26%, 100% { opacity: 0; transform: translate(161px, 221px); }
-    }
-    @keyframes plCharge {
-      0%, 21% { opacity: 0; }
-      27% { opacity: .8; }
-      42% { opacity: .3; }
-      48%, 100% { opacity: 0; }
-    }
-    @keyframes plFacK {
-      0% { opacity: 1; transform: scale(1); }
-      5%, 24% { opacity: .3; transform: scale(1); }
-      27% { opacity: 1; transform: scale(1.12); }
-      30%, 100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes plFacT {
-      0% { opacity: 1; transform: scale(1); }
-      5%, 28.5% { opacity: .3; transform: scale(1); }
-      31.5% { opacity: 1; transform: scale(1.12); }
-      34.5%, 100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes plFacR {
-      0% { opacity: 1; transform: scale(1); }
-      5%, 33% { opacity: .3; transform: scale(1); }
-      36% { opacity: 1; transform: scale(1.12); }
-      39%, 100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes plFacS {
-      0% { opacity: 1; transform: scale(1); }
-      5%, 37.5% { opacity: .3; transform: scale(1); }
-      40.5% { opacity: 1; transform: scale(1.12); }
-      43.5%, 100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes plPulseOut {
-      0%, 44% { opacity: 0; transform: translate(339px, 221px); }
-      46% { opacity: 1; transform: translate(344px, 221px); }
-      49% { opacity: 1; transform: translate(358px, 221px); }
-      51%, 100% { opacity: 0; transform: translate(364px, 221px); }
-    }
-    @keyframes plResD {
-      0% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
-      5%, 47% { opacity: .4; transform: translate(-50%,-50%) scale(.97); }
-      50% { opacity: 1; transform: translate(-50%,-50%) scale(1.02); }
-      53%, 100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
-    }
-    @keyframes plResGlow {
-      0%, 47% { opacity: 0; }
-      51% { opacity: .95; }
-      66%, 100% { opacity: 0; }
-    }
-    @keyframes plStamp1 {
-      0% { opacity: 1; transform: scale(1); }
-      5%, 51% { opacity: 0; transform: scale(.6); }
-      54% { opacity: 1; transform: scale(1.15); }
-      57%, 100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes plStamp2 {
-      0% { opacity: 1; transform: scale(1); }
-      5%, 55% { opacity: 0; transform: scale(.6); }
-      58% { opacity: 1; transform: scale(1.15); }
-      61%, 100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes plPlayhead {
-      0%, 3% { opacity: 0; transform: translate(58px, 322px); }
-      6% { opacity: .9; transform: translate(68px, 322px); }
-      20% { opacity: .9; transform: translate(150px, 322px); }
-      34% { opacity: .9; transform: translate(250px, 322px); }
-      57% { opacity: .9; transform: translate(425px, 322px); }
-      61%, 100% { opacity: 0; transform: translate(438px, 322px); }
-    }
-
-    /* Stacks at 1099px, not 980px. The engine column is 500px wide now, and below
-       ~1086px viewport a 500px art column would be WIDER than what is left for the
-       headline. Rather than shrink the diagram back under its type floor, the hero
-       stacks a little earlier and the panel gets 560px of its own. */
+    .engine-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 15px; }
+    .engine-kicker, .example-label { font: 500 .69rem/1.4 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .engine-kicker { color: #8BE6D8; }
+    .engine-counter { font: 500 .7rem/1.4 'JetBrains Mono', monospace; color: var(--muted); }
+    .example-app { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .example-app img { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 10px; border: 1px solid var(--line-strong); }
+    .example-choice { min-width: 0; flex: 1; }
+    .example-choice select { display: block; width: 100%; min-height: 44px; margin: -7px 0 -4px; padding: 6px 24px 6px 0; border: 0; border-radius: 4px; background: transparent; color: var(--example-accent); font: 600 1rem/1.3 'Space Grotesk', sans-serif; cursor: pointer; }
+    .example-choice option { background: var(--panel); color: var(--fg); }
+    .example-availability { display: block; color: var(--muted); font-size: .72rem; line-height: 1.4; }
+    .example-controls { display: flex; gap: 4px; }
+    .example-button { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; padding: 0 9px; border: 1px solid var(--line-strong); border-radius: 10px; background: rgba(255,255,255,.025); color: var(--fg); font: 500 .76rem/1 'Inter', sans-serif; cursor: pointer; }
+    .example-button:hover { border-color: var(--example-accent); background: rgba(255,255,255,.07); }
+    .example-button:focus-visible, .example-choice select:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 3px; }
+    .example-controls[hidden] { display: none; }
+    .example-scene { margin-top: 18px; }
+    .example-prompt { margin-top: 6px; min-height: 52px; font: 500 1.08rem/1.5 'Space Grotesk', sans-serif; color: var(--fg); text-wrap: pretty; }
+    .example-context { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; margin-top: 12px; }
+    .example-context > div { padding: 9px; border: 1px solid var(--line); border-radius: 9px; background: rgba(8,11,17,.45); }
+    .example-context dt { font-size: .69rem; color: var(--muted); margin-bottom: 3px; }
+    .example-context dd { font-size: .72rem; line-height: 1.45; color: #D0D8E5; }
+    .example-processor { display: flex; align-items: center; gap: 10px; padding: 15px 0; }
+    .example-processor::before, .example-processor::after { content: ''; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(45,212,191,.5)); }
+    .example-processor::after { transform: rotate(180deg); }
+    .example-processor img { width: 24px; height: 16px; object-fit: contain; }
+    .example-processor strong { font: 500 .82rem/1.35 'Space Grotesk', sans-serif; }
+    .example-result { position: relative; padding: 16px; min-height: 170px; border: 1px solid rgba(45,212,191,.3); border-radius: 13px; background: linear-gradient(115deg, rgba(45,212,191,.075), rgba(167,139,250,.065)); }
+    .example-status { display: flex; align-items: center; gap: 8px; color: #97EBDD; font-size: .79rem; font-weight: 600; }
+    .example-check { display: inline-flex; align-items: center; justify-content: center; width: 21px; height: 21px; flex: 0 0 auto; border: 1px solid rgba(45,212,191,.4); border-radius: 50%; background: rgba(45,212,191,.12); font-size: .72rem; }
+    .example-result .example-artifact { font: 600 1.18rem/1.35 'Space Grotesk', sans-serif; margin: 10px 0 7px; min-height: 1.35em; }
+    .example-result .example-detail { font-size: .8rem; line-height: 1.6; color: #BAC7D9; min-height: 3.2em; }
+    .example-proofs { display: flex; flex-wrap: wrap; gap: 5px 12px; margin-top: 11px; padding: 0; list-style: none; }
+    .example-proofs li { color: #B3C5D2; font-size: .69rem; line-height: 1.4; }
+    .example-proofs li::before { content: '·'; color: var(--brand-a); margin-right: 5px; }
+    .engine-foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px 12px; margin-top: 10px; }
+    .engine-foot small { color: var(--muted); font-size: .69rem; }
+    .example-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--example-accent); font-size: .77rem; font-weight: 600; }
+    .example-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+    .engine-note { font-size: .69rem; color: var(--muted); line-height: 1.5; }
+    .example-scene.is-changing .example-result { animation: result-arrive .45s ease both; }
+    @keyframes result-arrive { from { transform: translateY(5px); } to { transform: translateY(0); } }
     @media (max-width: 1099px) {
-      .hero-stage {
-        grid-template-columns: 1fr; grid-template-areas: "eyebrow" "title" "copy" "engine";
-      }
+      .hero-stage { grid-template-columns: 1fr; grid-template-areas: 'eyebrow' 'title' 'copy' 'engine'; }
       .hero h1 { max-width: 880px; font-size: clamp(2.5rem, 6vw, 4.4rem); }
-      /* 320px: at the 40px floor "a point of view." is 283px of text in a 272px column, so
-         the headline broke to three lines ending on "view.". Nested here so it wins over
-         the rule above. */
-      @media (max-width: 360px) { .hero h1 { font-size: clamp(2.2rem, 11.5vw, 2.5rem); } }
       .hero-copy { max-width: 720px; }
-      .context-engine { justify-self: start; max-width: 560px; margin-top: 42px; }
+      .context-engine { justify-self: start; max-width: 560px; margin-top: 36px; }
     }
     @media (max-width: 560px) {
-      /* Same trade as desktop: the strip's 40px margin is gone, so this padding is
-         the whole gap from the diagram to the strip's rule. 88px → 56px. */
-      section.hero { padding: 58px 0 56px; }
-      /* The pipeline rotates vertical: message → sources → core → result, with a
-         ticked rail standing in for the timeline. */
-      .context-engine {
-        width: calc(100% + 8px); margin: 34px -4px 0; border-radius: 18px;
-        aspect-ratio: auto; display: flex; flex-direction: column; align-items: center;
-        padding: 42px 14px 34px 27px;
-      }
-      /* Tracking, not size, gives the two eyebrows room on a 350px panel — the
-         strings themselves are settled and stay whole. */
-      .engine-head { inset: 13px 13px auto; font-size: .69rem; letter-spacing: .02em; gap: 8px; }
-      .engine-foot { left: 27px; right: 13px; bottom: 11px; }
-      .pl-wires { display: none; }
-      .pl-rail {
-        display: block; position: absolute; left: 14px; top: 46px; bottom: 38px; width: 1px;
-        background: repeating-linear-gradient(to bottom, rgba(255,255,255,.16) 0 4px, transparent 4px 16px);
-      }
-      .pl-msg { position: static; transform: none; width: auto; max-width: 78%; align-self: flex-start; }
-      .pl-conn {
-        display: block; width: 1px; height: 15px; margin: 5px auto; flex: 0 0 auto;
-        background: linear-gradient(to bottom, rgba(45,212,191,0), rgba(45,212,191,.65));
-        opacity: .5;
-      }
-      /* Three cards ACROSS a 350px panel cannot hold 11px type — at the old
-         clamp() sizes they were 8-9.6px, the worst strings on the page. They
-         stack instead: one full-width row each, same type scale as desktop.
-         The phone layout was already a vertical read, so this is in character. */
-      .pl-sources { display: flex; flex-direction: column; gap: 6px; align-items: stretch; width: 100%; }
-      .pl-src { position: static; transform: none; width: 100%; padding: 7px 10px; gap: 8px; justify-content: flex-start; }
-      .pl-core { position: static; transform: none; width: min(100%, 260px); }
-      .pl-result { position: static; transform: none; width: min(100%, 260px); }
-      /* The phone card is wide enough for both proofs on one row. */
-      .pl-stamps { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-      .context-engine.pl-live .pl-msg { animation-name: plMsgM; }
-      .context-engine.pl-live .pl-result { animation-name: plResM; }
-      .context-engine.pl-live .pl-src { animation: plSrcM 14s ease infinite; }
-      .context-engine.pl-live .src-2 { animation-delay: .6s; }
-      .context-engine.pl-live .src-3 { animation-delay: 1.2s; }
-      .context-engine.pl-live .c1 { animation: plConnA 14s ease infinite; }
-      .context-engine.pl-live .c2 { animation: plConnB 14s ease infinite; }
-      .context-engine.pl-live .c3 { animation: plConnC 14s ease infinite; }
+      section.hero { padding: 40px 0 48px; }
+      .context-engine { padding: 16px; border-radius: 18px; margin-top: 28px; }
+      .example-context { grid-template-columns: 1fr; gap: 5px; }
+      .example-context > div { display: flex; align-items: baseline; gap: 8px; padding: 7px 9px; }
+      .example-context dt { flex: 0 0 84px; margin: 0; }
+      .example-context dd { min-height: 0; }
+      .example-prompt { min-height: 3em; }
+      .example-app { flex-wrap: wrap; }
+      .example-app { gap: 7px; }
+      .example-app img { width: 32px; height: 32px; }
+      .example-choice { min-width: 145px; }
+      .example-choice select { font-size: .9rem; padding-right: 16px; }
+      .example-controls { margin-left: auto; }
+      .example-result { min-height: 215px; }
+      .engine-head { margin-bottom: 12px; }
     }
-    /* Mobile beats, recomputed for 14s on the same story clock as the desktop
-       loop — the message clears in the same 93-100% window, so the prompt
-       handover stays invisible on a phone too. */
-    @keyframes plMsgM {
-      0%, 1% { opacity: 0; transform: translateY(-10px); }
-      6% { opacity: 1; transform: none; }
-      93% { opacity: 1; transform: none; }
-      96%, 100% { opacity: 0; transform: none; }
+    @media (max-width: 380px) {
+      .example-controls { width: 100%; margin-top: 2px; justify-content: flex-end; }
+      .example-result { min-height: 245px; padding: 13px; }
     }
-    @keyframes plResM {
-      0% { opacity: 1; transform: scale(1); }
-      5%, 47% { opacity: .4; transform: scale(.97); }
-      50% { opacity: 1; transform: scale(1.02); }
-      53%, 100% { opacity: 1; transform: scale(1); }
+    @media (max-width: 360px) {
+      .hero h1 { font-size: clamp(2.2rem, 11.5vw, 2.5rem); }
+      .hero .eyebrow { letter-spacing: .14em; }
     }
-    @keyframes plSrcM {
-      0% { opacity: 1; }
-      5%, 12% { opacity: .55; }
-      18%, 100% { opacity: 1; }
-    }
-    @keyframes plConnA { 0%, 5% { opacity: .5; } 9% { opacity: 1; } 14%, 100% { opacity: .5; } }
-    @keyframes plConnB { 0%, 14% { opacity: .5; } 19% { opacity: 1; } 26%, 100% { opacity: .5; } }
-    @keyframes plConnC { 0%, 43% { opacity: .5; } 48% { opacity: 1; } 56%, 100% { opacity: .5; } }
 
     /* ===== LOGO / WORDMARK STRIP ===== */
     /* No margin-top. It used to ADD to the hero's own bottom padding — 64+40=104px
@@ -1175,27 +753,13 @@
       /* Paper cannot scroll: unwrap the rail so every case prints. */
       .layer-proof { grid-auto-flow: row; grid-auto-columns: auto; overflow: visible; }
       .rail-nav { display: none; }
-      .context-engine .pl-tok, .context-engine .pl-pulse,
-      .context-engine .pl-playhead { display: none !important; }
-      /* Paper gets the composed frame, not whichever frame the loop happened to be
-         on when Print was pressed: freeze every beat and show prompt 1 alone. */
-      .context-engine, .context-engine *, .context-engine *::before, .context-engine *::after {
-        animation: none !important; transition: none !important;
-      }
-      .context-engine .pl-msg, .context-engine .pl-result,
-      .context-engine .pl-src, .context-engine .pl-stamp,
-      .context-engine .pl-fac span { opacity: 1 !important; }
-      .context-engine .pl-stamp, .context-engine .pl-fac span { transform: none !important; }
-      .context-engine .pl-prompt + .pl-prompt { opacity: 0 !important; }
-      .context-engine .pl-ctx + .pl-ctx { opacity: 0 !important; }
+      .example-controls { display: none !important; }
+      .context-engine * { animation: none !important; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation: none !important; transition: none !important; }
-      .pl-tok, .pl-pulse, .pl-playhead { display: none; }
-      /* Prompts 2-4 rest at opacity 0, so killing the animation above leaves
-         prompt 1 alone in a fully composed diagram. */
       .product:hover, .btn:hover { transform: none !important; }
       .approach-row:hover::after { width: 0 !important; }
     }
@@ -1206,8 +770,9 @@
       }
     }
     @media (forced-colors: active) {
-      body::before, .context-engine { display: none; }
-      .hero-stage { grid-template-columns: 1fr; grid-template-areas: "eyebrow" "title" "copy"; }
+      body::before { display: none; }
+      .context-engine, .example-result, .example-context > div { background: Canvas; border-color: CanvasText; }
+      .context-engine *, .example-choice select { color: CanvasText; }
       .grad-text { color: CanvasText; background: none; -webkit-text-fill-color: CanvasText; }
       .btn, .eyebrow, .product, .proof-card, .approach-row {
         color: CanvasText; background: Canvas; border-color: CanvasText;
@@ -1267,99 +832,64 @@
         <span class="eyebrow">Independent Product Studio</span>
         <h1><span class="hero-line">Software with</span> <span class="grad-text hero-line">a point of view.</span></h1>
         <div class="hero-copy">
-          <p class="lede">HyperSage builds distinctive consumer apps for relationships, health, recovery, food, stories, markets, and sleep — alongside original games. Where AI belongs, we add a <strong>product-specific intelligence layer</strong>. It combines information you provide and relevant in-product context with domain knowledge, tools, and safeguards.</p>
+          <p class="lede">We build consumer apps and original games. Our <strong>product-specific intelligence</strong> turns your context into a recipe for your kitchen, a brief for your doctor, or a reply that sounds like you.</p>
           <div class="hero-cta">
             <a href="#products" class="btn btn-primary"><span>Explore the products</span><span aria-hidden="true">→</span></a>
-            <a href="#ai" class="btn btn-ghost">Product intelligence</a>
             <a class="hero-try" href="https://waddleton.pages.dev/" target="_blank" rel="noopener" aria-label="Play Waddleton free in your browser"><span class="u">Or play Waddleton free</span> <span aria-hidden="true">↗</span></a>
           </div>
         </div>
 
-        <figure class="context-engine" aria-hidden="true">
-          <div class="engine-head"><span>How a response is formed</span><span>Product intelligence</span></div>
-
-          <svg class="pl-wires" viewBox="0 0 500 368" preserveAspectRatio="none" focusable="false">
-            <defs>
-              
-              <linearGradient id="plGradient" gradientUnits="userSpaceOnUse" x1="338" y1="0" x2="365" y2="0">
-                <stop offset="0" stop-color="#2DD4BF" stop-opacity=".48"/>
-                <stop offset="1" stop-color="#A78BFA" stop-opacity=".58"/>
-              </linearGradient>
-            </defs>
-            
-            <path class="pl-wire glow" d="M0 221 L8 221"/>
-            <path class="pl-wire glow" d="M138 221 L160 221"/>
-            <path class="pl-wire out glow" d="M340 221 L363 221"/>
-            <path class="pl-wire" d="M0 221 L8 221"/>
-            <path class="pl-wire" d="M138 221 L160 221"/>
-            <path class="pl-wire out" d="M340 221 L363 221"/>
-            
-            <path class="pl-wire glow" d="M85 114 C85 136 130 136 220 152"/>
-            <path class="pl-wire glow" d="M250 114 L250 152"/>
-            <path class="pl-wire glow" d="M415 114 C415 136 370 136 280 152"/>
-            <path class="pl-wire" d="M85 114 C85 136 130 136 220 152"/>
-            <path class="pl-wire" d="M250 114 L250 152"/>
-            <path class="pl-wire" d="M415 114 C415 136 370 136 280 152"/>
-            
-            <line class="pl-tl-base" x1="20" y1="322" x2="480" y2="322"/>
-            <path class="pl-tl-tick" d="M40 319 V325 M90 319 V325 M110 319 V325 M130 319 V325 M150 319 V325 M170 319 V325 M190 319 V325 M210 319 V325 M230 319 V325 M270 319 V325 M290 319 V325 M310 319 V325 M330 319 V325 M350 319 V325 M370 319 V325 M390 319 V325 M440 319 V325 M460 319 V325"/>
-            <path class="pl-tl-stage" d="M68 316 V328 M250 316 V328 M425 316 V328"/>
-            <circle class="pl-playhead" cx="0" cy="0" r="2.8" fill="#2DD4BF"/>
-            
-            <g class="pl-tok tok-1"><circle cx="0" cy="0" r="3.4"/></g>
-            <g class="pl-tok tok-2"><circle cx="0" cy="0" r="3.4"/></g>
-            <g class="pl-tok violet tok-3"><circle cx="0" cy="0" r="3.4"/></g>
-            <circle class="pl-pulse pulse-in" cx="0" cy="0" r="3.4" fill="#2DD4BF"/>
-            <circle class="pl-pulse pulse-out" cx="0" cy="0" r="3.6" fill="#A78BFA"/>
-          </svg>
-
-          <div class="pl-msg">
-            <span class="pl-msg-tag">You ask</span>
-            
-            <span class="pl-msg-bubble">
-              
-              <span class="pl-prompt"><span class="pl-q">What should I cook tonight?</span><span class="pl-of" style="--app: var(--c-saffra);"><img src="icons/saffra.webp" alt="" width="16" height="16">Saffra</span></span>
-              <span class="pl-prompt"><span class="pl-q">Start an adventure in Dracula&rsquo;s castle.</span><span class="pl-of" style="--app: var(--c-story);"><img src="icons/storyvault.webp" alt="" width="16" height="16">StoryVault&nbsp;AI</span></span>
-              <span class="pl-prompt"><span class="pl-q">Write me a bedtime story about the sea.</span><span class="pl-of" style="--app: var(--c-night);"><img src="icons/nightshelf.webp" alt="" width="16" height="16">Nightshelf</span></span>
-              <span class="pl-prompt"><span class="pl-q">What should I say back to her?</span><span class="pl-of" style="--app: var(--c-wingmate);"><img src="icons/wingmate.webp" alt="" width="16" height="16">Wingmate</span></span>
-              <span class="pl-prompt"><span class="pl-q">Athena, what makes a hero?</span><span class="pl-of" style="--app: var(--c-mythkin);"><img src="icons/mythkin.webp" alt="" width="16" height="16">Mythkin</span></span>
-              <span class="pl-prompt"><span class="pl-q">Which skill should I practice tonight?</span><span class="pl-of" style="--app: var(--c-quietoak);"><img src="icons/quietoak.webp" alt="" width="16" height="16">Quietoak</span></span>
-              <span class="pl-prompt"><span class="pl-q">What do I need to finish this set?</span><span class="pl-of" style="--app: var(--c-holohound);"><img src="icons/holohound.webp" alt="" width="16" height="16">Holohound</span></span>
-              <span class="pl-prompt"><span class="pl-q">What should I tell my doctor on Friday?</span><span class="pl-of" style="--app: var(--c-rowan-text);"><img src="icons/rowan.webp" alt="" width="16" height="16">Rowan</span></span>
-              <span class="pl-prompt"><span class="pl-q">How long have I been on track?</span><span class="pl-of" style="--app: var(--c-alder);"><img src="icons/alder.webp" alt="" width="16" height="16">Alder</span></span>
-              <span class="pl-prompt"><span class="pl-q">Why did my portfolio move today?</span><span class="pl-of" style="--app: var(--c-crypto);"><img src="icons/cryptosage.webp" alt="" width="16" height="16">CryptoSage&nbsp;AI</span></span>
-              <span class="pl-prompt"><span class="pl-q">Forge me a card: a cunning sea-witch.</span><span class="pl-of" style="--app: var(--c-myth);"><img src="icons/mythwright.webp" alt="" width="16" height="16">Mythwright</span></span>
-            </span>
+        <figure class="context-engine" aria-labelledby="engine-title">
+          <div class="engine-head">
+            <span class="engine-kicker" id="engine-title">From context to action</span>
+            <span class="engine-counter" aria-hidden="true">01 / 12</span>
           </div>
-
-          <div class="pl-conn c1"></div>
-          
-          <div class="pl-sources">
-            <div class="pl-src src-1"><i class="pl-dot"></i><span><strong>Your context</strong><small class="pl-roll"><span class="pl-ctx">diet · allergies</span><span class="pl-ctx">the chosen classic</span><span class="pl-ctx">narrator · timer</span><span class="pl-ctx">the connection</span><span class="pl-ctx">the kin you chose</span><span class="pl-ctx">goals · boundaries</span><span class="pl-ctx">your binder</span><span class="pl-ctx">conditions · meds</span><span class="pl-ctx">your reasons</span><span class="pl-ctx">your holdings</span><span class="pl-ctx">your collection</span></small></span></div>
-            <div class="pl-src src-2"><i class="pl-dot"></i><span><strong>Recent activity</strong><small class="pl-roll"><span class="pl-ctx">recent chats</span><span class="pl-ctx">your turns so far</span><span class="pl-ctx">your saved place</span><span class="pl-ctx">the whole thread</span><span class="pl-ctx">the conversation</span><span class="pl-ctx">diary · check-ins</span><span class="pl-ctx">recent scans</span><span class="pl-ctx">recent symptoms</span><span class="pl-ctx">recent check-ins</span><span class="pl-ctx">your watchlists</span><span class="pl-ctx">recent duels</span></small></span></div>
-            <div class="pl-src src-3"><i class="pl-dot"></i><span><strong>Current task*</strong><small class="pl-roll"><span class="pl-ctx">tonight&rsquo;s dinner</span><span class="pl-ctx">the current scene</span><span class="pl-ctx">tonight&rsquo;s story</span><span class="pl-ctx">the reply</span><span class="pl-ctx">who&rsquo;s in the room</span><span class="pl-ctx">tonight&rsquo;s practice</span><span class="pl-ctx">the set you&rsquo;re on</span><span class="pl-ctx">Friday&rsquo;s visit</span><span class="pl-ctx">the count</span><span class="pl-ctx">today&rsquo;s move</span><span class="pl-ctx">the forge</span></small></span></div>
-          </div>
-
-          <div class="pl-conn c2"></div>
-          <div class="pl-core">
-            <img src="logo.png" alt="" width="24" height="16">
-            <strong>Product intelligence</strong>
-            <div class="pl-fac">
-              <span class="fac-k">knowledge</span><span class="fac-t">tools</span>
-              <span class="fac-r">rules</span><span class="fac-s">safeguards</span>
+          <div class="example-app">
+            <img id="example-icon" src="icons/saffra.webp" alt="" width="36" height="36">
+            <div class="example-choice">
+              <label class="sr-only" for="example-product">Choose a product walkthrough</label>
+              <select id="example-product" disabled>
+                  <option value="saffra">Saffra</option>
+                  <option value="rowan">Rowan</option>
+                  <option value="loam">Loam</option>
+                  <option value="wingmate">Wingmate</option>
+                  <option value="quietoak">Quietoak</option>
+                  <option value="cryptosage">CryptoSage AI</option>
+                  <option value="storyvault">StoryVault AI</option>
+                  <option value="nightshelf">Nightshelf</option>
+                  <option value="alder">Alder</option>
+                  <option value="holohound">Holohound</option>
+                  <option value="mythkin">Mythkin</option>
+                  <option value="mythwright">Mythwright</option>
+              </select>
+              <span class="example-availability">Live on iOS</span>
+            </div>
+            <div class="example-controls" hidden>
+              <button type="button" class="example-button" id="example-prev" aria-label="Previous product walkthrough">←</button>
+              <button type="button" class="example-button" id="example-play" aria-label="Pause automatic walkthroughs">Pause</button>
+              <button type="button" class="example-button" id="example-next" aria-label="Next product walkthrough">→</button>
             </div>
           </div>
-
-          <div class="pl-conn c3"></div>
-          <div class="pl-result">
-            <span>Result</span>
-            
-            <strong class="grad-text">The best possible answer</strong>
-            <div class="pl-stamps"><span class="pl-stamp">✓&nbsp;grounded</span><span class="pl-stamp">✓&nbsp;checked</span></div>
+          <div class="example-scene" id="example-scene">
+            <span class="example-label">You ask</span>
+            <p class="example-prompt">“What can I make with chickpeas and spinach?”</p>
+            <dl class="example-context">
+              <div><dt>Your context</dt><dd>dairy-free · pantry</dd></div>
+              <div><dt>Relevant inputs</dt><dd>cook history</dd></div>
+              <div><dt>Current task</dt><dd>tonight’s dinner</dd></div>
+            </dl>
+            <div class="example-processor"><img src="logo.png" alt="" width="24" height="16"><strong>Product intelligence</strong></div>
+            <div class="example-result">
+              <div class="example-status"><span class="example-check" aria-hidden="true">✓</span><span id="example-result-status">Recipe adapted</span></div>
+              <p class="example-artifact">Chickpea &amp; spinach skillet</p>
+              <p class="example-detail">Measured ingredients, a dairy-free variation, and steps you can cook along with.</p>
+              <ul class="example-proofs"><li>Pantry considered</li><li>Diet preferences applied</li></ul>
+            </div>
           </div>
-
-          <div class="pl-rail"></div>
-          <figcaption class="engine-foot">* In products that support live task context.</figcaption>
+          <figcaption>
+            <div class="engine-foot"><small>Illustrative example</small><a class="example-link" href="/saffra/">Explore Saffra <span aria-hidden="true">&nbsp;↗</span></a></div>
+          </figcaption>
+          <span class="sr-only" id="example-announcement" aria-live="polite" aria-atomic="true"></span>
         </figure>
       </div>
     </div>
@@ -1407,7 +937,7 @@
             </div>
             <span class="status">iOS · In development</span>
           </div>
-          <p class="desc">Five card games — Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam. Scan a card, get a real price, and keep the whole binder in one place. Scanning is uncapped: recognition runs on the phone against a bundled index of 131,507 cards.</p>
+          <p class="desc">A binder for Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam. On-device scanning, catalogue lookup, and source-attributed prices bring your collection together. Recognition runs against a bundled index of 131,507 cards; scan and price coverage vary by game.</p>
           <ul role="list">
             <li>Prices that name their source, and say what they don't know</li>
             <li>Master-set completion, pre-grade triage, and flip P&amp;L</li>
@@ -1743,8 +1273,8 @@
       <div class="section-head">
         <span class="eyebrow">Product intelligence</span>
         
-        <h2>Anyone can call the same models. The layer around them is ours.</h2>
-        <p>Where a product uses AI, the models come from Anthropic and OpenAI: Claude in most of the products that write to you, OpenAI in others and for any image a product generates as you use it. What we build, for each product, is the layer around them — what to ask, what the product already knows about your situation, and what it checks before you see an answer.</p>
+        <h2>The intelligence is in how it all works together.</h2>
+        <p>We build the context, tools, and checks around each product’s AI. That work turns a conversation into a useful recipe, visit brief, story, or next step. The models come from Anthropic and OpenAI: Claude in most writing experiences, OpenAI in others and for generated images.</p>
       </div>
 
       <h3 class="sr-only">How a response is formed</h3>
@@ -1752,7 +1282,7 @@
         <li>Your context — goals, preferences, conditions, and boundaries you provide within the product.</li>
         <li>Recent activity — relevant diary entries, symptoms, check-ins, conversations, and in-product activity.</li>
         <li>Product intelligence — the current task, domain knowledge, live data, tools, rules, and safeguards.</li>
-        <li>The best possible answer — an answer, brief, recipe, story beat, or next action, grounded in your context and checked before you see it.</li>
+        <li>A useful result — an answer, visit brief, recipe, story beat, or next action shaped to the task. Available actions and checks vary by product and feature.</li>
       </ol>
 
       <div class="proof-rail">
@@ -1845,8 +1375,8 @@
         <div class="approach-row">
           <div class="k">Kept running</div>
           <div>
-            <h3>The servers are ours too</h3>
-            <p>We build and run our own backends &mdash; deploying them, keeping them up, and paying for them is part of shipping a product.</p>
+            <h3>Built and operated in-house</h3>
+            <p>We build the apps and the services behind them, and maintain both as the products grow.</p>
           </div>
         </div>
         <div class="approach-row">
@@ -1916,24 +1446,329 @@
   </footer>
 
   <script>
-    /* The pipeline loops only where motion is welcome. The markup's resting state
-       is the finished diagram, so no-JS, reduced-motion and save-data users always
-       see the complete picture; the global reduced-motion override is a second
-       gate on top of this one. */
+    /* Complete examples share one data record. Auto-advance pauses on focus,
+       pointer hover, explicit interaction, offscreen, or a hidden document. */
     (function () {
       var engine = document.querySelector('.context-engine');
       if (!engine) return;
-      var motionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+      var cases = [
+  {
+    "id": "saffra",
+    "name": "Saffra",
+    "color": "#F2BB61",
+    "availability": "Live on iOS",
+    "prompt": "What can I make with chickpeas and spinach?",
+    "context": [
+      "dairy-free · pantry",
+      "cook history",
+      "tonight’s dinner"
+    ],
+    "result": "Recipe adapted",
+    "artifact": "Chickpea & spinach skillet",
+    "detail": "Measured ingredients, a dairy-free variation, and steps you can cook along with.",
+    "proof": [
+      "Pantry considered",
+      "Diet preferences applied"
+    ],
+    "url": "/saffra/",
+    "icon": "icons/saffra.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "rowan",
+    "name": "Rowan",
+    "color": "#B4A3F4",
+    "availability": "Live on iOS",
+    "prompt": "What should I tell my doctor on Friday?",
+    "context": [
+      "conditions · meds",
+      "recent symptoms",
+      "Friday’s visit"
+    ],
+    "result": "Visit brief ready",
+    "artifact": "Your recent health, organized",
+    "detail": "Symptoms, medication notes, and questions brought together in a brief for your care team.",
+    "proof": [
+      "Diary context included",
+      "Ready to share"
+    ],
+    "url": "/rowan/",
+    "icon": "icons/rowan.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "loam",
+    "name": "Loam",
+    "color": "#B7C69D",
+    "availability": "Coming soon",
+    "prompt": "I promised Tom a draft by Friday.",
+    "context": [
+      "your note · dials",
+      "this note’s Ledger",
+      "your follow-up"
+    ],
+    "result": "Follow-up suggested",
+    "artifact": "A promise, brought into view",
+    "detail": "A margin mark flags your commitment and points back to your words. Review it before applying.",
+    "proof": [
+      "Review before applying",
+      "Undo available"
+    ],
+    "url": "/loam/",
+    "icon": "icons/loam.webp",
+    "inputLabel": "Note → Look deeper"
+  },
+  {
+    "id": "wingmate",
+    "name": "Wingmate",
+    "color": "#E8B65F",
+    "availability": "Live on iOS",
+    "prompt": "What should I say back to her?",
+    "context": [
+      "the connection",
+      "the whole thread",
+      "your next reply"
+    ],
+    "result": "Reply ready to copy",
+    "artifact": "A reply that fits the conversation",
+    "detail": "Suggestions shaped by the shared thread and what your coaches remember about this connection.",
+    "proof": [
+      "Connection context used",
+      "You choose what to send"
+    ],
+    "url": "/wingmate/",
+    "icon": "icons/wingmate.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "quietoak",
+    "name": "Quietoak",
+    "color": "#A7D2B5",
+    "availability": "Coming soon",
+    "prompt": "Which skill should I practice tonight?",
+    "context": [
+      "goals · boundaries",
+      "diary · check-ins",
+      "tonight’s practice"
+    ],
+    "result": "Guided practice ready",
+    "artifact": "A skill for the week you’ve had",
+    "detail": "A DBT skill to practice, with guidance informed by your diary cards and recent conversations.",
+    "proof": [
+      "Diary context included",
+      "Self-help support"
+    ],
+    "url": "/quietoak/",
+    "icon": "icons/quietoak.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "cryptosage",
+    "name": "CryptoSage AI",
+    "color": "#E2C565",
+    "availability": "Live on iOS",
+    "prompt": "Why did my portfolio move today?",
+    "context": [
+      "shared holdings",
+      "your watchlists",
+      "today’s move"
+    ],
+    "result": "Portfolio move explained",
+    "artifact": "The drivers behind the change",
+    "detail": "An explanation connected to your holdings and cost basis, with relevant market context.",
+    "proof": [
+      "With portfolio sharing",
+      "Not investment advice"
+    ],
+    "url": "https://cryptosageai.io/",
+    "icon": "icons/cryptosage.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "storyvault",
+    "name": "StoryVault AI",
+    "color": "#BCA6FF",
+    "availability": "Live on iOS",
+    "prompt": "Start an adventure in Dracula’s castle.",
+    "context": [
+      "the chosen classic",
+      "scenario setting",
+      "the opening scene"
+    ],
+    "result": "Adventure created",
+    "artifact": "The castle doors open. Your move.",
+    "detail": "An opening scene with choices to follow—or room to type a move of your own.",
+    "proof": [
+      "Built around the classic",
+      "Your choices shape the story"
+    ],
+    "url": "/storyvault/",
+    "icon": "icons/storyvault.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "nightshelf",
+    "name": "Nightshelf",
+    "color": "#A5B6FF",
+    "availability": "Live on iOS · Pro",
+    "prompt": "Write me a bedtime story about the sea.",
+    "context": [
+      "place · mood",
+      "chosen length",
+      "tonight’s story"
+    ],
+    "result": "Bedtime story ready",
+    "artifact": "A quiet story by the sea",
+    "detail": "An original bedtime story shaped to your setting, mood, and chosen length, with a matching cover.",
+    "proof": [
+      "Custom story",
+      "Cover generated"
+    ],
+    "url": "/nightshelf/",
+    "icon": "icons/nightshelf.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "alder",
+    "name": "Alder",
+    "color": "#E0AF72",
+    "availability": "Coming soon",
+    "prompt": "How long have I been on track?",
+    "context": [
+      "your reasons",
+      "recent check-ins",
+      "your progress"
+    ],
+    "result": "Progress reviewed",
+    "artifact": "Every goal has its own story",
+    "detail": "Progress across your recovery goals, with your reasons and recent check-ins kept in view.",
+    "proof": [
+      "Separate goal clocks",
+      "Recovery support"
+    ],
+    "url": "/alder/",
+    "icon": "icons/alder.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "holohound",
+    "name": "Holohound",
+    "color": "#7BE6F7",
+    "availability": "In development",
+    "prompt": "What am I missing from Scarlet & Violet—151?",
+    "context": [
+      "your binder",
+      "set catalogue",
+      "set completion"
+    ],
+    "result": "Set gaps identified",
+    "artifact": "See what your binder is missing",
+    "detail": "Missing cards and available price data help you plan the next addition to your collection.",
+    "proof": [
+      "Collection context used",
+      "Price sources shown"
+    ],
+    "url": "/holohound/",
+    "icon": "icons/holohound.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "mythkin",
+    "name": "Mythkin",
+    "color": "#F2AF7D",
+    "availability": "Coming soon",
+    "prompt": "Athena, what makes a hero?",
+    "context": [
+      "the kin you chose",
+      "the conversation",
+      "your question"
+    ],
+    "result": "Conversation continued",
+    "artifact": "Athena’s perspective, in character",
+    "detail": "A response shaped by her written character history and the conversation you’ve had together.",
+    "proof": [
+      "Character context used",
+      "Fictional conversation"
+    ],
+    "url": "/mythkin/",
+    "icon": "icons/mythkin.webp",
+    "inputLabel": "You ask"
+  },
+  {
+    "id": "mythwright",
+    "name": "Mythwright",
+    "color": "#F8A197",
+    "availability": "Coming soon · Pro",
+    "prompt": "Forge me a card: a cunning sea-witch.",
+    "context": [
+      "your description",
+      "faction · card cost",
+      "the Card Forge"
+    ],
+    "result": "Card added to collection",
+    "artifact": "A sea-witch, made playable",
+    "detail": "Original card art, stats, and an ability turn a description into a card for your collection.",
+    "proof": [
+      "Prompt moderated",
+      "Art + ability generated"
+    ],
+    "url": "/mythwright/",
+    "icon": "icons/mythwright.webp",
+    "inputLabel": "You ask"
+  }
+];
+      var select = engine.querySelector('select');
+      var play = engine.querySelector('#example-play');
+      var scene = engine.querySelector('.example-scene');
+      var motion = window.matchMedia('(prefers-reduced-motion: reduce)');
       var saveData = !!(navigator.connection && navigator.connection.saveData);
-      function apply() {
-        var ok = !(motionQuery && motionQuery.matches) && !saveData;
-        engine.classList.toggle('pl-live', ok);
+      var paused = motion.matches || saveData;
+      var index = 0, timer = null, visible = true, hovered = false, focused = false, explicitPlay = false;
+      function render(manual) {
+        var item = cases[index];
+        select.value = item.id;
+        engine.querySelector('.example-label').textContent = item.inputLabel;
+        engine.style.setProperty('--example-accent', item.color);
+        engine.querySelector('#example-icon').src = item.icon;
+        engine.querySelector('.example-availability').textContent = item.availability;
+        engine.querySelector('.engine-counter').textContent = String(index + 1).padStart(2, '0') + ' / ' + cases.length;
+        engine.querySelector('.example-prompt').textContent = '“' + item.prompt + '”';
+        engine.querySelectorAll('.example-context dd').forEach(function (el, i) { el.textContent = item.context[i]; });
+        engine.querySelector('#example-result-status').textContent = item.result;
+        engine.querySelector('.example-artifact').textContent = item.artifact;
+        engine.querySelector('.example-detail').textContent = item.detail;
+        engine.querySelectorAll('.example-proofs li').forEach(function (el, i) { el.textContent = item.proof[i]; });
+        var link = engine.querySelector('.example-link');
+        link.href = item.url;
+        link.firstChild.textContent = 'Explore ' + item.name + ' ';
+        if (manual) engine.querySelector('#example-announcement').textContent = item.name + '. ' + item.availability + '. ' + item.result + '. ' + item.detail;
+        scene.classList.remove('is-changing');
+        if (!motion.matches) requestAnimationFrame(function () { scene.classList.add('is-changing'); });
       }
-      apply();
-      if (motionQuery) {
-        if (motionQuery.addEventListener) motionQuery.addEventListener('change', apply);
-        else if (motionQuery.addListener) motionQuery.addListener(apply);
+      function schedule() {
+        clearTimeout(timer);
+        play.textContent = paused ? 'Play' : 'Pause';
+        play.setAttribute('aria-label', paused ? 'Play automatic walkthroughs' : 'Pause automatic walkthroughs');
+        if (paused || !visible || document.hidden || (!explicitPlay && (hovered || focused))) return;
+        timer = setTimeout(function () { index = (index + 1) % cases.length; render(false); schedule(); }, 10000);
       }
+      function choose(next) { paused = true; explicitPlay = false; index = (next + cases.length) % cases.length; render(true); schedule(); }
+      select.addEventListener('change', function () { choose(cases.findIndex(function (item) { return item.id === select.value; })); });
+      engine.querySelector('#example-prev').addEventListener('click', function () { choose(index - 1); });
+      engine.querySelector('#example-next').addEventListener('click', function () { choose(index + 1); });
+      play.addEventListener('click', function () { paused = !paused; explicitPlay = !paused; schedule(); });
+      engine.addEventListener('mouseenter', function () { hovered = true; explicitPlay = false; schedule(); });
+      engine.addEventListener('mouseleave', function () { hovered = false; schedule(); });
+      engine.addEventListener('focusin', function () { focused = true; explicitPlay = false; schedule(); });
+      engine.addEventListener('focusout', function (event) { focused = engine.contains(event.relatedTarget); schedule(); });
+      document.addEventListener('visibilitychange', schedule);
+      function motionChanged() { if (motion.matches) { paused = true; explicitPlay = false; } schedule(); }
+      if (motion.addEventListener) motion.addEventListener('change', motionChanged);
+      else if (motion.addListener) motion.addListener(motionChanged);
+      if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; schedule(); }).observe(engine);
+      engine.querySelector('.example-controls').hidden = false;
+      select.disabled = false;
+      schedule();
     })();
 
     /* Reveal elements as they scroll into view (one-shot per element). */

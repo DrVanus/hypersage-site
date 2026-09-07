@@ -174,23 +174,9 @@ def build_html() -> str:
                   border:1px solid rgba(255,255,255,.14);
                   background:rgba(255,255,255,.05);
                   box-shadow:0 3px 10px rgba(0,0,0,.45); }}
-  /* The figure is the site's, so pin only its BOX — never its internals.
-     Scaled UP, and that is the whole point: a link preview is rendered ~460px
-     wide in a message bubble, and at that size the pipeline's three input cards
-     turned to mush. The old orbital art survived shrinking because it was one
-     bold ring saying nothing; this one carries real labels, so it has to be
-     big enough to still read them. Checked by downscaling to preview width, not
-     by looking at the 1200px render.
-     1.17, retuned 2026-08-25 with the left column at 500: at 1.24 the 500px
-     figure rendered 620 wide inside a 544px column, overhanging its box by 38px
-     a side, so the card carried a 56px left margin against an 18px right one —
-     an asymmetry that reads as "not quite right" without announcing why. The
-     column is 568 wide now and 1.17 makes the figure 585, so it overhangs 8.5px
-     and the right margin lands at ~47 against the left's 56. That costs 5.6% of
-     the diagram's size, which at a 460px preview is 0.5px of glyph height on
-     strings that are marginal at either scale — the balance is worth more than
-     the half pixel. Re-derive both numbers together if either moves. */
-  .og-right .context-engine {{ transform:scale(1.17); transform-origin:center; margin:0; }}
+  /* The complete product walkthrough is taller than the retired diagram.
+     Fit its unchanged contents inside the 630px social card. */
+  .og-right .context-engine {{ transform:scale(.95); transform-origin:center; margin:0; }}
 </style></head><body>
 <div class="og">
   <div class="og-left">
