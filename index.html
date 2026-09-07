@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907d">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907e">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907d">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907e">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260907d",
+        "image": "https://hypersage.ai/og-image.png?v=20260907e",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -450,6 +450,15 @@
       .section-head { margin-bottom: 36px; }
     }
 
+    .section-head .portfolio-facts {
+      display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+      gap: 8px 24px; margin: 22px auto 0; color: var(--muted); font-size: .85rem;
+    }
+    .portfolio-facts { list-style: none; padding: 0; }
+    .portfolio-facts li { white-space: nowrap; }
+    .portfolio-facts strong { color: var(--fg); font: 600 1rem/1.4 'Space Grotesk', sans-serif; }
+    @media (max-width: 860px) { .section-head .portfolio-facts { justify-content: flex-start; margin-left: 0; gap: 8px 18px; } }
+
     /* ===== STUDIO — operating principles ===== */
     .approach-ledger { border-top: 1px solid var(--line-strong); }
     .approach-row {
@@ -488,37 +497,21 @@
     }
     .grid-label::after { content: ''; flex: 1 1 auto; height: 1px; background: var(--line); }
     .products-grid + .grid-label { margin-top: 48px; }
-    .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .products-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     /* minmax(0,1fr), not 1fr: a 1fr track's automatic minimum is min-content, and
        four of the cards min-content at 289-299px. At a 320px viewport (272px of
        container) that stretched the track past the container and pushed 3px of
        document overflow — invisible only because body{overflow-x:hidden} ate it.
        Binds at 320 alone; the track is unchanged at 360 and above. */
     @media (max-width: 700px) { .products-grid { grid-template-columns: minmax(0, 1fr); } }
-    /* The portfolio card FINISHES the last row instead of starting a new one.
-       The count that matters is PER GRID (there are two now: apps, then games —
-       the contact card sits in the games grid). With an odd number of articles in
-       its grid the last one sits alone with a hole beside it — so the contact
-       card drops into that hole at normal card size and closes the section.
-       It has to flip back when the count is even, or the card would be the one
-       left alone. `article:last-of-type:nth-of-type(even) ~ aside` says exactly
-       that: only when the last PRODUCT is even-numbered does the card span the
-       full row. Counting articles (not children) matters because the card is
-       itself a child of this grid. Nothing to maintain when the next game lands. */
+    /* One continuous grid for apps and games. The contact card fills the last
+       empty cell after an odd product count, or spans the row after an even one. */
     @media (min-width: 701px) {
       .products-grid > aside { grid-column: auto; }
       .products-grid > article:last-of-type:nth-of-type(even) ~ aside { grid-column: 1 / -1; }
 
-      /* THE GRID LAW (Vanus, 2026-09-01): ONE continuous grid, apps then
-         games, every product card the same size always. The portfolio CTA
-         aside closes the grid and is the only element allowed to stretch —
-         full row while the product count is even (the rule above), a normal
-         cell when an odd count leaves it a hole to fill. Adding an app:
-         add the article anywhere in the flow and touch nothing else. */
     }
-    /* The two invitation cards (portfolio contact, layer teaser): product-card
-       chrome, centered, a gentle brand halo at rest. Their copy is verbatim
-       reuse of audited on-page strings — restyle freely, reword never. */
+    /* Close the portfolio with an invitation using the same card treatment. */
     .aside-card { justify-content: center; align-items: center; text-align: center; }
     .aside-card .inner {
       display: flex; flex-direction: column; align-items: center; gap: 13px;
@@ -612,23 +605,19 @@
     .product .btn-store:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -12px var(--accent-text); }
     .product .btn-store:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; }
     @media (prefers-reduced-motion: reduce) { .product .btn-store { transition: none; } .product .btn-store:hover { transform: none; } }
+    @media (max-width: 560px) {
+      .product { padding: 20px; }
+      .product .top { column-gap: 12px; }
+      .product .btn-store { padding: 0 12px; }
+    }
     .product .link { display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent-text); transition: gap .2s; }
     .product .link:hover { gap: 11px; }
     /* ===== INTELLIGENCE LAYER ===== */
     .systems { background: linear-gradient(180deg, var(--bg-2), var(--bg)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
                overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-    /* The layer AT WORK — three concrete cases instead of the four abstract cards
-       that used to sit here. Those cards repeated the hero diagram's stages word
-       for word (Vanus called the repeat out 2026-08-25); the accessible version of
-       the four stages is the sr-only <ol> in the markup. Each case card borrows
-       the product's own accent, so the tie back to the portfolio is carried the
-       same way the cards above carry it. */
-    /* A rail, not a grid: five cases do not fit three columns, and a carousel that
-       HIDES slides was rejected. Everything sits in one native overflow-x scroller, so
-       touch swipe and trackpad work with no JS at all; the buttons are an extra
-       affordance, not the only way through. Cards are sized so the next one always
-       peeks — that is what tells a reader there is more, without needing the arrow. */
+    /* Product examples stay in a native horizontal scroller. A partial next
+       card signals more content; buttons and the range counter add navigation. */
     .layer-proof {
       display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 32px - 72px) / 3);
       gap: 16px; margin: 0 0 16px; padding: 2px 2px 6px; list-style: none;
@@ -640,7 +629,8 @@
     /* The rail is keyboard-scrollable, so it has to show where focus is. */
     .layer-proof:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 3px; border-radius: 14px; }
     .rail-controls { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
-    .rail-nav { display: flex; gap: 8px; }
+    .rail-nav { display: flex; align-items: center; gap: 8px; }
+    .rail-count { min-width: 140px; color: var(--muted); text-align: center; font: .72rem/1.4 'JetBrains Mono', monospace; }
     /* [hidden] loses to display:flex — say it, or the buttons never hide. */
     .rail-nav[hidden] { display: none; }
     .rail-btn {
@@ -668,9 +658,9 @@
       background: linear-gradient(180deg, var(--accent), transparent 85%);
       opacity: 0.9;
     }
-    .proof-head { display: flex; align-items: center; gap: 9px; }
+    .proof-head { display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: center; gap: 2px 9px; max-width: 100%; min-height: 38px; }
     .proof-head img {
-      width: 26px; height: 26px; border-radius: 7px; flex: 0 0 auto; object-fit: cover;
+      grid-row: 1 / 3; width: 26px; height: 26px; border-radius: 7px; flex: 0 0 auto; object-fit: cover;
       background: rgba(255,255,255,.05);
       border: 1px solid var(--line-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
@@ -680,28 +670,24 @@
       font-size: 0.69rem; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--accent-text);
     }
+    .proof-card h3 { color: var(--fg); font: 600 1.15rem/1.3 'Space Grotesk', sans-serif; text-wrap: balance; }
     .proof-card p { color: var(--muted); font-size: 0.92rem; line-height: 1.6; text-wrap: pretty; }
-    /* Four of these products have not shipped. The card still describes what the
-       layer does there, exactly as the product grid already does, but it says so
-       on the card — an unmarked case reads as something you can go and use. */
-    .proof-head .soon {
-      margin-left: 6px; padding: 1px 5px; border-radius: 999px;
-      border: 1px solid var(--line-strong); color: var(--faint);
-      font-family: 'JetBrains Mono', monospace; font-size: 0.74rem;
-      letter-spacing: .04em; text-transform: none; white-space: nowrap;
+    /* State the availability of each demonstrated feature, including Pro. */
+    .proof-head .availability {
+      grid-column: 2; color: var(--muted); font-family: 'Inter', sans-serif;
+      font-size: .69rem; font-weight: 400; line-height: 1.35;
+      letter-spacing: 0; text-transform: none;
     }
     .proof-card .link { margin-top: auto; display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--accent-text); transition: gap .2s; }
     .proof-card .link:hover { gap: 11px; }
-    @media (max-width: 860px) { .layer-proof { grid-auto-columns: 84%; gap: 12px; } }
-    /* Uncapped this ran the full container: 164 characters per line at 1440 and
-       150 at 1024 — the worst measure on the page. It is a footnote, so it sits
-       left under the flow and stops at a readable width. */
-    /* The three cards are examples, not a catalogue. Without a way back to the
-       grid a reader cannot tell whether three is three-of-three or three-of-many.
-       A carousel was considered and rejected: anything behind an arrow is seen by
-       almost nobody, so more cases would end up LESS visible than three shown at
-       once, and this page ships no carousel to borrow. Each card already links up
-       into the grid; this is the same move for the set. */
+    @media (min-width: 701px) and (max-width: 1099px) {
+      .layer-proof { grid-auto-columns: calc((100% - 16px - 48px) / 2); }
+    }
+    @media (max-width: 700px) {
+      .layer-proof { grid-auto-columns: 90%; gap: 12px; }
+      .proof-card { padding: 20px; }
+    }
+    /* A direct route back to the complete portfolio follows the examples. */
     .proof-more { display: flex; justify-content: center; margin: 0; }
     .proof-more a { display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--muted); transition: gap .2s, color .2s; }
     .proof-more a:hover { gap: 11px; color: var(--fg); }
@@ -709,6 +695,9 @@
        62ch cap and no auto margins, so it hugged the left edge under three
        centred cards and read as an unfinished column. Centre the block. */
     .model-note { color: var(--faint); font-size: 0.82rem; margin: 18px auto 0; max-width: 62ch; text-align: center; }
+
+    .model-note p + p { margin-top: 10px; }
+    .model-note-label { display: block; margin-bottom: 6px; color: var(--fg); font: 500 .69rem/1.4 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
 
     /* ===== CTA ===== */
     .cta {
@@ -790,6 +779,8 @@
       transition: opacity .6s cubic-bezier(.16,.8,.3,1), transform .6s cubic-bezier(.16,.8,.3,1);
     }
     .js-reveal .is-in { opacity: 1 !important; transform: none !important; }
+    /* Resolve linked cards before anchor positioning, without the reveal offset. */
+    .js-reveal .product:target { opacity: 1 !important; transform: none !important; transition: none; }
     .js-reveal .products-grid > *:nth-child(2n) { transition-delay: .07s; }
     .js-reveal .approach-ledger > *:nth-child(2) { transition-delay: .06s; }
     .js-reveal .approach-ledger > *:nth-child(3) { transition-delay: .12s; }
@@ -983,6 +974,7 @@
         <h2>Focused products for different parts of life.</h2>
         
         <p>Each product is designed around a clear audience and job, with its own identity and way of working.</p>
+        <ul class="portfolio-facts" aria-label="Portfolio at a glance"><li><strong data-portfolio-total>16</strong> products</li><li><strong data-portfolio-live>10</strong> live now</li><li><strong>iOS + web</strong></li></ul>
       </div>
 
       <div class="products-grid">
@@ -1002,7 +994,7 @@
             <li>Master-set completion, pre-grade triage, and flip P&amp;L</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Holohound site" href="holohound/">Visit Holohound <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Visit Holohound" href="holohound/">Visit Holohound <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1015,14 +1007,14 @@
             </div>
             <span class="status live">iOS · Live</span>
           </div>
-          <p class="desc">Screenshot a conversation and get replies you can actually send. Four coaches read the whole thread, not just the last message, and all four share one memory of the person you&rsquo;re talking about.</p>
+          <p class="desc">Screenshot a conversation and get replies you can actually send. Four coaches work from the conversation you share, and all four share one memory of the person you&rsquo;re talking about.</p>
           <ul role="list">
             <li>Connection-specific context and screenshot analysis</li>
             <li>Guidance for Tinder, Hinge, Bumble, Instagram, and texting</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download Wingmate on the App Store" href="https://apps.apple.com/app/id6792772729" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the Wingmate site" href="wingmate/">Visit Wingmate <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Download on the App Store: Wingmate" href="https://apps.apple.com/app/id6792772729" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit Wingmate" href="wingmate/">Visit Wingmate <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1036,13 +1028,13 @@
             </div>
             <span class="status">iOS · Coming soon</span>
           </div>
-          <p class="desc">Notes, tended. Write anything — Loam fixes slips in place, shapes rambly jots into clean lines, files and flags what matters. Every change is previewed, attributed, undoable and redoable; your words are never rephrased.</p>
+          <p class="desc">Notes, tended. Loam fixes slips, shapes rambly jots, and files and flags what matters. Choose Ask first or Auto for each power. Companion changes are recorded with undo and redo; Tidy preserves your wording.</p>
           <ul role="list">
             <li>Six powers, each dialed Off, Ask first, or Auto</li>
             <li>A Ledger of every action — surgical undo and redo, never paywalled</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Loam site" href="loam/">Visit Loam <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Visit Loam" href="loam/">Visit Loam <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1061,7 +1053,7 @@
             <li>One-minute diary cards, progress tracking, and an offline crisis kit</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Quietoak site" href="quietoak/">Visit Quietoak <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Visit Quietoak" href="quietoak/">Visit Quietoak <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1081,8 +1073,8 @@
             <li>Live prices, watchlists, sentiment, and market maps</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download CryptoSage AI on the App Store" href="https://apps.apple.com/app/id6792761331" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the CryptoSage AI site" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit CryptoSage AI <span aria-hidden="true">↗</span></a>
+            <a class="btn-store" aria-label="Download on the App Store: CryptoSage AI" href="https://apps.apple.com/app/id6792761331" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit CryptoSage AI" href="https://cryptosageai.io/" target="_blank" rel="noopener">Visit CryptoSage AI <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -1096,14 +1088,14 @@
             <span class="status live">iOS · Live</span>
           </div>
           
-          <p class="desc">Tell it what&rsquo;s in your kitchen and it rewrites a complete recipe around it &mdash; every amount measured, prep noted, equipment listed. Recipes declare their allergens; when something you can&rsquo;t eat is in the way, Saffra names a substitution or passes on the recipe.</p>
+          <p class="desc">Tell it what&rsquo;s in your kitchen and it adapts a complete recipe around it &mdash; with measured ingredients, prep notes, and equipment listed. Recipes flag allergens, and declared dietary restrictions guide substitutions and recipe selection.</p>
           <ul role="list">
             <li>Recipes adapted to your kitchen and constraints</li>
             <li>Diet- and allergen-aware substitutions with hands-free cooking mode</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download Saffra on the App Store" href="https://apps.apple.com/app/id6792760857" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the Saffra site" href="saffra/">Visit Saffra <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Download on the App Store: Saffra" href="https://apps.apple.com/app/id6792760857" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit Saffra" href="saffra/">Visit Saffra <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1124,8 +1116,8 @@
             <li>A hand-curated AI scenario behind every classic in the library</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download StoryVault AI on the App Store" href="https://apps.apple.com/app/id6792759454" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the StoryVault AI site" href="storyvault/">Visit StoryVault&nbsp;AI <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Download on the App Store: StoryVault AI" href="https://apps.apple.com/app/id6792759454" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit StoryVault AI" href="storyvault/">Visit StoryVault&nbsp;AI <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1144,8 +1136,8 @@
             <li>Layered ambient sound under the narration, and your place saved to the paragraph</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download Nightshelf on the App Store" href="https://apps.apple.com/app/id6792761643" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the Nightshelf site" href="nightshelf/">Visit Nightshelf <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Download on the App Store: Nightshelf" href="https://apps.apple.com/app/id6792761643" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit Nightshelf" href="nightshelf/">Visit Nightshelf <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1158,14 +1150,14 @@
             </div>
             <span class="status live">iOS · Live</span>
           </div>
-          <p class="desc">Say how the day went in your own words. Rowan turns it into symptom logs, a medication list and a visit brief you can hand your doctor. It does not diagnose or treat &mdash; that stays with your care team.</p>
+          <p class="desc">Say how the day went in your own words. Rowan turns your words into symptom logs and brings those entries together with the medications you entered in a visit brief for your doctor. It does not diagnose or treat &mdash; that stays with your care team.</p>
           <ul role="list">
             <li>Conversations converted into symptom logs and visit briefs</li>
             <li>No account, ads, or third-party health-data tracking</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download Rowan on the App Store" href="https://apps.apple.com/app/id6797693737" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the Rowan site" href="rowan/">Visit Rowan <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Download on the App Store: Rowan" href="https://apps.apple.com/app/id6797693737" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit Rowan" href="rowan/">Visit Rowan <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1184,7 +1176,7 @@
             <li>The SOS screen and crisis lines are never metered or paywalled</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Alder site" href="alder/">Visit Alder <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Visit Alder" href="alder/">Visit Alder <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1203,7 +1195,7 @@
             <li>44 stories to step into, each cast with kin from the roster</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Mythkin site" href="mythkin/">Visit Mythkin <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Visit Mythkin" href="mythkin/">Visit Mythkin <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1225,8 +1217,8 @@
             
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Download Hexhunter on the App Store" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the Hexhunter site" href="hexhunter/">Visit Hexhunter <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Download on the App Store: Hexhunter" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener">Download on the App Store <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit Hexhunter" href="hexhunter/">Visit Hexhunter <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1245,7 +1237,7 @@
             <li>A seasonal ladder that climbs from Recruit to Infinite</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Visit the Mythwright site" href="mythwright/">Visit Mythwright <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Visit Mythwright" href="mythwright/">Visit Mythwright <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1265,8 +1257,8 @@
             <li>Free on the web, with no advertising or web purchases</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Play Waddleton, free in your browser" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the Waddleton site" href="waddleton/">Visit Waddleton <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Play free: Waddleton" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit Waddleton" href="waddleton/">Visit Waddleton <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1286,7 +1278,7 @@
             <li>Duels in one shared cavern, the same waves down both roads</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Play Hoardling free in your browser" href="hoardling/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
+            <a class="btn-store" aria-label="Play free: Hoardling" href="hoardling/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -1307,8 +1299,8 @@
             
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Play Gemburrow free in your browser" href="gemburrow/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Visit the Gemburrow site" href="gemburrow/">Visit Gemburrow <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Play free: Gemburrow" href="gemburrow/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Visit Gemburrow" href="gemburrow/">Visit Gemburrow <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1333,7 +1325,7 @@
         <span class="eyebrow">Product intelligence</span>
         
         <h2>The intelligence is in how it all works together.</h2>
-        <p>We build the context, tools, and checks around each product’s AI. That work turns a conversation into a useful recipe, visit brief, story, or next step. The models come from Anthropic and OpenAI: Claude in most writing experiences, OpenAI in others and for generated images.</p>
+        <p>We build the context, tools, and checks around each product’s AI. That work turns context into portfolio explanations, adapted recipes, visit briefs, branching stories, and practical next steps.</p>
       </div>
 
       <h3 class="sr-only">How a response is formed</h3>
@@ -1347,58 +1339,69 @@
       <div class="proof-rail">
         <ul class="layer-proof" id="layer-proof" tabindex="0" role="list" aria-label="Product intelligence at work, one product at a time">
         <li class="proof-card" style="--accent: var(--c-wingmate);">
-          <span class="proof-head"><img src="icons/wingmate.webp" alt="" width="26" height="26" loading="lazy"><span>In Wingmate</span></span>
-          <p>Before a reply is suggested, the coach has read the whole thread &mdash; not just the last message &mdash; and what all four coaches remember about the person you&rsquo;re talking to.</p>
+          <span class="proof-head"><img src="icons/wingmate.webp" alt="" width="26" height="26" loading="lazy"><span>In Wingmate</span><span class="availability">Live on iOS</span></span>
+          <h3>Context across coaches</h3>
+          <p>Before suggesting a reply, the coach works from the conversation you share and the connection-specific memory shared by all four coaches.</p>
           <a class="link" href="#product-wingmate">See Wingmate <span aria-hidden="true">↑</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-saffra);">
-          <span class="proof-head"><img src="icons/saffra.webp" alt="" width="26" height="26" loading="lazy"><span>In Saffra</span></span>
-          <p>Tell it what&rsquo;s in your kitchen and the recipe is rewritten around exactly that &mdash; with anything you can&rsquo;t eat filtered out before it&rsquo;s ever suggested.</p>
+          <span class="proof-head"><img src="icons/saffra.webp" alt="" width="26" height="26" loading="lazy"><span>In Saffra</span><span class="availability">Live on iOS</span></span>
+          <h3>Recipes shaped to you</h3>
+          <p>Saffra checks your pantry and declared dietary restrictions, then adapts a catalog recipe and names the substitutions.</p>
           <a class="link" href="#product-saffra">See Saffra <span aria-hidden="true">↑</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-story);">
-          <span class="proof-head"><img src="icons/storyvault.webp" alt="" width="26" height="26" loading="lazy"><span>In StoryVault&nbsp;AI</span></span>
+          <span class="proof-head"><img src="icons/storyvault.webp" alt="" width="26" height="26" loading="lazy"><span>In StoryVault&nbsp;AI</span><span class="availability">Live on iOS</span></span>
+          <h3>A story that remembers</h3>
           <p>Tap an offered choice or type your own move &mdash; the story follows, and it remembers, so the next beat fits the adventure you&rsquo;ve actually had.</p>
           <a class="link" href="#product-storyvault">See StoryVault&nbsp;AI <span aria-hidden="true">↑</span></a>
         </li>
               <li class="proof-card" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
-          <span class="proof-head"><img src="icons/rowan.webp" alt="" width="26" height="26" loading="lazy"><span>In Rowan</span></span>
-          <p>Say how the day went in your own words &mdash; it comes back as symptom logs, a medication list and a brief you can hand your doctor, with an independent safety check running on its own separate model.</p>
+          <span class="proof-head"><img src="icons/rowan.webp" alt="" width="26" height="26" loading="lazy"><span>In Rowan</span><span class="availability">Live on iOS</span></span>
+          <h3>From diary to visit brief</h3>
+          <p>Rowan converts what you describe into symptom logs and assembles a visit brief with the medications you entered. An independent safety check reviews the conversation before Rowan answers.</p>
           <a class="link" href="#product-rowan">See Rowan <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-crypto);">
-          <span class="proof-head"><img src="icons/cryptosage.webp" alt="" width="26" height="26" loading="lazy"><span>In CryptoSage&nbsp;AI</span></span>
-          <p>Ask why your portfolio moved and the answer is built from your own holdings and cost basis &mdash; not a market recap that would read the same for everyone.</p>
+          <span class="proof-head"><img src="icons/cryptosage.webp" alt="" width="26" height="26" loading="lazy"><span>In CryptoSage&nbsp;AI</span><span class="availability">Live on iOS</span></span>
+          <h3>Your portfolio, explained</h3>
+          <p>When portfolio sharing is enabled, CryptoSage combines your holdings and cost basis with market context to explain what moved.</p>
           <a class="link" href="#product-cryptosage">See CryptoSage&nbsp;AI <span aria-hidden="true">&uarr;</span></a>
         </li>
               <li class="proof-card" style="--accent: var(--c-night);">
-          <span class="proof-head"><img src="icons/nightshelf.webp" alt="" width="26" height="26" loading="lazy"><span>In Nightshelf</span></span>
+          <span class="proof-head"><img src="icons/nightshelf.webp" alt="" width="26" height="26" loading="lazy"><span>In Nightshelf</span><span class="availability">Live on iOS · Pro</span></span>
+          <h3>Bedtime stories made for you</h3>
           <p>With Pro, pick a place, a mood and a length &mdash; tonight&rsquo;s story is written to those three, and the cover is painted to match.</p>
           <a class="link" href="#product-nightshelf">See Nightshelf <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-quietoak);">
-          <span class="proof-head"><img src="icons/quietoak.webp" alt="" width="26" height="26" loading="lazy"><span>In Quietoak</span> <span class="soon">Coming soon</span></span>
-          <p>It carries your diary cards and recent conversations as context &mdash; down to what it already knows not to ask you twice.</p>
+          <span class="proof-head"><img src="icons/quietoak.webp" alt="" width="26" height="26" loading="lazy"><span>In Quietoak</span> <span class="availability">Coming soon</span></span>
+          <h3>Practice shaped by your week</h3>
+          <p>Diary cards and recent conversations inform the skill guidance, so practice stays connected to what you&rsquo;re working through.</p>
           <a class="link" href="#product-quietoak">See Quietoak <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-alder);">
-          <span class="proof-head"><img src="icons/alder.webp" alt="" width="26" height="26" loading="lazy"><span>In Alder</span> <span class="soon">Coming soon</span></span>
+          <span class="proof-head"><img src="icons/alder.webp" alt="" width="26" height="26" loading="lazy"><span>In Alder</span> <span class="availability">Coming soon</span></span>
+          <h3>Support through a setback</h3>
           <p>A lapse starts a debrief, not a lecture: what happened, what came before it, and what you&rsquo;d want next time, held in your own words.</p>
           <a class="link" href="#product-alder">See Alder <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-mythkin);">
-          <span class="proof-head"><img src="icons/mythkin.webp" alt="" width="26" height="26" loading="lazy"><span>In Mythkin</span> <span class="soon">Coming soon</span></span>
+          <span class="proof-head"><img src="icons/mythkin.webp" alt="" width="26" height="26" loading="lazy"><span>In Mythkin</span> <span class="availability">Coming soon</span></span>
+          <h3>Characters with a history</h3>
           <p>Each of 470 figures is written at length before you ever speak to one, so the reply comes from that history rather than a one-line persona.</p>
           <a class="link" href="#product-mythkin">See Mythkin <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-myth);">
-          <span class="proof-head"><img src="icons/mythwright.webp" alt="" width="26" height="26" loading="lazy"><span>In Mythwright</span> <span class="soon">Coming soon</span></span>
+          <span class="proof-head"><img src="icons/mythwright.webp" alt="" width="26" height="26" loading="lazy"><span>In Mythwright</span> <span class="availability">Coming soon · Pro</span></span>
+          <h3>Ideas become playable cards</h3>
           <p>In Pro&rsquo;s Card Forge, describe a card and a model writes its stats and ability and paints the art &mdash; with the prompt moderated before anything is generated.</p>
           <a class="link" href="#product-mythwright">See Mythwright <span aria-hidden="true">&uarr;</span></a>
         </li>
         <li class="proof-card" style="--accent: var(--c-loam); --accent-text: var(--c-loam-text);">
-          <span class="proof-head"><img src="icons/loam.webp" alt="" width="26" height="26" loading="lazy"><span>In Loam</span> <span class="soon">Coming soon</span></span>
-          <p>Before Loam proposes a margin mark, the layer has read your note against your collections, your recent Ledger, and your dials &mdash; and a verifier has checked that every quoted span appears verbatim on your page.</p>
+          <span class="proof-head"><img src="icons/loam.webp" alt="" width="26" height="26" loading="lazy"><span>In Loam</span> <span class="availability">Coming soon</span></span>
+          <h3>Suggestions you can trace</h3>
+          <p>Loam checks your note, collections, recent Ledger, and dials before proposing a margin mark. A verifier checks each quoted passage against your original words.</p>
           <a class="link" href="#product-loam">See Loam <span aria-hidden="true">&uarr;</span></a>
         </li>
       </ul>
@@ -1406,12 +1409,13 @@
       <div class="rail-controls">
         <div class="rail-nav" hidden>
           <button type="button" class="rail-btn" data-dir="-1" aria-controls="layer-proof" aria-label="Previous example">&larr;</button>
+          <span class="rail-count"></span>
           <button type="button" class="rail-btn" data-dir="1" aria-controls="layer-proof" aria-label="Next example">&rarr;</button>
         </div>
         <p class="proof-more"><a href="#products">See all products <span aria-hidden="true">&uarr;</span></a></p>
       </div>
 
-      <p class="model-note">Not every product uses AI. Where one does, the provider, what leaves your device, what is remembered, and the safeguards vary by product and feature. Most artwork ships with the app rather than being generated while you use it.</p>
+      <div class="model-note"><p><span class="model-note-label">Models and safeguards</span>Anthropic and OpenAI provide the models: Claude in most writing experiences, OpenAI in others and for generated images.</p><p>Not every product uses AI. Where one does, the provider, what leaves your device, what is remembered, and the safeguards vary by product and feature. Most artwork ships with the app rather than being generated while you use it.</p></div>
     </div>
   </section>
 
@@ -1421,7 +1425,7 @@
       <div class="section-head">
         <span class="eyebrow">The studio</span>
         <h2>We build, operate, and support everything we ship.</h2>
-        <p>HyperSage is an independent consumer-product studio working across health, relationships, food, finance, stories, and games.</p>
+        <p>We take products from concept to release, then keep improving the apps and services behind them.</p>
       </div>
       <div class="approach-ledger">
         <div class="approach-row">
@@ -1505,6 +1509,15 @@
   </footer>
 
   <script>
+    /* Keep the at-a-glance counts tied to the visible portfolio. */
+    (function () {
+      var cards = document.querySelectorAll('.products-grid > article.product');
+      var total = document.querySelector('[data-portfolio-total]');
+      var live = document.querySelector('[data-portfolio-live]');
+      if (total) total.textContent = cards.length;
+      if (live) live.textContent = document.querySelectorAll('.products-grid > article.product .status.live').length;
+    })();
+
     /* Complete examples share one data record. Auto-advance pauses on focus,
        pointer hover, explicit interaction, offscreen, or a hidden document. */
     (function () {
@@ -1867,6 +1880,8 @@
       if (!rail || !nav) return;
       var btns = nav.querySelectorAll('.rail-btn');
       if (btns.length !== 2) return;
+      var counter = nav.querySelector('.rail-count');
+      var cards = Array.prototype.slice.call(rail.querySelectorAll('.proof-card'));
       nav.hidden = false;
 
       function stepSize() {
@@ -1888,6 +1903,26 @@
         nav.hidden = max <= EDGE;
         btns[0].disabled = rail.scrollLeft <= EDGE;
         btns[1].disabled = rail.scrollLeft >= max - EDGE;
+        if (!counter || !cards.length) return;
+        var railBox = rail.getBoundingClientRect();
+        var left = railBox.left + rail.clientLeft;
+        var right = left + rail.clientWidth;
+        var first = -1, last = -1, nearest = -1, mostVisible = 0;
+        cards.forEach(function (card, index) {
+          var box = card.getBoundingClientRect();
+          var overlap = Math.max(0, Math.min(box.right, right) - Math.max(box.left, left));
+          if (overlap > mostVisible) { mostVisible = overlap; nearest = index; }
+          // Count readable cards, not the narrow teaser at the trailing edge.
+          if (overlap > 0 && overlap >= Math.min(box.width, rail.clientWidth) / 2) {
+            if (first < 0) first = index;
+            last = index;
+          }
+        });
+        if (first < 0) first = last = nearest;
+        if (first < 0) return;
+        var label = String(first + 1) + (last > first ? '–' + (last + 1) : '') + ' of ' + cards.length + ' examples';
+        // Plain text avoids announcing every swipe to screen-reader users.
+        if (counter.textContent !== label) counter.textContent = label;
       }
       Array.prototype.forEach.call(btns, function (b) {
         b.addEventListener('click', function () {
