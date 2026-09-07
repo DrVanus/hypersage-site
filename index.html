@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907f">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260907g">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907f">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260907g">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260907f",
+        "image": "https://hypersage.ai/og-image.png?v=20260907g",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -426,10 +426,9 @@
     }
 
     /* ===== SECTION SCAFFOLD ===== */
-    /* scroll-margin: the sticky nav is 73px tall on phones and the block's phone padding is
-       68px, so a menu tap landed each eyebrow 4-5px under the nav's bottom rule. */
-    section.block { padding: 88px 0; position: relative; scroll-margin-top: 20px; }
-    .section-head { max-width: 680px; margin-bottom: 52px; }
+    /* Keep anchor headings clear of the sticky nav while tightening the page rhythm. */
+    section.block { padding: 64px 0; position: relative; scroll-margin-top: 44px; }
+    .section-head { max-width: 680px; margin-bottom: 40px; }
     /* Progressive: browsers without text-wrap ignore it. Stops the section head and
        the ledger paragraphs ending on a one-word line at phone widths. */
     .section-head h2 { text-wrap: balance; }
@@ -449,8 +448,8 @@
     .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; line-height: 1.22; padding-bottom: 0.12em; margin-bottom: 16px; }
     .section-head p { color: var(--muted); font-size: 1.08rem; }
     @media (max-width: 560px) {
-      section.block { padding: 68px 0; }
-      .section-head { margin-bottom: 36px; }
+      section.block { padding: 48px 0; scroll-margin-top: 40px; }
+      .section-head { margin-bottom: 32px; }
     }
 
     /* A compact summary with separate number and label baselines. */
@@ -641,7 +640,7 @@
     .layer-proof > * { scroll-snap-align: start; }
     /* The rail is keyboard-scrollable, so it has to show where focus is. */
     .layer-proof:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 3px; border-radius: 14px; }
-    .rail-controls { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .rail-controls { display: flex; align-items: center; justify-content: center; gap: 4px 16px; flex-wrap: wrap; }
     .rail-nav { display: flex; align-items: center; gap: 8px; }
     .rail-count { min-width: 140px; color: var(--muted); text-align: center; font: .72rem/1.4 'JetBrains Mono', monospace; }
     /* [hidden] loses to display:flex — say it, or the buttons never hide. */
@@ -704,23 +703,36 @@
     .proof-more { display: flex; justify-content: center; margin: 0; }
     .proof-more a { display: inline-flex; align-items: center; min-height: 44px; gap: 7px; font-weight: 600; font-size: 0.9rem; color: var(--muted); transition: gap .2s, color .2s; }
     .proof-more a:hover { gap: 11px; color: var(--fg); }
-    /* The section head and the proof grid are both centred; this note had a
-       62ch cap and no auto margins, so it hugged the left edge under three
-       centred cards and read as an unfinished column. Centre the block. */
-    .model-note { color: var(--faint); font-size: 0.82rem; margin: 18px auto 0; max-width: 62ch; text-align: center; }
-
-    .model-note p + p { margin-top: 10px; }
-    .model-note-label { display: block; margin-bottom: 6px; color: var(--fg); font: 500 .69rem/1.4 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
+    /* Secondary detail stays available without becoming another section of copy. */
+    .model-note { color: var(--faint); font-size: .82rem; margin: 6px auto 0; max-width: 760px; }
+    .model-note > summary {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      width: fit-content; min-height: 44px; margin: 0 auto; padding: 6px 10px;
+      list-style: none; cursor: pointer; color: var(--muted); font-weight: 500;
+      border-radius: 8px;
+    }
+    .model-note > summary::-webkit-details-marker { display: none; }
+    .model-note > summary::after {
+      content: ''; width: 6px; height: 6px; flex: 0 0 auto;
+      border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+      transform: translateY(-2px) rotate(45deg);
+    }
+    .model-note[open] > summary::after { transform: translateY(2px) rotate(225deg); }
+    .model-note > summary:hover { color: var(--fg); background: rgba(255,255,255,.035); }
+    .model-note-content { margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--line); line-height: 1.6; }
+    .model-note-content p + p { margin-top: 8px; }
+    #ai { padding-bottom: 24px; }
+    @media (max-width: 560px) { #ai { padding-bottom: 20px; } }
 
     /* ===== CTA ===== */
     .cta {
-      /* 88, not 84 — every other section band on the page is 88/88. */
-      text-align: center; padding: 88px 0; margin: 0;
+      text-align: center; padding: 64px 0; margin: 0; scroll-margin-top: 44px;
       background:
         radial-gradient(ellipse 60% 100% at 50% 0%, rgba(45,212,191,0.12), transparent 70%),
         radial-gradient(ellipse 60% 100% at 50% 100%, rgba(167,139,250,0.10), transparent 70%);
       border-top: 1px solid var(--line);
     }
+    @media (max-width: 560px) { .cta { padding: 48px 0; scroll-margin-top: 40px; } }
     .cta h2 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; margin-bottom: 16px; line-height: 1.22; }
     .cta p { color: var(--muted); font-size: 1.1rem; max-width: 560px; margin: 0 auto 30px; }
     /* .cta p (0,1,1) outranked .cta-routes (0,1,0): the routes rendered at 1.1rem in --muted
@@ -1428,7 +1440,13 @@
         <p class="proof-more"><a href="#products">See all products <span aria-hidden="true">&uarr;</span></a></p>
       </div>
 
-      <div class="model-note"><p><span class="model-note-label">Models and safeguards</span>Anthropic and OpenAI provide the models: Claude in most writing experiences, OpenAI in others and for generated images.</p><p>Not every product uses AI. Where one does, the provider, what leaves your device, what is remembered, and the safeguards vary by product and feature. Most artwork ships with the app rather than being generated while you use it.</p></div>
+      <details class="model-note">
+        <summary>Models and safeguards</summary>
+        <div class="model-note-content">
+          <p>Anthropic and OpenAI provide the models: Claude in most writing experiences, OpenAI in others and for generated images.</p>
+          <p>Not every product uses AI. Where one does, the provider, what leaves your device, what is remembered, and the safeguards vary by product and feature. Most artwork ships with the app rather than being generated while you use it.</p>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -1522,6 +1540,21 @@
   </footer>
 
   <script>
+    /* Include the full model disclosure in print, then restore the reading state. */
+    (function () {
+      var note = document.querySelector('.model-note');
+      if (!note) return;
+      var wasOpen = null;
+      window.addEventListener('beforeprint', function () {
+        if (wasOpen === null) wasOpen = note.open;
+        note.open = true;
+      });
+      window.addEventListener('afterprint', function () {
+        if (wasOpen !== null) note.open = wasOpen;
+        wasOpen = null;
+      });
+    })();
+
     /* Keep the at-a-glance counts tied to the visible portfolio. */
     (function () {
       var cards = document.querySelectorAll('.products-grid > article.product');
