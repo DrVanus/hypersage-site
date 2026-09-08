@@ -192,6 +192,10 @@
     @media (max-width: 900px) { .hero-text .lede { margin-left: auto; margin-right: auto; } }
     .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
     @media (max-width: 900px) { .hero-buttons { justify-content: center; } }
+    .release-note { margin-top: 18px; color: var(--muted-fg); font-size: .9rem; max-width: 540px; }
+    .release-note strong { color: var(--gold-bright); }
+    @media (max-width: 900px) { .release-note { margin-left: auto; margin-right: auto; } }
+    .preview-caption { margin-top: 14px; color: var(--gold-bright); font-size: .8rem; text-align: center; }
 
     .btn-primary {
       display: inline-flex; align-items: center; gap: 10px;
@@ -377,7 +381,7 @@
 
     /* ===== HEROES ===== */
     .heroes-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
     }
     @media (max-width: 900px) { .heroes-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 440px) { .heroes-grid { grid-template-columns: 1fr; } }
@@ -439,6 +443,12 @@
     .weapon-chip.evo { color: var(--gold); border-color: rgba(212,175,55,0.4); background: var(--gold-glow); }
     .weapon-chip.evo::before { content: '✦ '; }
     .evo-note { margin-top: 26px; font-size: 0.92rem; color: var(--tertiary-fg); }
+    .evolution-guide { max-width: 780px; margin: 28px auto 0; text-align: left; }
+    .evolution-guide dl { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; margin-top: 16px; }
+    .evolution-guide dl div { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .evolution-guide dt { color: var(--fg); font-weight: 700; }
+    .evolution-guide dd { color: var(--muted-fg); font-size: .92rem; }
+    @media (max-width: 440px) { .evolution-guide dl { grid-template-columns: 1fr; } }
     .evo-note b { color: var(--gold); }
 
     /* Ascension flow — decorative CSS/SVG restatement of the evo-note rule
@@ -674,6 +684,7 @@
   "name": "Hexhunter",
   "applicationCategory": "GameApplication",
   "operatingSystem": "iOS",
+  "softwareVersion": "1.0",
   "description": "A gothic illustrated horde-survivor for iOS. Pick a hero, draft upgrades every level, evolve your weapons into ascended forms, and fight to survive across three dark biomes.",
   "url": "https://hypersage.ai/hexhunter/",
   "author": {
@@ -693,7 +704,7 @@
       "name": "When can I play Hexhunter?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Now. Hexhunter is out on the App Store for iPhone (iOS 17 or later). Questions? Email support@hypersage.ai ."
+        "text": "Version 1.0 is available now on the App Store for iPhone (iOS 17 or later). Version 1.1 is coming; the features and screenshots marked 1.1 preview are not in the App Store release yet. Questions? Email support@hypersage.ai."
       }
     },
     {
@@ -709,7 +720,7 @@
       "name": "Can I unlock everything just by playing?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. The six locked hunters are earned by DOING something — defeat a boss, survive five minutes, evolve a weapon, kill a thousand in one run — not by saving up. Essence is spent on relics, and deeper biomes open by surviving long enough. There are exactly two optional one-time purchases — Unlock All, which opens every hunter, stage, and relic permanently, and a Starter Pack of essence plus a hero — and that&#8217;s the whole catalog. No subscription, no ads, no consumables: nothing is sold that can&#8217;t also be earned by playing."
+        "text": "Yes. In the 1.1 preview roster, start free with Vess and Kael, then earn the other seven hunters through their challenges: defeat a boss, survive long enough, evolve a weapon, kill 1,000 in one run, or win on The Ashlands. Spend earned essence on relics; deeper biomes open through survival challenges. The two optional one-time purchases are Unlock All — all 9 heroes, all 3 stages, and all 12 relics at maximum level permanently — and the Starter Pack of Maugrim plus 500 essence. No subscriptions, ads, or repeatable currency packs. Everything these purchases unlock can also be earned by playing. Purchase and restore details are on the support page."
       }
     },
     {
@@ -717,7 +728,7 @@
       "name": "Does Hexhunter have leaderboards?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes — two Game Center leaderboards, longest survival and most kills, plus 33 achievements. Game Center is entirely optional: decline it and everything still plays. Scores earned while signed out are kept on your phone and submitted if you ever sign in, and achievements ride your Game Center account, so they come back after a reinstall or on a new phone."
+        "text": "Yes — two Game Center leaderboards, longest survival and most kills. The 1.1 preview tracks 33 Game Center achievements and one local trophy for winning as Silas. Game Center is entirely optional: decline it and everything still plays. Scores earned while signed out are kept on your phone and submitted when you sign in. Completed achievements successfully synced with Game Center can be recovered with the same account; Silas’s local trophy stays on the device."
       }
     },
     {
@@ -725,7 +736,7 @@
       "name": "What does Hexhunter collect about me?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Nothing. There are no ads, no analytics, no tracking, and no account to create — the app has no server of its own, and your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, those run through Apple under Apple's terms; Hexhunter itself sends nothing anywhere."
+        "text": "Nothing. There are no ads, no analytics, no tracking, and no account to create — the app has no server of its own, and your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, Apple handles those optional services under Apple's terms. No game progress is sent to a HyperSage server."
       }
     },
     {
@@ -780,35 +791,61 @@
     <div class="container">
       <div class="hero-layout">
         <div class="hero-text">
-          <span class="eyebrow">Out now on iOS</span>
+          <span class="eyebrow">Version 1.0 available on iOS</span>
           <h1>Survive the <span class="glow">Horde.</span><br>Draft Your <span class="doom">Doom.</span></h1>
           <p class="lede">A gothic illustrated horde-survivor. Pick a hero, draft upgrades every level, evolve your weapons into ascended forms, and fight to survive the endless dark.</p>
           <div class="hero-buttons">
             <a href="https://apps.apple.com/app/id6792798732" class="btn-primary" target="_blank" rel="noopener">
               <span>Download on the App Store</span>
             </a>
-            <a href="#features" class="btn-ghost">
-              <span>See the hunt</span>
+            <a href="#preview" class="btn-ghost">
+              <span>Preview version 1.1</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </a>
           </div>
+          <p class="release-note"><strong>1.1 is coming.</strong> The preview below shows the next update in development. The App Store download is currently version 1.0; preview features are not available there yet.</p>
         </div>
         <div class="hero-art">
           <div class="carousel-column">
             <div class="device">
               
-              <div class="carousel" id="heroCarousel" aria-roledescription="carousel" aria-label="Hexhunter gameplay screenshots">
-                
-                <img class="active" fetchpriority="high" src="assets/screens/screen-combat-massacre.jpg?v=20260823a" width="720" height="1560" alt="A Cleaving Arc sweeping through a scatter of skeletons as a MASSACRE streak lands, the screen edged red from a hit just taken.">
-                <img src="assets/screens/screen-combat-annihilation.jpg?v=20260823a" width="620" height="1344" alt="The hunter surrounded on the Ossuary floor at level 4, skeletons closing from every side with forty-two already slain.">
-                <img src="assets/screens/screen-gameplay2.jpg?v=20260823a" width="460" height="1000" alt="The hunter loosing Arcane Bolt across the Ossuary as skeletons close in, an essence gem glinting where one fell.">
-                <img src="assets/screens/screen-boss.jpg?v=20260823a" width="620" height="1347" alt="Boss fight against the Plague Abbot in the Ossuary at level 6, its named boss health bar full across the top of the screen while the hunter fights it at close range.">
-                <img src="assets/screens/screen-results.jpg?v=20260823a" width="620" height="1347" alt="Run results — a new best of 1:27 survived, 214 slain and 63 essence earned, with Play Again, Home and Share beneath.">
+              <div class="carousel" id="heroCarousel" aria-roledescription="carousel" aria-label="Hexhunter 1.1 preview screenshots">
+                <img class="active" fetchpriority="high" src="assets/screens/preview-1-1-horde.jpg?v=712d525598" width="720" height="1564" alt="1.1 preview: Vess moving between foes, glowing pickups and projectiles in the Ossuary.">
+                <img src="assets/screens/preview-1-1-evolution.jpg?v=5eafb63a76" width="720" height="1564" alt="1.1 preview: Nyx firing an evolved Storm Conduit lightning strike at an enemy, with a visible stun ring.">
+                <img src="assets/screens/preview-1-1-boss.jpg?v=de7a5632e0" width="720" height="1564" alt="1.1 preview: Vess faces the Plague Abbot and its spreading golden projectiles beneath the boss health bar.">
+                <img src="assets/screens/preview-1-1-ritual.jpg?v=7d2fb0c6b6" width="720" height="1564" alt="1.1 preview: Ravenna charges the remaining rune seal while two seals are marked SEALED and the ritual shows 2 of 3.">
+                <img src="assets/screens/preview-1-1-draft.jpg?v=b5b9b69bac" width="720" height="1564" alt="1.1 preview: the Choose One draft presents weapon and passive cards with Reroll and Banish controls.">
               </div>
             </div>
-            <div class="carousel-dots" id="heroDots" role="tablist" aria-label="Choose a screenshot"></div>
+            <p class="preview-caption">Native screenshots · 1.1 preview</p>
+            <div class="carousel-dots" id="heroDots" role="group" aria-label="Choose a screenshot"></div>
             <button class="carousel-pause" id="heroPause" type="button" hidden>Pause rotation</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block tight panel" id="preview" aria-labelledby="preview-title">
+    <div class="container">
+      <div class="section-eyebrow">1.1 preview · coming update</div>
+      <h2 id="preview-title">More ways to <em>hold your ground.</em></h2>
+      <p class="lede">The next update adds an active escape, optional rituals, and clearer character motion while keeping the original illustrated hunters. These features are in the 1.1 preview, ahead of its App Store release.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>HexStep</h3>
+          <p>Tap your dash control to break through a closing pack. A short burst protects you during the step, then recharges. Put it on either side, or drag your own position in Control Layout.</p>
+          <span class="stat">An active dodge</span>
+        </div>
+        <div class="feature-card">
+          <h3>Warding Rituals</h3>
+          <p>Hold each of three rune seals before time runs out. Finish the optional ritual to damage and push back nearby foes, recover a little health, and gain +25% damage for 12 seconds.</p>
+          <span class="stat">Three seals · one pulse</span>
+        </div>
+        <div class="feature-card">
+          <h3>Motion with character</h3>
+          <p>Grounded footwork, clearer weapon and spell cues, and smoother enemy motion bring the original artwork into the action. Hovering hunters keep their own way of moving.</p>
+          <span class="stat">Original illustrated art</span>
         </div>
       </div>
     </div>
@@ -830,27 +867,27 @@
           <div class="card-label">Item</div>
         </div>
       </div>
-      <p class="draft-note">Every level the hunt deals <b>three cards</b> — a new weapon, an upgrade, or an item. Reroll, banish, and craft your perfect run.</p>
-      <p class="draft-tally">8 hunters · 18 weapons · 3 biomes</p>
+      <p class="draft-note">Every level the hunt deals <b>three cards</b> — four for Lyra — with a new weapon, an upgrade, or an item to choose from. Reroll, banish, and craft your perfect run.</p>
+      <p class="draft-tally">1.1 preview · 9 hunters · 18 weapons · 3 biomes</p>
     </div>
   </section>
 
   <section class="section-block" id="features">
     <div class="container">
-      <div class="section-eyebrow">What you're getting into</div>
+      <div class="section-eyebrow">Inside the 1.1 preview</div>
       <h2>Every run is a <em>new nightmare.</em></h2>
       <p class="lede">One life, an endless horde, and a build you assemble on the fly. Survive long enough and your weapons don't just get stronger — they <span style="color:var(--gold)">ascend</span>.</p>
       <div class="features-grid">
         <div class="feature-card">
           <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.2 4.5 6 7.4 6 10.5a6 6 0 0 1-12 0C6 10.4 8.8 7.5 12 3z"/></svg></div>
-          <h3>8 Unique Heroes</h3>
+          <h3>9 Unique Heroes</h3>
           <p>Each with a distinct passive and a starting weapon — from the balanced Huntress to the heavy Gravewarden and a Revenant who grows stronger with every kill.</p>
-          <span class="stat">8 hunters</span>
+          <span class="stat">9 hunters</span>
         </div>
         <div class="feature-card">
           <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 3v8.5h-4V6z"/><line x1="8" y1="14.5" x2="16" y2="14.5"/><line x1="12" y1="14.5" x2="12" y2="20"/><circle cx="12" cy="21" r="1.1"/></svg></div>
           <h3>18 Weapons + Evolutions</h3>
-          <p>Combine weapons with the right passives to discover secret evolved forms — Runestorm, Supernova, Reaper's Round — the dopamine peak of every run.</p>
+          <p>Ten weapons need only their level requirement to unlock an evolution draft. Eight also need a paired passive. Discover Runestorm, Supernova, Reaper's Round, and more.</p>
           <span class="stat">18 weapons · ascended forms</span>
         </div>
         <div class="feature-card">
@@ -875,18 +912,18 @@
         <div class="showcase-copy">
           <div class="section-eyebrow">The Hunt</div>
           <h2>Kite the horde. <em>Hex from range.</em></h2>
-          <p class="lede">Your hexes fire on their own, auto-aiming into the dark — your one job is to keep moving. Weave through the swarm, funnel the horde into your bolts, and never let them close the gap.</p>
+          <p class="lede">Your hexes fire on their own, auto-aiming into the dark. Weave through the swarm, funnel the horde into your bolts, and choose your escape before they close the gap.</p>
           <ul class="showcase-points">
             <li><b>One-thumb control</b> — drag to move; your arsenal aims itself.</li>
             <li><b>Chain-lightning &amp; frost hexes</b> arc across packs from across the screen.</li>
-            <li><b>Positioning is everything</b> — get surrounded and the dark takes you.</li>
+            <li><b>New in the 1.1 preview: HexStep</b> — an active dash when the pack closes in.</li>
           </ul>
         </div>
         <div class="showcase-media">
           <div class="phone-row stagger">
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-combat-massacre.jpg?v=20260823a" width="720" height="1560" alt="A Cleaving Arc sweeping through skeletons as a MASSACRE streak lands" loading="lazy"></div><figcaption><div class="screen-kind">Combat</div><div class="screen-name">Fire from range</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-gameplay2.jpg?v=20260823a" width="460" height="1000" alt="The hunter loosing Arcane Bolt across the Ossuary as skeletons close in" loading="lazy"></div><figcaption><div class="screen-kind">Combat</div><div class="screen-name">Hexes fill the dark</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-combat-horde.jpg?v=20260823a" width="720" height="1560" alt="A hunter kiting across open ground with clear space around them as ghouls, bone hounds and cultists converge from every edge and hex rings burst on the horde at range" loading="lazy"></div><figcaption><div class="screen-kind">Combat</div><div class="screen-name">Never stop moving</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/preview-1-1-horde.jpg?v=712d525598" width="720" height="1564" alt="1.1 preview: Vess moving between foes, glowing pickups and projectiles in the Ossuary."></div><figcaption><div class="screen-kind">1.1 preview</div><div class="screen-name">Keep moving</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/preview-1-1-evolution.jpg?v=5eafb63a76" width="720" height="1564" alt="1.1 preview: Nyx firing an evolved Storm Conduit lightning strike at an enemy, with a visible stun ring."></div><figcaption><div class="screen-kind">1.1 preview</div><div class="screen-name">Unleash Storm Conduit</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/preview-1-1-controls.jpg?v=64ffe0161e" width="720" height="1564" alt="1.1 preview: the Control Layout editor shows a custom Hex Step position, Left and Right presets, Cancel and Save Layout."></div><figcaption><div class="screen-kind">1.1 preview</div><div class="screen-name">Place your Hex Step</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -897,20 +934,21 @@
     <div class="container">
       <div class="showcase reverse">
         <div class="showcase-copy">
-          <div class="section-eyebrow">The Hunters</div>
-          <h2>Eight ways to <em>face the dark.</em></h2>
+          <div class="section-eyebrow">The Hunters · 1.1 preview roster</div>
+          <h2>Nine ways to <em>face the dark.</em></h2>
           
-          <p class="lede">Pick your hunter in the loadout, then earn the rest by clearing their challenge — or take the optional one-time Unlock All purchase and skip it. Every hero rewrites the run — a passive, a stat identity, and a starting weapon that sets the whole build in motion. Start with Vess and Kael; unlock the other six.</p>
+          <p class="lede">Pick your hunter in the loadout, then earn the rest by clearing their challenge — or take the optional one-time Unlock All purchase and skip it. Every hero rewrites the run — a passive, a stat identity, and a starting weapon that sets the whole build in motion. Start free with Vess and Kael; unlock the other seven.</p>
           <ul class="showcase-points">
-            <li><b>8 distinct hunters</b> — from the balanced Huntress to the kill-hungry Revenant.</li>
+            <li><b>9 distinct hunters</b> — from the balanced Huntress to the kill-hungry Revenant.</li>
             <li><b>Each shifts the whole build</b> with its own passive and starting weapon.</li>
             <li><b>Unlock by playing</b> — each locked hunter has its own challenge (defeat a boss, survive five minutes, evolve a weapon) — or with the optional Unlock All purchase.</li>
+            <li><b>Silas, the Pilgrim</b> carries a Boomerang and trades health and speed for +30% damage. Win on The Ashlands to unlock him.</li>
           </ul>
         </div>
         <div class="showcase-media">
           
           <div class="phone-row single">
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-lobby.jpg?v=20260823a" width="620" height="1344" alt="The loadout screen with Vess the Huntress selected and the Ossuary chosen as the stage" loading="lazy"></div><figcaption><div class="screen-kind">Loadout</div><div class="screen-name">Pick your hunter</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/preview-1-1-heroes.jpg?v=b0460a1298" width="720" height="1564" alt="1.1 preview: Maugrim the Gravewarden is selected, with his starting Cleaving Arc, stat modifiers and the Ossuary stage selector."></div><figcaption><div class="screen-kind">1.1 preview</div><div class="screen-name">Pick your hunter</div></figcaption></figure>
 
           </div>
         </div>
@@ -981,6 +1019,14 @@
           <div class="stat-line">Kill-streak DMG · −25% pickup</div>
           <div class="weapon">Starts with <b>Soul Whip</b></div>
         </div>
+        <div class="hero-card locked">
+          <img class="portrait" src="assets/heroes/pilgrim.png?v=20260907a" width="256" height="256" loading="lazy" alt="Silas, the Pilgrim, in a dark hood with his curved blade">
+          <div class="name">Silas</div>
+          <div class="epithet">the Pilgrim</div>
+          <p>No armour, no retreat. Trades health and speed for the roster's highest starting damage.</p>
+          <div class="stat-line">+30% DMG · −20% HP · −8% SPD</div>
+          <div class="weapon">Starts with <b>Boomerang</b> · Win on The Ashlands to unlock</div>
+        </div>
         
       </div>
     </div>
@@ -1001,7 +1047,7 @@
         </div>
         <div class="showcase-media">
           <div class="phone-row single">
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-lobby2.jpg?v=20260823a" width="620" height="1344" alt="Stage selection on the loadout screen with the Frostvault chosen, showing a +40% essence bonus" loading="lazy"></div><figcaption><div class="screen-kind">Descent</div><div class="screen-name">Choose your stage</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/preview-1-1-heroes.jpg?v=b0460a1298" width="720" height="1564" alt="1.1 preview: Maugrim the Gravewarden is selected, with his starting Cleaving Arc, stat modifiers and the Ossuary stage selector."></div><figcaption><div class="screen-kind">1.1 preview</div><div class="screen-name">Choose your descent</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -1046,7 +1092,7 @@
         <div class="showcase-copy">
           <div class="section-eyebrow">The Arsenal</div>
           <h2>Draft your build. <span class="gold">Ascend</span> your weapons.</h2>
-          <p class="lede">Every level, choose one of three cards — a new weapon, an upgrade, or an item that bends the run your way. Reroll or banish what you don't want, then max a weapon with its paired passive to evolve it into an ascended form.</p>
+          <p class="lede">Every level, choose a card — a new weapon, an upgrade, or an item that bends the run your way. Reroll or banish what you don't want, then meet a weapon's evolution requirements to bring its ascended form into the draft.</p>
           <ul class="showcase-points">
             <li><b>18 weapons, each with an ascended form</b> — Runestorm, Supernova, Reaper&#8217;s Round.</li>
             <li><b>Items &amp; passives</b> like Lucky Charm and Swift Boots bend the odds.</li>
@@ -1055,9 +1101,9 @@
         </div>
         <div class="showcase-media">
           <div class="phone-row stagger">
-            <figure class="screen-card"><div class="screen-frame"><img src="shots/04-levelup.jpg?v=20260717a" width="828" height="1799" alt="Level-up draft offering Cleaving Arc, an Arcane Bolt upgrade, and Bone Spear" loading="lazy"></div><figcaption><div class="screen-kind">Draft</div><div class="screen-name">Choose one</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-draft.jpg?v=20260823a" width="620" height="1344" alt="A level-up draft at level 2 — an EVOLUTION READY Reaper&#8217;s Round, the Runic Might passive at +20% damage, and Bone Spear as a new weapon, with Reroll and Banish beneath" loading="lazy"></div><figcaption><div class="screen-kind">Items</div><div class="screen-name">Bend the run</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-results.jpg?v=20260823a" width="620" height="1347" alt="Run results showing a new best of 1:27 survived, 214 slain and 63 essence earned" loading="lazy"></div><figcaption><div class="screen-kind">Results</div><div class="screen-name">See your MVP</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/preview-1-1-draft.jpg?v=b5b9b69bac" width="720" height="1564" alt="1.1 preview: the Choose One draft presents weapon and passive cards with Reroll and Banish controls."></div><figcaption><div class="screen-kind">1.1 preview</div><div class="screen-name">Choose your power</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/preview-1-1-evolution.jpg?v=5eafb63a76" width="720" height="1564" alt="1.1 preview: Nyx firing an evolved Storm Conduit lightning strike at an enemy, with a visible stun ring."></div><figcaption><div class="screen-kind">1.1 preview</div><div class="screen-name">Watch it fire</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/preview-1-1-codex.jpg?v=64f9902213" width="720" height="1564" alt="1.1 preview: the Evolution Codex shows discovered and undiscovered recipes and explains the level 6 requirement, or level 5 as Nyx."></div><figcaption><div class="screen-kind">1.1 preview</div><div class="screen-name">Know the requirements</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -1110,7 +1156,22 @@
           <div class="evo-label">Ascended form</div>
         </div>
       </div>
-      <p class="evo-note">Max a weapon with its paired passive and it <b>ascends</b> — brighter, wider, and lit in evolution gold.</p>
+      <p class="evo-note">Evolution becomes draft-ready at weapon level 6, or level 5 for Nyx. Choose the evolution card to <b>ascend</b>.</p>
+      <details class="faq evolution-guide">
+        <summary>Which weapons need a paired passive?</summary>
+        <p><strong>Ten need only the level requirement:</strong> Arcane Bolt, Orbiting Blades, Nova Pulse, Cleaving Arc, Frost Shard, Chain Lightning, Venom Cloud, Boomerang, Hex Ward, and Soul Whip.</p>
+        <p><strong>These eight also need at least one level of their paired passive:</strong></p>
+        <dl>
+          <div><dt>Holy Water</dt><dd>Magnet</dd></div>
+          <div><dt>Garlic Ring</dt><dd>Thornmail</dd></div>
+          <div><dt>Runic Missile</dt><dd>Lucky Charm</dd></div>
+          <div><dt>Bone Spear</dt><dd>Swift Boots</dd></div>
+          <div><dt>Shadow Orb</dt><dd>Wardstone</dd></div>
+          <div><dt>Plague Rats</dt><dd>Second Wind</dd></div>
+          <div><dt>Thunder Clap</dt><dd>Runic Might</dd></div>
+          <div><dt>Flame Pillar</dt><dd>Gold Tongue, or at least one level of the Ash Crucible relic</dd></div>
+        </dl>
+      </details>
       </div>
     </div>
   </section>
@@ -1131,7 +1192,7 @@
         <div class="showcase-media">
           
           <div class="phone-row single">
-            <figure class="screen-card"><div class="screen-frame"><img src="assets/screens/screen-boss.jpg?v=20260823a" width="620" height="1347" alt="Boss fight against the Plague Abbot in the Ossuary at level 6, its named health bar full and red across the top of the screen, with hex rings bursting over the horde below" loading="lazy"></div><figcaption><div class="screen-kind">Boss</div><div class="screen-name">The Plague Abbot</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/preview-1-1-boss.jpg?v=de7a5632e0" width="720" height="1564" alt="1.1 preview: Vess faces the Plague Abbot and its spreading golden projectiles beneath the boss health bar."></div><figcaption><div class="screen-kind">1.1 preview</div><div class="screen-name">The Plague Abbot</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -1177,7 +1238,7 @@
       <div class="faq-list">
         <details class="faq">
           <summary>When can I play Hexhunter?</summary>
-          <p>Now. Hexhunter is out on the App Store for iPhone (iOS 17 or later). Questions? Email <a href="mailto:support@hypersage.ai?subject=Hexhunter">support@hypersage.ai</a>.</p>
+          <p>Version 1.0 is available now on the App Store for iPhone (iOS 17 or later). Version 1.1 is coming; the features and screenshots marked 1.1 preview are not in the App Store release yet. Questions? Email <a href="mailto:support@hypersage.ai?subject=Hexhunter">support@hypersage.ai</a>.</p>
         </details>
         <details class="faq">
           <summary>Do I need an internet connection to play?</summary>
@@ -1185,15 +1246,15 @@
         </details>
         <details class="faq">
           <summary>Can I unlock everything just by playing?</summary>
-          <p>Yes. The six locked hunters are earned by DOING something — defeat a boss, survive five minutes, evolve a weapon, kill a thousand in one run — not by saving up. Essence is spent on relics, and deeper biomes open by surviving long enough. There are exactly two optional one-time purchases — Unlock All, which opens every hunter, stage, and relic permanently, and a Starter Pack of essence plus a hero — and that&#8217;s the whole catalog. No subscription, no ads, no consumables: nothing is sold that can&#8217;t also be earned by playing.</p>
+          <p>Yes. In the 1.1 preview roster, start free with Vess and Kael, then earn the other seven hunters through their challenges: defeat a boss, survive long enough, evolve a weapon, kill 1,000 in one run, or win on The Ashlands. Spend earned essence on relics; deeper biomes open through survival challenges. The two optional one-time purchases are Unlock All — all 9 heroes, all 3 stages, and all 12 relics at maximum level permanently — and the Starter Pack of Maugrim plus 500 essence. No subscriptions, ads, or repeatable currency packs. Everything these purchases unlock can also be earned by playing. Purchase and restore details are on the <a href="support.html">support page</a>.</p>
         </details>
         <details class="faq">
           <summary>Does Hexhunter have leaderboards?</summary>
-          <p>Yes — two Game Center leaderboards, longest survival and most kills, plus 33 achievements. Game Center is entirely optional: decline it and everything still plays. Scores earned while signed out are kept on your phone and submitted if you ever sign in, and achievements ride your Game Center account, so they come back after a reinstall or on a new phone.</p>
+          <p>Yes — two Game Center leaderboards, longest survival and most kills. The 1.1 preview tracks 33 Game Center achievements and one local trophy for winning as Silas. Game Center is entirely optional: decline it and everything still plays. Scores earned while signed out are kept on your phone and submitted when you sign in. Completed achievements successfully synced with Game Center can be recovered with the same account; Silas&#8217;s local trophy stays on the device.</p>
         </details>
         <details class="faq">
           <summary>What does Hexhunter collect about me?</summary>
-          <p>Nothing. There are no ads, no analytics, no tracking, and no account to create — the app has no server of its own, and your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, those run through Apple under Apple's terms; Hexhunter itself sends nothing anywhere.</p>
+          <p>Nothing. There are no ads, no analytics, no tracking, and no account to create — the app has no server of its own, and your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, Apple handles those optional services under Apple's terms. No game progress is sent to a HyperSage server.</p>
         </details>
         <details class="faq">
           <summary>Is the art hand-drawn?</summary>
@@ -1218,7 +1279,7 @@
 
   <section class="cta-strip" id="download">
     <h2>The horde is waiting.</h2>
-    <p>Hexhunter is out now on iOS. Sharpen your build — the crypt doors are open.</p>
+    <p>Play version 1.0 on iOS today. Version 1.1 is coming; the preview shows what is next.</p>
     <a href="https://apps.apple.com/app/id6792798732" class="btn-primary" target="_blank" rel="noopener">
       <span>Download on the App Store</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -1255,6 +1316,7 @@
   <script>
     (function () {
       var carousel = document.getElementById('heroCarousel');
+      var carouselColumn = carousel && carousel.closest('.carousel-column');
       var dotsWrap = document.getElementById('heroDots');
       var pauseBtn = document.getElementById('heroPause');
       if (!carousel || !dotsWrap) return;
@@ -1269,8 +1331,9 @@
       var dots = slides.map(function (_, idx) {
         var b = document.createElement('button');
         b.type = 'button';
-        b.setAttribute('role', 'tab');
         b.setAttribute('aria-label', 'Show screenshot ' + (idx + 1) + ' of ' + slides.length);
+        b.setAttribute('aria-controls', 'heroCarousel');
+        b.setAttribute('aria-pressed', 'false');
         b.addEventListener('click', function () { show(idx); restart(); });
         dotsWrap.appendChild(b);
         return b;
@@ -1278,12 +1341,14 @@
 
       function show(n) {
         slides[i].classList.remove('active');
+        slides[i].setAttribute('aria-hidden', 'true');
         dots[i].classList.remove('active');
-        dots[i].setAttribute('aria-selected', 'false');
+        dots[i].setAttribute('aria-pressed', 'false');
         i = (n + slides.length) % slides.length;
         slides[i].classList.add('active');
+        slides[i].setAttribute('aria-hidden', 'false');
         dots[i].classList.add('active');
-        dots[i].setAttribute('aria-selected', 'true');
+        dots[i].setAttribute('aria-pressed', 'true');
       }
 
       function next() { show(i + 1); }
@@ -1296,21 +1361,32 @@
       }
 
       // Initial state
+      slides.forEach(function (slide, idx) { slide.setAttribute('aria-hidden', idx === 0 ? 'false' : 'true'); });
       dots[0].classList.add('active');
-      dots[0].setAttribute('aria-selected', 'true');
+      dots[0].setAttribute('aria-pressed', 'true');
 
       if (!reduce) {
+        var pointerPause = null;
+        function setPaused(value) {
+          paused = value;
+          if (pauseBtn) pauseBtn.textContent = paused ? 'Resume rotation' : 'Pause rotation';
+          if (paused) stop(); else restart();
+        }
+        // Focus stops rotation until the visitor explicitly resumes it.
+        if (carouselColumn) carouselColumn.addEventListener('focusin', function () { setPaused(true); });
         if (pauseBtn) {
           pauseBtn.hidden = false;
-          pauseBtn.addEventListener('click', function () {
-            paused = !paused;
-            pauseBtn.textContent = paused ? 'Resume rotation' : 'Pause rotation';
-            if (paused) stop(); else restart();
+          // Preserve a pointer's intent when its focus event pauses the carousel.
+          pauseBtn.addEventListener('pointerdown', function () { pointerPause = !paused; });
+          pauseBtn.addEventListener('pointercancel', function () { pointerPause = null; });
+          pauseBtn.addEventListener('click', function (event) {
+            setPaused(event.detail > 0 && pointerPause !== null ? pointerPause : !paused);
+            pointerPause = null;
           });
         }
         restart();
-        carousel.addEventListener('mouseenter', stop);
-        carousel.addEventListener('mouseleave', restart);
+        (carouselColumn || carousel).addEventListener('mouseenter', stop);
+        (carouselColumn || carousel).addEventListener('mouseleave', restart);
         document.addEventListener('visibilitychange', function () {
           if (document.hidden) stop(); else restart();
         });
