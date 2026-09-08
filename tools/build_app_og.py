@@ -213,11 +213,8 @@ CARDS = {
          /* 440px keeps the page's sentence break ("...DBT skills." / "A crisis
             kit...") instead of orphaning "A crisis" onto the first line. */
          max-width: 440px; }
-  /* Keep the approved ivory portrait at its natural aspect ratio, with the
-     same rounded frame as the page's hero. All six companions stay visible. */
-  .art { width: 506px; height: auto; border-radius: 20px;
-         border: 1px solid rgba(33,53,59,0.12);
-         box-shadow: 0 12px 32px rgba(33,53,59,0.08); }
+  /* Match the page's transparent companion portraits at their natural aspect ratio. */
+  .art { width: 506px; height: auto; }
 """,
         "kicker": 'Quiet<span class="oak">oak</span>',
         "h1": 'Talk it through.<br><em>Find a next step.</em>',
