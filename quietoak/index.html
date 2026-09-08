@@ -263,7 +263,7 @@
     /* ===== HOW ===== */
     .how-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 56px; align-items: center; }
     @media (max-width: 880px) { .how-grid { grid-template-columns: 1fr; gap: 36px; } }
-    .how-image { width: 100%; max-width: 420px; display: block; margin: 0 auto; object-fit: contain; }
+    .how-image { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto; object-fit: contain; }
     .how-steps { list-style: none; counter-reset: step; }
     .how-steps li {
       counter-increment: step; padding: 16px 0 16px 64px;
@@ -540,14 +540,8 @@
     .gp-bar i { display: block; width: 0%; height: 100%; background: var(--primary); border-radius: 2px; }
     .gp-time { flex: 0 0 auto; color: var(--tertiary-fg); font-size: 0.83rem; font-variant-numeric: tabular-nums; }
     .gp-cap { margin-top: 12px; color: var(--tertiary-fg); font-size: 0.86rem; line-height: 1.55; }
-    /* Companion sits on a soft accent disc — same treatment as the in-app avatar. */
-    /* The same squircle tile the app draws (CompanionAvatar.cornerFraction =
-       0.30). It was `border-radius: 50%`, and a circle is the wrong container
-       for these characters: a fawn, a rabbit and a fox with upright ears do not
-       fit a round hole without slicing the ears or shrinking the face, and the
-       head crop that worked around it left every companion cut off flat across
-       the chest. `compose_site_cards.py` asserts no card's ink reaches this
-       corner. Change the radius there and here together. */
+    /* Match the app's current full-body portrait inside its softly tinted
+       companion tile. Keep the original canvas registration and all ears/feet. */
     .companion-card img { width: 104px; height: 104px; object-fit: contain; margin: 0 auto 10px; display: block; border-radius: 30%; padding: 4px; }
     .companion-card.willow img { background: var(--c-willow); }
     .companion-card.sage   img { background: var(--c-sage); }
@@ -887,7 +881,7 @@
           </ol>
         </div>
         <div>
-          <img class="how-image" src="companions/willow-steady.png?v=20260810w" alt="Willow, a gentle sage-green fawn companion" loading="lazy">
+          <img class="how-image" src="companions/willow-portrait.png?v=20260908c" width="840" height="840" alt="Willow, a gentle sage-green fawn companion" loading="lazy">
         </div>
       </div>
     </div>
@@ -901,42 +895,42 @@
       
       <div class="companions-grid">
         <div class="companion-card willow">
-          <img src="companions/willow-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="Willow, a fawn">
+          <img src="companions/willow-card.png?v=20260908c" width="416" height="416" loading="lazy" alt="Willow, a fawn">
           <div class="name">Willow</div>
           <div class="role">Grounding</div>
           <p>Warm and quiet. Starts with your body — feet on the floor, one slow breath — before anything else.</p>
           <button type="button" class="comp-hear" data-audio="audio/sample-willow.m4a?v=20260901a" aria-label="Hear Willow’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Willow</span></button>
         </div>
         <div class="companion-card sage">
-          <img src="companions/sage-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="Sage, an owl">
+          <img src="companions/sage-card.png?v=20260908c" width="416" height="416" loading="lazy" alt="Sage, an owl">
           <div class="name">Sage</div>
           <div class="role">Clear</div>
           <p>Calm and plainspoken. Explains what's actually happening, so the thing stops being a mystery.</p>
           <button type="button" class="comp-hear" data-audio="audio/sample-sage.m4a?v=20260901a" aria-label="Hear Sage’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Sage</span></button>
         </div>
         <div class="companion-card river">
-          <img src="companions/river-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="River, an otter">
+          <img src="companions/river-card.png?v=20260908c" width="416" height="416" loading="lazy" alt="River, an otter">
           <div class="name">River</div>
           <div class="role">Flowing</div>
           <p>Curious and easy to talk to. Asks before assuming — more of a conversation than a lesson.</p>
           <button type="button" class="comp-hear" data-audio="audio/sample-river.m4a?v=20260901a" aria-label="Hear River’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear River</span></button>
         </div>
         <div class="companion-card sol">
-          <img src="companions/sol-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="Sol, a fox">
+          <img src="companions/sol-card.png?v=20260908c" width="416" height="416" loading="lazy" alt="Sol, a fox">
           <div class="name">Sol</div>
           <div class="role">Hopeful</div>
           <p>Warm and low-light, never peppy. Finds the one true thing you already did, without talking you out of the hard part.</p>
           <button type="button" class="comp-hear" data-audio="audio/sample-sol.m4a?v=20260901a" aria-label="Hear Sol’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Sol</span></button>
         </div>
         <div class="companion-card stone">
-          <img src="companions/stone-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="Stone, a tortoise">
+          <img src="companions/stone-card.png?v=20260908c" width="416" height="416" loading="lazy" alt="Stone, a tortoise">
           <div class="name">Stone</div>
           <div class="role">Steady</div>
           <p>Unhurried and immovable. Sits with it instead of reaching for a fix, and says the least of any of them.</p>
           <button type="button" class="comp-hear" data-audio="audio/sample-stone.m4a?v=20260901a" aria-label="Hear Stone’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Stone</span></button>
         </div>
         <div class="companion-card fern">
-          <img src="companions/fern-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="Fern, a rabbit">
+          <img src="companions/fern-card.png?v=20260908c" width="416" height="416" loading="lazy" alt="Fern, a rabbit">
           <div class="name">Fern</div>
           <div class="role">Tender</div>
           <p>Soft and permission-giving. Takes the obligation off you first, before anything else gets discussed.</p>
@@ -975,17 +969,17 @@
       <p class="lede" style="text-align:center; margin: 0 auto 8px;">Tap a companion to see how they'd answer. These are real replies from the app &mdash; nothing here was written for this page.</p>
 
       <div class="cv-tabs" role="tablist" aria-label="Choose a companion">
-          <button class="cv-tab is-on" data-c="willow" type="button" aria-selected="true" role="tab"><img src="companions/willow-card.png?v=20260810w" width="416" height="416" loading="lazy" alt=""><span>Willow</span></button>
-          <button class="cv-tab" data-c="sage" type="button" aria-selected="false" role="tab"><img src="companions/sage-card.png?v=20260810w" width="416" height="416" loading="lazy" alt=""><span>Sage</span></button>
-          <button class="cv-tab" data-c="river" type="button" aria-selected="false" role="tab"><img src="companions/river-card.png?v=20260810w" width="416" height="416" loading="lazy" alt=""><span>River</span></button>
-          <button class="cv-tab" data-c="sol" type="button" aria-selected="false" role="tab"><img src="companions/sol-card.png?v=20260810w" width="416" height="416" loading="lazy" alt=""><span>Sol</span></button>
-          <button class="cv-tab" data-c="stone" type="button" aria-selected="false" role="tab"><img src="companions/stone-card.png?v=20260810w" width="416" height="416" loading="lazy" alt=""><span>Stone</span></button>
-          <button class="cv-tab" data-c="fern" type="button" aria-selected="false" role="tab"><img src="companions/fern-card.png?v=20260810w" width="416" height="416" loading="lazy" alt=""><span>Fern</span></button>
+          <button class="cv-tab is-on" data-c="willow" type="button" aria-selected="true" role="tab"><img src="companions/willow-card.png?v=20260908c" width="416" height="416" loading="lazy" alt=""><span>Willow</span></button>
+          <button class="cv-tab" data-c="sage" type="button" aria-selected="false" role="tab"><img src="companions/sage-card.png?v=20260908c" width="416" height="416" loading="lazy" alt=""><span>Sage</span></button>
+          <button class="cv-tab" data-c="river" type="button" aria-selected="false" role="tab"><img src="companions/river-card.png?v=20260908c" width="416" height="416" loading="lazy" alt=""><span>River</span></button>
+          <button class="cv-tab" data-c="sol" type="button" aria-selected="false" role="tab"><img src="companions/sol-card.png?v=20260908c" width="416" height="416" loading="lazy" alt=""><span>Sol</span></button>
+          <button class="cv-tab" data-c="stone" type="button" aria-selected="false" role="tab"><img src="companions/stone-card.png?v=20260908c" width="416" height="416" loading="lazy" alt=""><span>Stone</span></button>
+          <button class="cv-tab" data-c="fern" type="button" aria-selected="false" role="tab"><img src="companions/fern-card.png?v=20260908c" width="416" height="416" loading="lazy" alt=""><span>Fern</span></button>
       </div>
 
       <div class="cv-phone">
         <div class="cv-head">
-          <img class="cv-head-img" src="companions/willow-card.png?v=20260810w" width="416" height="416" loading="lazy" alt="">
+          <img class="cv-head-img" src="companions/willow-card.png?v=20260908c" width="416" height="416" loading="lazy" alt="">
           
           <div><div class="cv-head-name">Willow</div><div class="cv-head-ai">AI companion · not human</div><div class="cv-head-role">Grounding</div></div>
           <span class="cv-help">Get help now</span>
@@ -1503,7 +1497,7 @@
       }
       thread.innerHTML = out;
       thread.scrollTop = 0;
-      headImg.src = 'companions/' + cid + '-card.png?v=20260810w';
+      headImg.src = 'companions/' + cid + '-card.png?v=20260908c';
       headName.textContent = m[0];
       // Name and persona word only. The "AI companion · not human" line is a
       // separate element (.cv-head-ai) and is deliberately NOT addressed here:
