@@ -1,0 +1,207 @@
+{
+  "version": 1,
+  "coordinateSpace": "Normalized original base-art canvas, before aspect-preserving contain fit. x is right, y is down. All lengths scale independently with native art width/height before square fitting.",
+  "headWeight": "1 - smoothstep(neckBand[0], neckBand[1], y); if xFade exists multiply by 1 - smoothstep(xFade[0],xFade[1],x). Rotate inverse source coordinates around pivot by -angle * weight; do not merely add rotation displacement from an ellipse at the center of the face. All eyes/mouth patches must already be composited before this warp. Facial rectangle bottoms are above the neck fade.",
+  "headTiming": "Willow, River, Sol, Stone and Fern use a smooth 4.2-second tilt starting 4 seconds into each 16-second interval; they rest between gestures and alternate direction. Sage retains its gentle 12.8- and 8.3-second blended sway. A listening-state transition eases over 450 ms toward a small attentive tilt and reduces tail motion by 80% and head lift by 35%, without restarting breathing. All channels use continuous active time.",
+  "tailWeight": "Projection t = dot(p - pivot, tip - pivot) / dot(tip - pivot,tip - pivot); smoothstep(axisFade[0],axisFade[1],t) makes root stationary. Multiply by 1 - smoothstep(.55,1,ellipseDistanceSquared). If clipX exists multiply smoothstep(clipX[0],clipX[1],x), similarly clipY. Translation follows perpendicular unit axis times maxTipOffset and a gesture envelope. Coordinates are original art normalized; contain-fit before rendering.",
+  "tailTiming": "A smooth 3.2-second two-lobe burst begins 1 second into each 11.2-second interval, with exact rest between bursts. Listening reduces its amplitude by 80%. Reduced Motion stops it. No separate tail timer or audio sampling.",
+  "importantLimit": "These are authored 2D distortion rigs. They cannot reveal hidden surfaces. Do not advertise as 3D or promise free head turns. Suggested angles/offsets need real rendered phone-size pixel QA before shipping.",
+  "rigs": {
+    "willow": {
+      "head": {
+        "pivot": [
+          0.44,
+          0.57
+        ],
+        "neckBand": [
+          0.515,
+          0.615
+        ],
+        "xFade": null,
+        "maxTiltDegrees": 0.65,
+        "maxBob": 0.003
+      },
+      "tail": {
+        "pivot": [
+          0.75,
+          0.895
+        ],
+        "tip": [
+          0.846,
+          0.807
+        ],
+        "center": [
+          0.807,
+          0.853
+        ],
+        "radius": [
+          0.115,
+          0.125
+        ],
+        "axisFade": [
+          0.18,
+          0.7
+        ],
+        "maxTipOffset": 0.01,
+        "frequencyHz": 0.4,
+        "weightMode": "source_masked_tail_layer_behind_stationary_body",
+        "notes": "The whole exposed tail rotates as a separate source layer behind the stationary body. The moving source mask includes under-body overlap at the curved haunch seam. The broad support falls off only in transparent padding, preserving the full tip and fur edge. A fixed destination clipping wall is never used.",
+        "supportFormula": "1 - smoothstep(.9, 1, ellipseDistanceSquared), evaluated in each source layer; only transparent padding fades. Rigid tail rotation has no destination seam weight.",
+        "clipX": [
+          0.797,
+          0.814
+        ],
+        "hinge": {
+          "pivot": [
+            0.751,
+            0.9
+          ],
+          "maxAngleDegrees": 4.0,
+          "feather": 0.004,
+          "boundary": [
+            [
+              0.79,
+              0.8
+            ],
+            [
+              0.835,
+              0.786
+            ],
+            [
+              0.86,
+              0.774
+            ],
+            [
+              0.88,
+              0.758
+            ],
+            [
+              0.895,
+              0.747
+            ],
+            [
+              0.91,
+              0.751
+            ]
+          ]
+        }
+      }
+    },
+    "sage": {
+      "head": {
+        "pivot": [
+          0.5,
+          0.585
+        ],
+        "neckBand": [
+          0.49,
+          0.625
+        ],
+        "xFade": null,
+        "maxTiltDegrees": 0.75,
+        "maxBob": 0.003
+      },
+      "tail": null,
+      "noTailReason": "No visible tail in this frontal owl portrait. Do not wobble wing tips or feet as a substitute."
+    },
+    "river": {
+      "head": {
+        "pivot": [
+          0.465,
+          0.51
+        ],
+        "neckBand": [
+          0.45,
+          0.56
+        ],
+        "xFade": null,
+        "maxTiltDegrees": 0.75,
+        "maxBob": 0.003
+      },
+      "tail": {
+        "pivot": [
+          0.805,
+          0.884
+        ],
+        "tip": [
+          0.889,
+          0.844
+        ],
+        "center": [
+          0.867,
+          0.851
+        ],
+        "radius": [
+          0.043,
+          0.057
+        ],
+        "axisFade": [
+          0.3,
+          0.8
+        ],
+        "maxTipOffset": 0.008,
+        "frequencyHz": 0.32,
+        "weightMode": "axis_fade_times_flat_ellipse",
+        "notes": "Only the small segment behind the image-right haunch is exposed. Constrain to x >= .824 with a .018-wide feather; keep the large haunch and rear paw fixed. Tiny tip movement only, not a full tail wag. The visible haunch and attachment are protected by the final horizontal fade; only the exposed tip moves.",
+        "supportFormula": "1 - smoothstep(.55, 1, ellipseDistanceSquared)",
+        "clipX": [
+          0.842,
+          0.854
+        ]
+      }
+    },
+    "sol": {
+      "head": {
+        "pivot": [
+          0.48,
+          0.585
+        ],
+        "neckBand": [
+          0.53,
+          0.635
+        ],
+        "xFade": null,
+        "maxTiltDegrees": 0.55,
+        "maxBob": 0.003
+      },
+      "tail": null,
+      "noTailReason": "The tail is curled across the floor and its pale tip overlaps both front-paw silhouettes. A simple elliptical warp either leaves the true tip stationary, pulls the grounded curl, or moves paw pixels. Omit the Sol wag in this safe rig; retain expressive head/ear tilt and torso breathing. A later tail-specific segmentation and hidden-surface painting pass would support an actual lift."
+    },
+    "stone": {
+      "head": {
+        "pivot": [
+          0.355,
+          0.585
+        ],
+        "neckBand": [
+          0.545,
+          0.64
+        ],
+        "xFade": [
+          0.565,
+          0.62
+        ],
+        "maxTiltDegrees": 0.5,
+        "maxBob": 0.002
+      },
+      "tail": null,
+      "noTailReason": "No exposed tail. Keep shell completely still. The head x fade gives full motion through all facial masks and zero motion at x >= .620, protecting the visible shell."
+    },
+    "fern": {
+      "head": {
+        "pivot": [
+          0.49,
+          0.62
+        ],
+        "neckBand": [
+          0.575,
+          0.665
+        ],
+        "xFade": null,
+        "maxTiltDegrees": 0.65,
+        "maxBob": 0.003
+      },
+      "tail": null
+    }
+  }
+}
