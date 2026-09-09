@@ -161,6 +161,8 @@
       display: flex; flex-direction: column; gap: 2px; min-width: 190px;
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 14px; padding: 8px; box-shadow: 0 16px 40px rgba(33,53,59,0.12);
+      max-height: calc(100vh - 96px); max-height: calc(100dvh - 96px);
+      overflow-y: auto; overscroll-behavior: contain;
     }
     .mobile-links a { color: var(--fg); font-weight: 600; padding: 10px 12px; border-radius: 8px; }
     .mobile-links a:hover { background: var(--card-soft); color: var(--primary-dark); }
@@ -461,7 +463,7 @@
        .cv-head-role with the uppercase transform dropped — a disclosure is read,
        not decorated. Never drop this line while the header replica stands. */
     .cv-head-ai { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; color: var(--primary-dark); }
-    .cv-help { margin-left: auto; font-size: 0.72rem; font-weight: 700; color: #fff; background: #C2604B;
+    .cv-help { margin-left: auto; font-size: 0.72rem; font-weight: 700; color: #fff; background: #C2553B;
       padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
     /* The transcript is a real one, so it is longer than the panel. Wrap it so a
        fade can signal there is more — a nested scroller with a hard edge just
@@ -470,8 +472,8 @@
     .cv-scroll::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 54px;
       background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.96));
       pointer-events: none; border-radius: 0 0 4px 4px; }
-    .cv-thread { padding: 16px; max-height: 460px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
-      scrollbar-width: thin; scroll-behavior: smooth; }
+    .cv-thread { padding: 16px 16px 64px; max-height: 460px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+      scrollbar-width: thin; }
     .cv-msg { max-width: 86%; padding: 11px 15px; border-radius: 18px; font-size: 0.93rem; line-height: 1.55; }
     .cv-msg p { margin: 0 0 8px; } .cv-msg p:last-child { margin: 0; }
     .cv-me { align-self: flex-end; background: var(--primary-dark); color: #fff; border-bottom-right-radius: 6px; }
@@ -503,7 +505,7 @@
       margin-top: 12px; display: inline-flex; align-items: center; gap: 7px;
       padding: 8px 14px; min-height: 36px; border-radius: 999px;
       border: 1px solid rgba(62,125,138,0.35); background: rgba(62,125,138,0.08);
-      color: var(--primary); font-weight: 600; font-size: 0.86rem; cursor: pointer;
+      color: var(--primary-dark); font-weight: 600; font-size: 0.86rem; cursor: pointer;
       transition: background .2s;
     }
     .comp-hear:hover { background: rgba(62,125,138,0.16); }
@@ -683,7 +685,7 @@
     /* ===== FOOTER ===== */
     footer.site { padding: 40px 24px 60px; text-align: center; color: var(--muted-fg); font-size: 0.9rem; }
     footer.site .links { margin-bottom: 12px; }
-    footer.site .links a { color: var(--muted-fg); margin: 0 14px; font-weight: 600; }
+    footer.site .links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted-fg); margin: 0 14px; font-weight: 600; }
     footer.site .links a:hover { color: var(--primary); }
     footer.site .copyright { margin-top: 10px; }
 
@@ -721,7 +723,7 @@
     .screen-frame > a { display: block; cursor: zoom-in; }
     .screen-frame:focus-within { outline: 3px solid var(--primary-dark); outline-offset: 4px; }
     .cv-head-ai, .cv-head-role { font-size: .75rem; letter-spacing: 0; }
-    .cv-help { font-size: .8125rem; }
+    .cv-help { display: inline-flex; align-items: center; min-height: 44px; font-size: .8125rem; }
     .cv-help:hover { color: #fff; background: #9e4937; }
     .audio-status { text-align: center; color: var(--muted-fg); font-size: .875rem; }
     .audio-status { min-height: 1.65em; margin-top: 12px; }
@@ -905,7 +907,7 @@
             </a>
             <a href="#screens" class="btn-outline">See the app</a>
           </div>
-          <p class="hero-note">Free skills &amp; diary · No account · Ages 18+</p>
+          <p class="hero-note">Free skills &amp; diary · Ages 18+</p>
         </div>
         <div class="hero-image">
           <div class="hero-app screen-frame"><a href="screenshots/02-companion.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak companion screen with Willow, conversation starters, and saved talks"><img src="screenshots/02-companion.webp?v=20260909a" width="1080" height="2347" fetchpriority="high" alt="Quietoak companion screen with Willow, conversation starters, and saved talks"></a></div>
@@ -1193,9 +1195,9 @@
         </div>
         <div class="feature-card">
           <div class="icon-box"><img src="icons/feat-privacy.png?v=20260810w" width="192" height="192" loading="lazy" alt=""></div>
-          <h3>Private &amp; accountless</h3>
+          <h3>Your diary, your space</h3>
           
-          <p>No sign-up, no account to create. Your diary and practice live on your device — we keep no diary on our servers. No ads, no third-party trackers on your diary or chat.</p>
+          <p>Keep your diary and practice on your device. Choose what to share with your companion, and clear your saved conversations whenever you want.</p>
         </div>
       </div>
     </div>
@@ -1386,7 +1388,7 @@
         <div class="plan">
           <h3>Free</h3>
           <div class="price">$0</div>
-          <div class="period">no account, ever</div>
+          <div class="period">Everyday essentials</div>
           <ul>
             
             <li>Eighteen DBT skills across all four modules</li>

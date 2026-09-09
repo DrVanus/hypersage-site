@@ -58,7 +58,7 @@ a:focus-visible { outline: 3px solid var(--primary-dark); outline-offset: 3px; b
 }
 .legal-nav .brand img { width: 30px; height: 30px; border-radius: 8px; }
 .legal-nav .links { display: flex; gap: 22px; font-size: 0.95rem; }
-.legal-nav .links a { color: var(--muted-fg); font-weight: 600; }
+.legal-nav .links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted-fg); font-weight: 600; }
 .legal-nav .links a:hover { color: var(--primary); }
 .legal-nav .links a.active { color: var(--primary); }
 
@@ -97,6 +97,7 @@ main.legal h3 {
   color: var(--fg);
 }
 main.legal p, main.legal li { color: var(--fg); margin-bottom: 14px; }
+main.legal a { text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
 main.legal ul { padding-left: 22px; margin-bottom: 14px; }
 main.legal li { margin-bottom: 6px; }
 main.legal strong { color: var(--primary-dark); font-weight: 700; }
@@ -123,5 +124,5 @@ footer.legal-footer {
   text-align: center;
   color: var(--muted-fg); font-size: 0.9rem;
 }
-footer.legal-footer a { color: var(--muted-fg); margin: 0 12px; font-weight: 600; }
+footer.legal-footer a { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted-fg); margin: 0 12px; font-weight: 600; }
 footer.legal-footer a:hover { color: var(--primary); }
