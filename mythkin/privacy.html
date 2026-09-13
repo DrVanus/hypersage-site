@@ -73,7 +73,7 @@ we want to hear about it.</p>
 <tr><td><strong>Memories</strong> — short facts about you that a character has learned, each linked to the message it came from.</td><td>So characters remember you. This is the feature the app exists for.</td><td>Our server. Visible and editable by you in the app.</td></tr>
 <tr><td><strong>Age confirmation</strong> — that you confirmed you are 18+.</td><td>Legal requirement.</td><td>Our server, as a dated event against your device ID.</td></tr>
 <tr><td><strong>Crisis referral counts</strong> — that a referral was shown, and when. <em>Not what was said.</em> The row also holds a salted hash of the network the request came from — never an address, and it cannot be turned back into one.</td><td>California SB 243 requires operators to report these annually from July 2027. The network hash is what stops one caller looking like a crowd: crisis turns skip the free-tier limit, and without it anyone could mint a fresh device ID per message and take unlimited free replies.</td><td>Our server.</td></tr>
-<tr><td><strong>Subscription status</strong> — an Apple- or Google-signed receipt.</td><td>To unlock Plus. We never see your payment details; the store handles payment.</td><td>Verified in memory per request; not stored as a payment record.</td></tr>
+<tr><td><strong>Subscription status</strong>, if you subscribe — an Apple- or Google-signed receipt.</td><td>To unlock Plus. We never see your payment details; the store handles payment.</td><td>Verified in memory per request; not stored as a payment record.</td></tr>
 
 <tr><td><strong>Sparks, if they go on sale</strong> — sparks are a planned one-off purchase that would pay for paintings, and they are <strong>not on sale yet</strong>. If they are offered, we would store the store's transaction ID, which pack it was, and your remaining balance.</td><td>The transaction ID is how the same receipt could not be redeemed twice. The balance is what you would still own.</td><td>Our server. <strong>A balance would survive "Delete everything"</strong>, still keyed to your device — deleting it would destroy something you had paid for and we cannot refund it. See below.</td></tr>
 <tr><td><strong>Usage counts</strong> — how many messages you have sent in the current window.</td><td>To enforce the free tier fairly.</td><td>Our server.</td></tr>
@@ -130,7 +130,7 @@ There is no third-party analytics SDK and no advertising SDK in the app.</p>
 </div>
 <div class="card">
   <h3>Apple and Google — payments</h3>
-  <p>Subscriptions are handled entirely by the app stores. We receive a signed
+  <p>Subscriptions, if you take one, are handled entirely by the app stores. We receive a signed
   receipt confirming an active subscription. We never see your card.</p>
 </div>
 <div class="card">
@@ -217,7 +217,7 @@ we will say so in the app before the change takes effect, not only on this page.
   <a href="safety.html">Safety</a>
   <a href="terms.html">Terms</a>
   <a href="support.html">Support</a>
-  <span class="meta">Last updated 2026-08-24</span>
+  <span class="meta">Last updated 2026-09-13</span>
 </div></footer>
 <script>
 (function(){

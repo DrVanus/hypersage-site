@@ -314,19 +314,19 @@ FLEET_STATE = Path.home() / "Developer" / "DrVanus" / "fleet" / "state" / "curre
 # being true.
 STORE_ANSWER = {
     "PREPARE_FOR_SUBMISSION": (
-        "Not yet. Mythkin is an iPhone app; the build is finished and the "
-        "listing has not gone to review yet. There is no Android build; if one "
+        "Not yet. The iPhone app's build is finished and its listing has not "
+        "gone to review yet. There is no Android build; if one "
         "ships, this page will say so before it does."),
     "WAITING_FOR_REVIEW": (
-        "Not yet. Mythkin is an iPhone app, submitted and waiting on Apple. "
+        "Not yet. The iPhone app is submitted and waiting on Apple. "
         "There is no Android build; if one ships, this page will say so before "
         "it does."),
     "IN_REVIEW": (
-        "Not yet. Mythkin is an iPhone app, in review with Apple right now. "
+        "Not yet. The iPhone app is in review with Apple right now. "
         "There is no Android build; if one ships, this page will say so before "
         "it does."),
     "REJECTED": (
-        "Not yet. Mythkin is an iPhone app; the last submission came back with "
+        "Not yet. The iPhone app's last submission came back with "
         "changes to make, and it goes again once they are done. There is no "
         "Android build; if one ships, this page will say so before it does."),
     "READY_FOR_SALE": (
@@ -637,8 +637,8 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
          f"{_w(L['free_max_memories'])}-fact cap, {_w(L['plus_max_created_characters'])} "
          f"characters of your own and {_w(L['moment_paint_plus'])} paintings "
          f"{_paint_window(L)}. It also answers on a more capable model, and is what "
-         "lets you publish a story to the marketplace. Prices are whatever "
-         "the App Store shows you."),
+         "lets you publish a story to the marketplace. If you subscribe in the "
+         "iPhone app, the price is whatever the App Store shows you."),
         # SPARKS FAQ REMOVED 2026-08-22, and it must stay out until they can be
         # BOUGHT. Both consumables sit in MISSING_METADATA on App Store Connect
         # with no price schedule, so StoreKit prices neither and the app's own
