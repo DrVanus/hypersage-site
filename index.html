@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260913a">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260913b">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260913a">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260913b">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260913a",
+        "image": "https://hypersage.ai/og-image.png?v=20260913b",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -301,12 +301,11 @@
     .example-context dd { min-width: 0; font-size: .74rem; line-height: 1.35; color: #D0DCE9; }
     .example-processor { position: absolute; right: 0; top: 0; width: 32%; height: 102px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px; text-align: center; border: 1px solid rgba(167,139,250,.33); border-radius: 12px; background: linear-gradient(145deg,#17202E,#121721); }
     .example-processor::after { content: ''; position: absolute; inset: 0; border-radius: inherit; opacity: 0; box-shadow: 0 0 20px rgba(94,234,212,.22), inset 0 0 16px rgba(167,139,250,.13); pointer-events: none; }
-    /* Keep the diagram's text at its natural height inside the compact core. */
+    /* Keep the diagram's text at its natural height inside the box. The box names the
+       product the walkthrough belongs to, so the name stays on one line at phone widths. */
     .example-processor > * { flex-shrink: 0; }
-    .example-processor img { width: 27px; height: 18px; object-fit: contain; }
-    .example-processor strong { font: 500 .82rem/1.35 'Inter', sans-serif; }
-    .engine-faculties { font-size: .69rem; line-height: 1.45; color: #A7B8CD; }
-    .engine-faculties span { display: block; }
+    .example-processor img { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line-strong); object-fit: cover; }
+    .example-processor strong { font: 500 .82rem/1.35 'Inter', sans-serif; white-space: nowrap; }
     .example-result { position: relative; padding: 11px 14px; min-height: 94px; border: 1px solid rgba(45,212,191,.3); border-radius: 12px; background: linear-gradient(115deg,rgba(45,212,191,.08),rgba(167,139,250,.055)); }
     .example-status { display: flex; align-items: center; gap: 9px; color: #A0EBDC; font: 600 1.05rem/1.3 'Inter', sans-serif; }
     .example-check { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 auto; border: 1px solid rgba(45,212,191,.4); border-radius: 50%; background: rgba(45,212,191,.1); font-size: .72rem; }
@@ -379,8 +378,8 @@
       .example-context > div { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; padding: 4px 7px; }
       .example-context dt { flex: 0 0 auto; font-size: .69rem; }
       .example-context dd { font-size: .73rem; }
-      .example-processor { height: 132px; padding: 6px; gap: 8px; }
-      .engine-faculties { display: none; }
+      .example-processor { height: 132px; padding: 6px 2px; gap: 8px; }
+      .example-processor strong { font-size: .76rem; }
       .example-result { min-height: 116px; padding: 12px; }
       .example-status { font-size: .96rem; }
       .example-detail { font-size: .8rem; min-height: 4.5em; }
@@ -393,9 +392,11 @@
       .example-context { width: 55%; }
       .example-context dt { font-size: .69rem; }
       .example-context dd { font-size: .69rem; }
-      .example-processor strong { font-size: .76rem; }
       .engine-foot { column-gap: 4px; }
     }
+    /* Measured: the longest product name clears the box at 375px and up at .76rem. */
+    @media (max-width: 374px) { .example-processor strong { font-size: .7rem; } }
+    @media (max-width: 340px) { .example-processor strong { white-space: normal; } }
 
     /* ===== LOGO / WORDMARK STRIP ===== */
     /* No margin-top. It used to ADD to the hero's own bottom padding — 64+40=104px
@@ -612,7 +613,7 @@
       .product .top { column-gap: 12px; }
       .product .foot { column-gap: 12px; }
     }
-    /* ===== INTELLIGENCE LAYER ===== */
+    /* ===== AI SECTION (#ai) ===== */
     .systems { background: linear-gradient(180deg, var(--bg-2), var(--bg)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
                overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
@@ -880,7 +881,7 @@
       </a>
       <div class="links">
         <a href="#products">Products</a>
-        <a href="#ai">Intelligence</a>
+        <a href="#ai">AI features</a>
         <a href="#about">Studio</a>
         <a href="support.html">Support</a>
         <a href="#contact" class="btn btn-ghost">Get in touch</a>
@@ -889,7 +890,7 @@
         <summary aria-label="Open navigation menu">☰</summary>
         <div class="mobile-links">
           <a href="#products">Products</a>
-          <a href="#ai">Intelligence</a>
+          <a href="#ai">AI features</a>
           <a href="#about">Studio</a>
           <a href="support.html">Support</a>
           <a href="#contact">Get in touch</a>
@@ -906,14 +907,14 @@
         <span class="eyebrow">Independent Product Studio</span>
         <h1><span class="hero-line">Software with</span> <span class="grad-text hero-line">a point of view.</span></h1>
         <div class="hero-copy">
-          <p class="lede">HyperSage builds distinctive consumer apps for crypto markets, relationships, health, recovery, food, stories, and sleep — alongside original games. Where AI belongs, our <strong>product-specific intelligence layer</strong> brings together your context, relevant in-app activity, domain knowledge, tools, and safeguards.</p>
+          <p class="lede">HyperSage builds distinctive consumer apps for crypto markets, relationships, health, recovery, food, stories, and sleep — alongside original games. Some of them use AI for a specific task, like explaining why a portfolio moved, adapting a recipe to your pantry, or turning a symptom diary into a visit brief.</p>
           <div class="hero-cta">
             <a href="#products" class="btn btn-primary"><span>Explore the products</span><span aria-hidden="true">→</span></a>
             <a class="hero-try" href="https://waddleton.pages.dev/" target="_blank" rel="noopener" aria-label="Play Waddleton free in your browser"><span class="u">Or play Waddleton free</span> <span aria-hidden="true">↗</span></a>
           </div>
         </div>
 
-        <figure class="context-engine" aria-label="Product intelligence: from context to action">
+        <figure class="context-engine" aria-label="Product walkthroughs">
           <div class="example-app">
             <img id="example-icon" src="icons/cryptosage.webp" alt="" width="36" height="36">
             <div class="example-choice">
@@ -959,7 +960,7 @@
               <div><dt>Relevant inputs</dt><dd>your watchlists</dd></div>
               <div><dt>Current task</dt><dd>today’s move</dd></div>
             </dl>
-            <div class="example-processor"><img src="logo.png" alt="" width="27" height="18"><strong>Product intelligence</strong><div class="engine-faculties"><span>Knowledge · tools</span><span>Rules · safeguards</span></div></div>
+            <div class="example-processor"><img id="example-processor-icon" src="icons/cryptosage.webp" alt="" width="22" height="22"><strong id="example-processor-name">CryptoSage AI</strong></div>
             </div>
             <div class="example-result">
               <div class="example-status"><span class="example-check" aria-hidden="true">✓</span><span id="example-result-status">Portfolio move explained</span></div>
@@ -1352,22 +1353,14 @@
   <section class="block systems" id="ai">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow">Product intelligence</span>
+        <span class="eyebrow">Inside the products</span>
         
-        <h2>The intelligence is in how it all works together.</h2>
-        <p>We build the context, tools, and checks around each product’s AI. That work turns context into portfolio explanations, adapted recipes, visit briefs, branching stories, and practical next steps.</p>
+        <h2>Every AI feature is built for the product it serves.</h2>
+        <p>Not every product uses AI. Where one does, it has a specific job in that app, like the ones below.</p>
       </div>
 
-      <h3 class="sr-only">How a response is formed</h3>
-      <ol class="sr-only">
-        <li>Your context — goals, preferences, conditions, and boundaries you provide within the product.</li>
-        <li>Recent activity — relevant diary entries, symptoms, check-ins, conversations, and in-product activity.</li>
-        <li>Product intelligence — the current task, domain knowledge, live data, tools, rules, and safeguards.</li>
-        <li>A useful result — an answer, visit brief, recipe, story beat, or next action shaped to the task. Available actions and checks vary by product and feature.</li>
-      </ol>
-
       <div class="proof-rail">
-        <ul class="layer-proof" id="layer-proof" tabindex="0" role="list" aria-label="Product intelligence at work, one product at a time">
+        <ul class="layer-proof" id="layer-proof" tabindex="0" role="list" aria-label="Examples of what AI does in the products">
         <li class="proof-card" style="--accent: var(--c-wingmate);">
           <span class="proof-head"><img src="icons/wingmate.webp" alt="" width="26" height="26" loading="lazy"><span>In Wingmate</span><span class="availability">Live on iOS</span></span>
           <h3>Context across coaches</h3>
@@ -1520,7 +1513,7 @@
         <div class="f-col">
           <h3>Explore</h3>
           <a href="#products">Products</a>
-          <a href="#ai">Intelligence</a>
+          <a href="#ai">AI features</a>
           <a href="#about">Studio</a>
         </div>
         <div class="f-col">
@@ -1781,6 +1774,8 @@
         engine.querySelector('.example-label').textContent = item.inputLabel;
         engine.style.setProperty('--example-accent', item.color);
         engine.querySelector('#example-icon').src = item.icon;
+        engine.querySelector('#example-processor-icon').src = item.icon;
+        engine.querySelector('#example-processor-name').textContent = item.name;
         engine.querySelector('.example-availability').textContent = item.availability;
         engine.querySelector('.engine-counter').textContent = String(index + 1).padStart(2, '0') + ' / ' + cases.length;
         engine.querySelector('.example-prompt').textContent = '“' + item.prompt + '”';

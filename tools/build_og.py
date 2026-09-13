@@ -8,10 +8,10 @@ WHY THIS IS A RENDERER AND NOT A DESIGN FILE
 The previous og-image was drawn separately from the site and drifted, exactly the
 way a second copy of anything drifts:
 
-  * It showed an ORBITAL diagram — "PRODUCT INTELLIGENCE" ringed by KNOWLEDGE /
-    CONTEXT / RESULT / SAFEGUARDS. The site shows a left-to-right PIPELINE:
-    three input cards -> Product system -> Result. Two different diagrams making
-    two different claims about how the product works. Someone shares the link,
+  * It showed an ORBITAL diagram, four labels ringed around a hub. The site shows
+    a left-to-right walkthrough: three input cards -> the product -> Result. Two
+    different diagrams making two different claims about how the product works.
+    Someone shares the link,
     sees one thing, clicks, and sees another.
   * It listed THIRTEEN products including "The One". The site has twelve, and
     "The One" is not among them.

@@ -2,11 +2,10 @@
 
 > HyperSage AI Labs is an independent product studio building distinctive consumer
 > apps for relationships, health, recovery, food, stories, markets, and sleep —
-> alongside original games. Where AI belongs, its products add a product-specific
-> intelligence layer that combines information a person provides and relevant
-> in-product context with domain knowledge, tools, and safeguards. The studio
-> designs, builds, and operates the entire portfolio in-house. Legal entity:
-> HyperSage AI Labs LLC (Delaware, USA). Contact: support@hypersage.ai.
+> alongside original games. Some of its products use AI for a specific task, such
+> as explaining a portfolio move, adapting a recipe, or preparing a visit brief.
+> The studio designs, builds, and operates the entire portfolio in-house. Legal
+> entity: HyperSage AI Labs LLC (Delaware, USA). Contact: support@hypersage.ai.
 
 ## Products
 
