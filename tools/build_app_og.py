@@ -349,7 +349,7 @@ CARDS = {
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5v19M3.77 7.25l16.46 9.5M20.23 7.25L3.77 16.75"/><path d="M9.4 5.1L12 6.9l2.6-1.8M9.4 18.9L12 17.1l2.6 1.8"/><path d="M4.2 10.9l3.1.9-.8 3.1M19.8 13.1l-3.1-.9.8-3.1"/><path d="M19.8 10.9l-3.1.9.8 3.1M4.2 13.1l3.1-.9-.8-3.1"/></svg>',
         "kicker": "Free · Plays in your browser",
         "h1": 'A snowy island to<br><span class="grad">waddle&nbsp;around.</span>',
-        "sub": "Make a penguin, wander a painted arctic island, meet other players, and dive into 15 arcade games. No sign-up, no cost.",
+        "sub": "Make a penguin, wander a painted arctic island, meet other players, and dive into 17 arcade games. No sign-up, no cost.",
     },
     "mythkin": {
         "art": "mythkin-icon.png",
