@@ -25,11 +25,13 @@
 <header class="site"><span class="mark"></span><a class="brand" href="./">Hoardling</a></header>
 <main class="wrap">
 <h1>Privacy</h1>
-<p class="updated">Last updated 24 August 2026</p>
+<p class="updated">Last updated 13 September 2026</p>
 
 <div class="card">
 <h2 style="margin-top:0">The short version</h2>
-<p>Hoardling has <strong>no accounts, no sign-up form, and no name or email to give us</strong>.
+<p>Hoardling comes two ways: as the Hoardling iPhone app, and in a web browser at
+hypersage.ai. This page covers both. Hoardling has <strong>no accounts, no sign-up form, and no
+name or email to give us</strong>.
 Your campaign progress is stored on your device, not on our servers. We run
 <strong>no analytics, no advertising, and no third-party trackers</strong>. The only thing that
 leaves your device is an anonymous, auto-created leaderboard identity and the wave number your
@@ -41,14 +43,16 @@ it off. That is spelled out below.</p>
 <h2>What stays on your device</h2>
 <p>Everything about your run of the game — campaign stars, your best Daily Siege wave, which
 Forge upgrades you've bought, which trial badges you've earned, which raiders you've met, and
-your sound preference — is written to your browser's local storage. Deleting the site's data (or
-uninstalling the app if you added it to your Home Screen) deletes it. There is no server copy and
-no backup, so <strong>we cannot restore your progress</strong> if you clear your browser or switch
-devices.</p>
+your sound preference — is saved on your device. In the <strong>iPhone app</strong> the game
+is bundled inside the app and saves to the app's own storage on your phone; deleting the app
+deletes it. In a <strong>browser</strong> it is written to that browser's local storage, and
+deleting the site's data (or removing it if you added it to your Home Screen) deletes it. The app
+and the browser keep separate saves. There is no server copy and no backup, so <strong>we cannot
+restore your progress</strong> if you delete the app, clear your browser or switch devices.</p>
 
 <h2>The leaderboard identity</h2>
 <p>Hoardling has a public Daily Siege leaderboard, and <strong>posting to it is on by
-default</strong>. Starting a Daily Siege run issues your browser an <strong>anonymous
+default</strong>. Starting a Daily Siege run issues the app or your browser an <strong>anonymous
 session</strong> from our database provider, Supabase — no email, password, or personal detail is
 asked for or collected — and when that run ends, the wave you reached is submitted to the board
 automatically. There is no confirmation step and no prompt.</p>
@@ -62,13 +66,11 @@ only Daily Siege is.</p>
 (four characters derived from the anonymous session itself). You never type a name, and the app
 never asks you for one. Each submission carries that name, the board, the wave number, and a
 one-run token the server issued when the run began — nothing else about you or your device.</p>
-<p>Hoardling and its experimental sibling, <a href="https://hypersage.ai/hoardling3d/">Hoardling
-3D</a>, are both served from hypersage.ai, so browsers treat them as the same site for storage
-purposes: your anonymous session and your sound setting are shared between the two if you play
-both, the same way two tabs of one site would share a login. Your campaign progress is kept
-completely separate — playing one never touches your saved stars or Daily best in the other. Each
-game also posts to its own leaderboard, so a Daily Siege score from one never appears on the
-other's board.</p>
+<p><strong>In a browser only:</strong> hypersage.ai also hosts a 3D build of the game, and a
+browser treats every page on hypersage.ai as one site for storage purposes, so if you play both in
+the same browser they share your anonymous session and your sound setting, the way two tabs of one
+site share a login. Campaign progress is kept separate, and each posts to its own leaderboard. The
+iPhone app runs only its own bundled game and shares nothing with any website.</p>
 <p>If the leaderboard can't be reached — offline, or a slow connection — your pending score is held
 in local storage and retried later, up to six attempts over one hour, then dropped. It never grows
 beyond your ten most recent runs.</p>
@@ -96,10 +98,10 @@ ever changes, this page and the app's own screens will be updated on the same da
 change ships.</p>
 
 <h2>Children</h2>
-<p>Hoardling is built to a kid-safe standard (target age 9+): comic dark-fantasy, no blood or
-gore, and raider "defeats" play as slapstick, not violence. The app collects no personal
-information from anyone, of any age, and has no chat, no messaging, and no way for one player to
-contact another — the leaderboard is read-only score rows, nothing else.</p>
+<p>Hoardling is a fantasy strategy game with cartoon combat. It is rated 12+ on the App Store and
+is not directed at children under 13. It collects no personal information from anyone, of any
+age — no name, email address or contact detail — and has no chat, no messaging, and no way for
+one player to contact another; the leaderboard is read-only score rows, nothing else.</p>
 
 <h2>Changes</h2>
 <p>If what the app does changes, this page changes on the same day. The date at the top is the

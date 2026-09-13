@@ -27,13 +27,16 @@
 <header class="site"><img class="mark" src="app-icon.png" alt="" width="30" height="30"><a class="brand" href="./">Holohound</a></header>
 <main class="wrap">
 <h1>Privacy</h1>
-<p class="updated">Last updated 1 September 2026</p>
+<p class="updated">Last updated 13 September 2026</p>
 
 <div class="card">
 <h2 style="margin-top:0">The short version</h2>
 <p>Holohound has <strong>no accounts and no sign-in</strong>. Your collection is stored
 on your phone, not on our servers. We run <strong>no analytics, no advertising and no
-third-party tracking</strong>. We cannot see your binder.</p>
+third-party tracking</strong>. We cannot see your binder. Three things do reach our own
+server, and each is described below: <strong>messages to Hound</strong>, the AI companion;
+<strong>sold-price lookups</strong> for a card; and, if you subscribe, <strong>proof of your
+Holohound Pro subscription</strong>. Hound's replies are written by Anthropic's AI.</p>
 </div>
 
 <h2>What stays on your device</h2>
@@ -53,12 +56,12 @@ lose the device or delete the app. Backup is not implemented in this version.</p
 each game: <a href="https://tcgdex.dev" rel="noopener">TCGdex</a> for Pokémon,
 <a href="https://scryfall.com" rel="noopener">Scryfall</a> for Magic,
 <a href="https://ygoprodeck.com" rel="noopener">YGOPRODeck</a> for Yu-Gi-Oh!,
-
 Lorcast for Lorcana, and
 <a href="https://gcgapi.com" rel="noopener">gcg-api</a> for Gundam. Like any request to any
 website, whichever catalogue you are browsing receives your IP address and can see which
-cards were requested. We do not send any of them your collection, and the requests carry no
-identifier from us.</p>
+cards were requested. Yu-Gi-Oh! and Gundam card images are fetched through our own server,
+which requests that card's image on the app's behalf, so the image host sees our server
+rather than your phone. We do not send any catalogue your collection, and these requests carry no identifier from us.</p>
 <p>Holohound also links out to graders and marketplaces — PSA, Beckett, CGC, SGC, TCGplayer
 and eBay — when you tap a certificate or a listing. Those open outside the app and are
 covered by their own privacy policies, not this one. Nothing is sent to them unless you tap.</p>
@@ -74,32 +77,69 @@ dollars; Lorcast names no marketplace behind its numbers, so neither do we.
 <strong>Gundam:</strong> no price feed exists yet, so the app shows no price at all rather
 than an invented one. Holohound is not endorsed or certified by TCGplayer, Cardmarket,
 TCGdex, Scryfall, YGOPRODeck, Lorcast or gcg-api.</p>
+<p>When you open a card's price chart, the app asks our server for the daily prices it has
+recorded for that product. That request carries the product number and, like any web
+request, your IP address — nothing else. The app also fetches a small settings file from our
+server that carries nothing about you.</p>
+
+<h3>Sold-price lookups</h3>
+<p>When its sold-listings feed is connected, the app can show recent sold prices for a card,
+including graded sales. That feed is <strong>not always connected and does not cover every
+card</strong>, and when the app cannot get sold prices for a card it says so on that card. To look it up, the app sends our server the card's catalogue
+id, its name, number and printing, the grading company and grade if the card is graded, the random
+install id described below, and — if you subscribe to Pro — the Apple-signed record of your subscription. Our
+server counts lookups per IP address per day, so one network cannot run up unlimited
+lookups, and asks our sold-listings data provider (currently
+<a href="https://scrydex.com" rel="noopener">Scrydex</a>, which supplies eBay sold-listing data)
+for that card. The provider is sent the card, not your install id, your IP address or your
+collection.</p>
 
 <h3>Hound, the AI companion</h3>
-<p><strong>Hound has been live since 18 August 2026.</strong> Until that date its answers
-were pre-written examples; they now come from a real model. This is exactly what happens
-when you send it a message, and nothing more: the message you type, any photo you attach to
-it, the last few messages of that conversation, and the specific card rows relevant to your
-question are sent to our server and forwarded to
-<a href="https://www.anthropic.com/" rel="noopener">Anthropic</a> to generate the reply.
-Your whole collection is not sent, no account is created, and we do not store the
-conversation on our servers. Anthropic retains API inputs and outputs for a limited
-period under its trust-and-safety policy before deleting them; that retention is theirs,
-not ours, and it is why the App Store privacy label declares Hound messages and attached
-photos as collected — not linked to you, and never used for tracking.</p>
-<p>Two things are counted so the daily message allowance can be enforced: a random id the
-app generates for your install, and the IP address the request arrives from. Neither is a
-login and neither is joined to anything else — they are a running count for the day, which
-resets at midnight UTC. The app ships no password, no email address and no profile.</p>
+<p>When you send Hound a message, this is exactly what is sent, and nothing more: the message
+you type, any photo you attach to it, the last few messages of that conversation, and the
+specific card rows relevant to your question — which can include what you paid for a card and
+its condition. They go to our server and are forwarded to
+<a href="https://www.anthropic.com/" rel="noopener">Anthropic</a>, whose AI model writes the
+reply. Your whole collection is not sent, no account is created, and we do not store the
+conversation on our servers. Anthropic retains API inputs and outputs for a limited period
+under its trust-and-safety policy before deleting them; that retention is theirs, not ours.
+None of it is used for tracking.</p>
+
+<h3>The install id and daily counts</h3>
+<p>The app generates a random id for your install. It is not a login, and it is not your
+Apple ID or an advertising identifier. It is sent with every Hound message and every
+sold-price lookup, and our server uses it, together with the IP address the request arrives
+from, to keep <strong>daily counts</strong>: how many Hound messages an install and a network
+have sent that day, and how many sold-price lookups a network has made. The allowances reset at
+midnight UTC. The counts are tallies against those ids and addresses; they are not joined to
+your collection, and the app ships no password, no email address and no profile.</p>
+
+<h3>Holohound Pro</h3>
+<p>Holohound Pro is sold and billed by <strong>Apple through the App Store</strong>. We never
+see your name, your Apple ID, your card or your billing address. When you subscribe, Apple
+gives the app a signed record of the transaction, and the app sends that record with each
+Hound message and sold-price lookup, so our server can check against Apple's certificate that
+the subscription is real and current before applying Pro's limits.</p>
+<p>To stop one subscription being shared across strangers' phones, our server keeps a
+<strong>one-way hash of the subscription's original transaction id</strong>, together with
+<strong>up to five install ids</strong> that have used it and when each last did. An install id
+that has not used the subscription for 30 days stops counting toward those five, but it can stay
+in the record until the subscription is next used, and the record itself has no automatic
+deletion date yet; to ask us to remove it, email us. This means that,
+for a subscriber, the install id and its daily Hound count are linked on our server to the
+subscription.</p>
 
 <h2>What we never collect</h2>
 <ul>
   <li>No name, email address or phone number — there is nothing to sign up for.</li>
+  <li>No payment details — Apple handles every purchase.</li>
   <li>No advertising identifiers, no ad networks, no cross-app tracking.</li>
   <li>No analytics or crash-reporting SDK is present in this build. If something breaks,
       Profile offers a "Share diagnostics" report — it is assembled on your phone, you can
       read every line before sharing it, and the app never transmits it anywhere itself.</li>
-  <li>No location, contacts, photos library, or microphone access is requested.</li>
+  <li>No location, contacts, or microphone access is requested, and no photo-library
+      permission: a photo you choose to attach is picked with the system photo picker, which
+      hands the app only that photo.</li>
 </ul>
 
 <h2>Camera</h2>
@@ -112,14 +152,18 @@ message to Hound, that photo is sent with the message, exactly as described abov
 attaches a photo on your behalf.</p>
 
 <h2>Children</h2>
-<p>Holohound is a collection tracker for a hobby many children take part in. It collects no
-personal information from anyone, of any age, and has no social features, no chat with
-strangers, and no user-generated content. Hound is an AI, not a person and not another
-user; what a message to it sends is listed in full above, and none of it is stored.</p>
+<p>Holohound is rated 12+ on the App Store and is not directed at children under 13. It asks
+no one for a name, an email address or contact details, and it has no social features and no
+chat with other people. Hound is an AI, not a person and not another user; what a message to
+it sends is listed in full above.</p>
 
 <h2>Your choices</h2>
-<p>You can export your collection to a CSV file from the Profile screen at any time,
-without a subscription. To erase everything Holohound holds about you, delete the app.</p>
+<p>You can export your collection to a CSV file from the Profile screen at any time, without
+a subscription. Deleting the app erases your collection, your scan photos and the install id
+on your phone. If you subscribed, cancel Holohound Pro in your Apple ID's subscription settings —
+deleting the app does not cancel it — and the install stops counting toward the subscription's five
+places 30 days after it was last used, as described above. For a question about anything our
+server holds, or to ask for it to be removed, email us.</p>
 
 <h2>Changes</h2>
 <p>If what the app does changes, this page changes on the same day. The date at the top is

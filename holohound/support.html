@@ -28,7 +28,7 @@
 <h1>Support</h1>
 <p class="lede">A real person reads this mailbox.
 <a href="mailto:support@hypersage.ai">support@hypersage.ai</a></p>
-<p class="updated">Last updated 31 August 2026</p>
+<p class="updated">Last updated 13 September 2026</p>
 
 <div class="card">
 <p style="margin:0">When you write, it helps enormously to include your iOS version, the
@@ -40,15 +40,18 @@ its name and set. A screenshot is worth several paragraphs.</p>
 
 <h3>Is scanning limited?</h3>
 <p>No. Scanning is unlimited and free, with no daily cap and no account. The only metered
-thing is the number of messages you send to Hound, the AI companion, and the app shows how
-many you have used and when they reset.</p>
+thing is the number of messages you send to Hound, the AI companion — 3 a day free, or 400 a
+day with Holohound Pro — and the app shows how many you have used and when they reset.</p>
 
 <h3>Why does a price look wrong?</h3>
 <p>Prices come from a different feed for each game — TCGplayer via TCGdex for Pokémon,
 TCGplayer via Scryfall for Magic, YGOPRODeck for Yu-Gi-Oh!, Lorcast for Lorcana, and none at
-all for Gundam — and the card names its own. A market price is not the same as the The card report shows the cheapest current listing and
-the middle of the listings so you can see the spread. Sold-price history is not connected
-yet, and the app says so rather than showing you a market price labelled as a sale.</p>
+all for Gundam — and the card names its own. A market price is not the same as a sale
+price, so the card report also shows the cheapest current listing and the middle of the
+listings, so you can see the spread. Sold-price history comes from a separate sold-listings
+feed, which isn't always connected and doesn't cover every card; where the app can't show it
+for a card, it says so
+rather than showing you a market price labelled as a sale.</p>
 
 <h3>How do I get my collection out?</h3>
 <p><strong>Profile → Export collection (CSV)</strong>. It is free, it needs no
@@ -56,22 +59,32 @@ subscription, and the file is yours.</p>
 
 <h3>How do I delete my data?</h3>
 <p>Delete the app. Your collection is stored on your device, so removing the app removes all
-of it, and there is no account to close and no server copy of it to request. The only thing
-our own server holds is the running count of Hound messages for the day, described in the
-<a href="privacy.html">privacy policy</a>; it is keyed to a random per-install id, it resets
-daily, and it is not joined to anything about you.</p>
+of it, and there is no account to close and no server copy of your collection to request.
+Our own server holds daily counts of Hound messages and sold-price lookups, keyed to a random
+per-install id and to IP address, and — if you subscribe to Pro — a hashed record of which
+installs use your subscription; an install stops counting toward it after 30 days without use.
+None of these has an automatic deletion date yet, so email us to ask for removal. The
+<a href="privacy.html">privacy policy</a> lists all of it. Deleting the app does not cancel
+Holohound Pro; cancel that in your Apple ID settings (see below).</p>
 
 <h3>I lost my collection when I changed phones.</h3>
 <p>We are sorry — and this one is on us to fix. Backup is not implemented in this version,
 so the collection lives only on the device that recorded it. Until backup ships, exporting
 a CSV occasionally is the safety net.</p>
 
-<h3>Restoring a purchase</h3>
-<p>There is nothing to restore yet: Holohound is not on the App Store, so nothing has ever
-been sold to anyone. The purchase and restore code is written and ships in the app — it
-simply has no sale to restore. When Holohound Pro does go on sale, <strong>Restore Purchases</strong> will sit
-on the Holohound Pro screen, and purchases will be tied to your Apple account rather than to
-a Holohound account.</p>
+<h3>Restoring Holohound Pro</h3>
+<p>Holohound Pro is tied to your Apple ID, not to a Holohound account — there isn't one. On a
+new or reinstalled phone signed in to the same Apple ID, open <strong>Profile → See Holohound
+Pro</strong> (or tap the Hound message counter) and tap <strong>Restore Purchases</strong> at the
+top of the Holohound Pro screen.</p>
+
+<h3>Cancelling Holohound Pro, or asking for a refund</h3>
+<p>Holohound Pro renews automatically until you cancel it. To stop the next renewal, cancel at
+least 24 hours before the current period ends, in your Apple ID's subscription settings (on iPhone: <strong>Settings →
+your name → Subscriptions</strong>); you keep Pro until the period you have paid for ends.
+Apple handles billing and refunds, so a refund request goes to Apple at
+<a href="https://reportaproblem.apple.com/" rel="noopener">reportaproblem.apple.com</a>. The
+full subscription terms are in the <a href="terms.html#subscriptions">Terms of Use</a>.</p>
 
 <h2>Report a bug or a wrong card</h2>
 <p>If a card is identified wrongly, or a set is missing printings, tell us the card and set

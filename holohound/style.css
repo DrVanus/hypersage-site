@@ -191,12 +191,6 @@ footer.site-marketing{border-top:1px solid var(--border);margin-top:24px;padding
 .footer-links{display:flex;flex-wrap:wrap;gap:14px 20px;font-size:14px}
 .footer-links a{color:var(--dim);text-decoration:none}
 .footer-links a:hover{color:var(--text)}
-.hs-more{margin-top:26px;padding-top:22px;border-top:1px solid var(--border)}
-.hs-more h4{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px}
-.hs-more-list{display:flex;flex-wrap:wrap;gap:8px}
-.hs-more-list a{font-size:12.5px;color:var(--dim);text-decoration:none;padding:6px 12px;border:1px solid var(--border);
-  border-radius:999px}
-.hs-more-list a:hover{color:var(--text);border-color:var(--tint)}
 .footer-copy{margin-top:22px;font-size:13px;color:var(--dim)}
 
 footer.site{border-top:1px solid var(--border);margin-top:48px;padding:22px 20px;max-width:var(--maxw);margin-left:auto;margin-right:auto;
