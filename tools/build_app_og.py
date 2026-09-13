@@ -321,7 +321,7 @@ CARDS = {
         # "coming". Follows the fleet's "<category> · iOS" kicker convention.
         "kicker": "Dating coach · iOS",
         "h1": 'AI dating<br>coaches that<br><em>actually get&nbsp;it.</em>',
-        "sub": "Four coaches, four perspectives. Drop a screenshot and get exact replies to send — platform-aware advice for Tinder, Hinge, Bumble, and texting.",
+        "sub": "Four coaches, four perspectives. Drop in a screenshot and get replies you can make your own — for Tinder, Hinge, Bumble, Instagram, Snapchat, Messages, or any app.",
     },
     "waddleton": {
         "art": "waddleton-icon.png",
