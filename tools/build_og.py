@@ -49,7 +49,7 @@ NAMES = {
 }
 
 
-def site_parts() -> tuple[str, str, list[str]]:
+def site_parts() -> tuple[str, str, list[str], list[str], str]:
     html = INDEX.read_text()
     style = re.search(r"<style>(.*?)</style>", html, re.S)
     if not style:
@@ -82,28 +82,22 @@ def site_parts() -> tuple[str, str, list[str]]:
         if i not in icons[i].rsplit("/", 1)[-1]:
             sys.exit(f"icon for product-{i} is {icons[i]} — the file does not name "
                      f"the product it was matched to; the card would show the wrong art")
-    # Each card's lifecycle chip, in page order. The card renders fifteen
-    # identical tiles, but the PAGE qualifies seven of them as unshipped — so a
-    # bare "15 apps and games" under a row of store-looking icons asserts a
-    # shipping portfolio nearly half of which you cannot get yet, to an audience
-    # that mostly never clicks through. The count of live products is read off
-    # the page's own `status live` marker rather than typed, so it moves on its
-    # own the day something ships; a hardcoded number here would rot at exactly
-    # the moment the news is good.
-    statuses = re.findall(r'class="status( live)?">([^<]*)<', html)
-    if len(statuses) != len(seen):
-        sys.exit(f"{len(seen)} product cards but {len(statuses)} status chips — "
-                 f"the card cannot say how many are live if the page's own "
-                 f"lifecycle markers do not line up with its products")
+    # The strip's label is the portfolio section's own eyebrow, and it carries NO
+    # COUNT. It used to read "16 apps and games · 10 live now", counted off the
+    # page's status chips. A number inside a picture is a claim that goes stale
+    # between rebuilds and then sits in X's card cache for a week per URL, and
+    # Vanus judged a count unprofessional on the page itself (2026-09-13), so the
+    # page's at-a-glance band dropped its numbers in the same change.
+    cap = re.search(r'id="products".{0,400}?class="eyebrow">([^<]+)<', html, re.S)
+    if not cap:
+        sys.exit("no eyebrow in the #products section — the strip label has no source")
     return (style.group(1), fig.group(1), [NAMES[i] for i in seen],
-            [icons[i] for i in seen], [t for _, t in statuses],
-            sum(1 for cls, _ in statuses if cls.strip() == "live"))
+            [icons[i] for i in seen], cap.group(1).strip())
 
 
 def build_html() -> str:
-    style, figure, products, icons, _, live = site_parts()
+    style, figure, products, icons, cap = site_parts()
     tiles = "".join(f'<img src="{s}" alt="">' for s in icons)
-    cap = f"The portfolio · {len(products)} apps and games · {live} live now"
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <!-- The site's @font-face rules live HERE, not in index.html's <style> block, so
      lifting that block alone rendered the whole card — including the lifted
@@ -124,7 +118,7 @@ def build_html() -> str:
   /* 500 + a 20px gutter, tuned WITH the figure's scale below so the card has
      even air on both sides — see that rule for the arithmetic. The floor on this
      width is the tile strip: 8 tiles per row needs 477px of content box, and at
-     7 per row fifteen products spill into a third row that collides upward. */
+     7 per row sixteen products spill into a third row that collides upward. */
   .og-left {{ width:500px; flex:0 0 500px; display:flex; flex-direction:column; }}
   .og-right {{ flex:1; display:flex; align-items:center; justify-content:center; }}
   .og-brand {{ display:flex; align-items:center; gap:12px; margin-bottom:30px; }}
@@ -161,10 +155,10 @@ def build_html() -> str:
      no name is ever read, so the card spent its whole lower third on type nobody
      can see. Icons survive the downscale — each tile is still ~18px in that
      bubble and reads as a portfolio at a glance. The label is the live page's own
-     strip label and the tiles are the live page's own icons, so this section
+     section eyebrow and the tiles are the live page's own icons, so this section
      mirrors the site exactly like the figure does.
-     50px + 11px gap = 8 tiles per row inside 492px, so fifteen products land as
-     8 + 7. Check the arithmetic if the count changes; a third row would collide
+     50px + 11px gap = 8 tiles per row inside 492px, so sixteen products land as
+     8 + 8. Check the arithmetic if the count changes; a third row would collide
      with the paragraph above. */
   .og-apps {{ margin-top:auto; }}
   .og-apps .cap {{ font: 600 11px/1 'JetBrains Mono',ui-monospace,monospace;
@@ -178,6 +172,14 @@ def build_html() -> str:
   /* The compact flow keeps the page’s own typography and geometry.
      Scale it as one unit inside the social card’s right column. */
   .og-right .context-engine {{ transform:scale(1.08); transform-origin:center; margin:0; }}
+  /* NO CONTROLS IN A PICTURE. The lifted figure is the page's live carousel, and
+     on the page "01 / 12", "Explore app ↗" and the product menu's chevron all
+     work. Frozen into a PNG they are a counter for slides nobody can advance, a
+     button nobody can press and a menu nobody can open — a fake CTA in the one
+     image that represents the studio on X. "Illustrative example" stays: it is
+     the caption that keeps the diagram honest. */
+  .og-right .engine-counter, .og-right .example-link {{ display:none !important; }}
+  .og-right .example-choice select {{ background-image:none; }}
 </style></head><body>
 <div class="og">
   <div class="og-left">
@@ -210,22 +212,22 @@ def inputs_digest() -> str:
     the left column: that is precisely why they belong. If the page's hero
     headline is rewritten, nothing about the lifted figure changes, and the
     preview would keep promising the old line in silence."""
-    style, figure, products, icons, statuses, _ = site_parts()
+    style, figure, products, icons, cap = site_parts()
     html = INDEX.read_text()
     h1 = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S)
     h1 = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", h1.group(1))).strip() if h1 else ""
     ogt = re.search(r'<meta property="og:title" content="([^"]*)"', html)
     h = hashlib.sha256()
-    # Statuses are in here because the card COUNTS them. An app going live
-    # changes no style, no figure and no name — without this the preview would
-    # keep announcing the old number in silence, which is this stamp's whole job.
-    for part in (style, figure, "\n".join(products), "\n".join(icons),
-                 "\n".join(statuses), h1, ogt.group(1) if ogt else ""):
+    # Lifecycle chips are deliberately NOT in here any more: the card stopped
+    # counting them, so an app going live changes no pixel, and a stale verdict
+    # would only force a ?v= bump on identical bytes.
+    for part in (style, figure, "\n".join(products), "\n".join(icons), cap,
+                 h1, ogt.group(1) if ogt else ""):
         h.update(part.encode())
         h.update(b"\0")
     # The brand mark is pixels in the card; a swapped logo.png must read as stale.
-    # The fifteen app icons are pixels in it too, for exactly the same reason —
-    # a redrawn icon changes what the card shows while every string stays put.
+    # The app icons are pixels in it too, for exactly the same reason — a redrawn
+    # icon changes what the card shows while every string stays put.
     for rel in ["logo.png"] + [s.split("?", 1)[0] for s in icons]:
         h.update((ROOT / rel).read_bytes())
         h.update(b"\0")
@@ -253,8 +255,8 @@ def main() -> None:
                     help="verify the product list resolves AND that og-image.png "
                          "was rendered from the page as it stands now; render nothing")
     args = ap.parse_args()
-    _, _, products, _, _, live = site_parts()
-    print(f"{len(products)} products from index.html ({live} live): {', '.join(products)}")
+    _, _, products, _, cap = site_parts()
+    print(f"{len(products)} products from index.html under “{cap}”: {', '.join(products)}")
     if args.check:
         # The failure this catches actually happened: the hero diagram's result
         # changed from "Fit to the task" to "The best possible answer", nobody

@@ -17,7 +17,7 @@
   <meta property="og:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260908a">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260913a">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="HyperSage is an independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260908a">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260913a">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260908a",
+        "image": "https://hypersage.ai/og-image.png?v=20260913a",
         "description": "An independent studio building distinctive consumer apps and original games, with context-aware AI where it improves the product.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -455,23 +455,23 @@
       .section-head { margin-bottom: 32px; }
     }
 
-    /* A compact summary with separate number and label baselines. */
+    /* A compact summary: a short fact over its label. No counts — a number of
+       apps, or of how many are available, reads as a scoreboard and goes stale
+       the day something ships (Vanus, 2026-09-13). */
     .section-head .portfolio-facts {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-      max-width: 520px; margin: 26px auto 0; padding: 16px 0;
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 440px; margin: 26px auto 0; padding: 16px 0;
       border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
       list-style: none; text-align: center;
     }
     .portfolio-facts li { display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 0 12px; }
     .portfolio-facts li + li { border-left: 1px solid var(--line); }
-    .portfolio-facts strong { color: var(--fg); font: 600 1.5rem/1.4 'Inter', sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -.025em; }
-    .portfolio-facts .platforms { font-size: 1.08rem; line-height: 1.94; letter-spacing: -.015em; white-space: nowrap; }
+    .portfolio-facts strong { color: var(--fg); font: 600 1.08rem/1.94 'Inter', sans-serif; letter-spacing: -.015em; white-space: nowrap; }
     .portfolio-facts span { color: var(--muted); font-size: .75rem; line-height: 1.5; }
     @media (max-width: 860px) { .section-head .portfolio-facts { margin-left: 0; } }
     @media (max-width: 560px) {
       .portfolio-facts li { padding: 0 6px; }
-      .portfolio-facts strong { font-size: 1.3rem; }
-      .portfolio-facts .platforms { font-size: .94rem; }
+      .portfolio-facts strong { font-size: .94rem; }
       .portfolio-facts span { font-size: .69rem; }
     }
 
@@ -1025,7 +1025,7 @@
         <h2>Focused products for different parts of life.</h2>
         
         <p>Each product is designed around a clear audience and job, with its own identity and way of working.</p>
-        <ul class="portfolio-facts" aria-label="Portfolio at a glance"><li><strong data-portfolio-total>16</strong><span>Apps &amp; games</span></li><li><strong data-portfolio-live>10</strong><span>Available now</span></li><li><strong class="platforms">iOS + Web</strong><span>Platforms</span></li></ul>
+        <ul class="portfolio-facts" aria-label="Portfolio at a glance"><li><strong>iOS + Web</strong><span>Platforms</span></li><li><strong>More coming</strong><span>In development</span></li></ul>
       </div>
 
       <div class="products-grid">
@@ -1577,15 +1577,6 @@
         if (wasOpen !== null) note.open = wasOpen;
         wasOpen = null;
       });
-    })();
-
-    /* Keep the at-a-glance counts tied to the visible portfolio. */
-    (function () {
-      var cards = document.querySelectorAll('.products-grid > article.product');
-      var total = document.querySelector('[data-portfolio-total]');
-      var live = document.querySelector('[data-portfolio-live]');
-      if (total) total.textContent = cards.length;
-      if (live) live.textContent = document.querySelectorAll('.products-grid > article.product .status.live').length;
     })();
 
     /* Complete examples share one data record. Auto-advance pauses on focus,
