@@ -455,26 +455,6 @@
       .section-head { margin-bottom: 32px; }
     }
 
-    /* A compact summary: a short fact over its label. No counts — a number of
-       apps, or of how many are available, reads as a scoreboard and goes stale
-       the day something ships (Vanus, 2026-09-13). */
-    .section-head .portfolio-facts {
-      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-      max-width: 440px; margin: 26px auto 0; padding: 16px 0;
-      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-      list-style: none; text-align: center;
-    }
-    .portfolio-facts li { display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 0 12px; }
-    .portfolio-facts li + li { border-left: 1px solid var(--line); }
-    .portfolio-facts strong { color: var(--fg); font: 600 1.08rem/1.94 'Inter', sans-serif; letter-spacing: -.015em; white-space: nowrap; }
-    .portfolio-facts span { color: var(--muted); font-size: .75rem; line-height: 1.5; }
-    @media (max-width: 860px) { .section-head .portfolio-facts { margin-left: 0; } }
-    @media (max-width: 560px) {
-      .portfolio-facts li { padding: 0 6px; }
-      .portfolio-facts strong { font-size: .94rem; }
-      .portfolio-facts span { font-size: .69rem; }
-    }
-
     /* ===== STUDIO — operating principles ===== */
     .approach-ledger { border-top: 1px solid var(--line-strong); }
     .approach-row {
@@ -1025,7 +1005,6 @@
         <h2>Focused products for different parts of life.</h2>
         
         <p>Each product is designed around a clear audience and job, with its own identity and way of working.</p>
-        <ul class="portfolio-facts" aria-label="Portfolio at a glance"><li><strong>iOS + Web</strong><span>Platforms</span></li><li><strong>More coming</strong><span>In development</span></li></ul>
       </div>
 
       <div class="products-grid">
