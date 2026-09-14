@@ -1,14 +1,15 @@
 // Hoardling leaderboard config — the Waddleton Supabase project's
 // PUBLISHABLE key (already public on waddleton.pages.dev; RLS + the
 // authenticated-only RPCs are the security boundary, not this file).
-window.HOARDLING_LB = {
-  "url": "https://wwdpvmaqumdygyiirlns.supabase.co",
-  "key": "sb_publishable_uGWMFqWOrum9T9x5QrEEFg_N7gsIQwE",
-  // NOT "hoardling_daily". This build's DAILY_ROSTER diverges from the shipping
-  // /hoardling/ build, so submitting here ranked two different games on one
-  // board: players on this build never faced the two hardest raider types, and
-  // their scores competed with players who did. flush() also submits with
-  // cfg.board rather than a board stored per queued entry, so the offline queue
-  // is namespaced too.
-  "board": "hoardling3d_daily"
-};
+//
+// BOARD OFF (2026-09-13). This parked build signed every visitor up the moment
+// the title loaded (Lb.top for _lbTop) and posted each Daily run with no
+// question at all, while the shipping /hoardling/ build now asks before any
+// identity or score leaves the device. Rather than port the consent card into
+// a parked codebase, the board is switched off: with no config, Lb.on() is
+// false and every Lb path no-ops before it reaches the network. To restore it,
+// port hoardkeep's consent gate (HANDOFF §3g there) FIRST, then put back
+//   { url, key, board: "hoardling3d_daily" }
+// — never "hoardling_daily": this build's DAILY_ROSTER diverges from the
+// shipping one, so the two must not share a board.
+window.HOARDLING_LB = null;
