@@ -1,5 +1,5 @@
 /* Gemburrow — single-file canvas engine.
- * Scaffolded by new-game-scaffold. READ HANDOFF.md before editing: the RNG
+ * READ HANDOFF.md before editing: the RNG
  * firewall (§3a) and the fixed-timestep loop (§3b) are load-bearing.
  *
  * Layout (top-down, so greps land):
@@ -1220,6 +1220,19 @@
   // Everything below needs a DOM. Under node (tests) we stop here.
   if (typeof window === 'undefined' || !window.document) return;
 
+  // OS preference, read only by presentation. Changing it must never change
+  // the simulation clock, hit-stop, jar physics, order timers or rewards.
+  var Motion = (function () {
+    var api = { reduced: false };
+    if (typeof window.matchMedia !== 'function') return api;
+    var query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    function sync() { api.reduced = !!query.matches; }
+    sync();
+    if (query.addEventListener) query.addEventListener('change', sync);
+    else if (query.addListener) query.addListener(sync);
+    return api;
+  })();
+
   // ===== Sprites ==========================================================
   // Painted art from tools/gen_art.py (artcore). Draw sizes are the collision
   // circles — sprite radius must hug the body radius or taps feel wrong.
@@ -1258,8 +1271,8 @@
   // ASSET URLS ARE BUILD-STAMPED, AND THE CODEC IS CHOSEN BY THE BUILD.
   //
   // Sprite filenames never change, so a CDN, WKWebView's URLCache and Safari's
-  // PWA store will all serve the original bytes forever — Hoardling shipped new
-  // art on 2026-08-13 and Vanus got "it's all the old art". `?v=<build>` is the
+  // PWA store will all serve the original bytes forever — new art under an old
+  // filename reaches a phone as "it's all the old art". `?v=<build>` is the
   // only thing that dislodges them. Both globals are published by
   // tools/build-web.py BEFORE game.js runs; in dev neither exists, so this is
   // the identity function and the PNG masters load straight off the dev server.
@@ -1633,7 +1646,33 @@
                  // journal, keyed by a hash of platform:transactionId, so a
                  // purchase interrupted mid-fulfilment retries on the next
                  // launch without granting twice.
-                 full: 0, iapSeen: {} };
+                 full: 0, iapSeen: {}, iapAccess: {} };
+    // Access is separate from the fulfillment journal and from progression.
+    // A StoreKit-verified state is keyed by the ORIGINAL purchase (restores
+    // may have new transaction ids). Apple's signed date orders revisions;
+    // revocation wins a tie, and a newer signed grant can reinstate a refund
+    // Apple later reversed. No wall clock or missing purchase revokes access.
+    function mergeAccess(a, b) {
+      var merged = {};
+      [a, b].forEach(function (states) {
+        if (!states || typeof states !== 'object') return;
+        Object.keys(states).forEach(function (key) {
+          var next = states[key], old = merged[key];
+          if (key.indexOf('ios:') !== 0 || !next || typeof next.revoked !== 'boolean' ||
+              typeof next.signedDate !== 'number' || !isFinite(next.signedDate) || next.signedDate < 0) return;
+          if (!old || next.signedDate > old.signedDate ||
+              (next.signedDate === old.signedDate && next.revoked)) {
+            merged[key] = { signedDate: next.signedDate, revoked: next.revoked };
+          }
+        });
+      });
+      return merged;
+    }
+    function accessFull(states, legacyFull) {
+      var keys = Object.keys(states);
+      if (!keys.length) return legacyFull ? 1 : 0;
+      return keys.some(function (key) { return !states[key].revoked; }) ? 1 : 0;
+    }
     var hadLocal = false;
     // IS THE LOCAL COPY PROVISIONAL? A session that could not read the native
     // backup still writes localStorage — with `data` at DEFAULTS if the read
@@ -1653,15 +1692,21 @@
       var s = localStorage.getItem(K);
       if (s) { data = Object.assign(data, JSON.parse(s)); hadLocal = true; }
     } catch (e) {}
+    data.iapAccess = mergeAccess(data.iapAccess);
+    data.full = accessFull(data.iapAccess, data.full);
     var Prefs = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences) || null;
     // MAY WE WRITE TO THE NATIVE BACKUP AT ALL? A latch, not a per-call
     // argument — see the restore block below. While it is false every save is
     // localStorage-only, so nothing this session can overwrite a backup we have
     // not successfully read.
     var nativeOK = false;
+    // Order native writes: an older snapshot must never land after a paid
+    // unlock. Every caller may ignore the returned promise safely; flush()
+    // lets the purchase handshake wait for the native storage acknowledgement.
+    var nativeWrite = Promise.resolve(true);
     function save(localOnly) {
-      var s2 = JSON.stringify(data);
-      try { localStorage.setItem(K, s2); } catch (e) {}
+      var s2 = JSON.stringify(data), localOK = false;
+      try { localStorage.setItem(K, s2); localOK = true; } catch (e) {}
       // ...and say which of the two it is. The mark rides beside the save, not
       // inside it, so it can never travel to the native backup and cannot
       // affect a payload any other code reads.
@@ -1670,8 +1715,28 @@
         else localStorage.removeItem(K + '.prov');
       } catch (e) {}
       if (Prefs && !localOnly && nativeOK) {
-        try { Prefs.set({ key: K, value: s2 }).catch(function () {}); } catch (e) {}
+        nativeWrite = nativeWrite.then(function () {
+          return Prefs.set({ key: K, value: s2 });
+        }).then(function () { return true; }, function () { return false; });
+        return nativeWrite;
       }
+      // A provisional native save cannot be acknowledged as durable. Keep the
+      // transaction unfinished until a later recovery can read/write its backup.
+      return Promise.resolve(!Prefs && localOK);
+    }
+    function flush() {
+      // A hung bridge must not leave the purchase controls busy forever. The
+      // ordered write can finish later; only a fresh acknowledged recovery may
+      // then finish the transaction.
+      return new Promise(function (resolve) {
+        var complete = false;
+        var timer = setTimeout(function () { finish(false); }, 3000);
+        function finish(ok) {
+          if (complete) return;
+          complete = true; clearTimeout(timer); resolve(ok);
+        }
+        save().then(finish);
+      });
     }
     // How much life is in a save. Only consulted when a PROVISIONAL local copy
     // meets a readable native backup and one of them has to win.
@@ -1747,11 +1812,24 @@
           // stay local-only, so a parse bug cannot eat a real save.
           try {
             var nat = JSON.parse(r.value);
+            // A delayed read can land AFTER the launch timeout and a verified
+            // Store.recover grant or refund. Merge verified access revisions
+            // independently of the winning career copy. Legacy booleans may
+            // preserve an unlock only until verified purchase state exists.
+            var full = !!data.full || !!nat.full;
+            var access = mergeAccess(nat.iapAccess, data.iapAccess);
+            var receipts = Object.assign({}, nat.iapSeen || {}, data.iapSeen || {});
+            for (var receipt in (nat.iapSeen || {})) {
+              if (nat.iapSeen[receipt] === 'fulfilled') receipts[receipt] = 'fulfilled';
+            }
             // On an ORDINARY boot (no local copy) the backup simply wins. On a
             // provisional one the local copy may be a whole week of play made
             // while the bridge was down, so the fuller save wins and the other
             // is published over on the next write either way.
             if (!provisional || progress(nat) >= progress(data)) Object.assign(data, nat);
+            data.iapAccess = access;
+            data.full = accessFull(access, full);
+            data.iapSeen = receipts;
             nativeOK = true;
           } catch (e) {
             try { Prefs.set({ key: K + '.bad', value: r.value }).catch(function () {}); } catch (e2) {}
@@ -1771,7 +1849,8 @@
       nativeOK = true;
       settle();
     }
-    return { data: data, save: save, ready: function (cb) { if (settled) cb(); else waiting.push(cb); } };
+    return { data: data, save: save, flush: flush, mergeAccess: mergeAccess, accessFull: accessFull,
+             ready: function (cb) { if (settled) cb(); else waiting.push(cb); } };
   })();
 
   // ===== Lb — daily leaderboard client (Supabase REST, lane 3) ============
@@ -1818,17 +1897,39 @@
     // then journal 'fulfilled'. Only then may the caller finalize. If the app
     // dies anywhere in here the transaction is still unfinished, so the next
     // launch re-yields it and this runs again — idempotently.
-    function fulfill(platform, txId, productId) {
+    function fulfill(platform, txId, productId, state) {
       if (productId !== FULL_PRODUCT) return { granted: false, reason: 'unknown product' };
       var key = receiptKey(platform, txId);
+      var versioned = state && typeof state.originalTransactionId === 'string' && state.originalTransactionId &&
+                      typeof state.signedDate === 'number' && isFinite(state.signedDate) && state.signedDate >= 0 &&
+                      typeof state.revoked === 'boolean' && platform === 'ios';
+      var access = Meta.mergeAccess(Meta.data.iapAccess);
+      // Old dev/mock rows remain usable before migration, but can never erase
+      // newer verified access evidence. Malformed revocations grant nothing.
+      if (!versioned && ((state && ('revoked' in state || 'signedDate' in state || 'originalTransactionId' in state)) ||
+                         Object.keys(access).length)) return { granted: false, reason: 'missing verified state' };
+      var was = owned();
+      if (versioned) {
+        var incoming = {};
+        incoming[platform + ':' + state.originalTransactionId] = { signedDate: state.signedDate, revoked: state.revoked };
+        access = Meta.mergeAccess(access, incoming);
+        Meta.data.iapAccess = access;
+        Meta.data.full = Meta.accessFull(access, Meta.data.full);
+        // Revocation is an access change, never a reversal of career, stars,
+        // cosmetics, wallet or the record that a purchase was fulfilled.
+        if (state.revoked || access[platform + ':' + state.originalTransactionId].revoked) {
+          Meta.save();
+          return { granted: !was && owned(), revoked: was && !owned(), key: key };
+        }
+      }
       if (!Meta.data.iapSeen) Meta.data.iapSeen = {};
       if (Meta.data.iapSeen[key] === 'fulfilled' && owned()) {
-        return { granted: false, reason: 'already fulfilled', key: key };
+        Meta.save();
+        return { granted: !was && owned(), reason: 'already fulfilled', key: key };
       }
       Meta.data.iapSeen[key] = 'fulfilling';
       Meta.save();
-      var was = owned();
-      Meta.data.full = 1;
+      if (!versioned) Meta.data.full = 1;
       Meta.data.iapSeen[key] = 'fulfilled';
       Meta.save();
       return { granted: !was, key: key };
@@ -1854,6 +1955,31 @@
     return Ent.owned() ? CAREER_MAX : FREE_CAREER_LEVELS;
   }
 
+  // THE ONE OUTWARD LINK. The privacy policy the Daily Dig's network call is
+  // described by (hypersage.ai/gemburrow/privacy.html, the same URL App Store
+  // Connect lists).
+  //
+  // Native: a top-level navigation. Capacitor's WebViewDelegationHandler (iOS)
+  // and BridgeWebViewClient (Android) CANCEL any main-frame navigation off the
+  // app's own origin and hand the URL to the system browser, so the game stays
+  // loaded underneath. window.open is not used there: WKWebView only honours it
+  // inside a user gesture, and a touch pointerdown — where every tap in this
+  // game is routed — is not an activation-triggering event.
+  // Web (the /play/ build, or a desktop browser): a new tab, falling back to
+  // this tab if a popup blocker refuses, since the save lives in localStorage.
+  var PRIVACY_URL = 'https://hypersage.ai/gemburrow/privacy.html';
+  function openOutward(url) {
+    var C = window.Capacitor;
+    if (C && typeof C.isNativePlatform === 'function' && C.isNativePlatform()) {
+      window.location.href = url;
+      return;
+    }
+    var w = null;
+    try { w = window.open(url, '_blank'); } catch (e) { w = null; }
+    if (w) { try { w.opener = null; } catch (e2) {} return; }
+    window.location.href = url;
+  }
+
   // The native bridge. Absent on the web build and in any browser, where the
   // game stays free and the paywall says so rather than pretending to sell.
   var Store = (function () {
@@ -1870,19 +1996,62 @@
       busy: false,
       note: null,
     };
+    var finalizing = {}, observedPlugin = null, observer = null;
+    function finalizeAfterSave(p, row, key) {
+      // Grant and refund can share a transaction id. Each signed state needs
+      // its OWN durable acknowledgement; duplicate deliveries of that same
+      // state still share one finish. Native also compares this exact token.
+      key += ':' + (row.stateToken || 'legacy');
+      if (finalizing[key]) return finalizing[key];
+      var work = Meta.flush().then(function (saved) {
+        if (!saved || !p || !p.finalize) return false;
+        return Promise.resolve(p.finalize({ transactionId: row.transactionId, stateToken: row.stateToken })).then(function () { return true; });
+      }).catch(function () { return false; }).then(function (finished) {
+        delete finalizing[key];
+        return finished;
+      });
+      finalizing[key] = work;
+      return work;
+    }
     function handle(rows, done) {
-      var granted = false;
+      var was = Ent.owned(), work = [];
       rows = rows || [];
       for (var i = 0; i < rows.length; i++) {
         var r = rows[i];
-        var res = Ent.fulfill(r.platform || 'ios', r.transactionId, r.productId);
-        if (res.granted) granted = true;
-        // finalize LAST — this is what lets native call finish()/acknowledge
-        var p = plugin();
-        if (p && p.finalize) { try { p.finalize({ transactionId: r.transactionId }); } catch (e) {} }
+        if (!r || r.productId !== FULL_PRODUCT || !r.transactionId) continue;
+        var res = Ent.fulfill(r.platform || 'ios', r.transactionId, r.productId, r);
+        if (!res.key) continue;
+        // A grant in memory is not the storage acknowledgement. Failed writes
+        // leave the native transaction unfinished so recovery can try again.
+        work.push(finalizeAfterSave(plugin(), r, res.key));
       }
-      if (done) done(granted);
+      return Promise.all(work).then(function (finished) {
+        var saved = finished.every(function (ok) { return ok; });
+        if (done) done(!was && Ent.owned(), saved, was && !Ent.owned());
+        return saved;
+      });
     }
+    api.observe = function () {
+      var p = plugin();
+      if (!p || !p.addListener || observedPlugin === p) return;
+      if (observer && observer.remove) { try { Promise.resolve(observer.remove()).catch(function () {}); } catch (e) {} }
+      observer = null; observedPlugin = p;
+      try {
+        Promise.resolve(p.addListener('transactionsUpdated', function (event) {
+          if (plugin() !== p) return;
+          Meta.ready(function () {
+            handle(event && event.transactions, function (granted, saved, revoked) {
+              if (granted) api.note = saved ? 'Purchase approved. Full Burrow unlocked.'
+                                          : 'Unlocked. Saving will retry when you return.';
+              else if (revoked) api.note = saved ? 'Purchase refunded or revoked. Your progress is saved.'
+                                               : 'Purchase status changed. Saving will retry when you return.';
+            });
+          });
+        })).then(function (listener) { observer = listener; }, function () {
+          if (observedPlugin === p) observedPlugin = null;
+        });
+      } catch (e) { observedPlugin = null; }
+    };
     api.load = function () {
       var p = plugin(); if (!p || !p.products) return;
       try {
@@ -1896,6 +2065,7 @@
     };
     // Silent, on launch: re-yields anything verified but not finished.
     api.recover = function () {
+      api.observe();
       var p = plugin(); if (!p || !p.recover) return;
       try { p.recover().then(function (r) { handle(r && r.transactions); }).catch(function () {}); } catch (e) {}
     };
@@ -1905,10 +2075,18 @@
       api.busy = true; api.note = null;
       try {
         p.purchase({ id: FULL_PRODUCT }).then(function (r) {
-          api.busy = false;
-          if (r && r.cancelled) { if (done) done(false); return; }
-          handle(r && r.transactions, function (g) {
-            api.note = g ? null : 'Nothing to unlock.';
+          if (r && r.cancelled) { api.busy = false; if (done) done(false); return; }
+          if (r && r.pending) {
+            api.busy = false;
+            api.note = 'Waiting for purchase approval.';
+            if (done) done(false);
+            return;
+          }
+          return handle(r && r.transactions, function (g, saved) {
+            api.busy = false;
+            api.note = !saved ? (Ent.owned() ? 'Unlocked. Saving will retry when you return.'
+                                           : 'Purchase status changed. Saving will retry when you return.')
+                     : Ent.owned() ? null : 'Nothing to unlock.';
             if (done) done(g || Ent.owned());
           });
         }).catch(function (e) {
@@ -1925,9 +2103,14 @@
       api.busy = true; api.note = null;
       try {
         p.restore().then(function (r) {
-          api.busy = false;
-          handle(r && r.transactions, function () {
-            api.note = Ent.owned() ? 'Purchase restored.' : 'No purchase found on this Apple ID.';
+          return handle(r && r.transactions, function (granted, saved, revoked) {
+            api.busy = false;
+            api.note = !saved ? (Ent.owned() ? 'Unlocked. Saving will retry when you return.'
+                                           : 'Purchase status changed. Saving will retry when you return.')
+                     : revoked ? 'Purchase refunded or revoked. Your progress is saved.'
+                     : r && r.syncSucceeded === false
+                       ? (Ent.owned() ? 'Already unlocked. Store sync unavailable.' : 'Could not sync purchases. Please try again.')
+                     : Ent.owned() ? 'Purchase restored.' : 'No purchase found on this Apple ID.';
             if (done) done(Ent.owned());
           });
         }).catch(function () {
@@ -1957,7 +2140,7 @@
     // trigger drops a replay that does not beat the stored row, so a worse
     // attempt cannot lower your score or regress your name.
     function submit(payload, done) {
-      if (!window.fetch) return;
+      if (!window.fetch) { if (done) done(false); return; }
       fetch(RPC, {
         method: 'POST',
         headers: H,
@@ -1988,8 +2171,9 @@
     }
     // THE FORTNIGHT LEAGUE — a rolling 14-day view (tools/leaderboard-league.sql).
     // Read-only like top(). A 404 here is the EXPECTED state until that
-    // migration is run, and is reported as 'closed' rather than 'error' so the
-    // client can say something true instead of something broken.
+    // migration is run, and is reported as 'closed' rather than 'error': the
+    // RECORDS screen then does not offer a LEAGUE tab at all (see
+    // leagueOffered). 'error' is a transient failure and never hides the tab.
     function league(limit, done) {
       if (!window.fetch) return done('error', null);
       fetch(LEAGUE + '?select=player,total,days&order=total.desc&limit=' + limit,
@@ -2013,7 +2197,31 @@
         })
         .catch(function () { done('error', null); });
     }
-    return { submit: submit, top: top, league: league };
+    // Retry on a real opportunity (launch, online, resume), never a polling
+    // loop. One in-flight retry and a cooldown keep duplicate lifecycle events
+    // from flooding a failed backend. A hanging request releases the guard.
+    var retrying = false, retryLast = null, retryAt = -Infinity;
+    function retryPending() {
+      if (retrying) return;
+      var payload = Meta.data.pendingScore;
+      if (!payload) return;
+      if (payload.day !== dayNumber()) { Meta.data.pendingScore = null; Meta.save(); return; }
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+      if (payload === retryLast && nowMs() - retryAt < 15000) return;
+      retrying = true; retryLast = payload; retryAt = nowMs();
+      var complete = false;
+      var timeout = setTimeout(function () { finish(false); }, 12000);
+      function finish(ok) {
+        if (complete) return;
+        complete = true; clearTimeout(timeout); retrying = false;
+        // An older response acknowledges only its own payload. If a better
+        // run queued meanwhile, a working connection can post that best next.
+        if (ok && Meta.data.pendingScore === payload) { Meta.data.pendingScore = null; Meta.save(); }
+        if (ok && Meta.data.pendingScore && Meta.data.pendingScore !== payload) retryPending();
+      }
+      submit(payload, finish);
+    }
+    return { submit: submit, top: top, league: league, retryPending: retryPending };
   })();
 
   // ===== Hap — haptics through Capacitor (no-op on web) ===================
@@ -2286,8 +2494,7 @@
       voice(gen(p));
     }
 
-    // ---- music: composed beds rendered by tools/generate_music.py through
-    // ---- the fleet pipeline (hexmusic/score — the Hexhunter lane). The
+    // ---- music: composed beds rendered by tools/generate_music.py. The
     // ---- ladder/fanfares harmonize to the LIVE bed's bar via music_map.json.
     // ---- Fallback chords cover the seconds before the files decode.
     var FALLBACK_CHORD = [43, 47, 50];   // G major, the suite's home
@@ -2547,7 +2754,7 @@
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.view = { cw: 1, ch: 1, dpr: 1, scale: 1, w: VIEW_MIN_W, h: VIEW_H, ox: 0, oy: 0 };
-    this._last = 0; this._acc = 0;
+    this._last = null; this._acc = 0;
     this._taps = [];
     this.fliers = []; this.sparks = []; this.rings = []; this.picks = [];
     this.bursts = [];   // sim-requested particle bursts, sampled in _cosmetic
@@ -2715,6 +2922,10 @@
     this.tutClearAt = 0;
     // a tap queued against the PREVIOUS jar must never spend a swing in this one
     this._taps.length = 0;
+    this._lastTap = null;
+    // A fresh jar owns a fresh clock, with no old freeze or catch-up debt.
+    this._last = null; this._acc = 0; this.hitStop = 0;
+    this.rings.length = 0; this.picks.length = 0;
     this.shakeT = 0;
     this.showSettings = false;
     this.choice = null; this.dragonPulse = 0;
@@ -2786,6 +2997,7 @@
   };
 
   Game.prototype.setPaused = function (v) {
+    var prior = this.state;
     if (this.state === 'playing' && v) this.state = 'paused';
     // The settings panel HOLDS the pause. Without this guard the lifecycle
     // callback wins the argument: open settings mid-shift (state -> paused),
@@ -2793,6 +3005,11 @@
     // underneath a panel that is still on screen — the jar runs while the
     // player thinks the game is stopped.
     else if (this.state === 'paused' && !v && !this.showSettings) this.state = 'playing';
+    if (this.state !== prior) {
+      // No pre-pause dig may fire on resume. Keep the sub-step and any current
+      // freeze, but discard elapsed background time at the next rAF boundary.
+      this._taps.length = 0; this._lastTap = null; this._last = null;
+    }
   };
 
   Game.prototype.resize = function () {
@@ -2819,6 +3036,9 @@
     var pb = document.getElementById('safe-probe-bottom');
     var insetBot = pb ? Math.max(0, ch - pb.getBoundingClientRect().bottom) : 0;
     if (insetBot < 20 && ch / cw >= 2.0) insetBot = Math.max(insetBot, 34);
+    // DOM help shares the canvas's resolved notch and home-indicator insets.
+    document.documentElement.style.setProperty('--guide-top', Math.max(12, inset) + 'px');
+    document.documentElement.style.setProperty('--guide-bottom', Math.max(12, insetBot) + 'px');
     var uiTop = Math.max(0, inset) / scale;
     this.view = {
       cw: cw, ch: ch, dpr: dpr, scale: scale,
@@ -2856,12 +3076,12 @@
 
   // Dedupe byte-identical taps within 80ms: some automation/compat layers
   // double-dispatch the first pointer event. Human re-taps differ in coords.
-  Game.prototype.tapAt = function (wx, wy) {
+  Game.prototype.tapAt = function (wx, wy, bodyId) {
     var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : 0;
     if (this._lastTap && now - this._lastTap.t < 80 &&
         this._lastTap.x === wx && this._lastTap.y === wy) return;
     this._lastTap = { x: wx, y: wy, t: now };
-    this._taps.push({ x: wx, y: wy });
+    this._taps.push({ x: wx, y: wy, bodyId: bodyId });
   };
 
   // ---- FIXED-TIMESTEP SIM. Physics + order timers ONLY. No ctx. No Math.random. ----
@@ -2883,9 +3103,12 @@
 
     while (this._taps.length) {
       var t = this._taps.shift();
-      // a tap that outlived the shift must not score into the next one
-      if (this.state !== 'playing') { this._taps.length = 0; break; }
+      // A preceding tap in THIS batch can finish the order line. The payout
+      // owns the remaining swings immediately, including taps already queued.
+      if (this.state !== 'playing' || this.epilogue > 0) { this._taps.length = 0; break; }
       if (this.choice) {
+        // A queued named dig cannot choose a newly opened rare-gem plate.
+        if (t.bodyId !== undefined) continue;
         // EVERY TARGET COMES FROM choiceRects(), WHICH IS ALSO WHAT DRAWS THEM.
         //
         // The previous pass gave this screen the targets Vanus said were
@@ -2948,7 +3171,15 @@
           continue;
         }
       }
-      var b = this.jar.bodyAt(t.x, t.y);
+      // A named semantic control commits to a piece, not the old pixel where
+      // it stood. Physics steps before this queue drains; never dig a neighbour
+      // that rolled into its place. Ordinary touch retains spatial hit testing.
+      var b = t.bodyId === undefined ? this.jar.bodyAt(t.x, t.y) : null;
+      if (t.bodyId !== undefined) {
+        for (var named = 0; named < this.jar.bodies.length; named++) {
+          if (this.jar.bodies[named].id === t.bodyId) { b = this.jar.bodies[named]; break; }
+        }
+      }
       if (!b) continue;
       if (b.key === 'heartstone') {
         if (!this.jar.exposed(b)) {
@@ -3004,8 +3235,22 @@
           // replay the plate already said "no coins on a replay", so in career
           // the second plate was either unaffordable or a lie. Free and daily
           // keep the real dilemma.
-          if (this.career) { this._resolveChoice('hoard'); }
-          else this.choice = { key: 'heartstone', slot: -1, until: this.worldT + CHOICE_SECS, x: b.x, y: b.y };
+          if (this.career) {
+            // Resolve the stone we just earned, while keeping an earlier
+            // prism's choice intact. Without a Heartstone choice the resolver
+            // either did nothing or awarded only the previous prism's hoard.
+            var pendingChoice = this.choice;
+            this.choice = { key: 'heartstone', slot: -1 };
+            this._resolveChoice('hoard');
+            this.choice = pendingChoice;
+          }
+          else {
+            // Keep the Heartstone dilemma and send any earlier prism to the
+            // dragon, like overlapping rares in _route. Delivering that prism
+            // here could end the shift before the Heartstone's reward exists.
+            if (this.choice) this._resolveChoice('hoard');
+            this.choice = { key: 'heartstone', slot: -1, until: this.worldT + CHOICE_SECS, x: b.x, y: b.y };
+          }
           if (this.swings <= 0 && this.state === 'playing') this._endShift();
         }
         continue;
@@ -3226,10 +3471,11 @@
         this.shakeT = Math.max(this.shakeT, 0.18);
         Hap.medium();
         Snd.fanfare(60);
+        var rolledBack = b.geode.length - got;
         this.toast = {
-          text: got === 2 ? 'CRACKED IT! Two gems straight to the bag!'
-              : got === 1 ? 'CRACKED IT! Bag full — one rolled back in.'
-              : 'CRACKED IT! Bag full — they rolled back in.',
+          text: rolledBack === 0
+              ? 'CRACKED IT! ' + got + (got === 1 ? ' gem' : ' gems') + ' straight to the bag!'
+              : 'CRACKED IT! ' + got + ' bagged, ' + rolledBack + ' rolled back in.',
           until: this.worldT + 2,
         };
         this._burst(b.x, b.y, 12, 260, 240, 2, 2.5, 0.7, '#ffe9a8');
@@ -3379,12 +3625,14 @@
     // than being destroyed — and at GREAT_R, not TYPE[key].r, or the gem
     // visibly shrinks as it falls back in.
     if (b.great) {
+      var greatOverflow = 0;
       for (var gq = 1; gq < GREAT_YIELD; gq++) {
         if (this.bag.length < this.bagCap) {
           this.bag.push(key);
           this._bumpCombo();
           this._fly(b, 'bag', this.bag.length - 1);
         } else {
+          greatOverflow++;
           this.jar.bodies.push({
             id: this.jar.nextId++, key: key, r: TYPE[key].r, geode: null,
             lode: false, shale: false, great: false,
@@ -3397,7 +3645,7 @@
       this.hitStop = 0.06;
       this.shakeT = Math.max(this.shakeT, 0.16);
       Hap.medium();
-      this.toast = { text: this.bag.length >= this.bagCap
+      this.toast = { text: greatOverflow > 0
         ? 'A GREAT ' + key.toUpperCase() + '! Bag full — the rest rolled back in.'
         : 'A GREAT ' + key.toUpperCase() + '! Three gems from one swing.',
         until: this.worldT + 2 };
@@ -4076,6 +4324,12 @@
 
   Game.prototype._cosmetic = function (dtRaw) {
     var i, f;
+    // Discard decoration immediately, including effects already in flight
+    // when the OS preference changes. Counters and static cues still update.
+    if (Motion.reduced) {
+      this.bursts.length = 0; this.sparks.length = 0;
+      this.fliers.length = 0; this.picks.length = 0;
+    }
     // expand any bursts the sim requested this tick
     while (this.bursts.length) {
       var bq = this.bursts.shift();
@@ -4129,7 +4383,8 @@
     if (gap > 0) {
       if (!this._rolling) this._rolling = gap;
       var before = Math.floor(this.displayCoins);
-      this.displayCoins = Math.min(this.coins, this.displayCoins + Math.max(1, gap * 4) * dtRaw * 4);
+      this.displayCoins = Motion.reduced ? this.coins
+        : Math.min(this.coins, this.displayCoins + Math.max(1, gap * 4) * dtRaw * 4);
       if (Math.floor(this.displayCoins) > before) Snd.tick();
       if (this.displayCoins >= this.coins) {
         if (this._rolling >= 25) Snd.slam();
@@ -4258,7 +4513,7 @@
 
     ctx.save();
     ctx.translate(v.ox, v.oy + v.uiTop);
-    if (this.shakeT > 0) {
+    if (!Motion.reduced && this.shakeT > 0) {
       var amp = 5 * (this.shakeT / 0.4);
       ctx.translate((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp);
     }
@@ -4270,7 +4525,7 @@
     if (this.state === 'paywall') { this._drawPaywall(); this._drawSettings(); ctx.restore(); return; }
 
     // lantern breath: the backdrop's lamp flickers (smoothed lane-3 noise)
-    this._lampT = (this._lampT || 0.5) + (Math.random() - 0.5) * 0.08;
+    this._lampT = Motion.reduced ? 0.5 : (this._lampT || 0.5) + (Math.random() - 0.5) * 0.08;
     this._lampT = Math.max(0.3, Math.min(0.7, this._lampT));
     var lg = ctx.createRadialGradient(VIEW_MIN_W / 2, 120, 10, VIEW_MIN_W / 2, 120, 260);
     lg.addColorStop(0, 'rgba(255,190,90,' + (0.10 + this._lampT * 0.08).toFixed(3) + ')');
@@ -4331,7 +4586,7 @@
 
     // LAYER 6 — fliers + sparks (lane 3)
     for (i = 0; i < this.fliers.length; i++) this._drawFlier(this.fliers[i]);
-    for (i = 0; i < this.sparks.length; i++) {
+    for (i = 0; !Motion.reduced && i < this.sparks.length; i++) {
       var p = this.sparks[i];
       ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 2));
       ctx.fillStyle = p.col;
@@ -4342,7 +4597,7 @@
       var rg = this.rings[i];
       ctx.globalAlpha = (1 - rg.t) * 0.7;
       ctx.strokeStyle = '#ffe9a8'; ctx.lineWidth = 2.5 * (1 - rg.t) + 0.5;
-      ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r + rg.t * 26, 0, 6.283); ctx.stroke();
+      ctx.beginPath(); ctx.arc(rg.x, rg.y, (rg.r || 14) + (Motion.reduced ? 0 : rg.t * 26), 0, 6.283); ctx.stroke();
     }
     ctx.globalAlpha = 1;
 
@@ -4400,7 +4655,7 @@
     var ctx = this.ctx;
     for (var i = 0; i < 3; i++) {
       // each fleck falls on its own offset loop, ~1.1s long
-      var ph = (this.worldT * 0.9 + b.id * 0.37 + i * 0.33) % 1;
+      var ph = ((Motion.reduced ? 0 : this.worldT * 0.9) + b.id * 0.37 + i * 0.33) % 1;
       var fx = x + ((i - 1) * 0.34 + Math.sin(b.id + i) * 0.08) * b.r;
       var fy = y + b.r * (0.15 + ph * 0.95);
       var a = 0.55 * (1 - ph) * (ph < 0.12 ? ph / 0.12 : 1);
@@ -4417,7 +4672,7 @@
   // (no RNG lane, deterministic, stable per body).
   Game.prototype._crustGlint = function (x, y, b) {
     var ctx = this.ctx;
-    var tw = 0.5 + 0.5 * Math.sin(this.worldT * 2.4 + b.id * 1.7);
+    var tw = Motion.reduced ? 0.5 : 0.5 + 0.5 * Math.sin(this.worldT * 2.4 + b.id * 1.7);
     // The seam bleeds the COLOUR of what is inside. Deep Rock Galactic's
     // grammar for a buried gem: the rock advertises its contents with a
     // coloured tell, so digging toward it is an informed choice rather than a
@@ -4450,7 +4705,7 @@
     var _hints = Meta.data.hints !== 0;
     var x = b.px + (b.x - b.px) * alpha;
     var y = b.py + (b.y - b.py) * alpha;
-    if (b.wiggle) x += Math.sin(this.worldT * 42) * b.wiggle * 3;
+    if (!Motion.reduced && b.wiggle) x += Math.sin(this.worldT * 42) * b.wiggle * 3;
     // TUTORIAL RING — only ever on a gem the player can ACTUALLY DIG.
     //
     // It used to ring every body order 0 still needed, with no diggability
@@ -4543,7 +4798,7 @@
     }
     var sk = bodySpr(b);
     var spr = SPR[sk];
-    var sq = b.squash || 0;                     // landing squash (cosmetic)
+    var sq = Motion.reduced ? 0 : (b.squash || 0); // landing squash (cosmetic)
     if (spr) {
       var d = b.r * sprFit(sk);                 // ink lands ON the circle
       if (sq > 0) {
@@ -4676,6 +4931,7 @@
   // a fast pick strike: wind-up already passed, we draw the swing-through.
   // Vector pick (painterly-adjacent), cracked head when the tool is nearly out.
   Game.prototype._drawPick = function (pk) {
+    if (Motion.reduced) return;
     var ctx = this.ctx;
     var e = pk.t < 0.4 ? pk.t / 0.4 : 1;
     var ang = -1.15 + e * (pk.heavy ? 1.75 : 1.45);
@@ -4742,6 +4998,7 @@
   };
 
   Game.prototype._drawFlier = function (f) {
+    if (Motion.reduced) return;
     var ctx = this.ctx;
     var e = f.t * f.t * (3 - 2 * f.t);           // smoothstep ease
     var x = f.x + (f.tx - f.x) * e;
@@ -4795,9 +5052,9 @@
     for (var s = 0; s < 5; s++) {
       var o = this.orders[s];
       var x = 14 + s * (ORDER_W + 8);
-      var sway = Math.sin(this.worldT * 1.15 + s * 1.7) * 0.022
+      var sway = Motion.reduced ? 0 : Math.sin(this.worldT * 1.15 + s * 1.7) * 0.022
                + (o.flash > 0 ? Math.sin(this.worldT * 14) * 0.05 * o.flash : 0);
-      var dropY = o.dropT ? -(o.dropT * o.dropT) * 150 : 0;
+      var dropY = !Motion.reduced && o.dropT ? -(o.dropT * o.dropT) * 150 : 0;
       ctx.save();
       ctx.translate(x + ORDER_W / 2, ORDER_Y - 6 + dropY);
       ctx.rotate(sway);
@@ -4837,13 +5094,14 @@
         var gy = ORDER_Y + 22 + i * rowH;
         var spr = SPR[BODY_SPR[key]];
         if (spr) ctx.drawImage(spr, x + 8, gy - 2, icon, icon);
-        // the SAME symbol the jar stamps, so a card and a gem are matched on
-        // silhouette rather than on hue
-        if (Meta.data.marks === 1) gemMark(ctx, key, x + 8 + icon / 2, gy - 2 + icon / 2, icon * 0.30);
         else {
+          // Keep the painted gem visible: a fallback dot drawn over loaded
+          // art erased the same silhouette the player sees in the jar/bag.
           ctx.fillStyle = TYPE[key].col;
-          ctx.beginPath(); ctx.arc(x + 16, gy + 6, 7, 0, 6.283); ctx.fill();
+          ctx.beginPath(); ctx.arc(x + 8 + icon / 2, gy - 2 + icon / 2, icon / 2, 0, 6.283); ctx.fill();
         }
+        // The optional symbol matches the one on the jar and bag gems.
+        if (Meta.data.marks === 1) gemMark(ctx, key, x + 8 + icon / 2, gy - 2 + icon / 2, icon * 0.30);
         var n = o.need[key];
         var cov = Math.min(this._bagCount(key), n);
         ctx.font = fT(12, 'bold');
@@ -4871,7 +5129,7 @@
         var kcol = remain <= 6 ? '#e2402c' : urgent ? '#e8843c' : '#d9a44c';
         var kx = x + ORDER_W - 14, ky = ORDER_Y + 10;
         if (urgent) {                        // the card itself gets anxious
-          var beat = 0.5 + 0.5 * Math.sin(this.worldT * (remain <= 6 ? 11 : 7));
+          var beat = Motion.reduced ? 0.5 : 0.5 + 0.5 * Math.sin(this.worldT * (remain <= 6 ? 11 : 7));
           ctx.strokeStyle = kcol;
           ctx.globalAlpha = 0.35 + beat * 0.5;
           ctx.lineWidth = 2.5;
@@ -4924,7 +5182,7 @@
       // fades, so the eye is told WHICH slot emptied even though the gems
       // behind it have already shuffled one place left
       if (this.tossFlash > 0 && this.tossSlot === i) {
-        var tf = this.tossFlash, grow = (1 - tf) * 7;
+        var tf = this.tossFlash, grow = Motion.reduced ? 0 : (1 - tf) * 7;
         ctx.strokeStyle = 'rgba(226,75,74,' + (0.75 * tf).toFixed(2) + ')';
         ctx.lineWidth = 2;
         rr(ctx, x - grow, BAG_Y - grow, BAG_SLOT + grow * 2, BAG_SLOT + grow * 2, 7 + grow);
@@ -5040,9 +5298,9 @@
       // Must fit the 336-wide banner drawn just above: this is one fillText
       // with no wrapping, and the first rewrite overflowed the view on BOTH
       // edges at 72.
-      var msg = this.tutStep === 0 ? 'Every swing counts — dig gems, crack sparkly rocks.'
+      var msg = this.tutStep === 0 ? 'Dig from the top — crack sparkly rocks for gems.'
               : this.tutStep === 1 ? 'Nice! Complete the FULL set and the order pays out.'
-              : 'That\'s the job! Tap a bagged gem to toss it back.';
+              : 'Need space? Tap a bagged gem to toss it away.';
       ctx.fillText(msg, VIEW_MIN_W / 2, bandY - 20);
       ctx.textBaseline = 'top';
     }
@@ -5147,7 +5405,7 @@
     // the physical clamp below (c.h - 6) is what actually bounds him, so the
     // counter can never be overrun whatever the hoard reaches.
     var ds = (c.compact ? 54 : 74) + Math.sqrt(total) * (c.compact ? 1.6 : 3.2);
-    if (this.dragonPulse) ds *= 1 + this.dragonPulse * 0.12;
+    if (!Motion.reduced && this.dragonPulse) ds *= 1 + this.dragonPulse * 0.12;
     // he grows with the hoard but never climbs back into the jar — on a short
     // phone (SE, counter 95 units) a maxed dragon would otherwise poke through
     ds = Math.min(ds, c.h - 6);
@@ -5294,9 +5552,10 @@
     ctx.fillText('PACE', cx, cy - (c.compact ? 11 : 15));
     ctx.fillStyle = col;
     ctx.font = fD((c.compact ? 15 : 19));
-    ctx.fillText(left === 0 ? 'ALL FILLED'
+    fitD(ctx, left === 0 ? 'ALL FILLED'
                : dead ? "can't fill " + left + ' more'
-               : this.swings + ' swings · ' + left + ' left', cx, cy + 2);
+               : this.swings + ' swings · ' + left + (left === 1 ? ' order' : ' orders'),
+               cx, cy + 2, c.compact ? 210 : 220, c.compact ? 15 : 19);
     // The sub-line is the only place the words live, so the dead state must
     // survive the compact band too — a colour-only signal for "this shift is
     // over" is exactly the unreadable state this whole pass is about.
@@ -5346,7 +5605,7 @@
     // wrong: it erases every layer already painted, so the hole went through
     // the chip, the wallpaper and the canvas to the page behind.
     ctx.moveTo(cx + R * 0.44, cy);
-    ctx.arc(cx, cy, R * 0.44, 0, 6.283, true);
+    ctx.arc(cx, cy, R * 0.44, 0, Math.PI * 2, true);
     ctx.fill('evenodd');
     ctx.textAlign = ta; ctx.textBaseline = tb;
   };
@@ -5385,10 +5644,15 @@
     // is not enough on its own. Hidden once owned, because there is then
     // nothing left to restore and a dead control invites a support email.
     var canRestore = Store.available() && !Ent.owned();
-    var ids = inShift ? ['music', 'sound', 'hints', 'marks', 'resume', 'quit']
-                      : ['music', 'sound', 'hints', 'marks']
+    // PRIVACY POLICY sits beside RESTORE and, unlike it, never hides: the Daily
+    // Dig sends a random device id and a score off the device, so the policy
+    // that describes that has to be one tap away from anywhere outside a shift
+    // (App Review 5.1.1). Not offered mid-shift — leaving for Safari there would
+    // strand a paused run behind the app switcher.
+    var ids = inShift ? ['music', 'sound', 'hints', 'marks', 'help', 'resume', 'quit']
+                      : ['music', 'sound', 'hints', 'marks', 'help']
                           .concat(canRestore ? ['restore'] : [])
-                          .concat(['done']);
+                          .concat(['privacy', 'done']);
     var ph = SET_HEAD + SET_PAD + ids.length * SET_ROW_H + (ids.length - 1) * SET_GAP + SET_FOOT;
     var px = VIEW_MIN_W / 2 - SET_W / 2;
     var py = Math.round(VIEW_H / 2 - ph / 2);
@@ -5484,9 +5748,11 @@
         var label = r.id === 'resume' ? 'RESUME'
                   : r.id === 'quit' ? (armed ? 'TAP AGAIN TO QUIT' : 'QUIT SHIFT')
                   : r.id === 'restore' ? (Store.busy ? 'RESTORING\u2026' : 'RESTORE PURCHASE')
+                  : r.id === 'privacy' ? 'PRIVACY POLICY'
+                  : r.id === 'help' ? 'HOW TO PLAY'
                   : 'DONE';
         this._menuBtn(label, r.y, { w: r.w, h: r.h,
-                                    quiet: (r.id === 'quit' && !armed) || r.id === 'restore',
+                                    quiet: (r.id === 'quit' && !armed) || r.id === 'restore' || r.id === 'privacy',
                                     disabled: r.id === 'restore' && Store.busy });
       }
     }
@@ -5507,6 +5773,12 @@
         // already present is a SUCCESS, not a no-op — say so either way.
         Snd.pop();
         Store.restore(function (got) { if (got) { Snd.fanfare(150); Hap.medium(); } });
+        return;
+      }
+      if (r.id === 'privacy') { Snd.pop(); openOutward(PRIVACY_URL); return; }
+      if (r.id === 'help') {
+        Snd.pop();
+        openHelpGuide();
         return;
       }
       if (r.id === 'music') { Snd.setMusicMuted(!Snd.musicMuted); Snd.pop(); }
@@ -5623,7 +5895,7 @@
     var ctx = this.ctx, c = this.choice, R = this.choiceRects();
     // hover INSIDE the jar's top: above it sits the bag row now
     var cx = R.cx, cy = R.cy;
-    var pulse = 1 + Math.sin(this.worldT * 6) * 0.06;
+    var pulse = Motion.reduced ? 1 : 1 + Math.sin(this.worldT * 6) * 0.06;
     var frac = Math.max(0, (c.until - this.worldT) / CHOICE_SECS);
     if (c.slot >= 0) {
       var ox = 14 + c.slot * (ORDER_W + 8);
@@ -5646,7 +5918,7 @@
     var lgx = dr ? dr.x + dr.w / 2 : 50, lgy = dr ? dr.y + dr.h / 2 : VIEW_H - 70;
     var lgr = dr ? Math.max(46, dr.w * 0.54) : 46;
     ctx.strokeStyle = 'rgba(232,201,255,0.8)'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(lgx, lgy, lgr + Math.sin(this.worldT * 5) * 4, 0, 6.283); ctx.stroke();
+    ctx.beginPath(); ctx.arc(lgx, lgy, lgr + (Motion.reduced ? 0 : Math.sin(this.worldT * 5) * 4), 0, 6.283); ctx.stroke();
     // Career used to bank NO coins, which made "SELL 200c" a dominated choice
     // dressed up with a fanfare, and the label said so. The wallet changed
     // that: a FIRST clear banks its payout, so on a level you have not cleared
@@ -6177,10 +6449,20 @@
   // FIVE tabs. 5x76 + 4 gaps = 396 in a 420 view; 76 world units is ~71pt on
   // a 390pt phone, still well past the 44pt floor. Measured before the tab was
   // added, as with the fourth.
-  var REC_TAB_Y = 78, REC_TAB_H = 34, REC_TAB_W = 76, REC_TAB_GAP = 4;
+  //
+  // FOUR OR FIVE. The LEAGUE tab exists only once the league has answered
+  // (see leagueOffered): build 115 drew it against a server view that did not
+  // exist yet, so every player who opened it met a tab that could only fail.
+  // Without it the row is the four-tab row above — no hole where it would
+  // sit. `tabLeague` is null then, and every reader must check it.
+  var REC_TAB_Y = 78, REC_TAB_H = 34, REC_TAB_W = 76, REC_TAB_GAP = 4, REC_TAB_W4 = 96;
   Game.prototype.recordsRects = function () {
-    var cx = VIEW_MIN_W / 2, W = REC_TAB_W, G = REC_TAB_GAP;
-    var x0 = cx - (W * 2.5 + G * 2);
+    var league = !!this._recLeague;
+    var n = league ? 5 : 4;
+    var cx = VIEW_MIN_W / 2, W = league ? REC_TAB_W : REC_TAB_W4, G = REC_TAB_GAP;
+    var x0 = cx - (W * n + G * (n - 1)) / 2;
+    var slot = function (i) { return { x: x0 + (W + G) * i, y: REC_TAB_Y, w: W, h: REC_TAB_H }; };
+    var i = 0;
     return {
       backY: RECORDS_BACK_Y,
       // 50, not 46: this card is the ONLY door to the records screen — the
@@ -6190,28 +6472,63 @@
       // CAREER button starts at 502, so the four units come out of the slack
       // and nothing else moves.
       card: { x: cx - 132, y: 438, w: 264, h: 50 },
-      tabStats:  { x: x0,                 y: REC_TAB_Y, w: W, h: REC_TAB_H },
-      tabBoard:  { x: x0 + (W + G),       y: REC_TAB_Y, w: W, h: REC_TAB_H },
-      tabLeague: { x: x0 + (W + G) * 2,   y: REC_TAB_Y, w: W, h: REC_TAB_H },
-      tabPast:   { x: x0 + (W + G) * 3,   y: REC_TAB_Y, w: W, h: REC_TAB_H },
-      tabJobs:   { x: x0 + (W + G) * 4,   y: REC_TAB_Y, w: W, h: REC_TAB_H },
+      tabStats:  slot(i++),
+      tabBoard:  slot(i++),
+      tabLeague: league ? slot(i++) : null,
+      tabPast:   slot(i++),
+      tabJobs:   slot(i++),
     };
+  };
+
+  // IS THERE A LEAGUE TO SHOW? Only a fetch that came back 200 with a JSON
+  // array says yes. 'closed' (404 PGRST205: the view does not exist) says no,
+  // and so does "never asked yet". A transient 'error' changes nothing either
+  // way: a phone in a tunnel must not hide a league it has already seen, nor
+  // invent one it has not. Not persisted — every launch asks again, so the day
+  // the view is created on the server the tab appears without a new build.
+  Game.prototype.leagueOffered = function () { return this._leagueOpen === true; };
+
+  // THE ROW MUST NOT MOVE UNDER A FINGER. Four tabs and five tabs put TODAY,
+  // PAST and JOBS in different places, so a league answer that lands while the
+  // player is aiming would re-route their tap. The tab set is latched when
+  // RECORDS opens and may change only inside the opening hand-over lock, while
+  // no tap is accepted anyway; a later answer takes effect on the next open.
+  var REC_SETTLE_MS = UI_LOCK_MS;
+  Game.prototype._openRecords = function () {
+    this.state = 'records';
+    this._recOpenedAt = nowMs();
+    this._recLeague = this.leagueOffered();
+    this.recTab = this.recTab || 'stats';
+    if (this.recTab === 'league' && !this._recLeague) this.recTab = 'stats';
+    this._loadBoard(false);      // warm it now; the tab is one tap away
+    this._loadLeague(false);
   };
 
   // The 14-day league, cached like the daily board. `state` carries a fourth
   // value the board does not have: 'closed', meaning the view is not published
-  // yet (tools/leaderboard-league.sql has not been run). That is a normal
-  // state, not a failure, so it gets its own copy.
+  // yet (tools/leaderboard-league.sql has not been run). A good answer is kept
+  // for two minutes; a 'closed' or 'error' one is asked again on the next
+  // RECORDS open, so an outage is never remembered for the session.
   Game.prototype._loadLeague = function (force) {
     var b = this._league;
-    if (!force && b && nowMs() - b.at < 120000) return;
-    this._league = { at: nowMs(), state: 'loading', rows: null };
+    if (!force && b) {
+      if (b.state === 'loading' && !fetchStalled(b)) return;
+      if (b.state === 'ok' && nowMs() - b.at < 120000) return;
+    }
+    var mine = this._league = { at: nowMs(), state: 'loading', rows: null };
     var self = this;
     Lb.league(12, function (state, rows) {
-      if (!self._league) return;
-      self._league.state = state;
-      self._league.rows = rows;
-      self._league.at = nowMs();
+      // a superseded request (a stalled one that was retried) says nothing
+      if (self._league !== mine) return;
+      mine.state = state;
+      mine.rows = rows;
+      mine.at = nowMs();
+      if (state === 'ok') self._leagueOpen = true;
+      else if (state === 'closed') self._leagueOpen = false;
+      if (self.state === 'records' && nowMs() - (self._recOpenedAt || 0) < REC_SETTLE_MS) {
+        self._recLeague = self.leagueOffered();
+        if (!self._recLeague && self.recTab === 'league') self.recTab = 'stats';
+      }
     });
   };
 
@@ -6284,11 +6601,13 @@
     // --- tabs ---------------------------------------------------------------
     var R = this.recordsRects();
     var tab = this.recTab || 'stats';
+    if (tab === 'league' && !R.tabLeague) tab = 'stats';
     [[R.tabStats, 'YOU', tab === 'stats'],
      [R.tabBoard, 'TODAY', tab === 'board'],
      [R.tabLeague, 'LEAGUE', tab === 'league'],
      [R.tabPast, 'PAST', tab === 'past'],
      [R.tabJobs, 'JOBS', tab === 'jobs']]
+      .filter(function (t) { return !!t[0]; })
       .forEach(function (t) {
         var box = t[0], on = t[2];
         ctx.fillStyle = on ? 'rgba(90,70,50,0.95)' : 'rgba(20,12,6,0.45)';
@@ -6538,17 +6857,12 @@
       ctx.fillText('tap the tab again to retry', cx, 314);
       return;
     }
-    if (b.state === 'closed') {
-      // The view is not published yet. Say something TRUE and unalarming
-      // rather than an error — this is the expected state before
-      // tools/leaderboard-league.sql is run.
-      ctx.fillStyle = '#ffd75e'; ctx.font = fT(14, 'bold');
-      ctx.fillText('the league opens soon', cx, 288);
-      ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fT(12);
-      ctx.fillText('your daily digs are already being counted', cx, 314);
-      return;
-    }
-    if (b.state === 'error') {
+    // 'closed' normally never reaches this draw: without a league the tab is
+    // not offered (leagueOffered). It can only land here when a league this
+    // session had already seen stops answering while RECORDS is open, and
+    // then it is the same thing to the player as an outage. The old copy
+    // here promised the league would open "soon", a date nobody had set.
+    if (b.state === 'error' || b.state === 'closed') {
       ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('the league is out of reach right now', cx, 292);
       ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = fT(11);
@@ -7169,7 +7483,9 @@
     // WHAT YOU GET, and — just as important — what you already have.
     var yy = 178;
     var give = ['Career levels ' + (FREE_CAREER_LEVELS + 1) + '-' + CAREER_MAX + ' — the rest of the ladder',
-                'Every past daily jar, still playable'];
+                // ARCHIVE_DAYS, not "every past": the archive is a rolling
+                // fortnight, and the IAP's own ASC description says 14-day.
+                'The last ' + ARCHIVE_DAYS + ' daily jars, still playable'];
     ctx.font = fT(13); ctx.textAlign = 'left';
     for (var i = 0; i < give.length; i++) {
       ctx.fillStyle = '#ffd75e';
@@ -7179,8 +7495,13 @@
       yy += 24;
     }
     yy += 8;
+    // Never promise the game is clock-free: every shift carries a 45s RUSH
+    // order (CFG.timedDur) and the rare-gem choice stands CHOICE_SECS. The
+    // claim this line makes is the one that is true — nothing meters how much
+    // you may play. tools/check_frame_claims.py scans this whole file (comments
+    // ship in the bundle too) for store/frames.json _forbidden_strings.
     var keep = ['Free digs, the daily jar and its board stay free',
-                'No ads, no energy, no timers — same as before'];
+                'No ads, no energy meter — same as before'];
     for (var k = 0; k < keep.length; k++) {
       ctx.fillStyle = 'rgba(232,201,255,0.75)';
       ctx.fillText('\u2713', cx - 128, yy);
@@ -7435,7 +7756,7 @@
   // ---- IDENTICAL simulation.
   Game.prototype._frame = function (ts) {
     requestAnimationFrame(this._frame);
-    if (!this._last) this._last = ts;
+    if (this._last === null) this._last = ts;
     // Clamped at BOTH ends. The 0.1 ceiling stops a backgrounded tab from
     // stepping the world 200 times on resume; the 0 floor stops a timestamp
     // that goes BACKWARD from running every cosmetic age in reverse. Without
@@ -7443,29 +7764,38 @@
     // extraction ring is drawn at `r + t*26` — an arc with radius -1051, which
     // throws IndexSizeError and kills the render loop outright.
     var dtRaw = Math.max(0, Math.min(0.1, (ts - this._last) / 1000));
-    this._last = ts;
+    this._last = Math.max(this._last, ts);
     if (!this._ft) this._ft = [];
     this._ft.push(dtRaw * 1000);
     if (this._ft.length > 240) this._ft.shift();
     var STEP = 1 / CFG.stepHz;
-    if (this.hitStop > 0) {
-      this.hitStop -= dtRaw;             // the world holds its breath
-    } else if (this.state === 'playing') {
+    if (this.state === 'playing') {
       this._acc += dtRaw;
-      var n = 0;
-      // _clacks samples per STEP, not per frame. b.px/b.py hold the START of
-      // the step that just ran, so an impact is only visible in the step it
-      // happens in — and at stepHz 120 against a 60Hz frame, a once-per-frame
-      // sampler sees every other step and misses most landings outright.
-      // Measured: sampling in _cosmetic gave 1 clack across 15 real digs
-      // (0.07/dig) where a per-step harness predicted 2.27. The voice budget
-      // inside _clacks is what keeps 12 possible calls per frame safe.
-      while (this._acc >= STEP && n < 12) {
-        this.update(STEP); this._clacks(); this._acc -= STEP; n++;
+      var n = 0, EPS = 1e-9;
+      // Spend accepted wall time in chronological order. A freeze generated
+      // by update owns the next interval even within this same catch-up frame.
+      // When it expires, its leftover time is still available to the sim.
+      // Sub-nanosecond tolerance keeps an exact fixed-step boundary from losing
+      // a step merely because rAF timestamps were divided differently.
+      while (this.state === 'playing') {
+        if (this.hitStop > 0) {
+          var held = Math.min(this.hitStop, this._acc);
+          this.hitStop -= held; this._acc -= held;
+          if (this.hitStop > EPS) break;
+          this.hitStop = 0;
+        }
+        if (this._acc + EPS < STEP || n >= 12) break;
+        this._acc = Math.max(0, this._acc - STEP);
+        // Landings are sampled per fixed step; once-per-frame sampling misses
+        // impacts on displays slower than the 120 Hz simulation.
+        this.update(STEP); this._clacks(); n++;
       }
+      // The end-of-shift result owns the rest of the frame, including its time.
+      if (this.state !== 'playing') this._acc = 0;
     }
     this._cosmetic(dtRaw);
-    this.draw(this.state === 'playing' ? this._acc / STEP : 0);
+    this.draw(this.state === 'playing' ? Math.min(1, this._acc / STEP) : 0);
+    this._syncAccess();
   };
 
   // ---- TYPE. One definition, because there were 101 of them. ----------------
@@ -7578,9 +7908,292 @@
     return 'rgb(' + r + ',' + g + ',' + c + ')';
   }
 
+  // Semantic controls mirror the same rectangles and route through the same
+  // actions as touch. This is presentation only: no seed or simulation writes.
+  Game.prototype.accessControls = function () {
+    var g = this, out = [];
+    function add(id, label, rect, disabled, checked, role) {
+      out.push({ id: id, label: label, rect: rect, disabled: !!disabled, checked: checked, role: role });
+    }
+    function btn(id, label, y, disabled) { add(id, label, { x: 100, y: y, w: 220, h: 56 }, disabled); }
+    if (g.showSettings) {
+      var labels = { music: 'Music', sound: 'Sound effects', hints: 'Hints in the jar', marks: 'Gem symbols',
+        help: 'How to Play', resume: 'Resume', done: 'Done', quit: g._quitArmed > nowMs() ? 'Confirm quit shift' : 'Quit shift',
+        restore: 'Restore purchases', privacy: 'Privacy policy' };
+      var values = { music: !Snd.musicMuted, sound: !Snd.sfxMuted, hints: Meta.data.hints !== 0, marks: Meta.data.marks === 1 };
+      g.settingsRects().rows.forEach(function (r) {
+        add('setting:' + r.id, labels[r.id], r, r.id === 'restore' && Store.busy, values[r.id], r.id in values ? 'switch' : null);
+      });
+      add('settings-close', 'Close Settings', g.settingsRects().close);
+      return out;
+    }
+    if (g.state === 'paused') { btn('resume', 'Resume', 340); return out; }
+    if (g.state === 'menu') {
+      add('career', 'Career level ' + Math.min(careerCap(), Meta.data.careerLevel || 1), g.menuRect('career'));
+      add('daily', 'Daily Dig', g.menuRect('daily'), !Meta.data.tutorialDone);
+      add('free', 'Free Dig', g.menuRect('free'));
+      add('levels', 'Career level map', g.menuRect('strip'));
+      add('shop', 'Shop', g.menuRect('shop'));
+      var rc = g.recordsRects().card;
+      add('records', 'Records and hoard', { x: rc.x, y: rc.y + g._menuShift(), w: rc.w, h: rc.h });
+      add('settings', 'Settings', g.menuRect('gear'));
+      return out;
+    }
+    if (g.state === 'playing') {
+      if (g.choice) {
+        var cr = g.choiceRects(), heart = g.choice.key === 'heartstone';
+        add('choice:use', heart ? 'Sell Heartstone for ' + HEART_SELL + ' coins' : 'Use prism for an order', cr.use);
+        add('choice:hoard', heart ? 'Give Heartstone to the dragon for ' + HEART_GIFT + ' hoard' : 'Give prism to the dragon', cr.hoard);
+      } else if (!g.epilogue) {
+        g.orders.forEach(function (o, i) {
+          var needs = Object.keys(o.need).filter(function (k) { return o.need[k] > 0; }).map(function (k) {
+            return k + ' ' + Math.min(g._bagCount(k), o.need[k]) + ' of ' + o.need[k];
+          }).join(', ');
+          add('order:' + i, 'Order ' + (i + 1) + '. ' + needs + '. Pays ' + o.pay + ' coins. Show needed gems.',
+            { x: 14 + i * (ORDER_W + 8), y: ORDER_Y, w: ORDER_W, h: ORDER_H });
+        });
+        g.bag.forEach(function (k, i) {
+          add('bag:' + i, 'Discard ' + k + ' from bag slot ' + (i + 1) + ' permanently, no coins',
+            { x: bagSlotX(i), y: BAG_Y, w: BAG_SLOT, h: BAG_SLOT });
+        });
+        g.jar.bodies.filter(function (b) { return g.jar.exposed(b); }).sort(function (a, b) { return a.x - b.x; }).forEach(function (b, i) {
+          var name = b.key === 'heartstone' ? 'Heartstone, ' + (3 - (b.pry || 0)) + ' pries remaining' :
+            b.lode ? 'lodestone' : b.shale ? 'shale' : b.geode ? 'crusted rock' : (b.great ? 'great ' : '') + b.key;
+          add('gem:' + b.id, 'Dig ' + name + ', ' + (i + 1) + ' from the left',
+            { x: b.x - b.r, y: b.y - b.r, w: b.r * 2, h: b.r * 2 });
+        });
+      }
+      add('settings', 'Settings', g.gearRect());
+      return out;
+    }
+    if (g.state === 'levels') {
+      var cap = careerCap(), reached = Math.min(cap, Meta.data.careerLevel || 1);
+      for (var i = 0; i < CAREER_MAX; i++) {
+        add('level:' + (i + 1), 'Level ' + (i + 1) + (i + 1 > cap ? '. Unlock full burrow' : i + 1 > reached ? '. Not reached yet' : ''),
+          levelRect(i), i + 1 <= cap && i + 1 > reached);
+      }
+      btn('back', 'Back', LEVELS_BACK_Y);
+    } else if (g.state === 'results') {
+      var rr = resultsRects(g), won = g.careerResult && g.careerResult.won;
+      if (rr.pick > 0 && g.career && !won) btn('deeper-pick', 'Deeper pick. ' + DEEPER_PICK_COST + ' coins for ' + DEEPER_PICK_SWINGS + ' extra swings', rr.pick, (Meta.data.coins || 0) < DEEPER_PICK_COST);
+      btn('again', g.careerFinale() ? 'Daily Dig' : g.career ? won ? g.career.level + 1 > careerCap() ? 'Unlock to continue' : 'Next level' : 'Retry' : 'Again', rr.again);
+      btn('back', 'Menu', rr.menu);
+    } else if (g.state === 'paywall') {
+      var pr = g.paywallRects();
+      add('buy', 'Unlock full burrow' + (Store.price ? ', ' + Store.price : ''), pr.buy, Ent.owned() || Store.busy || !Store.price || !Store.available());
+      add('restore', 'Restore purchases', pr.restore, Store.busy || !Store.available());
+      add('back', 'Back', pr.back);
+    } else if (g.state === 'shop') {
+      var tabs = shopTabs(), tab = g.shopTab || 'walls';
+      ['walls', 'dragon', 'pick'].forEach(function (t) { add('tab:' + t, { walls: 'Jar walls', dragon: 'Dragon colors', pick: 'Pickaxes' }[t], tabs[t], false, t === tab); });
+      var list = tab === 'pick' ? PICK_SKINS : tab === 'dragon' ? DRAGON_SKINS : WALL_SKINS;
+      list.forEach(function (sk, i) {
+        var owned = tab === 'pick' ? pickUnlocked(sk) : tab === 'dragon' ? dragonUnlocked(sk) : sk.price === 0 || !!(Meta.data.owned && Meta.data.owned[sk.id]);
+        var equipped = sk.id === (tab === 'pick' ? equippedPickId() : tab === 'dragon' ? equippedDragonId() : equippedWallId());
+        var detail = owned ? equipped ? '. Equipped' : '. Equip' : tab === 'walls' ? '. Buy for ' + sk.price + ' coins' : tab === 'pick' ? '. Requires ' + sk.stars + ' career stars' : '. Requires ' + (20 + sk.rank * HOARD_STEP) + ' hoard';
+        add('skin:' + sk.id, sk.name + detail, { x: 60, y: tab === 'walls' ? shopRowY(i) : dragonRowY(i), w: 300, h: tab === 'walls' ? SHOP_ROW_H : DRAGON_HIT_H },
+          !owned && (tab !== 'walls' || (Meta.data.coins || 0) < sk.price), equipped);
+      });
+      btn('back', 'Back', g._shopBackY((tab === 'walls' ? shopRowY(list.length) : dragonRowY(list.length)) + 6));
+    } else if (g.state === 'records') {
+      var r = g.recordsRects(), tabNames = { stats: 'Stats', board: 'Daily leaderboard', league: 'League', past: 'Past daily digs', jobs: 'Contracts' };
+      var activeTab = g.recTab || 'stats';
+      if (activeTab === 'league' && !r.tabLeague) activeTab = 'stats';
+      Object.keys(tabNames).forEach(function (t) {
+        var rect = r['tab' + t.charAt(0).toUpperCase() + t.slice(1)];
+        if (rect) add('tab:' + t, tabNames[t], rect, false, activeTab === t);
+      });
+      if (g.recTab === 'jobs' || g.recTab === 'past') {
+        var pager = g.recTab === 'jobs' ? g.jobsPageRect() : g.pastPageRect();
+        add('page:previous', 'Previous page', { x: pager.x, y: pager.y, w: pager.w / 2, h: pager.h });
+        add('page:next', 'Next page', { x: pager.x + pager.w / 2, y: pager.y, w: pager.w / 2, h: pager.h });
+      }
+      if (g.recTab === 'past') g.archiveRows().slice((g.pastPage || 0) * PAST_PER_PAGE, ((g.pastPage || 0) + 1) * PAST_PER_PAGE).forEach(function (a, i) {
+        add('archive:' + a.day, 'Daily Dig from ' + a.ago + (a.ago === 1 ? ' day' : ' days') + ' ago. Best ' + a.best + (Ent.owned() ? '' : '. Unlock full burrow'),
+          { x: 60, y: PAST_ROW_Y + i * PAST_ROW_H, w: 300, h: PAST_ROW_H });
+      });
+      btn('back', 'Back', r.backY);
+    }
+    add('settings', 'Settings', SHOP_GEAR);
+    return out;
+  };
+
+  Game.prototype.accessSummary = function () {
+    var g = this, text = '';
+    if (g.showSettings) text = 'Settings. ' + (g.state === 'paused' ? 'Your shift is paused.' : '');
+    else if (g.state === 'playing' || g.state === 'paused' || g.state === 'results') {
+      text = (g.state === 'results' ? 'Shift finished. ' : g.state === 'paused' ? 'Paused. ' : '') +
+        g.swings + ' swings left. ' + g.ordersDone + ' of ' + g.goalOrders + ' orders filled. ' + g.coins + ' coins. Bag ' + g.bag.length + ' of ' + g.bagCap + '.';
+      if (g.choice) text = (g.choice.key === 'heartstone' ? 'Heartstone: sell or give to dragon.' : 'Prism: use for an order or give to dragon.') + ' ' + CHOICE_SECS + ' seconds to choose.';
+      else if (g.toast && g.toast.until > g.worldT) text += ' ' + g.toast.text;
+    } else text = (g.state === 'menu' ? 'Gemburrow. Dig gems, fill orders, feed the dragon.' : g.state + '.') +
+      ' ' + (Meta.data.coins || 0) + ' coins saved. ' + (Meta.data.hoardTotal || 0) + ' hoard.';
+    if (Store.note && (g.showSettings || g.state === 'paywall')) text += ' ' + Store.note;
+    return text;
+  };
+
+  // Longer screen content is readable on demand, never repeatedly announced.
+  Game.prototype.accessDetails = function () {
+    var g = this, lines = [], m = Meta.data;
+    if (g.showSettings || g.state === 'paused') return lines;
+    if (g.state === 'results') {
+      var cr = g.careerResult;
+      lines.push((g.career ? 'Career level ' + g.career.level + '. ' : g.archiveDay ? 'Archive dig. ' : g.isDaily ? 'Daily Dig. ' : 'Free Dig. ') +
+        (g.ordersDone >= g.goalOrders ? 'Orders complete.' : 'The pick gave out.') + ' ' + g.ordersDone + ' of ' + g.goalOrders + ' orders filled.');
+      if (g.career && cr) lines.push(cr.stars + ' of 3 stars. ' + (cr.banked || 0) + ' coins banked. Career pays on the first clear only.');
+      else lines.push((g.banked || 0) + ' coins banked. ' + (g.archiveDay ? 'Archive coins are not banked or submitted to the leaderboard.' : g.isDaily ? 'Only your first finished Daily shift today pays coins.' : 'Free digs bank every shift.'));
+      lines.push(g.hoard + ' added to the hoard. Purse: ' + (m.coins || 0) + ' coins.');
+      (g.contractsWon || []).forEach(function (c) { lines.push('Contract completed: ' + c.name + '. ' + c.h + ' hoard.'); });
+    } else if (g.state === 'records') {
+      var tab = g.recTab || 'stats';
+      if (tab === 'league' && !g.recordsRects().tabLeague) tab = 'stats';
+      if (tab === 'stats') {
+        var st = m.stats || {}, stars = m.careerStars || {}, total = 0, best = 0;
+        Object.keys(stars).forEach(function (k) { total += stars[k] || 0; });
+        Object.keys(m.bestDaily || {}).forEach(function (k) { best = Math.max(best, m.bestDaily[k]); });
+        lines.push('Career: ' + Math.min(CAREER_MAX, m.careerLevel || 1) + ' of ' + CAREER_MAX + '. Stars: ' + total + ' of ' + CAREER_MAX * 3 + '.');
+        lines.push('Best daily: ' + best + ' coins. Best free dig: ' + (m.bestFree || 0) + ' coins.');
+        lines.push('Day streak: ' + (st.streak || 0) + '. Best streak: ' + (st.bestStreak || 0) + '. Shifts worked: ' + (st.shifts || 0) + '. Days dug: ' + (st.days || Object.keys(m.bestDaily || {}).length) + '.');
+        lines.push('Gems delivered: ' + (st.gems || 0) + '. Crusted rocks cracked: ' + (st.crusts || 0) + '. Heartstones found: ' + (st.hearts || 0) + '. Longest chain: ' + (st.bestCombo || 0) + '. Coins earned: ' + (st.earned || m.coins || 0) + '.');
+      } else if (tab === 'jobs') {
+        var done = contractsDone(), page = g.jobsPage || 0;
+        lines.push('Contracts. Page ' + (page + 1) + ' of ' + Math.ceil(CONTRACTS.length / JOBS_PER_PAGE) + '. Earned in Free and Career. No expiry.');
+        CONTRACTS.slice(page * JOBS_PER_PAGE, (page + 1) * JOBS_PER_PAGE).forEach(function (c) { lines.push(c.name + ': ' + c.desc + '. ' + c.h + ' hoard. ' + (done[c.id] ? 'Completed.' : 'Not completed.')); });
+      } else if (tab === 'past') lines.push('Past Daily digs. Page ' + ((g.pastPage || 0) + 1) + ' of ' + Math.ceil(ARCHIVE_DAYS / PAST_PER_PAGE) + '. Revisit the same jars. Coins are not banked and scores stay off today’s board.');
+      else {
+        var board = tab === 'league' ? g._league : g._board, limit = tab === 'league' ? 12 : 10;
+        lines.push(tab === 'league' ? 'League. Daily digs over the last 14 days, added together.' : 'Today’s daily leaderboard.');
+        if (!board || board.state === 'loading' && !fetchStalled(board)) lines.push('Loading.');
+        else if (board.state === 'closed' || board.state === 'error' || fetchStalled(board)) lines.push('The board is out of reach. Activate the same tab to retry.');
+        else if (!(board.rows || []).length) lines.push('No digs yet.');
+        else board.rows.slice(0, limit).forEach(function (r, i) { lines.push((i + 1) + '. ' + safeName(r.player) + '. ' + ((tab === 'league' ? r.total : r.coins) | 0) + ' coins' + (tab === 'league' ? ' over ' + (r.days | 0) + ' days' : '') + '.'); });
+        lines.push('Your name: ' + safeName(m.playerName) + '. Your best today: ' + ((m.bestDaily || {})[dayNumber()] || 0) + ' coins.' + (m.pendingScore ? ' Score waiting to post.' : ''));
+      }
+    } else if (g.state === 'paywall') lines.push('Full Burrow is a one-time purchase. Unlock the full 40-level career and past Daily jars. Today’s Daily and Free Dig remain available without purchase.');
+    else if (g.state === 'levels') lines.push('Choose a reached level to replay it. Stars can improve; coins bank on the first clear only.');
+    else if (g.state === 'shop') lines.push('Walls cost saved coins. Dragon colors unlock with your hoard. Pickaxes unlock with career stars. These appearances do not change your dig.');
+    else if (g.state === 'menu' && !m.tutorialDone) lines.push('Daily Dig unlocks after your first finished shift.');
+    return lines;
+  };
+
+  // Stable DOM nodes retain focus through animation and Space keyup. Geometry
+  // refreshes at 10 Hz; activation resolves the current descriptor again.
+  Game.prototype._syncAccess = function (force) {
+    var host = document.getElementById('game-controls');
+    if (!host) return;
+    var stamp = nowMs();
+    if (!force && stamp - (this._accessAt || 0) < 100) return;
+    this._accessAt = stamp;
+    if (helpIsOpen()) { host.setAttribute('aria-hidden', 'true'); return; }
+    host.removeAttribute('aria-hidden');
+    var g = this, controls = g.accessControls(), nodes = g._accessNodes || (g._accessNodes = {}), seen = {}, v = g.view;
+    var focused = document.activeElement, prior = focused && focused.getAttribute('data-control-id');
+    var priorRect = prior && nodes[prior] && nodes[prior]._worldRect;
+    var scene = g.state + ':' + !!g.showSettings + ':' + !!g.choice;
+    controls.forEach(function (d) {
+      seen[d.id] = true;
+      var el = nodes[d.id];
+      if (!el) {
+        el = document.createElement('button'); el.type = 'button'; el.className = 'game-control';
+        el.setAttribute('data-control-id', d.id);
+        el.addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          if (helpIsOpen()) return;
+          var fresh = g.accessControls().filter(function (c) { return c.id === d.id; })[0];
+          if (!fresh || fresh.disabled) return;
+          g._accessKeyboard = true;
+          var r = fresh.rect;
+          _activateWorld({ x: r.x + r.w / 2, y: r.y + r.h / 2, bodyId: fresh.id.indexOf('gem:') === 0 ? Number(fresh.id.slice(4)) : undefined });
+          g._syncAccess(true);
+        });
+        el.addEventListener('focus', function () { g._accessKeyboard = true; });
+        nodes[d.id] = el; host.appendChild(el);
+      }
+      function attr(k, val) { if (el.getAttribute(k) !== val) el.setAttribute(k, val); }
+      attr('aria-label', d.label); attr('role', d.role || 'button');
+      el.disabled = d.disabled;
+      var checkAttr = d.role === 'switch' ? 'aria-checked' : 'aria-pressed';
+      if (typeof d.checked === 'boolean') attr(checkAttr, String(d.checked));
+      else { el.removeAttribute('aria-checked'); el.removeAttribute('aria-pressed'); }
+      el._worldRect = d.rect;
+      var r = d.rect, css = 'left:' + ((r.x + v.ox) * v.scale) + 'px;top:' + ((r.y + v.oy + v.uiTop) * v.scale) +
+        'px;width:' + r.w * v.scale + 'px;height:' + r.h * v.scale + 'px;';
+      if (el.style.cssText !== css) el.style.cssText = css;
+    });
+    Object.keys(nodes).forEach(function (id) { if (!seen[id]) { nodes[id].remove(); delete nodes[id]; } });
+    if (g._accessKeyboard && ((prior && !seen[prior]) || (g._accessScene && g._accessScene !== scene))) {
+      var target = controls.filter(function (d) { return !d.disabled && (g.showSettings || g.choice || g.state !== 'playing' || d.id.indexOf('gem:') === 0); });
+      if (priorRect && prior && prior.indexOf('gem:') === 0 && g._accessScene === scene) target.sort(function (a, b) {
+        function distance(r) { return Math.pow(r.x + r.w / 2 - priorRect.x - priorRect.w / 2, 2) + Math.pow(r.y + r.h / 2 - priorRect.y - priorRect.h / 2, 2); }
+        return distance(a.rect) - distance(b.rect);
+      });
+      if (target.length) nodes[target[0].id].focus({ preventScroll: true });
+    }
+    g._accessScene = scene;
+    var status = document.getElementById('game-status'), summary = g.accessSummary();
+    if (status && status.textContent !== summary) status.textContent = summary;
+    var details = document.getElementById('game-details'), lines = g.accessDetails(), detailsKey = JSON.stringify(lines);
+    if (details && g._accessDetailsKey !== detailsKey) {
+      g._accessDetailsKey = detailsKey;
+      while (details.firstChild) details.removeChild(details.firstChild);
+      lines.forEach(function (line) { var p = document.createElement('p'); p.textContent = line; details.appendChild(p); });
+      details.hidden = !lines.length;
+    }
+  };
+
   // ===== boot + input + DEV-GATED debug surface ===========================
   var canvas = document.getElementById('game-canvas');
   var game = new Game(canvas);
+  // Settings remains underneath, keeping a live shift paused for the whole
+  // guide. Use the same asset resolver as the canvas in stamped WebP builds.
+  var helpDialog = document.getElementById('how-to-play');
+  function helpIsOpen() { return helpDialog && helpDialog.hasAttribute('open'); }
+  var helpInvoker = null;
+  function openHelpGuide() {
+    if (!helpDialog || helpIsOpen()) return;
+    helpInvoker = document.activeElement;
+    // iOS 15.0–15.3 has no native dialog methods. Keep the guide usable at the
+    // app's minimum OS with the same scroll area and an explicit focus trap.
+    if (typeof helpDialog.showModal === 'function') helpDialog.showModal();
+    else {
+      document.documentElement.classList.add('guide-fallback');
+      helpDialog.setAttribute('open', '');
+      document.getElementById('game-wrap').setAttribute('aria-hidden', 'true');
+      document.getElementById('guide-close').focus();
+    }
+    helpDialog.querySelector('.guide-body').scrollTop = 0;
+  }
+  function closeHelpGuide() {
+    if (!helpIsOpen()) return;
+    if (document.documentElement.classList.contains('guide-fallback')) {
+      helpDialog.removeAttribute('open');
+      document.documentElement.classList.remove('guide-fallback');
+      document.getElementById('game-wrap').removeAttribute('aria-hidden');
+    } else helpDialog.close();
+    game._uiLockUntil = nowMs() + UI_LOCK_MS;
+    game._syncAccess(true);
+    if (helpInvoker && helpInvoker.isConnected) helpInvoker.focus({ preventScroll: true });
+  }
+  if (helpDialog) {
+    helpDialog.querySelectorAll('[data-guide-art]').forEach(function (img) {
+      img.src = assetURL(SPR_FILES[img.getAttribute('data-guide-art')]);
+    });
+    var guideValues = { choice: CHOICE_SECS, gift: HEART_GIFT, sell: HEART_SELL };
+    helpDialog.querySelectorAll('[data-guide-value]').forEach(function (el) {
+      el.textContent = guideValues[el.getAttribute('data-guide-value')];
+    });
+    document.getElementById('guide-close').addEventListener('click', closeHelpGuide);
+    helpDialog.addEventListener('close', function () { game._uiLockUntil = nowMs() + UI_LOCK_MS; });
+    document.addEventListener('keydown', function (e) {
+      if (!helpIsOpen()) return;
+      if (e.key === 'Escape') { e.preventDefault(); closeHelpGuide(); }
+      else if (e.key === 'Tab') {
+        var stops = [document.getElementById('guide-close'), helpDialog.querySelector('.guide-body')];
+        var next = (stops.indexOf(document.activeElement) + (e.shiftKey ? -1 : 1) + stops.length) % stops.length;
+        e.preventDefault(); stops[next].focus();
+      }
+    });
+  }
   // AFTER the native restore settles — the queued payload lives in Meta, and
   // a payload from a day that has already turned can never be accepted.
   // IAP boot: load the storefront price, and silently re-yield any transaction
@@ -7591,35 +8204,60 @@
   // ...and again on resume: a purchase completed while the app was backgrounded
   // (Ask to Buy, a slow Apple ID prompt) arrives with no launch to catch it.
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) Store.recover();
+    if (document.hidden) game.setPaused(true);
+    else {
+      // Native lifecycle may resume separately; neither path may bill hidden
+      // time to the jar. On the web the paused screen awaits the player's tap.
+      game._last = null;
+      Store.recover();
+      Meta.ready(function () { Lb.retryPending(); });
+    }
+  });
+  window.addEventListener('online', function () {
+    Meta.ready(function () { Lb.retryPending(); });
   });
 
-  Meta.ready(function () {
-    var p = Meta.data.pendingScore;
-    if (!p) return;
-    if (p.day !== dayNumber()) { Meta.data.pendingScore = null; Meta.save(); return; }
-    Lb.submit(p, function (ok) {
-      if (ok) { Meta.data.pendingScore = null; Meta.save(); }
-    });
-  });
+  Meta.ready(function () { Lb.retryPending(); });
   window.addEventListener('resize', function () { game.resize(); });
 
   // UI routing happens HERE (listener), sim taps are queued for update() —
   // that keeps Math.random-free update() while menus can pick free seeds.
-  window.addEventListener('pointerdown', function (e) {
+  function _activateWorld(w) {
+    if (helpIsOpen()) return;
     Snd.unlock();
-    // THE HAND-OVER GUARD (§3p). Every screen in this game appears under the
-    // finger that summoned it, and the next tap is routed by the NEW screen: a
-    // stray tap after the bell spends 250c on DEEPER PICK, and a stray tap
-    // after RETRY spends a swing on the fresh jar. Arming is automatic —
-    // whenever a tap changes `state` or `showSettings`, the lock is set below,
-    // so a new branch cannot forget to do it.
+    // Shared screen hand-over guard for touch, keyboard and assistive clicks.
     if (game._uiLockUntil && nowMs() < game._uiLockUntil) return;
-    var _st0 = game.state, _ss0 = game.showSettings;
-    _routeTap(game.toWorld(e.clientX, e.clientY));
-    if (game.state !== _st0 || game.showSettings !== _ss0) {
-      game._uiLockUntil = nowMs() + UI_LOCK_MS;
-    }
+    var state = game.state, settings = game.showSettings;
+    _routeTap(w);
+    if (game.state !== state || game.showSettings !== settings) game._uiLockUntil = nowMs() + UI_LOCK_MS;
+  }
+  window.addEventListener('pointerdown', function (e) {
+    if (helpIsOpen() || (e.target.closest && e.target.closest('.game-control'))) return;
+    game._accessKeyboard = false;
+    if (document.activeElement && document.activeElement.classList.contains('game-control')) document.activeElement.blur();
+    _activateWorld(game.toWorld(e.clientX, e.clientY));
+    game._syncAccess(true);
+  });
+  function navigateBack() {
+    if (helpIsOpen()) { closeHelpGuide(); return true; }
+    if (game.showSettings) game.closeSettings();
+    else if (game.state === 'playing') game.openSettings();
+    else if (game.state === 'paused') game.setPaused(false);
+    else if (game.state === 'paywall') game.state = 'levels';
+    else if (game.state !== 'menu') { game.state = 'menu'; Snd.scene('shop'); }
+    else return false;
+    game._uiLockUntil = nowMs() + UI_LOCK_MS;
+    game._syncAccess(true);
+    return true;
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.defaultPrevented || helpIsOpen()) return;
+    if (e.key === 'Escape') { e.preventDefault(); if (!e.repeat) { game._accessKeyboard = true; navigateBack(); } }
+    else if (e.key.indexOf('Arrow') === 0 && document.activeElement && document.activeElement.classList.contains('game-control')) {
+      var buttons = Array.prototype.slice.call(document.querySelectorAll('#game-controls button:not(:disabled)'));
+      var index = buttons.indexOf(document.activeElement), dir = e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 1;
+      if (buttons.length) { e.preventDefault(); buttons[(index + dir + buttons.length) % buttons.length].focus({ preventScroll: true }); }
+    } else if ((e.key === 'Enter' || e.key === ' ') && e.repeat) e.preventDefault();
   });
 
   function _routeTap(w) {
@@ -7672,7 +8310,7 @@
           }
         }
       }
-      if (inRect(w, padHitUp(RR.tabLeague))) {
+      if (RR.tabLeague && inRect(w, padHitUp(RR.tabLeague))) {
         uiTick();
         game._loadLeague(game.recTab === 'league');   // same-tab tap retries
         game.recTab = 'league';
@@ -7820,10 +8458,7 @@
       var rc = game.recordsRects().card;
       if (inRect(w, { x: rc.x, y: rc.y + game._menuShift(), w: rc.w, h: rc.h })) {
         uiTick();
-        game.state = 'records';
-        game.recTab = game.recTab || 'stats';
-        game._loadBoard(false);      // warm it now; the tab is one tap away
-        game._loadLeague(false);
+        game._openRecords();
         Snd.scene('shop'); return;
       }
       if (inRect(w, game.menuRect('career'))) { uiTick(); game.start(0, 'career'); }
@@ -7918,7 +8553,7 @@
       // UI routing lives in the listener, where device geometry is allowed.
       // Same rect the gear is drawn from — these used to drift ~20 units apart.
       if (inRect(w, game.gearRect())) { game.openSettings(); return; }
-      game.tapAt(w.x, w.y);
+      game.tapAt(w.x, w.y, w.bodyId);
     }
   }
   function hitBtn(w, y) {
@@ -7939,9 +8574,7 @@
   // build no reading or writing of the game beyond the pause it already had.
   window.__game = { pause: function (v) { game.setPaused(v); } };
   window.__game.pauseIfPlaying = function () {
-    if (game.state !== 'playing') return 'exit';
-    game.setPaused(true);
-    return 'paused';
+    return navigateBack() ? 'paused' : 'exit';
   };
 
 

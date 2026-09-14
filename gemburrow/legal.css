@@ -72,7 +72,7 @@ a:focus-visible { outline: 3px solid var(--lantern); outline-offset: 3px; border
 .legal-nav .links a.active { color: var(--lantern); }
 
 @media (max-width: 560px) {
-  .legal-nav .container { gap: 12px; }
+  .legal-nav .container { gap: 12px; flex-wrap: wrap; }
   .legal-nav .brand { font-size: 0.95rem; gap: 8px; }
   .legal-nav .brand img { width: 27px; height: 27px; }
   .legal-nav .links { gap: 13px; font-size: 0.85rem; }
