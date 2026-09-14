@@ -627,7 +627,7 @@
         { x: 192, y: 612 }, { x: 332, y: 574 }, { x: 252, y: 448 },
         { x: 58, y: 424 }, { x: 158, y: 312 },
       ],
-      torches: [[86, 648], [336, 478], [92, 332], [244, 692], [306, 366], [46, 552]],
+      torches: [[38, 643], [388, 478], [44, 332], [254, 633], [309, 354], [46, 552]],
       heroStart: { x: 210, y: 470 },
       pathW: 34,
     },
@@ -646,7 +646,7 @@
         { x: 226, y: 486 }, { x: 138, y: 328 }, { x: 356, y: 262 },
         { x: 44, y: 348 }, { x: 288, y: 356 }, { x: 140, y: 630 },
       ],
-      torches: [[40, 690], [368, 580], [40, 480], [330, 250], [230, 726], [368, 420]],
+      torches: [[32, 690], [396, 565], [135, 496], [338, 223], [398, 440]],
       heroStart: { x: 124, y: 636 },   // was (150,600): 18u from the road, inside the toll reach
       pathW: 34,
     },
@@ -666,7 +666,7 @@
         { x: 222, y: 384 }, { x: 62, y: 584 }, { x: 372, y: 484 },
         { x: 62, y: 384 }, { x: 300, y: 282 },
       ],
-      torches: [[46, 730], [380, 660], [46, 530], [380, 410], [60, 300], [250, 750]],
+      torches: [[46, 730], [391, 665], [46, 530], [396, 410], [32, 300]],
       heroStart: { x: 385, y: 675 },   // was (300,610): 2.8u from the road — standing ON it
       pathW: 32,
     },
@@ -693,7 +693,7 @@
         { x: 296, y: 494 }, { x: 314, y: 602 }, { x: 200, y: 368 }, { x: 92, y: 254 },
         { x: 80, y: 356 }, { x: 122, y: 500 },
       ],
-      torches: [[266, 596], [266, 380], [290, 710], [170, 308], [86, 494], [344, 500]],
+      torches: [[249, 606], [266, 380], [290, 710], [34, 311], [78, 494], [344, 500]],
       heroStart: { x: 212, y: 716 },
       pathW: 34,
     },
@@ -715,7 +715,7 @@
         { x: 302, y: 518 }, { x: 374, y: 566 }, { x: 110, y: 536 }, { x: 44, y: 578 },
         { x: 134, y: 374 }, { x: 284, y: 374 },
       ],
-      torches: [[254, 488], [320, 722], [26, 476], [368, 326], [146, 524], [38, 356]],
+      torches: [[254, 488], [320, 722], [22, 476], [368, 326], [154, 524], [38, 356]],
       heroStart: { x: 212, y: 716 },
       pathW: 34,
     },
@@ -756,7 +756,7 @@
         { x: 110, y: 306 }, { x: 44, y: 276 }, { x: 86, y: 462 }, { x: 98, y: 576 }, { x: 32, y: 666 },
         { x: 310, y: 306 }, { x: 376, y: 276 }, { x: 334, y: 462 }, { x: 322, y: 576 }, { x: 388, y: 666 },
       ],
-      torches: [[186, 700], [234, 700], [176, 420], [244, 420], [150, 560], [270, 560]],
+      torches: [[186, 700], [242, 700], [184, 420], [240, 413], [167, 570], [259, 572]],
       heroStart: { x: 150, y: 690 },
       pathW: 34,
     },
@@ -906,6 +906,8 @@
       PATH_LEN: PATH.len, setLevel: setLevel,
       TOWER_TYPES: TOWER_TYPES, ENEMY_TYPES: ENEMY_TYPES, LEVEL1_WAVES: LEVEL1_WAVES,
       WAVE_TABLES: WAVE_TABLES, MAPS: MAPS, MAP: MAP, CFG: CFG,
+      // tools/torch_clearance.js measures torches against the PAINTED road bed
+      roadSurfaceSamples: roadSurfaceSamples, lanes: function () { return LANES; },
     };
   }
 
@@ -7472,8 +7474,11 @@
     } else {
     this._drawCavern(ctx);
     // EVERY hoard in the cavern. A shared-cavern duel has two: yours and hers.
-    for (var kq = 0; kq < (MAP.keeps ? MAP.keeps.length : 1); kq++) this._drawMoundAndKeep(ctx, kq);
+    // THE ROAD RUNS UNDER THE HOARD, NOT OVER IT (2026-09-14). The path cache
+    // was drawn after the mound, so its faded end lay across the coin pile and
+    // the gold ghosted through the cobbles at the keep door.
     this._drawPath(ctx);
+    for (var kq = 0; kq < (MAP.keeps ? MAP.keeps.length : 1); kq++) this._drawMoundAndKeep(ctx, kq);
     this._drawMouthAlarm(ctx);    // escape pressure, UNDER the entities
     this._drawTar(ctx);           // slag sits ON the road, under everyone
     for (var kr2 = 0; kr2 < (MAP.keeps ? MAP.keeps.length : 1); kr2++) this._drawKeep(ctx, kr2);
@@ -7721,15 +7726,30 @@
   Game.prototype._drawCavern = function (ctx) {
     this._buildSceneCache();
     ctx.drawImage(this._bgCache, 0, 0, WORLD_W, WORLD_H);
-    // torch glows breathe on the world clock
+    // TORCH LIGHT FLICKERS, IT DOES NOT FLASH (2026-09-14). The glow used to
+    // swell 45 -> 60 units once a second, and three of Long Sleep's six torches
+    // stood ON the road, which is painted after this pass -- so the sprite was
+    // buried and only its pulsing light showed, as "lights flashing on the road
+    // in random places". Every map's torches now clear the road bed, the pads,
+    // the mound and the keep (tools/torch_clearance.js holds it), and the light
+    // moves a few percent on two slow, detuned waves; still under reduced motion.
     for (var t = 0; t < MAP.torches.length; t++) {
       var tc = MAP.torches[t];
-      var pulse = 0.75 + 0.25 * Math.sin(this.worldT * 5 + t * 1.7);
-      var rg = ctx.createRadialGradient(tc[0], tc[1], 2, tc[0], tc[1], 60 * pulse);
-      rg.addColorStop(0, 'rgba(255,170,60,0.55)');
+      var pulse = RM ? 1 : 0.95 + 0.03 * Math.sin(this.worldT * 2.3 + t * 1.7) + 0.02 * Math.sin(this.worldT * 5.3 + t * 2.9);
+      // A POOL AT THE FOOT, NOT A DISC ON THE FLOOR. A 60u circle at 55% read
+      // as "glowing circles all over the road" even once no torch stood on it.
+      // The light sits at the base, flattened into floor perspective, and fades
+      // with no edge the eye can find.
+      var lx = tc[0], ly = tc[1] + 12, lr = 42 * pulse;
+      ctx.save();
+      ctx.translate(lx, ly); ctx.scale(1, 0.55);
+      var rg = ctx.createRadialGradient(0, 0, 0, 0, 0, lr);
+      rg.addColorStop(0, 'rgba(255,170,60,0.34)');
+      rg.addColorStop(0.45, 'rgba(255,145,45,0.14)');
       rg.addColorStop(1, 'rgba(255,120,30,0)');
       ctx.fillStyle = rg;
-      ctx.beginPath(); ctx.arc(tc[0], tc[1], 60 * pulse, 0, 6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, lr, 0, 6.283); ctx.fill();
+      ctx.restore();
       if (!drawSpriteBottom(ctx, 'torch', tc[0], tc[1] + 16, 26)) {
         // flame + stick fallback
         ctx.fillStyle = '#ffcf6a';
@@ -7783,13 +7803,17 @@
     // ONLY YOUR KEEP. The glow says "tap me", and the tap test (_onTapWorld)
     // reads MAP.keep -- so on the Split Cavern the rival's hoard was pulsing an
     // invitation to a control that does not exist on her side.
+    // IT BREATHES, IT DOES NOT STROBE (2026-09-14). sin(worldT*7) swelled a
+    // 150-174 unit glow over the whole coin pile about once a second, from the
+    // moment the hoard ran low until the player tapped -- read on a phone as
+    // "the road on the gold coins is flashing". Same invitation, a slow breath.
     if (this.motherReady && this._sameSide(side, 0)) {
-      var mp2 = 0.5 + 0.5 * Math.sin(this.worldT * 7);
-      var mg2 = ctx.createRadialGradient(k.x, k.y - 30, 8, k.x, k.y - 30, 120 + mp2 * 24);
-      mg2.addColorStop(0, 'rgba(255,190,90,' + (0.30 + mp2 * 0.25) + ')');
+      var mp2 = RM ? 0.5 : 0.5 + 0.5 * Math.sin(this.worldT * 2.4);
+      var mg2 = ctx.createRadialGradient(k.x, k.y - 30, 8, k.x, k.y - 30, 128 + mp2 * 10);
+      mg2.addColorStop(0, 'rgba(255,190,90,' + (0.30 + mp2 * 0.08) + ')');
       mg2.addColorStop(1, 'rgba(255,140,40,0)');
       ctx.fillStyle = mg2;
-      ctx.beginPath(); ctx.arc(k.x, k.y - 30, 150 + mp2 * 24, 0, 6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(k.x, k.y - 30, 158 + mp2 * 10, 0, 6.283); ctx.fill();
     }
     var plate=this._sidePlate(side,'keep','keep'),keepW=158;
     if(!this.isRival&&plate){
