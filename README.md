@@ -140,12 +140,24 @@ private generated stories and unknown ids keep the normal welcome page. This
 custom-scheme button works without Associated Domains. Automatic Universal Link
 opening still requires the app entitlement and a matching AASA configuration.
 
-The catalog is exported from the app's actual `SleepCatalog.swift`. To refresh it,
-compile that source together with `tools/export_nightshelf_catalog.swift` using
-`swiftc -parse-as-library`, then redirect the executable's stdout into
-`nightshelf/shared-book-catalog.js`. Update the static book counts and the OG card
-copy when the catalog changes, and bump the two shared-book scripts' version query
-in `nightshelf/index.html` when publishing either script.
+The catalog is exported from the app's actual `SleepCatalog.swift`,
+`BedtimeSelections.swift` and `OriginalStories.swift`. It contains full volumes,
+complete selected tales and prepared Originals; the classic shelf graphic still
+counts only the 80 full volumes. Originals carry the app's AI-writing disclosure.
+The wrapper compiles the metadata exporter with those shipping models and their
+parser dependency. Its custom-story stand-in only satisfies compilation; the
+exporter does not read private generated stories or bundled prose.
+
+```bash
+bash tools/export_nightshelf_catalog.sh /path/to/Nightshelf-repository > nightshelf/shared-book-catalog.js
+bash tools/export_nightshelf_catalog.sh /path/to/Nightshelf-repository --check
+```
+
+Update the static classic counts and OG card only if the full-volume catalog
+changes, and bump the two shared-book scripts' version query in
+`nightshelf/index.html` when publishing either script. A shared story requires an
+installed app version whose catalog contains that story; the card asks existing
+listeners to update to the latest version.
 
 ```bash
 node tools/check_nightshelf_share.cjs

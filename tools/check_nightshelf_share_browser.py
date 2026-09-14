@@ -30,6 +30,10 @@ try:
                 ('peter_pan', 'Peter Pan', 'Free on Nightshelf'),
                 ('pride_prejudice', 'Pride and Prejudice', 'Included with Nightshelf Pro'),
                 ('wind_in_willows', 'The Wind in the Willows', 'Free on Nightshelf'),
+                ('bedtime_real_princess', 'The Real Princess', 'Free on Nightshelf'),
+                ('original_lantern_ferry', 'The Lantern Ferry', 'Free on Nightshelf'),
+                ('original_evening_they_kept', 'The Evening They Kept', 'Free on Nightshelf'),
+                ('original_borrowed_light', 'The Sea of Borrowed Light', 'Included with Nightshelf Pro'),
             ]:
                 page.goto(base + '?book=' + book, wait_until='networkidle')
                 assert page.locator('#shared-book').is_visible(), book
@@ -38,8 +42,11 @@ try:
                 assert page.locator('#shared-book-open').get_attribute('href') == 'nightshelf://book/' + book
                 assert page.url == base + '?book=' + book
                 assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'), (width, book)
-                if captures and book == 'peter_pan':
-                    page.screenshot(path=str(captures / f'share-{width}.png'))
+                if book.startswith('original_'):
+                    assert page.locator('#shared-book-author').inner_text() == 'A Nightshelf Original'
+                    assert 'Created with AI for Nightshelf.' in page.locator('#shared-book-description').inner_text()
+                if captures and book in ['peter_pan', 'original_evening_they_kept', 'original_borrowed_light']:
+                    page.screenshot(path=str(captures / f'share-{book}-{width}.png'))
             page.goto(base + '?book=custom_private', wait_until='networkidle')
             assert page.locator('#shared-book').is_hidden()
             assert page.locator('h1').inner_text() == 'Stories to drift off to'
@@ -48,6 +55,6 @@ try:
             assert not errors, errors
             page.close()
         browser.close()
-    print('PASS: shared/free/Pro/unknown/normal pages at 320px, 390px and 1440px; no script errors or horizontal overflow')
+    print('PASS: classics, a traditional selection, prior and new free/Pro Originals, unknown and normal pages at 320px, 390px and 1440px; AI disclosure intact, no script errors or horizontal overflow')
 finally:
     server.shutdown()

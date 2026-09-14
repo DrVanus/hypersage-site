@@ -328,7 +328,7 @@ window.nightshelfSharedBooks = {
   },
   "ohenry_four_million" : {
     "author" : "O. Henry",
-    "blurb" : "Warm New York short stories, each with a small, kind twist.",
+    "blurb" : "New York lives, love, and chance, with O. Henry's famous twists.",
     "freeTier" : false,
     "title" : "The Four Million"
   },
@@ -337,6 +337,14 @@ window.nightshelfSharedBooks = {
     "blurb" : "A parish boy's progress through foggy, lamplit London.",
     "freeTier" : false,
     "title" : "Oliver Twist"
+  },
+  "original_borrowed_light" : {
+    "author" : "Nightshelf",
+    "blurb" : "A strange glow on an ocean planet leads three observers to a discovery hidden by their own point of view.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : false,
+    "kind" : "original",
+    "title" : "The Sea of Borrowed Light"
   },
   "original_clockmaker_garden" : {
     "author" : "Nightshelf",
@@ -353,6 +361,14 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "kind" : "original",
     "title" : "The Orchard Above the Clouds"
+  },
+  "original_evening_they_kept" : {
+    "author" : "Nightshelf",
+    "blurb" : "When a concert is postponed, two amateur pianists must decide whether the evening they planned means more than music.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : true,
+    "kind" : "original",
+    "title" : "The Evening They Kept"
   },
   "original_hill_teahouse" : {
     "author" : "Nightshelf",
@@ -544,7 +560,7 @@ window.nightshelfSharedBooks = {
   },
   "twenty_thousand_leagues" : {
     "author" : "Jules Verne",
-    "blurb" : "The Nautilus gliding through silent, lamplit deeps.",
+    "blurb" : "An extraordinary submarine voyage of discovery, captivity, and danger.",
     "freeTier" : false,
     "title" : "Twenty Thousand Leagues Under the Sea"
   },

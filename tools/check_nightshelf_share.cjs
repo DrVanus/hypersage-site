@@ -62,7 +62,19 @@ for (const id of Object.keys(run('').elements)) assert.ok(html.includes('id="' +
 const books = Object.values(catalog).filter(book => !book.kind);
 const originals = Object.values(catalog).filter(book => book.kind === 'original');
 const selections = Object.values(catalog).filter(book => book.kind === 'selection');
-assert.ok(originals.length > 0 && selections.length > 0, 'catalog must route Originals and selected tales');
+assert.equal(books.length, 80, 'all 80 full-volume routes remain available');
+assert.equal(selections.length, 10, 'all ten traditional selection routes remain available');
+assert.equal(originals.length, 8, 'all eight prepared Originals have a shared route');
+assert.equal(originals.filter(book => book.freeTier).length, 3, 'three Originals are free');
+assert.equal(originals.filter(book => !book.freeTier).length, 5, 'five Originals require Pro');
+for (const [id, title, freeTier] of [
+  ['original_evening_they_kept', 'The Evening They Kept', true],
+  ['original_borrowed_light', 'The Sea of Borrowed Light', false],
+]) {
+  assert.equal(catalog[id]?.title, title, id + ' must name the intended story');
+  assert.equal(catalog[id]?.freeTier, freeTier, id + ' must preserve its intended access');
+  assert.equal(catalog[id]?.kind, 'original', id + ' must use the AI-disclosing Original card');
+}
 const freeCount = books.filter(book => book.freeTier).length;
 assert.match(html, new RegExp('>' + books.length + '<'));
 assert.match(html, new RegExp('>' + freeCount + '<'));
