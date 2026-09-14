@@ -75,6 +75,8 @@ html, body {
 .guide-tip { color:#dcc69f; background:#cfa9590b; border-left:2px solid #ae844d; padding:12px 14px; font-size:12px; line-height:1.65; margin:5px 0 20px; }
 .guide-button { display:block; width:100%; min-height:48px; padding:13px 17px; margin-top:10px; border:1px solid #af8b515c; border-radius:12px; background:#ffffff04; color:#ead6b6; font:700 14px system-ui,sans-serif; }
 .guide-primary { background:linear-gradient(#d9533d,#ac352e); border-color:#eda463; color:#fff4e0; box-shadow:inset 0 1px #ffffff22,0 3px 10px #0003; }
+.guide-pair { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+.guide-pair .guide-button { margin-top:0; }
 .guide-quiet { border-color:transparent; color:#b9a591; font-weight:500; }
 .guide-stats { display:grid; grid-template-columns:repeat(3,1fr); background:#0e0b0966; border:1px solid #ab834a33; border-radius:13px; margin:0 0 22px; padding:16px 8px; text-align:center; }
 .guide-stats span { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#b9a27f; margin-bottom:7px; }

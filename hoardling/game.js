@@ -10674,13 +10674,24 @@
     }
     ctx.textAlign='left';
   };
+  // THE ONE ABILITY SHOULD LOOK LIKE ONE (2026-09-14). VANUS: the rebuilt rail
+  // Breath "doesn't look better" than the old orange button. Same rect, same
+  // words and positions (test-breath owns those); what changed is presence: a
+  // lit plate when a cast would land, a bigger flame, a thick cooldown ring.
+  // The halo breathes slowly and holds still under reduced motion.
   Game.prototype._drawBreathControl=function(ctx,r){
-    var a=this._breathStatus(),u=1/this.view.scale,cx=r.x+26*u,cy=r.y+23*u,rad=20*u;
-    var glow=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);glow.addColorStop(0,a.canCast?'#7f391b':'#353131');glow.addColorStop(1,'#17181c');
-    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(cx,cy,rad,0,(Math.PI*2));ctx.fill();ctx.strokeStyle='#5e5547';ctx.lineWidth=2*u;ctx.stroke();
-    ctx.strokeStyle=a.canCast?'#f4be63':'#a58b5b';ctx.beginPath();ctx.arc(cx,cy,rad,-Math.PI/2,-Math.PI/2+(Math.PI*2)*a.fraction);ctx.stroke();
-    flameGlyph(ctx,cx,cy-u,.95*u,RM?0:this.worldT,a.canCast);
-    battleText(ctx,'BREATH',cx,r.y+54*u,12,'#d3c3a3','center',u);
+    var a=this._breathStatus(),u=1/this.view.scale,cx=r.x+25*u,cy=r.y+20*u,rad=16.5*u,hot=a.canCast,t=RM?0:this.worldT;
+    battlePanel(ctx,r.x,r.y+2*u,r.w,r.h-2*u,9*u,hot?'#4b2616':'#26221f',hot?'#e38a3f':'#5e5547',u);
+    if(hot){var sw=RM?.5:.5+.5*Math.sin(t*2.2),halo=ctx.createRadialGradient(cx,cy,rad*.55,cx,cy,rad*1.7);
+      halo.addColorStop(0,'rgba(255,150,60,'+(.26+.10*sw)+')');halo.addColorStop(1,'rgba(255,120,40,0)');
+      ctx.fillStyle=halo;ctx.beginPath();ctx.arc(cx,cy,rad*1.7,0,Math.PI*2);ctx.fill();}
+    var core=ctx.createRadialGradient(cx,cy-rad*.35,rad*.1,cx,cy,rad);
+    core.addColorStop(0,hot?'#ffb257':a.ready?'#6b4a2b':'#3b3431');core.addColorStop(1,hot?'#b0421c':a.ready?'#2d231c':'#1c1a1b');
+    ctx.fillStyle=core;ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.fill();
+    ctx.lineWidth=3*u;ctx.strokeStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.arc(cx,cy,rad+1.5*u,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle=hot?'#ffd27a':a.ready?'#d9a55a':'#e0873f';ctx.beginPath();ctx.arc(cx,cy,rad+1.5*u,-Math.PI/2,-Math.PI/2+(Math.PI*2)*a.fraction);ctx.stroke();
+    flameGlyph(ctx,cx,cy-u,.92*u,t,hot||a.ready);
+    battleText(ctx,'BREATH',cx,r.y+51*u,12,hot?'#ffe3b0':'#d3c3a3','center',u);
     var x=r.x+51*u,w=r.w-53*u;
     if(a.kind==='cooling'||a.kind==='recovering'){
       battleText(ctx,a.seconds+'s',x,r.y+27*u,18,'#e4d6b7','left',u,w,14);
@@ -12936,8 +12947,23 @@
         [['Treasure',g.hoard],['Build gold',g.gold],['Wave',Math.min(g.wave+1,g.totalWaves())]].forEach(function (s) {var c=el('div');c.appendChild(el('span','',s[0]));c.appendChild(el('strong','',String(s[1])));stats.appendChild(c);});
         body.appendChild(stats);
         body.appendChild(button('Resume defense',resume,'guide-button guide-primary'));
+        // A PAUSE MENU OFFERS THE RUN, NOT JUST THE EXIT (2026-09-14). VANUS:
+        // "why only ability to quit to title?" Settings share one row; Restart
+        // asks first and names what survives, exactly like Return to title.
+        var settings=el('div','guide-pair');
         var sound=button(Sfx.isMuted()?'Sound: off':'Sound: on',function(){Sfx.toggle();sound.textContent=Sfx.isMuted()?'Sound: off':'Sound: on';sound.setAttribute('aria-pressed',String(!Sfx.isMuted()));});
-        sound.setAttribute('aria-pressed',String(!Sfx.isMuted()));sound.setAttribute('data-pause-sound','');body.appendChild(sound);
+        sound.setAttribute('aria-pressed',String(!Sfx.isMuted()));sound.setAttribute('data-pause-sound','');settings.appendChild(sound);
+        var speed=button('Speed: '+g.speed+'×',function(){g.speed=g.speed===1?2:1;speed.textContent='Speed: '+g.speed+'×';speed.setAttribute('aria-pressed',String(g.speed===2));});
+        speed.setAttribute('aria-pressed',String(g.speed===2));speed.setAttribute('data-pause-speed','');settings.appendChild(speed);
+        body.appendChild(settings);
+        body.appendChild(button(g.mode==='daily'?'Restart Daily Siege':g.mode==='duel'?'Restart duel':'Restart keep',function(){
+          body.replaceChildren(); title.textContent = 'Restart this run?';
+          paragraph(g.mode==='daily'?'Today’s Daily Siege starts over on the same map with the same waves. Your best wave so far is kept.'
+            :g.mode==='duel'?'The duel against '+(g.rival?g.rival.name:'your rival')+' starts over from its opening.'
+            :'Your machines, build gold and treasure return to the keep’s opening. '+(g.campaignCheckpoint()?'Your saved wave checkpoint is replaced when you call the first wave. ':'')+'Earned stars, unlocks and cosmetics stay with you.');
+          body.appendChild(button('Keep playing',resume,'guide-button guide-primary'));
+          body.appendChild(button('Restart from wave 1',function(){hide();restartRun();}));
+        }));
         body.appendChild(button('Field guide & machines',function(){api.open('guide');}));
         body.appendChild(button('Return to title',function(){
           body.replaceChildren(); title.textContent = 'Leave this defense?';
@@ -12959,6 +12985,15 @@
         if (tab==='machines') machines(); else if (tab==='controls') controls(); else basics();
       }
       body.scrollTop=0;
+    }
+    // Restart the run in hand with the same identity: the same keep and trial,
+    // today's Daily seed, the same duel rival. A campaign checkpoint is only
+    // replaced when the first wave is called (capture lives in startWave).
+    function restartRun() {
+      if (g.mode === 'daily') g.reset(dailySeed(), 'daily');
+      else if (g.mode === 'duel') g.reset(0, 'duel', 0, null, g.rivalIdx);
+      else g.reset(1, 'campaign', g.levelIdx, g.trial);
+      g.state = 'playing';
     }
     api.startCampaign = function (level) {
       if (!g || level !== (level | 0) || level < 0 || level >= CAMPAIGN_MAPS || !Save.unlocked(level)) return false;
