@@ -3471,11 +3471,17 @@
         this.shakeT = Math.max(this.shakeT, 0.18);
         Hap.medium();
         Snd.fanfare(60);
+        // Say what happened to EVERY gem. The toast used to key off got === 2
+        // and got === 1 only, so a three-gem crust that all fit read "Bag
+        // full, they rolled back in". A crust that all rolls back names no
+        // count of zero: "0 bagged" reads like a bug.
         var rolledBack = b.geode.length - got;
         this.toast = {
-          text: rolledBack === 0
-              ? 'CRACKED IT! ' + got + (got === 1 ? ' gem' : ' gems') + ' straight to the bag!'
-              : 'CRACKED IT! ' + got + ' bagged, ' + rolledBack + ' rolled back in.',
+          text: 'CRACKED IT! ' + (rolledBack === 0
+              ? got + (got === 1 ? ' gem' : ' gems') + ' straight to the bag!'
+              : got === 0
+              ? 'Bag full, ' + (rolledBack === 1 ? 'it' : rolledBack === 2 ? 'both' : 'all ' + rolledBack) + ' rolled back in.'
+              : got + ' bagged, ' + rolledBack + ' rolled back in.'),
           until: this.worldT + 2,
         };
         this._burst(b.x, b.y, 12, 260, 240, 2, 2.5, 0.7, '#ffe9a8');
@@ -3645,8 +3651,9 @@
       this.hitStop = 0.06;
       this.shakeT = Math.max(this.shakeT, 0.16);
       Hap.medium();
+      // Same counts as the crust toast. The first gem is already in the bag.
       this.toast = { text: greatOverflow > 0
-        ? 'A GREAT ' + key.toUpperCase() + '! Bag full — the rest rolled back in.'
+        ? 'A GREAT ' + key.toUpperCase() + '! ' + (GREAT_YIELD - greatOverflow) + ' bagged, ' + greatOverflow + ' rolled back in.'
         : 'A GREAT ' + key.toUpperCase() + '! Three gems from one swing.',
         until: this.worldT + 2 };
       this._burst(b.x, b.y, 14, 250, 235, 2, 2.6, 0.7, TYPE[key].hi);
@@ -5272,7 +5279,7 @@
     // there is no room below either — the PACE block sits there. So the toast
     // keeps the safe row and the coach yields for the two or three seconds a
     // toast is alive. The coach is persistent guidance and loses nothing by
-    // waiting; "CRACKED IT! Two gems straight to the bag" is feedback about
+    // waiting; "CRACKED IT! 2 gems straight to the bag" is feedback about
     // something that just happened and cannot be shown later.
     var toastLive = !!(this.toast && this.worldT < this.toast.until);
     var coachOn = !Meta.data.tutorialDone && this.tutStep < 3 && !toastLive;
