@@ -19,9 +19,9 @@
   <meta name="twitter:title" content="Hoardling">
   <meta name="twitter:description" content="Too young for dragonfire. Built his own.">
   <meta name="twitter:image" content="https://hypersage.ai/hoardling/og-image.png?v=20260901a">
-  <link rel="manifest" href="manifest.json?v=a0c6cb9c6b">
-  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=a0c6cb9c6b">
-  <link rel="apple-touch-icon" href="art/icon-180.png?v=a0c6cb9c6b">
+  <link rel="manifest" href="manifest.json?v=5967052e3a">
+  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=5967052e3a">
+  <link rel="apple-touch-icon" href="art/icon-180.png?v=5967052e3a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Hoardling">
@@ -52,7 +52,7 @@
        that the title screen carries the same pair in its top corners
        (TITLE_LEGAL in game.js). In the iOS app neither page is bundled:
        App.swift opens the published copies in a Safari view. */
-    #boot-legal{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));
+    #boot-legal{position:absolute;bottom:max(14px,var(--hoardling-safe-bottom,env(safe-area-inset-bottom)));
       font-family:system-ui,sans-serif;font-size:12px;letter-spacing:.04em}
     #boot-legal a{color:rgba(255,233,196,.52);text-decoration:none;padding:6px 8px}
     #boot-legal a:hover{color:#ffd75e;text-decoration:underline}
@@ -67,13 +67,26 @@
     @media (prefers-reduced-motion:reduce){
       #boot-ember{display:none}#boot-fill{transition:none}#boot{transition:none}}
   </style>
-  <link rel="stylesheet" href="style.css?v=a0c6cb9c6b">
+  <link rel="stylesheet" href="style.css?v=5967052e3a">
 </head>
 <body>
   <div id="game-wrap">
     <div id="safe-probe" style="position:absolute;visibility:hidden;pointer-events:none;
          padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);"></div>
-    <canvas id="game-canvas" aria-label="Hoardling game area"></canvas>
+    <canvas id="game-canvas" tabindex="0" aria-label="Hoardling battlefield. Press H for the field guide and keyboard controls."></canvas>
+  </div>
+  <div id="player-ui" data-game-ui>
+    <div class="guide-hits" aria-label="Game controls"></div>
+    <div class="guide-placement" hidden></div>
+    <div class="guide-scout" role="status" aria-live="polite" aria-atomic="true"></div>
+    <button class="guide-launch" type="button" hidden>How to play</button>
+    <div class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guide-title" hidden>
+      <section class="guide-panel">
+        <header class="guide-header"><div><p class="guide-kicker">HOARDLING</p><h2 id="guide-title">Wick’s field guide</h2></div><button class="guide-close" type="button">Close guide</button></header>
+        <nav class="guide-tabs" aria-label="Guide sections"></nav>
+        <div class="guide-body"></div>
+      </section>
+    </div>
   </div>
   <div id="boot" role="status" aria-live="polite">
     <div id="boot-ember"></div>
@@ -82,12 +95,12 @@
     <div id="boot-track"><div id="boot-fill"></div></div>
     <div id="boot-note">stoking the forge</div>
     <div id="boot-legal">
-      <a href="privacy.html">Privacy</a><span>·</span><a href="terms.html">Terms</a>
+      <a href="https://hypersage.ai/hoardling/privacy.html">Privacy</a><span>·</span><a href="https://hypersage.ai/hoardling/terms.html">Terms</a>
     </div>
   </div>
-  <script>window.__BUILD__="a0c6cb9c6b";window.__ART_EXT__="webp";</script>
+  <script>window.__BUILD__="5967052e3a";window.__ART_EXT__="webp";</script>
   <script>(function(){var B=window.__BUILD__;function chk(){fetch("build.txt?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(t){t=(t||"").trim();if(!t||t===B)return;try{if(sessionStorage.getItem("hl.rl")===t)return;sessionStorage.setItem("hl.rl",t);}catch(e){}location.reload();}).catch(function(){});}chk();document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});})();</script>
-  <script src="lb-config.js?v=a0c6cb9c6b"></script>
-  <script src="game.js?v=a0c6cb9c6b" defer></script>
+  <script src="lb-config.js?v=5967052e3a"></script>
+  <script src="game.js?v=5967052e3a" defer></script>
 </body>
 </html>

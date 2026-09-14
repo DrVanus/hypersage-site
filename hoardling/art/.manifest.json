@@ -157,6 +157,20 @@
    "codec_psnr": 34.2,
    "as_drawn_psnr": 36.0
   },
+  "enemy_looter_body_v2.png": {
+   "size": "1035->178px",
+   "kb": 12.0,
+   "q": 84,
+   "codec_psnr": 34.1,
+   "as_drawn_psnr": 36.0
+  },
+  "enemy_looter_leg_v2.png": {
+   "size": "1035->107px",
+   "kb": 3.9,
+   "q": 84,
+   "codec_psnr": 37.4,
+   "as_drawn_psnr": 39.3
+  },
   "enemy_sapper.png": {
    "size": "512px",
    "kb": 69.3,
@@ -374,6 +388,20 @@
    "codec_psnr": 38.2,
    "as_drawn_psnr": 38.2
   },
+  "tower_ballista_base_v2.png": {
+   "size": "1116->348px",
+   "kb": 25.9,
+   "q": 84,
+   "codec_psnr": 35.4,
+   "as_drawn_psnr": 37.6
+  },
+  "tower_ballista_turntable_v2.png": {
+   "size": "1536->396px",
+   "kb": 15.5,
+   "q": 84,
+   "codec_psnr": 37.4,
+   "as_drawn_psnr": 39.5
+  },
   "tower_ballista_weapon.png": {
    "size": "723px",
    "kb": 39.5,
@@ -387,6 +415,20 @@
    "q": 88,
    "codec_psnr": 34.5,
    "as_drawn_psnr": 36.5
+  },
+  "tower_bellows_base_v2.png": {
+   "size": "1254->309px",
+   "kb": 30.7,
+   "q": 88,
+   "codec_psnr": 34.5,
+   "as_drawn_psnr": 36.5
+  },
+  "tower_bellows_fan_v2.png": {
+   "size": "1254->135px",
+   "kb": 5.6,
+   "q": 84,
+   "codec_psnr": 36.1,
+   "as_drawn_psnr": 38.5
   },
   "tower_brazier.png": {
    "size": "508->291px",

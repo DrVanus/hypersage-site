@@ -154,42 +154,10 @@
       mount: { dx:  16, up: 24 },
       blurb: 'Fast bolts, long reach. Hits flyers.',
       aims: true,
-      // The crossbow assembly and its gunner sit ON a round wooden turntable.
-      // Split there so only the TOP turns: rotating the whole plate tipped the
-      // barrel and made every machine look like it was falling over.
-      // AIM RIG -- replaces `turret` for this machine.
-      //
-      // `turret` split the plate on a HORIZONTAL LINE and rotated the top half.
-      // Measured by compositing the real split and counting pixels that swing
-      // outside the plate's outline / are left uncovered: 6deg clean, 12deg
-      // visible, 19deg = 1,744 over + 7,501 uncovered. The shipped clamp was
-      // 18.9deg and `want` reached ~17 for any raider below the machine, so the
-      // most-built machine in the game was tearing at its own cut in normal
-      // play. And it could not aim anyway: the bow is painted 41.8deg above
-      // horizontal, so +/-18.9 reached 23..61deg and never level or below,
-      // while a raider on the road sits at roughly 0..-30. VANUS: "the crossbow
-      // isnt properly pointed at its enemy."
-      //
-      // So the weapon is its own cutout now -- the REAL painted pixels, lifted
-      // off the original plate with an authored mask, zero model drift -- over a
-      // base whose deck was rebuilt where the weapon used to hide it. Nothing is
-      // split, so there is no seam and no upper bound on the swing but taste.
-      // Every number below is in BASE-PLATE units (the base is still 554x700, so
-      // the machine keeps its exact on-screen size).
-      aimRig: {
-        base: 't_ballista_base', weapon: 't_ballista_weapon',
-        ox: -59 / 554, oy: -39 / 700,      // weapon canvas origin
-        ww:  723 / 554, wh: 743 / 700,     // weapon canvas size
-        px:  305 / 554, py: 350 / 700,     // the trunnion it swings about
-        rest: -0.7296,                     // painted attitude, screen radians (-41.8deg)
-        // RANGE PICKED OFF A RENDERED SWEEP at true draw size (76px), not by
-        // taste: 25deg and 42deg read as a weapon being aimed, 55 starts to tip,
-        // and by 66 the stock's butt is in the air and it reads as falling over.
-        // 0.78 lands the bow ~4deg BELOW level -- which is the case that was
-        // impossible before, and the one a raider on the road actually needs.
-        lo:   -0.25,                       // how far it may raise above rest
-        hi:    0.78,                       // ...and drop below it, to just under level
-      },
+      // A separate top-down painted weapon turns in the projected ground
+      // plane over a fixed operator and drum. _crossbowPose shares its visible
+      // rail and muzzle with shot presentation; _muzzleOf retains simulation
+      // launch geometry so this art change cannot rebalance hit timing.
       // NATIVE FACING, measured off the plate: the bolt's iron head sits at
       // ~0.60 of the width with the fletching lower-LEFT, so this machine is
       // painted aiming up-RIGHT. Every other aiming plate (gargoyle snout,
@@ -1309,7 +1277,7 @@
       // 19 MB to 1.4 MB and the whole point was to paint sooner.
       if (Music.loading || !window.fetch || !ac) return;
       Music.loading = true;
-      fetch('audio/music_map.json').then(function (r) { return r.json(); })
+      fetch(assetURL('audio/music_map.json')).then(function (r) { return r.json(); })
         .then(function (map) {
           Music.map = map;
           // Staged: the two beds first (one of them is needed immediately),
@@ -1323,7 +1291,7 @@
     }
 
     function fetchTrack(name) {
-      fetch('audio/' + name + '.m4a')
+      fetch(assetURL('audio/' + name + '.m4a'))
         .then(function (r) { return r.arrayBuffer(); })
         .then(function (ab) {
           if (!ac) return;
@@ -2397,6 +2365,181 @@
              dailyPaidFor: dailyPaidFor, setDailyPaid: setDailyPaid };
   })();
 
+  // ===== Campaign wave checkpoints ======================================
+  // One local checkpoint at the opening of the latest campaign wave. It is
+  // deliberately separate from the meta save: restarting a wave never rolls
+  // back earned stars, cosmetics or marks. Daily/duel scores cannot resume.
+  // Bump this schema when changing the meaning of a serialized combat field.
+  var CampaignCheckpoint = (function () {
+    var KEY = 'hoardling.campaign.v1', VERSION = 1, loaded = false, cached = null;
+    var own = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
+    function bad() { throw new Error('invalid campaign checkpoint'); }
+    function object(o) { if (!o || Array.isArray(o) || typeof o !== 'object') bad(); return o; }
+    function number(n, min, max, integer) {
+      if (typeof n !== 'number' || !isFinite(n) || n < min || n > max || (integer && Math.floor(n) !== n)) bad();
+      return n;
+    }
+    function bool(v) { if (typeof v !== 'boolean') bad(); return v; }
+    function list(v, max) { if (!Array.isArray(v) || v.length > max) bad(); return v; }
+    function fields(o, required, optional, flags) {
+      object(o);
+      var out = {};
+      required.split(' ').filter(Boolean).forEach(function (k) {
+        if (!own(o, k)) bad();
+        out[k] = number(o[k], -1e7, 1e7);
+      });
+      (optional || '').split(' ').filter(Boolean).forEach(function (k) {
+        if (own(o, k)) out[k] = number(o[k], -1e7, 1e7);
+      });
+      (flags || '').split(' ').filter(Boolean).forEach(function (k) {
+        if (own(o, k)) out[k] = bool(o[k]);
+      });
+      return out;
+    }
+    function tar(o, payload) {
+      var out = fields(o, payload ? 'd ln w dps dur max tid' : 'd ln w dps until tid');
+      number(out.d, 0, 10000); number(out.ln, 0, 1, true);
+      number(out.w, 1, 500); number(out.dps, 0, 10000); number(out.tid, 1, 1e7, true);
+      if (payload) { number(out.dur, 0.01, 120); number(out.max, 1, 128, true); }
+      return out;
+    }
+    function validate(raw) {
+      object(raw);
+      if (raw.version !== VERSION || raw.mode !== 'campaign') bad();
+      var level = number(raw.level, 0, CAMPAIGN_MAPS - 1, true);
+      var wave = number(raw.wave, 0, WAVE_TABLES[level].length - 1, true);
+      if (raw.trial !== null && (typeof raw.trial !== 'string' || !own(TRIALS, raw.trial))) bad();
+      var out = { version: VERSION, mode: 'campaign', level: level, wave: wave,
+        seed: number(raw.seed, 1, 4294967295, true), trial: raw.trial,
+        rng: number(raw.rng, -2147483648, 2147483647, true) };
+      out.run = fields(raw.run, 'worldT gold hoard nextId stolenLost kills tollRecovered hitstopT', '', 'breathUsed motherReady castMother');
+      number(out.run.worldT, 0, 1e7); number(out.run.gold, 0, 1e7);
+      number(out.run.hoard, 1, CFG.startHoard, true); number(out.run.nextId, 1, 1e7, true);
+      number(out.run.stolenLost, 0, CFG.startHoard, true); number(out.run.kills, 0, 1e7, true);
+      // Fixed-step countdowns can end a fraction below zero. Preserve that
+      // remainder; rejecting it would stop saves after the first big impact.
+      number(out.run.tollRecovered, 0, 1e7, true); number(out.run.hitstopT, -1, 1);
+      ['breathUsed', 'motherReady', 'castMother'].forEach(function (k) { bool(out.run[k]); });
+      out.hero = fields(raw.hero, 'x y tx ty range dmg rate cd breathCd spd manTid face hp maxHp downT safeT tollCd', '', 'selected castBreath manned');
+      ['selected', 'castBreath', 'manned'].forEach(function (k) { bool(out.hero[k]); });
+      ['x', 'tx'].forEach(function (k) { number(out.hero[k], 0, WORLD_W); });
+      ['y', 'ty'].forEach(function (k) { number(out.hero[k], 0, WORLD_H); });
+      number(out.hero.hp, 0, 1000); number(out.hero.maxHp, 1, 1000);
+      number(out.hero.range, 1, 1000); number(out.hero.rate, 0.01, 100);
+      number(out.hero.spd, 1, 1000); number(out.hero.downT, -1, 60);
+      number(out.hero.manTid, -1, out.run.nextId - 1, true);
+      var tids = {};
+      out.towers = list(raw.towers, 128).map(function (t) {
+        var r = fields(t, 'tid level fork x y padIdx cd targeting shotT',
+          'own ln jamT lockId ramp shots sweeps _aimX _aimY _auraDmg _auraRate _faceRot _faceSign', '_manned _oc');
+        if (typeof t.type !== 'string' || !own(TOWER_TYPES, t.type)) bad();
+        r.type = t.type;
+        number(r.tid, 1, out.run.nextId - 1, true);
+        if (tids[r.tid]) bad(); tids[r.tid] = 1;
+        number(r.level, 0, 2, true); number(r.fork, 0, 1, true);
+        number(r.x, 0, WORLD_W); number(r.y, 0, WORLD_H);
+        number(r.padIdx, -1, MAPS[level].pads.length - 1, true);
+        number(r.targeting, 0, AIM_MODES.length - 1, true);
+        if (r.own !== undefined && r.own !== 0) bad();
+        if (r.ln !== undefined && r.ln !== 0) bad();
+        return r;
+      });
+      // Selling and starting can be two taps in the same update, before the
+      // hero pass notices the sold machine. Resolve that stale assignment in
+      // the saved copy exactly as the next hero pass does.
+      if (out.hero.manTid >= 0 && !tids[out.hero.manTid]) {
+        out.hero.manTid = -1; out.hero.manned = false;
+      }
+      out.tar = list(raw.tar, 384).map(function (p) { return tar(p, false); });
+      out.projectiles = list(raw.projectiles, 256).map(function (p) {
+        var r = fields(p, 'x y dmg', 'target spd sx sy tx ty t dur splash burn tower own scald net hops dx dy', 'hero crit shieldbreak');
+        if (p.kind !== 'lob' && p.kind !== 'bolt' && p.kind !== 'fire') bad();
+        r.kind = p.kind;
+        if (r.kind === 'lob') {
+          ['sx','sy','tx','ty','t','splash','burn','tower','own','scald'].forEach(function (k) { number(r[k], -1e7, 1e7); });
+          number(r.dur, 0.01, 10); number(r.t, 0, r.dur);
+          r.tar = p.tar === null ? null : tar(p.tar, true);
+        } else { number(r.target, 1, out.run.nextId - 1, true); number(r.spd, 1, 2000); }
+        return r;
+      });
+      out.mods = fields(raw.mods, 'dmgMul rangeMul startGold breathCd sellRefund', 'startGoldSet bountyMul fleeMul', 'breathOff');
+      number(out.mods.dmgMul, 0.1, 5); number(out.mods.rangeMul, 0.1, 5);
+      number(out.mods.startGold, 0, 10000); number(out.mods.breathCd, 0.1, 120); number(out.mods.sellRefund, 0, 1);
+      if (out.mods.startGoldSet !== undefined) number(out.mods.startGoldSet, 0, 10000);
+      if (out.mods.bountyMul !== undefined) number(out.mods.bountyMul, 0, 10);
+      if (out.mods.fleeMul !== undefined) number(out.mods.fleeMul, 0.1, 10);
+      if (own(raw.mods, 'bannedTower')) {
+        if (typeof raw.mods.bannedTower !== 'string' || !own(TOWER_TYPES, raw.mods.bannedTower)) bad();
+        out.mods.bannedTower = raw.mods.bannedTower;
+      }
+      object(raw.leaks); out.leaks = {};
+      Object.keys(raw.leaks).forEach(function (k) {
+        if (!own(ENEMY_TYPES, k)) bad();
+        var row = fields(raw.leaks[k], 'coins runs firstWave');
+        number(row.coins, 0, CFG.startHoard, true); number(row.runs, 0, 1e7, true);
+        number(row.firstWave, 1, WAVE_TABLES[level].length, true);
+        out.leaks[k] = row;
+      });
+      return out;
+    }
+    function clear() {
+      cached = null; loaded = true;
+      try { localStorage.removeItem(KEY); } catch (_) {}
+    }
+    function read() {
+      if (loaded) return cached;
+      loaded = true;
+      try {
+        var text = localStorage.getItem(KEY);
+        if (text) {
+          if (text.length > 180000) bad();
+          cached = validate(JSON.parse(text));
+        }
+      } catch (_) { clear(); }
+      return cached;
+    }
+    function capture(g) {
+      if (g.mode !== 'campaign' || g.isRival || g.state !== 'playing' || !g.waveActive || g.enemies.length || g.waveT !== 0) return false;
+      try {
+        var snapshot = validate({ version: VERSION, mode: 'campaign',
+          level: g.levelIdx, wave: g.wave, seed: g.seed, trial: g.trial, rng: _stream | 0,
+          run: g, hero: g.hero, towers: g.towers, tar: g.tar,
+          projectiles: g.projectiles, mods: g.mods, leaks: g.leaks });
+        var encoded = JSON.stringify(snapshot);
+        if (encoded.length > 180000) bad();
+        localStorage.setItem(KEY, encoded);
+        cached = snapshot; loaded = true;
+        return true;
+      } catch (_) { return false; }
+    }
+    function summary() {
+      var r = read();
+      return r ? { level: r.level, name: MAPS[r.level].name, wave: r.wave + 1,
+        totalWaves: WAVE_TABLES[r.level].length, trial: r.trial ? TRIALS[r.trial].name : null } : null;
+    }
+    function restore(g) {
+      var stored = read();
+      if (!stored) return false;
+      // Revalidate a detached copy so the resumed sim can never mutate the
+      // saved opening while playing. Read-side restore grants no gold/marks.
+      var r;
+      try { r = validate(JSON.parse(JSON.stringify(stored))); } catch (_) { clear(); return false; }
+      g.reset(r.seed, 'campaign', r.level, r.trial);
+      Object.keys(r.run).forEach(function (k) { g[k] = r.run[k]; });
+      g.hero = r.hero; g.towers = r.towers; g.tar = r.tar; g.projectiles = r.projectiles;
+      g.mods = r.mods; g.leaks = r.leaks; g.wave = r.wave; _stream = r.rng;
+      g.spawnQueue = g.buildWave(g.wave);
+      g.waveActive = true; g.waveT = 0; g.countdown = 0;
+      g._waveStartHoard = g.hoard;
+      g._bossWave = g.spawnQueue.some(function (s) { return s.type === 'boss'; });
+      g._mCue = g._bossWave ? { name: 'boss' } : null;
+      g.state = 'playing'; g._acc = 0; g._last = 0;
+      Input.drain();
+      return true;
+    }
+    return { capture: capture, summary: summary, restore: restore, clear: clear };
+  })();
+
   // ===== Daily leaderboard (fail-soft, lane 3) ============================
   // Hoardling is board 'hoardling_daily' in a multi-board Supabase
   // schema (registry + authenticated-only RPCs +
@@ -2436,7 +2579,11 @@
       } catch (e) {}
       return null;
     }
+    // Each answer cancels work started under the previous answer, including a
+    // quick NO -> YES while an old request is still arriving.
+    var consentEpoch = 0;
     function setConsent(yes) {
+      consentEpoch++;
       try {
         localStorage.setItem('hoardling.lbConsent', yes ? 'yes' : 'no');
         localStorage.removeItem('hoardling.lbOut');
@@ -2448,27 +2595,57 @@
       if (!yes) token = null;
     }
     function on() { return configured() && consent() === 'yes'; }
+    function current(epoch) { return on() && epoch === consentEpoch; }
     var sess = null;
     try { sess = JSON.parse(localStorage.getItem('hoardling.sb') || 'null'); } catch (e) {}
     function saveSess() { try { localStorage.setItem('hoardling.sb', JSON.stringify(sess)); } catch (e) {} }
+    function tagFor(id) {
+      var h = 0;
+      for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+      return 'WICK-' + ('0000' + ((h >>> 0) % 65536).toString(16).toUpperCase()).slice(-4);
+    }
+    // Older saves named the player from a rotating refresh token. Freeze that
+    // existing name once; new accounts are named from their stable user id.
+    if (sess && sess.refresh_token && !/^WICK-[0-9A-F]{4}$/.test(sess.display_tag || '')) {
+      sess.display_tag = tagFor(sess.user_id || sess.refresh_token);
+      saveSess();
+    }
+    function acceptSession(d, refresh) {
+      var previous = refresh ? sess : null;
+      var uid = d.user && d.user.id || previous && previous.user_id || null;
+      sess = { access_token: d.access_token, refresh_token: d.refresh_token,
+        expires_at: Date.now() / 1000 + (d.expires_in || 3600), user_id: uid,
+        display_tag: previous && previous.display_tag || tagFor(uid || d.refresh_token || 'wick') };
+      saveSess();
+    }
     function hdrs() {
       return { 'apikey': cfg.key, 'Authorization': 'Bearer ' + (sess && sess.access_token || cfg.key), 'Content-Type': 'application/json' };
     }
-    // ensureSession(cb): reuse -> refresh -> anonymous signup, all fail-soft
+    // Share one auth operation: concurrent board/queue/run requests must not
+    // create separate anonymous users or race the same refresh token.
+    var sessionWaiters = null;
     function ensureSession(cb) {
       if (!on()) { cb(false); return; }
+      var epoch = consentEpoch;
       var now = Date.now() / 1000;
       if (sess && sess.access_token && sess.expires_at - 60 > now) { cb(true); return; }
+      if (sessionWaiters) { sessionWaiters.push({ epoch: epoch, cb: cb }); return; }
+      sessionWaiters = [{ epoch: epoch, cb: cb }];
+      function finishSession(ok) {
+        var waiting = sessionWaiters; sessionWaiters = null;
+        for (var wi = 0; wi < waiting.length; wi++) waiting[wi].cb(ok && current(waiting[wi].epoch));
+      }
       var doSignup = function () {
+        if (!current(epoch)) { finishSession(false); return; }
         fetch(cfg.url + '/auth/v1/signup', { method: 'POST', headers: { 'apikey': cfg.key, 'Content-Type': 'application/json' }, body: '{}' })
           .then(function (r) { return r.json(); })
           .then(function (d) {
             if (d && d.access_token) {
-              sess = { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: now + (d.expires_in || 3600) };
-              saveSess(); cb(true);
-            } else cb(false);
+              acceptSession(d, false);
+              finishSession(true);
+            } else finishSession(false);
           })
-          .catch(function () { cb(false); });
+          .catch(function () { finishSession(false); });
       };
       if (sess && sess.refresh_token) {
         fetch(cfg.url + '/auth/v1/token?grant_type=refresh_token', {
@@ -2477,102 +2654,142 @@
         }).then(function (r) { return r.json(); })
           .then(function (d) {
             if (d && d.access_token) {
-              sess = { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: Date.now() / 1000 + (d.expires_in || 3600) };
-              saveSess(); cb(true);
+              // Keep a rotated token locally even if posting was just stopped,
+              // but never authorize another request under the old answer.
+              acceptSession(d, true);
+              finishSession(true);
             } else doSignup();   // refresh rejected: mint a fresh anonymous user
           })
-          .catch(function () { cb(false); });   // network: not a reason to re-mint
+          .catch(function () { finishSession(false); });   // network: not a reason to re-mint
       } else doSignup();
     }
-    // Before the first session there is no name to show: tag() would hash the
-    // constant 'wick' and print a WICK-XXXX that is nobody's.
+    // Before the first session there is no name to show.
     function hasId() { return !!(sess && sess.refresh_token); }
-    function tag() {   // WICK-XXXX derived from the stored session — no input UI
-      var s = (sess && sess.refresh_token) || 'wick';
-      var h = 0;
-      for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-      return 'WICK-' + ('0000' + ((h >>> 0) % 65536).toString(16).toUpperCase()).slice(-4);
-    }
+    function tag() { return sess && sess.display_tag || 'WICK-????'; }
     // strict-pattern render guard: any name
     // that isn't exactly our tag shape paints as WICK-???? — no sanitizer gaps
     function safeName(s) { return /^WICK-[0-9A-F]{4}$/.test(s) ? s : 'WICK-????'; }
-    var token = null;
+    var token = null, runEpoch = 0, receipt = null;
     function beginRun() {
-      token = null;
+      token = null; receipt = null;
+      var run = ++runEpoch, epoch = consentEpoch;
       if (!on()) return;
       ensureSession(function (ok) {
-        if (!ok) return;
+        if (!ok || !current(epoch) || run !== runEpoch) return;
         fetch(cfg.url + '/rest/v1/rpc/waddleton_start_run', {
           method: 'POST', headers: hdrs(), body: JSON.stringify({ p_board: cfg.board }),
         }).then(function (r) { return r.json(); })
-          .then(function (t) { if (typeof t === 'string' && t) token = t; })
+          .then(function (t) {
+            if (current(epoch) && run === runEpoch && typeof t === 'string' && t) token = t;
+          })
           .catch(function () {});
       });
     }
     var VERDICTS = { 'bad-body': 1, 'bad-token': 1, 'too-fast': 1, 'over-rate': 1 };
-    function readQ() { try { return JSON.parse(localStorage.getItem('hoardling.lbq') || '[]'); } catch (e) { return []; } }
-    function writeQ(v) { try { localStorage.setItem('hoardling.lbq', JSON.stringify(v.slice(-10))); } catch (e) {} }
-    var flushing = false;
+    function validQ(value) {
+      if (!Array.isArray(value)) return [];
+      var seen = Object.create(null), out = [];
+      for (var i = value.length - 1; i >= 0 && out.length < 10; i--) {
+        var e = value[i];
+        if (!e || typeof e !== 'object' || typeof e.token !== 'string' ||
+            !/^[A-Za-z0-9_-]{1,128}$/.test(e.token) || seen[e.token] ||
+            typeof e.wave !== 'number' || !isFinite(e.wave) || e.wave < 1 || e.wave > 80 || Math.floor(e.wave) !== e.wave) continue;
+        seen[e.token] = true;
+        out.unshift({ token: e.token, wave: e.wave, kills: e.kills | 0, seed: e.seed >>> 0,
+          ts: typeof e.ts === 'number' && isFinite(e.ts) ? e.ts : 0,
+          tries: Math.max(0, Math.min(7, e.tries | 0)) });
+      }
+      return out;
+    }
+    function readQ() { try { return validQ(JSON.parse(localStorage.getItem('hoardling.lbq') || '[]')); } catch (e) { return []; } }
+    function writeQ(v) { try { localStorage.setItem('hoardling.lbq', JSON.stringify(validQ(v))); } catch (e) {} }
+    // Settle a token against the CURRENT queue. A slow older response must
+    // never overwrite a completed run appended while it was in flight.
+    function settle(e, drop) {
+      var live = readQ();
+      for (var i = live.length - 1; i >= 0; i--) if (live[i].token === e.token) {
+        if (drop) live.splice(i, 1); else live[i] = e;
+      }
+      writeQ(live);
+    }
+    var flushing = false, flushWaiters = [];
+    function status() { return { pending: readQ().length, sending: flushing, outcome: receipt && receipt.state || 'none' }; }
     function flush(done) {
-      if (!on() || flushing) { if (done) done(); return; }
-      var list = readQ();
-      if (!list.length) { if (done) done(); return; }
-      flushing = true;
+      if (!on()) { if (done) done(); return; }
+      if (flushing) { if (done) flushWaiters.push(done); return; }
+      if (!readQ().length) { if (done) done(); return; }
+      var epoch = consentEpoch, attempted = Object.create(null);
+      flushing = true; flushWaiters = done ? [done] : [];
+      function finishFlush() {
+        flushing = false;
+        var waiting = flushWaiters; flushWaiters = [];
+        for (var wi = 0; wi < waiting.length; wi++) waiting[wi]();
+      }
+      function failed(e) {
+        if (!current(epoch)) { finishFlush(); return; }
+        e.tries = (e.tries || 0) + 1;
+        var drop = e.tries > 6 || Date.now() - (e.ts || 0) > 36e5;
+        settle(e, drop);
+        if (receipt && receipt.token === e.token) receipt.state = drop ? 'not-recorded' : 'queued';
+        finishFlush();
+      }
       ensureSession(function (ok) {
-        if (!ok) { flushing = false; if (done) done(); return; }
-        (function step(i) {
-          if (i >= list.length) {
-            flushing = false;
-            writeQ(list.filter(function (e) { return !e._drop; }));
-            if (done) done(); return;
-          }
-          var e = list[i];
+        if (!ok || !current(epoch)) { finishFlush(); return; }
+        (function step() {
+          if (!current(epoch)) { finishFlush(); return; }
+          var live = readQ(), e = null;
+          for (var i = 0; i < live.length; i++) if (!attempted[live[i].token]) { e = live[i]; break; }
+          if (!e) { finishFlush(); return; }
+          attempted[e.token] = true;
           fetch(cfg.url + '/rest/v1/rpc/waddleton_submit_run', {
             method: 'POST', headers: hdrs(),
             body: JSON.stringify({ p_token: e.token, p_board: cfg.board, p_name: tag(), p_value: e.wave }),
           }).then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
             .then(function (v) {
-              if (v && (v.ok || VERDICTS[v.error])) e._drop = 1;   // verdicts never retry
-              step(i + 1);
-            })
-            .catch(function () {
-              e.tries = (e.tries || 0) + 1;
-              if (e.tries > 6 || Date.now() - (e.ts || 0) > 36e5) e._drop = 1;
-              flushing = false;
-              writeQ(list.filter(function (x) { return !x._drop; }));
-              if (done) done();
-            });
-        })(0);
+              if (!current(epoch)) { finishFlush(); return; }
+              if (v && (v.ok || VERDICTS[v.error])) {
+                settle(e, true);
+                if (receipt && receipt.token === e.token) receipt.state = v.ok ? 'posted' : 'not-recorded';
+                step();
+              } else failed(e);
+            }).catch(function () { failed(e); });
+        })();
       });
     }
-    // Returns whether THIS run was queued: a run with no token (started before
-    // a yes, or its start_run failed) has nothing to send, and the result
-    // screen must not tell that player "your run is queued".
+    // The boolean records initial enqueue only. status() is the live receipt;
+    // a result must not claim a score is queued after rejection or delivery.
     function finishRun(wave, kills, seed, done) {
-      if (!on() || !token || wave < 1) { if (done) done(); return false; }
+      runEpoch++;
+      if (!on() || !token || wave < 1) {
+        if (!receipt) receipt = { state: 'not-recorded' };
+        if (done) done(); return false;
+      }
       var list = readQ(), dup = false;
       for (var i = 0; i < list.length; i++) if (list[i].token === token) dup = true;
       if (!dup) { list.push({ token: token, wave: wave, kills: kills, seed: seed, ts: Date.now() }); writeQ(list); }
-      token = null;
+      receipt = { token: token, state: 'queued' }; token = null;
+      var recorded = readQ().some(function (e) { return e.token === receipt.token; });
+      if (!recorded) receipt.state = 'not-recorded';
       flush(done);
-      return true;
+      return recorded;
     }
     function top(n, cb) {
       if (!on()) { cb(null); return; }
+      var epoch = consentEpoch;
       ensureSession(function (ok) {
-        if (!ok) { cb(null); return; }
+        if (!ok || !current(epoch)) { cb(null); return; }
         fetch(cfg.url + '/rest/v1/waddleton_scores?board=eq.' + cfg.board +
               '&select=display_name,value,updated_at&order=value.desc,updated_at.asc&limit=' + n,
               { headers: hdrs() })
           .then(function (r) { return r.json(); })
-          .then(function (rows) { cb(Array.isArray(rows) ? rows : null); })
+          .then(function (rows) { cb(current(epoch) && Array.isArray(rows) ? rows : null); })
           .catch(function () { cb(null); });
       });
     }
     if (typeof window !== 'undefined') window.addEventListener('online', function () { flush(); });
     return { on: on, configured: configured, consent: consent, setConsent: setConsent,
              beginRun: beginRun, finishRun: finishRun, top: top, tag: tag, hasId: hasId,
-             safeName: safeName, flush: flush };
+             safeName: safeName, flush: flush, status: status };
   })();
 
   // Placeholder + preview tint per enemy (shared by the enemy drawer and the
@@ -2606,9 +2823,6 @@
   // Sprites land as PNG cutouts in art/. Until then every drawer has a chunky
   // procedural fallback. The fallback is LOUD in dev: missing ids are listed
   // on screen (silent fallbacks hide assets — see HANDOFF invariants).
-  // walk-cycle frames (masked-inpaint legs; upper bodies identical to the
-  // master plate by construction). Behind a toggle per the animation memory.
-  var WALK_FRAMES = !/[?&]frames=0/.test(location.search);
   // Reduce-motion, cached and live-updating. Used to PIN the title's clock at
   // t=0 rather than delete anything: the room keeps its embers, its firelight
   // and its call-to-action ring, all frozen at their mean values. The screen
@@ -2634,24 +2848,6 @@
     if (ART_EXT) p = p.replace(/\.png$/, '.' + ART_EXT);
     return BUILD ? p + '?v=' + BUILD : p;
   }
-  var ANIM = { meta: {}, images: {} };
-  // Walk-cycle frames are an ENHANCEMENT: without them a raider still walks,
-  // it just uses the static plate. So they load AFTER the boot set rather than
-  // competing with it for the connection.
-  function loadWalkFrames() {
-    if (!WALK_FRAMES || typeof window === 'undefined' || !window.fetch) return;
-    fetch(assetURL('art/anim/meta.json')).then(function (r) { return r.ok ? r.json() : {}; }).then(function (m) {
-      ANIM.meta = m || {};
-      Object.keys(ANIM.meta).forEach(function (k) {
-        ['a', 'b'].forEach(function (tag) {
-          var img = new Image();
-          img.onload = function () { ANIM.images[k + '_' + tag] = img; };
-          img.src = assetURL('art/anim/' + k + '_' + tag + '.png');
-        });
-      });
-    }).catch(function () {});
-  }
-
   var ART = {
     manifest: {
       keep:      'art/keep.png',
@@ -2659,42 +2855,28 @@
       hero:      'art/hero_whelp.png',
       hero_breathe: 'art/hero_breathe.png',
       hero_back: 'art/hero_back.png',
-      // MANNING POSE -- he HOVERS beside the machine and works it, wings out.
-      // Standing the rest plate next to a machine read as loitering (VANUS:
-      // "manning it doesnt look like anything just standing next to it").
-      // Registered onto hero_whelp by tools/register_frames.py: foot drift
-      // 0.0px, shoulder drift 0.1px, tone gain 0.91, so the swap does not
-      // move him. The two BREATH poses generated alongside it were REJECTED
-      // by that same tool at gain 0.42/0.46 -- and excluding their baked
-      // flame barely moved the number (the fire is 1.7% of pixels), so the
-      // whole dragon was repainted ~40% brighter. They are in
-      // art-src/wick_poses/ and did not ship.
+      // The crew rig articulates this registered painting. Old wing-frame
+      // assets remain on disk for art history but are no longer fetched.
       hero_man:  'art/hero_man.png',
-      // WING FRAMES for the manning flap. Generated by EDITING hero_man
-      // itself, so body, wrench, lean and lighting are identical between
-      // them and only the wings move -- then registered onto it (foot drift
-      // 0.0px). Three frames cycled is a flap; scaling one painted sprite
-      // non-uniformly is a squash, which is what shipped first and what
-      // VANUS rejected: "he looks like he's being squashed".
-      hero_man_dn: 'art/hero_man_dn.png',
-      hero_man_up: 'art/hero_man_up.png',
       hero_title: 'art/hero_title.png',
       t_mimic:   'art/tower_mimic.png',
       t_ballista:'art/tower_ballista.png',
-      // THE CROSSBOW IS TWO PLATES (see aimRig on TOWER_TYPES.ballista): a
-      // complete base -- barrel, deck, gunner at his winch -- and the weapon as
-      // its own cutout, so it can be rotated to any angle without a seam.
-      t_ballista_base:  'art/tower_ballista_base.png',
-      t_ballista_weapon:'art/tower_ballista_weapon.png',
+      // Keyed masters are decoded to cached alpha layers before finishes.
+      t_ballista_base_v2:'art/tower_ballista_base_v2.png',
+      t_ballista_turntable_v2:'art/tower_ballista_turntable_v2.png',
       t_brazier: 'art/tower_brazier.png',
       t_crystal: 'art/tower_crystal.png',
       t_perch:   'art/tower_perch.png',
       t_bellows: 'art/tower_bellows.png',
+      t_bellows_base_v2: 'art/tower_bellows_base_v2.png',
+      t_bellows_fan_v2: 'art/tower_bellows_fan_v2.png',
       t_press:   'art/tower_press.png',
       t_rotor:   'art/tower_rotor.png',
       // the combined manned plates are GONE (see MAN_SCALE) -- Wick
     // is drawn as himself on each machine's own mount point.
       e_looter:  'art/enemy_looter.png',
+      e_looter_body_v2: 'art/enemy_looter_body_v2.png',
+      e_looter_leg_v2: 'art/enemy_looter_leg_v2.png',
       e_scout:   'art/enemy_scout.png',
       e_brute:   'art/enemy_brute.png',
       e_shield:  'art/enemy_shield.png',
@@ -2825,11 +3007,14 @@
     var convert = null;                       // installed by Game
     window.addEventListener('pointerdown', function (e) {
       Sfx.unlock();
+      // DOM controls own their gesture; never also move Wick or place a machine.
+      if (e.target && e.target.closest && e.target.closest('[data-game-ui]')) return;
       if (convert) taps.push(convert(e.clientX, e.clientY));
     });
     return {
       setConverter: function (fn) { convert = fn; },
       inject: function (wx, wy, vx, vy) { taps.push({ x: wx, y: wy, vx: vx, vy: vy }); },
+      intent: function (name, x, y) { taps.push({ intent: name, x: x, y: y }); },
       drain: function () { var t = taps; taps = []; return t; },
     };
   })();
@@ -3671,7 +3856,9 @@
                   // graded, replay-identical, never read from the render lane.
                   hp: CFG.heroHp, maxHp: CFG.heroHp, downT: 0, safeT: 0, tollCd: 0 };
     this.menu = null;                       // { padIdx } build menu | { towerIdx } manage menu
-    this.shopPick = -1;                     // index into TOWER_ORDER while placing, else -1
+    this.shopPick = -1;                     // absolute index into _shelf(), else -1
+    this.shopPage = 0;                      // presentation only; never part of combat saves
+    this.shopOpen = false;                  // catalog visibility is presentation only
     this.placeHint = null;                  // {x,y,ok,why} — the last previewed spot
     this.stolenLost = 0;
     // The rival's side of the duel. rivalHoard steps ONCE PER WAVE off the
@@ -3771,9 +3958,18 @@
     this.result = null;
   };
 
+  Game.prototype.campaignCheckpoint = function () { return CampaignCheckpoint.summary(); };
+  Game.prototype.resumeCampaignCheckpoint = function () { return CampaignCheckpoint.restore(this); };
+
   Game.prototype.setPaused = function (v) {
     if (this.state === 'playing' && v) this.state = 'paused';
     else if (this.state === 'paused' && !v) this.state = 'playing';
+    else return;
+    // A resume begins from the next real frame, with no accumulated time or
+    // queued battle tap carried across a background/foreground transition.
+    this._acc = 0;
+    this._last = 0;
+    Input.drain();
   };
 
   Game.prototype.resize = function () {
@@ -3803,6 +3999,14 @@
       st = parseFloat(cs.paddingTop) || 0;
       sb = parseFloat(cs.paddingBottom) || 0;
     }
+    // WKWebView may expose zero CSS env() values even when UIKit knows the
+    // display cutout. Native layout/finish callbacks publish measured points
+    // and resize again; browser env() remains the baseline on every platform.
+    var nativeArea=window.__hoardlingSafeArea;
+    function nativeInset(value,limit){return typeof value==='number'&&isFinite(value)&&value>=0&&value<=limit?value:0;}
+    if(nativeArea){st=Math.max(st,nativeInset(nativeArea.top,ch*.4));sb=Math.max(sb,nativeInset(nativeArea.bottom,ch*.4));}
+    document.documentElement.style.setProperty('--hoardling-safe-top',st+'px');
+    document.documentElement.style.setProperty('--hoardling-safe-bottom',sb+'px');
     // centre the fixed SIM world; the RENDER fills the whole viewport (bands
     // get painted scenery + the screen-anchored HUD, never dead black)
     R3D.on && R3D.ready && setTimeout(function (g) { return function () { R3D.resize(g); }; }(this), 0);
@@ -3891,6 +4095,11 @@
     return WAVE_TABLES[this.levelIdx].length;
   };
 
+  // The ordinary campaign opens with a planning phase. Shared-score modes
+  // and challenge trials retain their authored opening countdowns.
+  Game.prototype._waitingForCampaignStart = function () {
+    return !this.isRival && this.mode === 'campaign' && !this.trial && this.wave === 0 && !this.waveActive;
+  };
   Game.prototype.startWave = function () {
     if (this.waveActive || this.state !== 'playing') return;
     if (this.countdown > 0.5 && this.wave > 0) {           // early-call bonus
@@ -3921,6 +4130,9 @@
     }
     // daily: the server-timed run token starts at the FIRST wave call
     if (this.mode === 'daily' && this.wave === 0) Lb.beginRun();
+    // Persist the wave opening after its one-time early-call bonus. Restoring
+    // this state bypasses startWave, so reopening cannot mint that bonus again.
+    CampaignCheckpoint.capture(this);
     Sfx.play('wave');
   };
 
@@ -3995,7 +4207,6 @@
   };
 
   Game.prototype.update = function (STEP) {
-    this.worldT += STEP;
     if (this.infoCard && (this.infoCard.t -= STEP) <= 0) this.infoCard = null;
     if (this.resultLockT > 0) this.resultLockT -= STEP;
     if (this._lbAskT > 0) this._lbAskT -= STEP;   // UI only: the ask's double-tap guard
@@ -4008,11 +4219,18 @@
       this._handleTap(taps[ti]);
       if (this.state !== preState) break;   // no same-frame chaining through screens
     }
-    if (this.state !== 'playing') return;
+    if (this.state !== 'playing') {
+      // The title uses this clock for its idle illustration. A paused battle
+      // must keep it still: Tar Boiler patches expire against worldT, so ten
+      // seconds in the pause screen used to erase them on the very next tick.
+      if (this.state !== 'paused') this.worldT += STEP;
+      return;
+    }
 
     // hit-stop: an event-driven, DETERMINISTIC beat of frozen sim (same for
     // every replay of the same run -- it lives in the sim, not the renderer)
     if (this.hitstopT > 0) { this.hitstopT -= STEP; return; }
+    this.worldT += STEP;
 
     // THE RIVAL PLAYS HER HALF OF THIS CAVERN. One sim, not two: she builds and
     // upgrades on her side out of her own purse while the same waves march down
@@ -4026,8 +4244,10 @@
     // -- countdown / auto-start --
     if (!this.waveActive) {
       if (this.wave >= this.totalWaves()) return;          // shouldn't happen; guarded at clear
-      this.countdown -= STEP;
-      if (this.countdown <= 0) this.startWave();
+      if (!this._waitingForCampaignStart()) {
+        this.countdown -= STEP;
+        if (this.countdown <= 0) this.startWave();
+      }
     }
 
     // -- spawner --
@@ -4410,7 +4630,7 @@
         var aimT = this._pickTarget(tw, lvlRow(tw).range * (this.mods.rangeMul || 1),
                                     tt.hitsAir, tt.airBonus, tw.targeting | 0,
                                     this.rivalSide ? (tw.ln | 0) : -1);
-        if (aimT) { tw._aimX = aimT.px; tw._aimY = aimT.py; }
+        if (aimT) { tw._aimX = aimT.px; tw._aimY = aimT.py; this._rememberAim(tw,aimT); }
       }
       if (tw.cd > 0) continue;
       var pad = tw;
@@ -4422,7 +4642,7 @@
         // tick with no _pickTarget, no projectile and no muzzle, and therefore
         // -- like the crystal -- no eFly test, which is the entire point. It is
         // the only machine in the game that does AREA damage to flyers.
-        var rHitAny = 0;
+        var rHitAny = 0, rContacts = [];
         var rR = lv.range * (this.mods.rangeMul || 1);
         var rDmg = lv.dmg * (this.mods.dmgMul || 1) * (tw._manned ? 1.3 : 1)
                           * (1 + (tw._auraDmg || 0));
@@ -4440,6 +4660,7 @@
           // Netcaster's net holds a flyer down, so keying on it would make the
           // game's two anti-air answers cancel instead of stack.
           var rMul = (lv.special === 'updraft' && re2.flyer) ? lv.airMul : 1;
+          rContacts.push(this._enemyImpactPoint(re2));
           this._damage(re2, rDmg * rMul, { kind: 'blade', tower: tw });
           // NEVER push a fleeing raider: e.d is the path's arc-length address,
           // so subtracting from a carrier on the way OUT would shove them
@@ -4451,14 +4672,16 @@
         }
         if (rHitAny) {
           tw.shotT = 0;
-          this.fxQueue.push({ k: 'pulse', x: pad.x, y: pad.y, r: rR, n: rHitAny, c: '#e8eef5' });
+          var rSource = this._machineAttackSource(tw);
+          this.fxQueue.push({ k: 'pulse', x: pad.x, y: pad.y, r: rR, n: rHitAny, c: '#e8eef5',
+            attack: 'blade', sx: rSource.x, sy: rSource.y, contacts: rContacts, scale: 1 + tw.level * .12 });
           Sfx.play('whirl', tw.tid, { gain: Math.min(1, 0.55 + rHitAny * 0.12), pri: 1 });
         }
         tw.cd = rHitAny ? 1 / (lv.rate || 1) : 0.1;
         continue;
       }
       if (tw.type === 'crystal') {
-        var hitAny = 0;
+        var hitAny = 0, chillContacts = [];
         for (var c = this.enemies.length - 1; c >= 0; c--) {
           var ce = this.enemies[c];
           if (ce.hp <= 0) continue;
@@ -4466,6 +4689,7 @@
           var cR = lv.range * (this.mods.rangeMul || 1);
           var cdx = ce.px - pad.x, cdy = ce.py - pad.y;
           if (cdx * cdx + cdy * cdy <= cR * cR) {
+            chillContacts.push(this._enemyImpactPoint(ce));
             ce.slowF = Math.min(ce.slowF, ce.type === 'boss' ? 0.75 : 1 - lv.slow);
             // max, not assign: a weaker crystal must never TRUNCATE a deep
             // chill (deepT <= slowT must hold — blink immunity reads slowT)
@@ -4497,7 +4721,9 @@
         // every pulse chimed identically. It is a deterministic count of sim
         // state, so riding gain and pitch on it consumes nothing seeded.
         if (hitAny) {
-          this.fxQueue.push({ k: 'pulse', x: pad.x, y: pad.y, r: lv.range, n: hitAny });
+          var chillSource = this._machineAttackSource(tw);
+          this.fxQueue.push({ k: 'pulse', x: pad.x, y: pad.y, r: lv.range, n: hitAny,
+            attack: 'chill', sx: chillSource.x, sy: chillSource.y, contacts: chillContacts, scale: 1 + tw.level * .12 });
           Sfx.play('chime', tw.tid, { gain: Math.min(1, 0.6 + hitAny * 0.14),
                                       rate: 1 + Math.min(4, hitAny) * 0.05, pri: 1 });
         }
@@ -4515,12 +4741,13 @@
       // The plate's base is a round turntable, so the art is built to swivel.
       // Cosmetic cache: written here, read ONLY by the renderer, exactly like
       // the _r3dAim line above — the sim never reads it back, so no fork.
-      tw._aimX = target.px; tw._aimY = target.py;
+      tw._aimX = target.px; tw._aimY = target.py; this._rememberAim(tw,target);
       tw.cd = 1 / lv.rate;
       var tp = { x: target.px, y: target.py };
       var mz0 = this._muzzleOf(tw, tp.x, tp.y);
       if (tw.type === 'mimic') {                            // instant bite
         tw.shotT = 0;
+        var bitePoint = this._enemyImpactPoint(target), biteSource = this._machineAttackSource(tw, tp.x);
         this._damage(target, lv.dmg * mDmg, { kind: 'melee', tower: tw });
         if (lv.special === 'rend') { target.bleedT = lv.rendDur; target.bleedDps = lv.rendDps; }
         // Magnet Jaws: shake a stolen coin home (cap 2/raider). Losing weight
@@ -4531,14 +4758,15 @@
           if (this.rivalSide && (tw.own | 0) === 1) this.rivalHoard++; else this.hoard++;
           this.fxQueue.push({ k: 'recover', x: tp.x, y: tp.y, n: 1, ln: target.ln | 0 });
         }
-        this.fxQueue.push({ k: 'bite', x: tp.x, y: tp.y });
+        this.fxQueue.push({ k: 'bite', x: tp.x, y: tp.y, attack: 'bite',
+          sx: biteSource.x, sy: biteSource.y, contacts: [bitePoint], scale: 1 + tw.level * .12 });
         // Gearjaw grinds; Magnet Jaws snaps. Both forks used to make the one
         // sound, so the choice you commit a machine to for the rest of the run
         // was inaudible. The fx is queued here and SPENT in _cosmetic() -- a
         // particle spawned beside this line would be a cosmetic draw on the
         // fixed-step path.
         if (lv.special === 'rend') {
-          this.fxQueue.push({ k: 'grind', x: tp.x, y: tp.y });
+          this.fxQueue.push({ k: 'grind', x: tp.x, y: tp.y, bodyX: bitePoint.x, bodyY: bitePoint.y });
           Sfx.play('grind', tw.tid, { pri: 1 });
         } else {
           Sfx.play('bite', tw.tid);
@@ -4572,17 +4800,19 @@
           dmg += tw.ramp;
         }
         tw.shotT = 0;
-        this.projectiles.push({
+        var firedBolt = {
           kind: 'bolt', x: mz0.x, y: mz0.y, target: target.id, spd: 340,
           dmg: dmg, crit: crit, hops: lv.pierce || 0,
           shieldbreak: lv.special === 'shieldbreak',
           net: lv.special === 'downdraft' ? lv.groundDur : 0, tower: t,
-        });
+        };
+        this.projectiles.push(firedBolt);
+        var shotMouth = this._registerShotVisual(firedBolt,tw,target,mz0);
         // the STRING SNAP: a real crossbow releases, it doesn't just emit
         // AT THE MUZZLE. This fired at (pad.x, pad.y-26) — the machine's middle —
         // so after shots moved to the bow the release flashed ~25px away from
         // where the bolt actually left. My own residue, caught by the audit.
-        this.fxQueue.push({ k: 'snap', x: mz0.x, y: mz0.y, tx: tp.x, ty: tp.y });
+        this.fxQueue.push({ k: 'snap', x: shotMouth.x, y: shotMouth.y, tx: this._enemyImpactPoint(target).x, ty: this._enemyImpactPoint(target).y, stone:tw.type==='perch' });
         Sfx.play(tw.type === 'perch' ? 'stone' : 'bow', tw.tid);
       }
     }
@@ -4590,6 +4820,8 @@
     // -- projectiles --
     for (var p = this.projectiles.length - 1; p >= 0; p--) {
       var pr = this.projectiles[p];
+      var visualFlight=SHOT_VISUALS.get(pr);
+      if(visualFlight){var fvx=pr.x-visualFlight.lastX,fvy=pr.y-visualFlight.lastY;visualFlight.travel+=Math.sqrt(fvx*fvx+fvy*fvy);visualFlight.lastX=pr.x;visualFlight.lastY=pr.y;}
       if (pr.kind === 'lob') {
         pr.t += STEP;
         var a = Math.min(1, pr.t / pr.dur);
@@ -4634,8 +4866,9 @@
         var fdx = ft.px - pr.x, fdy = ft.py - pr.y;
         var fdist = Math.sqrt(fdx * fdx + fdy * fdy);
         if (fdist < 11) {
+          var fireBody=this._enemyImpactPoint(ft);
           this._damage(ft, pr.dmg, { kind: 'hero' });
-          this.fxQueue.push({ k: 'fireburst', x: ft.px, y: ft.py });
+          this.fxQueue.push({ k: 'fireburst', x: fireBody.x, y: fireBody.y });
           Sfx.play('fireimp', pr.target, { pri: 1 });   // it landed in silence
           this.projectiles.splice(p, 1);
         } else {
@@ -4651,6 +4884,7 @@
         var pdx = gp.x - pr.x, pdy = gp.y - pr.y;
         var dist = Math.sqrt(pdx * pdx + pdy * pdy);
         if (dist < 10) {
+          var impactBody=this._enemyImpactPoint(tgt);
           this._damage(tgt, pr.dmg, { kind: 'bolt', tower: this.towers[pr.tower], shieldbreak: pr.shieldbreak });
           // THE BACK HALF OF THE LIFECYCLE WAS SILENT. A bolt crossing the cave
           // and connecting made no sound whatsoever, so the shot had a beginning
@@ -4666,7 +4900,7 @@
           // Carry the bolt's HEADING into the impact so the sparks spray off the
           // hit instead of puffing symmetrically — the direction was always right
           // there in the projectile and the effect threw it away.
-          this.fxQueue.push({ k: 'hit', x: gp.x, y: gp.y, c: pr.crit ? '#ff9a3c' : '#ffd75e',
+          this.fxQueue.push({ k: 'hit', x: impactBody.x, y: impactBody.y, c: pr.crit ? '#ff9a3c' : '#ffd75e',
                               dx: pr.dx || 0, dy: pr.dy || 0, big: pr.crit ? 1 : 0 });
           if (pr.crit) this.fxQueue.push({ k: 'float', x: gp.x, y: gp.y - 14, txt: 'OVERWOUND!', c: '#ff9a3c' });
           // Netcaster: a netted flyer crashes low and fights as ground troops
@@ -4677,7 +4911,9 @@
           // pierce: hop to the next enemy behind, at 60% damage per hop
           if (pr.hops > 0) {
             var nxt = this._nextBehind(tgt);
-            if (nxt) { pr.target = nxt.id; pr.hops--; pr.dmg = Math.round(pr.dmg * 0.6) || 1; continue; }
+            if (nxt) { pr.target = nxt.id; pr.hops--; pr.dmg = Math.round(pr.dmg * 0.6) || 1;
+              var hopVisual=SHOT_VISUALS.get(pr);if(hopVisual){hopVisual.source=impactBody;hopVisual.travel=0;hopVisual.lastX=pr.x;hopVisual.lastY=pr.y;}
+              continue; }
           }
           this.projectiles.splice(p, 1);
         } else {
@@ -4707,7 +4943,7 @@
     if (h.manned && !wasManned) {
       var mp2 = this._towerByTid(h.manTid);
       if (mp2) {
-        this.fxQueue.push({ k: 'float', x: mp2.x, y: mp2.y - 54, txt: 'MANNING!', c: '#ffcf6a' });
+        this.fxQueue.push({ k: 'float', x: mp2.x, y: mp2.y - 54, txt: 'Wick on duty', c: '#ffcf6a' });
         this.fxQueue.push({ k: 'place', x: mp2.x, y: mp2.y });
       }
     }
@@ -4720,6 +4956,7 @@
     // things that were free before. He comes back at the keep at full health,
     // so the punishment is tempo, never a dead run.
     if (h.downT > 0) {
+      h.castBreath = false; // a rejected command cannot fire after recovery
       h.downT -= STEP;
       h.manTid = -1; h.manned = false;
       if (h.downT <= 0) {
@@ -4777,6 +5014,7 @@
       if (h.hp <= 0) {
         h.hp = 0;
         h.downT = CFG.heroDownTime;
+        h.castBreath = false; // contact can down Wick on the queued cast's step
         h.manTid = -1; h.manned = false;
         this.fxQueue.push({ k: 'herodown', x: h.x, y: h.y });
         // Nine seconds with no breath, no manning, no jam-clearing -- and it
@@ -4835,8 +5073,9 @@
       // onto a machine, which the hardcoded offset could not -- crewing lifts him
       // ~27 units and the fire went on leaving from the floor.
       var fmz = this._muzzle(false);
-      this.projectiles.push({ kind: 'fire', x: fmz.x, y: fmz.y, target: pick.id,
-                              spd: 300, dmg: h.dmg, hero: true });
+      var fireShot={kind:'fire',x:fmz.x,y:fmz.y,target:pick.id,spd:300,dmg:h.dmg,hero:true};
+      this.projectiles.push(fireShot);
+      SHOT_VISUALS.set(fireShot,{type:'fire',source:fmz,travel:0,lastX:fmz.x,lastY:fmz.y});
       this.fxQueue.push({ k: 'muzzle', x: fmz.x, y: fmz.y, tx: pick.px, ty: pick.py, hero: true });
       Sfx.play('flame');
     }
@@ -5151,6 +5390,7 @@
     // stars, duel records, daily bests and the leaderboard queue; a live
     // opponent reaching wave 12 must set its own state and nothing else.
     if (this.isRival) { this.state = won ? 'won' : 'lost'; return; }
+    if (this.mode === 'campaign') CampaignCheckpoint.clear();
     this.state = won ? 'won' : 'lost';
     this._bossWave = false;
     // Victory: the bed ducks and comes back — the cave is still his.
@@ -5247,7 +5487,9 @@
         marksEarned += MARK_AWARDS.dailyWave * (this.wave - paidTo);
         Save.setDailyPaid(sKey, this.wave);
       }
-      if (this.wave > Save.data.daily.best) Save.data.daily.best = this.wave;
+      // A siege can finish after midnight. Its marks belong to its own seed;
+      // its score must not become the new day's "today's best" on the title.
+      if (this.seed === dailySeed() && this.wave > Save.data.daily.best) Save.data.daily.best = this.wave;
       if (this.wave > Save.data.dailyBestWave) Save.data.dailyBestWave = this.wave;
     }
     if (marksEarned > 0) Save.addMarks(marksEarned);
@@ -5265,10 +5507,59 @@
     Sfx.play(won ? 'win' : 'lose');
   };
 
+  // Read-only ability status: the same live, same-side radius test as casting.
+  // Countdown strings change by seconds, not by animation frames.
+  Game.prototype._breathStatus = function () {
+    var h=this.hero, n=0, seconds=0, kind, line;
+    if(h.downT>0){kind='recovering';seconds=Math.ceil(h.downT);line='Recovering '+seconds+'s';}
+    else if(h.breathCd>0){kind='cooling';seconds=Math.ceil(h.breathCd);line='Ready in '+seconds+'s';}
+    else{
+      for(var i=0;i<this.enemies.length;i++){var e=this.enemies[i],dx=e.px-h.x,dy=e.py-h.y;
+        if(e.hp>0&&this._sameSide(e.ln,0)&&dx*dx+dy*dy<=h.range*h.range)n++;}
+      kind=n?'ready':'empty';line=n?n+' in reach':'Move closer';
+    }
+    var ready=kind==='ready'||kind==='empty';
+    return {kind:kind,line:line,count:n,seconds:seconds,ready:ready,canCast:kind==='ready',
+      fraction:ready?1:kind==='recovering'?clamp(1-h.downT/CFG.heroDownTime,0,1):clamp(1-h.breathCd/(this.mods.breathCd||14),0,1),
+      label:'Use Wick’s breath. '+(kind==='ready'?'Ready. '+n+' nearby '+(n===1?'enemy.':'enemies.'):kind==='empty'?'Ready, but no enemies nearby. Move Wick closer.':kind==='recovering'?'Wick recovers in '+seconds+' seconds.':'Ready in '+seconds+' seconds.')+' Burns nearby enemies through armor.'};
+  };
+  Game.prototype._requestBreath = function () {
+    if (this.mods.breathOff) return;
+    var h = this.hero;
+    if (h.downT > 0 || h.breathCd > 0) {
+      h.castBreath = false;
+      this.fxQueue.push({k:'float',x:h.x,y:h.y-40,
+        txt:h.downT > 0 ? 'Wick recovers in '+Math.ceil(h.downT)+'s' : Math.ceil(h.breathCd)+'s until the flame',
+        c:'#e7c7a8'});
+    } else h.castBreath = true;
+  };
+
+  Game.prototype._selectMachine = function (index) {
+    if(index<0||index>=this._shelf().length)return;
+    this.shopPick=this.shopPick===index?-1:index;
+    this.shopPage=Math.floor(index/4);this.shopOpen=false;this.placeHint=null;
+    Sfx.play('place');
+  };
+
   // ---- tap handling (runs inside update — deterministic order) ----------
   // Priority: letterbox reject -> screens -> OPEN MENU -> hero -> towers/pads
   // -> HUD buttons -> start-wave. Interactive elements always beat big rects.
   Game.prototype._handleTap = function (tap) {
+    if (!this.isRival && PlayerGuide.isOpen()) return;
+    // Keyboard/assistive activation names its visible control. Physical
+    // pointers keep their coordinates and use the same tray/world boundaries.
+    if(tap.intent){
+      if(this.state==='playing'&&!this.menu){
+        if(tap.intent==='build')this._selectMachine(tap.x|0);
+        else if(tap.intent==='shop'){this.shopOpen=!this.shopOpen;this.shopPick=-1;this.placeHint=null;}
+        else if(this.shopPick<0){
+          if(tap.intent==='wave')this.startWave();
+          else if(tap.intent==='breath')this._requestBreath();
+          else if(tap.intent==='move')this._moveWickTo(tap);
+        }
+      }
+      return;
+    }
     var w = tap;   // world-space + .vx/.vy view-space (converted at capture)
     // TWO coordinate systems in R3D mode. The GROUND (pads, towers, walking,
     // placement) lives under the 3D camera -> raycast. 2D-DRAWN UI (title,
@@ -5284,135 +5575,51 @@
     var vx = w.vx !== undefined ? w.vx : w.x + v.ox;
     var vy = w.vy !== undefined ? w.vy : w.y + v.oy;
 
-    // FORK CHOOSER IS MODAL — it swallows every tap before any other surface
-    // (HUD, start-wave, info card). A card buys; anywhere else closes. Bands
-    // included: w is out-of-world there, which simply reads as "close".
-    if (this.state === 'playing' && this.menu && this.menu.forkFor !== undefined) {
-      var ftw = this.towers[this.menu.forkFor];
-      if (ftw && ftw.level === 1) {
-        var fcost = TOWER_TYPES[ftw.type].levels[1].upgradeCost;
-        var cards = this._forkCards(ftw);
-        for (var fc = 0; fc < 2; fc++) {
-          var cr = cards[fc];
-          if (w.x >= cr.x && w.x <= cr.x + cr.w && w.y >= cr.y && w.y <= cr.y + cr.h) {
-            if (this.gold >= fcost) {
-              this.gold -= fcost; ftw.level = 2; ftw.fork = fc;
-              var fpad = ftw;
-              var fkRow = TOWER_TYPES[ftw.type].forks[fc];
-              this.fxQueue.push({ k: 'place', x: fpad.x, y: fpad.y });
-              this.fxQueue.push({ k: 'float', x: fpad.x, y: fpad.y - 52, txt: fkRow.name + '!', c: fc ? '#a8e6ff' : '#ffd75e' });
-              Sfx.play('upg');
-            }
-            this.menu = null; return;
-          }
-        }
-      }
-      this.menu = null; return;                              // tapped elsewhere: close
+    // The entire management panel is modal, including letterbox bands. Its
+    // linear overlay coordinates must win before HUD and 3D ground picking.
+    if (this.state === 'playing' && this.menu) {
+      this._handleMachineMenuTap(wl); return;
     }
     // an open enemy card swallows its tap (dismiss) — x-bounded to the panel,
     // so a world tap beside the card still reaches pads under the band
     if (this.infoCard && this.state === 'playing') {
       var Gc = this._hudGeom();
       var cw2 = Math.min(this.view.w - 24, 372);
-      if (vy > Gc.topY + 56 && vy < Gc.topY + 114 &&
+      if (vy > Gc.infoY && vy < Gc.infoY + 58 &&
           vx > this.view.w / 2 - cw2 / 2 && vx < this.view.w / 2 + cw2 / 2) { this.infoCard = null; return; }
     }
     // SCREEN-ANCHORED HUD first — it lives in the bands on tall phones
     if (this.state === 'playing') {
       var G = this._hudGeom();
-      if (vy >= G.btnY && vy <= G.btnY + 34) {
-        if (vx >= G.spd && vx <= G.spd + 44) { this.speed = this.speed === 1 ? 2 : 1; return; }
-        if (vx >= G.pause && vx <= G.pause + 44) { this.setPaused(true); return; }
-        if (vx >= G.mute && vx <= G.mute + 44) { Sfx.toggle(); return; }
+      if (vy >= G.btnY && vy <= G.btnY + G.buttonH) {
+        if (vx >= G.spd && vx <= G.spd + G.buttonW) { this.speed = this.speed === 1 ? 2 : 1; return; }
+        if (vx >= G.pause && vx <= G.pause + G.buttonW) { this.setPaused(true); return; }
+        if (G.mute!==null && vx >= G.mute && vx <= G.mute + G.buttonW) { Sfx.toggle(); return; }
       }
-      // A MACHINE IN HAND MEANS THE NEXT TAP ON LEGAL GROUND IS A BUILD.
-      //
-      // The action row sits over the bottom of the cavern floor, so without
-      // this the START WAVE and BREATH buttons eat taps aimed at the ground
-      // beneath them. Measured against the engine's own _placeCheck: 680
-      // buildable positions sit under START WAVE and 460 under BREATH. A
-      // player aiming at any of them with a machine in hand loses their whole
-      // build phase to a button they were not pressing.
-      //
-      // fb78c1a separately lifted the authored pads clear of the shelf, which
-      // fixed the worst case (a pad you could not build on). It does not fix
-      // this one: free placement means the whole floor is a build target, so
-      // the ~1,140 positions above are still live without this guard.
-      //
-      // Deliberately narrow: it only defers a HUD button when a machine is
-      // armed AND the ground under the finger is actually buildable. Armed
-      // over illegal ground still starts the wave, so the button never goes
-      // dead and needs no second tap to reach.
-      var armedOverGround = this.shopPick >= 0 && this._placeCheck(w.x, w.y).ok;
-      // ...and it did NOT cover the management direction, which is the common
-      // one. Once a machine STANDS on that ground, _placeCheck returns false
-      // ('too close to another machine'), so armedOverGround goes false and the
-      // button eats the tap forever after. Measured on stock pads: L1 pad (56,684)
-      // sits inside the BREATH rect and L3 pad (224,684) inside START WAVE on
-      // EVERY device tested -- so tapping your own machine fired the breath, or
-      // started the next wave and took the early-call bonus with it.
-      // The file already claims this priority twice ('towers / pads beat the HUD
-      // bands and the start-wave rect'); this makes it true.
-      // AN OPEN MENU OWNS THE SCREEN. This only scanned a 32-unit disc around a
-      // tower, but _menuBtnPos lays its buttons on an arc of radius 56 -- so a
-      // machine built near the shop, START WAVE or the breath button had menu
-      // buttons UNDER those rects, and the HUD claimed the tap first. Measured:
-      // 4 authored pads and 7-11% of the free-build floor own machines that
-      // cannot be upgraded, manned, re-aimed or sold. While a menu is open,
-      // every HUD band defers.
-      var twUnder = !!(this.menu && this.menu.towerIdx !== undefined);
-      if (!twUnder && this.shopPick < 0) {        // a machine in hand still places
-        for (var tu = 0; tu < this.towers.length; tu++) {
-          var tud = this.towers[tu], ux = w.x - tud.x, uy = w.y - tud.y;
-          if (!this._sameSide(tud.own, 0)) continue;   // hers opens no menu to defer for
-          if (ux * ux + uy * uy < 32 * 32) { twUnder = true; break; }
-        }
+      function inside(r){return r&&vx>=r.x&&vx<=r.x+r.w&&vy>=r.y&&vy<=r.y+r.h;}
+      // The opaque tray owns its actual screen area. A machine's invisible
+      // base-disc/slop cannot steal a button; painted bodies above it remain
+      // normal world targets. While building the tray is absent altogether.
+      if(inside(G.commandRow)){
+        if(inside(G.shopToggle)){this.shopOpen=true;Sfx.play('place');}
+        else if(!this.mods.breathOff&&inside(G.breathRect))this._requestBreath();
+        else if(!this.waveActive&&this.wave<this.totalWaves()&&inside(G.startRect))this.startWave();
+        return;
       }
-      if (!armedOverGround && !twUnder) {
-        if (!this.waveActive && this.wave < this.totalWaves() &&
-            vx >= G.cx - 92 && vx <= G.cx + 92 && vy >= G.startY && vy <= G.startY + 52) {
-          this.startWave(); return;
-        }
-        // THE RETURN USED TO BE UNCONDITIONAL while the button is only DRAWN
-        // when !breathOff -- so under the Smothered Fire trial ("Wick's flame is
-        // out. The machines answer alone.") a 62x62-unit patch of buildable
-        // cavern floor swallowed every tap for the whole run, with nothing on
-        // screen to explain it. Gate the hit test on the same predicate that
-        // decides whether the button exists, and the tap falls through to the
-        // world path exactly as it does everywhere else.
-        if (!this.mods.breathOff &&
-            vx >= G.breathX && vx <= G.breathX + 62 && vy >= G.breathY && vy <= G.breathY + 62) {
-          // ...and a tap while it is COOLING used to vanish silently too. Same
-          // idiom as the 'no raiders in reach' refusal: answer, do not swallow.
-          if (this.hero.breathCd > 0) {
-            this.fxQueue.push({ k: 'float', x: this.hero.x, y: this.hero.y - 40,
-                                txt: Math.ceil(this.hero.breathCd) + 's until the flame', c: '#8a7f72' });
-          } else this.hero.castBreath = true;
-          return;                                  // the breath's own button
-        }
+      if(inside(G.shopHeader)){
+        if(inside(G.shopToggle)){this.shopOpen=false;Sfx.play('place');}
+        else if(inside(G.shopMore)){this.shopPage=(G.shopPage+1)%G.shopPages;Sfx.play('place');}
+        return;
       }
-      // THE SHOP: pick a machine, then tap the cavern to place it.
-      // The card test is EXACT — it used to claim the whole width of the band
-      // and, when a machine was armed, swallow anything that landed in it. On
-      // a screen with no letterbox band the shop sits over the cavern floor,
-      // so a tap aimed at the ground behind it silently disarmed the shop
-      // instead of building. Now only the cards themselves consume a tap and
-      // everything between and around them falls through to the world.
-      // ...and the shop row needs the same deferral START/BREATH already have:
-      // with a machine armed over buildable ground, the card band was still
-      // claiming the tap and re-arming a different card instead of building.
-      if (!armedOverGround && vy >= G.shopY && vy <= G.shopY + G.shopH) {
-        var shelfT = this._shelf();
-        for (var sc = 0; sc < shelfT.length; sc++) {
-          var sxp = G.shopX + sc * G.shopStep;
-          if (vx >= sxp && vx <= sxp + G.shopW) {
-            this.shopPick = this.shopPick === sc ? -1 : sc;
-            this.placeHint = null;
-            Sfx.play('place');
-            return;
-          }
-        }
+      if(G.shopExpanded&&vy>=G.shopY-8&&vy<=this.view.h){
+        for(var sc=0;sc<G.shopCards.length;sc++)if(inside(G.shopCards[sc])){this._selectMachine(G.shopCards[sc].index);return;}
+        return;
       }
+      if(this.shopPick>=0&&inside(G.buildCancel)){this.shopPick=-1;this.shopOpen=false;this.placeHint=null;return;}
+      if(this.shopPick>=0&&inside(G.buildInfo))return;
+      // Scout information is an intentional catalog overlay, not a hidden
+      // floor target. Close Machines to see and command this ground again.
+      if(this.shopOpen&&vx>=G.barX&&vx<=G.barX+G.barW&&vy>=G.infoY&&vy<=G.infoY+88)return;
     }
 
     // THE LEADERBOARD QUESTION IS MODAL (§3g), over the title and over a Daily
@@ -5457,7 +5664,10 @@
       for (var lv = 0; lv < nRows; lv++) {
         if (hit(w, TG.rows[lv])) {
           if (!Save.unlocked(lv)) return;        // locked: tap does nothing
-          this.reset(1, 'campaign', lv); this.state = 'playing'; return;
+          var checkpoint = this.campaignCheckpoint();
+          if (checkpoint) { PlayerGuide.open('checkpoint', lv); return; }
+          PlayerGuide.startCampaign(lv);
+          return;
         }
       }
       if (hit(w, TG.daily)) {
@@ -5517,29 +5727,20 @@
     if (this.state === 'cavern') {
       var CG = cavernRoomGeom(this.view), ci;
       for (ci = 0; ci < SLOTS.length; ci++) {
-        if (hit(w, CG.tabs[ci])) { this.cavSlot = ci; Sfx.play('place'); return; }
+        if (hit(w, CG.tabs[ci])) { this.cavSlot = ci; this.cavInspect = null; Sfx.play('place'); return; }
       }
       var cslot = SLOTS[this.cavSlot | 0] || SLOTS[0];
+      if (hit(w, CG.action)) {
+        var selected = this._cavernSelection(), owned = Save.owns(cslot.id, selected.id);
+        if (Save.equipped(cslot.id).id === selected.id) return;
+        if (!owned && !Save.buy(cslot.id, selected.id)) return;
+        Save.equip(cslot.id, selected.id); Sfx.play(owned ? 'coin' : 'upg');
+        if (cslot.id === 'finish') this._warmFinish();
+        return;
+      }
       for (ci = 0; ci < cslot.items.length && ci < CG.cards.length; ci++) {
         if (!hit(w, CG.cards[ci])) continue;
-        var cit = cslot.items[ci];
-        if (Save.owns(cslot.id, cit.id)) {
-          // ALREADY WEARING IT is not a failure and must not play a rejection
-          // sound -- a tap on the equipped card is the most likely misfire.
-          var was = Save.equipped(cslot.id);
-          if (was && was.id === cit.id) return;
-          Save.equip(cslot.id, cit.id); Sfx.play('coin');
-          if (cslot.id === 'finish') this._warmFinish();   // pay it here, not on the board
-          return;
-        }
-        // buy() spends the wallet and grants; equipping it immediately is the
-        // only sane read of "I just bought this"
-        if (Save.buy(cslot.id, cit.id)) {
-          Save.equip(cslot.id, cit.id); Sfx.play('upg');
-          if (cslot.id === 'finish') this._warmFinish();
-        }
-        else Sfx.play('sell');
-        return;
+        this.cavInspect = cslot.items[ci].id; Sfx.play('place'); return;
       }
       if (hit(w, CG.back)) { this.state = 'menu'; return; }
       return;
@@ -5571,6 +5772,8 @@
       // THE OPT-OUT IS TESTED FIRST, because every other pixel on this screen
       // dismisses it. Its rect is written by the drawer, so it exists only on
       // the frames the control is actually on screen.
+      var retry = this._lbRetryRect;
+      if (retry && w.x >= retry.x && w.x <= retry.x + retry.w && w.y >= retry.y && w.y <= retry.y + retry.h) { this._retryLeaderboard(); return; }
       var lo = this._lbOptRect;
       // STOPPING IS ONE TAP; JOINING IS THE QUESTION. Withdrawing needs no
       // disclosure, but "join" is a yes to an anonymous identity and a public,
@@ -5591,79 +5794,10 @@
       this.state = 'menu';
       return;
     }
-    if (this.state === 'paused') {
-      // QUIT TO TITLE button on the pause overlay
-      if (w.x > WORLD_W / 2 - 90 && w.x < WORLD_W / 2 + 90 && w.y > WORLD_H / 2 + 56 && w.y < WORLD_H / 2 + 104) {
-        this.reset(1, 'campaign'); this.state = 'menu'; return;
-      }
-      this.setPaused(false); return;
-    }
+    if (this.state === 'paused') return; // explicit Resume in the DOM pause menu
 
     // world interactions only within the sim world (bands are HUD territory)
     if (w.x < 0 || w.x > WORLD_W || w.y < 0 || w.y > WORLD_H) return;
-
-    // OPEN MENU first — its buttons beat everything else on screen
-    // (the fork chooser was already handled modally above, before the HUD)
-    if (this.menu) {
-      var m = this.menu;
-      if (m.towerIdx !== undefined) {                 // manage menu — nearest-wins
-        var tw = this.towers[m.towerIdx];
-        // A SPLICE CAN RE-POINT towerIdx AT HER MACHINE. The menu holds an
-        // array index, and _buyAt/sell mutate the array under it, so the owner
-        // is re-checked here as well as at the tap that opened it.
-        if (tw && !this._sameSide(tw.own, 0)) { this.menu = null; return; }
-        if (tw) {
-          var pad2 = tw;
-          pad2 = this._uiAnchor(pad2);
-          // MUST mirror the draw: supports have no AIM, so they have 3 buttons.
-          // If these two ever disagree, a tap sells the machine the player meant
-          // to man. Derived from the same predicate, deliberately.
-          var isSup2 = !!TOWER_TYPES[tw.type].support;
-          var nb2 = isSup2 ? 3 : 4;
-          var btns = [];
-          for (var qb = 0; qb < nb2; qb++) btns.push(this._menuBtnPos(pad2, qb, nb2));
-          var lvl = lvlRow(tw);
-          var bi2 = -1, bd2 = 24 * 24;
-          for (var mb2 = 0; mb2 < btns.length; mb2++) {
-            var mdx = wl.x - btns[mb2].x, mdy = wl.y - btns[mb2].y, mdd = mdx * mdx + mdy * mdy;
-            if (mdd < bd2) { bd2 = mdd; bi2 = mb2; }
-          }
-          if (bi2 !== -1) {
-            if (bi2 === 0) {                                 // upgrade
-              if (tw.level === 0 && this.gold >= lvl.upgradeCost) {
-                this.gold -= lvl.upgradeCost; tw.level++;
-                this.fxQueue.push({ k: 'place', x: pad2.x, y: pad2.y });
-                Sfx.play('upg');
-                this.menu = null;
-              } else if (tw.level === 1 && this.gold >= lvl.upgradeCost) {
-                // L3 is a commitment: open the fork chooser, charge on the pick
-                this.menu = { forkFor: m.towerIdx };
-                Sfx.play('place');
-              }
-            } else if (!isSup2 && bi2 === 1) {               // cycle aim mode (menu stays open)
-              // % AIM_MODES.length, not a literal: adding HEXER as a fourth mode
-              // with a hardcoded 3 here would have left it unreachable from the
-              // only control that selects it.
-              tw.targeting = ((tw.targeting | 0) + 1) % AIM_MODES.length;
-              Sfx.play('place');
-            } else if (bi2 === (isSup2 ? 1 : 2)) {           // MAN / LEAVE the machine
-              if (this.hero.manTid === tw.tid) { this.hero.manTid = -1; this.hero.manned = false; }
-              else { this.hero.manTid = tw.tid; }
-              Sfx.play('place');
-              this.menu = null;
-            } else {                                         // sell
-              this.gold += this._sellValue(tw);
-              this.towers.splice(m.towerIdx, 1);
-              Sfx.play('sell');
-              this.menu = null;
-            }
-            return;
-          }
-        }
-      }
-      this.menu = null;                                     // tapped elsewhere: close
-      return;
-    }
 
     // Mother's Breath: the armed keep eats the tap
     if (this.motherReady) {
@@ -5677,12 +5811,8 @@
     // SELL. Measured: one tap sold Cinder's ballista and paid the player 91
     // gold. Five more taps and the DRAKE has an empty cave and you are 400 gold
     // up, which is the entire mode decided before wave 2.
-    for (var t = 0; t < this.towers.length; t++) {
-      var pd = this.towers[t];
-      if (!this._sameSide(pd.own, 0)) continue;
-      var tdx = w.x - pd.x, tdy = w.y - pd.y;
-      if (tdx * tdx + tdy * tdy < 32 * 32) { this.menu = { towerIdx: t }; return; }
-    }
+    var hitTower = this.shopPick < 0 ? this._towerHitAt(wl) : -1;
+    if (hitTower >= 0) { this.shopOpen=false; this.menu = { towerIdx: hitTower }; return; }
     // (empty pads are no longer tap-to-build — the shop owns building now, and
     // a pad is simply cheaper ground. That frees the whole floor for walking.)
 
@@ -5692,21 +5822,27 @@
       if (!stid) { this.shopPick = -1; return; }
       var chk = this._placeCheck(w.x, w.y, 0);
       if (!chk.ok) {
+        this.placeHint = {x:w.x,y:w.y,ok:false,why:chk.why,at:this.worldT};
         this.fxQueue.push({ k: 'float', x: w.x, y: w.y - 18, txt: chk.why, c: '#ff9a9a' });
         return;                                   // stay armed: let them try again
       }
       if (!this._buyAt(stid, w.x, w.y, chk)) {
+        this.placeHint = {x:w.x,y:w.y,ok:false,why:'not enough gold',at:this.worldT};
         this.fxQueue.push({ k: 'float', x: w.x, y: w.y - 18, txt: 'not enough gold', c: '#ff9a9a' });
         return;
       }
-      this.shopPick = -1; this.placeHint = null;
+      this.shopPick = -1; this.shopOpen=false; this.placeHint = null;
       return;
     }
 
-    // ANY other world tap WALKS WICK THERE. He used to need selecting first,
-    // and tapping him fired his breath instead of selecting — so once breath
-    // was charged (i.e. nearly always) he could not be moved at all.
+    this._moveWickTo(w);
+  };
+  Game.prototype._moveWickTo = function (w) {
     var hh = this.hero;
+    if (hh.downT > 0) {
+      this.fxQueue.push({k:'float',x:hh.x,y:hh.y-40,txt:'Wick recovers in '+Math.ceil(hh.downT)+'s',c:'#ffc1a4'});
+      return;
+    }
     hh.manTid = -1; hh.manned = false;      // walking off a machine leaves it
     var tx = clamp(w.x, 20, WORLD_W - 20), ty = clamp(w.y, 120, WORLD_H - 30);
     for (var pj = 0; pj < MAP.pads.length; pj++) {   // never park ON a pad's tap target
@@ -5738,6 +5874,46 @@
   // 3D projection remapped into overlay coords when the 3D world is live.
   Game.prototype._uiAnchor = function (o) {
     return (R3D.on && R3D.ready) ? R3D.remap(o.x, o.y) : o;
+  };
+  // Selection follows the painted body as well as its forgiving ground
+  // target. These masks depend only on decoded art, never render cadence or
+  // cached aim transforms. Transparent corners remain ordinary floor.
+  var MACHINE_HIT_MASKS = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  function machineHitMask(img) {
+    var mask = MACHINE_HIT_MASKS && MACHINE_HIT_MASKS.get(img);
+    if (mask) return mask;
+    var c = document.createElement('canvas'); c.width = 96; c.height = Math.max(1, Math.round(96 * img.height / img.width));
+    var ctx = c.getContext('2d', {willReadFrequently:true}); ctx.drawImage(img,0,0,c.width,c.height);
+    mask = {w:c.width,h:c.height,alpha:ctx.getImageData(0,0,c.width,c.height).data};
+    if (MACHINE_HIT_MASKS) MACHINE_HIT_MASKS.set(img,mask);
+    return mask;
+  }
+  Game.prototype._towerHitAt = function (point) {
+    var picked = -1, front = -Infinity, pad = 4 / this.view.scale;
+    for (var i = 0; i < this.towers.length; i++) {
+      var tw = this.towers[i]; if (!this._sameSide(tw.own,0) || tw.y < front) continue;
+      var p = this._uiAnchor(tw), dx = point.x-p.x, dy = point.y-p.y;
+      var hit = dx*dx+dy*dy < 32*32, img = ART.images['t_'+tw.type];
+      var layeredCrossbow=tw.type==='ballista'&&ART.images.t_ballista_turntable_v2;
+      var layeredRoost=tw.type==='perch'&&img;
+      var layeredBellows=tw.type==='bellows'&&ART.images.t_bellows_base_v2&&ART.images.t_bellows_fan_v2;
+      if(!hit&&layeredCrossbow)hit=this._crossbowHit({x:tw.x+dx,y:tw.y+dy},tw,pad);
+      if(!hit&&layeredRoost)hit=this._roostHit({x:tw.x+dx,y:tw.y+dy},tw,pad);
+      if(!hit&&layeredBellows)hit=this._bellowsHit({x:tw.x+dx,y:tw.y+dy},tw,pad);
+      if (!hit && !layeredCrossbow && !layeredRoost && !layeredBellows && img && img.width) {
+        var w = 54*(1+tw.level*.12), h = w*img.height/img.width, bodyDy = dy - 8;
+        if (Math.abs(dx) <= w/2+pad && bodyDy >= -h-pad && bodyDy <= pad) {
+          var mask = machineHitMask(img), sx = (dx/w+.5)*mask.w, sy = (bodyDy/h+1)*mask.h;
+          var rx = Math.ceil(pad/w*mask.w), ry = Math.ceil(pad/h*mask.h);
+          // A few extra pixels admit a finger beside a wire or narrow column.
+          for (var y=Math.max(0,Math.floor(sy)-ry); y<=Math.min(mask.h-1,Math.ceil(sy)+ry)&&!hit; y++)
+            for (var x=Math.max(0,Math.floor(sx)-rx); x<=Math.min(mask.w-1,Math.ceil(sx)+rx); x++)
+              if (mask.alpha[(y*mask.w+x)*4+3] > 32) {hit=true;break;}
+        }
+      }
+      if (hit) {picked=i;front=tw.y;}
+    }
+    return picked;
   };
   Game.prototype._towerByTid = function (tid) {
     for (var i = 0; i < this.towers.length; i++) if (this.towers[i].tid === tid) return this.towers[i];
@@ -6321,6 +6497,7 @@
     if (!img) return;
     var w = this.rivalWick || { x: keepOf(1).x, y: keepOf(1).y + 150 };
     var a = this._wickAnchor(w.x, w.y, this.rivalManTid === undefined ? -1 : this.rivalManTid);
+    if (a.tw && this._drawCrewWick(ctx, a, 1)) return;
     // COAT, not the old hex `tint`. Her SPRITE is a real colourway now; `tint`
     // is her UI ACCENT -- her name and her difficulty pips on the duel select,
     // and her name on the in-game duel strip. That sentence used to be here
@@ -6457,7 +6634,7 @@
     // cavern is her spending YOUR attention. The dust puff stays -- that is her
     // board telling you something happened, which is the point of a duel.
     if (own !== 1) {
-      if (chk.discount) this.fxQueue.push({ k: 'float', x: bx, y: by - 40, txt: 'PAD BONUS -20%', c: '#9ef58f' });
+      if (chk.discount) this.fxQueue.push({ k: 'float', x: bx, y: by - 40, txt: 'Pad discount −20%', c: '#9ef58f' });
       Sfx.play('place');
     }
     return tw;
@@ -6514,25 +6691,328 @@
     for (var l = 0; l < tw.level; l++) spent += tt.levels[l].upgradeCost;
     return Math.round(spent * (this.mods.sellRefund || CFG.sellRefund));
   };
-  Game.prototype._forkCards = function (tw) {
-    // two stacked cards above the pad, clamped fully on-world
-    var pad = this._uiAnchor(tw);
-    var w = 200, h = 64, gap = 10;
-    var cx = clamp(pad.x, w / 2 + 8, WORLD_W - w / 2 - 8);
-    var y0 = clamp(pad.y - 170, 96, WORLD_H - (h * 2 + gap + 40));
-    return [
-      { x: cx - w / 2, y: y0, w: w, h: h },
-      { x: cx - w / 2, y: y0 + h + gap, w: w, h: h },
-    ];
+  // Machine management uses one model for canvas, pointer hit regions, keyboard
+  // proxies and the bot. Sizes are CSS pixels so a small phone gets full controls.
+  Game.prototype._machineMenuTower = function () {
+    var m = this.menu;
+    if (!m) return null;
+    var tw = this.towers[m.forkFor !== undefined ? m.forkFor : m.towerIdx];
+    return tw && this._sameSide(tw.own, 0) ? tw : null;
   };
+  Game.prototype._machineMenuSignature = function () {
+    var tw = this._machineMenuTower(), m = this.menu || {};
+    return [m.towerIdx, m.forkFor, m.forkChoice, !!m.confirmSell, !!m.aimMenu, tw && tw.tid,
+      tw && tw.level, tw && tw.fork, tw && tw.targeting,
+      this.gold, this.hero.manTid, this.hero.manned, this.hero.downT > 0].join(':');
+  };
+  Game.prototype._machineMenuGeom = function (tw) {
+    var v = this.view, u = 1 / v.scale, m = this.menu || {}, H = this._hudGeom();
+    var aimed = !TOWER_TYPES[tw.type].support && tw.type !== 'crystal' && tw.type !== 'rotor';
+    var fork = m.forkFor !== undefined, compact = v.cw <= 340;
+    var height = fork ? 234 : m.aimMenu ? 246 : m.confirmSell ? 176 : compact ? 184 : 196;
+    var w = Math.min(v.w - 24 * u, 288 * u), h = height * u, anchor = this._uiAnchor(tw);
+    // Keep the actual machine in view. The dock yields its space while these
+    // local controls are open; the battle and its top status bar remain visible.
+    var img = ART.images['t_' + tw.type], sw = 54 * (1 + tw.level * 0.12);
+    var sh = img && img.width ? sw * img.height / img.width : sw * 1.4;
+    var bounds = { x: anchor.x - sw * 0.66, y: anchor.y - sh - 6,
+      w: sw * 1.32, h: sh + 14 };
+    if (this.hero.manned && this.hero.manTid === tw.tid) {
+      var crew = this._heroAnchor(), cy = anchor.y + 5 - crew.lift - HERO_H * crew.s;
+      var cx = anchor.x + crew.x - tw.x, cw = HERO_H * crew.s * HERO_MAN_ASPECT;
+      var right = Math.max(bounds.x + bounds.w, cx + cw / 2);
+      bounds.x = Math.min(bounds.x, cx - cw / 2); bounds.w = right - bounds.x;
+      var bottom = bounds.y + bounds.h; bounds.y = Math.min(bounds.y, cy); bounds.h = bottom - bounds.y;
+    }
+    var gap = 10 * u, left = -v.ox + 12 * u, right = -v.ox + v.w - 12 * u - w;
+    var top = -v.oy + H.topY + H.barH + 8 * u;
+    var bottom = -v.oy + v.h - (v.safeB || 0) - 12 * u - h;
+    var candidates = [
+      { x: anchor.x - w / 2, y: bounds.y - gap - h, placement: 'above' },
+      { x: anchor.x - w / 2, y: bounds.y + bounds.h + gap, placement: 'below' },
+      { x: bounds.x - gap - w, y: bounds.y + bounds.h / 2 - h / 2, placement: 'left' },
+      { x: bounds.x + bounds.w + gap, y: bounds.y + bounds.h / 2 - h / 2, placement: 'right' }
+    ];
+    var best, score = Infinity;
+    candidates.forEach(function (c, i) {
+      var x = clamp(c.x, left, right), y = clamp(c.y, top, Math.max(top, bottom));
+      var overlapW = Math.max(0, Math.min(x + w, bounds.x + bounds.w + gap) - Math.max(x, bounds.x - gap));
+      var overlapH = Math.max(0, Math.min(y + h, bounds.y + bounds.h + gap) - Math.max(y, bounds.y - gap));
+      var value = overlapW * overlapH * 1000 + Math.abs(x - c.x) + Math.abs(y - c.y) * 2 + i * 3 * u;
+      if (value < score) { score = value; best = { x: x, y: y, placement: c.placement }; }
+    });
+    var x = best.x, y = best.y, width = w / u, inner = width - 20;
+    // Tether joins the two closest edges. It remains short when the panel is
+    // clamped near a screen edge instead of pretending to be a bottom drawer.
+    var tx = clamp(anchor.x, x + 16 * u, x + w - 16 * u);
+    var source = { x: anchor.x, y: bounds.y }, target = { x: tx, y: y + h };
+    if (best.placement === 'below') { source.y = bounds.y + bounds.h; target.y = y; }
+    else if (best.placement === 'left' || best.placement === 'right') {
+      var onLeft = best.placement === 'left';
+      source = { x: onLeft ? bounds.x : bounds.x + bounds.w, y: bounds.y + bounds.h / 2 };
+      target = { x: onLeft ? x + w : x, y: clamp(source.y, y + 16 * u, y + h - 16 * u) };
+    }
+    function rect(px, py, pw, ph) { return { x: x + px * u, y: y + py * u, w: pw * u, h: ph * u }; }
+    var row = compact ? 126 : 134, smallW = aimed ? 62 : 74, crewW = aimed ? 98 : inner - smallW - 6;
+    return { x: x, y: y, w: w, h: h, u: u, aimed: aimed, fork: fork, compact: compact,
+      anchor: { x: anchor.x, y: anchor.y }, machineBounds: bounds, placement: best.placement,
+      tether: { source: source, target: target },
+      close: rect(width - 54, 6, 44, 44), pause: rect(width - 100, 6, 44, 44),
+      stats: rect(10, 46, inner, 16),
+      upgrade: rect(10, m.confirmSell ? 56 : compact ? 64 : 68, inner, m.confirmSell ? 60 : compact ? 56 : 60),
+      crew: rect(10, row, crewW, compact ? 48 : 52),
+      aim: rect(10 + crewW + 6, row, inner - crewW - smallW - 12, compact ? 48 : 52),
+      sell: rect(width - 10 - smallW, row, smallW, compact ? 48 : 52),
+      keep: rect(10, 122, inner, 44),
+      cards: [rect(10, 54, (inner - 6) / 2, 84), rect(13 + inner / 2, 54, (inner - 6) / 2, 84)],
+      buy: rect(10, 182, inner, 44),
+      aimCards: [0, 1, 2, 3].map(function (i) { return rect(10, 54 + i * 46, inner, 44); }) };
+  };
+  // Portraits use the battle renderer with an isolated, still machine. Four
+  // tiers share one crop, so their real size and equipment remain comparable.
+  // This bounded UI cache never updates a live tower or consumes gameplay RNG.
+  Game.prototype._machinePortrait = function (type, level, fork, finish) {
+    if (!ART.images['t_' + type]) return null;
+    finish = finish || this._sideItem(0, 'finish');
+    var key = type + ':' + (finish ? finish.id : 'stock');
+    var cache = this._machinePortraits || (this._machinePortraits = new Map());
+    var group = cache.get(key);
+    if (!group) {
+      var scene = Object.create(this), frames = [], x0 = 240, y0 = 352, x1 = 0, y1 = 0;
+      scene._previewMachine = true; scene.waveActive = false; scene.worldT = 0;
+      scene.menu = null; scene.towers = []; scene.rivalSide = false;
+      scene.hero = { manned: false, manTid: -1, downT: 0 };
+      var owner = this;
+      scene._sideItem = function (side, slot) { return slot === 'finish' ? finish : owner._sideItem(side, slot); };
+      [0, 1, 2, 2].forEach(function (rank, index) {
+        var c = document.createElement('canvas'); c.width = 240; c.height = 352;
+        var cc = c.getContext('2d'); cc.translate(120, 288); cc.scale(2.1, 2.1);
+        var tower = { type: type, x: 0, y: 0, tid: -1000, own: 0, level: rank,
+          fork: index === 3 ? 1 : 0, targeting: 0, shotT: 9, jamT: 0,
+          _aimX: 80, _aimY: 20, _manned: false, _oc: false };
+        scene._drawTower(cc, tower);
+        var data = cc.getImageData(0, 0, c.width, c.height).data;
+        for (var y = 0; y < c.height; y++) for (var x = 0; x < c.width; x++) {
+          if (data[(y * c.width + x) * 4 + 3] < 12) continue;
+          x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+        }
+        frames.push(c);
+      });
+      group = { frames: frames, x: Math.max(0, x0 - 3), y: Math.max(0, y0 - 3),
+        w: Math.min(240, x1 + 4) - Math.max(0, x0 - 3), h: Math.min(352, y1 + 4) - Math.max(0, y0 - 3) };
+      if (cache.size >= 8) cache.delete(cache.keys().next().value);
+      cache.set(key, group);
+    }
+    return { image: group.frames[level === 2 ? 2 + (fork === 1 ? 1 : 0) : level | 0],
+      x: group.x, y: group.y, w: group.w, h: group.h };
+  };
+  Game.prototype._drawMachinePortrait = function (ctx, type, level, fork, rect, finish) {
+    var p = this._machinePortrait(type, level, fork, finish); if (!p || p.w <= 0 || p.h <= 0) return;
+    var scale = Math.min(rect.w / p.w, rect.h / p.h), w = p.w * scale, h = p.h * scale;
+    ctx.drawImage(p.image, p.x, p.y, p.w, p.h, rect.x + (rect.w - w) / 2, rect.y + rect.h - h, w, h);
+  };
+  // Ability emblems describe the upgrade's effect; the adjacent portrait shows
+  // its actual in-game chassis. Distinct silhouettes survive small screens.
+  function machineAbilityGlyph(ctx, type, fork, x, y, radius) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(radius / 12, radius / 12);
+    ctx.fillStyle = '#252423'; ctx.strokeStyle = fork ? '#a8d6dd' : '#eac583'; ctx.lineWidth = 1.35;
+    ctx.beginPath(); ctx.arc(0, 0, 11.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath();
+    if (type === 'mimic' && fork) {
+      ctx.moveTo(-5,-5);ctx.lineTo(-5,1);ctx.bezierCurveTo(-5,8,5,8,5,1);ctx.lineTo(5,-5);ctx.moveTo(-7,-2);ctx.lineTo(-3,-2);ctx.moveTo(3,-2);ctx.lineTo(7,-2);
+    } else if (type === 'mimic' || type === 'rotor' && fork) {
+      for(var i=0;i<16;i++){var a=i*Math.PI/8,r=i%2?4.8:7;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.moveTo(2.5,0);ctx.arc(0,0,2.5,0,6.283);
+    } else if (type === 'ballista' && fork) {
+      ctx.arc(0,0,5,0,6.283);ctx.moveTo(-8,0);ctx.lineTo(-3,0);ctx.moveTo(3,0);ctx.lineTo(8,0);ctx.moveTo(0,-8);ctx.lineTo(0,-3);ctx.moveTo(0,3);ctx.lineTo(0,8);
+    } else if (type === 'ballista') {
+      ctx.moveTo(-6,5);ctx.lineTo(6,-5);ctx.lineTo(0,-5);ctx.moveTo(6,-5);ctx.lineTo(6,1);ctx.moveTo(-6,-1);ctx.lineTo(0,-6);ctx.moveTo(0,6);ctx.lineTo(6,1);
+    } else if (type === 'brazier' && fork) {
+      ctx.moveTo(0,-7);ctx.bezierCurveTo(-2,-2,-6,0,-5,4);ctx.bezierCurveTo(-4,8,5,8,5,3);ctx.bezierCurveTo(5,0,1,-4,0,-7);ctx.closePath();ctx.moveTo(-7,8);ctx.lineTo(7,8);
+    } else if (type === 'brazier') {
+      [-4,0,4].forEach(function(v){ctx.moveTo(v,5);ctx.bezierCurveTo(v-4,0,v+4,-2,v,-7);});
+    } else if (type === 'crystal' && fork) {
+      ctx.moveTo(-4,-7);ctx.lineTo(-4,0);ctx.quadraticCurveTo(0,7,4,0);ctx.lineTo(4,-7);ctx.moveTo(0,3);ctx.lineTo(0,8);
+    } else if (type === 'crystal') {
+      for(var j=0;j<6;j++){var a2=j*Math.PI/3;ctx.moveTo(0,0);ctx.lineTo(Math.cos(a2)*7,Math.sin(a2)*7);ctx.moveTo(Math.cos(a2-.35)*5,Math.sin(a2-.35)*5);ctx.lineTo(Math.cos(a2)*3,Math.sin(a2)*3);ctx.lineTo(Math.cos(a2+.35)*5,Math.sin(a2+.35)*5);}
+    } else if (type === 'perch' && fork) {
+      ctx.rect(-6,-6,12,12);[-2,2].forEach(function(v){ctx.moveTo(v,-6);ctx.lineTo(v,6);ctx.moveTo(-6,v);ctx.lineTo(6,v);});
+    } else if (type === 'perch') {
+      ctx.moveTo(-6,-5);ctx.lineTo(6,-5);ctx.lineTo(5,3);ctx.lineTo(0,7);ctx.lineTo(-5,3);ctx.closePath();ctx.moveTo(3,-8);ctx.lineTo(-1,0);ctx.lineTo(2,0);ctx.lineTo(-3,8);
+    } else if (type === 'bellows' && fork) {
+      ctx.moveTo(-5,6);ctx.lineTo(4,-3);ctx.moveTo(1,-6);ctx.lineTo(7,0);ctx.lineTo(4,3);ctx.lineTo(-2,-3);ctx.closePath();
+    } else if (type === 'bellows') {
+      [-4,0,4].forEach(function(v){ctx.moveTo(-7,v);ctx.lineTo(3,v);ctx.quadraticCurveTo(8,v,5,v-3);});
+    } else if (type === 'rotor') {
+      [-4,4].forEach(function(v){ctx.moveTo(v,7);ctx.lineTo(v,-6);ctx.moveTo(v-3,-2);ctx.lineTo(v,-6);ctx.lineTo(v+3,-2);});
+    } else if (type === 'press' && fork) {
+      ctx.ellipse(-2,3,5,2.5,0,0,6.283);ctx.moveTo(-7,3);ctx.lineTo(-7,6);ctx.quadraticCurveTo(-2,10,3,6);ctx.lineTo(3,3);ctx.moveTo(5,-7);ctx.lineTo(5,-1);ctx.moveTo(2,-4);ctx.lineTo(8,-4);
+    } else {
+      ctx.moveTo(-7,-4);ctx.lineTo(-5,5);ctx.lineTo(5,5);ctx.lineTo(7,-4);ctx.lineTo(3,-1);ctx.lineTo(0,-7);ctx.lineTo(-3,-1);ctx.closePath();ctx.moveTo(-5,8);ctx.lineTo(5,8);
+    }
+    ctx.stroke();ctx.restore();
+  }
+  var MACHINE_PERK_LABELS = {
+    mimic: ['Bleeds enemies for 4 damage/sec', 'Recovers up to 2 stolen coins'],
+    ballista: ['Every fifth shot deals double damage', 'Damage builds on the same target'],
+    brazier: ['Burns enemies and blocks healing', 'Leaves burning tar on the road'],
+    crystal: ['Stronger slow; stops drum boosts', 'Enemies take 25% more damage'],
+    perch: ['Pierces shields and six enemies', 'Grounds flyers; doubles air damage'],
+    bellows: ['Nearby machines fire 32% faster', 'Nearby machines deal 28% more'],
+    rotor: ['Deals 75% more damage to flyers', 'Every fourth sweep pushes back'],
+    press: ['Earns 78 gold after every wave', '62 gold per wave; 2 per kill']
+  };
+  function machineNumber(n) { return String(Math.round(n * 100) / 100); }
+  function machineStats(tw, row) {
+    if (tw.type === 'press') return [
+      { label: 'Gold / wave', value: row.waveGold + 'g' },
+      { label: 'Gold / kill', value: (row.killGold || 0) + 'g' }];
+    if (tw.type === 'bellows') return [
+      { label: row.auraDmg ? 'Damage aura' : 'Fire-rate aura', value: '+' + Math.round((row.auraDmg || row.auraRate || 0) * 100) + '%' },
+      { label: 'Reach', value: String(row.range) }];
+    return [{ label: 'Damage / hit', value: String(row.dmg) },
+      { label: 'Attacks / sec', value: machineNumber(row.rate) },
+      { label: 'Reach', value: String(row.range) }];
+  }
+  function machineUpgradeLines(tw) {
+    var tt = TOWER_TYPES[tw.type], a = tt.levels[0], b = tt.levels[1];
+    if (tw.type === 'press') return [a.waveGold + ' → ' + b.waveGold + ' gold per wave', 'Income arrives when each wave ends'];
+    if (tw.type === 'bellows') return ['Fire-rate aura +' + Math.round(a.auraRate * 100) + '% → +' + Math.round(b.auraRate * 100) + '%', 'Reach ' + a.range + ' → ' + b.range + ' · affects nearby machines'];
+    var extra = b.slow ? 'Slow ' + Math.round(a.slow * 100) + '% → ' + Math.round(b.slow * 100) + '%'
+      : b.pierce ? 'Ground pierce ' + a.pierce + ' → ' + b.pierce
+      : b.burn ? 'Adds ' + b.burn + '/sec burn' : 'Reach ' + a.range + ' → ' + b.range;
+    return ['Damage ' + a.dmg + ' → ' + b.dmg + ' · ' + machineNumber(a.rate) + ' → ' + machineNumber(b.rate) + ' attacks/sec', extra + (b.slow || b.pierce || b.burn ? ' · reach ' + a.range + ' → ' + b.range : '')];
+  }
+  function machineForkLines(tw, row) {
+    var from = TOWER_TYPES[tw.type].levels[1];
+    if (tw.type === 'press') return ['Gold / wave ' + from.waveGold + ' → ' + row.waveGold,
+      row.killGold ? 'Also earns ' + row.killGold + ' gold per kill' : 'Income arrives after every wave'];
+    if (tw.type === 'bellows') return ['+' + Math.round(from.auraRate * 100) + '% fire rate → +' + Math.round((row.auraDmg || row.auraRate) * 100) + '% ' + (row.auraDmg ? 'damage' : 'fire rate'), 'Reach ' + from.range + ' → ' + row.range];
+    return ['Damage ' + from.dmg + ' → ' + row.dmg + ' · ' + machineNumber(from.rate) + ' → ' + machineNumber(row.rate) + ' attacks/sec',
+      'Reach ' + from.range + ' → ' + row.range + (row.slow ? ' · slow ' + Math.round(from.slow * 100) + '% → ' + Math.round(row.slow * 100) + '%' : row.pierce ? ' · pierce ' + from.pierce + ' → ' + row.pierce : '')];
+  }
+  Game.prototype._machineMenuActions = function () {
+    var tw = this._machineMenuTower();
+    if (!tw) return [];
+    var m = this.menu, G = this._machineMenuGeom(tw), tt = TOWER_TYPES[tw.type], row = lvlRow(tw);
+    var self = this, actions = [], cost = tw.level < 2 ? row.upgradeCost : 0;
+    function add(id, rect, title, detail, price, disabled) {
+      actions.push({ id: id, rect: rect, title: title, detail: detail || [], price: price || '',
+        label: [title, price].concat(detail || []).filter(Boolean).join('. '), disabled: !!disabled });
+    }
+    add('close', G.close, G.fork || m.confirmSell || m.aimMenu ? 'Back to machine' : 'Close machine panel');
+    if (G.fork) {
+      var choice = m.forkChoice === 1 ? 1 : 0, fk = tt.forks[choice];
+      tt.forks.forEach(function (option, i) {
+        add('preview' + i, G.cards[i], option.name, ['Preview this specialization. ' + option.pitch]);
+      });
+      add('fork' + choice, G.buy, 'Build ' + fk.name, [fk.pitch].concat(machineForkLines(tw, fk)),
+        cost + 'g' + (self.gold < cost ? ' · need ' + (cost - self.gold) + 'g' : ''), self.gold < cost);
+      add('pause', G.pause, 'Pause battle');
+      return actions;
+    }
+    if (m.aimMenu) {
+      AIM_MODES.forEach(function (name, i) {
+        add('aim' + i, G.aimCards[i], name, [['Closest to hoard', 'Most health', 'Newest arrival', 'Healers first'][i] + ' · carriers take priority']);
+      });
+      add('pause', G.pause, 'Pause battle');
+      return actions;
+    }
+    if (m.confirmSell) {
+      var refund = this._sellValue(tw);
+      add('confirmSell', G.upgrade, 'Sell this machine', ['You receive ' + refund + ' gold. Its upgrades are lost.', 'Gold ' + this.gold + ' → ' + (this.gold + refund)], '+' + refund + 'g');
+      add('keep', G.keep, 'Keep machine', ['Return to its controls']);
+    } else {
+      add('upgrade', G.upgrade, tw.level === 0 ? 'Upgrade to Level 2' : tw.level === 1 ? 'Choose specialization' : row.name,
+        tw.level === 0 ? machineUpgradeLines(tw) : tw.level === 1 ? ['Compare two permanent paths', this.gold < cost ? 'Need ' + (cost - this.gold) + 'g more to buy one' : 'Choose what this machine does best'] : [row.pitch, 'Fully upgraded · this path is permanent'],
+        tw.level < 2 ? cost + 'g' : 'MAX', tw.level === 2 || tw.level === 0 && this.gold < cost);
+      if (G.aimed) add('aim', G.aim, 'Aim: ' + AIM_MODES[tw.targeting | 0],
+        [['Closest to hoard', 'Most health', 'Newest arrival', 'Healers first'][tw.targeting | 0] + ' · carriers take priority']);
+      var assigned = this.hero.manTid === tw.tid;
+      add('crew', G.crew, this.hero.downT > 0 ? 'Wick is recovering' : assigned ? this.hero.manned ? 'Release Wick' : 'Cancel crew order' : 'Crew with Wick',
+        [this.hero.downT > 0 ? 'Crew available when Wick recovers' : assigned ? this.hero.manned ? 'Wick returns to the floor' : 'Bonus starts when Wick arrives'
+          : tw.type === 'bellows' ? '+60% aura strength' : tw.type === 'press' ? '+50% gold income' : '+70% fire rate · +30% damage'], '', this.hero.downT > 0);
+      add('sell', G.sell, 'Sell…', [this._sellValue(tw) + 'g refund']);
+    }
+    add('pause', G.pause, 'Pause battle');
+    return actions;
+  };
+  Game.prototype._machineMenuBack = function () {
+    if (this.menu && (this.menu.forkFor !== undefined || this.menu.confirmSell || this.menu.aimMenu))
+      this.menu = { towerIdx: this.menu.forkFor !== undefined ? this.menu.forkFor : this.menu.towerIdx };
+    else this.menu = null;
+  };
+  Game.prototype._handleMachineMenuTap = function (tap) {
+    var tw = this._machineMenuTower();
+    if (!tw) { this.menu = null; return; }
+    var G = this._machineMenuGeom(tw), actions = this._machineMenuActions(), hit = null;
+    for (var i = 0; i < actions.length; i++) {
+      var r = actions[i].rect;
+      if (tap.x >= r.x && tap.x <= r.x + r.w && tap.y >= r.y && tap.y <= r.y + r.h) { hit = actions[i]; break; }
+    }
+    if (!hit) {
+      if (tap.x < G.x || tap.x > G.x + G.w || tap.y < G.y || tap.y > G.y + G.h) {
+        // A visible neighbouring machine takes one tap to select. Empty floor
+        // only dismisses; this same tap must not also move Wick or place a build.
+        this.menu = null;
+        var next = this._towerHitAt(tap);
+        if (next >= 0) this.menu = { towerIdx: next };
+      }
+      return;
+    }
+    if (hit.disabled) return;
+    var id = hit.id, index = this.menu.forkFor !== undefined ? this.menu.forkFor : this.menu.towerIdx;
+    if (id === 'close' || id === 'back' || id === 'keep') { this._machineMenuBack(); return; }
+    if (id === 'pause') { this.setPaused(true); return; }
+    if (id === 'sell') { this.menu.confirmSell = true; return; }
+    if (id === 'confirmSell') {
+      this.gold += this._sellValue(tw); this.towers.splice(index, 1);
+      if (this.hero.manTid === tw.tid) {
+        this.hero.manTid = -1; this.hero.manned = false;
+        this.hero.tx = this.hero.x; this.hero.ty = this.hero.y;
+      }
+      Sfx.play('sell'); this.menu = null; return;
+    }
+    if (/^preview[01]$/.test(id)) { this.menu.forkChoice = Number(id.slice(-1)); Sfx.play('place'); return; }
+    if (id === 'aim') { this.menu.aimMenu = true; Sfx.play('place'); return; }
+    if (/^aim[0-3]$/.test(id)) { tw.targeting = Number(id.slice(-1)); this.menu = { towerIdx: index }; Sfx.play('place'); return; }
+    if (id === 'crew') {
+      if (this.hero.manTid === tw.tid) {
+        this.hero.manTid = -1; this.hero.manned = false;
+        this.hero.tx = this.hero.x; this.hero.ty = this.hero.y;
+      }
+      else { this.hero.manTid = tw.tid; this.hero.manned = false; }
+      Sfx.play('place'); this.menu = null; return;
+    }
+    if (id === 'upgrade' && tw.level === 1) { this.menu = { forkFor: index }; Sfx.play('place'); return; }
+    var row = lvlRow(tw);
+    if ((id === 'upgrade' && tw.level === 0 || /^fork[01]$/.test(id) && tw.level === 1) && this.gold >= row.upgradeCost) {
+      this.gold -= row.upgradeCost; tw.level++;
+      if (tw.level === 2) {
+        tw.fork = Number(id.slice(-1));
+        this.fxQueue.push({ k: 'float', x: tw.x, y: tw.y - 52, txt: lvlRow(tw).name + '!', c: tw.fork ? '#a8e6ff' : '#ffd75e' });
+      }
+      this.fxQueue.push({ k: 'place', x: tw.x, y: tw.y }); Sfx.play('upg');
+      this.menu = { towerIdx: index }; // show the paid result, ready for the next decision
+    }
+  };
+  Game.prototype._forkCards = function (tw) { return this._machineMenuGeom(tw).cards; };
   Game.prototype._menuBtnPos = function (pad, i, n) {
-    // arc of buttons above the pad, clamped inside the world
-    var spread = Math.min(2.4, 0.55 * n);
-    var a0 = -Math.PI / 2 - spread / 2 + (n > 1 ? spread * (i / (n - 1)) : 0);
-    var r = 56;
-    var x = clamp(pad.x + Math.cos(a0) * r, 30, WORLD_W - 30);
-    var y = clamp(pad.y + Math.sin(a0) * r, 90, WORLD_H - 40);
-    return { x: x, y: y };
+    // Compatibility for deterministic gameplay tools that select a menu action.
+    var ids = n === 3 ? ['upgrade', 'crew', 'sell'] : ['upgrade', 'aim', 'crew', 'sell'];
+    var id = ids[i];
+    if (id === 'sell' && this.menu && this.menu.confirmSell) id = 'confirmSell';
+    var action = this._machineMenuActions().filter(function (a) { return a.id === id; })[0];
+    var r = action ? action.rect : { x: pad.x, y: pad.y, w: 0, h: 0 };
+    return { x: r.x + r.w / 2, y: r.y + r.h / 2 };
+  };
+
+  // Painted mechanism anchors, in world units. Constants use the original
+  // 700px-high plates, so loading a finish cannot change an attack event.
+  Game.prototype._machineAttackSource = function (tw, tx) {
+    var s = 1 + tw.level * .12;
+    if (tw.type === 'mimic') return { x: tw.x + (tx >= tw.x ? 1 : -1) * 4 * s, y: tw.y + 8 - 54 * 700 / 503 * .60 * s };
+    if (tw.type === 'rotor') return { x: tw.x - 54 * .045 * s, y: tw.y + 8 - 54 * 700 / 588 * .765 * s };
+    return { x: tw.x, y: tw.y + 8 - 54 * 700 / 649 * .76 * s };
   };
 
   // ---- COSMETIC lane. Per-frame, variable dt, Math.random. ----------------
@@ -6544,6 +7024,15 @@
       var fx = this.fxQueue[q];
       // R3D taps the same event stream (cosmetic -> cosmetic, sim untouched)
       if (R3D.on && R3D.ready) R3D.event(fx);
+      // The contact is captured in the real hit step, including killing blows.
+      // These three instantaneous attacks need no delayed or fake projectile.
+      if (fx.attack === 'bite' || fx.attack === 'blade' || fx.attack === 'chill') {
+        var mt = fx.attack === 'bite' ? .18 : .24;
+        this.particles.push({ kind: 'machineAttack', attack: fx.attack,
+          x: fx.sx, y: fx.sy, contacts: fx.contacts, s: fx.scale || 1,
+          life: mt, T: mt });
+        continue;
+      }
       // GEARJAW REND -- sheared metal and popped rivets. Cosmetic lane: this is
       // spent from the queue in _cosmetic(), Math.random only, never the seeded
       // stream. Mechanical, not organic: the content law is comic and kid-safe,
@@ -6552,7 +7041,7 @@
         for (var gi = 0; gi < 9; gi++) {
           var ga = -Math.PI * 0.5 + (Math.random() - 0.5) * 2.2;
           var gsp = 55 + Math.random() * 95;
-          this.particles.push({ kind: 'dot', x: fx.x, y: fx.y,
+          this.particles.push({ kind: 'dot', x: fx.bodyX === undefined ? fx.x : fx.bodyX, y: fx.bodyY === undefined ? fx.y : fx.bodyY,
             vx: Math.cos(ga) * gsp, vy: Math.sin(ga) * gsp - 15,
             r: 0.7 + Math.random() * 1.5,
             life: 0.13 + Math.random() * 0.2, T: 0.33,
@@ -6704,10 +7193,10 @@
       else if (fx.k === 'pulse') this.particles.push({ kind: 'ring', x: fx.x, y: fx.y, r: 10, R: fx.r, life: 0.35, T: 0.35, c: fx.c || '#a8e6ff' });
       else if (fx.k === 'spit') this.particles.push({ kind: 'tracer', x1: fx.x1, y1: fx.y1, x2: fx.x2, y2: fx.y2, life: 0.1, T: 0.1, c: '#ffb14e' });
       else if (fx.k === 'snap') {            // crossbow release: dust off the rail
-        var sang = Math.atan2(fx.ty - fx.y, fx.tx - fx.x);
+        var sang = fx.stone ? Math.atan2(-.10,fx.tx>=fx.x?1:-1) : Math.atan2(fx.ty-fx.y,fx.tx-fx.x);
         this.particles.push({ kind: 'tracer', x1: fx.x, y1: fx.y,
           x2: fx.x + Math.cos(sang) * 16, y2: fx.y + Math.sin(sang) * 16,
-          life: 0.06, T: 0.06, c: 'rgba(255,240,200,0.9)' });
+          life: 0.06, T: 0.06, c: fx.stone?'rgba(184,204,218,.55)':'rgba(255,240,200,0.9)' });
         for (var sn = 0; sn < 3; sn++) {
           var sa2 = sang + Math.PI + (Math.random() - 0.5) * 1.5;
           this.particles.push({ kind: 'dot', x: fx.x, y: fx.y,
@@ -6745,13 +7234,14 @@
           var of2 = this.floats[fq];
           if (Math.abs(of2.x - fx.x) < 70 && Math.abs(of2.y - fy) < 15) { fy = of2.y - 16; fq = -1; }
         }
-        this.floats.push({ x: fx.x, y: fy, txt: fx.txt, c: fx.c, t: 1.6 });
+        this.floats.push({ x: fx.x, y: fy, txt: fx.txt, c: fx.c, t: 1.6, notice: true });
       }
     }
     this.fxQueue.length = 0;
 
     for (var i = this.particles.length - 1; i >= 0; i--) {
       var pa = this.particles[i];
+      if (pa.kind === 'machineAttack' && this.state === 'paused') continue;
       pa.life -= dtRaw;
       if (pa.kind === 'dot') { pa.x += pa.vx * dtRaw; pa.y += pa.vy * dtRaw; pa.vy += 160 * dtRaw; }
       else if (pa.kind === 'coin') {
@@ -6763,7 +7253,7 @@
     }
     for (var f = this.floats.length - 1; f >= 0; f--) {
       var fl = this.floats[f];
-      fl.t -= dtRaw; fl.y -= 26 * dtRaw;
+      if (this.state !== 'paused') { fl.t -= dtRaw; if (!RM) fl.y -= 26 * dtRaw; }
       if (fl.t <= 0) this.floats.splice(f, 1);
     }
     for (var hk = this.husks.length - 1; hk >= 0; hk--) {
@@ -6792,9 +7282,12 @@
       }
     }
     this.shake = Math.max(0, this.shake - dtRaw * 2.2);
-    // the open-jaw / recoil beat, cosmetic lane only — never read by update()
-    if (this._breathT > 0) this._breathT = Math.max(0, this._breathT - dtRaw);
-    if (this._spitT > 0) this._spitT = Math.max(0, this._spitT - dtRaw);
+    // Pin the registered attack pose while paused, just like the walk/crew
+    // clock. rAF still calls cosmetics behind the pause dialog.
+    if (this.state !== 'paused') {
+      if (this._breathT > 0) this._breathT = Math.max(0, this._breathT - dtRaw);
+      if (this._spitT > 0) this._spitT = Math.max(0, this._spitT - dtRaw);
+    }
     if (this.state === 'won' || this.state === 'lost') this._resultT = (this._resultT || 0) + dtRaw;
     // ---- music director (cosmetic lane; consumes nothing from the seed) ----
     // Everything the score reacts to is read HERE, in _cosmetic(), never in
@@ -6857,8 +7350,6 @@
   // tools/validate.py asserts both against the shipped PNGs.
   // The band of screen angles a raider on the road actually occupies, measured
   // over a live wave across six machines: 33..88 degrees "below" the machine.
-  // The aim rig maps this onto its rotation range (see aimRig on the ballista).
-  var AIM_BAND_LO = 0.0, AIM_BAND_HI = 1.05;   // radians (0 .. 60 degrees)
   var HERO_ASPECT = 783 / 730;          // hero_whelp.png, hero_breathe.png
   var HERO_MAN_ASPECT = 951 / 746;      // hero_man.png, hero_man_up/_dn.png
   /// WHERE WICK IS DRAWN, and how big -- the single source both the drawer and
@@ -6938,6 +7429,7 @@
 
   // ---- RENDER ONLY. Back-to-front off world state. No lane-2 draws. -------
   Game.prototype.draw = function (alpha) {
+    if (!this.isRival) PlayerGuide.sync(this);
     var ctx = this.ctx, v = this.view;
     // R3D: the WebGL canvas underneath draws the WORLD; this canvas goes
     // transparent and keeps only UI. Until three has booted, draw 2D as ever.
@@ -6986,15 +7478,10 @@
     this._drawTar(ctx);           // slag sits ON the road, under everyone
     for (var kr2 = 0; kr2 < (MAP.keeps ? MAP.keeps.length : 1); kr2++) this._drawKeep(ctx, kr2);
     this._drawPads(ctx);
+    if (!this.isRival) this._drawWorldHints(ctx);
     this._drawEntities(ctx);
     this._drawParticles(ctx);
-    // NO WORLD TEXT ON THE OPPONENT'S BOARD. Floats and build hints are drawn
-    // at world scale, and the inset is 96px wide, so "PAD BONUS -20%" and
-    // "OVERCLOCKED!" came out as an illegible smear covering her whole cave.
-    // Her numbers are on the duel strip; her board only has to show the fight.
-    if (!this.isRival) this._drawWorldHints(ctx);
     }
-    if (this.menu) this._drawMenus(ctx);
     if (this.state === 'menu') this._drawTitle(ctx);
     if (this.state === 'forge') this._drawForge(ctx);
     if (this.state === 'trials') this._drawTrials(ctx);
@@ -7002,18 +7489,6 @@
     if (this.state === 'duel') this._drawDuelSelect(ctx);
     if (this.state === 'won' || this.state === 'lost') this._drawResult(ctx);
     if (this._lbAsk && (this.state === 'menu' || this.state === 'won' || this.state === 'lost')) this._drawLbAsk(ctx);
-    if (this.state === 'paused') {
-      ctx.fillStyle = 'rgba(10,6,4,0.55)';
-      ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);   // full view
-      ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 40px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('PAUSED', WORLD_W / 2, WORLD_H / 2);
-      ctx.font = '16px system-ui, sans-serif'; ctx.fillText('tap to resume', WORLD_W / 2, WORLD_H / 2 + 30);
-      ctx.fillStyle = 'rgba(214,69,69,0.9)';
-      rr(ctx, WORLD_W / 2 - 90, WORLD_H / 2 + 56, 180, 48, 12); ctx.fill();
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 17px system-ui, sans-serif';
-      ctx.fillText('QUIT TO TITLE', WORLD_W / 2, WORLD_H / 2 + 86);
-      ctx.textAlign = 'left';
-    }
     ctx.restore();
 
     // Soft seams where the brighter sim world meets the DIMMED BAND SCENERY --
@@ -7047,6 +7522,13 @@
     // second gold counter and a second wave chip are illegible noise, and its
     // hoard is already on the player's own duel strip.
     if (!this.isRival) this._drawHudView(ctx);
+    if (!this.isRival && (this.state === 'playing' || this.state === 'paused')) {
+      ctx.save();ctx.translate(v.ox,v.oy);this._drawFeedback(ctx);ctx.restore();
+    }
+    // Attached management controls remain stable during screen shake.
+    if (!this.isRival && this.menu && this.state === 'playing') {
+      ctx.save(); ctx.translate(v.ox, v.oy); this._drawMenus(ctx); ctx.restore();
+    }
 
     // dev overlay: LOUD missing-art list (never silent fallbacks)
     if (_dev) {
@@ -7062,6 +7544,26 @@
   // Static scenery is painted ONCE into offscreen canvases (rebuilt only when
   // the bg art arrives) — the per-frame cost of the cavern + path drops to two
   // blits instead of gradients, 26 ellipses, and four wide path strokes.
+  // Worn paving follows the simulation's exact centreline. Historic stone
+  // paths have a shallow bed and broken material edges, not a uniform black
+  // curb. Tiny edge wear is exaggerated to survive a 393px phone; neither the
+  // contours nor their cosmetic positional hashes enter movement/build rules.
+  function roadSurfaceSamples(ln) {
+    var out=[],len=LANES[ln].len,steps=Math.ceil(len/5);
+    function wear(d,salt){var p=d/13,k=Math.floor(p),t=p-k;t=t*t*(3-2*t);return(noise01(k*37+ln*101,salt)*(1-t)+noise01((k+1)*37+ln*101,salt)*t-.5)*3.2;}
+    for(var i=0;i<=steps;i++){
+      var d=len*i/steps,p=pathPointAt(d,ln),a=pathPointAt(Math.max(0,d-3),ln),b=pathPointAt(Math.min(len,d+3),ln),dx=b.x-a.x,dy=b.y-a.y,mag=Math.sqrt(dx*dx+dy*dy)||1;
+      out.push({x:p.x,y:p.y,nx:-dy/mag,ny:dx/mag,l:wear(d,641),r:wear(d,977),d:d});
+    }return out;
+  }
+  function fillRoadSurface(c,samples,width,style) {
+    c.fillStyle=style;c.beginPath();
+    for(var side=0;side<2;side++)for(var n=0;n<samples.length;n++){
+      var i=side?samples.length-1-n:n,p=samples[i],off=(width*.5+(side?p.r:p.l))*(side?-1:1),x=p.x+p.nx*off,y=p.y+p.ny*off;
+      if(!side&&!n)c.moveTo(x,y);else c.lineTo(x,y);
+    }c.closePath();c.fill();
+  }
+
   Game.prototype._buildSceneCache = function () {
     // THE ROAD SKIN IS PART OF THE KEY. The path is baked into _bgCache once
     // and reused; without the equipped road id here, changing it in the Cavern
@@ -7115,19 +7617,21 @@
     // the road, so a lane missing from this loop is a lane raiders walk across
     // bare stone. Beds are laid for all lanes FIRST so a later road's shadow
     // cannot darken an earlier road's crown where the two cross.
-    var LN = LANES;
+    var LN = LANES,roadSamples=LN.map(function(_,i){return roadSurfaceSamples(i);});
     // the bed is drawn opaque into its own layer and composited ONCE, so where
     // two roads overlap the shadow does not stack into a dark scar
     var bd = document.createElement('canvas');
     bd.width = WORLD_W * res; bd.height = WORLD_H * res;
     var bc = bd.getContext('2d');
     bc.scale(res, res); bc.lineCap = 'round'; bc.lineJoin = 'round';
-    for (var b0 = 0; b0 < LN.length; b0++) {
-      strokePath(bc, LN[b0].pts, MAP.pathW + 8, 'rgb(18,10,6)');
+    // Three shallow, irregular margins replace the opaque outlined ribbon.
+    // Each union is composited once, so crossing lanes do not stack shadows.
+    for(var bed=0;bed<3;bed++){
+      bc.clearRect(0,0,WORLD_W,WORLD_H);
+      for(var b0=0;b0<LN.length;b0++)fillRoadSurface(bc,roadSamples[b0],MAP.pathW+9-bed*3,'#17131a');
+      pc.globalAlpha=[.10,.13,.17][bed];pc.drawImage(bd,0,1.2,WORLD_W,WORLD_H);
     }
-    pc.globalAlpha = 0.55;
-    pc.drawImage(bd, 0, 0, WORLD_W, WORLD_H);
-    pc.globalAlpha = 1;
+    pc.globalAlpha=1;
     if (ART.images.road) {
       // PAINTED road: tile the cobble texture, then mask it to the path
       // ribbon with a destination-in stroke; edge wear on top.
@@ -7135,11 +7639,14 @@
       rl.width = WORLD_W * res; rl.height = WORLD_H * res;
       var rc = rl.getContext('2d');
       rc.scale(res, res);
-      var tile = 148;                                   // ~12 world px per cobble
       var roadImg = this._slotPlate('road', 'road');
-      for (var ty = 0; ty < WORLD_H; ty += tile)
-        for (var tx = 0; tx < WORLD_W; tx += tile)
-          rc.drawImage(roadImg, tx, ty, tile, tile);
+      // The tile is a ground material, not a billboard. Compress its depth
+      // axis and let foreground stones grow with the world's shallow view.
+      for(var ty=0,row=0;ty<WORLD_H;row++){
+        var tile=148*depthScale(ty),tileH=tile*.70;
+        for(var tx=-(row%2)*tile*.5;tx<WORLD_W;tx+=tile)rc.drawImage(roadImg,tx,ty,tile,tileH+.15);
+        ty+=tileH;
+      }
       // UNION THE MASK, THEN CUT ONCE. Stroking each lane with
       // destination-in in turn does not add roads together, it INTERSECTS them:
       // lane 0's cut erases everything outside lane 0, then lane 1's erases
@@ -7151,15 +7658,39 @@
       mk.width = WORLD_W * res; mk.height = WORLD_H * res;
       var mc = mk.getContext('2d');
       mc.scale(res, res); mc.lineCap = 'round'; mc.lineJoin = 'round';
-      for (var m0 = 0; m0 < LN.length; m0++) strokePath(mc, LN[m0].pts, MAP.pathW, 'rgba(0,0,0,1)');
+      for(var edge=0;edge<3;edge++){
+        bc.clearRect(0,0,WORLD_W,WORLD_H);
+        for(var m0=0;m0<LN.length;m0++)fillRoadSurface(bc,roadSamples[m0],MAP.pathW+2-edge*2,'#000');
+        mc.globalAlpha=[.16,.40,1][edge];mc.drawImage(bd,0,0,WORLD_W,WORLD_H);
+      }mc.globalAlpha=1;
+      // Let the outside cobbles end at their painted mortar joints. Merely
+      // feathering a smooth ribbon still slices every border stone in half.
+      // Keep the centre wholly opaque; only the four-unit margin uses this
+      // material mask. Quantiles adapt it to dark Ashfall and pale Bone Road.
+      var swatch=document.createElement('canvas');swatch.width=32;swatch.height=32;
+      var sx=swatch.getContext('2d');sx.drawImage(roadImg,0,0,32,32);
+      var sd=sx.getImageData(0,0,32,32).data,values=[];
+      for(var si=0;si<sd.length;si+=4)values.push(sd[si]*.2126+sd[si+1]*.7152+sd[si+2]*.0722);
+      values.sort(function(a,b){return a-b;});
+      var low=values[Math.floor(values.length*.25)],high=values[Math.floor(values.length*.56)],spread=Math.max(8,high-low);
+      bc.clearRect(0,0,WORLD_W,WORLD_H);
+      for(var ci=0;ci<LN.length;ci++)fillRoadSurface(bc,roadSamples[ci],MAP.pathW-8,'#000');
+      var surface=rc.getImageData(0,0,rl.width,rl.height).data,mask=mc.getImageData(0,0,mk.width,mk.height),core=bc.getImageData(0,0,bd.width,bd.height).data;
+      for(var mi=0;mi<mask.data.length;mi+=4){
+        if(!mask.data[mi+3]||core[mi+3]===255)continue;
+        var inside=core[mi+3]/255,lum=surface[mi]*.2126+surface[mi+1]*.7152+surface[mi+2]*.0722;
+        mask.data[mi+3]*=inside+(1-inside)*clamp((lum-low)/spread,0,1);
+      }mc.putImageData(mask,0,0);
       rc.globalCompositeOperation = 'destination-in';
       rc.drawImage(mk, 0, 0, WORLD_W, WORLD_H);
       rc.globalCompositeOperation = 'source-over';
       rc.lineCap = 'round'; rc.lineJoin = 'round';
-      for (var m1 = 0; m1 < LN.length; m1++) strokePath(rc, LN[m1].pts, MAP.pathW - 4, 'rgba(216,190,149,0.07)');   // lit crown
-      rc.save();
-      rc.globalCompositeOperation = 'source-atop';
-      for (var m2 = 0; m2 < LN.length; m2++) strokePath(rc, LN[m2].pts, MAP.pathW - 20, 'rgba(20,12,8,0.16)');      // boot-worn centre
+      rc.save();rc.globalCompositeOperation='source-atop';
+      var tone=rc.createLinearGradient(0,180,WORLD_W,WORLD_H);
+      tone.addColorStop(0,'rgba(211,169,109,.08)');tone.addColorStop(.55,'rgba(64,59,76,.12)');tone.addColorStop(1,'rgba(36,56,84,.24)');
+      rc.fillStyle=tone;rc.fillRect(0,0,WORLD_W,WORLD_H);
+      // Foot traffic polishes a broad crown; it does not paint a dark stripe.
+      for(var m2=0;m2<LN.length;m2++)strokePath(rc,LN[m2].pts,MAP.pathW-15,'rgba(205,189,165,.07)');
       rc.restore();
       pc.drawImage(rl, 0, 0, WORLD_W, WORLD_H);
     } else {
@@ -7172,11 +7703,18 @@
       for (var f3 = 0; f3 < LN.length; f3++) strokePath(pc, LN[f3].pts, MAP.pathW - 24, 'rgba(30,18,10,0.28)');
       pc.restore();
     }
-    // a cave mouth per ENTRANCE — every road has to come from somewhere
+    // Let each road recede into the painted cave instead of stamping a flat
+    // black disc over it. This soft entrance shadow is baked once per scene;
+    // its heading comes from that road, including left-hand and Duel entries.
     for (var e1 = 0; e1 < LN.length; e1++) {
-      var e0 = LN[e1].pts[0];
-      pc.fillStyle = '#0d0805';
-      pc.beginPath(); pc.ellipse(e0[0] + 8, e0[1], 34, 26, 0.4, 0, 6.283); pc.fill();
+      var e0 = LN[e1].pts[0], eNext = LN[e1].pts[1];
+      var angle = Math.atan2(eNext[1] - e0[1], eNext[0] - e0[0]);
+      pc.save();pc.translate(e0[0], e0[1]);pc.rotate(angle);pc.scale(1,0.68);
+      var entryShade=pc.createRadialGradient(-9,0,4,-9,0,48);
+      entryShade.addColorStop(0,'rgba(8,8,14,0.94)');
+      entryShade.addColorStop(0.42,'rgba(10,10,18,0.82)');
+      entryShade.addColorStop(1,'rgba(10,10,18,0)');
+      pc.fillStyle=entryShade;pc.fillRect(-57,-48,96,96);pc.restore();
     }
   };
 
@@ -7253,7 +7791,13 @@
       ctx.fillStyle = mg2;
       ctx.beginPath(); ctx.arc(k.x, k.y - 30, 150 + mp2 * 24, 0, 6.283); ctx.fill();
     }
-    if (drawSpriteBottom(ctx, this._sidePlate(side, 'keep', 'keep'), k.x, k.y + 40, 158)) { /* sprite */ }
+    var plate=this._sidePlate(side,'keep','keep'),keepW=158;
+    if(!this.isRival&&plate){
+      var H=this._hudGeom(),below=H.infoY-this.view.oy+1/this.view.scale;
+      var naturalH=158*plate.height/plate.width;
+      keepW*=Math.min(1,Math.max(0.25,(k.y+40-below)/naturalH));
+    }
+    if (drawSpriteBottom(ctx,plate,k.x,k.y+40,keepW)) { /* proportional art; unchanged gameplay base */ }
     else {
       // chunky keep: main cylinder + two side turrets, blue conical roofs
       drawTurret(ctx, k.x - 46, k.y - 6, 26, 52, '#8d8577', '#655e52', '#3e6bd6');
@@ -7294,6 +7838,10 @@
   };
 
   Game.prototype._drawPads = function (ctx) {
+    var pickedId = this.shopPick >= 0 ? this._shelf()[this.shopPick] : null;
+    var pickedType = pickedId && TOWER_TYPES[pickedId], ownCount = 0;
+    for (var oc = 0; oc < this.towers.length; oc++) if (this._sameSide(this.towers[oc].own, 0)) ownCount++;
+    var padPrice = pickedType ? Math.round(pickedType.cost * PAD_DISCOUNT * crowdMul(ownCount)) : 0;
     // WHERE YOU MAY BUILD, shown only while a machine is actually in hand.
     // placeHint was scaffolded and never populated or drawn — but this is a
     // touch game with no hover, so a cursor ghost cannot work. What the player
@@ -7335,8 +7883,9 @@
       // nothing is in hand is the most button-like thing on the map promising
       // something that does not happen, so they only wake up while armed.
       var armed = this.shopPick >= 0;
-      var afford = armed && this.gold >= 115;   // was `>= 60`: no machine costs 60
-      var pulse = afford ? 0.6 + 0.4 * Math.sin(this.worldT * 3 + i) : (armed ? 0.35 : 0.16);
+      var legal = armed && this._placeCheck(p.x, p.y, 0).ok;
+      var afford = legal && pickedType && this.gold >= padPrice;
+      var pulse = afford ? (RM ? 0.85 : 0.72 + 0.18 * Math.sin(this.worldT * 3 + i)) : (armed ? 0.35 : 0.16);
       if (ART.images.pad) { ctx.globalAlpha = 0.6 + pulse * 0.4; ctx.drawImage(ART.images.pad, p.x - 26, p.y - 18, 52, 36); ctx.globalAlpha = 1; }
       else {
         ctx.strokeStyle = 'rgba(255,215,94,' + pulse + ')';
@@ -7349,6 +7898,13 @@
         ctx.font = 'bold 16px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('+', p.x, p.y + 1);
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      }
+      if (armed && legal && pickedType) {
+        ctx.strokeStyle = afford ? 'rgba(184,224,164,0.85)' : 'rgba(214,145,116,0.7)'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.ellipse(p.x,p.y,24,15,0,0,Math.PI*2); ctx.stroke();
+        ctx.fillStyle = 'rgba(20,17,13,0.92)'; rr(ctx,p.x-20,p.y+17,40,17,6);ctx.fill();
+        ctx.textAlign='center';ctx.font='bold 11px system-ui, sans-serif';ctx.fillStyle=afford?'#d3f0b8':'#efb9a5';
+        ctx.fillText(padPrice+'g',p.x,p.y+29);ctx.textAlign='left';
       }
     }
   };
@@ -7395,7 +7951,7 @@
       var d = draws[i];
       if (d.kind === 'rivalwick') this._drawRivalWick(ctx);
       else if (d.kind === 'tower') this._drawTower(ctx, d.ref);
-      else if (d.kind === 'enemy') this._drawEnemy(ctx, d.ref, { x: d.px, y: d.py });
+      else if (d.kind === 'enemy') this._drawEnemy(ctx, d.ref, { x: d.px, y: d.py }, d);
       else if (d.kind === 'husk') {
         // Replay the raider's own sprite, white-hot and fading. Driving it
         // through flashT means the corpse inherits the SAME white re-draw and
@@ -7438,31 +7994,41 @@
     // projectiles on top
     for (i = 0; i < this.projectiles.length; i++) {
       var pr = this.projectiles[i];
+      var pp=this._projectilePresentation(pr);
       if (pr.kind === 'lob') {
         ctx.fillStyle = '#ff8a3c';
-        ctx.beginPath(); ctx.arc(pr.x, pr.y, 5, 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(pp.x, pp.y, 5, 0, 6.283); ctx.fill();
         ctx.fillStyle = 'rgba(255,180,90,0.5)';
-        ctx.beginPath(); ctx.arc(pr.x, pr.y, 8, 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(pp.x, pp.y, 8, 0, 6.283); ctx.fill();
       } else if (pr.kind === 'fire') {   // Wick's fireball: a comet with a tail
-        var fdx2 = pr.dx || 1, fdy2 = pr.dy || 0;
+        var fdx2 = pp.dx, fdy2 = pp.dy;
         var flick = 0.75 + 0.25 * Math.sin(this.worldT * 40 + pr.target);
         for (var tl = 3; tl >= 1; tl--) {
           ctx.fillStyle = 'rgba(255,110,40,' + (0.13 * tl * flick) + ')';
-          ctx.beginPath(); ctx.arc(pr.x - fdx2 * tl * 6, pr.y - fdy2 * tl * 6, 3 + tl * 1.7, 0, 6.283); ctx.fill();
+          ctx.beginPath(); ctx.arc(pp.x - fdx2 * tl * 6, pp.y - fdy2 * tl * 6, 3 + tl * 1.7, 0, 6.283); ctx.fill();
         }
         ctx.fillStyle = 'rgba(255,140,50,0.85)';
-        ctx.beginPath(); ctx.arc(pr.x, pr.y, 6.2 * flick, 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(pp.x, pp.y, 6.2 * flick, 0, 6.283); ctx.fill();
         ctx.fillStyle = '#fff0b0';
-        ctx.beginPath(); ctx.arc(pr.x, pr.y, 3.1 * flick, 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(pp.x, pp.y, 3.1 * flick, 0, 6.283); ctx.fill();
+      } else if(pp.type==='perch') {
+        ctx.save();ctx.translate(pp.x,pp.y);ctx.rotate(Math.atan2(pp.dy,pp.dx));
+        ctx.strokeStyle=pr.net?'rgba(142,215,237,.6)':'rgba(201,216,226,.42)';ctx.lineWidth=2.4;
+        ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(-3,0);ctx.stroke();
+        ctx.fillStyle='#536375';ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(1,-4);ctx.lineTo(-4,-2);ctx.lineTo(-5,2);ctx.lineTo(1,4);ctx.closePath();ctx.fill();
+        ctx.fillStyle='#c4d0d6';ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(1,-4);ctx.lineTo(-1,0);ctx.closePath();ctx.fill();
+        if(pr.net){ctx.strokeStyle='#9bdce7';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(0,0,7,5,0,0,6.283);ctx.stroke();}
+        if(pr.shieldbreak){ctx.strokeStyle='#e2d7b3';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(-2,-3);ctx.lineTo(2,3);ctx.moveTo(1,-3);ctx.lineTo(5,1);ctx.stroke();}
+        ctx.restore();
       } else {
         // A REAL ARROW, not a light streak: shaft, iron head, fletching, all
         // rotated to its heading. This is a crossbow bolt — it should look
         // like one in flight.
-        var tdx = pr.dx || 1, tdy = pr.dy || 0;
+        var tdx = pp.dx, tdy = pp.dy;
         var ang = Math.atan2(tdy, tdx);
         var isPierce = pr.hops > 0;
         ctx.save();
-        ctx.translate(pr.x, pr.y);
+        ctx.translate(pp.x, pp.y);
         ctx.rotate(ang);
         ctx.strokeStyle = 'rgba(255,220,150,0.22)'; ctx.lineWidth = 3.5;   // motion smear
         ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(-6, 0); ctx.stroke();
@@ -7480,6 +8046,13 @@
         }
         ctx.restore();
       }
+    }
+    // Readability pass: the living raiders' health and stolen gold stay above
+    // foreground bodies and bolts. Husks keep their fading art without badges.
+    for (i = 0; i < n; i++) {
+      var indicator = draws[i];
+      if (indicator.kind === 'enemy' && indicator.ref.hp > 0)
+        this._drawEnemyIndicators(ctx, indicator.ref, indicator);
     }
   };
 
@@ -7540,6 +8113,185 @@
   /// than off the bow, and nothing marked the moment of firing at all.
   /// SIM LANE: derived from the target, never from the renderer's _faceSign,
   /// which is draw-time state the sim must not read. No RNG, so no fork.
+  // Body contact is presentation only. Keep these source-aspect measurements
+  // independent of decoded art and animation cadence; combat still uses feet.
+  var ENEMY_BODY_ASPECT = {looter:700/477,scout:665/700,brute:700/545,shield:700/297,
+    bat:700/643,warlock:700/497,blinker:700/541,boss:700/551,sapper:700/512,splitter:700/439};
+  Game.prototype._enemyImpactPoint = function(e){
+    var w=(e.type==='boss'?62:e.type==='brute'?46:36)*depthScale(e.py);
+    return {x:e.px,y:e.py+6-(eFly(e)?26:0)-w*(ENEMY_BODY_ASPECT[e.type]||1.4)*.52};
+  };
+  Game.prototype._towerAimPoint = function(tw){
+    var x=tw._aimX===undefined?tw.x+75:tw._aimX,y=tw._aimY===undefined?tw.y-70:tw._aimY;
+    var remembered=TOWER_AIM_POINTS.get(tw);if(remembered&&remembered.x===tw._aimX&&remembered.y===tw._aimY)return remembered.point;
+    for(var i=0;i<this.enemies.length;i++){
+      var e=this.enemies[i];if(Math.abs(e.px-x)<.01&&Math.abs(e.py-y)<.01)return this._enemyImpactPoint(e);
+    }
+    return {x:x,y:y};
+  };
+  // The art service returns RGB sprites on a keyed background. Remove that
+  // key once, before finishes, then cache the real alpha silhouette. The key
+  // cannot occur in the warm wood/metal artwork. No per-frame pixel reads.
+  var CROSSBOW_KEY_CACHE = new WeakMap();
+  function crossbowKeyPlate(img){
+    if(!img||!img.width)return null;
+    var old=CROSSBOW_KEY_CACHE.get(img);if(old)return old;
+    var c=document.createElement('canvas'),scale=Math.min(1,640/img.width);
+    c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+    var ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,c.width,c.height);
+    var data=ctx.getImageData(0,0,c.width,c.height),a=data.data,minX=c.width,minY=c.height,maxX=0,maxY=0;
+    for(var p=0;p<a.length;p+=4){
+      var r=a[p],g=a[p+1],b=a[p+2],key=Math.min(r,b)-g;
+      if(r>140&&b>120&&key>65){a[p+3]=0;}
+      if(a[p+3]>32){var at=p/4,x=at%c.width,y=Math.floor(at/c.width);minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}
+    }
+    ctx.putImageData(data,0,0);var trim=document.createElement('canvas');
+    trim.width=maxX-minX+1;trim.height=maxY-minY+1;trim.getContext('2d').drawImage(c,minX,minY,trim.width,trim.height,0,0,trim.width,trim.height);
+    CROSSBOW_KEY_CACHE.set(img,trim);return trim;
+  }
+  function crossbowPlateHit(img,x,y,w,h,left,top,pad){
+    if(x<left-pad||x>left+w+pad||y<top-pad||y>top+h+pad)return false;
+    var mask=machineHitMask(img),sx=(x-left)/w*mask.w,sy=(y-top)/h*mask.h,rx=Math.ceil(pad/w*mask.w),ry=Math.ceil(pad/h*mask.h);
+    for(var yy=Math.max(0,Math.floor(sy)-ry);yy<=Math.min(mask.h-1,Math.ceil(sy)+ry);yy++)
+      for(var xx=Math.max(0,Math.floor(sx)-rx);xx<=Math.min(mask.w-1,Math.ceil(sx)+rx);xx++)if(mask.alpha[(yy*mask.w+xx)*4+3]>32)return true;
+    return false;
+  }
+  Game.prototype._crossbowHit=function(point,tw,pad){
+    var base=crossbowKeyPlate(ART.images.t_ballista_base_v2),weapon=crossbowKeyPlate(ART.images.t_ballista_turntable_v2);
+    if(!base||!weapon)return false;
+    var p=this._crossbowPose(tw),w=54*p.s,h=w*base.height/base.width;
+    if(crossbowPlateHit(base,point.x-tw.x,point.y-tw.y-8,w,h,-w/2,-h,pad))return true;
+    var dx=point.x-p.x,dy=(point.y-p.y)/.57,c=Math.cos(p.yaw),s=Math.sin(p.yaw),ww=60*p.s,hh=ww*weapon.height/weapon.width;
+    return crossbowPlateHit(weapon,c*dx+s*dy+p.kick,-s*dx+c*dy,ww,hh,-.46*ww,-.5*hh,pad/.57);
+  };
+
+  Game.prototype._crossbowPose = function(tw,target,shot){
+    var s=1+tw.level*.12,cx=tw.x-4.4*s,cy=tw.y-24.5*s;
+    target=target||this._towerAimPoint(tw);
+    var dx=target.x-cx,dy=target.y-cy;
+    // Rotate in the ground plane, then foreshorten vertically. The painted
+    // rail is horizontal in this source: its projected axis points exactly at
+    // the body contact in every quadrant, including directly above/below.
+    var yaw=Math.atan2(dy/.57,dx),ux=Math.cos(yaw),uy=Math.sin(yaw)*.57;
+    var t=shot===undefined?tw.shotT:shot;
+    var kick=!RM&&!(tw.jamT>0)&&t>=0&&t<.16?1.25*(1-t/.16)*s:0;
+    var muzzle=31.8*s-kick;
+    return {x:cx,y:cy,yaw:yaw,s:s,kick:kick,muzzle:{x:cx+ux*muzzle,y:cy+uy*muzzle},target:target,
+      dx:ux/Math.sqrt(ux*ux+uy*uy),dy:uy/Math.sqrt(ux*ux+uy*uy)};
+  };
+  Game.prototype._drawCrossbow = function(ctx,tw){
+    var base=crossbowKeyPlate(ART.images.t_ballista_base_v2),weapon=crossbowKeyPlate(ART.images.t_ballista_turntable_v2);
+    if(!base||!weapon)return false;
+    base=this._finishPlate(base,tw.own);weapon=this._finishPlate(weapon,tw.own);
+    var pose=this._crossbowPose(tw),s=pose.s,w=54*s,h=w*base.height/base.width;
+    ctx.drawImage(base,tw.x-w/2,tw.y+8-h,w,h);
+    // The short bearing connects the rotating assembly to the fixed deck.
+    ctx.fillStyle='#57412a';ctx.fillRect(pose.x-3*s,pose.y,6*s,5*s);
+    ctx.fillStyle='#b28a46';ctx.beginPath();ctx.ellipse(pose.x,pose.y+1*s,4*s,2*s,0,0,6.283);ctx.fill();
+    ctx.save();ctx.translate(pose.x,pose.y);ctx.scale(1,.57);ctx.rotate(pose.yaw);ctx.translate(-pose.kick,0);
+    // A top-down weapon gives continuous yaw without turning the support legs,
+    // operator or drum upside down. A shallow edge supplies the missing height.
+    var ww=60*s,hh=ww*weapon.height/weapon.width,px=.46*ww,py=.50*hh;
+    ctx.save();ctx.globalAlpha*=.4;ctx.drawImage(weapon,-px,-py+2*s,ww,hh);ctx.restore();
+    ctx.drawImage(weapon,-px,-py,ww,hh);ctx.restore();
+    return true;
+  };
+
+  // Bellows is now assembled from a stationary painted base and a real fan.
+  // The source registration is measured in the trimmed base; the fan plane
+  // rotates around its spindle, never around the workers or the whole beam.
+  Game.prototype._bellowsPose=function(tw,work){
+    var base=crossbowKeyPlate(ART.images.t_bellows_base_v2);
+    if(!base)return null;
+    var s=1+tw.level*.12,w=54*s,h=w*base.height/base.width;
+    var body={x:tw.x-w/2,y:tw.y+8-h,w:w,h:h};
+    work=work||this._machineOperatingPose(tw);
+    var phase=!RM&&work.working?this.worldT*(tw._manned?9.2:7.6):0;
+    return {body:body,s:s,working:work.working,phase:phase,
+      fan:{x:body.x+w*.4568,y:body.y+h*.0284,w:14.6*s,angle:phase+.785398,plane:.57},
+      outlets:[{x:body.x+w*.275,y:body.y+h*.714},
+        {x:body.x+w*.357,y:body.y+h*.699},{x:body.x+w*.436,y:body.y+h*.726}]};
+  };
+  Game.prototype._bellowsHit=function(point,tw,pad){
+    var base=crossbowKeyPlate(ART.images.t_bellows_base_v2),fan=crossbowKeyPlate(ART.images.t_bellows_fan_v2);
+    var p=this._bellowsPose(tw);if(!p||!fan)return false;
+    var b=p.body;
+    if(crossbowPlateHit(base,point.x,point.y,b.w,b.h,b.x,b.y,pad))return true;
+    var f=p.fan,dx=point.x-f.x,dy=(point.y-f.y)/f.plane,c=Math.cos(f.angle),s=Math.sin(f.angle),h=f.w*fan.height/fan.width;
+    return crossbowPlateHit(fan,c*dx+s*dy,-s*dx+c*dy,f.w,h,-f.w/2,-h/2,pad/f.plane);
+  };
+  Game.prototype._drawBellows=function(ctx,tw,work){
+    var base=crossbowKeyPlate(ART.images.t_bellows_base_v2),fan=crossbowKeyPlate(ART.images.t_bellows_fan_v2);
+    var p=this._bellowsPose(tw,work);if(!p||!fan)return false;
+    base=this._finishPlate(base,tw.own);fan=this._finishPlate(fan,tw.own);
+    var b=p.body,f=p.fan,fh=f.w*fan.height/fan.width;
+    ctx.drawImage(base,b.x,b.y,b.w,b.h);
+    ctx.save();ctx.translate(f.x,f.y);ctx.scale(1,f.plane);ctx.rotate(f.angle);
+    ctx.drawImage(fan,-f.w/2,-fh/2,f.w,fh);ctx.restore();
+    // Small warm wisps leave the three actual mouths. A support post with
+    // no recipient, an idle workshop or a jammed pump has no painted airflow.
+    if(p.working){
+      ctx.save();ctx.lineCap='round';
+      for(var j=0;j<p.outlets.length;j++){
+        var q=p.outlets[j],t=RM?.42:(this.worldT*1.45+j*.29)%1;
+        var fade=RM?.40:Math.sin(t*Math.PI)*.55,reach=(4+11*t)*p.s;
+        ctx.strokeStyle='rgba(255,213,139,'+fade+')';ctx.lineWidth=(1.4-.5*t)*p.s;
+        ctx.beginPath();ctx.moveTo(q.x-1.1*p.s,q.y+.4*p.s);
+        ctx.bezierCurveTo(q.x-reach*.4,q.y+2*p.s,q.x-reach*.85,q.y+4*p.s,q.x-reach,q.y+1.8*p.s);ctx.stroke();
+      }
+      ctx.restore();
+    }
+    return true;
+  };
+
+  var SHOT_VISUALS=new WeakMap(), TOWER_AIM_POINTS=new WeakMap();
+  Game.prototype._roostPose=function(tw,target){
+    target=target||this._towerAimPoint(tw);
+    var s=1+tw.level*.12,w=54*s,h=w*700/418,sign=target.x>=tw.x?-1:1;
+    // A small head inclination keeps the sculpted wings seated on the column.
+    // Its stone projectile leaves the actual snout before curving to the foe.
+    var rot=clamp(Math.atan2(target.y-(tw.y-h*.79+8),Math.abs(target.x-tw.x)||.001)*.10,-.12,.12),a=rot*sign;
+    var px=0,py=-h*.54,mx=-w*.28,my=-h*.70-py;
+    return {sign:sign,rotation:rot,muzzle:{x:tw.x+sign*(Math.cos(a)*mx-Math.sin(a)*my),y:tw.y+8+py+Math.sin(a)*mx+Math.cos(a)*my},
+      dx:-sign,dy:-.10,target:target};
+  };
+  Game.prototype._roostHit=function(point,tw,pad){
+    var layers=this._turretFor('t_perch',TOWER_TYPES.perch,tw.own);if(!layers)return false;
+    var pose=this._roostPose(tw),w=54*(1+tw.level*.12),h=w*700/418;
+    var dx=(point.x-tw.x)*pose.sign,dy=point.y-tw.y-8;
+    if(crossbowPlateHit(layers.base,dx,dy,w,h,-w/2,-h,pad))return true;
+    var a=pose.rotation*pose.sign,c=Math.cos(a),s=Math.sin(a),py=-h*.54;
+    return crossbowPlateHit(layers.top,c*dx+s*(dy-py),-s*dx+c*(dy-py)+py,w,h,-w/2,-h,pad);
+  };
+  Game.prototype._rememberAim=function(tw,e){
+    TOWER_AIM_POINTS.set(tw,{x:tw._aimX,y:tw._aimY,point:this._enemyImpactPoint(e)});
+  };
+  Game.prototype._registerShotVisual=function(pr,tw,target,origin){
+    var point=this._enemyImpactPoint(target),pose=tw.type==='ballista'?this._crossbowPose(tw,point,0):this._roostPose(tw,point);
+    SHOT_VISUALS.set(pr,{type:tw.type,source:pose.muzzle,aim:point,dx:pose.dx,dy:pose.dy,
+      x:origin.x,y:origin.y,travel:0,lastX:origin.x,lastY:origin.y});
+    return pose.muzzle;
+  };
+  Game.prototype._projectilePresentation=function(pr){
+    var v=SHOT_VISUALS.get(pr),target=null;
+    for(var i=0;i<this.enemies.length;i++)if(this.enemies[i].id===pr.target){target=this.enemies[i];break;}
+    if(!v||!target)return {x:pr.x,y:pr.y,dx:pr.dx===undefined?1:pr.dx,dy:pr.dy===undefined?0:pr.dy,type:pr.kind};
+    var end=this._enemyImpactPoint(target),lx=pr.x-v.lastX,ly=pr.y-v.lastY;
+    var travel=v.travel+Math.sqrt(lx*lx+ly*ly),rx=target.px-pr.x,ry=target.py-pr.y;
+    var remaining=Math.max(0,Math.sqrt(rx*rx+ry*ry)-10),t=travel/(travel+remaining||1);
+    var x=v.source.x+(end.x-v.source.x)*t,y=v.source.y+(end.y-v.source.y)*t;
+    var dx=end.x-v.source.x,dy=end.y-v.source.y;
+    if(v.type==='perch'){
+      // A short, coherent magical arc starts along the gargoyle's snout. The
+      // hit still occurs on the original simulation step, including pierce.
+      var bx=v.source.x+v.dx*20,by=v.source.y-9,one=1-t;
+      x=one*one*v.source.x+2*one*t*bx+t*t*end.x;y=one*one*v.source.y+2*one*t*by+t*t*end.y;
+      dx=2*one*(bx-v.source.x)+2*t*(end.x-bx);dy=2*one*(by-v.source.y)+2*t*(end.y-by);
+    }
+    var n=Math.sqrt(dx*dx+dy*dy)||1;
+    return {x:x,y:y,dx:dx/n,dy:dy/n,type:v.type,progress:t};
+  };
+
   Game.prototype._muzzleOf = function (tw, tx, ty) {
     var m = TOWER_TYPES[tw.type].muzzle;
     if (!m) return { x: tw.x, y: tw.y - 26 };
@@ -7619,9 +8371,143 @@
       top: half(true), base: half(false), pvx: tt.turret.pvx, pvy: tt.turret.pvy });
   };
 
+  // A machine moves only while doing real work. Idle cooldown rescans are not
+  // shots; support operation requires an active wave (and Bellows recipients).
+  Game.prototype._machineOperatingPose = function (tw) {
+    var jam = tw.jamT > 0, since = tw.shotT === undefined ? 9 : tw.shotT;
+    var shot = !jam && since >= 0 && since < .56 ? Math.pow(1 - since / .56, 2) : 0;
+    var working = false;
+    if (!jam && this.waveActive && tw.type === 'press') working = true;
+    if (!jam && this.waveActive && tw.type === 'bellows') {
+      var range = lvlRow(tw).range;
+      for (var i = 0; i < this.towers.length; i++) {
+        var other = this.towers[i], dx = other.x - tw.x, dy = other.y - tw.y;
+        if (!TOWER_TYPES[other.type].support && this._sameSide(other.own, tw.own) && dx * dx + dy * dy <= range * range) { working = true; break; }
+      }
+    }
+    var motion = !RM && !jam;
+    var turn = motion && tw.type === 'rotor' && since >= 0 && since < .68
+      ? 6.2831853 * (1 - Math.pow(1 - since / .68, 3)) : 0;
+    return { jam: jam, shot: shot, flash: RM ? 0 : shot, kick: motion ? shot : 0, turn: turn, working: working,
+      pump: motion && working ? Math.sin(this.worldT * 5.5) : 0,
+      press: motion && working ? (.5 - .5 * Math.cos(this.worldT * 4)) : 0 };
+  };
+
+  // Small moving mechanisms cut from the existing finish plate. The foundation
+  // is never scaled or rotated. These source-image caches are render-only and
+  // live outside Game, tower and checkpoint state.
+  var MACHINE_WORK_PARTS = {
+    mimic: { points:[[0,0],[1,0],[1,.45],[.88,.48],[.70,.41],[.23,.34],[0,.39]], pivot:[.53,.40] },
+    rotor: { points:[[.43,.18],[.61,0],[.71,0],[.85,.075],[.79,.15],[.54,.23],[.72,.27],[1,.32],[1,.38],[.88,.48],[.79,.48],[.46,.29],[.30,.49],[.19,.51],[.07,.44],[.055,.39],[.33,.23],[.075,.22],[0,.185],[0,.14],[.13,.02],[.20,.04]], pivot:[.455,.235] },
+    bellows: { points:[[0,0],[1,0],[1,.46],[.69,.43],[.43,.37],[.02,.35]], pivot:[.45,.33] },
+    brazier: { points:[[.30,0],[.73,0],[.73,.24],[.63,.35],[.45,.38],[.35,.30]], pivot:[.51,.34] },
+    crystal: { points:[[.36,.07],[.50,.08],[.63,.19],[.64,.31],[.42,.31],[.36,.19]], pivot:[.50,.27], overlay:true }
+  };
+  var MACHINE_WORK_CACHE = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  function machineWorkParts(img, type) {
+    var spec = MACHINE_WORK_PARTS[type]; if (!spec) return null;
+    var found = MACHINE_WORK_CACHE && MACHINE_WORK_CACHE.get(img); if (found) return found;
+    var h = Math.min(384, img.height), w = Math.max(1, Math.round(h * img.width / img.height));
+    function layer() { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+    function path(c) { c.beginPath(); for (var i=0;i<spec.points.length;i++){var p=spec.points[i];if(i)c.lineTo(p[0]*w,p[1]*h);else c.moveTo(p[0]*w,p[1]*h);}c.closePath(); }
+    var body=layer(), base=body.getContext('2d');base.drawImage(img,0,0,w,h);
+    var part=layer(), cut=part.getContext('2d');cut.save();path(cut);cut.clip();cut.drawImage(img,0,0,w,h);cut.restore();
+    if(type==='rotor'){
+      // A blade mask can also catch tiny disconnected scraps of the guard.
+      // Retain its connected four-blade/axle silhouette, not those scraps.
+      var pixels=cut.getImageData(0,0,w,h), labels=new Int32Array(w*h), queue=new Int32Array(w*h);
+      var label=0, best=0, largest=0;
+      for(var at=0;at<labels.length;at++){
+        if(labels[at]||pixels.data[at*4+3]<8)continue;
+        label++;var head=0,tail=1;queue[0]=at;labels[at]=label;
+        while(head<tail){
+          var here=queue[head++], x=here%w;
+          for(var side=0;side<4;side++){
+            var next=side===0?here-w:side===1?here+w:side===2?here-1:here+1;
+            if(next<0||next>=labels.length||(side===2&&x===0)||(side===3&&x===w-1)||labels[next]||pixels.data[next*4+3]<8)continue;
+            labels[next]=label;queue[tail++]=next;
+          }
+        }
+        if(tail>largest){largest=tail;best=label;}
+      }
+      for(var clear=0;clear<labels.length;clear++)if(labels[clear]!==best)pixels.data[clear*4+3]=0;
+      cut.putImageData(pixels,0,0);
+    }
+    if(!spec.overlay){base.save();
+      if(type==='rotor'){base.translate(spec.pivot[0]*w,spec.pivot[1]*h);base.scale(1.10,1.10);base.translate(-spec.pivot[0]*w,-spec.pivot[1]*h);}
+      path(base);base.clip();base.clearRect(-w,-h,w*3,h*3);base.restore();}
+    found={body:body,part:part,spec:spec};if(MACHINE_WORK_CACHE)MACHINE_WORK_CACHE.set(img,found);return found;
+  }
+  // The screw press is driven at its handwheel: turning the screw lowers the
+  // upper die (Royal Mint Museum, "Collection in Context"). The painted frame,
+  // coin trays and lower die stay fixed. This small partial turn deliberately
+  // favours a readable working stroke over a full spin of perspective artwork;
+  // it uses the existing active-wave preparation cycle, never a coin payout.
+  var PRESS_WORK_CACHE = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  function machinePressParts(img) {
+    var found=PRESS_WORK_CACHE&&PRESS_WORK_CACHE.get(img);if(found)return found;
+    var h=Math.min(384,img.height),w=Math.max(1,Math.round(h*img.width/img.height));
+    function layer(){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+    var body=layer(),wheel=layer(),ram=layer(),b=body.getContext('2d');b.drawImage(img,0,0,w,h);
+    // Follow the handwheel's lower lobes but leave the threaded stem on the
+    // stationary axis. The shared pivot is the original brass hub, not the
+    // bounding-box centre of the six asymmetrical painted lobes.
+    var wheelPath=[[.28,0],[.81,0],[.81,.18],[.74,.225],[.64,.225],[.60,.21],[.59,.19],[.505,.19],[.49,.21],[.43,.225],[.32,.225],[.28,.17]];
+    function cut(dst,points){
+      var x=dst.getContext('2d');x.save();x.beginPath();for(var i=0;i<points.length;i++){var p=points[i];if(i)x.lineTo(p[0]*w,p[1]*h);else x.moveTo(p[0]*w,p[1]*h);}x.closePath();x.clip();x.drawImage(img,0,0,w,h);x.restore();
+      b.save();b.beginPath();for(var j=0;j<points.length;j++){var q=points[j];if(j)b.lineTo(q[0]*w,q[1]*h);else b.moveTo(q[0]*w,q[1]*h);}b.closePath();b.clip();b.clearRect(0,0,w,h);b.restore();
+    }
+    cut(wheel,wheelPath);cut(ram,[[.442,.423],[.66,.411],[.669,.46],[.64,.491],[.57,.508],[.49,.502],[.443,.480]]);
+    found={body:body,wheel:wheel,ram:ram};if(PRESS_WORK_CACHE)PRESS_WORK_CACHE.set(img,found);return found;
+  }
+  function paintPressWork(ctx,img,w,h,pose) {
+    var parts=machinePressParts(img),stroke=pose.press;
+    // A linked wheel turn and downward die stroke followed by an equal return.
+    // Keep the full painted screw on its fixed axis to hide the tiny travel
+    // under the original collar; no synthetic chassis or replacement art.
+    ctx.fillStyle='#382a20';ctx.beginPath();ctx.ellipse(w*.025,-h*.535,w*.095,h*.048,0,0,6.283);ctx.fill();
+    // The descending die reveals its central screw below the crossbar. Reuse
+    // the painted thread in that newly exposed slot, behind frame and die.
+    ctx.drawImage(img,img.width*.50,img.height*.20,img.width*.11,img.height*.075,
+      0,-h*.605,w*.11,h*.075+stroke*2.3);
+    ctx.drawImage(parts.body,-w/2,-h,w,h);
+    ctx.drawImage(parts.ram,-w/2,-h+stroke*2.3,w,h);
+    var px=w*.043,py=-h*.914;
+    ctx.save();ctx.translate(px,py);ctx.scale(1,.50);ctx.rotate(stroke*.46);ctx.scale(1,2);
+    ctx.drawImage(parts.wheel,-w/2-px,-h-py,w,h);ctx.restore();
+  }
+  function paintMachineWork(ctx,img,w,h,type,pose) {
+    if(type==='press'){paintPressWork(ctx,img,w,h,pose);return;}
+    var layers=machineWorkParts(img,type);
+    if(!layers){ctx.drawImage(img,-w/2,-h,w,h);return;}
+    var px=(layers.spec.pivot[0]-.5)*w, py=(layers.spec.pivot[1]-1)*h;
+    if(type==='rotor'){
+      // The guard is behind the blades in the painting. Restore the small
+      // sections they used to hide, so rotating blades cannot carry stray arc
+      // fragments with them or leave gaps in a stationary guard.
+      ctx.save();ctx.beginPath();ctx.ellipse(-w*.045,-h*.735,w*.365,h*.19,0,0,6.283);
+      ctx.strokeStyle='#80521e';ctx.lineWidth=w*.021;ctx.stroke();
+      ctx.strokeStyle='#dbaa4b';ctx.lineWidth=w*.011;ctx.stroke();ctx.restore();
+    }
+    ctx.drawImage(layers.body,-w/2,-h,w,h);
+    ctx.save();ctx.translate(px,py);
+    if(type==='mimic')ctx.scale(1,1-.34*pose.kick);
+    else if(type==='rotor'){
+      // Rotate in the rotor's foreshortened plane, about the painted axle.
+      ctx.scale(1,.53);ctx.rotate(pose.turn);ctx.scale(1,1/.53);
+    }else if(type==='bellows')ctx.rotate(pose.pump*.045);
+    else if(type==='brazier')ctx.scale(1+pose.kick*.045,1+pose.kick*.24);
+    if(type==='crystal'){
+      ctx.globalCompositeOperation='lighter';ctx.globalAlpha*=pose.flash*.55;
+    }
+    ctx.drawImage(layers.part,-w/2-px,-h-py,w,h);
+    ctx.restore();
+  }
+
   Game.prototype._drawTower = function (ctx, tw) {
     var p = tw;
     var lvl = tw.level;
+    var work = this._machineOperatingPose(tw);
     // NO MANNED-PLATE SWAP. See MAN_SCALE: the machine is always itself, and
     // _drawHero puts Wick on top of it at his own constant size.
     var spriteId = 't_' + tw.type;
@@ -7631,7 +8517,7 @@
     // the generic yellow one, only while its menu was open, in the same colour
     // an attack tower uses for its KILL range. Going out when the post is
     // jammed is also the only visible tell that machine has.
-    if (tw.type === 'bellows' && !(tw.jamT > 0)) {
+    if (tw.type === 'bellows' && !(tw.jamT > 0) && !this._previewMachine) {
       // A SOFT GLOW, NOT A RING. This was a dashed 1.5px circle at the aura's
       // full radius, and at 96-132 units that is a hard geometric line drawn
       // across half the board and straight through whatever raiders happen to
@@ -7672,173 +8558,34 @@
       ctx.strokeStyle = 'rgba(255,120,110,0.85)'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(p.x, p.y + 4, 22, -1.5708, -1.5708 + 6.283 * jf); ctx.stroke();
     }
-    if (tw._oc || tw._manned) {   // Wick nearby (thin ring) or ON it (hot ring)
-      var ocp2 = 0.6 + 0.4 * Math.sin(this.worldT * (tw._manned ? 11 : 8));
-      ctx.strokeStyle = tw._manned ? 'rgba(255,180,64,' + ocp2 + ')' : 'rgba(212,168,64,' + ocp2 + ')';
-      ctx.lineWidth = tw._manned ? 4 : 2.5;
+    if (tw._oc && !tw._manned && !(tw.jamT > 0)) {   // proximity; a crew is Wick himself
+      var ocp2 = RM ? .6 : 0.6 + 0.4 * Math.sin(this.worldT * 8);
+      ctx.strokeStyle = 'rgba(212,168,64,' + (ocp2 * 0.55) + ')';
+      ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 26 + ocp2 * 3, 12 + ocp2 * 2, 0, 0, 6.283); ctx.stroke();
-      if (tw._manned) {
-        ctx.strokeStyle = 'rgba(255,120,40,' + (ocp2 * 0.5) + ')'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 33 + ocp2 * 4, 16 + ocp2 * 3, 0, 0, 6.283); ctx.stroke();
-      }
     }
+    this._drawCrewMount(ctx, tw);
     var timg = this._finishPlate(ART.images[spriteId], tw.own);
     var tt2 = TOWER_TYPES[tw.type];
     if (timg) {
-      // recoil press-down right after firing + gentle idle breathing
+      // Foundations stay planted. Local mechanisms carry the work below;
+      // an idle or jammed contraption cannot inherit a whole-body recoil.
       var tlv = lvlRow(tw);
-      // ONE recoil envelope per real shot: a hard kick that settles over 0.34s
-      // and then holds perfectly still. Keyed to shotT, never to the cooldown,
-      // so an idle machine does not vibrate.
-      var st = tw.shotT === undefined ? 9 : tw.shotT;
-      var kick = st < 0.34 ? (1 - st / 0.34) : 0;
-      kick *= kick;                                   // sharp attack, soft tail
-      // the idle breath STOPS while jammed: a machine that has been silenced
-      // should read as stopped, not as working quietly.
-      var tsq = 1 - 0.10 * kick
-              + Math.sin(this.worldT * 1.6 + tw.padIdx) * 0.008 * (tw.jamT > 0 ? 0 : 1);
       var tw0 = 54 * (1 + lvl * 0.12);
       var th0 = tw0 * (timg.height / timg.width);
-      // FACING. The plate is painted aiming up-LEFT at about 45 degrees, on a
-      // round turntable base. So: mirror to put the barrel on the target's side
-      // (that is the error the player actually sees — shooting backwards), then
-      // swivel the remainder, clamped, about the base so the perspective holds.
-      // Eased toward the target rather than snapped: a turret that teleports its
-      // aim reads as cheap even when the angle is right.
-      var fSign = 1, fRot = 0;
-      if (tt2 && tt2.aims && tw._aimX !== undefined) {
-        var fdx = tw._aimX - p.x, fdy = tw._aimY - (p.y - th0 * 0.55);
-        // face: +1 = plate painted facing RIGHT, -1 (default) = facing LEFT.
-        // For nat = -1 this is identical to the old expression, so the perch
-        // and mimic are byte-identical; only the crossbow flips.
-        var nat = (tt2.face || -1);
-        fSign = (fdx >= 0 ? -1 : 1) * -nat;
-        // SCREEN-Y IS DEPTH HERE, NOT HEIGHT. The first version used
-        // atan2(dy, |dx|) as if a raider further down the screen were BELOW the
-        // machine, which swung the bow through huge angles for a target that is
-        // really only closer to the camera. In a three-quarter view that axis is
-        // foreshortened, so the turn is proportional to the depth component and
-        // stays small: level for a target across from it, a gentle tilt for one
-        // up-road or down-road. Rendered all 8 compass directions to pick 0.30.
-        var fn = Math.max(1, Math.sqrt(fdx * fdx + fdy * fdy));
-        // IT BARELY TURNED. want maxed at 0.30 rad = 17 degrees, and because it
-        // read ONLY the depth component it was exactly ZERO for a raider level
-        // with the machine -- which is most of them on an S-curve road. So the
-        // crossbow mirrored left/right and otherwise sat still, and VANUS read
-        // it as not tracking what it shoots.
-        //
-        // The horizontal component now contributes too, scaled well down
-        // because screen-y is DEPTH in a three-quarter view and screen-x is not:
-        // a target across from the machine should angle the barrel a little,
-        // not swing it like a top-down turret. Only a machine with a separated
-        // turret rotates at all (the base stays planted), so the plate cannot
-        // tip over.
-        // BACK DOWN TO A SEAM-SAFE ANGLE. I raised this to 0.42/0.16 with a
-        // 0.52 clamp to make the tracking visible, and it visibly BROKE the
-        // machine: `turret.cut` splits the plate into a top and a base, and
-        // rotating the top 24-30 degrees swings it off the socket it is drawn
-        // to sit in, so the bow assembly detached from its drum. VANUS: "the
-        // crossbows still arent right either... its broken". The original 0.30
-        // was not timidity -- it is the angle at which a painted three-quarter
-        // plate can be rotated without the cut showing, and its comment says
-        // all eight compass directions were rendered to pick it.
-        //
-        // The real defect was never the angle. It was that `_aimX` only updated
-        // when the machine FIRED, so the barrel pointed at where the raider had
-        // been up to a full cooldown earlier. That is fixed above and it is what
-        // makes the machine read as tracking; this only has to not break.
-        //
-        // MEASURED 2026-08-21, AND THE PARAGRAPH ABOVE IS WRONG ABOUT 0.30 BEING
-        // SEAM-SAFE. Compositing the real split at a range of angles and counting
-        // (a) top pixels that swing outside the plate's own outline and (b) plate
-        // pixels left uncovered:
-        //      6deg   560 over,    875 uncovered   clean
-        //     12deg  1167 over,  3811 uncovered   visible
-        //     19deg  1744 over,  7501 uncovered   BROKEN   <-- the shipped clamp
-        // `want` reaches ~0.30 rad (17deg) for any raider below the machine, i.e.
-        // most of them, so the plate is tearing at its own cut during normal play.
-        //
-        // AND ROTATION CANNOT SOLVE THE AIM ANYWAY. The plate's bow is painted
-        // 41.8deg above horizontal (principal axis of the top half's opaque
-        // pixels), so +/-18.9deg reaches 23deg..61deg and NEVER points level or
-        // below -- while a raider on the road sits at roughly 0..-30deg. VANUS,
-        // from the phone: "the crossbow isnt properly pointed at its enemy".
-        // That is a 25-70deg error no clamp can close.
-        //
-        // The answer is the one this repo already wrote down for the wings:
-        // THE ANSWER IS A FRAME, not a deformation. Directional plates, picked
-        // by angle, the way hero_man_up/_dn work. Left as-is pending that,
-        // because lowering the clamp trades a tear for a bow that never moves
-        // and raising it is what VANUS already rejected as broken.
-        //
-        // ATTEMPT 1 FAILED, $0.63, DO NOT REPEAT IT. masked_repair.py over a box
-        // of (10,4)-(544,540) -- everything above the drum -- with a prose prompt
-        // asking for the weapon lowered. All three candidates verified "outside-
-        // mask pixels changed: 0", so the tool did its job; the MODEL re-composed
-        // rather than re-posed. Every candidate came back massively zoomed in,
-        // and the kobold gunner was mangled in one and gone from two. The mask
-        // was 75% of the plate, which is a regeneration wearing a mask -- the
-        // exact failure targeted-art-repair's own gotcha table names.
-        //
-        // The architecture that should work, and costs one generation:
-        //   1. inpaint ONE "bare machine" plate -- drum, deck, gunner, empty
-        //      mount, weapon REMOVED. A removal is a well-posed inpaint task;
-        //      a re-pose of a large rigid object is not.
-        //   2. cut the weapon out of THIS plate with an authored mask, so it is
-        //      the real painted weapon with zero model drift.
-        //   3. engine draws bare plate, then the weapon cutout rotated about its
-        //      trunnion to any angle. Continuous aim, perfect registration, and
-        //      no seam because nothing is split horizontally any more.
-        if (tt2.aimRig) {
-          // POINT AT IT -- but remember SCREEN-Y IS DEPTH in this three-quarter
-          // view, not height. Feeding the raw screen angle straight in saturates:
-          // measured over a live wave, every target sits 33..88deg "below" the
-          // machine, so the bow simply parked at the clamp and stopped tracking,
-          // which is the old complaint in a new costume.
-          //
-          // So the band the road actually occupies is mapped onto the range the
-          // rig can show. The result varies across that band instead of pinning,
-          // and still reaches just under level for the near ones.
-          var tAng = Math.atan2(fdy, Math.abs(fdx));
-          var u = (tAng - AIM_BAND_LO) / (AIM_BAND_HI - AIM_BAND_LO);
-          u = u < 0 ? 0 : u > 1 ? 1 : u;
-          fRot = tt2.aimRig.lo + u * (tt2.aimRig.hi - tt2.aimRig.lo);
-        } else {
-          var want = 0.30 * (fdy / fn) + 0.07 * Math.abs(fdx / fn) * (fdy >= 0 ? 1 : -1);
-          // Only a machine with a SEPARATED turret may turn at all — its base
-          // stays planted. The Mimic is a chest: it mirrors, nothing rotates.
-          fRot = tt2.turret ? Math.max(-0.33, Math.min(0.33, want)) : 0;
-        }
-        // ease in RENDER time; cosmetic only, so wall-clock is correct here
-        var prev = tw._faceRot === undefined ? fRot : tw._faceRot;
-        var prevS = tw._faceSign === undefined ? fSign : tw._faceSign;
-        tw._faceRot = prev + (fRot - prev) * 0.18;
-        tw._faceSign = fSign;                        // the mirror snaps; the angle eases
-        fRot = tw._faceRot;
-      }
-      // BOTH RIG PLATES TAKE THE FINISH. They bypass spriteId entirely, so a
-      // finish threaded only through `timg` would leave the crossbow brass on
-      // an otherwise blackened board.
-      var rig = tt2.aimRig;
-      var rigB = rig && this._finishPlate(ART.images[rig.base], tw.own);
-      var rigW = rig && this._finishPlate(ART.images[rig.weapon], tw.own);
-      var split = (rig && rigB && rigW) ? null : this._turretFor(spriteId, tt2, tw.own);
+      var paintedCrossbow = tw.type === 'ballista' && ART.images.t_ballista_turntable_v2;
+      var paintedBellows = tw.type === 'bellows' && ART.images.t_bellows_base_v2 && ART.images.t_bellows_fan_v2;
+      var fSign=1,fRot=0;
+      if(tw.type==='perch') {var roost=this._roostPose(tw);fSign=roost.sign;fRot=roost.rotation;}
+      else if(!paintedCrossbow&&tt2.aims&&tw._aimX!==undefined){fSign=tw._aimX>=tw.x?-1:1;}
+      var split = paintedCrossbow ? null : this._turretFor(spriteId, tt2, tw.own);
       ctx.save();
       ctx.translate(p.x, p.y + 8);
-      ctx.scale((2 - tsq) * fSign, tsq);
-      if (rig && rigB && rigW) {
-        // BASE, THEN THE WEAPON ON TOP OF IT. The base is the full original
-        // canvas, so it draws exactly where the single plate used to; the weapon
-        // sits on its own padded canvas placed by the same scale, and turns
-        // about the trunnion. Nothing is cut, so nothing can tear.
-        var sc = tw0 / 554;                    // base-plate units -> screen px
-        ctx.drawImage(rigB, -tw0 / 2, -th0, tw0, th0);
-        var rpx = -tw0 / 2 + tw0 * rig.px, rpy = -th0 + th0 * rig.py;
-        ctx.translate(rpx, rpy);
-        ctx.rotate(fRot * fSign);
-        ctx.translate(-rpx, -rpy);
-        ctx.drawImage(rigW, -tw0 / 2 + tw0 * rig.ox, -th0 + th0 * rig.oy,
-                            tw0 * rig.ww, th0 * rig.wh);
+      ctx.scale(fSign, 1);
+      if (paintedCrossbow) {
+        ctx.restore();ctx.save();this._drawCrossbow(ctx,tw);
+      } else if (paintedBellows) {
+        ctx.restore();ctx.save();this._drawBellows(ctx,tw,work);
       } else if (split) {
         // THE BASE NEVER MOVES. This is the whole fix: the previous version
         // rotated the entire plate, so a barrel-based machine visibly leaned
@@ -7850,10 +8597,20 @@
         ctx.rotate(fRot * fSign);
         ctx.translate(-pvX, -pvY);
         ctx.drawImage(split.top, -tw0 / 2, -th0, tw0, th0);
+        if(work.flash>0){
+          ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha*=work.flash*.18;
+          ctx.drawImage(split.top,-tw0/2,-th0,tw0,th0);ctx.restore();
+        }
       } else {
-        ctx.drawImage(timg, -tw0 / 2, -th0, tw0, th0);
+        paintMachineWork(ctx,timg,tw0,th0,tw.type,work);
       }
       ctx.restore();
+      if(work.jam){
+        ctx.save();var jx=p.x-14,jy=p.y-th0-10;
+        ctx.fillStyle='#38201e';ctx.strokeStyle='#ef8c75';ctx.lineWidth=1;
+        rr(ctx,jx,jy,28,13,3);ctx.fill();ctx.stroke();
+        ctx.fillStyle='#ffe1bc';ctx.font='bold 8px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('JAM',p.x,jy+6.5);ctx.restore();
+      }
       this._drawForkBadge(ctx, tw, p, p.y - th0 * 0.72);
     }
     else {
@@ -7874,12 +8631,12 @@
       } else if (tw.type === 'brazier') {
         drawTurret(ctx, p.x, p.y - 4, 13, h * 0.55, '#6d6557', '#4c463c', null);
         ctx.fillStyle = '#2e2620'; ctx.beginPath(); ctx.ellipse(p.x, p.y - h * 0.62, 16, 6, 0, 0, 6.283); ctx.fill();
-        var fl = 0.7 + 0.3 * Math.sin(this.worldT * 6 + p.x);
+        var fl = RM ? .7 : 0.7 + 0.3 * Math.sin(this.worldT * 6 + p.x);
         ctx.fillStyle = '#ff8a3c'; ctx.beginPath(); ctx.ellipse(p.x, p.y - h * 0.72, 9, 12 * fl, 0, 0, 6.283); ctx.fill();
         ctx.fillStyle = '#ffcf6a'; ctx.beginPath(); ctx.ellipse(p.x, p.y - h * 0.70, 5, 7 * fl, 0, 0, 6.283); ctx.fill();
       } else if (tw.type === 'crystal') {
         ctx.fillStyle = '#5c5470'; rr(ctx, p.x - 10, p.y - 14, 20, 14, 4); ctx.fill();
-        var glow = 0.6 + 0.4 * Math.sin(this.worldT * 2.5 + p.y);
+        var glow = RM ? .6 : 0.6 + 0.4 * Math.sin(this.worldT * 2.5 + p.y);
         ctx.fillStyle = 'rgba(140,200,255,' + (0.35 + glow * 0.3) + ')';
         ctx.beginPath(); ctx.moveTo(p.x, p.y - h - 10); ctx.lineTo(p.x + 9, p.y - h * 0.55); ctx.lineTo(p.x, p.y - 10); ctx.lineTo(p.x - 9, p.y - h * 0.55); ctx.closePath(); ctx.fill();
         ctx.strokeStyle = '#a8e6ff'; ctx.lineWidth = 1.5; ctx.stroke();
@@ -7894,43 +8651,26 @@
       this._drawForkBadge(ctx, tw, p, p.y - h - 14);   // rank + fork, both branches
     }
   };
-  /// RANK on the left, FORK on the right, on the machine's top strip.
-  ///
-  /// The level pips lived ONLY in the no-art fallback branch of _drawTower, and
-  /// every one of the seven sprites loads -- so on 100% of shipped machines the
-  /// player's own upgrade was invisible. A level-1 and a level-3 crossbow were
-  /// distinguishable only by 12% of sprite width, on a board where machines also
-  /// sit at different depths and therefore different scales. This function was
-  /// already called from BOTH branches, so the rank belongs here.
-  ///
-  /// Bars, not dots, and COUNT carries the read -- the rule written four lines
-  /// down, which the hue-only fork dot broke. Top strip rather than under the
-  /// base: _placeCheck allows 30 units between machines and a neighbour that
-  /// close draws its sprite up over anything at p.y+12.
+  // Compact rank marks on the chassis edge. The old 14×12 dark rectangle
+  // carried one tiny dash at rank one and looked like an empty status box.
+  // Count still identifies rank; disc versus bar still identifies the L3 path.
+  // These are permanent machine facts, never a pretend firing/income timer.
   Game.prototype._drawForkBadge = function (ctx, tw, p, topY) {
-    var rank = (tw.level | 0) + 1;
-    var rh = rank * 4 + 8;
-    ctx.fillStyle = 'rgba(16,10,7,0.72)';
-    rr(ctx, p.x - 30, topY - 4 - rank * 4, 14, rh, 3); ctx.fill();
-    ctx.fillStyle = '#ffd75e';
+    var rank = (tw.level | 0) + 1, x = p.x - (tw.level === 2 ? 12 : rank * 2), y = p.y - 3;
+    ctx.save();ctx.lineWidth = 1.5;ctx.strokeStyle = '#251b13';
     for (var rb = 0; rb < rank; rb++) {
-      ctx.fillRect(p.x - 27, topY - rb * 4, 6, 2.4);
+      ctx.fillStyle = '#e5ba63';
+      ctx.beginPath();ctx.rect(x + rb * 4, y, 2.5, 5);ctx.stroke();ctx.fill();
     }
-    if (tw.level < 2) return;              // badge: which mod this machine keeps
-    // TWO COLOURS BECAME TWO SHAPES. This was a 6px dot whose ONLY difference
-    // between the two permanent L3 identities was hue -- gold vs pale blue --
-    // in a cavern lit gold, three lines above the file's own rule that "Count
-    // and LENGTH and SHAPE carry the read, never hue". A disc and a bar survive
-    // greyscale, dark adaptation and the torchlight; the hue stays as
-    // reinforcement rather than as the carrier.
-    var bc = tw.fork ? '#a8e6ff' : '#ffd75e';
-    ctx.fillStyle = 'rgba(28,20,14,0.9)';
-    ctx.beginPath(); ctx.arc(p.x + 20, topY, 7.5, 0, 6.283); ctx.fill();
-    ctx.strokeStyle = bc; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(p.x + 20, topY, 7.5, 0, 6.283); ctx.stroke();
-    ctx.fillStyle = bc;
-    if (tw.fork) { rr(ctx, p.x + 14.5, topY - 1.4, 11, 2.8, 1.4); ctx.fill(); }
-    else { ctx.beginPath(); ctx.arc(p.x + 20, topY, 3.2, 0, 6.283); ctx.fill(); }
+    if (tw.level === 2) {
+      var fx = x + 17, fy = y + 2.5, bc = tw.fork ? '#a8e6ff' : '#ffd75e';
+      ctx.fillStyle = '#382b20';ctx.strokeStyle = bc;ctx.lineWidth = 1;
+      ctx.beginPath();ctx.arc(fx,fy,4,0,6.283);ctx.fill();ctx.stroke();
+      ctx.fillStyle = bc;
+      if (tw.fork) ctx.fillRect(fx-2.4,fy-.85,4.8,1.7);
+      else { ctx.beginPath();ctx.arc(fx,fy,1.8,0,6.283);ctx.fill(); }
+    }
+    ctx.restore();
   };
 
   // THE LOOT LEDGER — the carried amount, baked once into an atlas of 6 cells
@@ -7998,11 +8738,370 @@
     return { c: c, gw: gw, gh: gh };
   };
 
-  Game.prototype._drawEnemy = function (ctx, e, p) {
+  // Only _drawEntities supplies live-body metrics; a fading husk never enters
+  // this pass. Save the canvas state so indicators cannot tint the next layer.
+  Game.prototype._drawEnemyIndicators = function (ctx, e, rec) {
+    var fy = rec.fy, baseW = rec.baseW, hh2 = rec.spriteH;
+    ctx.save();
+    // THE LOOT LEDGER — how much of OUR gold this one is holding, anchored to
+    // the sprite's REAL drawn height (a fixed offset buries it in tall sprites
+    // and floats it off short ones). Inflates + reddens as the mouth nears, so
+    // the biggest badge on screen is always the most urgent target.
+    if (e.stolen > 0) {
+      var L = this._ledger || (this._ledger = this._bakeLedger());
+      var ci2 = e.stolen >= 6 ? 5 : e.stolen - 1;
+      var kk = e.fleeing ? Math.max(0, 1 - e.d / 220) : 0;
+      ctx.save();
+      ctx.translate(rec.px, rec.py + 6 + fy - Math.min(hh2 || 30, 78) - 8);
+      ctx.scale(1 + 0.45 * kk, 1 + 0.45 * kk);
+      if (kk > 0.02) {
+        ctx.fillStyle = 'rgba(255,123,123,' + (0.10 + 0.30 * kk) + ')';
+        ctx.beginPath();
+        ctx.ellipse(0, -L.gh[ci2] * 0.5, L.gw[ci2] * 0.5 + 3 + 4 * kk, L.gh[ci2] * 0.5 + 3 + 4 * kk, 0, 0, 6.283);
+        ctx.fill();
+      }
+      var cell = LEDGER_CELL * LEDGER_S;
+      ctx.drawImage(L.c, 0, ci2 * cell, cell, cell,
+        -LEDGER_CELL / 2, -(LEDGER_CELL - LEDGER_BOT), LEDGER_CELL, LEDGER_CELL);
+      ctx.restore();
+    }
+    // hp bar (only when hurt)
+    // ABOVE THE HEAD, not across the waist. rec.py - 20 is mid-body on a 36-unit
+    // raider, so a damaged raider wore a bright green line through their legs --
+    // VANUS: "theres a white or yellow line there too that shows up under the
+    // enemies it looks broken". Derived from the drawn sprite height now, so it
+    // clears the head of a Scrapling and of the Hoard King alike.
+    if (e.hp < e.maxHp) {
+      var bw = e.type === 'boss' ? 36 : 20;
+      var bimg = ART.images['e_' + e.type];
+      var bh = baseW * (bimg ? bimg.height / bimg.width : 1.1);
+      var by2 = rec.py - bh - 5 + fy;
+      ctx.fillStyle = 'rgba(10,12,15,0.72)'; ctx.fillRect(rec.px - bw / 2 - 1, by2 - 1, bw + 2, 5);
+      ctx.fillStyle = e.fleeing ? '#ff7b7b' : '#9ef58f';
+      ctx.fillRect(rec.px - bw / 2, by2, bw * Math.max(0, e.hp / e.maxHp), 3);
+    }
+    ctx.restore();
+  };
+
+  // Distance unfolds at the actual theft turn (keepD - 1), so a raider keeps
+  // the same leading foot while it turns and slows under stolen gold. The
+  // head/torso stay rigid: only authored legs, cloth and wings articulate.
+  var ENEMY_GAITS = {
+    looter:{stride:29}, scout:{stride:35}, brute:{stride:37}, shield:{stride:27},
+    bat:{stride:34}, warlock:{stride:31}, blinker:{stride:34}, boss:{stride:43},
+    sapper:{stride:28}, splitter:{stride:30}
+  };
+  Game.prototype._enemyPose = function (e, time) {
+    var profile=ENEMY_GAITS[e.type] || ENEMY_GAITS.looter;
+    var active=!RM && e.hp>0;
+    var travel=e.fleeing ? 2*(laneLen(e.ln)-1)-e.d : e.d;
+    var cycle=active ? travel/profile.stride*6.2831853+e.id*2.399963 : 0;
+    var step=Math.sin(cycle), walking=active && e.spd!==0;
+    return {cycle:cycle,travel:travel,stride:profile.stride,active:active,moving:walking && e.grabT<=0,
+      // A stopped/stealing actor holds its distance pose; no wall-clock shuffle.
+      articulated:walking,foot:walking?Math.cos(cycle):0,
+      leftLift:walking?Math.max(0,step):0,rightLift:walking?Math.max(0,-step):0,
+      roll:0,hop:0,lean:0,squash:1,
+      wing:active && eFly(e)?Math.sin(time*18+e.id*1.7):0,
+      staff:walking?Math.sin(cycle)*.022:0,hem:walking?Math.sin(cycle-.8):0,
+      type:e.type,d:e.d,ln:e.ln,fleeing:!!e.fleeing,
+      facing:e.type==='looter'?this._enemyFacing(e):1};
+  };
+
+  // Look back along the travelled road when its current tangent is vertical.
+  // This is the last nonvertical heading, computed from geometry rather than
+  // a render latch: 30/60fps, a first frame after resume and a turn agree.
+  Game.prototype._enemyFacing = function(e) {
+    var lane=laneOf(e.ln), pts=lane.pts, cum=lane.cum, n=pts.length-1;
+    var lo=0,hi=n;while(lo+1<hi){var mid=(lo+hi)>>1;if(cum[mid]<=e.d)lo=mid;else hi=mid;}
+    var index=Math.min(n-1,lo), direction=e.fleeing?-1:1, dx=0;
+    for(var j=index;j>=0 && j<n;j-=direction){dx=pts[j+1][0]-pts[j][0];if(Math.abs(dx)>.08)break;}
+    if(Math.abs(dx)<=.08){for(var k=index;k>=0 && k<n;k+=direction){dx=pts[k+1][0]-pts[k][0];if(Math.abs(dx)>.08)break;}}
+    var heading=Math.abs(dx)>.08?(dx<0?-1:1)*direction:-1;
+    return heading*(ENEMY_FACING[e.type] || -1);
+  };
+
+  // Authored normalized hip/knee/ankle coordinates, inspected against the
+  // actual alpha-visible painting. No leg is invented under a shield/robe.
+  // width/feather enclose the limb, not an arbitrary half of the sprite.
+  var ENEMY_LIMBS = {
+    looter:{stride:.040,lift:.023,legs:[[[.34,.60],[.26,.75],[.19,.93],.105,.105],[[.55,.63],[.61,.72],[.67,.80],.080,.090]]},
+    scout:{stride:.030,lift:.027,legs:[[[.48,.52],[.38,.65],[.43,.73],.075,.085],[[.57,.54],[.66,.75],[.68,.91],.060,.080]]},
+    brute:{stride:.029,lift:.017,legs:[[[.42,.71],[.36,.79],[.30,.865],.070,.070],[[.62,.72],[.65,.84],[.67,.945],.075,.065]]},
+    shield:{stride:.022,lift:.006,legs:[[[.22,.928],[.21,.944],[.20,.951],.085,.060],[[.76,.934],[.76,.958],[.75,.983],.095,.070]]},
+    warlock:{stride:0,lift:0,hem:{x:.58,y:.73,bottom:.947,width:.28,amount:.029}},
+    blinker:{stride:0,lift:0,hem:{x:.45,y:.61,bottom:.995,width:.30,amount:.055}},
+    boss:{stride:.019,lift:.010,legs:[[[.30,.813],[.28,.85],[.265,.885],.038,.047],[[.63,.835],[.65,.878],[.66,.934],.044,.042]]},
+    sapper:{stride:.036,lift:.021,legs:[[[.43,.772],[.40,.835],[.30,.943],.075,.070],[[.66,.799],[.69,.851],[.67,.912],.070,.065]]},
+    splitter:{stride:.030,lift:.016,legs:[[[.34,.818],[.25,.901],[.20,.970],.082,.065],[[.66,.817],[.74,.899],[.80,.972],.078,.065]]}
+  };
+  function enemySmooth(a,b,v){var q=clamp((v-a)/(b-a),0,1);return q*q*(3-2*q);}
+  // A continuous, local inverse field. The upper body and each hip have zero
+  // weight; all four components are zero outside the authored anatomy. A soft
+  // field avoids cut edges and separated joints, including on enlarged art.
+  function enemyLimbField(type,x,y) {
+    var spec=ENEMY_LIMBS[type], out=[0,0,0,0,0];if(!spec)return out;
+    var legs=spec.legs || [];
+    for(var i=0;i<legs.length;i++){
+      var l=legs[i],hip=l[0],knee=l[1],ankle=l[2];if(y<=hip[1])continue;
+      var a=clamp((y-hip[1])/(ankle[1]-hip[1]),0,1);
+      var center=y<knee[1]?(hip[0]+(knee[0]-hip[0])*clamp((y-hip[1])/(knee[1]-hip[1]),0,1)):
+        (knee[0]+(ankle[0]-knee[0])*clamp((y-knee[1])/(ankle[1]-knee[1]),0,1));
+      var lateral=1-enemySmooth(l[3],l[3]+l[4]*1.45,Math.abs(x-center));
+      // Fade beyond this painted boot so a short bent leg cannot drag the
+      // unrelated lower boot or transparent plate margin along with it.
+      var weight=lateral*enemySmooth(0,1,a)*(1-enemySmooth(ankle[1]+.04,ankle[1]+.10,y));
+      out[i*2]=(i?-1:1)*spec.stride*weight;out[i*2+1]=spec.lift*weight;
+    }
+    if(spec.hem){var h=spec.hem;out[4]=(1-enemySmooth(h.width,h.width+.12,Math.abs(x-h.x)))*
+      enemySmooth(h.y,h.y+.09,y)*(1-enemySmooth(h.bottom-.05,h.bottom,y))*h.amount;}
+    return out;
+  }
+  // Only the lower patch is cached; the full-resolution head/torso is drawn
+  // directly from the painting. 32 shared poses/type, not a per-actor atlas.
+  // Each pose is baked at most once using continuous bilinear sampling. The
+  // source, influence fields and cached frames live outside simulation state.
+  var ENEMY_LIMB_CACHE=typeof WeakMap!=='undefined'?new WeakMap():null;
+  var ENEMY_LIMB_STEPS=32;
+  function enemyLimbBank(img,type){
+    var spec=ENEMY_LIMBS[type];if(!spec)return null;
+    var cached=ENEMY_LIMB_CACHE && ENEMY_LIMB_CACHE.get(img);if(cached===false)return null;if(cached)return cached;
+    var h=type==='boss'?192:160,w=Math.max(1,Math.round(h*img.width/img.height));
+    var first=spec.hem?spec.hem.y:Math.min.apply(null,spec.legs.map(function(l){return l[0][1];}));
+    var cut=Math.max(0,Math.floor(first*h)-2),rows=h-cut+3;
+    var c=document.createElement('canvas');c.width=w;c.height=h;
+    var cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(img,0,0,w,h);
+    var source=cx.getImageData(0,0,w,h).data,fields=new Float32Array(w*rows*5);
+    for(var y=0;y<rows;y++)for(var x=0;x<w;x++){
+      var field=enemyLimbField(type,x/w,(cut+y)/h),at=(y*w+x)*5;
+      for(var k=0;k<5;k++)fields[at+k]=field[k];
+    }
+    cached={w:w,h:h,cut:cut,rows:rows,source:source,fields:fields,frames:[],baked:0,bytes:source.byteLength+fields.byteLength};
+    if(ENEMY_LIMB_CACHE)ENEMY_LIMB_CACHE.set(img,cached);return cached;
+  }
+  function enemyLimbFrame(img,pose){
+    var bank=enemyLimbBank(img,pose.type);if(!bank)return null;
+    var phase=((pose.cycle/6.2831853)%1+1)%1,key=Math.round(phase*ENEMY_LIMB_STEPS)%ENEMY_LIMB_STEPS;
+    if(bank.frames[key])return {bank:bank,image:bank.frames[key]};
+    var angle=key/ENEMY_LIMB_STEPS*6.2831853,step=Math.sin(angle),swing=Math.cos(angle),
+      liftL=Math.max(0,step),liftR=Math.max(0,-step),hem=Math.sin(angle-.8);
+    var c=document.createElement('canvas');c.width=bank.w;c.height=bank.rows;
+    var ctx=c.getContext('2d'),dst=ctx.createImageData(c.width,c.height),out=dst.data,src=bank.source;
+    var w=bank.w,h=bank.h,fields=bank.fields;
+    for(var y=0;y<bank.rows;y++)for(var x=0;x<w;x++){
+      var at=(y*w+x)*5,dx=((fields[at]+fields[at+2])*swing+fields[at+4]*hem)*w,
+        dy=-(fields[at+1]*liftL+fields[at+3]*liftR)*h;
+      var sx=x-dx,sy=bank.cut+y-dy,index=(y*w+x)*4;
+      if(sx<0 || sx>=w-1 || sy<0 || sy>=h-1)continue;
+      var ix=Math.floor(sx),iy=Math.floor(sy),fx=sx-ix,fy=sy-iy,
+        a=(iy*w+ix)*4,b=a+4,c0=a+w*4,d=c0+4,
+        wa=(1-fx)*(1-fy)*src[a+3],wb=fx*(1-fy)*src[b+3],
+        wc=(1-fx)*fy*src[c0+3],wd=fx*fy*src[d+3],alpha=wa+wb+wc+wd;
+      if(alpha>0){out[index]=(src[a]*wa+src[b]*wb+src[c0]*wc+src[d]*wd)/alpha;
+        out[index+1]=(src[a+1]*wa+src[b+1]*wb+src[c0+1]*wc+src[d+1]*wd)/alpha;
+        out[index+2]=(src[a+2]*wa+src[b+2]*wb+src[c0+2]*wc+src[d+2]*wd)/alpha;out[index+3]=alpha;}
+    }
+    ctx.putImageData(dst,0,0);bank.frames[key]=c;bank.baked++;bank.bytes+=c.width*c.height*4;
+    return {bank:bank,image:c};
+  }
+  var ENEMY_MOTION_PREWARM_MS=0;
+  function enemyMotionPrewarm(){
+    var started=Date.now();
+    Object.keys(ENEMY_GAITS).forEach(function(type){
+      var img=ART.images['e_'+type];if(!img)return;
+      var source=img;
+      try{
+        if(type==='looter'&&looterPuppet()){
+          ['body','arm','upper','lower','boot'].forEach(function(part){enemyFrameRim(LOOTER_PUPPET[part]);});return;
+        }
+        var rig=enemyRig(img,type);source=rig?rig.body:img;
+        enemyFrameRim(source);
+        if(rig)rig.parts.forEach(function(part){enemyFrameRim(part.image);});
+        for(var i=0;i<ENEMY_LIMB_STEPS;i++){
+          var frame=enemyLimbFrame(source,{type:type,cycle:i/ENEMY_LIMB_STEPS*6.2831853});
+          if(frame)enemyFrameRim(frame.image);
+        }
+      }catch(error){
+        // A missing/undecodable plate must retain the ordinary sprite/fallback,
+        // never strand the loading overlay or repeatedly retry a failed bank.
+        if(ENEMY_LIMB_CACHE)ENEMY_LIMB_CACHE.set(source,false);
+        if(_dev && typeof console!=='undefined')console.warn('Enemy articulation unavailable: '+type,error);
+      }
+    });
+    ENEMY_MOTION_PREWARM_MS=Date.now()-started;
+  }
+  // Pure render diagnostics for anatomy/continuity/cost gates; no state hooks.
+  Game.prototype._enemyLimbField=function(type,x,y){return enemyLimbField(type,x,y);};
+  Game.prototype._enemyMotionCache=function(type){var img=ART.images['e_'+type];if(!img)return null;
+    if(type==='looter'&&looterPuppet()){
+      var puppet=LOOTER_PUPPET,bytes=0;['body','arm','leg','upper','lower','boot'].forEach(function(part){var p=puppet[part];bytes+=p.width*p.height*4;if(part!=='leg'){var r=enemyFrameRim(p);bytes+=r.width*r.height*4;}});
+      return {kind:'puppet',frames:0,bytes:bytes,prewarmMs:ENEMY_MOTION_PREWARM_MS};
+    }
+    var rig=enemyRig(img,type),bank=enemyLimbBank(rig?rig.body:img,type);
+    return bank?{frames:bank.baked,limit:ENEMY_LIMB_STEPS,bytes:bank.bytes+bank.frames.reduce(function(n,c){return n+c.width*c.height*4;},0),width:bank.w,height:bank.rows,prewarmMs:ENEMY_MOTION_PREWARM_MS}:null;};
+
+  // Runtime cutouts retain the original painted pixels. Cache by source image
+  // (including its rim), outside Game/enemy/checkpoint state. Joint overlap
+  // stays under the torso; only the wing tips/staff move independently.
+  var ENEMY_RIG_CACHE = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  var ENEMY_RIGS = {
+    bat: [
+      { points: [[0,0],[.27,0],[.35,.34],[.31,.47],[.20,.51],[0,.44]], pivot: [.28,.44], side: -1 },
+      { points: [[.70,.16],[1,.12],[1,.67],[.65,.71],[.59,.52]], pivot: [.64,.56], side: 1 }
+    ],
+    warlock: [
+      { points: [[0,0],[.21,0],[.22,.35],[.16,.45],[.18,.59],[.13,.91],[0,.91]], pivot: [.15,.53], side: 0 }
+    ]
+  };
+  function enemyRig(img, type) {
+    var spec = ENEMY_RIGS[type]; if (!spec) return null;
+    var cached = ENEMY_RIG_CACHE && ENEMY_RIG_CACHE.get(img);
+    if (cached) return cached;
+    var h = Math.min(256, img.height), w = Math.max(1, Math.round(h * img.width / img.height));
+    function plate() { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+    function path(ctx, points) { ctx.beginPath(); points.forEach(function(p,i){if(i)ctx.lineTo(p[0]*w,p[1]*h);else ctx.moveTo(p[0]*w,p[1]*h);});ctx.closePath(); }
+    var body = plate(), bc = body.getContext('2d'); bc.drawImage(img,0,0,w,h);
+    var parts = spec.map(function(s){
+      var c=plate(), cx=c.getContext('2d');cx.save();path(cx,s.points);cx.clip();cx.drawImage(img,0,0,w,h);cx.restore();
+      bc.save();path(bc,s.points);bc.clip();bc.globalCompositeOperation='destination-out';bc.fillRect(0,0,w,h);bc.restore();
+      // Keep a small original shoulder/wrist patch on top of the moving part.
+      bc.save();bc.beginPath();bc.ellipse(s.pivot[0]*w,s.pivot[1]*h,w*.055,h*.045,0,0,6.283);bc.clip();bc.drawImage(img,0,0,w,h);bc.restore();
+      return { image:c, pivot:s.pivot, side:s.side };
+    });
+    cached={body:body,parts:parts};if(ENEMY_RIG_CACHE)ENEMY_RIG_CACHE.set(img,cached);return cached;
+  }
+  var ENEMY_FRAME_RIMS = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  function enemyFrameRim(img) {
+    var cached = ENEMY_FRAME_RIMS && ENEMY_FRAME_RIMS.get(img);
+    if (cached) return cached;
+    var c=document.createElement('canvas');c.height=Math.min(256,img.height);c.width=Math.max(1,Math.round(c.height*img.width/img.height));
+    var ctx=c.getContext('2d');ctx.drawImage(img,0,0,c.width,c.height);
+    ctx.globalCompositeOperation='source-in';ctx.fillStyle='#ffc47c';ctx.fillRect(0,0,c.width,c.height);
+    if(ENEMY_FRAME_RIMS)ENEMY_FRAME_RIMS.set(img,c);return c;
+  }
+  // Separate painted bones let the common raider actually exchange support
+  // feet. His previous running illustration could only shear a raised boot.
+  var LOOTER_PUPPET = null;
+  var LOOTER_JOINTS={hip:{x:.66,y:.054},knee:{x:.56,y:.392},ankle:{x:.675,y:.711}};
+  function looterPuppet(){
+    if(LOOTER_PUPPET)return LOOTER_PUPPET;
+    var body=crossbowKeyPlate(ART.images.e_looter_body_v2),leg=crossbowKeyPlate(ART.images.e_looter_leg_v2);
+    if(!body||!leg)return null;
+    // Bound the working texture before cutting; oversized stitch detail must
+    // not shimmer when a nine-unit boot is reduced to phone pixels.
+    if(leg.height>320){var small=document.createElement('canvas');small.height=320;small.width=Math.round(320*leg.width/leg.height);small.getContext('2d').drawImage(leg,0,0,small.width,small.height);leg=small;}
+    function cut(top,bottom,topJoint,bottomJoint){
+      var c=document.createElement('canvas');c.width=leg.width;c.height=leg.height;
+      var x=c.getContext('2d');x.save();x.beginPath();x.rect(0,top*c.height,c.width,(bottom-top)*c.height);
+      // Rounded painted overlaps hide a rotating joint without copying any
+      // of the boot onto the shin or leaving a rectangular trouser edge.
+      [topJoint,bottomJoint].forEach(function(j){if(!j)return;var ankle=j===LOOTER_JOINTS.ankle,rx=ankle?.26:.34,ry=ankle?.018:.038;x.moveTo((j.x+rx)*c.width,j.y*c.height);x.ellipse(j.x*c.width,j.y*c.height,c.width*rx,c.height*ry,0,0,6.2831853);});
+      x.clip();x.drawImage(leg,0,0);x.restore();return c;
+    }
+    var knee=LOOTER_JOINTS.knee,ankle=LOOTER_JOINTS.ankle;
+    var arm=document.createElement('canvas'),torso=document.createElement('canvas');
+    arm.width=torso.width=body.width;arm.height=torso.height=body.height;
+    var armPoints=[[0,.629],[.105,.624],[.148,.66],[.145,.70],[.192,.752],[.194,.862],[0,.862]];
+    function armMask(x){x.beginPath();armPoints.forEach(function(p,i){if(i)x.lineTo(p[0]*body.width,p[1]*body.height);else x.moveTo(p[0]*body.width,p[1]*body.height);});x.closePath();}
+    var ax=arm.getContext('2d');ax.save();armMask(ax);ax.clip();ax.drawImage(body,0,0);ax.restore();
+    var tx=torso.getContext('2d');tx.drawImage(body,0,0);tx.globalCompositeOperation='destination-out';armMask(tx);tx.fill();tx.globalCompositeOperation='source-over';
+    // The cuff overlaps its pinned elbow; the face, chest, sack and shoulder
+    // remain the original rigid painting while the free forearm counter-swings.
+    tx.save();tx.beginPath();tx.ellipse(body.width*.073,body.height*.641,body.width*.040,body.height*.022,0,0,6.2831853);tx.clip();tx.drawImage(body,0,0);tx.restore();
+    LOOTER_PUPPET={body:torso,arm:arm,leg:leg,upper:cut(0,knee.y,null,knee),lower:cut(knee.y,ankle.y,knee,ankle),boot:cut(ankle.y,1,ankle,null)};
+    return LOOTER_PUPPET;
+  }
+  function looterLegPose(w,h,pose,far){
+    var rig=looterPuppet(),legH=h*.44*(far?.98:1),legW=legH*rig.leg.width/rig.leg.height;
+    var bodyH=w*rig.body.height/rig.body.width,hip={x:w*(far?.105:-.055),y:-h+bodyH*.87+(far?.7:0)};
+    var phase=((pose.cycle/6.2831853+(far?.5:0))%1+1)%1,span=pose.stride/4;
+    var x=0,lift=0,bootAngle=0,stance=true;
+    if(pose.articulated){
+      if(phase<.5)x=-span+4*span*phase;
+      else{
+        var u=phase*2-1,u2=u*u,u3=u2*u;
+        // Matched endpoint velocity continues the toe-off/landing motion.
+        x=(2*u3-3*u2+1)*span+(u3-2*u2+u)*2*span+(-2*u3+3*u2)*-span+(u3-u2)*2*span;
+        lift=Math.sin(u*Math.PI)*h*.070;bootAngle=Math.sin(u*6.2831853)*.18;stance=false;
+      }
+    }
+    var groundX=x,groundY=0;
+    if(pose.articulated&&Number.isFinite(pose.d)){
+      // The planted target lies on the real road. During stance, d - x stays
+      // constant, so a corner cannot make the foot skate sideways. Depth is
+      // foreshortened in the painted three-quarter view; no render latch.
+      var road=pathPointAt(pose.d,pose.ln),contact=pathPointAt(pose.d+(pose.fleeing?-1:1)*-x,pose.ln);
+      groundX=(contact.x-road.x)*pose.facing;groundY=(contact.y-road.y)*.4;
+    }
+    var ground=far?-.65:0,ankle={x:hip.x+groundX,y:ground+groundY-lift-(1-LOOTER_JOINTS.ankle.y)*legH};
+    var a=LOOTER_JOINTS.hip,b=LOOTER_JOINTS.knee,c=LOOTER_JOINTS.ankle;
+    var l1=Math.hypot((b.x-a.x)*legW,(b.y-a.y)*legH),l2=Math.hypot((c.x-b.x)*legW,(c.y-b.y)*legH);
+    var dx=ankle.x-hip.x,dy=ankle.y-hip.y,raw=Math.hypot(dx,dy),d=Math.min(l1+l2-.01,Math.max(Math.abs(l1-l2)+.01,raw));
+    if(raw!==d){ankle.x=hip.x+dx*d/(raw||1);ankle.y=hip.y+dy*d/(raw||1);dx=ankle.x-hip.x;dy=ankle.y-hip.y;}
+    var along=(l1*l1-l2*l2+d*d)/(2*d),bend=Math.sqrt(Math.max(0,l1*l1-along*along));
+    var knee={x:hip.x+dx/d*along-dy/d*bend,y:hip.y+dy/d*along+dx/d*bend};
+    return {hip:hip,knee:knee,ankle:ankle,w:legW,h:legH,stance:stance,lift:lift,phase:phase,bootAngle:bootAngle,reachError:Math.abs(raw-d)};
+  }
+  Game.prototype._looterLegPose=function(e,far){
+    var img=ART.images.e_looter;if(!img||!looterPuppet())return null;
+    var w=36*depthScale(e.py);return looterLegPose(w,w*img.height/img.width,this._enemyPose(e,this.worldT),far);
+  };
+  function paintLooterPuppet(ctx,w,h,pose,isRim){
+    var rig=looterPuppet();if(!rig)return false;
+    function plate(p){return isRim?enemyFrameRim(p):p;}
+    function bone(image,leg,start,end,sourceStart,sourceEnd){
+      var angle=Math.atan2(end.y-start.y,end.x-start.x)-Math.atan2((sourceEnd.y-sourceStart.y)*leg.h,(sourceEnd.x-sourceStart.x)*leg.w);
+      ctx.save();ctx.translate(start.x,start.y);ctx.rotate(angle);
+      ctx.drawImage(plate(image),-sourceStart.x*leg.w,-sourceStart.y*leg.h,leg.w,leg.h);ctx.restore();
+    }
+    for(var i=0;i<2;i++){
+      var far=i===0,leg=looterLegPose(w,h,pose,far);
+      ctx.save();if(far)ctx.globalAlpha*=.94;
+      bone(rig.lower,leg,leg.knee,leg.ankle,LOOTER_JOINTS.knee,LOOTER_JOINTS.ankle);
+      bone(rig.upper,leg,leg.hip,leg.knee,LOOTER_JOINTS.hip,LOOTER_JOINTS.knee);
+      ctx.save();ctx.translate(leg.ankle.x,leg.ankle.y);ctx.rotate(leg.bootAngle);
+      ctx.drawImage(plate(rig.boot),-LOOTER_JOINTS.ankle.x*leg.w,-LOOTER_JOINTS.ankle.y*leg.h,leg.w,leg.h);ctx.restore();ctx.restore();
+    }
+    var bodyH=w*rig.body.height/rig.body.width,elbowX=(.073-.5)*w,elbowY=-h+bodyH*.641;
+    ctx.save();ctx.translate(elbowX,elbowY);ctx.rotate(pose.articulated?-Math.cos(pose.cycle)*.18:0);
+    ctx.drawImage(plate(rig.arm),-w/2-elbowX,-h-elbowY,w,bodyH);ctx.restore();
+    ctx.drawImage(plate(rig.body),-w/2,-h,w,bodyH);
+    return true;
+  }
+  function paintEnemyArt(ctx,img,w,h,pose,isRim) {
+    if(pose.type==='looter'&&paintLooterPuppet(ctx,w,h,pose,isRim))return;
+    var rig=enemyRig(img,pose.type);
+    if(rig){
+      for(var i=0;i<rig.parts.length;i++){
+        var part=rig.parts[i],px=(part.pivot[0]-.5)*w,py=(part.pivot[1]-1)*h;
+        ctx.save();ctx.translate(px,py);
+        if(pose.type==='bat'){
+          ctx.rotate(part.side*pose.wing*.24);
+          ctx.scale(1,1-.18*(pose.wing+1)*.5);
+        }else ctx.rotate(pose.staff);
+        ctx.drawImage(isRim?enemyFrameRim(part.image):part.image,-w/2-px,-h-py,w,h);ctx.restore();
+      }
+      img=rig.body;
+    }
+    var limb=pose.articulated?enemyLimbFrame(img,pose):null;
+    if(limb){
+      var bank=limb.bank,cut=bank.cut/bank.h,overlap=1/bank.h;
+      ctx.drawImage(isRim?enemyFrameRim(limb.image):limb.image,-w/2,-h+cut*h,w,h*bank.rows/bank.h);
+      // The two-row zero-weight band is identical to the original painting.
+      // One source-pixel overlap seals fractional phone scaling without a seam.
+      var upper=isRim?enemyFrameRim(img):img;
+      ctx.drawImage(upper,0,0,upper.width,upper.height*(cut+overlap),-w/2,-h,w,h*(cut+overlap));
+      return;
+    }
+    ctx.drawImage(isRim?enemyFrameRim(img):img,-w/2,-h,w,h);
+  }
+
+  Game.prototype._drawEnemy = function (ctx, e, p, indicator) {
     var base = ENEMY_TYPES[e.type];
-    var bob = Math.sin(this.worldT * 9 + e.id * 1.3) * 2;
+    var pose = this._enemyPose(e, this.worldT);
+    var bob = pose.active ? Math.sin(this.worldT * 9 + e.id * 1.3) * 2 : 0;
     // a netted flyer sits on the road (groundedT), wings clipped
-    var fy = eFly(e) ? -26 + Math.sin(this.worldT * 4 + e.id) * 4 : 0;
+    var fy = eFly(e) ? -26 + (pose.active ? Math.sin(this.worldT * 4 + e.id) * 1.5 : 0) : 0;
     // BEAT 1a — the shadow REACHES as he closes on the hoard: it darkens,
     // widens and flattens over the last 70 units. Zero extra draw calls.
     var near = e.fleeing ? 0 : Math.max(0, 1 - (laneLen(e.ln) - e.d) / 70);
@@ -8024,71 +9123,13 @@
     var sid = 'e_' + e.type;
     var img = ART.images[sid];
     if (img) {
-      // ALIVE pass — procedural sprite animation, all render-lane:
-      // facing flip along travel, walk-waddle rotation, volume-preserving
-      // squash & stretch, step-hop, dig-frenzy while grabbing, boss stomp.
-      var t = this.worldT, ph = e.id * 1.7;
-      var boss = e.type === 'boss';
-      var moving = e.grabT <= 0;
-      var ahead = pathPointAt(e.fleeing ? Math.max(0, e.d - 8) : Math.min(laneLen(e.ln), e.d + 8), e.ln);
-      // face the TRAVEL direction: mirror when it opposes the art's native side
-      var native = ENEMY_FACING[e.type] || -1;
-      var flip = (ahead.x - p.x) < -0.5 ? -native : native;
-      if (Math.abs(ahead.x - p.x) <= 0.5) flip = native;   // vertical stretch: hold facing
-      var wsp = boss ? 6 : 9 + (e.spd / 42) * 3;          // stride matches speed
-      // LOOT-WEIGHT GAIT: the sim already slows a laden thief; mirror that on
-      // the animation clock (read-only) so a heavy carrier MOVES heavy. The
-      // min() ceiling keeps frame-swaps inside the legibility band — nothing
-      // already in band moves (Recipe 9: saturate, don't clamp the symptom).
-      if (e.fleeing) {
-        var fmG = Math.max(CFG.fleeMin, CFG.fleeBase - CFG.fleeWeight * e.stolen) * (this.mods.fleeMul || 1);
-        wsp = Math.min(wsp * fmG, 13);
-      }
-      var animKey = e.type === 'looter' ? 'looter' : e.type;   // meta keys match types
-      var hasFrames = WALK_FRAMES && ANIM.meta[animKey] && ANIM.images[animKey + '_a'] && ANIM.images[animKey + '_b'];
-      if (hasFrames && moving && !e.flyer) {
-        var phase = ((t * wsp + ph) / 6.283) % 1;
-        var fi = Math.floor(phase * 4) % 4;                 // A -> rest -> B -> rest
-        if (fi === 0) img = ANIM.images[animKey + '_a'];
-        else if (fi === 2) img = ANIM.images[animKey + '_b'];
-      }
-      var amp = (boss ? 0.05 : 0.085) * (hasFrames ? 0.55 : 1);   // frames carry the stride
-      var waddle = (moving && !e.flyer) ? Math.sin(t * wsp + ph) * amp : 0;
-      var squash;
-      if (e.flyer) squash = 1 + Math.sin(t * 16 + ph) * 0.06;         // wing-beat
-      else squash = 1 + Math.abs(Math.sin(t * wsp + ph)) * (boss ? 0.05 : 0.08);
-      var hop = (moving && !e.flyer) ? -Math.abs(Math.sin(t * wsp + ph)) * (boss ? 1.5 : 2.5) * (hasFrames ? 0.75 : 1) : 0;
-      // BEAT 2 — THE GRAB, in three acts, plus the turn. Every term is a pure
-      // function of grabT (sim state), so it is frame-rate independent and
-      // replay-identical: no latch, no per-enemy render state.
-      var face = flip;
-      if (e.grabT > 0) {
-        var gg = 1 - e.grabT / CFG.grabTime;                  // 0 -> 1 across the grab
-        if (gg < 0.20) squash = 0.80 + 0.14 * (gg / 0.20);    // PLUNGE into the pile
-        else if (gg < 0.68)                                   // DIG: frenzy that DECAYS
-          squash = 0.96 + Math.sin(t * 24 + ph) * 0.075 * (1 - (gg - 0.20) / 0.48);
-        else {                                                // HAUL: stands up under it
-          var uu = (gg - 0.68) / 0.32;
-          squash = 1 + 0.20 * Math.sin(uu * 3.6) * (1 - uu * 0.4); hop = -uu * 3.5;
-        }
-        // the turn gets 0.12s instead of one invisible frame — this is the
-        // instant he becomes a target worth chasing
-        face = -flip * Math.cos(Math.min(1, gg / 0.24) * Math.PI);
-      }
-      if (e.flashT > 0) squash *= 1 + e.flashT * 0.35;                // impact pop, halved
-      if (e.fleeing) hop *= 1 - 0.30 * Math.min(1, e.stolen / 8);     // laden: barely leaves the ground
-      // BEAT 1b — the rear-back wind-up over the last 26 units before the hoard
-      var lean = 0;
-      if (!e.fleeing && e.grabT <= 0) {
-        var toKeep = laneLen(e.ln) - e.d;
-        if (toKeep < 26) {
-          var aw = 1 - toKeep / 26;
-          // TRAVEL direction, never `flip` (which is relative to each sprite's
-          // native side and would rear half the cast backwards)
-          lean = -((ahead.x - p.x) < -0.5 ? -1 : 1) * 0.26 * Math.sin(aw * Math.PI);
-          hop -= 2.4 * aw;
-        }
-      }
+      // The painting's torso and head stay registered over its contact shadow.
+      // Direction is a mirror; footsteps are local articulation, never a whole
+      // body tilt/stretch. A theft holds its last distance pose until travel.
+      var flip = this._enemyFacing(e);
+      var face = flip, hop = 0, waddle = 0, lean = 0, squash = 1;
+      // Preserve the short truthful impact pulse, not a looping walk pulse.
+      if (e.flashT > 0 && pose.active) squash += e.flashT * .06;
       var w0 = baseW;                       // depth-scaled above
       var hh2 = w0 * (img.height / img.width);
       ctx.save();
@@ -8101,30 +9142,28 @@
       // within 19 luminance points of the cavern floor. 3.5% larger is a hair
       // over one screen pixel at true draw size -- enough to catch the eye as an
       // edge, far too little to read as a halo.
-      var rimc = this._rimFor(sid);
-      if (rimc) {
-        var rk = 1.035;
-        ctx.globalAlpha = 0.5;
-        ctx.drawImage(rimc, -w0 * rk / 2, -hh2 * rk, w0 * rk, hh2 * rk);
-        ctx.globalAlpha = 1;
-      }
-      ctx.drawImage(img, -w0 / 2, -hh2, w0, hh2);
+      var bodyAlpha = ctx.globalAlpha;
+      var rk = 1.035;
+      ctx.globalAlpha = bodyAlpha * 0.5;
+      paintEnemyArt(ctx, img, w0 * rk, hh2 * rk, pose, true);
+      ctx.globalAlpha = bodyAlpha;
+      paintEnemyArt(ctx, img, w0, hh2, pose);
       // TORCHLIGHT: the six lights each map declares used to illuminate
       // nothing — they were painted before the entities. Now a body that
       // walks past a torch actually catches its warmth.
       var tw2 = torchWarm(p.x, p.y);
       if (tw2 > 0.02) {
         ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = 0.30 * tw2;
-        ctx.drawImage(img, -w0 / 2, -hh2, w0, hh2);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = bodyAlpha * 0.30 * tw2;
+        paintEnemyArt(ctx, img, w0, hh2, pose);
+        ctx.globalAlpha = bodyAlpha;
         ctx.globalCompositeOperation = 'source-over';
       }
       if (e.flashT > 0) {                       // white-flash: re-draw lighter
         ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = Math.min(0.45, e.flashT * 5);   // a tint, not a strobe
-        ctx.drawImage(img, -w0 / 2, -hh2, w0, hh2);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = bodyAlpha * Math.min(0.45, e.flashT * 5);   // a tint, not a strobe
+        paintEnemyArt(ctx, img, w0, hh2, pose);
+        ctx.globalAlpha = bodyAlpha;
         ctx.globalCompositeOperation = 'source-over';
       }
       ctx.restore();
@@ -8148,7 +9187,7 @@
       ctx.beginPath(); ctx.arc(p.x - r * 0.26, yy - r * 0.2, r * 0.1, 0, 6.283); ctx.fill();
       ctx.beginPath(); ctx.arc(p.x + r * 0.19, yy - r * 0.2, r * 0.1, 0, 6.283); ctx.fill();
       if (e.flyer) {
-        var wf = Math.sin(this.worldT * 18 + e.id) * 0.6;
+        var wf = pose.active ? Math.sin(this.worldT * 18 + e.id) * 0.6 : 0;
         ctx.fillStyle = 'rgba(160,130,230,0.8)';
         ctx.beginPath(); ctx.ellipse(p.x - r - 4, yy, 7, 3.5 + wf * 3, 0.5, 0, 6.283); ctx.fill();
         ctx.beginPath(); ctx.ellipse(p.x + r + 4, yy, 7, 3.5 - wf * 3, -0.5, 0, 6.283); ctx.fill();
@@ -8159,47 +9198,13 @@
         ctx.beginPath(); ctx.moveTo(p.x - 10, yy - r - 2); ctx.lineTo(p.x - 6, yy - r - 10); ctx.lineTo(p.x - 2, yy - r - 3); ctx.lineTo(p.x + 2, yy - r - 11); ctx.lineTo(p.x + 6, yy - r - 3); ctx.lineTo(p.x + 10, yy - r - 2); ctx.closePath(); ctx.fill();
       }
     }
-    // THE LOOT LEDGER — how much of OUR gold this one is holding, anchored to
-    // the sprite's REAL drawn height (a fixed offset buries it in tall sprites
-    // and floats it off short ones). Inflates + reddens as the mouth nears, so
-    // the biggest badge on screen is always the most urgent target.
-    if (e.stolen > 0) {
-      var L = this._ledger || (this._ledger = this._bakeLedger());
-      var ci2 = e.stolen >= 6 ? 5 : e.stolen - 1;
-      var kk = e.fleeing ? Math.max(0, 1 - e.d / 220) : 0;
-      ctx.save();
-      ctx.translate(p.x, p.y + 6 + fy - Math.min(hh2 || 30, 78) - 8);
-      ctx.scale(1 + 0.45 * kk, 1 + 0.45 * kk);
-      if (kk > 0.02) {
-        ctx.fillStyle = 'rgba(255,123,123,' + (0.10 + 0.30 * kk) + ')';
-        ctx.beginPath();
-        ctx.ellipse(0, -L.gh[ci2] * 0.5, L.gw[ci2] * 0.5 + 3 + 4 * kk, L.gh[ci2] * 0.5 + 3 + 4 * kk, 0, 0, 6.283);
-        ctx.fill();
-      }
-      var cell = LEDGER_CELL * LEDGER_S;
-      ctx.drawImage(L.c, 0, ci2 * cell, cell, cell,
-        -LEDGER_CELL / 2, -(LEDGER_CELL - LEDGER_BOT), LEDGER_CELL, LEDGER_CELL);
-      ctx.restore();
-    }
-    // hp bar (only when hurt)
-    // ABOVE THE HEAD, not across the waist. p.y - 20 is mid-body on a 36-unit
-    // raider, so a damaged raider wore a bright green line through their legs --
-    // VANUS: "theres a white or yellow line there too that shows up under the
-    // enemies it looks broken". Derived from the drawn sprite height now, so it
-    // clears the head of a Scrapling and of the Hoard King alike.
-    if (e.hp < e.maxHp) {
-      var bw = e.type === 'boss' ? 36 : 20;
-      var bimg = ART.images['e_' + e.type];
-      var bh = baseW * (bimg ? bimg.height / bimg.width : 1.1);
-      var by2 = p.y - bh - 5 + fy;
-      ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(p.x - bw / 2, by2, bw, 3);
-      ctx.fillStyle = e.fleeing ? '#ff7b7b' : '#9ef58f';
-      ctx.fillRect(p.x - bw / 2, by2, bw * Math.max(0, e.hp / e.maxHp), 3);
+    if (indicator) {
+      indicator.fy = fy; indicator.baseW = baseW; indicator.spriteH = hh2 || 30;
     }
     // burn flicker
     if (e.burnT > 0) {
       ctx.fillStyle = 'rgba(255,138,60,0.6)';
-      ctx.beginPath(); ctx.arc(p.x + Math.sin(this.worldT * 20 + e.id) * 3, p.y - 16 + fy, 3, 0, 6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x + (pose.active ? Math.sin(this.worldT * 20 + e.id) * 3 : 0), p.y - 16 + fy, 3, 0, 6.283); ctx.fill();
     }
     // CHILLED. This was a FILLED 24x26 blue ellipse centred 9 units above the
     // raider's feet -- i.e. a solid blue blob sitting on their legs and lower
@@ -8232,16 +9237,337 @@
     }
   };
 
+  // Wing motion is independent of machine output. The spread crew painting
+  // needs a sustained beat even between shots; ground poses stay restrained.
+  // Free wing edges are cut at authored roots; the painted shoulder overlap
+  // stays on the rigid torso. Feet, eyes and the shared muzzle remain fixed.
+  var WICK_PRESENCE = {
+    front:{w:783,h:730,parts:[
+      {name:'wing',side:1,pivot:[455,352],poly:[[443,319],[474,252],[474,175],[570,170],[688,253],[727,403],[727,472],[572,483],[496,447],[473,400],[449,377]]},
+    ]},
+    back:{w:565,h:688,parts:[
+      {name:'wing',side:-1,pivot:[243,344],poly:[[256,322],[222,319],[199,310],[181,291],[169,259],[157,240],[131,238],[97,257],[54,293],[20,337],[-10,394],[-10,463],[13,444],[23,428],[38,418],[57,420],[75,436],[96,475],[115,447],[133,428],[146,420],[167,420],[189,438],[207,432],[219,414],[238,405],[252,405],[263,382]]},
+      {name:'wing',side:1,pivot:[335,344],poly:[[321,321],[357,319],[386,309],[404,283],[415,251],[429,237],[450,240],[480,258],[517,287],[546,319],[575,358],[576,429],[550,423],[532,420],[508,435],[487,459],[477,485],[459,455],[447,438],[427,423],[404,418],[386,418],[367,431],[344,431],[331,410],[319,388]]}
+    ]},
+    crew:{w:951,h:746,parts:[
+      {name:'wing',side:-1,pivot:[309,328],poly:[[0,120],[36,86],[85,80],[145,80],[196,82],[235,89],[260,98],[269,146],[273,211],[275,257],[294,292],[308,318],[325,345],[312,350],[288,333],[272,313],[249,302],[225,299],[212,311],[207,277],[192,251],[173,243],[149,247],[139,256],[125,222],[110,198],[91,177],[71,159],[47,147],[20,140],[0,140]]},
+      {name:'wing',side:1,pivot:[596,343],poly:[[573,319],[608,306],[629,273],[636,236],[638,177],[642,131],[665,107],[693,112],[702,122],[746,101],[797,90],[859,95],[921,116],[968,144],[968,174],[925,164],[902,166],[878,179],[854,201],[852,237],[856,269],[875,318],[831,329],[812,294],[791,291],[769,296],[749,315],[735,346],[731,380],[709,365],[684,354],[661,356],[639,366],[618,385],[597,389]]},
+    ]},
+    breath:{w:783,h:730,parts:[
+      {name:'wing',side:1,pivot:[466,335],poly:[[449,305],[477,271],[480,223],[481,174],[488,146],[511,137],[550,143],[600,164],[652,200],[699,242],[731,289],[744,340],[703,321],[679,310],[658,311],[645,327],[650,389],[622,370],[598,358],[570,354],[550,363],[532,394],[510,366],[486,359],[467,350],[445,344]]}
+    ]}
+  };
+  Game.prototype._wickPresencePose = function(mode,work) {
+    if(RM)return{wing:0};
+    var quiet=Math.sin(this.worldT*1.9)*.013,wing=quiet;
+    if(mode==='crew'){
+      // A quicker downstroke and softer recovery repeat for the whole crew
+      // assignment. Neither a shot timeout nor an idle support post can stop
+      // the wings. Fixed-step world time naturally honors pause and speed.
+      var phase=this.worldT*2.2*Math.PI*2;
+      wing=.22*Math.sin(phase)+.035*Math.sin(phase*2);
+      return{wing:wing};
+    }
+    if(mode==='walk')wing+=Math.sin(this.worldT*5.4)*.070;
+    else if(mode==='attack'){
+      var attack=Math.max(clamp((this._breathT||0)/BREATH_BEAT,0,1),clamp((this._spitT||0)/SPIT_BEAT,0,1));
+      wing+=Math.sin(attack*Math.PI)*.075;
+    }else if(mode!=='idle' && mode!=='ready')wing+=(work||0)*.28;
+    return{wing:wing};
+  };
+  Game.prototype._wickPresenceParts = function(img,kind) {
+    var spec=WICK_PRESENCE[kind];if(!spec)return null;
+    if(!this._wickPresenceCache)this._wickPresenceCache=new WeakMap();
+    var found=this._wickPresenceCache.get(img);if(found)return found;
+    var w=img.width,h=img.height;
+    function layer(){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+    function path(c,poly){c.beginPath();poly.forEach(function(p,i){var x=p[0]/spec.w*w,y=p[1]/spec.h*h;if(i)c.lineTo(x,y);else c.moveTo(x,y);});c.closePath();}
+    var body=layer(),bc=body.getContext('2d');bc.drawImage(img,0,0);
+    var parts=spec.parts.map(function(s){
+      // Include the outer ink edge as well as the membrane. Cutting on the
+      // traced edge left a stationary hairline beside each flexing wing.
+      var mask=layer(),mc=mask.getContext('2d');path(mc,s.poly);mc.fill();
+      mc.lineJoin='round';mc.lineWidth=12/spec.w*w;mc.stroke();
+      var c=layer(),cx=c.getContext('2d');cx.drawImage(img,0,0);
+      cx.globalCompositeOperation='destination-in';cx.drawImage(mask,0,0);cx.globalCompositeOperation='source-over';
+      bc.save();bc.globalCompositeOperation='destination-out';bc.drawImage(mask,0,0);bc.restore();
+      // The root skin remains rigid and covers the small rotating overlap.
+      bc.save();bc.beginPath();bc.ellipse(s.pivot[0]/spec.w*w,s.pivot[1]/spec.h*h,20/spec.w*w,25/spec.h*h,0,0,6.283);bc.clip();bc.drawImage(img,0,0);bc.restore();
+      return{image:c,pivot:s.pivot,side:s.side,name:s.name};
+    });
+    // From behind the two membranes meet across the shoulder band. Keep the
+    // neck/spine on the torso so flexing those roots cannot open a chest seam.
+    if(kind==='back'){
+      bc.save();bc.beginPath();bc.rect(224/spec.w*w,265/spec.h*h,126/spec.w*w,185/spec.h*h);
+      bc.rect(150/spec.w*w,0,278/spec.w*w,265/spec.h*h);bc.clip();bc.drawImage(img,0,0);bc.restore();
+    }
+    found={body:body,parts:parts,w:spec.w,h:spec.h};this._wickPresenceCache.set(img,found);return found;
+  };
+  Game.prototype._drawWickPresence = function(ctx,presence,hh,hw,pose) {
+    if(!presence)return;
+    for(var i=0;i<presence.parts.length;i++){
+      var p=presence.parts[i],x=(p.pivot[0]/presence.w-.5)*hw,y=(p.pivot[1]/presence.h-1)*hh;
+      ctx.save();ctx.translate(x,y);ctx.rotate(p.side*(pose[p.name]||0));ctx.translate(-x,-y);
+      ctx.drawImage(p.image,-hw/2,-hh,hw,hh);ctx.restore();
+    }
+  };
+
+  // ===== Wick's crew rig — painted limbs, fixed body, real work ==========
+  // All joints are registered to hero_man.png. The old up/down images changed
+  // the body and wrench as well as the wings; cycling them morphed Wick. These
+  // cached cut-outs articulate one painting without stretching his silhouette.
+  var CREW_JOINTS = {
+    wrench: [[114,195],[170,190],[199,233],[192,277],[196,320],[236,331],[271,350],[300,350],[345,317],[359,365],[341,404],[316,431],[270,445],[235,445],[244,492],[278,527],[284,568],[260,594],[232,594],[217,570],[202,583],[173,552],[175,519],[191,497],[175,452],[148,436],[137,413],[146,393],[132,378],[128,354],[148,332],[129,288],[109,276],[89,260],[85,232],[96,205]],
+    hand: [[487,358],[547,362],[586,390],[609,437],[602,465],[568,476],[532,486],[499,494],[465,484],[445,452],[452,419],[477,403],[480,384]],
+  };
+  Game.prototype._crewPartsFor = function (img) {
+    if (!img || !img.width) return null;
+    if (!this._crewParts) this._crewParts = new WeakMap();
+    var cached = this._crewParts.get(img); if (cached) return cached;
+    var scale = Math.min(1, 512 / img.width), w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+    function layer() { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+    function mask(c, points) {
+      c.beginPath();
+      for (var i = 0; i < points.length; i++) {
+        var x = points[i][0] / 951 * w, y = points[i][1] / 746 * h;
+        if (i) c.lineTo(x, y); else c.moveTo(x, y);
+      }
+      c.closePath();
+    }
+    var body = layer(), b = body.getContext('2d'); b.drawImage(img, 0, 0, w, h);
+    var out = { body: body };
+    Object.keys(CREW_JOINTS).forEach(function (part) {
+      var cv = layer(), c = cv.getContext('2d'); c.save(); mask(c, CREW_JOINTS[part]); c.clip(); c.drawImage(img, 0, 0, w, h); c.restore();
+      b.save(); b.globalCompositeOperation = 'destination-out'; mask(b, CREW_JOINTS[part]); b.fill(); b.restore(); out[part] = cv;
+    });
+    out.presence=this._wickPresenceParts(body,'crew');if(out.presence)out.body=out.presence.body;
+    this._crewParts.set(img, out); return out;
+  };
+  Game.prototype._crewPose = function (tw) {
+    if (!tw || this._mannedTid(tw.own) !== tw.tid || (!(tw.own | 0) && this.hero.downT > 0)) return null;
+    var time = RM ? 0 : this.worldT, mode = 'ready', work = 0, pulse = 0;
+    if (tw.jamT > 0) {
+      // Crewing REALLY clears jams five times faster. This is a repair stroke,
+      // never a firing/recoil beat on a silenced machine.
+      mode = 'repair'; work = RM ? 0 : Math.sin(time * 7) * 0.18;
+    } else if (tw.type === 'bellows') {
+      var range = lvlRow(tw).range;
+      var feeds = this.towers.some(function (other) {
+        var dx = other.x - tw.x, dy = other.y - tw.y;
+        return !TOWER_TYPES[other.type].support && this._sameSide(other.own, tw.own) && dx * dx + dy * dy <= range * range;
+      }, this);
+      if (this.waveActive && feeds) { mode = 'pump'; work = RM ? 0 : Math.sin(time * 5.5) * 0.22; }
+    } else if (tw.type === 'press') {
+      if (this.waveActive) { mode = 'press'; work = RM ? 0 : Math.sin(time * 4) * 0.24; }
+    } else {
+      var since = tw.shotT === undefined ? 9 : tw.shotT;
+      if (since >= 0 && since < 0.52) {
+        mode = 'shot'; pulse = 1 - since / 0.52;
+        work = RM ? 0 : Math.sin(since / 0.52 * Math.PI) * 0.32;
+      }
+    }
+    return { mode: mode, work: work, pulse: pulse, moving: !RM && mode !== 'ready',
+      wrench: work, hand: -work * 0.65, time: time };
+  };
+  // Crew hardware is registered to the same painted contacts as the limbs.
+  // It never moves Wick or his mouth: only the grip follows the hand's joint.
+  Game.prototype._crewHardware = function(anchor,pose) {
+    var hh=HERO_H*anchor.s,hw=hh*HERO_MAN_ASPECT;
+    function point(x,y){return{x:(x/951-.5)*hw,y:(y/746-1)*hh};}
+    var near=point(555,730),far=point(330,663),socket=point(223,548);
+    var shoulder=point(550,380),rest=point(499,485),angle=pose.hand || 0;
+    var dx=rest.x-shoulder.x,dy=rest.y-shoulder.y,co=Math.cos(angle),si=Math.sin(angle);
+    return{near:near,far:far,socket:socket,shoulder:shoulder,
+      grip:{x:shoulder.x+dx*co-dy*si,y:shoulder.y+dx*si+dy*co},
+      lever:{x:rest.x,y:rest.y+8},
+      board:anchor.tw && (anchor.tw.type==='perch' || anchor.tw.type==='rotor')};
+  };
+  // A narrow oak tread in a brass shoe replaces the two isolated boot ticks on
+  // the tall side mounts. Its sloped top passes through both painted feet.
+  // The filled front edge supplies depth; the tiny grain/rivets match the
+  // existing workshop's wood-and-metal finish without adding a broad panel.
+  Game.prototype._drawCrewFootboard = function(ctx,hardware) {
+    var f=hardware.far,n=hardware.near;
+    var p=[{x:f.x-5,y:f.y-1.1},{x:n.x+4,y:n.y-1.1},{x:n.x+4.6,y:n.y+2},{x:f.x-4.4,y:f.y+2}];
+    function face(points,fill){ctx.fillStyle=fill;ctx.beginPath();points.forEach(function(v,i){if(i)ctx.lineTo(v.x,v.y);else ctx.moveTo(v.x,v.y);});ctx.closePath();ctx.fill();ctx.stroke();}
+    ctx.save();ctx.lineJoin='round';ctx.lineWidth=.8;ctx.strokeStyle='#30251b';
+    face([p[3],p[2],{x:p[2].x,y:p[2].y+2.1},{x:p[3].x,y:p[3].y+2.1}],'#55402a');
+    var wood=ctx.createLinearGradient(p[0].x,p[0].y,p[2].x,p[2].y);wood.addColorStop(0,'#a57d48');wood.addColorStop(.55,'#80603a');wood.addColorStop(1,'#b18a51');
+    face(p,wood);ctx.strokeStyle='#d2af6e';ctx.lineWidth=.65;ctx.beginPath();ctx.moveTo(p[3].x,p[3].y);ctx.lineTo(p[2].x,p[2].y);ctx.stroke();
+    ctx.strokeStyle='#59412a';ctx.lineWidth=.5;
+    for(var i=0;i<2;i++){var t=.35+i*.3;ctx.beginPath();ctx.moveTo(p[0].x+2,p[0].y+(p[3].y-p[0].y)*t);ctx.lineTo(p[1].x-2,p[1].y+(p[2].y-p[1].y)*t);ctx.stroke();}
+    // End shoes tie the tread into the bracket rather than floating as wood.
+    for(var j=0;j<2;j++){
+      var a=j?p[1]:p[0],b=j?p[2]:p[3],inset=j?-1.7:1.7;
+      ctx.strokeStyle='#b69a64';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(a.x+inset,a.y+.15);ctx.lineTo(b.x+inset,b.y+1.4);ctx.stroke();
+      ctx.fillStyle='#322820';ctx.beginPath();ctx.arc(b.x+inset,b.y+.6,.65,0,6.283);ctx.fill();
+      ctx.fillStyle='#e1c184';ctx.beginPath();ctx.arc(b.x+inset-.15,b.y+.35,.28,0,6.283);ctx.fill();
+    }
+    ctx.restore();
+  };
+  Game.prototype._drawCrewMount = function (ctx, tw) {
+    var pose=this._crewPose(tw);if(!pose)return;
+    var a=this._wickAnchor(tw.x,tw.y,tw.tid),hardware=this._crewHardware(a,pose);
+    var flip=(TOWER_TYPES[tw.type].mount || {dx:0}).dx>=0?1:-1;
+    var oy=a.y+5-a.lift,mx=(tw.x-a.x)*flip,my=tw.y-oy-Math.min(22,a.lift*.5);
+    ctx.save();ctx.translate(a.x,oy);ctx.scale(flip,1);ctx.lineCap='round';ctx.lineJoin='round';
+    function stay(x,y,board){
+      // A short turned-down outer shoe and a dark brass stay carry the tread.
+      // The inner fixing is drawn first so the real chassis occludes it.
+      ctx.beginPath();ctx.moveTo(mx,my);if(board)ctx.lineTo(x,y+5);ctx.lineTo(x,y);
+      ctx.strokeStyle='#2b2119';ctx.lineWidth=board?3:2.1;ctx.stroke();
+      ctx.strokeStyle='#88704a';ctx.lineWidth=board?1.7:.9;ctx.stroke();
+      ctx.strokeStyle='#b99b63';ctx.lineWidth=.45;ctx.stroke();
+    }
+    stay(hardware.near.x,hardware.near.y+1,hardware.board);
+    stay(hardware.far.x,hardware.far.y+1,hardware.board);
+    stay(hardware.socket.x,hardware.socket.y,false);
+    stay(hardware.lever.x,hardware.lever.y+2,false);
+    ctx.restore();
+  };
+  Game.prototype._drawCrewWick = function (ctx, anchor, side) {
+    var tw = anchor.tw, pose = this._crewPose(tw);
+    if (!tw || !pose || !ART.images.hero_man) return false;
+    var img = side ? this._rivalPlate(ART.images.hero_man, this.rival.coat || 'amethyst') : this._myPlate(ART.images.hero_man);
+    var parts = this._crewPartsFor(img); if (!parts) return false;
+    var hh = HERO_H * anchor.s, hw = hh * HERO_MAN_ASPECT;
+    var flip = (TOWER_TYPES[tw.type].mount || { dx: 0 }).dx >= 0 ? 1 : -1;
+    var originY = anchor.y + 5 - anchor.lift;
+    var hardware = this._crewHardware(anchor,pose);
+    ctx.save(); ctx.translate(anchor.x, originY); ctx.scale(flip, 1);
+    // Native painted coordinates, in world units, with the feet at the origin.
+    function px(x) { return (x / 951 - 0.5) * hw; }
+    function py(y) { return (y / 746 - 1) * hh; }
+    var socketX = px(223), socketY = py(548);
+    // A real attachment, not a second ring: the small brass bracket joins the
+    // wrench socket and two boot ledges to this machine's chassis.
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    function strut(x1, y1, x2, y2) {
+      ctx.strokeStyle = '#281f1c'; ctx.lineWidth = 2.1;
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      ctx.strokeStyle = '#8d806a'; ctx.lineWidth = 0.9;
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    }
+    if(hardware.board)this._drawCrewFootboard(ctx,hardware);
+    else{
+      strut(px(555)-4,py(730),px(555)+4,py(730));
+      strut(px(330)-3,py(663),px(330)+3,py(663));
+    }
+    strut(socketX, socketY+4, socketX, socketY);
+    ctx.fillStyle = '#987e50'; ctx.strokeStyle = '#3b281d'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(socketX,socketY,3,0,6.283); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#f0c987'; ctx.lineWidth = 1;
+    ctx.beginPath();ctx.moveTo(socketX-1,socketY-1);ctx.lineTo(socketX+1,socketY+1);ctx.stroke();
+    function limb(plate, jointX, jointY, angle) {
+      var jx=px(jointX), jy=py(jointY);
+      ctx.save();ctx.translate(jx,jy);ctx.rotate(angle);ctx.translate(-jx,-jy);
+      ctx.drawImage(plate,-hw/2,-hh,hw,hh);ctx.restore();
+    }
+    // Far tool arm sits behind the torso at its shoulder. Its socket stays
+    // fixed while the wrench turns; the free hand works the close control.
+    this._drawWickPresence(ctx,parts.presence,hh,hw,this._wickPresencePose('crew',pose.work));
+    limb(parts.wrench,223,548,pose.wrench);
+    ctx.drawImage(parts.body,-hw/2,-hh,hw,hh);
+    // The lever meets the painted lower fingers, transformed through the same
+    // shoulder rotation as the hand. Its pivot is fixed to the chassis; the
+    // former handY+7 decoration left a visible gap below the grip.
+    var lever=hardware.lever,grip=hardware.grip;
+    ctx.fillStyle='#725934';ctx.strokeStyle='#31241b';ctx.lineWidth=.85;
+    ctx.beginPath();ctx.moveTo(lever.x-3,lever.y+1);ctx.lineTo(lever.x+2.5,lever.y-.5);ctx.lineTo(lever.x+3,lever.y+2.5);ctx.lineTo(lever.x-2.5,lever.y+3.5);ctx.closePath();ctx.fill();ctx.stroke();
+    strut(lever.x,lever.y+1,grip.x,grip.y+.4);
+    ctx.fillStyle='#c2a16a';ctx.beginPath();ctx.arc(lever.x,lever.y+1,1.15,0,6.283);ctx.fill();
+    ctx.strokeStyle='#d7b775';ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(grip.x-2,grip.y+.1);ctx.lineTo(grip.x+2,grip.y+.1);ctx.stroke();
+    limb(parts.hand,550,380,pose.hand);
+    // Work lamps are attached to the socket. They name actual output/repair
+    // without covering Wick, and reduce-motion retains the steady state.
+    var lamp = pose.mode === 'repair' ? '#ec8667' : pose.mode === 'ready' ? '#756148' : '#d9b579';
+    ctx.fillStyle=lamp;ctx.beginPath();ctx.arc(socketX,socketY,1.15,0,6.283);ctx.fill();
+    ctx.restore();
+    return true;
+  };
+
+  // ===== Wick on foot — planted painting, articulated steps ===============
+  // Exposed boots, tool arm and wing membranes have local joints. The chest
+  // and head stay registered: rotating/scaling their plate shifts the mouth
+  // away from _muzzle() and makes a standing dragon look airborne.
+  var FOOT_JOINTS = {
+    front: { w: 783, h: 730, parts: [
+      { name: 'far', joint: [277,601], seam: 622, poly: [[198,591],[269,575],[318,603],[321,653],[301,675],[247,689],[209,686],[169,673],[171,650],[196,628]] },
+      { name: 'near', joint: [402,621], seam: 650, poly: [[347,613],[402,598],[453,610],[465,670],[459,704],[433,725],[405,729],[372,724],[334,710],[333,686],[348,653]] },
+      { name: 'tool', joint: [211,441], poly: [[60,303],[97,290],[127,293],[154,316],[167,344],[157,378],[171,412],[196,416],[224,399],[231,469],[208,483],[184,490],[183,513],[202,562],[197,585],[180,592],[164,579],[154,551],[137,548],[115,517],[100,510],[88,494],[86,471],[95,451],[89,427],[76,410],[56,384],[49,354]] },
+    ] },
+    back: { w: 565, h: 688, parts: [
+      // The far foot is behind his painted tail. Moving that whole silhouette
+      // to invent another leg would split it; one visible boot takes the step.
+      { name: 'near', joint: [368,608], seam: 638, poly: [[331,611],[356,582],[394,584],[414,625],[447,641],[461,662],[443,676],[406,681],[331,680],[327,654]] },
+    ] },
+    breath: { w: 783, h: 730, parts: [
+      { name: 'tool', joint: [195,449], poly: [[19,389],[51,369],[91,370],[116,397],[124,425],[154,439],[185,422],[214,431],[215,476],[181,508],[157,518],[175,557],[189,600],[175,623],[153,630],[122,603],[104,583],[82,565],[72,549],[46,544],[27,516],[17,484],[9,442],[8,410]] },
+    ] },
+  };
+  Game.prototype._footPose = function () {
+    var h = this.hero;
+    if (h.manned || h.downT > 0) return null;
+    var dx = h.tx - h.x, dy = h.ty - h.y, distance = Math.sqrt(dx * dx + dy * dy);
+    var moving = distance > 3;
+    var attack = Math.max(Math.min(1, (this._breathT || 0) / BREATH_BEAT),
+                          Math.min(1, (this._spitT || 0) / SPIT_BEAT));
+    var stride = moving && !RM ? Math.min(1, distance / 12) : 0;
+    var phase = RM ? 0 : this.worldT * 10.8, step = Math.sin(phase);
+    return { mode: attack > 0 ? 'attack' : moving ? 'walk' : 'idle', moving: moving,
+      back: moving && dy < -Math.abs(dx) * 0.7,
+      // One boot swings while the other bears weight; their lifts never
+      // coincide. No body bob, bank, scale or simulated position is involved.
+      far: step * 0.24 * stride, near: -step * 0.24 * stride,
+      farLift: Math.max(0, Math.cos(phase)) * 0.85 * stride,
+      nearLift: Math.max(0, -Math.cos(phase)) * 0.85 * stride,
+      tool: RM ? 0 : attack > 0 ? Math.sin(attack * Math.PI) * -0.12 : -step * 0.075 * stride };
+  };
+  Game.prototype._footPartsFor = function (img, kind) {
+    var rig = FOOT_JOINTS[kind];
+    if (!rig || !img || !img.width) return null;
+    if (!this._footParts) this._footParts = new WeakMap();
+    var cached = this._footParts.get(img); if (cached) return cached;
+    var scale = Math.min(1, 512 / img.width), w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+    function layer() { var cv = document.createElement('canvas'); cv.width = w; cv.height = h; return cv; }
+    function mask(c, points) {
+      c.beginPath();
+      for (var i = 0; i < points.length; i++) {
+        var x = points[i][0] / rig.w * w, y = points[i][1] / rig.h * h;
+        if (i) c.lineTo(x,y); else c.moveTo(x,y);
+      }
+      c.closePath();
+    }
+    var body = layer(), b = body.getContext('2d'); b.drawImage(img,0,0,w,h);
+    var out = { body: body, rig: rig };
+    rig.parts.forEach(function (part) {
+      var cv = layer(), c = cv.getContext('2d'); c.save(); mask(c,part.poly); c.clip(); c.drawImage(img,0,0,w,h); c.restore(); out[part.name] = cv;
+      b.save(); b.globalCompositeOperation = 'destination-out';
+      // Leave the upper calf painted over each moving boot. This overlap is
+      // the joint, so a lifted toe never opens a transparent ankle seam.
+      if (part.seam) { b.beginPath(); b.rect(0,part.seam / rig.h * h,w,h); b.clip(); }
+      mask(b,part.poly); b.fill(); b.restore();
+    });
+    out.presence=this._wickPresenceParts(body,kind);if(out.presence)out.body=out.presence.body;
+    this._footParts.set(img,out); return out;
+  };
+  Game.prototype._drawFootWick = function (ctx, img, kind, hh, hw, pose) {
+    if (!pose || RM) return false;
+    var parts = this._footPartsFor(img,kind); if (!parts) return false;
+    var rig = parts.rig;
+    this._drawWickPresence(ctx,parts.presence,hh,hw,this._wickPresencePose(pose.mode,0));
+    for (var i = 0; i < rig.parts.length; i++) {
+      var part = rig.parts[i], jx = (part.joint[0] / rig.w - 0.5) * hw, jy = (part.joint[1] / rig.h - 1) * hh;
+      ctx.save(); ctx.translate(jx,jy - (pose[part.name + 'Lift'] || 0));
+      ctx.rotate(pose[part.name] || 0); ctx.translate(-jx,-jy);
+      ctx.drawImage(parts[part.name],-hw/2,-hh,hw,hh); ctx.restore();
+    }
+    ctx.drawImage(parts.body,-hw/2,-hh,hw,hh);
+    return true;
+  };
+
   Game.prototype._drawHero = function (ctx) {
     var h = this.hero;
-    // While a manned plate is up, Wick is PAINTED INTO the machine sprite, so
-    // his own sprite must not be drawn or there are two of him on one machine.
-    // Only the BODY is skipped — the selection ring, the charged-breath ring
-    // and the breath meter are his UI and stay anchored to him.
-    //
-    // Falls back to the old lifted sprite for any machine whose manned plate
-    // has not loaded or does not exist, so manning never has a frame with no
-    // dragon in it.
     // DOWNED — he is not on the field. Drawing him greyed out in place would
     // read as "still there but sad"; a scorch mark and a countdown reads as
     // gone, which is what the sim means.
@@ -8288,32 +9614,19 @@
     // MANNED: he is perched ON the machine, so lift him and drop the ground
     // shadow (he is not standing on the floor any more).
     var lift = anc.lift;
-    // The shadow is the ONLY thing that says how high he is. It has to move
-    // with him or the hover reads as the sprite jittering in place.
+    // A steady ground shadow keeps the stationary body planted; only the
+    // exposed boots lift a little during a step.
     if (!h.manned) {
-      // planted feet cast a STEADY shadow; only a walking step or a hover
-      // moves it. A shadow that pulses under a motionless dragon is the same
-      // floating tell in another channel.
-      var shF = hMoving2 ? 1 - 0.10 * Math.abs(Math.sin(this.worldT * 9.2)) : 1;
-      groundShadow(ctx, h.x, h.y, 44 * depthScale(h.y) * shF, 0, 1 / shF);
+      groundShadow(ctx, h.x, h.y, 44 * depthScale(h.y), 0, 1);
     }
     var hdx2 = h.tx - h.x, hdy2 = h.ty - h.y;
     var hMoving2 = Math.abs(hdx2) + Math.abs(hdy2) > 3;
     var goingAway = hMoving2 && hdy2 < -Math.abs(hdx2) * 0.7;   // mostly up-screen
-    // He is always drawn now -- a manned frame with no dragon in it was only
-    // ever possible because the plate could be missing.
-    // THE FLAP. Four slots on the wingbeat -- down, mid, up, mid -- so the
-    // cycle is symmetric and never snaps between the extremes. Falls back to
-    // the mid plate if a wing frame has not decoded yet, so a slow load shows a
-    // still dragon rather than a missing one.
+    // Crewing uses one registered painting and articulated limbs. A missing
+    // manning image falls back to his normal plate, never an invisible dragon.
     var himg;
     if (h.manned && ART.images.hero_man) {
-      var wph = (this.worldT * 7.4) % 6.283;
-      var wdn = ART.images.hero_man_dn, wup = ART.images.hero_man_up;
-      himg = wph < 1.571 ? (wdn || ART.images.hero_man)
-           : wph < 3.142 ? ART.images.hero_man
-           : wph < 4.712 ? (wup || ART.images.hero_man)
-           : ART.images.hero_man;
+      himg = ART.images.hero_man;
     } else if ((this._breathT > 0 || this._spitT > 0) && ART.images.hero_breathe) {
       // THE OPEN JAW IS A FRAME, NOT PAINT. The idle plate has a closed muzzle,
       // and the dark ellipse this used to stamp on it to fake an open mouth
@@ -8338,9 +9651,11 @@
     // anchored at MUZZLE_FWD/MUZZLE_UP while the sprite drawn was the open jaw.
     // Take the identity while himg still IS an ART image.
     var breathPose = himg === ART.images.hero_breathe;
+    var footKind = breathPose ? 'breath' : himg === ART.images.hero_back ? 'back' : 'front';
     himg = this._myPlate(himg);
+    var crewDrawn = mtw && this._drawCrewWick(ctx, anc, 0);
     if (himg) {
-      // hover bob + sway; face the direction he's headed
+      // The painted body and open jaw share one rigid ground registration.
       var ht = this.worldT;
       // FACE THE MACHINE WHILE MANNING IT. hflip is derived from where he is
       // WALKING to -- and manning sets tx/ty to the machine he is already on, so
@@ -8351,70 +9666,20 @@
       // ONE SOURCE (see _heroFacing): the sim owns which way he looks, and the
       // plate is painted facing left, so the mirror is its negation.
       var hflip = -this._heroFacing();
-      var hmoving = Math.abs(h.tx - h.x) + Math.abs(h.ty - h.y) > 3;
-      // HE STANDS. He is drawn standing in his own art -- the title plate, the
-      // app icon, hero_whelp itself -- and he bobbed anyway, at every moment,
-      // which VANUS read as "even one still he is wobbling and looks like he's
-      // floating a little bit". My first answer was to commit to flight
-      // everywhere; his correction is the right one: "he could walk too cause
-      // he's standing in the original photo of him".
-      //
-      // So THREE distinct states, and only one of them leaves the ground:
-      //   IDLE     planted. ZERO vertical motion -- the thing that read as
-      //            floating was a bob with nothing to justify it. Breathing
-      //            only, on the squash term below.
-      //   WALKING  a STEP bob: he rises on each footfall, so the vertical runs
-      //            at twice the stride and its lowest point is the plant. Small
-      //            amplitude on purpose; a big one is a hop, not a walk.
-      //   MANNING  airborne, wings out, because that is what hero_man depicts
-      //            and what VANUS asked for -- "if you man it you are flying
-      //            next to it using wrench or controls".
-      // The flap only exists in the air. The wings are a static painting, so it
-      // is faked the way a two-frame cycle does it: the span widens on the
-      // downstroke and he RISES on it, i.e. the vertical is 90 degrees out of
-      // phase with the span. In phase it reads as a pulsing balloon.
-      var flapF = mnt ? 7.4 : 9.2;      // matches the wing-frame cycle above
-      var flap  = mnt ? Math.sin(ht * flapF) : 0;          // wingbeat: AIR ONLY
-      var flapA = mnt ? 0.055 : 0;                         // wing SPAN, x
-      var rise  = mnt ? Math.cos(ht * flapF)               // hover, out of phase
-                      : (hmoving ? -Math.abs(Math.sin(ht * flapF)) : 0);
-      var bobA2 = mnt ? 2.2 : (hmoving ? 1.5 : 0);         // idle is EXACTLY 0
-      // NO IDLE DEFORMATION AT ALL. A standing Wick was still being squashed
-      // and stretched by this breathing term -- (2-hsq) on X against hsq on Y --
-      // which is what VANUS is seeing: "wicks movement even when still looks
-      // like he's bouncing... that doesn't make it life like just cause you
-      // make him bounce. I said to give him other movements... not just making
-      // things stretch". Stretching a painting is not animation. A standing
-      // character should be STILL until it has real frames to be alive with.
-      var hsq = hmoving ? 1 + Math.sin(ht * 9) * 0.05
-              : mnt     ? 1 + Math.sin(ht * 7.4) * 0.018
-              : 1;
+      var footPose = this._footPose();
       var hh0 = HERO_H * manS, hw0 = hh0 * (himg.width / himg.height);
       // the sprite is drawn facing LEFT natively, so world-facing is -hflip.
       // _muzzle() reads this to put the breath where his mouth is.
       this._heroFace = -hflip;
-      // BREATH RECOIL — a short kick back and up, easing out. b runs 1 -> 0.
+      // The attack painting already braces and opens its jaw. Recoil belongs
+      // in the tool arm, not a transform that floats both boots and the muzzle.
       var b = Math.max(0, (this._breathT || 0) / BREATH_BEAT);
-      var kick = b * b;
       ctx.save();
-      // manX/manY are the machine's mount when manned, his own feet otherwise.
-      var hoverT = -rise * bobA2;                // 0 when idle: feet planted
-      ctx.translate(manX - (this._heroFace) * kick * 4,
-                    manY + 5 - lift - kick * 3 + hoverT);
-      // banks with the WINGBEAT while flying and leans into the WALK while
-      // moving; standing still it does neither. An idle rotation at its own
-      // unrelated frequency is most of what read as drifting.
-      ctx.rotate(flap * 0.028 + (hmoving && !mnt ? -hflip * 0.055 : 0)
-                 + this._heroFace * kick * 0.22);
-      // NO NON-UNIFORM FLAP SCALE. Widening X while narrowing Y is how you fake
-      // a wingbeat on a SHAPE; on a painted character it is just squashing, and
-      // it was compounding with the (2-hsq)/hsq breathing pair on two unrelated
-      // rhythms. VANUS: "he looks like he's being squashed and around doesn't
-      // look like he's actually flying. It just looks weird." A real flap needs
-      // real wing frames, which is what ART.images.hero_man_up/_dn are for --
-      // the body is identical between them and only the wings move.
-      ctx.scale(hflip * (2 - hsq) * (1 + kick * 0.10), hsq * (1 + kick * 0.06));
-      ctx.drawImage(himg, -hw0 / 2, -hh0, hw0, hh0);
+      ctx.translate(manX, manY + 5 - lift);
+      ctx.scale(hflip, 1);
+      if (!crewDrawn && (mnt || !this._drawFootWick(ctx,himg,footKind,hh0,hw0,footPose))) {
+        ctx.drawImage(himg, -hw0 / 2, -hh0, hw0, hh0);
+      }
       // THE MOUTH OPENS. The painted plate has a closed muzzle and there is no
       // open-mouthed variant, so the jaw is drawn: a dark throat wedge at the
       // snout with a hot core, scaled by the same eased kick. It sits inside
@@ -8506,7 +9771,7 @@
       }
       ctx.restore();
     }
-    else {
+    else if (!crewDrawn) {
       // procedural fallback ONLY when he genuinely has no sprite.
       //
       // THIS READ `!inPlate`, AND `inPlate` IS DECLARED NOWHERE. It guarded the
@@ -8518,7 +9783,7 @@
       // rather than a failure, so one slow or 404'd asset turned every draw()
       // into a throw that aborted ~38% of the frame -- the whole HUD, the shop,
       // and every overlay.
-      var bob = Math.sin(this.worldT * 4) * 1.5;
+      var bob = 0; // missing art must still leave a planted dragon
       // ember the whelp: round ruby dragonling
       ctx.fillStyle = '#d64545';
       ctx.beginPath(); ctx.ellipse(h.x, h.y - 14 + bob, 13, 15, 0, 0, 6.283); ctx.fill();
@@ -8561,9 +9826,10 @@
     // HEALTH — shown only when hurt, so a healthy Wick keeps a clean silhouette
     if (h.hp < h.maxHp) {
       var hpf = Math.max(0, h.hp / h.maxHp);
-      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(h.x - 16, h.y - 50, 32, 4);
+      var healthX = anc.x, healthY = mtw ? anc.y + 5 - anc.lift - HERO_H * anc.s - 6 : h.y - 50;
+      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(healthX - 16, healthY, 32, 4);
       ctx.fillStyle = hpf > 0.5 ? '#9ef58f' : hpf > 0.25 ? '#ffd75e' : '#ff5b5b';
-      ctx.fillRect(h.x - 16, h.y - 50, 32 * hpf, 4);
+      ctx.fillRect(healthX - 16, healthY, 32 * hpf, 4);
     }
     // THE BREATH METER IS GONE. Wick wore TWO bars stacked over his head and
     // the lower one duplicated the breath button, which already draws a
@@ -8596,16 +9862,6 @@
         ctx.beginPath(); ctx.ellipse(p.x, p.y - 20, 12, 14, 0, 0, 6.283); ctx.fill();
       }
     }
-    // floats + simple particles, remapped
-    for (var f2 = 0; f2 < this.floats.length; f2++) {
-      var fl2 = this.floats[f2];
-      var fp = R3D.remap(fl2.x, fl2.y);
-      ctx.globalAlpha = Math.min(1, fl2.t);
-      ctx.fillStyle = fl2.c;
-      ctx.font = 'bold 15px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(fl2.txt, fp.x, fp.y);
-    }
-    ctx.globalAlpha = 1; ctx.textAlign = 'left';
     // escape pressure at the cave mouth (the O(1) alarm, remapped)
     var esc = 0;
     for (var q2 = 0; q2 < this.enemies.length; q2++) {
@@ -8630,11 +9886,79 @@
     }
   };
 
+  // Local release and body contact share one short visual beat. No broad
+  // target webs: only the single-target Mimic has a connecting snap.
+  Game.prototype._drawMachineAttack = function (ctx, pa) {
+    var t = RM ? 0 : 1 - Math.max(0, pa.life / pa.T);
+    var alpha = RM ? .65 : Math.min(1, pa.life / .07), s = pa.s;
+    var points = pa.contacts || [];
+    ctx.save(); ctx.globalAlpha *= alpha; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    if (pa.attack === 'bite' && points.length) {
+      var dx = points[0].x - pa.x, dy = points[0].y - pa.y;
+      var reach = Math.sqrt(dx * dx + dy * dy);
+      var retract = t < .34 ? 1 : Math.max(0, (1 - t) / .66);
+      var end = reach * retract, gap = 1 - .65 * Math.min(1, t / .30);
+      ctx.translate(pa.x, pa.y); ctx.rotate(Math.atan2(dy, dx));
+      // A narrow spring linkage, extended on the hit and withdrawn into the maw.
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(end, 0);
+      ctx.strokeStyle = '#473421'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.strokeStyle = '#c8a060'; ctx.lineWidth = 1.25; ctx.stroke();
+      ctx.strokeStyle = '#f0d5a0'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (var link = 1; link < 4; link++) {
+        var lx = end * link / 4; ctx.moveTo(lx - 1, -1.2); ctx.lineTo(lx + 1, 1.2);
+      }
+      ctx.stroke();
+      // Closing steel jaw marks meet on the victim's body in the first frame.
+      ctx.translate(end, 0); ctx.strokeStyle = '#e6d2a7'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-5, -6 * gap); ctx.lineTo(2, -3 * gap); ctx.lineTo(5, -gap);
+      ctx.moveTo(-5, 6 * gap); ctx.lineTo(2, 3 * gap); ctx.lineTo(5, gap); ctx.stroke();
+    } else if (pa.attack === 'blade') {
+      // Short arcs live in the rotor plane, not at its foundation.
+      var sweep = t * 1.6;
+      ctx.strokeStyle = '#dce9e7'; ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.ellipse(pa.x, pa.y, (23 + t * 3) * s, (9 + t) * s, 0, sweep + .1, sweep + 1.3);
+      ctx.ellipse(pa.x, pa.y, (23 + t * 3) * s, (9 + t) * s, 0, sweep + 3.24, sweep + 4.44);
+      ctx.stroke();
+      ctx.strokeStyle = '#e9efde'; ctx.lineWidth = 1.5; ctx.beginPath();
+      for (var i = 0; i < points.length; i++) {
+        var cp = points[i], an = Math.atan2(cp.y - pa.y, cp.x - pa.x) + .55;
+        var ca = Math.cos(an), sa = Math.sin(an), r = 6 + t * 2;
+        ctx.moveTo(cp.x - ca * r - sa * 2, cp.y - sa * r + ca * 2);
+        ctx.quadraticCurveTo(cp.x, cp.y, cp.x + ca * r + sa * 2, cp.y + sa * r - ca * 2);
+        ctx.moveTo(cp.x - ca * 3 + sa * 3, cp.y - sa * 3 - ca * 3);
+        ctx.lineTo(cp.x + ca * 4 + sa * 3, cp.y + sa * 4 - ca * 3);
+      }
+      ctx.stroke();
+    } else if (pa.attack === 'chill') {
+      // A clear core resonance and compact frost contacts identify every victim.
+      var cr = (6 + t * 3) * s;
+      ctx.strokeStyle = '#bef6f3'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.moveTo(pa.x, pa.y - cr); ctx.lineTo(pa.x + cr * .65, pa.y);
+      ctx.lineTo(pa.x, pa.y + cr); ctx.lineTo(pa.x - cr * .65, pa.y); ctx.closePath(); ctx.stroke();
+      ctx.strokeStyle = '#abdfeb'; ctx.lineWidth = 1.25; ctx.beginPath();
+      for (var c = 0; c < points.length; c++) {
+        var fp = points[c], fr = 5 + t;
+        for (var spoke = 0; spoke < 3; spoke++) {
+          var a = spoke * 1.0472 + .35, cx = Math.cos(a) * fr, cy = Math.sin(a) * fr;
+          ctx.moveTo(fp.x - cx, fp.y - cy); ctx.lineTo(fp.x + cx, fp.y + cy);
+        }
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
+
   Game.prototype._drawParticles = function (ctx) {
     for (var i = 0; i < this.particles.length; i++) {
       var pa = this.particles[i];
       var a = Math.max(0, pa.life / pa.T);
-      if (pa.kind === 'dot') {
+      if (pa.kind === 'machineAttack') {
+        ctx.globalAlpha = 1;
+        this._drawMachineAttack(ctx, pa);
+      } else if (pa.kind === 'dot') {
         ctx.globalAlpha = a;
         ctx.fillStyle = pa.c;
         ctx.beginPath(); ctx.arc(pa.x, pa.y, pa.r, 0, 6.283); ctx.fill();
@@ -8659,30 +9983,297 @@
       }
     }
     ctx.globalAlpha = 1;
-    // The floats still DECAY on the rival's board (skipping that loop would
-    // leak them forever); they are simply not DRAWN there -- at 96px wide a
-    // world-scale "PAD BONUS -20%" covers her whole cave.
-    for (var f = 0; !this.isRival && f < this.floats.length; f++) {
-      var fl = this.floats[f];
-      ctx.globalAlpha = Math.min(1, fl.t);
-      ctx.fillStyle = fl.c;
-      ctx.font = 'bold 15px system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(fl.txt, fl.x, fl.y);
-      ctx.textAlign = 'left';
-    }
     ctx.globalAlpha = 1;
+  };
+
+  // ===== Wave intelligence — read-only views of the real encounter ========
+  // Forecasts read waveGroups, the SAME input buildWave uses. In a duel each
+  // side receives that party, so the forecast is per side, never doubled.
+  // Neither helper writes gameplay state, consumes a random draw, or caches a
+  // board-dependent answer that could survive a build/sell/restore.
+  Game.prototype._waveIntel = function (w) {
+    w = w === undefined ? this.wave : Math.max(0, w | 0);
+    var groups = w < this.totalWaves() ? (this.waveGroups(w) || []) : [];
+    var counts = {}, order = [], total = 0;
+    for (var i = 0; i < groups.length; i++) {
+      var gr = groups[i];
+      if (!Object.prototype.hasOwnProperty.call(ENEMY_TYPES, gr.type)) continue;
+      if (!counts[gr.type]) { counts[gr.type] = 0; order.push(gr.type); }
+      counts[gr.type] += gr.count; total += gr.count;
+    }
+    function trait(id) {
+      var e = ENEMY_TYPES[id];
+      if (e.summonAtHalf) return { label: 'BOSS', rank: 1000, color: '#ffb799' };
+      if (e.flyer) return { label: 'AIR', rank: 900, color: '#b9ddff' };
+      if (e.heals) return { label: 'HEAL', rank: 800, color: '#c3ecb2' };
+      if (e.sapR) return { label: 'JAM', rank: 700, color: '#ffc78e' };
+      if (e.blink) return { label: 'BLINK', rank: 600, color: '#d6c0ff' };
+      if (e.armor) return { label: 'ARMOR', rank: 500, color: '#cad4df' };
+      if (e.pavise) return { label: 'SHIELD', rank: 450, color: '#cad4df' };
+      if (e.splitInto) return { label: 'SPLIT', rank: 400, color: '#dbc2a5' };
+      if (e.spd > ENEMY_TYPES.looter.spd * 1.5) return { label: 'FAST', rank: 200, color: '#ffd486' };
+      return { label: 'GROUND', rank: 100, color: '#e9dac2' };
+    }
+    var roster = order.map(function (id, at) {
+      var t = trait(id);
+      return { type: id, name: ENEMY_TYPES[id].name, count: counts[id],
+        role: t.label, priority: t.rank, color: t.color, order: at };
+    }).sort(function (a, b) { return b.priority - a.priority || a.order - b.order; });
+    var board = { weapons: 0, air: 0, airDamage: 0, chill: 0, splash: 0, aimed: 0 };
+    for (var t = 0; t < this.towers.length; t++) {
+      var tw = this.towers[t];
+      if (!this._sameSide(tw.own, 0)) continue;
+      var tt = TOWER_TYPES[tw.type];
+      if (!tt || tt.support) continue;
+      board.weapons++;
+      if (tt.hitsAir) { board.air++; if (lvlRow(tw).dmg > 0) board.airDamage++; }
+      if (tw.type === 'crystal') board.chill++;
+      if (tw.type === 'brazier' || tw.type === 'rotor') board.splash++;
+      if (tw.type !== 'crystal' && tw.type !== 'rotor') board.aimed++;
+    }
+    var shelf = this._shelf();
+    function available(ids) {
+      for (var j = 0; j < ids.length; j++) if (shelf.indexOf(ids[j]) >= 0) return ids[j];
+      return null;
+    }
+    var advice = { key: 'ground', color: '#e9dac2', text: 'Scraplings have no armor. Crossbows are a cheap answer.', recommend: null };
+    var choice;
+    if (counts.boss) {
+      advice = { key: 'boss', color: '#ffb799', text: 'The King steals ' + ENEMY_TYPES.boss.steals + ' coins. Slow him inside your strongest fire.', recommend: board.chill ? null : available(['crystal']) };
+    } else if (counts.bat && !board.airDamage) {
+      choice = available(['ballista', 'perch', 'rotor', 'crystal']);
+      advice = { key: 'air-gap', color: '#b9ddff',
+        text: choice ? 'Add a ' + TOWER_TYPES[choice].short.charAt(0) + TOWER_TYPES[choice].short.slice(1).toLowerCase() + ' for flyers. ' + (board.air ? 'Chill needs damage beside it.' : 'Ground-only machines miss.') : 'Flying raiders need an air-capable weapon.', recommend: choice };
+    } else if (counts.warlock) {
+      choice = available(['ballista', 'perch', 'mimic', 'brazier']);
+      advice = { key: 'healer', color: '#c3ecb2', text: board.aimed ? 'Set a weapon to HEXER aim. Stop the healer before it mends the pack.' : 'Greed Hexers heal the pack. Add a weapon with HEXER aim.', recommend: board.aimed ? null : choice };
+    } else if (counts.sapper) {
+      advice = { key: 'jammer', color: '#ffc78e', text: 'Pry-Hands jam machines. Move Wick beside a jam to repair it faster.', recommend: null };
+    } else if (counts.blinker) {
+      advice = { key: 'blink', color: '#d6c0ff', text: board.chill ? 'Keep firepower beside your Gemsinger. Chilled Blinkers cannot teleport.' : 'A Gemsinger stops Blinkers teleporting while they are chilled.', recommend: board.chill ? null : available(['crystal']) };
+    } else if (counts.brute) {
+      advice = { key: 'armor', color: '#cad4df', text: 'Bulwarks block ' + ENEMY_TYPES.brute.armor + ' per hit. Upgrade damage; Gemsinger magic ignores armor.', recommend: board.chill ? null : available(['crystal']) };
+    } else if (counts.shield) {
+      choice = available(['brazier', 'crystal']);
+      advice = { key: 'shield', color: '#cad4df', text: 'Shellback shields halve bolts. ' + (this.mods.breathOff ? 'Magic and splash get through.' : "Magic, splash and Wick's breath get through."), recommend: choice };
+    } else if (counts.splitter) {
+      advice = { key: 'split', color: '#dbc2a5', text: board.splash ? 'Hogsheads split on defeat. Keep their smaller raiders inside your area damage.' : 'Hogsheads split on defeat. Bring area damage to catch the smaller raiders.', recommend: board.splash ? null : available(['brazier', 'rotor']) };
+    } else if (counts.bat) {
+      advice = { key: 'air', color: '#b9ddff', text: 'Keep your air weapons covering the road. Ground-only machines miss flyers.', recommend: null };
+    } else if (counts.scout) {
+      advice = { key: 'fast', color: '#ffd486', text: 'Filchers are fast and take ' + ENEMY_TYPES.scout.steals + ' coins. Cover their return trip as well as the entrance.', recommend: null };
+    } else if (!board.weapons) {
+      choice = available(['ballista', 'mimic', 'crystal']);
+      advice = { key: 'first-build', color: '#ffd486', text: 'Build a defender first. Stone pads cost ' + Math.round((1 - PAD_DISCOUNT) * 100) + '% less.', recommend: choice };
+    }
+    // A trial can ban Crossbows: even the uncomplicated-wave explanation must
+    // not recommend a machine that is absent from that run's shelf.
+    if (advice.key === 'ground' && shelf.indexOf('ballista') < 0) advice.text = 'Scraplings have no armor. Keep your damage covering both trips.';
+    return { wave: w + 1, total: total, perSide: !!this.rivalSide, roster: roster,
+      counts: counts, board: board, advice: advice,
+      announcement: 'Wave ' + (w + 1) + ': ' + total + ' raiders' + (this.rivalSide ? ' per side' : '') + '. ' +
+        roster.map(function (e) { return e.count + ' ' + e.name; }).join(', ') + '. ' + advice.text };
+  };
+
+  Game.prototype._battleIntel = function () {
+    var onRoad = 0, incoming = 0, carriers = 0, coins = 0, inBreath = 0, jammed = 0;
+    var h = this.hero;
+    for (var i = 0; i < this.enemies.length; i++) {
+      var e = this.enemies[i];
+      if (e.hp <= 0 || !this._sameSide(e.ln, 0)) continue;
+      onRoad++;
+      if (e.fleeing && e.stolen > 0) { carriers++; coins += e.stolen; }
+      var dx = e.px - h.x, dy = e.py - h.y;
+      if (dx * dx + dy * dy <= h.range * h.range) inBreath++;
+    }
+    for (var s = 0; s < this.spawnQueue.length; s++) if (this._sameSide(this.spawnQueue[s].ln, 0)) incoming++;
+    for (var t = 0; t < this.towers.length; t++) if (this._sameSide(this.towers[t].own, 0) && this.towers[t].jamT > 0) jammed++;
+    var breathReady = h.downT <= 0 && h.breathCd <= 0 && !this.mods.breathOff;
+    var label = onRoad + ' on the road' + (incoming ? '  ·  ' + incoming + ' incoming' : '  ·  last group');
+    var detail = '', color = '#e9dac2', key = 'progress';
+    if (coins > 0) {
+      key = 'recover'; color = '#ffd486';
+      label = coins + (coins === 1 ? ' COIN' : ' COINS') + ' CAN STILL BE SAVED';
+      detail = 'Catch ' + carriers + (carriers === 1 ? ' carrier' : ' carriers') + ' before the exit.';
+    } else if (jammed > 0) {
+      key = 'jammed'; color = '#ffc78e';
+      label = jammed + (jammed === 1 ? ' MACHINE JAMMED' : ' MACHINES JAMMED');
+      detail = 'Move Wick beside a jam to repair it faster.';
+    } else if (breathReady && inBreath >= 3) {
+      key = 'breath'; color = '#ffcf98';
+      label = inBreath + ' RAIDERS IN BREATH RANGE';
+      detail = "Wick's breath is ready.";
+    }
+    return { active: this.waveActive, onRoad: onRoad, incoming: incoming,
+      remaining: onRoad + incoming, carriers: carriers, coinsAtRisk: coins,
+      jammed: jammed, inBreath: inBreath, breathReady: breathReady,
+      key: key, label: label, detail: detail, color: color };
+  };
+
+  // An 88-unit scout card, drawn in the caller's coordinate system. Text is
+  // clipped only at the supplied rectangle. Large late-Daily rosters become
+  // three named roles + an exact remainder, rather than running off the phone.
+  Game.prototype._drawWaveIntel = function (ctx, rect) {
+    var intel = this._waveIntel(), x = rect.x, y = rect.y, w = rect.w, h = rect.h || 88;
+    if (!intel.total) return null;
+    ctx.save();
+    uiPanel(ctx, x, y, w, h, 12);
+    ctx.beginPath(); rr(ctx, x + 2, y + 2, w - 4, h - 4, 10); ctx.clip();
+    ctx.fillStyle = intel.advice.color;
+    ctx.fillRect(x + 1, y + 14, 3, h - 28);
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left'; ctx.font = 'bold 12px system-ui, sans-serif'; ctx.fillStyle = '#d7c4a1';
+    ctx.fillText('SCOUT REPORT · WAVE ' + intel.wave, x + 13, y + 18);
+    ctx.textAlign = 'right'; ctx.font = 'bold 13px system-ui, sans-serif'; ctx.fillStyle = '#fff0cf';
+    ctx.fillText(intel.total + (intel.perSide ? ' / SIDE' : ' RAIDERS'), x + w - 12, y + 18);
+    var maxCells = Math.max(1, Math.min(4, Math.floor((w - 24) / 80)));
+    var cells = intel.roster.slice(0, maxCells);
+    if (intel.roster.length > maxCells) {
+      cells = intel.roster.slice(0, maxCells - 1);
+      var other = intel.roster.slice(maxCells - 1);
+      cells.push({ type: null, count: other.reduce(function (n, e) { return n + e.count; }, 0),
+        role: 'MORE', color: '#d7c4a1' });
+    }
+    var cw = (w - 24) / cells.length;
+    ctx.textAlign = 'left';
+    for (var c = 0; c < cells.length; c++) {
+      var cell = cells[c], cx = x + 12 + c * cw;
+      var img = cell.type && ART.images['e_' + cell.type];
+      if (img) {
+        var ih = Math.min(25, 22 * img.height / img.width), iw = ih * img.width / img.height;
+        ctx.drawImage(img, cx + 1, y + 24, iw, ih);
+      }
+      ctx.fillStyle = cell.color; ctx.font = 'bold 12px system-ui, sans-serif';
+      var cellText = cell.count + ' ' + cell.role;
+      var cellMax = cw - (img ? 27 : 2);
+      var namedText = cell.name ? cell.count + ' × ' + cell.name : '';
+      if (cells.length <= 2 && namedText && ctx.measureText(namedText).width <= cellMax) cellText = namedText;
+      if (ctx.measureText(cellText).width > cellMax) {
+        var shortRole = { GROUND: 'GND', SHIELD: 'SHLD', ARMOR: 'ARM', BLINK: 'BLNK', SPLIT: 'SPLT' };
+        cellText = cell.count + ' ' + (shortRole[cell.role] || cell.role);
+      }
+      ctx.fillText(cellText, cx + (img ? 26 : 1), y + 42);
+    }
+    // At most two readable advice lines. No font shrinking to force a long
+    // paragraph into a phone-sized band; the authored cues fit this budget.
+    ctx.font = '13px system-ui, sans-serif'; ctx.fillStyle = '#f1e6d2';
+    var words = intel.advice.text.split(' '), lines = [], line = '';
+    for (var wi = 0; wi < words.length; wi++) {
+      var next = line ? line + ' ' + words[wi] : words[wi];
+      if (line && ctx.measureText(next).width > w - 26) { lines.push(line); line = words[wi]; }
+      else line = next;
+    }
+    if (line) lines.push(line);
+    if (lines.length > 2) {
+      lines[1] = lines.slice(1).join(' ');
+      while (lines[1].length && ctx.measureText(lines[1] + '…').width > w - 26) lines[1] = lines[1].slice(0, -1);
+      lines[1] += '…'; lines.length = 2;
+    }
+    for (var li = 0; li < lines.length; li++) ctx.fillText(lines[li], x + 13, y + 64 + li * 16);
+    ctx.restore();
+    return { intel: intel, cells: cells, lines: lines, rect: { x: x, y: y, w: w, h: h } };
   };
 
   // world-anchored hints only (the pad ring); everything else lives in the
   // view-anchored HUD so it hugs the REAL screen edges on every device
+  // The displayed order is derived from the same destination the next fixed
+  // step uses. Inspecting another machine never changes this order.
+  Game.prototype._heroOrder = function () {
+    var h=this.hero;
+    if (this.isRival || (this.state!=='playing'&&this.state!=='paused') || h.downT>0 || h.manned) return null;
+    var tw=h.manTid>=0?this._towerByTid(h.manTid):null;
+    var x=tw?tw.x:h.tx, y=tw?tw.y-6:h.ty, dx=x-h.x, dy=y-h.y;
+    if (!tw && dx*dx+dy*dy<=9) return null;
+    return {kind:tw?'crew':'move',x:x,y:y,fromX:h.x,fromY:h.y,tid:tw?tw.tid:-1,
+      label:tw?'Wick → '+TOWER_TYPES[tw.type].short:'',tower:tw};
+  };
   Game.prototype._drawWorldHints = function (ctx) {
-    // The first-run hint used to pulse a ring around MAP.pads[3] and say "Tap a
-    // stone ring to build a defender". Free placement removed tap-to-build from
-    // pads — the shop owns building now and a pad is just cheaper ground — so
-    // the very first instruction a new player received was a dead end: the tap
-    // it asked for does nothing at all. The hint lives on the shop now, in
-    // _drawHudView, where the thing it points at actually is.
+    var order=this._heroOrder(),u=1/this.view.scale;
+    ctx.save();
+    if(order){
+      var a=this._uiAnchor({x:order.fromX,y:order.fromY}),b=this._uiAnchor(order);
+      var dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d>18*u){
+        ctx.strokeStyle='rgba(231,201,145,.34)';ctx.lineWidth=1.2*u;ctx.setLineDash([3*u,7*u]);
+        ctx.beginPath();ctx.moveTo(a.x+dx/d*10*u,a.y+dy/d*10*u);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([]);
+      }
+      // Corner marks, not another range ring. They disappear on arrival.
+      ctx.strokeStyle='#eed19a';ctx.lineWidth=1.6*u;ctx.lineJoin='round';
+      for(var i=0;i<4;i++){
+        var sx=i%2?1:-1,sy=i<2?-1:1;
+        ctx.beginPath();ctx.moveTo(b.x+sx*4*u,b.y+sy*6*u);ctx.lineTo(b.x+sx*9*u,b.y+sy*6*u);ctx.lineTo(b.x+sx*9*u,b.y+sy*2*u);ctx.stroke();
+      }
+      ctx.fillStyle='#eed19a';ctx.beginPath();ctx.arc(b.x,b.y,1.6*u,0,6.283);ctx.fill();
+    }
+    var hint=this.placeHint;
+    if(this.shopPick>=0&&hint&&!hint.ok&&this.worldT-hint.at<.8){
+      var p=this._uiAnchor(hint);ctx.strokeStyle='#efab94';ctx.lineWidth=2*u;
+      ctx.beginPath();ctx.moveTo(p.x-5*u,p.y-5*u);ctx.lineTo(p.x+5*u,p.y+5*u);ctx.moveTo(p.x+5*u,p.y-5*u);ctx.lineTo(p.x-5*u,p.y+5*u);ctx.stroke();
+    }
+    ctx.restore();
+  };
+  Game.prototype._feedbackObstacles = function () {
+    var v=this.view,H=this._hudGeom(),out=[];
+    function add(x,y,w,h){out.push({x:x-v.ox,y:y-v.oy,w:w,h:h});}
+    add(H.barX,H.topY,H.barW,H.barH);
+    if(this.rival)add(H.barX,H.topY+H.barH+4,H.barW,26);
+    if(this.trial)add(H.barX,H.topY+H.barH,H.barW,18);
+    if(this.menu){var tw=this._machineMenuTower();if(tw)out.push(this._machineMenuGeom(tw));return out;}
+    if(H.commandRow)add(H.commandRow.x,H.commandRow.y,H.commandRow.w,H.commandRow.h);
+    if(H.shopExpanded)add(H.shopX-12,H.shopY-8,420,v.h-H.shopY+8);
+    if(H.shopHeader)add(H.shopHeader.x,H.shopHeader.y,H.shopHeader.w,H.shopHeader.h);
+    if(this.shopPick>=0)add(H.buildInfo.x,H.buildInfo.y,H.buildInfo.w,H.buildInfo.h);
+    else if(this.shopOpen)add(H.barX,H.infoY,H.barW,88);
+    else if(this.infoCard)add(v.w/2-Math.min(v.w-24,372)/2,H.infoY,Math.min(v.w-24,372),58);
+    return out;
+  };
+  Game.prototype._feedbackLayout = function (ctx) {
+    if(this.isRival||(this.state!=='playing'&&this.state!=='paused'))return [];
+    var v=this.view,u=1/v.scale,font=(v.cw<=340?11:12)*u,rows=[],groups=[],obstacles=this._feedbackObstacles();
+    var left=-v.ox+10*u,right=-v.ox+v.w-10*u,top=-v.oy+(v.safeT||0)+8*u,bottom=-v.oy+v.h-(v.safeB||0)-10*u;
+    ctx.save();ctx.font='650 '+font+'px system-ui, sans-serif';
+    var order=this._heroOrder();
+    if(order&&order.kind==='crew'){
+      var tw=order.tower,img=ART.images['t_'+tw.type],w=54*(1+tw.level*.12),h=img?w*img.height/img.width:80;
+      groups.push({x:tw.x,y:tw.y-h-16*u,txt:order.label,c:'#eac583',t:1,notice:true,count:1});
+    }
+    // Co-located repetitions share one label. This affects display only; the
+    // original events and exact money transfers stay untouched.
+    for(var i=this.floats.length-1;i>=0;i--){
+      var fl=this.floats[i];if(fl.t<=0)continue;
+      var same=null;
+      for(var j=0;j<groups.length;j++)if(groups[j].txt===fl.txt&&Math.abs(groups[j].x-fl.x)<64&&Math.abs(groups[j].y-fl.y)<64){same=groups[j];break;}
+      if(same){same.count++;same.t=Math.max(same.t,fl.t);continue;}
+      groups.push({x:fl.x,y:fl.y,txt:fl.txt,c:fl.c,t:fl.t,notice:!!fl.notice,count:1});
+    }
+    groups.sort(function(a,b){return Number(b.notice)-Number(a.notice);});
+    function overlaps(a,b){return a.x<b.x+b.w+3*u&&a.x+a.w+3*u>b.x&&a.y<b.y+b.h+3*u&&a.y+a.h+3*u>b.y;}
+    for(var g=0;g<groups.length&&rows.length<8;g++){
+      var item=groups[g],point=this._uiAnchor(item),text=item.txt+(item.count>1?' ×'+item.count:'');
+      text=fitText(ctx,text,Math.min(292*u,right-left)-18*u);
+      var w=Math.min(right-left,ctx.measureText(text).width+18*u),h=22*u;
+      var x=clamp(point.x-w/2,left,right-w),y=clamp(point.y-h+5*u,top,bottom-h),found=null;
+      for(var k=0;k<24&&!found;k++){
+        var shift=k===0?0:Math.ceil(k/2)*(h+4*u)*(k%2?-1:1);
+        var r={x:x,y:y+shift,w:w,h:h};if(r.y<top||r.y+r.h>bottom)continue;
+        if(obstacles.some(function(o){return overlaps(r,o);})||rows.some(function(o){return overlaps(r,o);}))continue;
+        found=r;
+      }
+      if(found){found.text=text;found.color=item.c;found.alpha=Math.min(1,item.t);found.notice=item.notice;found.font=font;rows.push(found);}
+    }
+    ctx.restore();return rows;
+  };
+  Game.prototype._drawFeedback = function (ctx) {
+    var rows=this._feedbackLayout(ctx),u=1/this.view.scale;ctx.save();
+    rows.forEach(function(r){
+      ctx.globalAlpha=r.alpha;ctx.font='650 '+r.font+'px system-ui, sans-serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+      if(r.notice){
+        ctx.fillStyle='rgba(29,25,24,.94)';rr(ctx,r.x,r.y,r.w,r.h,6*u);ctx.fill();
+        ctx.strokeStyle='#806644';ctx.lineWidth=u;rr(ctx,r.x,r.y,r.w,r.h,6*u);ctx.stroke();
+        ctx.fillStyle=r.color;ctx.fillRect(r.x+4*u,r.y+7*u,2*u,8*u);ctx.fillStyle='#f6e6ce';
+      }else{ctx.strokeStyle='rgba(20,16,17,.95)';ctx.lineWidth=3*u;ctx.lineJoin='round';ctx.strokeText(r.text,r.x+r.w/2,r.y+15.5*u);ctx.fillStyle=r.color;}
+      ctx.fillText(r.text,r.x+r.w/2,r.y+15.5*u);
+    });ctx.restore();
   };
 
   // gold-trimmed slate panel — the art-bible UI language
@@ -8698,65 +10289,49 @@
 
   // VIEW-space HUD: screen-anchored, safe-area aware. Returns nothing; the tap
   // handler recomputes identical geometry from this.view.
-  /// Chip width + stride for an n-machine shelf, clamped to the shipped 52/56
-  /// so nothing moves until there are more than seven. Solves
-  ///   shopX + (n-1)*step + w <= WORLD_W - 12,  shopX = 12,  step = w + 4
-  /// for the largest integer w.
+  // Four readable cards per page. All input and assistive controls consume
+  // these exact rectangles; paging never changes the absolute shelf index.
   function shopChip(n) {
-    n = Math.max(1, n | 0);
-    var avail = WORLD_W - 24;                       // 12 in from each world edge
-    var w = Math.floor((avail - (n - 1) * 4) / n);
-    if (w > 52) w = 52;
-    return { w: w, step: w + 4 };
+    n = Math.max(1, Math.min(4, n | 0));
+    var w = (WORLD_W - 24 - (n - 1) * 7) / n;
+    return { w: w, step: w + 7 };
   }
 
   Game.prototype._hudGeom = function () {
-    var v = this.view;
-    // computed ONCE: _hudGeom runs from both draw() and the tap path, and
-    // _shelf() walks TOWER_ORDER. Guarded because _hudGeom can be reached
-    // before mode/mods exist during construction.
-    var nChips = 7;
-    try { if (this._shelf && this.mode) nChips = this._shelf().length; } catch (e) {}
-    var chip = shopChip(nChips);
-    var topY = Math.max(8, v.safeT + 4);
-    var cx = v.w / 2;
-    var bm = Math.max(10, v.safeB + 6);       // bottom margin, safe-area aware
+    var v=this.view,u=1/v.scale,shelf=this.mode?this._shelf():[];
+    var pages=Math.max(1,Math.ceil(shelf.length/4)),page=clamp(this.shopPage|0,0,pages-1);
+    var first=page*4,visible=shelf.slice(first,first+4),chip=shopChip(visible.length),cx=v.w/2;
+    var topY=Math.max(8,v.safeT+4),bm=Math.max(10,v.safeB+6);
+    var shopY=v.h-bm-76,shopX=cx-WORLD_W/2+12;
+    var buttonSize=Math.max(44,44*u),barX=Math.max(8,v.ox+8),barW=Math.min(v.w-16,WORLD_W-16);
+    var pauseX=barX+barW-8-buttonSize,spdX=pauseX-buttonSize-5,expanded=!!this.shopOpen||this.shopPick>=0;
+    var resourceX=barX+10*u,resourceW=(spdX-resourceX-8*u)/2;
+    // Closed controls occupy one 54 CSS-pixel tray. The catalog replaces it
+    // during planning; an armed machine hides the catalog header as well.
+    var actionY=v.h-Math.max(8*u,v.safeB+6*u)-54*u,actionH=54*u,gap=8*u;
+    var abilityW=clamp(v.cw*.28,96,114)*u,shopButtonW=84*u,actionW=WORLD_W-24;
+    var breathRect={x:shopX,y:actionY,w:abilityW,h:actionH};
+    var startX=shopX+(this.mods.breathOff?0:abilityW+gap);
+    var toggle={x:shopX+actionW-shopButtonW,y:expanded?shopY-52*u:actionY,w:shopButtonW,h:expanded?44*u:actionH};
+    var startRect={x:startX,y:actionY,w:toggle.x-gap-startX,h:actionH};
     return {
-      topY: topY, cx: cx,
-      barX: Math.max(8, v.ox + 8),
-      barW: Math.min(v.w - 16, WORLD_W - 16),
-      btnY: topY + 7,
-      mute: v.w / 2 + WORLD_W / 2 - 168, pause: v.w / 2 + WORLD_W / 2 - 112, spd: v.w / 2 + WORLD_W / 2 - 56,
-      // ---- bottom stack -------------------------------------------------
-      // The machine shop is the BOTTOM-MOST row and the action row sits above
-      // it, per VANUS. It used to be the other way up, which put the shop bar
-      // across world y 713..767 — right on top of two of level 1's eight build
-      // pads (300,758) and (168,736). They were not merely hard to see: the
-      // shop's hit test claimed the whole band before the world-tap path ran,
-      // so those pads could not be tapped at all.
-      //
-      // Anchoring the shop to the very bottom pushes it below world y 780 on
-      // any phone with letterbox bands, which clears the map completely. On a
-      // bandless screen (SE-class, 375x667) some overlap is unavoidable while
-      // those two pads sit that low — see HANDOFF; moving them is a balance
-      // change and therefore VANUS's call, not a layout fix.
-      shopY: v.h - bm - 56,
-      shopX: v.w / 2 - WORLD_W / 2 + 12,
-      // THE SHELF SIZES ITSELF TO WHAT IS ON IT. These were fixed at 52/56,
-      // which fits exactly seven chips (right edge 400 against a world edge of
-      // 420) and NOT eight: an 8th chip ran to 456, i.e. 36 units past the
-      // world, clipped off-screen rather than merely tight. The roster was one
-      // machine away from a shelf that silently ate its last entry, and nothing
-      // would have failed -- it would just not have been there.
-      // Derived, so adding a machine can never break it again: fit n chips into
-      // (WORLD_W - 24) with a 4-unit gap, capped at the old 52/56 so the
-      // seven-chip shelf is byte-identical to what shipped.
-      shopW: chip.w, shopStep: chip.step, shopH: 56,
-      // Wick's breath lives on its own button. It used to fire when you tapped
-      // HIM, which ate the tap that was supposed to pick him up and move him.
-      breathX: v.w / 2 - WORLD_W / 2 + 10,
-      breathY: v.h - bm - 56 - 10 - 62,
-      startY: v.h - bm - 56 - 10 - 57,
+      topY:topY,cx:cx,barH:buttonSize+12,
+      infoY:topY+buttonSize+12+(this.rival?34:this.trial?20:8),barX:barX,barW:barW,
+      btnY:topY+6,buttonW:buttonSize,buttonH:buttonSize,
+      buildCancel:{x:barX+barW-8-buttonSize,y:topY+buttonSize+24,w:buttonSize,h:buttonSize},
+      buildInfo:{x:barX,y:topY+buttonSize+20,w:barW,h:88*u},
+      mute:null,pause:pauseX,spd:spdX,
+      treasureRect:{x:resourceX,y:topY,w:resourceW,h:buttonSize+12},
+      goldRect:{x:resourceX+resourceW,y:topY,w:resourceW,h:buttonSize+12},
+      shopY:shopY,shopX:shopX,shopW:chip.w,shopStep:chip.step,shopH:76,
+      shopPage:page,shopPages:pages,shopExpanded:expanded,
+      shopCards:expanded?visible.map(function(id,i){return{id:id,index:first+i,x:shopX+i*chip.step,y:shopY,w:chip.w,h:76};}):[],
+      shopToggle:this.shopPick<0?toggle:null,
+      shopHeader:this.shopOpen&&this.shopPick<0?{x:shopX,y:toggle.y,w:actionW,h:44*u}:null,
+      shopMore:this.shopOpen&&this.shopPick<0&&pages>1?{x:toggle.x-gap-52*u,y:toggle.y,w:52*u,h:44*u}:null,
+      commandRow:!expanded?{x:0,y:actionY-6*u,w:v.w,h:v.h-actionY+6*u}:null,
+      breathRect:breathRect,startRect:startRect,
+      breathX:breathRect.x,breathY:breathRect.y,startY:startRect.y
     };
   };
 
@@ -8941,54 +10516,41 @@
   /// shot at 420x780 -- a rig that only renders the design box cannot see a
   /// design-box bug.
   Game.prototype._nextLevel = function () {
+    var checkpoint = this.campaignCheckpoint();
+    if (checkpoint && Save.unlocked(checkpoint.level)) return checkpoint.level;
+    // A newly opened keep comes before improving a completed keep's stars.
+    for (var first = 0; first < CAMPAIGN_MAPS; first++) {
+      if (Save.unlocked(first) && !(Save.data.stars[first] | 0)) return first;
+    }
     for (var i = 0; i < CAMPAIGN_MAPS; i++) {
       if (Save.unlocked(i) && (Save.data.stars[i] | 0) < 3) return i;
     }
     return -1;
   };
 
-  /// The stack, BOTTOM-MOST FIRST. `d` is what the piece measured in the 780
-  /// box; `f` is its share of whatever the real screen has spare. THE FLEXES
-  /// SUM TO 1, so on a screen exactly the size of the design box every piece
-  /// comes out at the number it was authored with and the ladder still starts
-  /// at y 368 -- the art above it never moves, on any phone. `cap` is a
-  /// backstop for an aspect nobody has shipped yet, not a working limit: at
-  /// 21:9, the tallest phone aspect sold, the largest piece lands well inside
-  /// its cap. Anything the caps refuse becomes bottom margin rather than being
-  /// tipped silently into whichever piece happens to be last.
-  var TITLE_STACK = [
-    { k: 'bar',     d: 56, f: 0.12, cap: 76 },   // the utility bar
-    { k: 'gapBar',  d: 32, f: 0.06 },            // ... under the Tonight pair
-    { k: 'ton',     d: 66, f: 0.19, cap: 96 },   // DAILY SIEGE / DUEL plates
-    { k: 'gapTon',  d: 16, f: 0.05 },            // ... under the TONIGHT label
-    { k: 'gapRule', d: 18, f: 0.07 },            // ... under the last row
-    { k: 'rowGap',  d: 16, f: 0.12, cap: 40 },   // TWO gaps between three rows
-    { k: 'rowSm',   d: 80, f: 0.29, cap: 124 },  // TWO compact rows
-    { k: 'rowBig',  d: 60, f: 0.10, cap: 84 },   // the CONTINUE row
-  ];
-  var TITLE_ROWS_TOP = 368;      // the art ends at the tagline (baseline 326)
-  var TITLE_SLACK_MAX = 240;     // past this the screen gets margin, not a bar the size of a door
-
   /// THE LEGAL PAGES, REACHABLE FOR AS LONG AS THE GAME RUNS. Their only links
   /// were in the boot overlay, which is on screen while the art loads and then
   /// removed -- so after the first second nothing in the game led to the privacy
   /// policy or the terms at all. They live in the title's two top corners now:
-  /// the bottom stack is sized to the last unit on an SE (see TITLE_STACK), and
-  /// the corners beside the hanging sign are the one place on this screen a
-  /// 44pt target fits without taking room from a control.
+  /// the header reserves 44 CSS pixels below the top safe area for links
+  /// and How to play, with matching semantic controls for keyboard access.
   ///
-  /// Relative URLs, like the boot overlay's: on the web the pages sit next to
-  /// index.html. The iOS app does NOT bundle them -- App.swift catches these two
-  /// paths and shows the published pages in a Safari view over the game, so a
-  /// tap can never navigate the game's own web view away to a missing file.
+  /// Browsers use the existing published pages. The iOS game keeps relative
+  /// paths: App.swift catches them and opens the published page in a Safari
+  /// view over the game, so the local game remains available underneath.
   var TITLE_LEGAL = [
     { key: 'privacy', label: 'PRIVACY', href: 'privacy.html' },
     { key: 'terms',   label: 'TERMS',   href: 'terms.html' },
   ];
+  function legalHref(key) {
+    // The local web build has no policy files. Native relative paths retain
+    // the shell's Safari-sheet interception; browsers use the published copy.
+    return window.location.protocol==='hoardling:'?key+'.html':'https://hypersage.ai/hoardling/'+key+'.html';
+  }
   function openLegal(key) {
     for (var i = 0; i < TITLE_LEGAL.length; i++) {
       if (TITLE_LEGAL[i].key !== key) continue;
-      var href = TITLE_LEGAL[i].href;
+      var href = legalHref(TITLE_LEGAL[i].key);
       try {
         // An installed home-screen copy has no address bar and no back button,
         // so a same-window load would strand it the way the app used to be
@@ -9003,94 +10565,37 @@
   }
 
   Game.prototype._titleGeom = function () {
-    var v = this.view, s = v.scale || 1;
-    var minH = Math.max(62, 44 / s);
-
-    // The world y of the lowest pixel a control may occupy. Same safe-area rule
-    // as _hudGeom's bottom stack, so the two screens agree about the home
-    // indicator instead of each guessing at it.
-    var bm = Math.max(10, (v.safeB || 0) + 6);
-    var bot = (v.h || WORLD_H) - (v.oy || 0) - bm;
-
-    var design = 0, i;
-    for (i = 0; i < TITLE_STACK.length; i++) design += TITLE_STACK[i].d;
-    var slack = Math.min(TITLE_SLACK_MAX, Math.max(0, bot - design - TITLE_ROWS_TOP));
-
-    var H = {};
-    for (i = 0; i < TITLE_STACK.length; i++) {
-      var e = TITLE_STACK[i];
-      var got = e.d + slack * e.f;
-      if (e.cap && got > e.cap) got = e.cap;
-      H[e.k] = got;
+    var v=this.view,s=v.scale||1,u=1/s,bot=roomBottom(v),nx=this._nextLevel();
+    // Physical button sizes are reserved first. The illustration uses the
+    // remaining space; short phones never borrow room from adjacent targets.
+    var extra=Math.max(0,Math.min(64,((v.ch||WORLD_H*s)-650)*.3))*u;
+    var x=42,w=WORLD_W-84,gap=8*u+extra*.04;
+    var big=Math.max(74,62*u)+extra*.20,small=Math.max(60,48*u)+extra*.12;
+    var modeH=Math.max(76,64*u)+extra*.24,barH=Math.max(66,60*u)+extra*.16;
+    var modeGap=24*u+extra*.04,barGap=14*u+extra*.04;
+    var block=(nx>=0?big:small)+small*2+gap*2+modeGap+modeH+barGap+barH;
+    var top=bot-block,rows=[],y=top;
+    function box(x,y,w,h){return{x:x,y:y,w:w,h:h,hx:x,hy:y,hw:w,hh:h};}
+    for(var i=0;i<CAMPAIGN_MAPS;i++){
+      var row=box(x,y,w,i===nx?big:small);row.hx=x-20;row.hw=w+20;row.big=i===nx;rows.push(row);y+=row.h+gap;
     }
-    // LAID OUT DOWNWARD FROM THE LADDER, not upward from the floor. Both land
-    // the bar exactly on `bot` while no cap binds -- but walking up from the
-    // floor makes a bound cap push the LADDER down, which moves the art, and
-    // the caps exist to protect a screen so tall that moving the art is the
-    // last thing you want. Downward, a bound cap becomes bottom margin, which
-    // is what it was always meant to be.
-    var top = TITLE_ROWS_TOP;
-
-    var rowBig = H.rowBig, rowSm = H.rowSm / 2, rowGap = H.rowGap / 2;
-    var nx = this._nextLevel();
-    var rows = [], yy = top;
-    for (var q = 0; q < CAMPAIGN_MAPS; q++) {
-      var hq = (q === nx) ? rowBig : rowSm;
-      var padq = Math.max(0, (minH - hq) / 2);
-      rows.push({ x: 42, y: yy, w: 336, h: hq,
-                  hx: 38, hy: yy - padq, hw: 344, hh: Math.max(hq, minH), big: q === nx });
-      yy += hq + rowGap;
+    var modeY=y-gap+modeGap,half=(w-10*u)/2;
+    var bar=box(12,modeY+modeH+barGap,WORLD_W-24,barH),pills=[];
+    var inner=bar.w-14;
+    for(var j=0;j<4;j++){var cell=box(bar.x+7+j*inner/4,bar.y,inner/4,barH);cell.hx=j===0?bar.x:cell.x;cell.hw=(j===3?bar.x+bar.w:cell.x+cell.w)-cell.hx;pills.push(cell);}
+    // Links and help share one real 44px header below the top safe area.
+    var headerY=-(v.oy||0)+(v.safeT||0),legal=[];
+    for(var k=0;k<TITLE_LEGAL.length;k++){
+      var lx=k===0?16:WORLD_W-16-66*u;
+      var r=box(lx,headerY,66*u,44*u);r.key=TITLE_LEGAL[k].key;r.label=TITLE_LEGAL[k].label;legal.push(r);
     }
-    var tY = yy - rowGap + H.gapRule + H.gapTon;      // top of the Tonight plates
-    function half(x, y, w, h) {
-      var pad = Math.max(0, (minH - h) / 2);
-      return { x: x, y: y, w: w, h: h, hx: x - 4, hy: y - pad, hw: w + 8, hh: Math.max(h, minH) };
-    }
-
-    // THE PLATE'S BEVEL IS NOT DECORATION, IT IS THE CELL'S EDGE. Dividing the
-    // bar's OUTER width left the first and last cells' content ~4 units outboard
-    // of the section the eye actually sees, because the rounded cap and the
-    // bevel eat into those two cells and into nothing else. Divide the INNER
-    // width and every cell's visual centre IS its arithmetic centre. VANUS read
-    // it as "cavern and forge aren't centered in their sections".
-    var BX = 12, BW = WORLD_W - 24, BI = 7, IW = BW - 2 * BI;
-    var barY = tY + H.ton + H.gapBar, PW = IW / 4;
-    var pills = [];
-    for (var p1 = 0; p1 < 4; p1++) {
-      var px1 = BX + BI + p1 * PW;
-      // Hit rects span the WHOLE bar: the bevel belongs to the cell it sits on,
-      // so the outer two reach the plate's edge instead of leaving a 7-unit dead
-      // column a finger will certainly find. Inset by 1 only where two cells
-      // MEET -- hit() is inclusive on both bounds, and two touching rects give
-      // the shared column to whichever branch is tested first.
-      var l1 = (p1 === 0) ? BX : px1 + 1;
-      var r1 = (p1 === 3) ? BX + BW : px1 + PW - 1;
-      pills.push({ x: px1, y: barY, w: PW, h: H.bar,
-                   hx: l1, hy: barY - Math.max(0, (minH - H.bar) / 2),
-                   hw: r1 - l1, hh: Math.max(H.bar, minH) });
-    }
-    // THE LEGAL LINKS sit in the top corners, ABOVE the hanging sign (its top
-    // edge is y 26, and its chamfer starts 16 in from x 38): the label's ink
-    // runs y 5..19 and x 6..58, clear of both. Their centre follows the safe
-    // area down only if a phone ever reports an inset deeper than its own
-    // letterbox band -- no shipped iPhone does. The hit rect is the tap floor
-    // in both axes, clamped to the screen top, and nothing else on this screen
-    // is within 300 units of it.
-    var LGW = Math.max(58, 44 / s), LGH = minH;
-    var lgC = Math.max(12, -(v.oy || 0) + (v.safeT || 0) + 12);
-    var lgHy = Math.max(-(v.oy || 0), lgC - LGH / 2);
-    var legal = [];
-    for (var lgi = 0; lgi < TITLE_LEGAL.length; lgi++) {
-      var lgLeft = lgi === 0;
-      legal.push({ key: TITLE_LEGAL[lgi].key, label: TITLE_LEGAL[lgi].label,
-                   x: lgLeft ? 6 : WORLD_W - 58, y: lgC - 9, w: 52, h: 18,
-                   hx: lgLeft ? 0 : WORLD_W - LGW, hy: lgHy, hw: LGW, hh: LGH });
-    }
-    return { rows: rows, ruleY: TITLE_ROWS_TOP - 16, tonightY: tY - H.gapTon,
-             daily: half(42, tY, 162, H.ton), duel: half(216, tY, 162, H.ton),
-             legal: legal,
-             pills: pills, bar: { x: BX, y: barY, w: BW, h: H.bar },
-             bot: bot, screenTop: -(v.oy || 0) };
+    var artTop=headerY+46*u,artBottom=top-36*u;
+    var artScale=Math.min(1.02,Math.max(.3,(artBottom-artTop)/300));
+    artTop+=Math.max(0,artBottom-artTop-300*artScale)*.5;
+    return{rows:rows,ruleY:top-13*u,tonightY:modeY-11*u,
+      daily:box(x,modeY,half,modeH),duel:box(x+half+10*u,modeY,half,modeH),
+      legal:legal,help:box(210-62*u,headerY,124*u,44*u),pills:pills,bar:bar,
+      artTop:artTop,artScale:artScale,bot:bot,screenTop:-(v.oy||0)};
   };
 
   function hit(w, r) {
@@ -9108,6 +10613,126 @@
            this.state === 'duel' || this.state === 'cavern';
   };
 
+  // A quiet, legible workbench. Machine art stays the existing painted asset;
+  // cards get the room to show it instead of shrinking with every unlock.
+  // Quiet brass and slate furniture shared by the battle rail. Sizes are CSS
+  // pixels through u; the matching semantic targets come from _hudGeom.
+  function battlePanel(ctx,x,y,w,h,r,fill,stroke,u) {
+    ctx.fillStyle=fill;rr(ctx,x,y,w,h,r);ctx.fill();
+    if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=u;ctx.stroke();}
+  }
+  function battleText(ctx,value,x,y,size,color,align,u,maxWidth,minSize) {
+    var text=String(value),font=size;
+    do{ctx.font='bold '+font*u+'px '+(size>=17?'Georgia, serif':'system-ui, sans-serif');if(!maxWidth||ctx.measureText(text).width<=maxWidth)break;font-=.5;}while(font>=(minSize||10.5));
+    ctx.fillStyle=color;ctx.textAlign=align||'left';ctx.fillText(text,x,y);
+  }
+  function battleRail(ctx,x,y,w,h,u) {
+    var grad=ctx.createLinearGradient(0,y,0,y+h);grad.addColorStop(0,'#302b26');grad.addColorStop(1,'#17171b');
+    battlePanel(ctx,x,y,w,h,7*u,grad,'#887047',u);
+    ctx.strokeStyle='rgba(244,218,159,.18)';ctx.beginPath();ctx.moveTo(x+12*u,y+3*u);ctx.lineTo(x+w-12*u,y+3*u);ctx.stroke();
+    [x+5*u,x+w-5*u].forEach(function(edge){ctx.fillStyle='#9a7d48';ctx.beginPath();ctx.arc(edge,y+h/2,1.2*u,0,(Math.PI*2));ctx.fill();});
+  }
+  Game.prototype._battleWaveLabel=function(){var total=this.totalWaves();return 'WAVE '+Math.min(this.wave+1,total)+(total===Infinity?'':' / '+total);};
+  Game.prototype._drawBattleResources=function(ctx,G){
+    var u=1/this.view.scale,x=G.treasureRect.x,y=G.topY;
+    battleRail(ctx,G.barX,y,G.barW,G.barH,u);
+    battleText(ctx,'TREASURE',x,y+14*u,9.5,'#c4b594','left',u);
+    var keep=this._sidePlate(0,'keep','keep');if(keep){var ih=27*u,iw=ih*keep.width/keep.height;ctx.drawImage(keep,x,y+20*u,iw,ih);}
+    battleText(ctx,this.hoard,x+24*u,y+40*u,20,this.hoard<=15?'#f6a785':'#f4e3b8','left',u);
+    battleText(ctx,'/'+CFG.startHoard,x+51*u,y+40*u,10,'#aa9d84','left',u);
+    x=G.goldRect.x;battleText(ctx,'BUILD GOLD',x,y+14*u,9.5,'#c4b594','left',u);
+    drawCoin(ctx,x+7*u,y+33*u,6.5*u,Save.equipped('coin'));
+    battleText(ctx,this.gold,x+20*u,y+40*u,20,'#f7d984','left',u,G.goldRect.w-22*u,12);
+    if(this.state==='playing'){
+      ctx.strokeStyle='rgba(189,163,115,.25)';ctx.beginPath();ctx.moveTo(G.spd-4*u,y+11*u);ctx.lineTo(G.spd-4*u,y+G.barH-10*u);ctx.stroke();
+      battleText(ctx,this.speed+'×',G.spd+G.buttonW/2,G.btnY+G.buttonH/2+5*u,15,'#d4c5a7','center',u);
+      var px=G.pause+G.buttonW/2,py=G.btnY+G.buttonH/2;ctx.fillStyle='#e5d4ac';ctx.fillRect(px-6*u,py-7*u,4*u,14*u);ctx.fillRect(px+2*u,py-7*u,4*u,14*u);
+    }
+    ctx.textAlign='left';
+  };
+  Game.prototype._drawBreathControl=function(ctx,r){
+    var a=this._breathStatus(),u=1/this.view.scale,cx=r.x+26*u,cy=r.y+23*u,rad=20*u;
+    var glow=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);glow.addColorStop(0,a.canCast?'#7f391b':'#353131');glow.addColorStop(1,'#17181c');
+    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(cx,cy,rad,0,(Math.PI*2));ctx.fill();ctx.strokeStyle='#5e5547';ctx.lineWidth=2*u;ctx.stroke();
+    ctx.strokeStyle=a.canCast?'#f4be63':'#a58b5b';ctx.beginPath();ctx.arc(cx,cy,rad,-Math.PI/2,-Math.PI/2+(Math.PI*2)*a.fraction);ctx.stroke();
+    flameGlyph(ctx,cx,cy-u,.95*u,RM?0:this.worldT,a.canCast);
+    battleText(ctx,'BREATH',cx,r.y+54*u,12,'#d3c3a3','center',u);
+    var x=r.x+51*u,w=r.w-53*u;
+    if(a.kind==='cooling'||a.kind==='recovering'){
+      battleText(ctx,a.seconds+'s',x,r.y+27*u,18,'#e4d6b7','left',u,w,14);
+      battleText(ctx,a.kind==='recovering'?'recover':'to ready',x,r.y+41*u,11,'#c1b49c','left',u,w,11);
+    }else{
+      battleText(ctx,a.canCast?a.count+' in':'Move',x,r.y+24*u,12,a.canCast?'#ffd788':'#c5b79c','left',u,w,10.5);
+      battleText(ctx,a.canCast?'reach':'closer',x,r.y+40*u,11,'#b7aa91','left',u,w,10.5);
+    }
+    ctx.textAlign='left';
+  };
+  Game.prototype._drawBattleWaveStatus=function(ctx,r){
+    var u=1/this.view.scale,live=this._battleIntel(),line=live.onRoad+' raiders',detail=live.incoming?live.incoming+' incoming':'Last group';
+    if(live.key==='recover'){line=live.coinsAtRisk+' stolen';detail='Catch carriers';}
+    else if(live.key==='jammed'){line=live.jammed+' jammed';detail='Wick repairs';}
+    battleText(ctx,this._battleWaveLabel(),r.x+r.w/2,r.y+10*u,9,'#b1a18a','center',u,r.w-8*u,9);
+    battleText(ctx,line,r.x+r.w/2,r.y+30*u,13,live.color,'center',u,r.w-8*u,11);
+    battleText(ctx,detail,r.x+r.w/2,r.y+47*u,10.5,'#baad94','center',u,r.w-8*u,10.5);
+    ctx.textAlign='left';
+  };
+
+  Game.prototype._drawBuildDock = function (ctx, G) {
+    var self = this, ownN = this.towers.filter(function(t){return self._sameSide(t.own,0);}).length;
+    var u=1/this.view.scale;
+    if(G.commandRow){
+      var tray=G.commandRow,m=G.shopToggle;
+      var shade=ctx.createLinearGradient(0,tray.y,0,tray.y+tray.h);shade.addColorStop(0,'#25221f');shade.addColorStop(1,'#111215');
+      ctx.fillStyle=shade;ctx.fillRect(tray.x,tray.y,tray.w,tray.h);ctx.strokeStyle='#78613c';ctx.lineWidth=u;ctx.beginPath();ctx.moveTo(0,tray.y);ctx.lineTo(this.view.w,tray.y);ctx.stroke();
+      battlePanel(ctx,m.x,m.y+2*u,m.w,m.h-2*u,7*u,'#403628','#a28a59',u);
+      battleText(ctx,'BUILD',m.x+m.w/2,m.y+24*u,13,'#f6dfad','center',u);
+      battleText(ctx,'Machines',m.x+m.w/2,m.y+42*u,10.5,'#bead8e','center',u);
+      if(this.waveActive)this._drawBattleWaveStatus(ctx,G.startRect);
+      ctx.textAlign='left';return;
+    }
+    var shade = ctx.createLinearGradient(0, G.shopY - 9, 0, this.view.h);
+    shade.addColorStop(0, 'rgba(15,11,10,0)'); shade.addColorStop(0.18, 'rgba(15,11,10,0.96)'); shade.addColorStop(1, '#0f0b0a');
+    ctx.fillStyle = shade; ctx.fillRect(G.shopX - 12, G.shopY - 9, WORLD_W, this.view.h - G.shopY + 9);
+    G.shopCards.forEach(function (r) {
+      var type = TOWER_TYPES[r.id], cost = Math.round(type.cost * crowdMul(ownN));
+      var picked = self.shopPick === r.index, can = self.gold >= cost;
+      var fill = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+      fill.addColorStop(0, picked ? '#69502b' : '#302923'); fill.addColorStop(1, picked ? '#312319' : '#191513');
+      ctx.fillStyle = fill; rr(ctx,r.x,r.y,r.w,r.h,10);ctx.fill();
+      ctx.strokeStyle = picked ? '#ffda7c' : can ? '#9d8050' : '#54483b'; ctx.lineWidth = picked ? 2.5 : 1;
+      rr(ctx,r.x+1,r.y+1,r.w-2,r.h-2,9);ctx.stroke();
+      ctx.globalAlpha=can||picked?1:0.55;
+      self._drawMachinePortrait(ctx,r.id,0,0,{x:r.x+8,y:r.y+3,w:r.w-16,h:46});
+      ctx.globalAlpha=1;
+      ctx.textAlign='center';ctx.font='bold '+Math.max(12,11/self.view.scale)+'px system-ui, sans-serif';
+      ctx.fillStyle=can||picked?'#f6e7cd':'#b4a48e';ctx.fillText(type.short,r.x+r.w/2,r.y+59);
+      ctx.font='bold '+Math.max(13,11*u)+'px system-ui, sans-serif';ctx.fillStyle=can?'#ffda7c':'#c2ad93';
+      ctx.fillText(cost+'g',r.x+r.w/2,r.y+73);
+      if(picked){ctx.fillStyle='#ffda7c';ctx.beginPath();ctx.arc(r.x+r.w-10,r.y+10,3,0,Math.PI*2);ctx.fill();}
+    });
+    ctx.textAlign='left';
+    if (this.shopPick >= 0) {
+      var id=this._shelf()[this.shopPick], type=TOWER_TYPES[id]; if(!type)return;
+      var price=Math.round(type.cost*crowdMul(ownN)), pad=Math.round(type.cost*PAD_DISCOUNT*crowdMul(ownN));
+      var info=G.buildInfo,x=info.x,y=info.y,w=info.w;
+      battleRail(ctx,x,y,w,info.h,u);
+      battleText(ctx,'PLACE · '+this._battleWaveLabel(),x+12*u,y+14*u,9.5,'#d7ba85','left',u);
+      battleText(ctx,type.name,x+12*u,y+35*u,16,'#fff0d4','left',u,G.buildCancel.x-x-22*u,13);
+      ctx.fillStyle=type.support?'#b5deea':'#dbcbb5';ctx.font=11*u+'px system-ui, sans-serif';ctx.fillText(type.blurb,x+12*u,y+59*u);
+      battleText(ctx,this.gold>=pad?'Floor '+price+'g · Stone pad '+pad+'g':'Need '+(pad-this.gold)+'g more for a stone pad',x+12*u,y+77*u,11,this.gold>=pad?'#ffda7c':'#e6ac9a','left',u,w-24*u,11);
+      var cr=G.buildCancel,cX=cr.x+cr.w/2,cY=cr.y+cr.h/2;uiPanel(ctx,cr.x,cr.y,cr.w,cr.h,9);
+      ctx.strokeStyle='#f0d8b6';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cX-6,cY-6);ctx.lineTo(cX+6,cY+6);ctx.moveTo(cX+6,cY-6);ctx.lineTo(cX-6,cY+6);ctx.stroke();
+    } else if(G.shopHeader){
+      var r=G.shopHeader,m=G.shopToggle;
+      uiPanel(ctx,r.x,r.y,r.w,r.h,10*u);ctx.fillStyle='#e8d7b6';ctx.font='bold '+12*u+'px system-ui, sans-serif';
+      ctx.fillText('BUILD MACHINES',r.x+10*u,r.y+27*u);
+      uiPanel(ctx,m.x,m.y,m.w,m.h,9*u);ctx.textAlign='center';ctx.fillStyle='#fff0d4';
+      ctx.fillText('Close ×',m.x+m.w/2,m.y+27*u);
+      if(G.shopMore){var more=G.shopMore;uiPanel(ctx,more.x,more.y,more.w,more.h,9*u);ctx.fillStyle='#ffda7c';ctx.fillText((G.shopPage+1)+'/'+G.shopPages+' ›',more.x+more.w/2,more.y+27*u);}
+      ctx.textAlign='left';
+    }
+  };
+
   Game.prototype._drawHudView = function (ctx) {
     var v = this.view, G = this._hudGeom();
     // The resource bar belongs to a RUN. It used to draw unconditionally, so
@@ -9115,24 +10740,11 @@
     // game that had not started — inert, but it read as leftover UI and it is
     // the first thing on the screen.
     if (this._ownsViewport()) return;
-    // top bar
-    uiPanel(ctx, G.barX, G.topY, G.barW, 48, 13);
-    var lx = G.barX + 14;
-    drawCoin(ctx, lx + 10, G.topY + 24, 10, Save.equipped('coin'));
-    ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 20px Georgia, serif';
-    ctx.fillText(String(this.hoard), lx + 27, G.topY + 31);
-    ctx.fillStyle = '#b9a27f'; ctx.font = 'bold 11px system-ui, sans-serif';
-    ctx.fillText('GOLD', lx + 82, G.topY + 18);
-    ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 19px Georgia, serif';
-    ctx.fillText(String(this.gold), lx + 82, G.topY + 38);
-    ctx.fillStyle = '#b9a27f'; ctx.font = 'bold 11px system-ui, sans-serif';
-    ctx.fillText('WAVE', lx + 152, G.topY + 18);
-    ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 19px Georgia, serif';
-    var tot = this.totalWaves();
-    ctx.fillText((this.waveActive ? this.wave + 1 : Math.min(this.wave + 1, tot === Infinity ? this.wave + 1 : tot)) + (tot === Infinity ? '' : '/' + tot), lx + 152, G.topY + 38);
+    this._drawBattleResources(ctx,G);
+    var lx=G.barX+14;
     if (this.trial) {   // which trial this run is — always visible, never loud
       ctx.fillStyle = 'rgba(168,230,255,0.85)'; ctx.font = 'bold 10px system-ui, sans-serif';
-      ctx.fillText('TRIAL: ' + TRIALS[this.trial].name.toUpperCase(), lx + 27, G.topY + 50);
+      ctx.fillText('TRIAL: ' + TRIALS[this.trial].name.toUpperCase(), lx + 27, G.topY + G.barH + 12);
     }
     // ---- THE DUEL STRIP ---------------------------------------------------
     // A second, dimmer hoard under your own. It sits in the band the TRIAL line
@@ -9141,7 +10753,7 @@
     // and the rival's raw hoard is the quiet one: "am I ahead" is the question
     // being asked every three seconds, and it should not need arithmetic.
     if (this.rival && (this.state === 'playing' || this.state === 'paused')) {
-      var dsY = G.topY + 52;
+      var dsY = G.topY + G.barH + 4;
       uiPanel(ctx, G.barX, dsY, G.barW, 26, 9);
       var pulse = Math.max(0, 1 - (this.worldT - this.rivalStepT) / 1.2);
       var dlx = G.barX + 14;
@@ -9174,206 +10786,21 @@
               ahead ? '#bdf5b0' : '#ffc0ae', 3, 1);
       ctx.textAlign = 'left';
     }
+    if(this.state==='playing'&&!this.menu)this._drawBuildDock(ctx,G);
     // Smothered Fire takes the flame away, so the button goes with it — an
     // unusable control that still sits there reads as a bug, not a rule.
-    if (this.state === 'playing' && !this.mods.breathOff) {
-      // BREATH button — charged is loud, cooling is a shrinking dark wedge
-      var bReady = this.hero.breathCd <= 0;
-      var bFrac = bReady ? 1 : 1 - this.hero.breathCd / (this.mods.breathCd || 14);
-      var bcx = G.breathX + 31, bcy = G.breathY + 31;
-      ctx.fillStyle = bReady ? 'rgba(90,40,14,0.95)' : 'rgba(34,26,22,0.9)';
-      ctx.beginPath(); ctx.arc(bcx, bcy, 28, 0, 6.283); ctx.fill();
-      if (!bReady) {
-        ctx.fillStyle = 'rgba(255,138,60,0.30)';
-        ctx.beginPath(); ctx.moveTo(bcx, bcy);
-        ctx.arc(bcx, bcy, 28, -1.5708, -1.5708 + 6.283 * bFrac); ctx.closePath(); ctx.fill();
-      }
-      var bpul = bReady ? 0.72 + 0.28 * Math.sin(this.worldT * 5) : 0.3;
-      if (bReady) {                            // charged: the button throws light
-        ctx.globalCompositeOperation = 'lighter';
-        var bg3 = ctx.createRadialGradient(bcx, bcy, 4, bcx, bcy, 46);
-        bg3.addColorStop(0, 'rgba(255,140,50,' + (0.16 + 0.06 * Math.sin(this.worldT * 5)).toFixed(3) + ')');
-        bg3.addColorStop(1, 'rgba(255,140,50,0)');
-        ctx.fillStyle = bg3;
-        ctx.beginPath(); ctx.arc(bcx, bcy, 46, 0, 6.283); ctx.fill();
-        ctx.globalCompositeOperation = 'source-over';
-      }
-      ctx.strokeStyle = 'rgba(255,150,60,' + bpul + ')'; ctx.lineWidth = bReady ? 3 : 1.5;
-      ctx.beginPath(); ctx.arc(bcx, bcy, 28, 0, 6.283); ctx.stroke();
-      flameGlyph(ctx, bcx, bcy - 4, 1.15, this.worldT, bReady);
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 9px system-ui, sans-serif';
-      inkText(ctx, bReady ? 'BREATH' : Math.ceil(this.hero.breathCd) + 's', bcx, bcy + 21,
-              bReady ? '#ffcf6a' : '#8a7f72', 3, 1);
-      // WHAT IT DOES, on the button. VANUS: "I'm not even sure what the breath
-      // does exactly" — and nothing in the game had ever said. It is a 26-damage
-      // burst on everything within Wick's radius that ignores armour, which is
-      // the only answer to a Bulwark pack, so the armour clause is the half
-      // worth the pixels.
-      // ABOVE the button, not below: below is the machine shelf, and the label
-      // sat on top of the first two cards.
-      if (bReady) {
-        ctx.font = 'bold 8px system-ui, sans-serif';
-        inkText(ctx, 'BURNS ARMOR', bcx, bcy - 36, 'rgba(255,190,120,0.92)', 4, 1);
-      }
-      ctx.textAlign = 'left';
+    if (this.state === 'playing' && !this.menu && this.shopPick < 0 && !this.shopOpen && !this.mods.breathOff) {
+      this._drawBreathControl(ctx,G.breathRect);
     }
-    // THE SHOP AND THE HUD BUTTONS ARE NOT PART OF THE BREATH.
-    // They used to sit INSIDE the block above, which is gated on
-    // `!this.mods.breathOff`. So Smothered Fire — the trial whose pitch is
-    // literally "Wick's flame is out. The machines answer alone." — deleted the
-    // entire machine shelf, the build hint, the first-run tutorial ring AND the
-    // mute/pause/speed row from the screen, while _onTap kept every one of
-    // their hit tests live (it has no breathOff guard). The trial that is about
-    // building machines was the one trial where you had to buy them by tapping
-    // unlabelled black space, and where you could not mute or pause.
-    if (this.state === 'playing') {
-      // THE SHOP — pick a machine, then tap the cavern floor to place it
-      var shelf = this._shelf();
-      for (var sc2 = 0; sc2 < shelf.length; sc2++) {
-        var sid2 = shelf[sc2], stt = TOWER_TYPES[sid2];
-        var sxx = G.shopX + sc2 * G.shopStep, syy = G.shopY;
-        var picked = this.shopPick === sc2;
-        // YOUR machines, not the board's. crowdMul is a tax on how much brass
-        // YOU own -- _buyAt has always charged it that way -- but the shop card
-        // read this.towers.length, which in a duel includes HERS. Two price
-        // sources, one shown: with her 7 machines up and yours at 0 the chip
-        // quoted a 70% markup on a cost that was never charged.
-        var ownN = 0;
-        for (var oc3 = 0; oc3 < this.towers.length; oc3++) {
-          if (this._sameSide(this.towers[oc3].own, 0)) ownN++;
-        }
-        var chipCost = Math.round(stt.cost * crowdMul(ownN));
-        // AFFORDABILITY MUST MATCH THE NUMBER ON THE CARD. This tested against
-        // the PAD-discounted price while printing and charging the full one, so
-        // a card lit up as buyable, you placed it off a pad, and the build
-        // silently refused. A discount is a pleasant surprise, never a promise
-        // the shelf makes and the floor breaks.
-        var can = this.gold >= chipCost;
-        forgePlate(ctx, { x: sxx, y: syy, w: G.shopW, h: G.shopH }, picked ? 'brasslit' : 'util');
-        if (picked) {
-          ctx.strokeStyle = '#ffd75e'; ctx.lineWidth = 2.5;
-          rr(ctx, sxx + 1, syy + 1, G.shopW - 2, G.shopH - 2, 11); ctx.stroke();
-        }
-        var sIm = this._finishPlate(ART.images['t_' + sid2]);   // what you buy is what you get
-        if (sIm) {
-          // FIT the machine INSIDE its card. It used to be blitted at a fixed
-          // 34px wide with its baseline at syy+26, so a 700px-tall master
-          // overhung the card by ~17px and floated out over the cavern floor.
-          // Seven of them doing that is what made the row read as a heap of
-          // stacked clutter instead of a shelf of buttons.
-          var boxW = G.shopW - 12, boxH = 32;
-          var sc3 = Math.min(boxW / sIm.width, boxH / sIm.height);
-          var siw = sIm.width * sc3, sih = sIm.height * sc3;
-          ctx.globalAlpha = can ? 1 : 0.42;
-          ctx.drawImage(sIm, sxx + G.shopW / 2 - siw / 2, syy + 5 + (boxH - sih), siw, sih);
-          ctx.globalAlpha = 1;
-        }
-        ctx.textAlign = 'center';
-        // SEVEN AUTHORED MACHINE NAMES WERE RENDERED NOWHERE IN THE GAME. The
-        // shelf was seven silhouettes and seven prices, so 'which one is the
-        // crossbow' was a question the game refused to answer. 52px of card
-        // cannot hold 'Kobold Crossbow', hence the short: field.
-        ctx.font = 'bold 7px system-ui, sans-serif';
-        inkText(ctx, stt.short || '', sxx + G.shopW / 2, syy + G.shopH - 19,
-                can ? '#e8dcc8' : '#7d7266', 3, 1);
-        ctx.font = 'bold 11px system-ui, sans-serif';
-        inkText(ctx, chipCost + 'g', sxx + G.shopW / 2, syy + G.shopH - 8,
-                can ? '#ffd75e' : '#8a7f72', 3, 1);
-        ctx.textAlign = 'left';
-      }
-      if (this.shopPick >= 0) {
-        // WHAT YOU ARE ABOUT TO BUY. The shelf chip is a silhouette, a 7px
-        // short name and a price -- so five of the seven machines were bought
-        // blind, and the two SUPPORTS (Bellows Post, Coin Press) look exactly
-        // like the five guns, never fire, and had nothing anywhere telling the
-        // player that is on purpose rather than broken. The game already ships
-        // a NAME + a sentence + a counter-hint for all ten RAIDERS
-        // (ENEMY_CARDS) -- it explained the enemy and refused to explain the
-        // player's own tools.
-        //
-        // This line is the right home for it: it already fires exactly when the
-        // player is deciding, it is already full-width, and it was spending
-        // itself on the same generic instruction seven times over. The build
-        // instruction moves to the second line, where it is still on screen.
-        // ONE line, at shopY-9. The band above is not free: START WAVE occupies
-        // shopY-67..shopY-15 (G.startY, +52 tall) and the wave-preview pill sits
-        // at startY-32, so a second line would have been drawn straight through
-        // a primary control. Measured every string at bold 11px: the widest
-        // joined line is 345px against 396px of safe width, so name AND blurb
-        // fit on the single line that is actually available.
-        var armT = TOWER_TYPES[this._shelf()[this.shopPick]];
-        ctx.textAlign = 'left';
-        if (armT && armT.blurb) {
-          ctx.font = 'bold 11px system-ui, sans-serif';
-          var nmW = ctx.measureText(armT.name).width;
-          var sepW = ctx.measureText('  ').width;
-          var blW = ctx.measureText(armT.blurb).width;
-          var ax0 = G.cx - (nmW + sepW + blW) / 2;
-          // Its own plate. Measured: START WAVE's box bottom is shopY-15 and an
-          // 11px cap-height reaches ~8px over the baseline, so a baseline at
-          // shopY-9 put the ascenders 2px INSIDE the button. Baseline shopY-5
-          // clears it, and the plate keeps the line readable against whatever
-          // stretch of painted cavern floor happens to sit behind it.
-          ctx.fillStyle = 'rgba(16,10,7,0.82)';
-          rr(ctx, ax0 - 8, G.shopY - 17, nmW + sepW + blW + 16, 16, 7); ctx.fill();
-          inkText(ctx, armT.name, ax0, G.shopY - 5, '#ffd75e', 4, 1);
-          // a support machine speaks in the raiders' cold blue, so "NOT A
-          // WEAPON" does not read as just more gold shop copy
-          inkText(ctx, armT.blurb, ax0 + nmW + sepW, G.shopY - 5,
-                  armT.support ? '#a8e6ff' : '#ffe9c4', 4, 1);
-        } else {
-          ctx.textAlign = 'center';
-          ctx.font = 'bold 12px system-ui, sans-serif';
-          inkText(ctx, 'tap the cavern floor to build  ·  pads cost 20% less',
-                  G.cx, G.shopY - 8, '#ffe9c4', 4, 1);
-        }
-        ctx.textAlign = 'left';
-      } else if (this.mode === 'campaign' && !Save.data.tut && !this.towers.length) {
-        // FIRST RUN, step 1: point at the shelf, which is where building now
-        // starts. Step 2 is the line above, which the shop already showed.
-        var tp = 0.6 + 0.4 * Math.sin(this.worldT * 5);
-        ctx.strokeStyle = 'rgba(158,245,143,' + tp.toFixed(3) + ')';
-        ctx.lineWidth = 3;
-        rr(ctx, G.shopX - 3, G.shopY - 3, G.shopW + 6, G.shopH + 6, 13); ctx.stroke();
-        // ABOVE the action row. Sitting it just over the shelf put it inside
-        // the START WAVE button's band (measured: plate 810..838, button
-        // 777..829), and the button draws after it, so the hint was invisible.
-        ctx.textAlign = 'center';
-        ctx.fillStyle = 'rgba(16,10,7,0.88)';
-        // ...AND THEN THE WAVE-PREVIEW PANEL BURIED IT ANYWAY. That comment
-        // above is right about START WAVE and missed the panel 18 units higher:
-        // the preview draws at py-18 h36 where py = startY-32, i.e.
-        // [startY-50, startY-14], AFTER this block -- so it covered 24 of this
-        // plate's 28 units including the whole glyph body. Frame one of a new
-        // player's first game read 'Pick a mac[####]ap the floor'. The one
-        // onboarding sentence in the game, painted over by a panel.
-        //
-        // startY-84 is where the SECOND hint already sits (py-52 == startY-84),
-        // and the two are mutually exclusive (!towers.length vs towers.length),
-        // so they now share one y: one law instead of two that can drift apart.
-        // Preview panel top is startY-50, so this clears it by 6 units.
-        rr(ctx, G.cx - 118, G.startY - 84, 236, 28, 9); ctx.fill();
-        ctx.font = 'bold 13px system-ui, sans-serif';
-        inkText(ctx, 'Pick a machine, then tap the floor', G.cx, G.startY - 65, '#9ef58f', 4, 1);
-        ctx.textAlign = 'left';
-      }
-      uiPanel(ctx, G.mute, G.btnY, 44, 34, 9);
-      uiPanel(ctx, G.pause, G.btnY, 44, 34, 9);
-      uiPanel(ctx, G.spd, G.btnY, 44, 34, 9);
-      drawSpeaker(ctx, G.mute + 22, G.btnY + 17, Sfx.isMuted());
-      ctx.fillStyle = '#ffe9c4';
-      ctx.fillRect(G.pause + 14, G.btnY + 9, 5, 16); ctx.fillRect(G.pause + 25, G.btnY + 9, 5, 16);
-      ctx.font = 'bold 16px system-ui, sans-serif';
-      ctx.fillText(this.speed + 'x', G.spd + 10, G.btnY + 22);
-    }
+    // Speed and Pause stay on the shared resource rail in every battle mode.
+    // Sound is available in Pause and on M, including Smothered Fire.
     // first-encounter enemy card: sprite + the counter line
-    if (this.infoCard && this.state === 'playing') {
+    if (this.infoCard && this.state === 'playing' && !this.menu && this.shopPick < 0 && !this.shopOpen) {
       var card = ENEMY_CARDS[this.infoCard.type];
       var fade = Math.min(1, this.infoCard.t / 0.4);
       ctx.globalAlpha = fade;
       var cw2 = Math.min(v.w - 24, 372);
-      var cx2 = v.w / 2 - cw2 / 2, cy2 = G.topY + 56;
+      var cx2 = v.w / 2 - cw2 / 2, cy2 = G.infoY;
       uiPanel(ctx, cx2, cy2, cw2, 58, 12);
       var ei2 = ART.images['e_' + this.infoCard.type];
       if (ei2) {
@@ -9387,174 +10814,136 @@
       ctx.globalAlpha = 1;
     }
     // bottom: start-wave button + sprite wave preview + hint
-    if (this.state === 'playing' && !this.waveActive && this.wave < this.totalWaves()) {
-      var pulse = 0.75 + 0.25 * Math.sin(this.worldT * 4);
-      var bx = G.cx - 92, by = G.startY;
-      var bg2 = ctx.createLinearGradient(0, by, 0, by + 52);
-      bg2.addColorStop(0, 'rgba(226,88,74,' + (0.85 + 0.12 * pulse) + ')');
-      bg2.addColorStop(1, 'rgba(168,48,42,' + (0.85 + 0.12 * pulse) + ')');
-      ctx.fillStyle = bg2;
-      rr(ctx, bx, by, 184, 52, 14); ctx.fill();
-      ctx.strokeStyle = '#ffcf6a'; ctx.lineWidth = 2;
-      rr(ctx, bx, by, 184, 52, 14); ctx.stroke();
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 19px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(this.wave === 0 ? 'BEGIN THE SIEGE' : 'NEXT WAVE', G.cx, by + (this.wave === 0 ? 32 : 24));
-      if (this.wave > 0) {
-        ctx.font = 'bold 11px system-ui, sans-serif'; ctx.fillStyle = '#ffe9c4';
-        ctx.fillText('auto in ' + Math.ceil(this.countdown) + 's — early pays gold', G.cx, by + 42);
-      }
-      // preview: ACTUAL enemy sprites, not ambiguous dots
-      // SAME SOURCE AS THE SIM. See waveGroups(): this line used to branch on
-      // 'daily' only and threw on every duel intermission.
-      var groups = this.waveGroups(this.wave) || [];
-      var counts = {}, order = [];
-      for (var gi = 0; gi < groups.length; gi++) {
-        var gt = groups[gi].type;
-        if (!counts[gt]) { counts[gt] = 0; order.push(gt); }
-        counts[gt] += groups[gi].count;
-      }
-      var cellW = 58, pw = order.length * cellW;
-      // ABOVE THE START BUTTON, not on top of it. This read shopY-30, whose
-      // panel rect (py-18..py+18 = shopY-48..shopY-12) covered 33 of the START
-      // WAVE plate's 52 units on EVERY viewport: frame one of a new player's
-      // first game rendered 'BEGI[scouts]IEGE', and from wave 2 the only tempo
-      // instruction in the game -- 'auto in Ns, early pays gold' -- was
-      // unreadable, so the early-call bonus was undiscoverable.
-      // The panel is draw-only (no hit test), so raising it cannot strand a tap;
-      // the BUTTON must not move -- startY-40 was measured to land its rect on
-      // level 1's build pad at (248,672).
-      var py = G.startY - 32;
-      uiPanel(ctx, G.cx - pw / 2 - 10, py - 18, pw + 20, 36, 10);
-      for (var oi = 0; oi < order.length; oi++) {
-        var px = G.cx - pw / 2 + cellW * oi + 16;
-        var eimg = ART.images['e_' + order[oi]];
-        if (eimg) {
-          var eh = 30, ew = eh * (eimg.width / eimg.height);
-          ctx.drawImage(eimg, px - ew / 2, py - 15, ew, eh);
-        } else {
-          ctx.fillStyle = ENEMY_COLORS[order[oi]] || '#fff';
-          ctx.beginPath(); ctx.ellipse(px, py, 8, 9, 0, 0, 6.283); ctx.fill();
-        }
-        ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 13px system-ui, sans-serif'; ctx.textAlign = 'left';
-        ctx.fillText('×' + counts[order[oi]], px + 12, py + 5);
-      }
-      // second tutorial hint rides above the preview
-      if (this.mode === 'campaign' && !Save.data.tut && this.towers.length && this.wave === 0) {
-        ctx.textAlign = 'center';
-        ctx.fillStyle = 'rgba(16,10,7,0.85)';
-        rr(ctx, G.cx - 118, py - 52, 236, 28, 9); ctx.fill();
-        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 13px system-ui, sans-serif';
-        ctx.fillText('Ready? Call the wave — early calls pay gold', G.cx, py - 33);
-      }
-      ctx.textAlign = 'left';
+    if (this.state === 'playing' && !this.menu && this.shopPick < 0 && !this.shopOpen && !this.waveActive && this.wave < this.totalWaves()) {
+      var r=G.startRect,u=1/v.scale,cx=r.x+r.w/2;
+      var red=ctx.createLinearGradient(0,r.y,0,r.y+r.h);red.addColorStop(0,'#874437');red.addColorStop(1,'#4e2826');
+      battlePanel(ctx,r.x,r.y+2*u,r.w,r.h-2*u,7*u,red,'#bd9253',u);
+      battleText(ctx,this._battleWaveLabel(),cx,r.y+11*u,9,'#dbc3a2','center',u,r.w-8*u,9);
+      battleText(ctx,this.wave===0?'START WAVE':'NEXT WAVE',cx,r.y+30*u,12,'#ffedc7','center',u,r.w-12*u,11.5);
+      var detail=this.wave===0?this._waveIntel().total+' raiders':Math.ceil(this.countdown)+'s · +'+Math.ceil(this.countdown)+'g';
+      battleText(ctx,detail,cx,r.y+47*u,10.5,'#dbc3a2','center',u,r.w-8*u,10.5);
+      ctx.textAlign='left';
     }
-  
+    if(this.state==='playing'&&!this.menu&&this.shopOpen&&this.shopPick<0)this._drawWaveIntel(ctx,{x:G.barX,y:G.infoY,w:G.barW,h:88});
   };
 
   Game.prototype._drawMenus = function (ctx) {
-    var m = this.menu;
-    if (m.forkFor !== undefined) {                 // L3 fork chooser cards
-      var ftw = this.towers[m.forkFor];
-      if (!ftw) return;
-      var ftt = TOWER_TYPES[ftw.type];
-      var fcost = ftt.levels[1].upgradeCost;
-      var cards = this._forkCards(ftw);
-      var v = this.view;
-      ctx.fillStyle = 'rgba(10,6,4,0.55)';         // scrim: this is a commitment
-      ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);   // FULL view, bands included
-      for (var fc = 0; fc < 2; fc++) {
-        var fk = ftt.forks[fc], cr = cards[fc];
-        var col = fc ? '#a8e6ff' : '#ffd75e';
-        ctx.fillStyle = 'rgba(38,26,18,0.97)';
-        rr(ctx, cr.x, cr.y, cr.w, cr.h, 10); ctx.fill();
-        ctx.strokeStyle = col; ctx.lineWidth = 2;
-        rr(ctx, cr.x, cr.y, cr.w, cr.h, 10); ctx.stroke();
-        ctx.textAlign = 'left';
-        ctx.fillStyle = col; ctx.font = 'bold 14px system-ui, sans-serif';
-        ctx.fillText(fk.name, cr.x + 12, cr.y + 22);
-        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 11px system-ui, sans-serif';
-        ctx.textAlign = 'right'; ctx.fillText(fcost + 'g', cr.x + cr.w - 10, cr.y + 22);
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#ffe9c4'; ctx.font = '11px system-ui, sans-serif';
-        // pitch wraps to two lines at the nearest space to the middle
-        var words = fk.pitch.split(' '), l1 = '', l2 = '';
-        for (var wd = 0; wd < words.length; wd++) {
-          if (l1.length < fk.pitch.length / 2) l1 += (l1 ? ' ' : '') + words[wd];
-          else l2 += (l2 ? ' ' : '') + words[wd];
+    var tw = this._machineMenuTower();
+    if (!tw) return;
+    var m = this.menu, G = this._machineMenuGeom(tw), u = G.u;
+    var tt = TOWER_TYPES[tw.type], row = lvlRow(tw), actions = this._machineMenuActions();
+    var wallet = this.gold, cream = '#fff0d5', gold = '#eac583', muted = '#c1b6a3';
+    function font(size, bold) { ctx.font = (bold ? '650 ' : '') + (size * u) + 'px system-ui, sans-serif'; }
+    function label(text, x, y, size, color, bold, max) {
+      font(size, bold); ctx.fillStyle = color; ctx.textAlign = 'left';
+      ctx.fillText(max ? fitText(ctx, text, max) : text, x, y);
+    }
+    function wrap(text, x, y, width, size, color, limit) {
+      font(size, false); ctx.fillStyle = color; ctx.textAlign = 'left';
+      var words = text.split(' '), line = '', lines = [];
+      words.forEach(function (word) { var next = line ? line + ' ' + word : word;
+        if (line && ctx.measureText(next).width > width) { lines.push(line); line = word; } else line = next; });
+      if (line) lines.push(line);
+      lines.slice(0, limit).forEach(function (s, i) { ctx.fillText(i === limit - 1 && lines.length > limit ? fitText(ctx, lines.slice(i).join(' '), width) : s, x, y + i * (size + 3) * u); });
+    }
+    function panel(r, fill, stroke, radius) {
+      ctx.fillStyle = fill; rr(ctx, r.x, r.y, r.w, r.h, (radius || 7) * u); ctx.fill();
+      ctx.strokeStyle = stroke; ctx.lineWidth = u; rr(ctx, r.x, r.y, r.w, r.h, (radius || 7) * u); ctx.stroke();
+    }
+    ctx.save();
+    // World-attached controls. No screen scrim: the selected machine and the
+    // neighbouring battlefield stay readable while a player makes a decision.
+    var stem = G.tether;
+    ctx.lineCap = 'round'; ctx.strokeStyle = '#241e1b'; ctx.lineWidth = 4 * u;
+    ctx.beginPath(); ctx.moveTo(stem.source.x, stem.source.y); ctx.lineTo(stem.target.x, stem.target.y); ctx.stroke();
+    ctx.strokeStyle = gold; ctx.lineWidth = 1.5 * u; ctx.stroke();
+    ctx.fillStyle = gold; ctx.beginPath(); ctx.arc(stem.source.x, stem.source.y, 2.4 * u, 0, 6.283); ctx.fill();
+    ctx.shadowColor = 'rgba(0,0,0,0.65)'; ctx.shadowBlur = 12 * u; ctx.shadowOffsetY = 3 * u;
+    var bg = ctx.createLinearGradient(G.x, G.y, G.x, G.y + G.h);
+    bg.addColorStop(0, '#302b27'); bg.addColorStop(1, '#1e1d20');
+    panel(G, bg, '#a58353', 10); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.fillStyle = '#c99f61'; ctx.fillRect(G.x + 12 * u, G.y, Math.min(74 * u, G.w / 3), 2 * u);
+    var subview = G.fork || m.confirmSell || m.aimMenu;
+    label(G.fork ? 'Final upgrade' : m.confirmSell ? 'Sell machine?' : m.aimMenu ? 'Target priority' : tt.name,
+      G.x + 12 * u, G.y + 23 * u, 14, cream, true, G.w - 115 * u);
+    var waveLabel = this._battleWaveLabel().replace('WAVE ', 'Wave ').replace(' / ', '/') + (this.waveActive ? '' : ' next');
+    var subtitle = subview ? tt.short + ' · ' + waveLabel : 'L' + (tw.level + 1) + ' · ' + waveLabel + ' · ' + (tw.jamT > 0 ? 'Jammed' : this.hero.manTid === tw.tid ? this.hero.manned ? 'Wick aboard' : 'Wick on way' : this.waveActive ? 'Fighting' : 'Ready');
+    label(subtitle, G.x + 12 * u, G.y + 41 * u, 10.5, muted, false, G.w - 114 * u);
+    if (!subview) {
+      var stats = machineStats(tw, row), summary;
+      if (tw.type === 'press') summary = stats[0].value + ' / wave · ' + stats[1].value + ' / kill';
+      else if (tw.type === 'bellows') summary = stats[0].value + ' ' + stats[0].label.toLowerCase() + ' · ' + row.range + ' reach';
+      else summary = row.dmg + ' damage · ' + machineNumber(row.rate) + '/sec · ' + row.range + ' reach';
+      label('Base · ' + summary, G.stats.x + 2 * u, G.stats.y + 11 * u, 10.5, gold, false, G.stats.w - 4 * u);
+    }
+    if (G.fork) {
+      var selected = m.forkChoice === 1 ? 1 : 0, fk = tt.forks[selected], lines = machineForkLines(tw, fk);
+      label(MACHINE_PERK_LABELS[tw.type][selected], G.x + 13 * u, G.y + 151 * u, 10.5, cream, true, G.w - 26 * u);
+      label(lines[0], G.x + 13 * u, G.y + 164 * u, 10.5, muted, false, G.w - 26 * u);
+      label(lines[1], G.x + 13 * u, G.y + 177 * u, 10.5, muted, false, G.w - 26 * u);
+    }
+    actions.forEach(function (a) {
+      var r = a.rect, isBuy = /^fork[01]$/.test(a.id), preview = /^preview[01]$/.test(a.id);
+      var aimChoice = /^aim[0-3]$/.test(a.id), danger = a.id === 'confirmSell';
+      var chosen = preview ? Number(a.id.slice(-1)) === (m.forkChoice === 1 ? 1 : 0) : aimChoice && Number(a.id.slice(-1)) === (tw.targeting | 0);
+      var primary = a.id === 'upgrade' && tw.level < 2 || isBuy;
+      var accent = danger ? '#dc9b85' : gold;
+      panel(r, danger ? '#4a2927' : chosen ? '#473b2a' : primary && !a.disabled ? '#413526' : '#272528',
+        a.disabled ? '#5d5449' : chosen || primary || danger ? accent : '#5c5045');
+      if (a.id === 'close') {
+        font(25, false); ctx.fillStyle = cream; ctx.textAlign = 'center';
+        ctx.fillText(subview ? '‹' : '×', r.x + r.w / 2, r.y + 30 * u); ctx.textAlign = 'left'; return;
+      }
+      if (a.id === 'pause') {
+        ctx.fillStyle = muted; ctx.fillRect(r.x + 17 * u, r.y + 10 * u, 3 * u, 12 * u);
+        ctx.fillRect(r.x + 24 * u, r.y + 10 * u, 3 * u, 12 * u);
+        font(8.5, false); ctx.textAlign = 'center'; ctx.fillText('Pause', r.x + r.w / 2, r.y + 35 * u); ctx.textAlign = 'left'; return;
+      }
+      var tx = r.x + 10 * u, max = r.w - 20 * u;
+      if (preview) {
+        var optionIndex = Number(a.id.slice(-1));
+        this._drawMachinePortrait(ctx, tw.type, 2, optionIndex, {x:r.x+12*u,y:r.y+5*u,w:r.w-24*u,h:56*u});
+        machineAbilityGlyph(ctx,tw.type,optionIndex,r.x+r.w-17*u,r.y+18*u,11*u);
+        font(11, true); ctx.fillStyle = chosen ? cream : muted; ctx.textAlign = 'center';
+        ctx.fillText(fitText(ctx, a.title, max), r.x + r.w / 2, r.y + 75 * u); ctx.textAlign = 'left';
+        if (chosen) { ctx.fillStyle = gold; ctx.fillRect(r.x + 12 * u, r.y + r.h - 3 * u, r.w - 24 * u, 2 * u); }
+      } else if (aimChoice) {
+        ctx.strokeStyle = chosen ? gold : muted; ctx.lineWidth = u;
+        ctx.beginPath(); ctx.arc(tx + 6 * u, r.y + 22 * u, 6 * u, 0, 6.283); ctx.stroke();
+        if (chosen) { ctx.fillStyle = gold; ctx.beginPath(); ctx.arc(tx + 6 * u, r.y + 22 * u, 3 * u, 0, 6.283); ctx.fill(); }
+        label(a.title, tx + 22 * u, r.y + 18 * u, 12.5, cream, true, max - 22 * u);
+        label(a.detail[0], tx + 22 * u, r.y + 34 * u, 10, muted, false, max - 22 * u);
+      } else if (isBuy) {
+        label(a.disabled ? 'Need ' + (row.upgradeCost - wallet) + 'g more' : a.title, tx, r.y + 19 * u, 12.5, a.disabled ? muted : cream, true, max - 52 * u);
+        label('Permanent choice · balance ' + wallet + 'g', tx, r.y + 34 * u, 9.5, muted, false, max - 48 * u);
+        font(14, true); ctx.fillStyle = gold; ctx.textAlign = 'right'; ctx.fillText(row.upgradeCost + 'g', r.x + r.w - 10 * u, r.y + 27 * u); ctx.textAlign = 'left';
+      } else if (a.id === 'upgrade' || danger) {
+        if (!danger) {
+          this._drawMachinePortrait(ctx, tw.type, Math.min(2, tw.level + 1), tw.fork || 0, {x:r.x+5*u,y:r.y+4*u,w:44*u,h:r.h-8*u});
+          tx += 44*u; max -= 44*u;
         }
-        ctx.fillText(l1, cr.x + 12, cr.y + 40);
-        ctx.fillText(l2, cr.x + 12, cr.y + 54);
+        label(a.title, tx, r.y + 18 * u, 12.5, a.disabled ? muted : cream, true, max - 46 * u);
+        font(13, true); ctx.fillStyle = gold; ctx.textAlign = 'right'; ctx.fillText(a.price, r.x + r.w - 10 * u, r.y + 18 * u); ctx.textAlign = 'left';
+        label(a.id === 'upgrade' && tw.level === 0 && a.disabled ? 'Need ' + (row.upgradeCost - wallet) + 'g more · ' + a.detail[0] : a.detail[0], tx, r.y + 35 * u, 10.5, muted, false, max);
+        label(a.detail[1], tx, r.y + 49 * u, 10, muted, false, max);
+      } else if (a.id === 'crew') {
+        var assigned = this.hero.manTid === tw.tid;
+        label(a.disabled ? 'Recovering' : assigned ? this.hero.manned ? 'Release Wick' : 'Cancel order' : 'Crew Wick', tx, r.y + 18 * u, 11.5, a.disabled ? muted : cream, true, max);
+        var benefit = a.disabled ? 'Crew unavailable' : assigned ? this.hero.manned ? 'Back to the floor' : 'Wick is on his way' : tw.type === 'press' ? '+50% income' : tw.type === 'bellows' ? '+60% aura' : '+70% fire rate';
+        label(benefit, tx, r.y + 33 * u, 9, muted, false, max);
+        if (!a.disabled && !assigned && !tt.support) label('+30% damage', tx, r.y + 44 * u, 9, muted, false, max);
+      } else if (a.id === 'aim') {
+        label('Aim: ' + AIM_MODES[tw.targeting | 0], tx, r.y + 19 * u, 10.5, cream, true, max);
+        label('Choose ▾', tx, r.y + 36 * u, 9.5, muted, false, max);
+      } else if (a.id === 'sell') {
+        label('Sell…', tx, r.y + 19 * u, 12, cream, true, max);
+        label(this._sellValue(tw) + 'g', tx, r.y + 36 * u, 10, muted, false, max);
+      } else {
+        font(12.5, true); ctx.fillStyle = cream; ctx.textAlign = 'center';
+        ctx.fillText(a.title, r.x + r.w / 2, r.y + 28 * u); ctx.textAlign = 'left';
       }
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#c9b8a8'; ctx.font = '11px system-ui, sans-serif';
-      ctx.fillText('Pick one — this machine keeps it', cards[0].x + cards[0].w / 2, cards[0].y - 10);
-      ctx.textAlign = 'left';
-      return;
-    }
-    if (m.towerIdx !== undefined) {
-      var tw = this.towers[m.towerIdx];
-      if (!tw) return;
-      var pad2 = tw;
-      var lvl = lvlRow(tw);
-      pad2 = this._uiAnchor(pad2);
-      // A SUPPORT MACHINE NEVER TARGETS ANYTHING, so AIM was three taps of
-      // visible state change and zero behaviour. It is gone for supports, and
-      // the button COUNT changes with it — the draw and the tap handler derive
-      // their indices from the same two lines so they cannot disagree about
-      // which circle is under the finger.
-      var isSup = !!TOWER_TYPES[tw.type].support;
-      var nb = isSup ? 3 : 4;
-      var up = this._menuBtnPos(pad2, 0, nb);
-      var aim = isSup ? null : this._menuBtnPos(pad2, 1, nb);
-      var man = this._menuBtnPos(pad2, isSup ? 1 : 2, nb);
-      var sell = this._menuBtnPos(pad2, isSup ? 2 : 3, nb);
-      var isManned = this.hero.manTid === tw.tid;
-      ctx.fillStyle = isManned ? 'rgba(70,52,20,0.97)' : 'rgba(38,26,18,0.95)';
-      ctx.beginPath(); ctx.arc(man.x, man.y, 22, 0, 6.283); ctx.fill();
-      ctx.strokeStyle = '#ffcf6a'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(man.x, man.y, 22, 0, 6.283); ctx.stroke();
-      ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 9px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(isManned ? 'LEAVE' : 'MAN IT', man.x, man.y - 2);
-      ctx.fillStyle = '#ffcf6a';
-      // '+70%' is the ATTACK machine's fire-rate bonus. On a support it was a
-      // flat lie: the number described a code path supports never reach.
-      var manLbl = tw.type === 'bellows' ? '+60% AURA'
-                 : tw.type === 'press'   ? '+50% GOLD'
-                 : '+70%';
-      if (isSup) ctx.font = 'bold 7px system-ui, sans-serif';
-      ctx.fillText(isManned ? '' : manLbl, man.x, man.y + 10);
-      ctx.font = 'bold 9px system-ui, sans-serif';
-      ctx.textAlign = 'left';
-      if (aim) {
-        ctx.fillStyle = 'rgba(38,26,18,0.95)';
-        ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.fill();
-        ctx.strokeStyle = '#a8e6ff'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(aim.x, aim.y, 22, 0, 6.283); ctx.stroke();
-        ctx.fillStyle = '#ffe9c4'; ctx.font = 'bold 9px system-ui, sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('AIM', aim.x, aim.y - 3);
-        ctx.fillStyle = '#a8e6ff';
-        ctx.fillText(AIM_MODES[tw.targeting | 0], aim.x, aim.y + 9);
-        ctx.textAlign = 'left';
-      }
-      var canUp = tw.level < 2, affordUp = canUp && this.gold >= lvl.upgradeCost;
-      ctx.fillStyle = affordUp ? 'rgba(38,26,18,0.95)' : 'rgba(28,20,16,0.7)';
-      ctx.beginPath(); ctx.arc(up.x, up.y, 22, 0, 6.283); ctx.fill();
-      ctx.strokeStyle = affordUp ? '#9ef58f' : '#5c5147'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(up.x, up.y, 22, 0, 6.283); ctx.stroke();
-      ctx.fillStyle = affordUp ? '#ffe9c4' : '#8a7f72';
-      ctx.font = 'bold 10px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(!canUp ? 'MAX' : (tw.level === 1 ? 'FORK' : 'UP'), up.x, up.y - 2);
-      if (canUp) ctx.fillText(lvl.upgradeCost + 'g', up.x, up.y + 10);
-      ctx.fillStyle = 'rgba(38,26,18,0.95)';
-      ctx.beginPath(); ctx.arc(sell.x, sell.y, 22, 0, 6.283); ctx.fill();
-      ctx.strokeStyle = '#ff7b7b';
-      ctx.beginPath(); ctx.arc(sell.x, sell.y, 22, 0, 6.283); ctx.stroke();
-      ctx.fillStyle = '#ffe9c4';
-      ctx.fillText('SELL', sell.x, sell.y - 2);
-      ctx.fillStyle = '#ffd75e';
-      ctx.fillText(this._sellValue(tw) + 'g', sell.x, sell.y + 10);
-      ctx.textAlign = 'left';
-    }
+    }, this);
+    ctx.restore();
   };
 
   // ===== TITLE — Wick's workshop, lit ====================================
@@ -9567,7 +10956,7 @@
   // the wordmark and dying before they reach the buttons. Motion above, calm
   // below — the separation is most of why it reads premium instead of busy.
   Game.prototype._drawTitle = function (ctx) {
-    var v = this.view;
+    var v = this.view, G=this._titleGeom(), u=1/(this.view.scale||1);
     var t = RM ? 0 : this.worldT;              // reduce-motion PINS the clock
     var X = -v.ox - 60, Y = -v.oy - 60, W = v.w + 120, H = v.h + 120;
 
@@ -9619,6 +11008,7 @@
 
     embers(ctx, t, 0, 18, 1.0, 1.0);           // back layer, behind the sign
 
+    ctx.save();ctx.translate(210,G.artTop);ctx.scale(G.artScale,G.artScale);ctx.translate(-210,-26);
     // ---- 2. the hanging nameplate ---------------------------------------
     ctx.textAlign = 'center';
     ctx.font = 'bold 54px Georgia, serif';
@@ -9687,7 +11077,7 @@
     ctx.fillText('HOARDLING', bx, by);
     ctx.globalCompositeOperation = 'source-over';
     // eyebrow — manual letterspacing; ctx.letterSpacing is not portable
-    ctx.font = 'bold 10px system-ui, sans-serif';
+    ctx.font = 'bold '+Math.max(10,10.5*u)+'px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(201,168,106,0.85)';
     var eb = "WICK'S WORKSHOP", ebw = 0, ebi;
     for (ebi = 0; ebi < eb.length; ebi++) ebw += ctx.measureText(eb[ebi]).width + 2.6;
@@ -9863,20 +11253,21 @@
     ctx.font = 'italic 16px Georgia, serif';
     inkText(ctx, 'Too young for dragonfire. Built his own.', 210, 326, '#ffb469', 5, 2);
 
+    ctx.restore();
+
     // ---- 5. sections ------------------------------------------------------
-    var G = this._titleGeom();
     // NO HAIRLINE RULES. Two lines with a word in the gap is ornament doing a
     // job contrast does better, on a screen already carrying a gold wordmark,
     // an ember ladder and a cold pair.
     function sectionLabel(y, label, col) {
       ctx.textAlign = 'center';
-      ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.font = 'bold '+Math.max(10,10.5*u)+'px system-ui, sans-serif';
       ctx.fillStyle = col;
       ctx.fillText(label, 210, y + 4);
     }
     sectionLabel(G.ruleY, 'CAMPAIGN', 'rgba(212,168,64,0.55)');
 
-    // which keep to hold next — the first unlocked level short of 3 stars
+    // Resume a saved workshop, then favor unplayed keeps before star replays.
     var next = this._nextLevel();
     // bounded by rows, not maps — same landmine as the tap side (see there)
     for (var li = 0; li < Math.min(CAMPAIGN_MAPS, G.rows.length); li++) {
@@ -9910,15 +11301,19 @@
           // optical centre is r.h/2: cap-top 22-7=15 and baseline 44 straddle
           // 30 at h 60, which is what these two numbers preserve.
           var bc = r.y + r.h / 2;
-          ctx.font = 'bold 10px system-ui, sans-serif';
-          inkText(ctx, (Save.data.stars[li] | 0) > 0 ? 'CONTINUE' : 'BEGIN HERE',
+          ctx.font = 'bold '+Math.max(10,10.5*u)+'px system-ui, sans-serif';
+          var checkpoint = this.campaignCheckpoint();
+          inkText(ctx, checkpoint && checkpoint.level === li ? 'RESUME · WAVE ' + checkpoint.wave : (Save.data.stars[li] | 0) > 0 ? 'PLAY AGAIN' : li===0?'BEGIN HERE':'CONTINUE CAMPAIGN',
                   r.x + 30, bc - 8, 'rgba(255,226,170,0.9)', 3, 1);
-          ctx.font = 'bold 18px system-ui, sans-serif';
+          ctx.font = 'bold '+Math.max(18,14*u)+'px system-ui, sans-serif';
           inkText(ctx, MAPS[li].name, r.x + 30, bc + 14, '#fff6e6', 4, 1.5);
         } else {
-          ctx.font = 'bold 15px system-ui, sans-serif';
-          inkText(ctx, MAPS[li].name, r.x + 30, r.y + r.h / 2 + 6,
-                  li === next ? '#fff6e6' : 'rgba(240,228,208,0.82)', 4, 1.5);
+          ctx.font = 'bold '+Math.max(15,13*u)+'px system-ui, sans-serif';
+          inkText(ctx, MAPS[li].name, r.x + 30, r.y + r.h / 2 - 2*u,
+                  'rgba(240,228,208,0.88)', 4, 1.5);
+          ctx.font = Math.max(11,10.5*u)+'px system-ui, sans-serif';
+          inkText(ctx, (Save.data.stars[li]|0)>=3 ? 'Keep mastered · replay' : 'Replay for more stars',
+                  r.x + 30, r.y + r.h / 2 + 13*u, '#b5a68e', 3, 1);
         }
         // THE RIVETS BIT A SECOND TIME. forgePlate strikes four at x+11 and
         // x+w-11 (r 2.4); the third star sat at x+w-18 with r 10, so its right
@@ -9937,19 +11332,19 @@
         // The current save has no locked row, which is the only reason nobody
         // saw it -- stars [3,0,0] puts a locked row on the screen at once.
         var lc = r.y + r.h / 2;
-        ctx.fillStyle = '#7a6a5c';
-        ctx.font = 'bold 15px system-ui, sans-serif';
-        ctx.fillText(MAPS[li].name, r.x + 30, lc - 1);
-        ctx.font = '11px system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(180,150,120,0.65)';
+        ctx.fillStyle = '#b5a68e';
+        ctx.font = 'bold '+Math.max(15,13*u)+'px system-ui, sans-serif';
+        ctx.fillText(MAPS[li].name, r.x + 30, lc - 2*u);
+        ctx.font = Math.max(11,10.5*u)+'px system-ui, sans-serif';
+        ctx.fillStyle = '#a4937a';
         // say WHAT unlocks it — a bare padlock is a dead end
-        ctx.fillText('hold keep ' + li + ' to open', r.x + 30, lc + 13);
+        ctx.fillText('win keep ' + li + ' to unlock', r.x + 30, lc + 13*u);
         lockGlyph(ctx, r.x + r.w - 32, r.y + r.h / 2, 1.25, '#6b5b4c');
       }
       ctx.textAlign = 'center';
     }
 
-    sectionLabel(G.tonightY, 'TONIGHT', 'rgba(157,138,214,0.62)');
+    sectionLabel(G.tonightY, 'CHALLENGES', 'rgba(157,138,214,0.62)');
     var D = G.daily, DU = G.duel;
     var dcx = D.x + D.w / 2, ducx = DU.x + DU.w / 2;
     // THE THREE LINES ARE CENTRED AS A BLOCK, not hung off the plate's top. At
@@ -9960,9 +11355,9 @@
     // to descender 2.5 below the last, and the two are 30 apart, so the top
     // baseline sits at h/2 - 10.5. At h 66 that is 22.5, and MEASURED margins
     // come out 9 and 12 against the 21.5/3.5 they replace.
-    var TT = D.y + D.h / 2 - 9.5, TN = TT + 17, TS = TT + 30;
+    var TT = D.y + D.h / 2 - 11*u, TN = TT + 17*u, TS = TT + 32*u;
     forgePlate(ctx, D, 'cold');
-    ctx.font = 'bold 16px system-ui, sans-serif';
+    ctx.font = 'bold '+Math.max(16,13*u)+'px system-ui, sans-serif';
     inkText(ctx, 'DAILY SIEGE', dcx, TT, '#f0eaff', 5, 2);
     // NO WORLD-BEST FETCH HERE. It read the top row into `self._lbTop`, and the
     // only thing that ever DREW _lbTop was deleted at 28d1e56 -- so every fresh
@@ -9972,40 +11367,40 @@
     // CAPTIONS INSIDE THE PLATE when there is room for them. Floating under it
     // they read as loose text belonging to the page rather than to the button,
     // and they were the only unhoused type on the screen.
-    ctx.font = '11px system-ui, sans-serif';
+    ctx.font = Math.max(11,10.5*u)+'px system-ui, sans-serif';
     var todayBest = (Save.data.daily.day === dayNumber()) ? Save.data.daily.best : 0;
     var dl2 = todayBest ? 'your best wave ' + todayBest
-      : (Save.data.dailyBestWave > 0 ? 'all-time wave ' + Save.data.dailyBestWave : 'endless — no finish line');
+      : (Save.data.dailyBestWave > 0 ? 'all-time wave ' + Save.data.dailyBestWave : 'endless survival');
     // NO 648/662 FALLBACK. Those were absolute world y values for a caption
     // floating under a short plate, and the plate is never short now -- but an
     // absolute y under a plate that MOVES is a caption stranded mid-screen, so
     // the branch goes rather than waiting to be right once.
-    inkText(ctx, MAPS[dailySeed() % CAMPAIGN_MAPS].name, dcx, TN, '#c9b8ff', 4, 1);
-    ctx.font = '10px system-ui, sans-serif';
+    inkText(ctx, 'A fresh challenge', dcx, TN, '#c9b8ff', 4, 1);
+    ctx.font = Math.max(10,10.5*u)+'px system-ui, sans-serif';
     inkText(ctx, dl2, dcx, TS, 'rgba(201,184,255,0.75)', 4, 1);
-    ctx.font = '11px system-ui, sans-serif';
+    ctx.font = Math.max(11,10.5*u)+'px system-ui, sans-serif';
 
     // ---- the DUEL plate ---------------------------------------------------
     forgePlate(ctx, DU, 'cold');
-    ctx.font = 'bold 16px system-ui, sans-serif';
+    ctx.font = 'bold '+Math.max(16,13*u)+'px system-ui, sans-serif';
     // NO CROSSED MARK. It hung off the plate's left edge while its title stayed
     // centred, so the DUEL plate read as lopsided beside a DAILY SIEGE plate
     // that carries no mark at all -- one ornament buying an asymmetry across a
     // matched pair. "same waves, two caves" already says what the mark said.
-    var UT = DU.y + DU.h / 2 - 9.5, UN = UT + 17, US = UT + 30;
+    var UT = DU.y + DU.h / 2 - 11*u, UN = UT + 17*u, US = UT + 32*u;
     inkText(ctx, 'DUEL', ducx, UT, '#ffd9c4', 5, 2);
     var beaten = 0;
     for (var rvi = 0; rvi < RIVAL_ORDER.length; rvi++) {
       var rvr = Save.data.duels[RIVAL_ORDER[rvi]];
       if (rvr && rvr.w) beaten++;
     }
-    ctx.font = '11px system-ui, sans-serif';
+    ctx.font = Math.max(11,10.5*u)+'px system-ui, sans-serif';
     // NOT "two caves". The duel is ONE cavern split down the middle, a keep and
     // a road each, both dragons on screen -- and "two caves" is the inset
     // shape VANUS rejected twice on the way to this one ("I don't see another
     // dragon that's fighting against me"). The button was still selling it.
-    inkText(ctx, 'one cavern, two sides', ducx, UN, '#ffc9a8', 4, 1);
-    ctx.font = '10px system-ui, sans-serif';
+    inkText(ctx, 'Against AI rivals', ducx, UN, '#ffc9a8', 4, 1);
+    ctx.font = Math.max(10,10.5*u)+'px system-ui, sans-serif';
     inkText(ctx, beaten ? 'beaten ' + beaten + '/' + RIVAL_ORDER.length : 'four rivals waiting',
             ducx, US, 'rgba(255,201,168,0.75)', 4, 1);
 
@@ -10032,7 +11427,7 @@
         ctx.beginPath(); ctx.moveTo(dx + 1, G.bar.y + 11); ctx.lineTo(dx + 1, G.bar.y + G.bar.h - 11); ctx.stroke();
       }
     }
-    var PF = G.bar ? 11 : 10;
+    var PF = Math.max(11,10.5*u);
     for (var pi = 0; pi < 4; pi++) {
       var pl = G.pills[pi];
       var live = pi === 1 ? anyWon : true;
@@ -10054,10 +11449,11 @@
       var nameY = pcy + 7 * pk, numY = pcy + 21 * pk, ICO = pcy - 13 * pk;
       ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
       if (pi === 0) {
-        starCoin(ctx, pcx, ICO, 8, fAvail > 0);
+        starCoin(ctx, pcx, ICO, Math.max(8,7*u), true);
         inkText(ctx, 'FORGE', pcx, nameY,
-                fAvail > 0 ? '#ffe9c4' : 'rgba(255,233,196,0.55)', 3, 1);
-        if (fAvail > 0) inkText(ctx, String(fAvail), pcx, numY, '#ffd75e', 3, 1);
+                '#ffe9c4', 3, 1);
+        ctx.font=Math.max(10,10.5*u)+'px system-ui, sans-serif';
+        inkText(ctx, fAvail>0?fAvail+' stars':'Upgrades', pcx, numY, fAvail>0?'#ffd75e':'#beac8d', 3, 1);
       } else if (pi === 1) {
         ctx.strokeStyle = live ? 'rgba(217,242,255,0.9)' : 'rgba(138,127,114,0.7)';
         ctx.lineWidth = 2;
@@ -10071,6 +11467,7 @@
         inkText(ctx, 'TRIALS', pcx, nameY, live ? '#d9f2ff' : '#8a7f72', 3, 1);
         if (live) inkText(ctx, tDone + '/' + (TRIAL_ORDER.length * CAMPAIGN_MAPS),
                           pcx, numY, 'rgba(217,242,255,0.75)', 3, 1);
+        else {ctx.font=10.5*u+'px system-ui, sans-serif';inkText(ctx,'Win a keep',pcx,numY,'#a89980',3,1);}
       } else if (pi === 2) {
         // the wallet is the label: a shop with nothing in the purse should say
         // so on the door rather than after the tap
@@ -10078,8 +11475,9 @@
         drawCoin(ctx, pcx, ICO, G.bar ? 11 : 9, Save.equipped('coin'));
         ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
         inkText(ctx, 'CAVERN', pcx, nameY,
-                mk > 0 ? '#ffe9c4' : 'rgba(255,233,196,0.55)', 3, 1);
-        if (mk > 0) inkText(ctx, String(mk), pcx, numY, '#ffd75e', 3, 1);
+                '#ffe9c4', 3, 1);
+        var wallet=mk>=1000000?(Math.floor(mk/100000)/10)+'m':mk>=10000?Math.floor(mk/1000)+'k':String(mk);
+        ctx.font=10.5*u+'px system-ui, sans-serif';inkText(ctx,mk>0?wallet+' marks':'Styles',pcx,numY,mk>0?'#ffd75e':'#beac8d',3,1);
       } else {
         drawSpeaker(ctx, pcx - 4, ICO, Sfx.isMuted());
         ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
@@ -10093,7 +11491,7 @@
     // The boot overlay's Privacy / Terms pair, kept: same cream, small caps on
     // the section-label face, a hairline underline so they read as links rather
     // than as a caption belonging to the art.
-    ctx.font = 'bold 11px system-ui, sans-serif';
+    ctx.font = 'bold '+10.5*u+'px system-ui, sans-serif';
     for (var lgd = 0; lgd < G.legal.length; lgd++) {
       var LG = G.legal[lgd], lgx = LG.x + LG.w / 2, lgb = LG.y + LG.h / 2 + 4;
       ctx.textAlign = 'center';
@@ -10160,6 +11558,8 @@
     return {
       tabs: tabs, cards: cards,
       preview: { x: 12, y: 188, w: 396, h: 128 },
+      action: { x: 174, y: 248, w: 220, h: Math.max(58, 44 / v.scale),
+        hx: 174, hy: 248, hw: 220, hh: Math.max(58, 44 / v.scale) },
       // the wallet chip, and the shelf a store would live on (see topUp)
       wallet: { x: 12, y: 104, w: 200, h: 30 },
       // THE STORE CHIP HAS NO HIT RECT UNTIL THERE IS A STORE, because there
@@ -10190,6 +11590,23 @@
   /// so turning it on is not a re-layout later.
   var STORE_ON = false;
 
+  function hoardMarkGlyph(ctx,x,y,r) {
+    ctx.save();ctx.translate(x,y);ctx.fillStyle='#315351';ctx.strokeStyle='#c6ae79';ctx.lineWidth=1.5;
+    ctx.beginPath();for(var i=0;i<8;i++){var a=(i+.5)*Math.PI/4;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.fillStyle='#bad9c5';ctx.beginPath();ctx.moveTo(0,-r*.6);ctx.lineTo(r*.38,0);ctx.lineTo(0,r*.6);ctx.lineTo(-r*.38,0);ctx.closePath();ctx.fill();ctx.restore();
+  }
+  Game.prototype._cavernSelection = function () {
+    var slot = SLOTS[this.cavSlot | 0] || SLOTS[0], selected = this.cavInspect;
+    return slot.items.find(function (it) { return it.id === selected; }) || Save.equipped(slot.id) || slot.items[0];
+  };
+  Game.prototype._cavernAction = function () {
+    var slot = SLOTS[this.cavSlot | 0] || SLOTS[0], it = this._cavernSelection();
+    var worn = Save.equipped(slot.id).id === it.id, owned = Save.owns(slot.id, it.id);
+    var short = Math.max(0, it.price - (Save.data.marks | 0));
+    return { title: worn ? 'Equipped' : owned ? 'Equip look' : short ? 'Need ' + short + ' more ' + (short === 1 ? 'mark' : 'marks') : 'Unlock · ' + it.price + ' marks',
+      label: worn ? it.name + ' equipped' : owned ? 'Equip ' + it.name : 'Unlock and equip ' + it.name + ' for ' + it.price + ' earned marks' + (short ? '. Need ' + short + ' more ' + (short === 1 ? 'mark' : 'marks') : ''),
+      disabled: worn || !owned && short > 0 };
+  };
   Game.prototype._drawCavernRoom = function (ctx) {
     var G = cavernRoomGeom(this.view), i;
     var slot = SLOTS[this.cavSlot | 0] || SLOTS[0];
@@ -10201,12 +11618,12 @@
     // UNDER the title, not over it: at y 62 this ran through the serif
     // ascenders and both lines became unreadable.
     ctx.font = '11px system-ui, sans-serif';
-    inkText(ctx, 'nothing here changes how a machine fires', WORLD_W / 2, 90,
+    inkText(ctx, 'Preview a look. Equip it when you are ready.', WORLD_W / 2, 90,
             'rgba(255,201,168,0.6)', 4, 1);
 
     // ---- wallet -----------------------------------------------------------
     ctx.textAlign = 'left';
-    drawCoin(ctx, G.wallet.x + 15, G.wallet.y + 15, 12, Save.equipped('coin'));
+    hoardMarkGlyph(ctx, G.wallet.x + 15, G.wallet.y + 15, 12);
     ctx.font = 'bold 20px Georgia, serif';
     inkText(ctx, String(Save.data.marks | 0), G.wallet.x + 34, G.wallet.y + 22, '#ffe9c4', 4, 1);
     ctx.font = 'bold 10px system-ui, sans-serif';
@@ -10240,41 +11657,47 @@
               on ? 'rgba(255,233,196,0.8)' : 'rgba(185,162,127,0.6)', 3, 1);
     }
 
-    // ---- preview: the equipped item for this slot, at size ----------------
-    var P = G.preview, eq = Save.equipped(slot.id);
+    // Inspecting a card is free and never changes the equipped loadout.
+    var P = G.preview, eq = Save.equipped(slot.id), selected = this._cavernSelection(), action = this._cavernAction();
     uiPanel(ctx, P.x, P.y, P.w, P.h, 12);
-    this._drawCosPreview(ctx, slot.id, eq, P);
-    ctx.font = 'bold 13px Georgia, serif';
-    inkText(ctx, eq ? eq.name : '-', P.x + P.w / 2, P.y + P.h - 26, '#ffe9c4', 4, 1);
-    ctx.font = 'italic 10px Georgia, serif';
-    inkText(ctx, eq && eq.how ? eq.how : '', P.x + P.w / 2, P.y + P.h - 11,
-            'rgba(255,201,168,0.72)', 4, 1);
+    this._drawCosPreview(ctx, slot.id, selected, {x:P.x+2,y:P.y+6,w:150,h:116});
+    ctx.textAlign = 'left'; ctx.font = 'bold 17px Georgia, serif';
+    inkText(ctx, fitText(ctx, selected.name, 218), G.action.x, P.y + 27, '#ffe9c4', 4, 1);
+    ctx.font = '12px system-ui, sans-serif';
+    inkText(ctx, slot.id === 'coat' ? 'Wick’s scale colour' : selected.how ? fitText(ctx, selected.how, 216) : 'A new look for your cavern',
+      G.action.x, P.y + 46, '#c3b29b', 3, 1);
+    ctx.fillStyle = action.disabled ? '#302b26' : '#634829';
+    rr(ctx,G.action.x,G.action.y,G.action.w,G.action.h,9);ctx.fill();
+    ctx.strokeStyle = action.disabled ? '#77644b' : '#d5ad65';ctx.lineWidth=1.4;
+    rr(ctx,G.action.x,G.action.y,G.action.w,G.action.h,9);ctx.stroke();
+    ctx.textAlign='center';ctx.font='bold 15px system-ui, sans-serif';
+    inkText(ctx,action.title,G.action.x+G.action.w/2,G.action.y+G.action.h/2+5,action.disabled?'#c5b7a3':'#ffedc8',3,1);
 
     // ---- the shelf --------------------------------------------------------
     for (i = 0; i < slot.items.length && i < G.cards.length; i++) {
       var it = slot.items[i], cd = G.cards[i];
       var owned = Save.owns(slot.id, it.id), worn = eq && eq.id === it.id;
       var afford = (Save.data.marks | 0) >= it.price;
-      ctx.fillStyle = worn ? 'rgba(96,66,28,0.9)' : 'rgba(30,21,16,0.9)';
+      var inspecting = selected.id === it.id;
+      ctx.fillStyle = inspecting ? 'rgba(83,65,39,0.95)' : 'rgba(30,25,21,0.95)';
       rr(ctx, cd.x, cd.y, cd.w, cd.h, 10); ctx.fill();
-      ctx.strokeStyle = worn ? 'rgba(255,215,110,0.95)'
+      ctx.strokeStyle = inspecting ? 'rgba(255,215,110,0.95)'
                       : owned ? 'rgba(150,126,96,0.7)' : 'rgba(90,76,60,0.5)';
-      ctx.lineWidth = worn ? 2 : 1;
+      ctx.lineWidth = inspecting ? 2 : 1;
       rr(ctx, cd.x, cd.y, cd.w, cd.h, 10); ctx.stroke();
       // swatch
       this._drawCosSwatch(ctx, slot.id, it, cd.x + 34, cd.y + cd.h / 2, 24);
       ctx.textAlign = 'left';
-      ctx.font = 'bold 12px Georgia, serif';
-      inkText(ctx, it.name, cd.x + 64, cd.y + 28,
+      ctx.font = 'bold 14px Georgia, serif';
+      inkText(ctx, fitText(ctx, it.name, cd.w-72), cd.x + 64, cd.y + 28,
               owned ? '#ffe9c4' : 'rgba(230,214,190,0.85)', 3, 1);
       ctx.font = 'bold 10px system-ui, sans-serif';
       if (worn) {
         inkText(ctx, 'EQUIPPED', cd.x + 64, cd.y + 48, '#ffd75e', 3, 1);
       } else if (owned) {
-        inkText(ctx, 'TAP TO WEAR', cd.x + 64, cd.y + 48, 'rgba(217,242,255,0.9)', 3, 1);
+        inkText(ctx, inspecting ? 'PREVIEWING' : 'OWNED · PREVIEW', cd.x + 64, cd.y + 48, 'rgba(217,242,255,0.9)', 3, 1);
       } else {
-        drawCoin(ctx, cd.x + 70, cd.y + 44, 7, Save.equipped('coin'));
-        inkText(ctx, String(it.price), cd.x + 82, cd.y + 48,
+        inkText(ctx, it.price + ' MARKS', cd.x + 64, cd.y + 48,
                 afford ? '#ffe9c4' : 'rgba(200,120,100,0.9)', 3, 1);
         if (!afford) {
           ctx.font = 'bold 9px system-ui, sans-serif';
@@ -10284,6 +11707,9 @@
       }
       ctx.textAlign = 'center';
     }
+
+    ctx.textAlign='center';ctx.font='11px system-ui, sans-serif';
+    inkText(ctx,'Earn marks from stars, trials, rivals and Daily Siege.',WORLD_W/2,G.back.y-18,'#b8aa95',3,1);
 
     // ---- back -------------------------------------------------------------
     forgePlate(ctx, G.back, 'util');
@@ -10304,6 +11730,8 @@
         var hh = 96, hw = hh * (hi.width / hi.height);
         ctx.drawImage(hi, cx - hw / 2, cy, hw, hh);
       }
+    } else if (slot === 'finish') {
+      this._drawMachinePortrait(ctx, 'ballista', 1, 0, {x:P.x+8,y:P.y+4,w:P.w-16,h:P.h-12}, it);
     } else if (slot === 'coin') {
       drawCoin(ctx, cx, cy + 46, 40, it);
     } else if (slot === 'road') {
@@ -10329,6 +11757,11 @@
   /// game's own gold so "the one you already had" is never a grey blank.
   Game.prototype._drawCosSwatch = function (ctx, slot, it, cx, cy, r) {
     if (slot === 'coin') { drawCoin(ctx, cx, cy, r, it); return; }
+    if (slot === 'coat') {
+      var wick = this._coatPlate(ART.images.hero || ART.images.hero_title, it);
+      if (wick) { var h = r*2.6, w = h*wick.width/wick.height;ctx.drawImage(wick,cx-w/2,cy-h/2,w,h);return; }
+    }
+    if (slot === 'finish') { this._drawMachinePortrait(ctx,'ballista',1,0,{x:cx-r*1.2,y:cy-r*1.2,w:r*2.4,h:r*2.4},it);return; }
     // THE SWATCH SHOWS THE THING ITSELF wherever it can -- a coloured ball
     // beside a card called "Gem Seam" is a worse answer than the pile, and the
     // stock entry has no art of its own because it IS the slot's base sprite.
@@ -10448,15 +11881,15 @@
     hg.addColorStop(0.75, 'rgba(10,6,4,0.72)');
     hg.addColorStop(1, 'rgba(10,6,4,0)');
     ctx.fillStyle = hg; ctx.fillRect(0, 96, WORLD_W, 128);
-    ctx.fillStyle = '#ffc9a8'; ctx.font = 'bold 34px Georgia, serif';
-    ctx.fillText('DUEL', WORLD_W / 2, 142);
+    ctx.fillStyle = '#ffc9a8'; ctx.font = 'bold 28px Georgia, serif';
+    ctx.fillText('DUEL · AI RIVALS', WORLD_W / 2, 142);
     ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
     // IT SAID "two caves". That is the shape VANUS rejected twice -- a second
     // board in an inset -- and the mode has been ONE cavern with two sides
     // since. Copy that describes the old format is the same lie as a dial that
     // no longer does anything.
-    ctx.fillText('One cavern, split down the middle. The same raiders', WORLD_W / 2, 172);
-    ctx.fillText('down both roads. Keep more gold than they do.', WORLD_W / 2, 188);
+    ctx.fillText('Face a computer rival in one shared cavern.', WORLD_W / 2, 172);
+    ctx.fillText('Same raiders. Defend your side and keep more gold.', WORLD_W / 2, 188);
     ctx.fillStyle = 'rgba(232,203,180,0.6)'; ctx.font = '11px system-ui, sans-serif';
     // EIGHT. TOWER_ORDER gained `press` and neither this line nor
     // towerUnlocked's comment followed it, so the screen undersold the shelf it
@@ -10647,8 +12080,29 @@
 
   var RESULT_FOOT = 706;
 
+  Game.prototype._retryLeaderboard = function () {
+    if (this.mode !== 'daily' || (this.state !== 'won' && this.state !== 'lost') || !Lb.on()) return false;
+    var state = Lb.status(); if (!state.pending || state.sending) return false;
+    var self = this, result = this.result;
+    this.lbRows = 'loading';
+    Lb.flush(function () {
+      if (self.result !== result || self.mode !== 'daily' || (self.state !== 'won' && self.state !== 'lost')) return;
+      Lb.top(10, function (rows) { if (self.result === result) self.lbRows = rows || 'error'; });
+    });
+    return true;
+  };
+  Game.prototype._leaderboardStatusText = function () {
+    var s = Lb.status();
+    if (s.pending) return s.sending ? 'Sending score…' : 'Score waiting to send';
+    if (this._lbJoined) return 'Your next Daily Siege can post';
+    if (s.outcome === 'posted') return 'Score posted · your best stays on the ladder';
+    return 'This run was not recorded online';
+  };
+
   Game.prototype._drawResult = function (ctx) {
     var r = this.result || {};
+    // Daily posting controls need room after the fullest toll/leak story.
+    var resultRise = this.mode === 'daily' && Lb.on() ? 60 : 0;
     ctx.fillStyle = 'rgba(12,7,5,0.75)';
     ctx.fillRect(-40, -40, WORLD_W + 80, WORLD_H + 80);
     // A COLUMN SCRIM UNDER THE COPY. 0.75 over the board is enough on a
@@ -10686,7 +12140,7 @@
       ctx.fillText('you ' + (r.hoard | 0) + '   ·   ' + r.rival + ' ' + Math.max(0, r.rivalHoard | 0) +
                    '   ·   ' + (mg2 >= 0 ? '+' + mg2 : String(mg2)), WORLD_W / 2, 340);
     } else {
-      ctx.fillText(r.won ? 'HOARD HELD!' : 'HOARD LOST', WORLD_W / 2, 320);
+      ctx.fillText(r.won ? 'HOARD HELD!' : 'HOARD LOST', WORLD_W / 2, 320 - resultRise);
     }
     if (r.trial) {
       ctx.font = 'bold 15px system-ui, sans-serif';
@@ -10709,7 +12163,7 @@
           if (since <= 0) continue;                       // not landed yet
           pop = 1 + 0.55 * Math.exp(-since * 9) * Math.cos(since * 22);
         }
-        starCoin(ctx, WORLD_W / 2 - 46 + s * 46, 360, 19 * pop, earned);
+        starCoin(ctx, WORLD_W / 2 - 46 + s * 46, 360 - resultRise, 19 * pop, earned);
       }
     }
     // ---- EVERYTHING BELOW FLOWS FROM ONE CURSOR ---------------------------
@@ -10724,6 +12178,7 @@
     var CX = WORLD_W / 2;
     var RY = r.rival ? 352 : (r.trial ? 357 : 332);       // under the headline
     if (r.won && !r.rival) RY = 379;                      // under the medallions
+    RY -= resultRise;
 
     // ---- HOARD MARKS EARNED ----------------------------------------------
     // _gameOver() writes result.marks and NOTHING READ IT: a player earned the
@@ -10843,7 +12298,7 @@
     // the run it is looking at (no start_run token), and before the first
     // session there is no WICK name to print. Stop is one tap; join opens the
     // question (§3g).
-    this._lbOptRect = null;
+    this._lbOptRect = null; this._lbRetryRect = null;
     if (this.mode === 'daily' && Lb.configured()) {
       var optTxt = !Lb.on() ? 'not posting — tap to join the ladder'
         : this._lbJoined ? 'posting from your next Daily Siege — tap to stop'
@@ -10852,7 +12307,8 @@
       ctx.font = '11px system-ui, sans-serif';
       var optW = ctx.measureText(optTxt).width + 28;
       var optY = RESULT_FOOT - 6;
-      this._lbOptRect = { x: CX - optW / 2, y: optY - 15, w: optW, h: 26 };
+      var optH = Math.max(26, 44 / this.view.scale);
+      this._lbOptRect = { x: CX - optW / 2, y: optY - 4 - optH / 2, w: optW, h: optH };
       ctx.fillStyle = 'rgba(255,233,196,0.40)';
       ctx.fillText(optTxt, CX, optY);
     }
@@ -10864,24 +12320,40 @@
       // both on exactly the mode this ladder belongs to. Eight rows still fit
       // on a clean run; a loaded run gives up the tail of the ladder rather
       // than printing it through the story, and the count is honest either way.
-      var LBY = storyY + 21 + 24;
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
-      ctx.fillText('— ALL-TIME BEST SIEGES —', CX, LBY);
-      var LBR = LBY + 22;
-      if (this.lbRows === 'loading') {
+      var LBY = storyY + 45, LBR = LBY + 41, posting = Lb.status();
+      if (posting.pending) {
+        var retryH = Math.max(44, 44 / this.view.scale);
+        var retry = this._lbRetryRect = { x: CX - 92, y: RESULT_FOOT - 45 - retryH, w: 184, h: retryH };
+        ctx.fillStyle = posting.sending ? '#473830' : '#745028';
+        rr(ctx, retry.x, retry.y, retry.w, retry.h, 9); ctx.fill();
+        ctx.strokeStyle = '#be965b'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = '#fff0d3'; ctx.font = 'bold 13px system-ui, sans-serif';
+        ctx.fillText(posting.sending ? 'SENDING…' : 'RETRY SCORE', CX, retry.y + retry.h / 2 + 4);
+      }
+      var ladderBottom = this._lbRetryRect ? this._lbRetryRect.y - 12 : RESULT_FOOT - 42;
+      var hasLadderRoom = LBR <= ladderBottom;
+      if (hasLadderRoom) {
+        ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
+        ctx.fillText('— ALL-TIME BEST SIEGES —', CX, LBY);
+      }
+      ctx.fillStyle = posting.outcome === 'posted' ? '#9ef58f' : '#c9b8ff';
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillText(this._leaderboardStatusText(), CX, hasLadderRoom ? LBY + 21 : Math.min(storyY + 43, ladderBottom - 4));
+      if (!hasLadderRoom) {
+        // Keep the story and a usable retry; do not squeeze tiny rank rows in.
+      } else if (this.lbRows === 'loading') {
         ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
         ctx.fillText('fetching the ladder…', CX, LBR);
       } else if (this.lbRows === 'error' || !this.lbRows) {
         ctx.fillStyle = '#8a7f72'; ctx.font = '13px system-ui, sans-serif';
-        ctx.fillText(this.lbQueued ? 'ladder unreachable — your run is queued'
-                                   : 'ladder unreachable right now', CX, LBR);
+        ctx.fillText('Ladder unavailable right now', CX, LBR);
       } else if (!this.lbRows.length) {
         ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
         ctx.fillText('no siegers yet — yours could be first', CX, LBR);
       } else {
         ctx.font = '13px ui-monospace, Menlo, monospace';
         var mine = Lb.hasId() ? Lb.tag() : null;
-        var nFit = Math.max(0, Math.floor((RESULT_FOOT - 18 - LBR) / 17) + 1);
+        var nFit = Math.max(0, Math.floor((ladderBottom - LBR) / 17) + 1);
         var nShow = Math.min(8, this.lbRows.length, nFit);
         for (var bi = 0; bi < nShow; bi++) {
           var row = this.lbRows[bi];
@@ -10939,7 +12411,7 @@
     var STEP = 1 / CFG.stepHz;
     this._acc += dtRaw * (this.state === 'playing' ? this.speed : 1);
     var n = 0, cap = 8 * this.speed;
-    while (this._acc >= STEP && n < cap) { this.update(STEP); this._acc -= STEP; n++; }
+    while (this._acc >= STEP && n < cap) { this._acc -= STEP; this.update(STEP); n++; }
     if (this._acc >= STEP) this._acc = 0;   // hard drop after a stall; never spiral
     this._cosmetic(dtRaw);
     this.draw(this._acc / STEP);
@@ -11338,6 +12810,401 @@
     ctx.stroke();
   }
 
+
+  // Semantic controls sit over the canvas geometry. They call the same input
+  // path as touch. The field guide is presentation only and never advances a run.
+  var PlayerGuide = (function () {
+    var g, root, modal, body, title, close, nav, launch, hits, marker;
+    var pointerProxy = null, pointerProxyId = null;
+    var keyboardPoint = null;
+    var scout, scoutSignature = '';
+    var page = '', tab = 'basics', previousFocus = null, signature = '', campaignLevel = null, briefingReturn = false;
+    var api = { seen: false, isOpen: function () { return !!page; } };
+    function el(tag, cls, text) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      return n;
+    }
+    function button(text, action, cls) {
+      var b = el('button', cls || 'guide-button', text); b.type = 'button';
+      b.addEventListener('click', function (event) { Sfx.unlock(); action(event); }); return b;
+    }
+    function tap(x, y) { var v = g.view; Input.inject(x, y, x + v.ox, y + v.oy); }
+    function hide() {
+      page = ''; briefingReturn = false; modal.hidden = true; root.classList.remove('has-dialog'); signature = '';
+      if (previousFocus && previousFocus.isConnected) previousFocus.focus({preventScroll:true});
+      else g.canvas.focus({preventScroll:true});
+    }
+    function resume() { hide(); g.setPaused(false); }
+    function dismiss() {
+      if (page === 'briefing') { api.seen = true; Save.data.tut = 1; Save.write(); resume(); }
+      else if (page === 'guide' && briefingReturn) { briefingReturn = false; api.open('briefing'); }
+      else if (g.state === 'paused' && page !== 'pause') api.open('pause');
+      else if (page === 'pause') resume();
+      else hide();
+    }
+    function paragraph(text, cls) { body.appendChild(el('p', cls || 'guide-copy', text)); }
+    function lesson(number, heading, text) {
+      var card = el('div','guide-lesson'); card.appendChild(el('span','guide-number',number));
+      var copy = el('div'); copy.appendChild(el('h3','',heading)); copy.appendChild(el('p','',text));
+      card.appendChild(copy); body.appendChild(card);
+    }
+    function basics() {
+      var hero = el('div','guide-hero');
+      var im = el('img'); im.src = ART.images.hero_title ? ART.images.hero_title.src : assetURL(ART.manifest.hero_title); im.alt = 'Wick, the dragon inventor';
+      hero.appendChild(im); var caption = el('div');
+      caption.appendChild(el('p','guide-kicker',"WICK’S WORKSHOP"));
+      caption.appendChild(el('h3','', 'Small dragon. Clever defenses.'));
+      caption.appendChild(el('p','', 'The Guild wants your treasure. Make them work for it.'));
+      hero.appendChild(caption); body.appendChild(hero);
+      lesson('01','Protect your treasure', 'TREASURE is the 60 coins in your keep: lose them and the defense ends. BUILD GOLD pays for machines and upgrades. Spending build gold never empties your treasure.');
+      lesson('02','Build, then call the wave', 'Tap Machines to open the catalog, choose a card, then tap clear ground beside the road. Round pads give a 20% discount. Your catalog closes after building; tap Machines to build again.');
+      lesson('03','Put Wick to work', 'Tap the floor to move Wick. Tap a built machine, then Crew Wick, to put him to work. His BREATH button burns nearby enemies through armor.');
+      lesson('04','Catch the thieves coming back', 'Raiders steal coins, then run for the exit. Defeat a carrier to recover its coins. Escaped coins are lost and lower your star rating.');
+      paragraph('A good first build: a Crossbow on a round pad, then a Gemsinger to slow the raiders. Read the next wave before you call it.', 'guide-tip');
+    }
+    function machines() {
+      paragraph('Every machine has a job. Upgrade one twice to choose its final specialization. Prices below are base prices; round pads give a 20% discount.');
+      TOWER_ORDER.forEach(function (id) {
+        var t = TOWER_TYPES[id], card = el('details','guide-machine');
+        var sum = el('summary'), im = el('img'); im.src = ART.images['t_' + id] ? ART.images['t_' + id].src : assetURL(ART.manifest['t_' + id]); im.alt = '';
+        sum.appendChild(im); var words = el('div'); words.appendChild(el('h3','', t.name));
+        words.appendChild(el('p','',t.blurb)); sum.appendChild(words);
+        var unlock = MACHINE_UNLOCK[id] || 0;
+        sum.appendChild(el('span','guide-price',t.cost + 'g')); card.appendChild(sum);
+        var content = el('div','guide-machine-detail');
+        content.appendChild(el('p','guide-kicker',t.support ? 'SUPPORT MACHINE' : t.hitsAir ? 'GROUND + AIR' : 'GROUND ONLY'));
+        content.appendChild(el('p','', unlock ? 'Campaign: unlocks at ' + unlock + ' stars. Always available in Daily Siege and Duel.' : 'Available from your first keep.'));
+        t.forks.forEach(function (f) { var line = el('p'); line.appendChild(el('strong','',f.name + '. ')); line.appendChild(document.createTextNode(f.pitch)); content.appendChild(line); });
+        card.appendChild(content); body.appendChild(card);
+      });
+    }
+    function controls() {
+      lesson('⌘','Choose your machine', 'Tap Machines to open the catalog and scout report. Browse four machines per page using the page arrow. Select a card, then tap clear floor or a stone pad; tap the selected card or × to cancel. Close returns to the battle.');
+      lesson('↗','Tap to move', 'Tap clear floor to send Wick there. He attacks automatically. Tapping a machine opens its attached popup. Upgrade, choose a target priority, crew it with Wick, or sell it. Tap another machine to switch; tap the floor to close. Support machines have no aim setting.');
+      lesson('Ⅱ','Plan at your pace', 'Pause holds the battle and includes the sound switch. Leaving the app pauses too; returning waits for you. Between later waves, call early for bonus gold or use the countdown to prepare.');
+      var dl = el('dl','guide-keys');
+      [['Space','Call the next wave'],['B','Use Wick’s breath'],['1–8','Select a machine from the catalog'],['Arrows / WASD','Move Wick, or aim a machine placement'],['Enter','Build at the keyboard marker'],['Esc / P','Pause or resume; Esc closes Machines or cancels placement'],['H','Open this guide'],['M','Toggle sound'],['Tab / Enter','Focus and activate menu controls']].forEach(function (r) {dl.appendChild(el('dt','',r[0])); dl.appendChild(el('dd','',r[1]));});
+      body.appendChild(dl);
+      paragraph('Duel is a race against a computer rival in one shared cavern. Daily Siege is endless and uses the same starting rules for everyone. Campaign stars unlock machines and Forge upgrades.', 'guide-tip');
+    }
+    function render() {
+      body.replaceChildren(); nav.replaceChildren();
+      modal.dataset.page = page;
+      close.hidden = page === 'briefing';
+      close.textContent = briefingReturn ? 'Back to setup' : page === 'pause' ? 'Resume' : g.state === 'paused' ? 'Back to pause' : 'Close guide';
+      title.textContent = page === 'pause' ? 'Paused' : page === 'briefing' ? 'Your first defense' : 'Wick’s field guide';
+      if (page === 'checkpoint') {
+        var saved=g.campaignCheckpoint(); title.textContent='Your workshop is waiting.';
+        close.textContent='Back to title';
+        if(saved){
+          var chosen = campaignLevel === null ? saved.level : campaignLevel, changing = chosen !== saved.level;
+          if (changing) title.textContent='Keep your saved workshop?';
+          paragraph(saved.name + (saved.trial ? ' · '+saved.trial : ''), 'guide-kicker');
+          paragraph('Resume from the start of wave '+saved.wave+' of '+saved.totalWaves+'. Your machines and building budget are saved with it.');
+          body.appendChild(button('Resume wave '+saved.wave,function(){hide();g.resumeCampaignCheckpoint();},'guide-button guide-primary'));
+          body.appendChild(button(changing ? 'Start '+MAPS[chosen].name : 'Start keep from wave 1',function(){api.startCampaign(chosen);},'guide-button'));
+          paragraph((changing ? 'Starting '+MAPS[chosen].name+' opens a fresh setup. ' : saved.trial ? 'Starting over opens the standard keep without a trial. ' : 'Starting over opens a fresh setup. ')+'Your saved workshop is replaced only when you call the first wave. Daily Siege and Duel are single-session runs.', 'guide-tip');
+        } else paragraph('No saved campaign is available. Choose a keep to begin.');
+      } else if (page === 'pause') {
+        var stats = el('div','guide-stats');
+        [['Treasure',g.hoard],['Build gold',g.gold],['Wave',Math.min(g.wave+1,g.totalWaves())]].forEach(function (s) {var c=el('div');c.appendChild(el('span','',s[0]));c.appendChild(el('strong','',String(s[1])));stats.appendChild(c);});
+        body.appendChild(stats);
+        body.appendChild(button('Resume defense',resume,'guide-button guide-primary'));
+        var sound=button(Sfx.isMuted()?'Sound: off':'Sound: on',function(){Sfx.toggle();sound.textContent=Sfx.isMuted()?'Sound: off':'Sound: on';sound.setAttribute('aria-pressed',String(!Sfx.isMuted()));});
+        sound.setAttribute('aria-pressed',String(!Sfx.isMuted()));sound.setAttribute('data-pause-sound','');body.appendChild(sound);
+        body.appendChild(button('Field guide & machines',function(){api.open('guide');}));
+        body.appendChild(button('Return to title',function(){
+          body.replaceChildren(); title.textContent = 'Leave this defense?';
+          paragraph(g.mode==='campaign'&&g.campaignCheckpoint()?'Your latest campaign wave checkpoint stays available. Changes after that checkpoint will be lost.':'This run will end. Earned stars, unlocks, and cosmetics stay with you.');
+          body.appendChild(button('Keep playing',resume,'guide-button guide-primary'));
+          body.appendChild(button('Return to title',function(){hide();g.reset(1,'campaign');g.state='menu';}));
+        },'guide-button guide-quiet'));
+      } else if (page === 'briefing') {
+        lesson('01','Protect your treasure', 'Keep your 60 treasure safe. Build gold pays for machines.');
+        lesson('02','Place a machine', 'Open Machines and build beside the road. Round pads save 20%.');
+        lesson('03','Start when ready', 'Build at your pace. Call the first wave when you’re ready.');
+        body.appendChild(button('Let’s build',dismiss,'guide-button guide-primary'));
+        body.appendChild(button('How to play',function(){briefingReturn=true;tab='basics';api.open('guide');},'guide-button guide-quiet'));
+      } else {
+        [['basics','The basics'],['machines','Machines'],['controls','Controls']].forEach(function (a) {
+          var b=button(a[1],function(){tab=a[0];render();nav.querySelector('[aria-pressed="true"]').focus();},'guide-tab');
+          b.setAttribute('aria-pressed',String(tab===a[0])); nav.appendChild(b);
+        });
+        if (tab==='machines') machines(); else if (tab==='controls') controls(); else basics();
+      }
+      body.scrollTop=0;
+    }
+    api.startCampaign = function (level) {
+      if (!g || level !== (level | 0) || level < 0 || level >= CAMPAIGN_MAPS || !Save.unlocked(level)) return false;
+      hide(); g.reset(1, 'campaign', level); g.state = 'playing';
+      if (!Save.data.tut && !api.seen) api.open('briefing');
+      return true;
+    };
+    api.open = function (which, level) {
+      if (!g || !modal) return;
+      if (!page) previousFocus = document.activeElement;
+      campaignLevel = which === 'checkpoint' && typeof level === 'number' && level === (level | 0) && level >= 0 && level < CAMPAIGN_MAPS && Save.unlocked(level) ? level : null;
+      g.setPaused(true); Input.drain(); page = which || 'guide';
+      modal.hidden = false; root.classList.add('has-dialog');
+      hits.replaceChildren(); signature = ''; render();
+      (page === 'briefing' ? body.querySelector('.guide-primary') : close).focus({preventScroll:true});
+    };
+    function proxy(label,r,world,action,disabled) {
+      var v=g.view, b=button('', function(event){
+        if(event && event.detail > 0){
+          // A canvas pointerdown can build a machine before its compatibility
+          // click arrives. The browser may retarget that click to a freshly
+          // inserted HUD button. Only the proxy where the gesture STARTED
+          // owns it; otherwise the same finger would queue a second world tap.
+          var ownsGesture=pointerProxy===b;
+          pointerProxy=null; pointerProxyId=null;
+          if(!ownsGesture)return;
+          var bounds=g.canvas.getBoundingClientRect();
+          var point=g.toWorld(event.clientX-bounds.left,event.clientY-bounds.top);
+          tap(point.x,point.y);
+        }else action();
+      },'guide-hit');
+      b.setAttribute('aria-label',label); b.disabled=!!disabled;
+      var x=r.hx===undefined?r.x:r.hx, y=r.hy===undefined?r.y:r.hy;
+      var w=r.hw===undefined?r.w:r.hw, h=r.hh===undefined?r.h:r.hh;
+      b.style.cssText='left:'+((x+(world?v.ox:0))*v.scale)+'px;top:'+((y+(world?v.oy:0))*v.scale)+'px;width:'+(w*v.scale)+'px;height:'+(h*v.scale)+'px';
+      hits.appendChild(b);
+    }
+    // One announcement per encounter transition, independent of the visual
+    // control cache. Building, drawing or resuming a paused wave stays quiet.
+    function syncScout() {
+      if (!scout) return;
+      if (g.state !== 'playing') {
+        if (g.state !== 'paused') {
+          scoutSignature = '';
+          if (scout.textContent) scout.textContent = '';
+        }
+        return;
+      }
+      if (page) return;
+      var key = [g.mode, g.seed, g.levelIdx, g.trial || '', g.wave, g.waveActive].join('|');
+      if (key === scoutSignature) return;
+      scoutSignature = key;
+      var intel = g._waveIntel();
+      scout.textContent = g.waveActive
+        ? 'Wave ' + intel.wave + ' underway. ' + intel.total + ' raiders' + (intel.perSide ? ' per side.' : '.')
+        : (g.wave > 0 ? 'Wave ' + g.wave + ' cleared. ' : '') + intel.announcement;
+    }
+    api.sync = function (game) {
+      if (!g || g !== game) return;
+      syncScout();
+      if (g.state==='paused' && !page) { api.open('pause'); return; }
+      marker.hidden=!!page||!!g.menu||g.state!=='playing'||g.shopPick<0||!keyboardPoint;
+      if (!marker.hidden) {
+        var spot=g._placeCheck(keyboardPoint.x,keyboardPoint.y,0);
+        marker.classList.toggle('blocked',!spot.ok);
+        marker.style.left=((keyboardPoint.x+g.view.ox)*g.view.scale)+'px';
+        marker.style.top=((keyboardPoint.y+g.view.oy)*g.view.scale)+'px';
+        marker.textContent=spot.ok?'Enter to build':spot.why;
+      }
+      if (g.shopPick<0) keyboardPoint=null;
+      launch.hidden=g.state!=='menu'||!!page||!!g._lbAsk;
+      if(page==='pause'){
+        var sound=body.querySelector('[data-pause-sound]');
+        if(sound){var label=Sfx.isMuted()?'Sound: off':'Sound: on',pressed=String(!Sfx.isMuted());if(sound.textContent!==label)sound.textContent=label;if(sound.getAttribute('aria-pressed')!==pressed)sound.setAttribute('aria-pressed',pressed);}
+      }
+      if (page) return;
+      var breathButton=hits.querySelector('[data-breath-action]');
+      if(breathButton){var ability=g._breathStatus();if(breathButton.getAttribute('aria-label')!==ability.label)breathButton.setAttribute('aria-label',ability.label);
+        if(breathButton.getAttribute('aria-disabled')!==String(!ability.canCast))breathButton.setAttribute('aria-disabled',String(!ability.canCast));}
+      var key=[g.state,g.view.cw,g.view.ch,g.view.safeT,g.view.safeB,g.shopPick,g.shopPage,g.shopOpen,!!g.mods.breathOff,g._shelf().join(','),g.waveActive,g.wave,g.menu?g._machineMenuSignature():'',!!g._lbAsk,Sfx.isMuted(),g.cavSlot,g.cavInspect,g.state==='cavern'?g._cavernAction().label:'',Save.forgeSpent(),Save.data.marks,Save.data.stars.join(',')].join('|');
+      if (g.state==='won'||g.state==='lost') { var ls=Lb.status(); key += '|'+ls.pending+'|'+ls.sending+'|'+ls.outcome+'|'+!!g._lbRetryRect+'|'+!!g._lbOptRect; }
+      if (signature===key) return; signature=key;
+      var focusedLabel=hits.contains(document.activeElement)?document.activeElement.getAttribute('aria-label'):null;
+      var focusedMachine=hits.contains(document.activeElement)?document.activeElement.getAttribute('data-machine-action'):null;
+      hits.replaceChildren();
+      if (!launch.hidden) {var help=g._titleGeom().help;launch.style.top=((help.y+g.view.oy)*g.view.scale)+'px';}
+      hits.removeAttribute('role'); hits.removeAttribute('aria-modal'); hits.setAttribute('aria-label','Game controls');
+      if (g._lbAsk) {
+        var A=lbAskGeom(g.view,g._lbAsk);
+        hits.setAttribute('role','dialog'); hits.setAttribute('aria-modal','true');
+        hits.setAttribute('aria-label','Daily Siege ladder. Post your waves to the public all-time ladder? '+LB_ASK_LINES.join(' '));
+        [[A.yes,'Post my waves to the public ladder'],[A.no,'Don’t post. Play offline']].forEach(function(a){proxy(a[1],a[0],true,function(){tap(a[0].x+a[0].w/2,a[0].y+a[0].h/2);});});
+        hits.lastChild.focus({preventScroll:true});return;
+      }
+      if (g.state==='playing' && g.menu) {
+        var machine=g._machineMenuTower();
+        hits.setAttribute('role','dialog'); hits.setAttribute('aria-modal','true');
+        hits.setAttribute('aria-label',machine ? 'Manage '+TOWER_TYPES[machine.type].name+'. Base stats; battle continues.' : 'Machine controls');
+        g._machineMenuActions().forEach(function(a){
+          proxy(a.label,a.rect,true,function(){tap(a.rect.x+a.rect.w/2,a.rect.y+a.rect.h/2);},a.disabled);
+          hits.lastChild.setAttribute('data-machine-action',a.id);
+          if (/^preview[01]$/.test(a.id)) hits.lastChild.setAttribute('aria-pressed', String(Number(a.id.slice(-1)) === (g.menu.forkChoice === 1 ? 1 : 0)));
+          if (/^aim[0-3]$/.test(a.id)) hits.lastChild.setAttribute('aria-pressed', String(Number(a.id.slice(-1)) === (machine.targeting | 0)));
+        });
+        var same=focusedMachine&&Array.prototype.find.call(hits.children,function(b){return b.getAttribute('data-machine-action')===focusedMachine&&!b.disabled;});
+        var first=hits.querySelector('button[data-machine-action="upgrade"]:not([disabled]),button[data-machine-action="preview0"],button[data-machine-action="aim0"],button[data-machine-action="keep"]');
+        var next=same||first||hits.firstChild;
+        if(next)next.focus({preventScroll:true});
+        return;
+      }
+      if (g.state==='menu') {
+        var T=g._titleGeom(),cp=g.campaignCheckpoint(),recommended=g._nextLevel();
+        T.rows.forEach(function(r,i){
+          var unlocked=Save.unlocked(i),name=cp&&cp.level===i?'Resume '+cp.name+' from wave '+cp.wave:MAPS[i].name;
+          proxy(name,r,true,function(){tap(r.x+r.w/2,r.y+r.h/2);},!unlocked);
+          var info=!unlocked?'Locked. Win '+MAPS[i-1].name+' to unlock.':cp&&cp.level===i?'Saved workshop. Continue from wave '+cp.wave+'.':(Save.data.stars[i]|0)>0?'Replay this keep. '+Save.data.stars[i]+' of 3 stars earned.':'Start keep '+(i+1)+'. 20 waves.';
+          hits.lastChild.setAttribute('aria-description',info);
+          if(i===recommended)hits.lastChild.setAttribute('aria-current','step');
+        });
+        [[T.daily,'Daily Siege','Endless survival. A new shared challenge each day.'],[T.duel,'Duel against a computer rival','Choose one of four AI dragon rivals.']].forEach(function(a){proxy(a[1],a[0],true,function(){tap(a[0].x+a[0].w/2,a[0].y+a[0].h/2);});hits.lastChild.setAttribute('aria-description',a[2]);});
+        ['Forge upgrades','Challenge trials','Cavern cosmetics','Toggle sound'].forEach(function(name,i){
+          var r=T.pills[i];proxy(name,r,true,function(){tap(r.x+r.w/2,r.y+r.h/2);},i===1&&!Save.starsTotal());
+          hits.lastChild.setAttribute('aria-description',i===0?(Save.starsTotal()-Save.forgeSpent())+' stars available for upgrades.':i===1?Save.starsTotal()?'Special campaign challenges.':'Win a keep to unlock trials.':i===2?'Customize Wick, machines and your cavern. '+(Save.data.marks|0)+' Hoard Marks.':Sfx.isMuted()?'Sound is off. Turn sound on.':'Sound is on. Turn sound off.');
+          if(i===3)hits.lastChild.setAttribute('aria-pressed',String(!Sfx.isMuted()));
+        });
+        T.legal.forEach(function(r){
+          var link=el('a','guide-hit');link.href=legalHref(r.key);link.setAttribute('aria-label',r.key==='privacy'?'Privacy policy':'Terms of use');
+          link.style.cssText='left:'+((r.x+g.view.ox)*g.view.scale)+'px;top:'+((r.y+g.view.oy)*g.view.scale)+'px;width:'+(r.w*g.view.scale)+'px;height:'+(r.h*g.view.scale)+'px';
+          link.addEventListener('click',function(event){event.preventDefault();openLegal(r.key);});hits.appendChild(link);
+        });
+      } else if (g.state==='playing') {
+        var H=g._hudGeom();
+        [['Pause',H.pause],['Toggle game speed',H.spd]].forEach(function(a){proxy(a[0],{x:a[1],y:H.btnY,w:H.buttonW,h:H.buttonH},false,function(){tap(a[1]+H.buttonW/2-g.view.ox,H.btnY+H.buttonH/2-g.view.oy);});});
+        if(!g.menu){
+          if(g.shopOpen){var report=el('p','guide-scout',g._waveIntel().announcement);report.setAttribute('role','note');report.setAttribute('aria-label','Scout report');hits.appendChild(report);}
+          if(H.shopToggle)proxy(g.shopOpen?'Close machines':'Open machines',H.shopToggle,false,function(){Input.intent('shop');});
+          H.shopCards.forEach(function(r){proxy('Build '+TOWER_TYPES[r.id].name,r,false,function(){tap(r.x+r.w/2-g.view.ox,r.y+r.h/2-g.view.oy);});});
+          if(g.shopPick<0&&H.shopMore){var more=H.shopMore;proxy('More machines. Page '+(H.shopPage+1)+' of '+H.shopPages,more,false,function(){g.shopPage=(H.shopPage+1)%H.shopPages;signature='';});}
+          if(g.shopPick>=0)proxy('Cancel placement',H.buildCancel,false,function(){g.shopPick=-1;g.placeHint=null;signature='';});
+        }
+        if (!g.menu && g.shopPick<0 && !g.shopOpen) {
+          if (!g.waveActive) proxy('Call next wave',H.startRect,false,function(){Input.intent('wave');});
+          if (!g.mods.breathOff){var ability=g._breathStatus();proxy(ability.label,H.breathRect,false,function(){Input.intent('breath');});
+            hits.lastChild.setAttribute('data-breath-action','cast');hits.lastChild.setAttribute('aria-disabled',String(!ability.canCast));}
+        }
+      } else if (g.state==='won'||g.state==='lost') {
+        if (g.mode==='daily' && Lb.on()) {
+          var statusNote=el('p','guide-scout',g._leaderboardStatusText());
+          statusNote.setAttribute('role','status'); hits.appendChild(statusNote);
+          var retry=Lb.status().pending?g._lbRetryRect:null;
+          if(retry)proxy('Retry queued score',retry,true,function(){g._retryLeaderboard();},Lb.status().sending);
+        }
+        var opt=g._lbOptRect;
+        if(opt)proxy(Lb.on()?'Stop posting scores':'Join the public all-time ladder',opt,true,function(){tap(opt.x+opt.w/2,opt.y+opt.h/2);});
+        proxy('Return to title',{x:70,y:RESULT_FOOT+22,w:280,h:Math.max(44,44/g.view.scale)},true,function(){tap(210,RESULT_FOOT+42);});
+      } else if (g._ownsViewport()) {
+        var G=g.state==='forge'?forgeGeom(g.view):g.state==='trials'?trialGeom(g.view):g.state==='cavern'?cavernRoomGeom(g.view):duelGeom(g.view);
+        if(g.state==='duel') RIVALS.forEach(function(r,i){var row={x:G.x,y:G.top+i*G.pitch,w:G.w,h:G.h};proxy('Challenge '+r.name,row,true,function(){tap(row.x+row.w/2,row.y+row.h/2);},!rivalReady(i));});
+        if(g.state==='forge'){
+          G.rows.forEach(function(r,i){var n=FORGE_NODES[i];proxy('Upgrade '+n.name,r.band,true,function(){tap(r.band.hx+r.band.hw/2,r.band.hy+r.band.hh/2);},Save.forgeSpent()>=Save.starsTotal()||(Save.data.forge[n.id]||0)>=n.ranks);});
+          proxy('Reset Forge upgrades',G.respec,true,function(){tap(G.respec.x+G.respec.w/2,G.respec.y+G.respec.h/2);});
+        }
+        if(g.state==='trials') TRIAL_ORDER.forEach(function(k,i){G.chips.forEach(function(c,lv){var row={hx:c.hx,hy:G.top+i*G.pitch+c.hy,hw:c.hw,hh:c.hh};proxy(TRIALS[k].name+' in '+MAPS[lv].name,row,true,function(){tap(row.hx+row.hw/2,row.hy+row.hh/2);},!(Save.data.stars[lv]>0));});});
+        if(g.state==='cavern'){
+          G.tabs.forEach(function(r,i){proxy(SLOTS[i].name+' cosmetics',r,true,function(){tap(r.x+r.w/2,r.y+r.h/2);});});
+          var slot=SLOTS[g.cavSlot|0]||SLOTS[0];
+          slot.items.forEach(function(it,i){var r=G.cards[i];if(!r)return;proxy('Preview '+it.name,r,true,function(){tap(r.x+r.w/2,r.y+r.h/2);});});
+          var ca=g._cavernAction(),cr=G.action;proxy(ca.label,cr,true,function(){tap(cr.x+cr.w/2,cr.y+cr.h/2);},ca.disabled);
+        }
+        proxy('Back to title',G.back,true,function(){tap(G.back.x+G.back.w/2,G.back.y+G.back.h/2);});
+      }
+      if(focusedLabel){var match=Array.prototype.find.call(hits.children,function(n){return n.getAttribute('aria-label')===focusedLabel;});
+        if(match)match.focus({preventScroll:true});else g.canvas.focus({preventScroll:true});}
+    };
+    api.init = function (game) {
+      g=game; root=document.getElementById('player-ui'); if(!root)return;
+      hits=root.querySelector('.guide-hits'); launch=root.querySelector('.guide-launch');
+      marker=root.querySelector('.guide-placement');
+      scout=root.querySelector('.guide-scout');
+      modal=root.querySelector('.guide-modal'); body=root.querySelector('.guide-body');
+      title=root.querySelector('#guide-title'); close=root.querySelector('.guide-close'); nav=root.querySelector('.guide-tabs');
+      launch.addEventListener('click',function(){api.open('guide');}); close.addEventListener('click',dismiss);
+      window.addEventListener('pointerdown',function(event){
+        pointerProxy=event.target&&event.target.closest?event.target.closest('.guide-hit'):null;
+        pointerProxyId=event.pointerId;
+        root.classList.remove('keyboard-controls');
+      },true);
+      window.addEventListener('pointercancel',function(event){
+        if(event.pointerId===pointerProxyId){pointerProxy=null;pointerProxyId=null;}
+      },true);
+      window.addEventListener('keydown',function(e){
+        if(e.altKey||e.ctrlKey||e.metaKey)return;
+        root.classList.add('keyboard-controls');
+        var k=e.key.toLowerCase();
+        if(page) {
+          if(k==='m'&&page==='pause'&&!e.repeat){e.preventDefault();Sfx.unlock();Sfx.toggle();return;}
+          if(k==='escape'||(k==='p'&&page==='pause')){e.preventDefault();dismiss();}
+          if(k==='tab') {
+            var focus=Array.prototype.filter.call(modal.querySelectorAll('button,summary'),function(n){return !n.disabled&&n.getClientRects().length;});
+            var first=focus[0],last=focus[focus.length-1];
+            if(!modal.contains(document.activeElement)){e.preventDefault();(e.shiftKey?last:first).focus();}
+            else if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+            else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+          }
+          return;
+        }
+        if(k==='enter'&&keyboardPoint&&g.state==='playing'&&!g.menu&&g.shopPick>=0){
+          e.preventDefault();tap(keyboardPoint.x,keyboardPoint.y);return;
+        }
+        if(e.target.tagName==='BUTTON'&&(k===' '||k==='enter'))return;
+        if(e.repeat)return;
+        if(g._lbAsk){
+          if(k==='escape'){e.preventDefault();g._lbAsk=null;signature='';g.canvas.focus();}
+          else if(k==='tab'){
+            var f=hits.firstChild,l=hits.lastChild;
+            if(!hits.contains(document.activeElement)){e.preventDefault();(e.shiftKey?l:f).focus();}
+            else if(e.shiftKey&&document.activeElement===f){e.preventDefault();l.focus();}
+            else if(!e.shiftKey&&document.activeElement===l){e.preventDefault();f.focus();}
+          }
+          return;
+        }
+        if(g.state==='playing'&&g.menu){
+          if(k==='escape'){e.preventDefault();g._machineMenuBack();signature='';if(!g.menu)g.canvas.focus({preventScroll:true});}
+          else if(k==='p'){e.preventDefault();g.setPaused(true);}
+          else if(k==='h'){e.preventDefault();api.open('guide');}
+          else if(k==='tab'){
+            var controls=hits.querySelectorAll('button:not([disabled])'), firstControl=controls[0],lastControl=controls[controls.length-1];
+            if(firstControl){
+              if(!hits.contains(document.activeElement)){e.preventDefault();(e.shiftKey?lastControl:firstControl).focus();}
+              else if(e.shiftKey&&document.activeElement===firstControl){e.preventDefault();lastControl.focus();}
+              else if(!e.shiftKey&&document.activeElement===lastControl){e.preventDefault();firstControl.focus();}
+            }
+          }
+          return;
+        }
+        if(k==='h'){e.preventDefault();api.open('guide');return;}
+        if(k==='m'){e.preventDefault();Sfx.unlock();Sfx.toggle();return;}
+        if(k==='escape'||k==='p'){
+          e.preventDefault();
+          if(g.state==='playing'){if(k==='escape'&&(g.menu||g.shopPick>=0||g.shopOpen)){g.menu=null;g.shopPick=-1;g.shopOpen=false;}else g.setPaused(true);}
+          else if(g._ownsViewport()&&g.state!=='menu')g.state='menu';
+          return;
+        }
+        if(g.state!=='playing')return;
+        var H=g._hudGeom(), x,y;
+        if((k===' '||k==='b')&&!g.menu){g.shopPick=-1;g.shopOpen=false;e.preventDefault();Sfx.unlock();Input.intent(k===' '?'wave':'breath');return;}
+        else if(/^[1-8]$/.test(k)&&!g.menu){var i=Number(k)-1;if(i>=g._shelf().length)return;e.preventDefault();Input.intent('build',i,0);return;}
+        else {
+          var move={arrowleft:[-48,0],a:[-48,0],arrowright:[48,0],d:[48,0],arrowup:[0,-48],w:[0,-48],arrowdown:[0,48],s:[0,48]}[k];
+          if(!move||g.menu)return;
+          if(g.shopPick>=0){
+            if(!keyboardPoint){
+              var near=MAP.pads.filter(function(p){return g._placeCheck(p.x,p.y,0).ok;});
+              near.sort(function(a,b){return Math.hypot(a.x-g.hero.x,a.y-g.hero.y)-Math.hypot(b.x-g.hero.x,b.y-g.hero.y);});
+              keyboardPoint=near.length?{x:near[0].x,y:near[0].y}:{x:g.hero.x,y:g.hero.y};
+            }else{
+              keyboardPoint.x=clamp(keyboardPoint.x+move[0]/3,20,WORLD_W-20);
+              keyboardPoint.y=clamp(keyboardPoint.y+move[1]/3,120,WORLD_H-30);
+            }
+            e.preventDefault();g.canvas.focus({preventScroll:true});signature='';return;
+          }
+          e.preventDefault();Sfx.unlock();Input.intent('move',g.hero.x+move[0],g.hero.y+move[1]);return;
+        }
+        e.preventDefault(); Sfx.unlock();tap(x-g.view.ox,y-g.view.oy);
+      });
+      api.sync(g);
+    };
+    return api;
+  })();
+
   // ===== boot + DEV-GATED debug surface (§3c) =============================
   var _dev = /[?&]dev=1/.test(location.search);   // DEV-HARNESS-COMPILE-TIME: strip
   var canvas = document.getElementById('game-canvas');
@@ -11345,7 +13212,25 @@
 
   // Production exposes lifecycle pause only. Declared before boot so a shell
   // that calls pause() during the splash cannot throw.
-  window.__game = { pause: function (v) { if (game) game.setPaused(v); } };
+  window.__game = { pause: function (v) {
+    if (!game) return false;
+    game.setPaused(v);
+    return game.state === 'paused';
+  } };
+
+  // Pause when the game leaves the screen, not when keyboard focus moves to
+  // a visible browser-host control or child frame: those also emit window
+  // blur and were repeatedly opening "Take a breather" during normal play.
+  // Native interruptions use __game.pause(true). Returning never auto-resumes.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && game) game.setPaused(true);
+  });
+  window.addEventListener('blur', function () {
+    if (document.hidden && game) game.setPaused(true);
+  });
+  window.addEventListener('pagehide', function () {
+    if (game) game.setPaused(true);
+  });
 
   // Replaced by the dev harness at the bottom of this file. It has to exist in
   // a stripped build too, because boot calls it unconditionally.
@@ -11368,9 +13253,9 @@
       if (fill) fill.style.width = Math.round(frac * 100) + '%';
     },
     function (loaded, total) {
+      enemyMotionPrewarm();
       game = new Game(canvas);
       window.addEventListener('resize', function () { game.resize(); });
-      loadWalkFrames();                    // enhancement: never blocks the boot
       var boot = document.getElementById('boot');
       if (boot) {
         boot.classList.add('gone');
@@ -11382,6 +13267,7 @@
         try { console.warn('hoardling: booted with ' + (total - loaded) + '/' + total +
                            ' assets missing: ' + Object.keys(ART.missing).join(', ')); } catch (e) {}
       }
+      PlayerGuide.init(game);
       bootDev();
     });
 
