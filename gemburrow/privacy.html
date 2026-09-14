@@ -48,7 +48,7 @@
 
   <main class="legal">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: September 13, 2026</p>
+    <p class="updated">Last updated: September 14, 2026</p>
 
     <div class="callout">
       <strong>The short version.</strong> Gemburrow has no account, no analytics
@@ -105,7 +105,7 @@
       generates a new one.
     </p>
 
-    <h2>The one network call: Daily Dig scores</h2>
+    <h2>Daily Dig scores and leaderboard reads</h2>
     <p>
       When you finish a <strong>Daily Dig</strong>, the game posts that run to our
       leaderboard, hosted on Supabase. The message contains only:
@@ -113,14 +113,15 @@
     <ul>
       <li>the day the jar belongs to, and that day's shared jar seed;</li>
       <li>your auto-generated <code>MOLE-</code> name and the random identifier above;</li>
-      <li>the run's results — coins earned and swings used.</li>
+      <li>the run's results — coins earned and pieces extracted.</li>
     </ul>
     <p>
-      The game then reads back the day's top scores to draw the board. If you
-      were offline, the score is held on your device and sent the next time the
-      game opens with a connection. <strong>Career digs and Free digs make no
-      network calls at all</strong>, and nothing about how you play — timings,
-      taps, sessions, crashes — is ever sent anywhere.
+      Opening a leaderboard fetches its scores. If a Daily score cannot be
+      sent, the game holds it on your device and retries on launch, reconnection
+      or resume while that Daily is still current. Pending scores expire at the
+      next UTC day. <strong>Career, Free Dig and archive results are not
+      uploaded.</strong> A pending Daily score may retry while another mode is
+      open. No individual tap timings, session logs or crash reports are sent.
     </p>
     <p>
       Scores are stored for the leaderboard and are visible to other players as a
