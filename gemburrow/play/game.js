@@ -1738,6 +1738,21 @@
         save().then(finish);
       });
     }
+    // Personal records are monotonic even when a recovering device has two
+    // divergent save copies. The wallet still belongs to the chosen profile.
+    function mergeBests(a, b) {
+      var out = {};
+      [a, b].forEach(function (map) {
+        Object.keys(map || {}).forEach(function (key) {
+          var value = map[key];
+          if (/^\d+$/.test(key) && typeof value === 'number' && isFinite(value) && value >= 0) {
+            out[key] = Math.max(out[key] || 0, value);
+          }
+        });
+      });
+      return out;
+    }
+
     // How much life is in a save. Only consulted when a PROVISIONAL local copy
     // meets a readable native backup and one of them has to win.
     //
@@ -1816,6 +1831,9 @@
             // Store.recover grant or refund. Merge verified access revisions
             // independently of the winning career copy. Legacy booleans may
             // preserve an unlock only until verified purchase state exists.
+            var bestFree = Math.max(Number(data.bestFree) || 0, Number(nat.bestFree) || 0);
+            var bestDaily = mergeBests(data.bestDaily, nat.bestDaily);
+            var careerStars = mergeBests(data.careerStars, nat.careerStars);
             var full = !!data.full || !!nat.full;
             var access = mergeAccess(nat.iapAccess, data.iapAccess);
             var receipts = Object.assign({}, nat.iapSeen || {}, data.iapSeen || {});
@@ -1827,6 +1845,9 @@
             // while the bridge was down, so the fuller save wins and the other
             // is published over on the next write either way.
             if (!provisional || progress(nat) >= progress(data)) Object.assign(data, nat);
+            data.bestFree = bestFree;
+            data.bestDaily = bestDaily;
+            data.careerStars = careerStars;
             data.iapAccess = access;
             data.full = accessFull(access, full);
             data.iapSeen = receipts;
@@ -2162,9 +2183,28 @@
         if (done) done(ok);
       }).catch(function () { if (done) done(false); });
     }
+    // Private standing is looked up by installation identity, never inferred
+    // from a short display name. The RPC returns only aggregate rank data.
+    function personal(day, board, done) {
+      if (!window.fetch || !Meta.data.clientId) { done(null); return; }
+      var clientId = Meta.data.clientId;
+      fetch('https://lrnupqottbfjfzsgtciq.supabase.co/rest/v1/rpc/gemburrow_personal_rank', {
+        method: 'POST', headers: H,
+        body: JSON.stringify({ p_day: day, p_client_id: clientId, p_board: board }),
+      }).then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      }).then(function (r) {
+        if (Meta.data.clientId !== clientId || !r || r.ok !== true || r.day !== day || r.board !== board ||
+            typeof r.hasScore !== 'boolean' || !Number.isInteger(r.participantCount) || r.participantCount < 0 ||
+            (r.hasScore && (!Number.isInteger(r.rank) || r.rank < 1 || r.rank > r.participantCount ||
+                           typeof r.score !== 'number' || !isFinite(r.score) || r.score < 0))) { done(null); return; }
+        done(r);
+      }).catch(function () { done(null); });
+    }
     function top(day, limit, done) {
       if (!window.fetch) return done(null);
-      fetch(URL + '?day=eq.' + day + '&select=player,coins&order=coins.desc&limit=' + limit, { headers: H })
+      fetch(URL + '?day=eq.' + day + '&select=player,coins&order=coins.desc,player.asc&limit=' + limit, { headers: H })
         .then(function (r) { return r.json(); })
         .then(function (rows) { done(Array.isArray(rows) ? rows : null); })
         .catch(function () { done(null); });
@@ -2176,7 +2216,7 @@
     // leagueOffered). 'error' is a transient failure and never hides the tab.
     function league(limit, done) {
       if (!window.fetch) return done('error', null);
-      fetch(LEAGUE + '?select=player,total,days&order=total.desc&limit=' + limit,
+      fetch(LEAGUE + '?select=player,total,days&order=total.desc,player.asc&limit=' + limit,
             { headers: H })
         .then(function (r) {
           // READ THE REASON, NOT THE TRANSPORT. "The view is not published
@@ -2221,7 +2261,7 @@
       }
       submit(payload, finish);
     }
-    return { submit: submit, top: top, league: league, retryPending: retryPending };
+    return { submit: submit, top: top, league: league, personal: personal, retryPending: retryPending };
   })();
 
   // ===== Hap — haptics through Capacitor (no-op on web) ===================
@@ -2904,8 +2944,8 @@
       // So L16, the level whose entire purpose is one sentence, was saying the
       // wrong one and silencing the right one.
       this.toast = cc.intro === 'lode'
-        ? { text: 'NEW — LODESTONE: dense striped stone. It takes two swings to break through.', until: 4.6 }
-        : { text: 'NEW — SHALE: the cracked slab brings more rock down when you break it.', until: 4.6 };
+        ? { text: 'NEW LODESTONE: dense striped stone. It takes two swings to break through.', until: 4.6 }
+        : { text: 'NEW SHALE: the cracked slab brings more rock down when you break it.', until: 4.6 };
       if (!Meta.data.taught) Meta.data.taught = {};
       Meta.data.taught[cc.intro] = 1;      // taught here, so the in-jar hint stays short
       Meta.save();
@@ -3278,8 +3318,8 @@
         this._rockChips(b.x, b.y);
         this.picks.push({ x: b.x, y: b.y, t: 0, heavy: true, cracked: this.swings <= 5 });
         this.toast = this._teach('lode',
-          'LODESTONE — dense stone. It takes two swings to break through.',
-          'The lodestone cracks — one more swing.');
+          'LODESTONE: dense stone. It takes two swings to break through.',
+          'The lodestone cracks. One more swing.');
         if (this.swings <= 0 && this.state === 'playing') this._endShift();
         continue;
       }
@@ -3394,7 +3434,7 @@
         // announcing one that did not happen is the same lie the PACE line was
         // telling in the other direction.
         this.combo = 0;
-        this.toast = { text: 'RUSH EXPIRED — new card, ladder reset',
+        this.toast = { text: 'RUSH EXPIRED: new card, ladder reset',
                        until: this.worldT + 2.2 };
         Snd.orderLost();
       }
@@ -3471,11 +3511,17 @@
         this.shakeT = Math.max(this.shakeT, 0.18);
         Hap.medium();
         Snd.fanfare(60);
+        // Say what happened to EVERY gem. The toast used to key off got === 2
+        // and got === 1 only, so a three-gem crust that all fit read "Bag
+        // full, they rolled back in". A crust that all rolls back names no
+        // count of zero: "0 bagged" reads like a bug.
         var rolledBack = b.geode.length - got;
         this.toast = {
-          text: rolledBack === 0
-              ? 'CRACKED IT! ' + got + (got === 1 ? ' gem' : ' gems') + ' straight to the bag!'
-              : 'CRACKED IT! ' + got + ' bagged, ' + rolledBack + ' rolled back in.',
+          text: 'CRACKED IT! ' + (rolledBack === 0
+              ? got + (got === 1 ? ' gem' : ' gems') + ' straight to the bag!'
+              : got === 0
+              ? 'Bag full, ' + (rolledBack === 1 ? 'it' : rolledBack === 2 ? 'both' : 'all ' + rolledBack) + ' rolled back in.'
+              : got + ' bagged, ' + rolledBack + ' rolled back in.'),
           until: this.worldT + 2,
         };
         this._burst(b.x, b.y, 12, 260, 240, 2, 2.5, 0.7, '#ffe9a8');
@@ -3543,8 +3589,8 @@
           Hap.medium();
           Snd.thunk();
           this.toast = this._teach('shale',
-            'SHALE — the cracked slab brings more rock down. Clearing it is not free.',
-            'The shale gives way — more rock!');
+            'SHALE: the cracked slab brings more rock down. Clearing it is not free.',
+            'The shale gives way. More rock!');
         } else {
           Snd.scrap();
         }
@@ -3593,7 +3639,7 @@
         Meta.save();
         // never stomp a milestone announcement — that one is rarer and louder
         if (this.toast === priorToast) {
-          this.toast = { text: 'PRISM — no card wants it, so Hoardling keeps it. The hoard is your collection.',
+          this.toast = { text: 'PRISM: no card wants it, so Hoardling keeps it. The hoard is your collection.',
                          until: this.worldT + 3.6 };
         }
       }
@@ -3645,8 +3691,9 @@
       this.hitStop = 0.06;
       this.shakeT = Math.max(this.shakeT, 0.16);
       Hap.medium();
+      // Same counts as the crust toast. The first gem is already in the bag.
       this.toast = { text: greatOverflow > 0
-        ? 'A GREAT ' + key.toUpperCase() + '! Bag full — the rest rolled back in.'
+        ? 'A GREAT ' + key.toUpperCase() + '! ' + (GREAT_YIELD - greatOverflow) + ' bagged, ' + greatOverflow + ' rolled back in.'
         : 'A GREAT ' + key.toUpperCase() + '! Three gems from one swing.',
         until: this.worldT + 2 };
       this._burst(b.x, b.y, 14, 250, 235, 2, 2.6, 0.7, TYPE[key].hi);
@@ -4173,10 +4220,13 @@
         var send = Meta.data.pendingScore;
         var self = this;
         this.board = null;
+        var boardRequest = this._resultBoardRequest = {};
         Lb.submit(send, function (ok) {
           if (ok && Meta.data.pendingScore === send) { Meta.data.pendingScore = null; Meta.save(); }
           // fetch AFTER the submit settles so your own row is on the board
-          Lb.top(day, 10, function (rows) { self.board = rows; });
+          Lb.top(day, 10, function (rows) {
+            if (self._resultBoardRequest === boardRequest && self.state === 'results' && self.isDaily && !self.archiveDay && self.day === day) self.board = rows;
+          });
         });
       } else if (this.coins > Meta.data.bestFree) {
         Meta.data.bestFree = this.coins;
@@ -5224,7 +5274,7 @@
     ctx.font = fT(10, 'bold'); ctx.textBaseline = 'top';
     if (this.bag.length >= this.bagCap) {
       ctx.fillStyle = '#f0a090'; ctx.textAlign = 'center';
-      ctx.fillText('BAG FULL — tap a gem to toss it', VIEW_MIN_W / 2, BAG_Y + BAG_SLOT + 4);
+      ctx.fillText('BAG FULL: tap a gem to toss it', VIEW_MIN_W / 2, BAG_Y + BAG_SLOT + 4);
     } else {
       ctx.fillStyle = 'rgba(232,220,200,0.5)'; ctx.textAlign = 'left';
       ctx.fillText('BAG', bagSlotX(0) - 32, BAG_Y + 9);
@@ -5272,7 +5322,7 @@
     // there is no room below either — the PACE block sits there. So the toast
     // keeps the safe row and the coach yields for the two or three seconds a
     // toast is alive. The coach is persistent guidance and loses nothing by
-    // waiting; "CRACKED IT! Two gems straight to the bag" is feedback about
+    // waiting; "CRACKED IT! 2 gems straight to the bag" is feedback about
     // something that just happened and cannot be shown later.
     var toastLive = !!(this.toast && this.worldT < this.toast.until);
     var coachOn = !Meta.data.tutorialDone && this.tutStep < 3 && !toastLive;
@@ -5298,7 +5348,7 @@
       // Must fit the 336-wide banner drawn just above: this is one fillText
       // with no wrapping, and the first rewrite overflowed the view on BOTH
       // edges at 72.
-      var msg = this.tutStep === 0 ? 'Dig from the top — crack sparkly rocks for gems.'
+      var msg = this.tutStep === 0 ? 'Dig from the top. Crack sparkly rocks for gems.'
               : this.tutStep === 1 ? 'Nice! Complete the FULL set and the order pays out.'
               : 'Need space? Tap a bagged gem to toss it away.';
       ctx.fillText(msg, VIEW_MIN_W / 2, bandY - 20);
@@ -5564,7 +5614,7 @@
       ctx.font = fT(11);
       ctx.fillText(left === 0 ? 'cash out the leftovers'
                  : dead ? this.swings + ' swings left · dig rock for coins'
-                 : ok ? 'comfortably ahead' : tight ? 'on the line' : 'behind — pick your gems',
+                 : ok ? 'comfortably ahead' : tight ? 'on the line' : 'behind: pick your gems',
                  cx, cy + (c.compact ? 13 : 20));
     }
   };
@@ -6287,8 +6337,8 @@
     if (mdrag) ctx.drawImage(mdrag, cx + 32, 447, 32, 32);
     // The card is the door to RECORDS, and says so. A tappable region with no
     // mark reads as a missing feature, not as a secret.
-    ctx.fillStyle = 'rgba(232,201,255,0.7)'; ctx.font = fT(9, 'bold');
-    ctx.fillText('RECORDS', cx + 100, 452, 44);
+    ctx.fillStyle = 'rgba(232,201,255,0.7)'; ctx.font = fT(12, 'bold');
+    ctx.fillText('SCORES', cx + 100, 452, 48);
     ctx.fillStyle = 'rgba(255,215,94,0.8)'; ctx.font = fT(14, 'bold');
     ctx.fillText('\u203A', cx + 100, 464);
 
@@ -6510,16 +6560,16 @@
   // for two minutes; a 'closed' or 'error' one is asked again on the next
   // RECORDS open, so an outage is never remembered for the session.
   Game.prototype._loadLeague = function (force) {
-    var b = this._league;
-    if (!force && b) {
+    var day = dayNumber(), b = this._league;
+    if (!force && b && b.day === day && b.clientId === Meta.data.clientId) {
       if (b.state === 'loading' && !fetchStalled(b)) return;
       if (b.state === 'ok' && nowMs() - b.at < 120000) return;
     }
-    var mine = this._league = { at: nowMs(), state: 'loading', rows: null };
+    var mine = this._league = { day: day, clientId: Meta.data.clientId, at: nowMs(), state: 'loading', rows: null, rankState: 'loading', standing: null };
     var self = this;
     Lb.league(12, function (state, rows) {
       // a superseded request (a stalled one that was retried) says nothing
-      if (self._league !== mine) return;
+      if (self._league !== mine || dayNumber() !== day) return;
       mine.state = state;
       mine.rows = rows;
       mine.at = nowMs();
@@ -6529,6 +6579,10 @@
         self._recLeague = self.leagueOffered();
         if (!self._recLeague && self.recTab === 'league') self.recTab = 'stats';
       }
+    });
+    Lb.personal(day, 'league', function (rank) {
+      if (self._league !== mine || dayNumber() !== day || Meta.data.clientId !== mine.clientId) return;
+      mine.standing = rank; mine.rankState = rank ? 'ok' : 'error';
     });
   };
 
@@ -6542,7 +6596,8 @@
   //
   // Read-only by construction — anon may SELECT every column EXCEPT client_id
   // (see tools/leaderboard-rpc.sql); writes go through the definer RPC. So the
-  // worst this can do is show a stale or empty board.
+  // Public top rows never identify you; private aggregate standing comes from
+  // the separate installation-ID lookup.
   // A FETCH THAT NEVER CALLS BACK MUST STILL RESOLVE ON SCREEN.
   //
   // Both boards sit in `state: 'loading'` until their callback fires, and the
@@ -6561,21 +6616,19 @@
   }
 
   Game.prototype._loadBoard = function (force) {
-    var day = dayNumber();
-    var b = this._board;
-    // refetch on a new UTC day, on an explicit retry, or after 60s
-    if (!force && b && b.day === day && nowMs() - b.at < 60000) return;
-    this._board = { day: day, at: nowMs(), state: 'loading', rows: null };
+    var day = dayNumber(), b = this._board;
+    if (!force && b && b.day === day && b.clientId === Meta.data.clientId && b.state !== 'error' && !fetchStalled(b) && nowMs() - b.at < 60000) return;
+    var mine = this._board = { day: day, clientId: Meta.data.clientId, at: nowMs(), state: 'loading', rows: null, rankState: 'loading', standing: null };
     var self = this;
     Lb.top(day, 10, function (rows) {
-      // a fetch that lands after the day rolled over belongs to yesterday
-      if (!self._board || self._board.day !== day) return;
-      self._board.state = rows ? 'ok' : 'error';
-      self._board.rows = rows || null;
-      self._board.at = nowMs();
+      if (self._board !== mine || dayNumber() !== day) return;
+      mine.state = rows ? 'ok' : 'error'; mine.rows = rows || null; mine.at = nowMs();
+    });
+    Lb.personal(day, 'daily', function (rank) {
+      if (self._board !== mine || dayNumber() !== day || Meta.data.clientId !== mine.clientId) return;
+      mine.standing = rank; mine.rankState = rank ? 'ok' : 'error';
     });
   };
-
   // THE RECORDS SCREEN. Every number here was already persisted and none of it
   // was ever shown together: bestDaily accumulated a day->coins map that was
   // read only for TODAY, bestFree and the star total lived on separate
@@ -6596,16 +6649,16 @@
     var st = stats();
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     ctx.fillStyle = '#ffe9a8'; ctx.font = fD(28);
-    ctx.fillText('RECORDS', cx, 34);
+    ctx.fillText(this.recTab === 'board' ? 'DAILY LEADERBOARD' : this.recTab === 'league' ? '14-DAY LEAGUE' : 'RECORDS', cx, 34, 370);
 
     // --- tabs ---------------------------------------------------------------
     var R = this.recordsRects();
     var tab = this.recTab || 'stats';
     if (tab === 'league' && !R.tabLeague) tab = 'stats';
     [[R.tabStats, 'YOU', tab === 'stats'],
-     [R.tabBoard, 'TODAY', tab === 'board'],
+     [R.tabBoard, 'DAILY', tab === 'board'],
      [R.tabLeague, 'LEAGUE', tab === 'league'],
-     [R.tabPast, 'PAST', tab === 'past'],
+     [R.tabPast, 'ARCHIVE', tab === 'past'],
      [R.tabJobs, 'JOBS', tab === 'jobs']]
       .filter(function (t) { return !!t[0]; })
       .forEach(function (t) {
@@ -6646,8 +6699,8 @@
     var rows = [
       ['Career', Math.min(CAREER_MAX, Meta.data.careerLevel || 1) + ' of ' + CAREER_MAX],
       ['Stars', starTotal + ' / ' + (CAREER_MAX * 3)],
-      ['Best daily', bestEver ? bestEver + 'c' : '—'],
-      ['Best free dig', Meta.data.bestFree ? Meta.data.bestFree + 'c' : '—'],
+      ['Best daily', bestEver ? bestEver + 'c' : 'none yet'],
+      ['Best free dig', Meta.data.bestFree ? Meta.data.bestFree + 'c' : 'none yet'],
       ['Day streak', (st.streak || 0) + (st.bestStreak > (st.streak || 0)
                       ? '  (best ' + st.bestStreak + ')' : '')],
       ['Shifts worked', st.shifts || 0],
@@ -6780,13 +6833,23 @@
     return { x: VIEW_MIN_W / 2 - 100, y: 154 + rows * 33 - 6, w: 200, h: 50 };
   };
 
+  Game.prototype.archiveAction = function () {
+    return Ent.owned() ? 'replay' : Store.available() ? 'unlock' : 'history';
+  };
+
   Game.prototype._drawPastTab = function () {
     var ctx = this.ctx, cx = VIEW_MIN_W / 2;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = fT(11);
-    ctx.fillText('every past jar, still diggable · no coins, no board', cx, 118, 300);
+    var action = this.archiveAction();
+    if (action === 'history') {
+      ctx.fillText('Archive replay: The Full Burrow for iPhone', cx, 118, 300);
+    } else {
+      ctx.fillText(action === 'unlock' ? 'unlock The Full Burrow to replay these jars'
+                                      : 'past daily jars · no coins, no board', cx, 118, 300);
+    }
 
-    // PAGED, AND EACH ROW IS A REAL TARGET.
+    // PAGED HISTORY. Replay rows become targets only where replay is available.
     //
     // Fourteen days at a 33 pitch drew a 29-unit row — 25.9pt on an SE3, barely
     // half the 44pt floor — with a 4-unit dead gap between neighbours, and each
@@ -6814,10 +6877,13 @@
       ctx.textAlign = 'right';
       if (dug) {
         ctx.fillStyle = '#ffd75e'; ctx.font = fT(12, 'bold');
-        ctx.fillText(r.best + 'c', cx + 140, y + 15, 70);
+        ctx.fillText(r.best + 'c', cx + 140, y + (action === 'unlock' ? 8 : 15), 70);
+        if (action === 'unlock') {
+          ctx.font = fT(9, 'bold'); ctx.fillText('Unlock', cx + 140, y + 26, 70);
+        }
       } else {
         ctx.fillStyle = 'rgba(201,168,106,0.75)'; ctx.font = fT(11, 'bold');
-        ctx.fillText('dig it', cx + 140, y + 16, 70);
+        ctx.fillText(action === 'replay' ? 'dig it' : action === 'unlock' ? 'Unlock' : 'no score', cx + 140, y + 16, 70);
       }
       ctx.textAlign = 'center';
       y += H;
@@ -6841,13 +6907,31 @@
     return { x: VIEW_MIN_W / 2 - 100, y: PAST_ROW_Y + n * PAST_ROW_H, w: 200, h: 50 };
   };
 
+  Game.prototype._standingText = function (which) {
+    var b = which === 'league' ? this._league : this._board;
+    var r = b && b.day === dayNumber() && b.clientId === Meta.data.clientId && b.standing;
+    if (r && r.hasScore) return 'your rank: ' + r.rank + ' of ' + r.participantCount + ' · ' + r.score + 'c';
+    if (which === 'league') return r ? 'no posted daily score in this fortnight yet' : 'your league rank is unavailable';
+    var best = Meta.data.bestDaily[dayNumber()] || 0;
+    var queued = Meta.data.pendingScore && Meta.data.pendingScore.day === dayNumber();
+    if (best > 0) return 'your best today: ' + best + 'c' + (queued ? ' · waiting to post' : r ? ' · not posted yet' : ' · rank unavailable');
+    return r ? 'no posted score today · try the daily dig' : 'you have not dug today';
+  };
+
+  Game.prototype._drawStanding = function (which, y) {
+    this.ctx.textAlign = 'center'; this.ctx.fillStyle = 'rgba(232,201,255,0.8)'; this.ctx.font = fT(12);
+    this.ctx.fillText(this._standingText(which), VIEW_MIN_W / 2, y, 300);
+  };
+
   Game.prototype._drawLeagueTab = function () {
+    if (!this._league || this._league.day !== dayNumber() || this._league.clientId !== Meta.data.clientId) this._loadLeague(false);
     var ctx = this.ctx, cx = VIEW_MIN_W / 2, b = this._league;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
 
     if (!b || (b.state === 'loading' && !fetchStalled(b))) {
       ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('counting the fortnight…', cx, 300);
+      this._drawStanding('league', 348);
       return;
     }
     if (fetchStalled(b)) {
@@ -6855,6 +6939,7 @@
       ctx.fillText('the league is out of reach right now', cx, 292);
       ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = fT(11);
       ctx.fillText('tap the tab again to retry', cx, 314);
+      this._drawStanding('league', 348);
       return;
     }
     // 'closed' normally never reaches this draw: without a league the tab is
@@ -6867,6 +6952,7 @@
       ctx.fillText('the league is out of reach right now', cx, 292);
       ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = fT(11);
       ctx.fillText('tap the tab again to retry', cx, 314);
+      this._drawStanding('league', 348);
       return;
     }
     var rows = b.rows || [];
@@ -6875,31 +6961,28 @@
       ctx.fillText('no digs in the last fortnight', cx, 292);
       ctx.fillStyle = '#ffd75e'; ctx.font = fT(13, 'bold');
       ctx.fillText('a daily dig starts your run', cx, 316);
+      this._drawStanding('league', 348);
       return;
     }
 
     ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = fT(11);
-    ctx.fillText('every daily dig of the last 14 days, added up', cx, 118, 300);
+    ctx.fillText('TOP 12 · daily bests of the last 14 days', cx, 118, 300);
 
-    var me = Meta.data.playerName, mine = -1;
+    var rank = 0, previousScore = null;
     var y = 140, H = 32;
     for (var i = 0; i < rows.length && i < 12; i++) {
-      var isMe = rows[i].player === me;
-      if (isMe) mine = i;
-      ctx.fillStyle = isMe ? 'rgba(90,70,40,0.85)'
-                           : (i % 2 ? 'rgba(20,12,6,0.30)' : 'rgba(20,12,6,0.48)');
+      if (rows[i].total !== previousScore) rank = i + 1;
+      previousScore = rows[i].total;
+      ctx.fillStyle = i % 2 ? 'rgba(20,12,6,0.30)' : 'rgba(20,12,6,0.48)';
       rr(ctx, cx - 150, y, 300, H - 4, 8); ctx.fill();
-      if (isMe) {
-        ctx.strokeStyle = 'rgba(255,215,94,0.8)'; ctx.lineWidth = 1.5;
-        rr(ctx, cx - 150, y, 300, H - 4, 8); ctx.stroke();
-      }
+
       ctx.textAlign = 'left';
-      ctx.fillStyle = i < 3 ? '#ffd75e' : 'rgba(240,226,200,0.55)';
+      ctx.fillStyle = rank <= 3 ? '#ffd75e' : 'rgba(240,226,200,0.55)';
       ctx.font = fT(12, 'bold');
-      ctx.fillText(String(i + 1), cx - 140, y + 8, 22);
+      ctx.fillText(String(rank), cx - 140, y + 8, 22);
       // safeName at the point of PAINT, same as the daily board
-      ctx.fillStyle = isMe ? '#ffe9a8' : 'rgba(240,226,200,0.9)';
-      ctx.font = (isMe ? 'bold ' : '') + fT(12);
+      ctx.fillStyle = 'rgba(240,226,200,0.9)';
+      ctx.font = fT(12);
       ctx.fillText(safeName(rows[i].player), cx - 114, y + 8, 118);
       ctx.fillStyle = 'rgba(232,201,255,0.6)'; ctx.font = fT(10);
       ctx.fillText((rows[i].days | 0) + 'd', cx + 12, y + 9, 30);
@@ -6910,11 +6993,10 @@
     }
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(232,201,255,0.8)'; ctx.font = fT(12);
-    ctx.fillText(mine >= 0 ? 'you are ' + (mine + 1) + ' of ' + rows.length + ' this fortnight'
-                           : 'dig the daily to enter the league', cx, y + 8, 290);
+    this._drawStanding('league', y + 8);
   };
-
   Game.prototype._drawBoardTab = function () {
+    if (!this._board || this._board.day !== dayNumber() || this._board.clientId !== Meta.data.clientId) this._loadBoard(false);
     var ctx = this.ctx, cx = VIEW_MIN_W / 2;
     var b = this._board;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
@@ -6922,6 +7004,7 @@
     if (!b || (b.state === 'loading' && !fetchStalled(b))) {
       ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('reading the board…', cx, 300);
+      this._drawStanding('board', 348);
       return;
     }
     if (b.state === 'error' || fetchStalled(b)) {
@@ -6929,6 +7012,7 @@
       ctx.fillText('the board is out of reach right now', cx, 292);
       ctx.fillStyle = 'rgba(232,220,200,0.4)'; ctx.font = fT(11);
       ctx.fillText('tap the tab again to retry', cx, 314);
+      this._drawStanding('board', 348);
       return;
     }
     var rows = b.rows || [];
@@ -6936,32 +7020,31 @@
       ctx.fillStyle = 'rgba(232,220,200,0.6)'; ctx.font = fT(13);
       ctx.fillText('nobody has dug today yet', cx, 292);
       ctx.fillStyle = '#ffd75e'; ctx.font = fT(13, 'bold');
-      ctx.fillText('be first — the daily jar is the same for everyone', cx, 316);
+      ctx.fillText('be first: the daily jar is the same for everyone', cx, 316);
+      this._drawStanding('board', 348);
       return;
     }
 
-    var me = Meta.data.playerName, mine = -1;
-    var y = 126, H = 34;
+    ctx.fillStyle = 'rgba(232,201,255,0.75)'; ctx.font = fT(11);
+    ctx.fillText('TOP 10 · equal scores share a rank', cx, 118, 300);
+    var rank = 0, previousScore = null;
+    var y = 140, H = 34;
     for (var i = 0; i < rows.length && i < 10; i++) {
-      var isMe = rows[i].player === me;
-      if (isMe) mine = i;
-      ctx.fillStyle = isMe ? 'rgba(90,70,40,0.85)'
-                           : (i % 2 ? 'rgba(20,12,6,0.30)' : 'rgba(20,12,6,0.48)');
+      if (rows[i].coins !== previousScore) rank = i + 1;
+      previousScore = rows[i].coins;
+      ctx.fillStyle = i % 2 ? 'rgba(20,12,6,0.30)' : 'rgba(20,12,6,0.48)';
       rr(ctx, cx - 150, y, 300, H - 4, 8); ctx.fill();
-      if (isMe) {
-        ctx.strokeStyle = 'rgba(255,215,94,0.8)'; ctx.lineWidth = 1.5;
-        rr(ctx, cx - 150, y, 300, H - 4, 8); ctx.stroke();
-      }
+
       ctx.textAlign = 'left';
-      ctx.fillStyle = i < 3 ? '#ffd75e' : 'rgba(240,226,200,0.55)';
+      ctx.fillStyle = rank <= 3 ? '#ffd75e' : 'rgba(240,226,200,0.55)';
       ctx.font = fT(13, 'bold');
-      ctx.fillText(String(i + 1), cx - 140, y + 8, 24);
+      ctx.fillText(String(rank), cx - 140, y + 8, 24);
       // ALWAYS through safeName. `player` is written by the RPC, which refuses
       // anything that is not a minted MOLE-XXXX — but this is a 4+ game and
       // the column is the one field a caller supplies, so it is sanitised at
       // the point of PAINT too rather than trusting the write path alone.
-      ctx.fillStyle = isMe ? '#ffe9a8' : 'rgba(240,226,200,0.9)';
-      ctx.font = (isMe ? 'bold ' : '') + fT(13);
+      ctx.fillStyle = 'rgba(240,226,200,0.9)';
+      ctx.font = fT(13);
       ctx.fillText(safeName(rows[i].player), cx - 112, y + 8, 150);
       ctx.textAlign = 'right';
       ctx.fillStyle = '#ffd75e'; ctx.font = fT(14, 'bold');
@@ -6970,27 +7053,8 @@
     }
     ctx.textAlign = 'center';
 
-    // Your own standing, when you are not in the visible top ten — otherwise
-    // the board is just other people and says nothing about you.
-    var best = Meta.data.bestDaily[dayNumber()] || 0;
-    ctx.fillStyle = 'rgba(232,201,255,0.8)'; ctx.font = fT(12);
-    var line;
-    if (mine >= 0) {
-      line = 'you are ' + (mine + 1) + ' of ' + rows.length + ' today';
-    } else if (best > 0) {
-      // "not in the top 1" is what a naive rows.length prints on a board with
-      // one row, and it is also WRONG about the cause: a local best that is
-      // absent from a short board did not miss the cut, it has not posted.
-      // pendingScore is the queue a failed submission sits in.
-      line = 'your best today: ' + best + 'c'
-           + (Meta.data.pendingScore ? ' · waiting to post'
-              : rows.length >= 10 ? ' · outside the top 10' : '');
-    } else {
-      line = 'you have not dug today';
-    }
-    ctx.fillText(line, cx, y + 10, 290);
+    this._drawStanding('board', y + 10);
   };
-
   // The Hoardling wardrobe. Unlocked by RANK, not bought — so the rows show a
   // threshold, never a price, and there is no wallet interaction at all.
   // The pick rack. Star-gated, so rows show a THRESHOLD, never a price.
@@ -7482,7 +7546,7 @@
 
     // WHAT YOU GET, and — just as important — what you already have.
     var yy = 178;
-    var give = ['Career levels ' + (FREE_CAREER_LEVELS + 1) + '-' + CAREER_MAX + ' — the rest of the ladder',
+    var give = ['Career levels ' + (FREE_CAREER_LEVELS + 1) + '-' + CAREER_MAX + ': the rest of the ladder',
                 // ARCHIVE_DAYS, not "every past": the archive is a rolling
                 // fortnight, and the IAP's own ASC description says 14-day.
                 'The last ' + ARCHIVE_DAYS + ' daily jars, still playable'];
@@ -7501,7 +7565,7 @@
     // you may play. tools/check_frame_claims.py scans this whole file (comments
     // ship in the bundle too) for store/frames.json _forbidden_strings.
     var keep = ['Free digs, the daily jar and its board stay free',
-                'No ads, no energy meter — same as before'];
+                'No ads, no energy meter, same as before'];
     for (var k = 0; k < keep.length; k++) {
       ctx.fillStyle = 'rgba(232,201,255,0.75)';
       ctx.fillText('\u2713', cx - 128, yy);
@@ -7557,7 +7621,7 @@
       ctx.fillText(Store.note, cx, PAY_RECTS.back.y + PAY_RECTS.back.h + 10, VIEW_MIN_W - 40);
     } else if (!Store.available()) {
       ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fT(11);
-      ctx.fillText('This build has no store — the full ladder ships with the app.',
+      ctx.fillText('This build has no store. The full ladder ships with the app.',
                    cx, PAY_RECTS.back.y + PAY_RECTS.back.h + 10, VIEW_MIN_W - 40);
     }
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
@@ -7607,7 +7671,7 @@
                    VIEW_MIN_W / 2, 300);
       ctx.fillStyle = 'rgba(232,220,200,0.75)'; ctx.font = fT(14);
       ctx.fillText(cr.won ? 'swings left at the bell: ' + Math.max(0, this.swingsAtGoal)
-                          : 'plan the dig — every swing counts', VIEW_MIN_W / 2, 334);
+                          : 'plan the dig: every swing counts', VIEW_MIN_W / 2, 334);
       if (cr.banked > 0) {
         ctx.fillStyle = '#ffd75e'; ctx.font = fT(15, 'bold');
         ctx.fillText('+' + cr.banked + 'c banked  ·  first clear', VIEW_MIN_W / 2, 356);
@@ -7619,7 +7683,7 @@
       var last = this.careerFinale();
       if (last) {
         ctx.fillStyle = '#ffd75e'; ctx.font = fT(15, 'bold');
-        ctx.fillText('END OF THE SHAFT — for now.', VIEW_MIN_W / 2, 392);
+        ctx.fillText('END OF THE SHAFT, for now.', VIEW_MIN_W / 2, 392);
         ctx.fillStyle = 'rgba(232,220,200,0.7)'; ctx.font = fT(13);
         ctx.fillText('The daily dig is where the diggers are.', VIEW_MIN_W / 2, 414);
       }
@@ -7733,13 +7797,15 @@
     if (this.isDaily && !arch && this.board && this.board.length) {
       ctx.fillStyle = '#c9a86a'; ctx.font = fT(13, 'bold');
       ctx.fillText("TODAY'S DIGGERS", VIEW_MIN_W / 2, 362);
+      var resultRank = 0, previousResultScore = null;
       for (var bi = 0; bi < this.board.length && bi < 8; bi++) {
         var row = this.board[bi];
-        var mine = row.player === Meta.data.playerName;
-        ctx.fillStyle = mine ? '#ffd75e' : '#e8dcc8';
-        ctx.font = (mine ? 'bold ' : '') + fT(13);
+        if (row.coins !== previousResultScore) resultRank = bi + 1;
+        previousResultScore = row.coins;
+        ctx.fillStyle = '#e8dcc8';
+        ctx.font = fT(13);
         ctx.textAlign = 'left';
-        ctx.fillText((bi + 1) + '.  ' + safeName(row.player), VIEW_MIN_W / 2 - 110, 386 + bi * 19);
+        ctx.fillText(resultRank + '.  ' + safeName(row.player), VIEW_MIN_W / 2 - 110, 386 + bi * 19);
         ctx.textAlign = 'right';
         ctx.fillText(row.coins + 'c', VIEW_MIN_W / 2 + 110, 386 + bi * 19);
         ctx.textAlign = 'center';
@@ -7935,7 +8001,7 @@
       add('levels', 'Career level map', g.menuRect('strip'));
       add('shop', 'Shop', g.menuRect('shop'));
       var rc = g.recordsRects().card;
-      add('records', 'Records and hoard', { x: rc.x, y: rc.y + g._menuShift(), w: rc.w, h: rc.h });
+      add('records', 'Scores, records and leaderboards', { x: rc.x, y: rc.y + g._menuShift(), w: rc.w, h: rc.h });
       add('settings', 'Settings', g.menuRect('gear'));
       return out;
     }
@@ -8008,7 +8074,7 @@
         add('page:previous', 'Previous page', { x: pager.x, y: pager.y, w: pager.w / 2, h: pager.h });
         add('page:next', 'Next page', { x: pager.x + pager.w / 2, y: pager.y, w: pager.w / 2, h: pager.h });
       }
-      if (g.recTab === 'past') g.archiveRows().slice((g.pastPage || 0) * PAST_PER_PAGE, ((g.pastPage || 0) + 1) * PAST_PER_PAGE).forEach(function (a, i) {
+      if (g.recTab === 'past' && g.archiveAction() !== 'history') g.archiveRows().slice((g.pastPage || 0) * PAST_PER_PAGE, ((g.pastPage || 0) + 1) * PAST_PER_PAGE).forEach(function (a, i) {
         add('archive:' + a.day, 'Daily Dig from ' + a.ago + (a.ago === 1 ? ' day' : ' days') + ' ago. Best ' + a.best + (Ent.owned() ? '' : '. Unlock full burrow'),
           { x: 60, y: PAST_ROW_Y + i * PAST_ROW_H, w: 300, h: PAST_ROW_H });
       });
@@ -8059,15 +8125,32 @@
         var done = contractsDone(), page = g.jobsPage || 0;
         lines.push('Contracts. Page ' + (page + 1) + ' of ' + Math.ceil(CONTRACTS.length / JOBS_PER_PAGE) + '. Earned in Free and Career. No expiry.');
         CONTRACTS.slice(page * JOBS_PER_PAGE, (page + 1) * JOBS_PER_PAGE).forEach(function (c) { lines.push(c.name + ': ' + c.desc + '. ' + c.h + ' hoard. ' + (done[c.id] ? 'Completed.' : 'Not completed.')); });
-      } else if (tab === 'past') lines.push('Past Daily digs. Page ' + ((g.pastPage || 0) + 1) + ' of ' + Math.ceil(ARCHIVE_DAYS / PAST_PER_PAGE) + '. Revisit the same jars. Coins are not banked and scores stay off today’s board.');
+      } else if (tab === 'past') {
+        var action = g.archiveAction();
+        lines.push('Past Daily digs. Page ' + ((g.pastPage || 0) + 1) + ' of ' + Math.ceil(ARCHIVE_DAYS / PAST_PER_PAGE) + '. ' +
+          (action === 'history' ? 'Archive replay is included in The Full Burrow for iPhone. Your personal score history is shown here.' :
+           action === 'unlock' ? 'Unlock The Full Burrow to replay these jars.' : 'Revisit the same jars. Coins are not banked and scores stay off today’s board.'));
+        g.archiveRows().slice((g.pastPage || 0) * PAST_PER_PAGE, ((g.pastPage || 0) + 1) * PAST_PER_PAGE).forEach(function (a) {
+          lines.push(a.ago + (a.ago === 1 ? ' day ago: ' : ' days ago: ') + a.ch.name + '. Personal best: ' + a.best + ' coins.');
+        });
+      }
       else {
         var board = tab === 'league' ? g._league : g._board, limit = tab === 'league' ? 12 : 10;
         lines.push(tab === 'league' ? 'League. Daily digs over the last 14 days, added together.' : 'Today’s daily leaderboard.');
         if (!board || board.state === 'loading' && !fetchStalled(board)) lines.push('Loading.');
         else if (board.state === 'closed' || board.state === 'error' || fetchStalled(board)) lines.push('The board is out of reach. Activate the same tab to retry.');
         else if (!(board.rows || []).length) lines.push('No digs yet.');
-        else board.rows.slice(0, limit).forEach(function (r, i) { lines.push((i + 1) + '. ' + safeName(r.player) + '. ' + ((tab === 'league' ? r.total : r.coins) | 0) + ' coins' + (tab === 'league' ? ' over ' + (r.days | 0) + ' days' : '') + '.'); });
-        lines.push('Your name: ' + safeName(m.playerName) + '. Your best today: ' + ((m.bestDaily || {})[dayNumber()] || 0) + ' coins.' + (m.pendingScore ? ' Score waiting to post.' : ''));
+        else {
+          var place = 0, previous = null;
+          lines.push('Top ' + limit + '. Equal scores share a rank.');
+          board.rows.slice(0, limit).forEach(function (r, i) {
+            var score = tab === 'league' ? r.total : r.coins;
+            if (score !== previous) place = i + 1;
+            previous = score;
+            lines.push(place + '. ' + safeName(r.player) + '. ' + (score | 0) + ' coins' + (tab === 'league' ? ' over ' + (r.days | 0) + ' days' : '') + '.');
+          });
+        }
+        lines.push(g._standingText(tab === 'league' ? 'league' : 'board') + '. Your display name: ' + safeName(m.playerName) + '.');
       }
     } else if (g.state === 'paywall') lines.push('Full Burrow is a one-time purchase. Unlock the full 40-level career and past Daily jars. Today’s Daily and Free Dig remain available without purchase.');
     else if (g.state === 'levels') lines.push('Choose a reached level to replay it. Stars can improve; coins bank on the first clear only.');
@@ -8301,6 +8384,7 @@
           // rows that each launch a dig is a mis-hit that silently does nothing
           if (w.y >= ay && w.y < ay + PAST_ROW_H &&
               w.x > VIEW_MIN_W / 2 - 150 && w.x < VIEW_MIN_W / 2 + 150) {
+            if (game.archiveAction() === 'history') return;
             uiTick();
             // The archive is part of the unlock (store/iap-catalog.json).
             // Today's daily is always free — only the PAST jars are behind it.

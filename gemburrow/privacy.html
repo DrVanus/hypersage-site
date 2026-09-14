@@ -5,24 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#17100A">
-  <title>Gemburrow — Privacy Policy</title>
-  <meta name="description" content="What Gemburrow stores on your device, the one thing that leaves it (a Daily Dig score), and what it never collects. No accounts, no analytics, no advertising SDK.">
+  <title>Gemburrow: Privacy Policy</title>
+  <meta name="description" content="How Gemburrow stores progress, uses a random installation ID for leaderboards, handles purchases, and receives reports from Apple.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/gemburrow/privacy.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Gemburrow — Privacy Policy">
-  <meta property="og:description" content="What Gemburrow stores on your device, the one thing that leaves it, and what it never collects.">
+  <meta property="og:title" content="Gemburrow: Privacy Policy">
+  <meta property="og:description" content="How Gemburrow stores progress, uses a random installation ID for leaderboards, handles purchases, and receives reports from Apple.">
   <meta property="og:url" content="https://hypersage.ai/gemburrow/privacy.html">
   <meta property="og:site_name" content="Gemburrow">
   <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260913a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Gemburrow — a cozy gem-digging puzzle set in a mole's underground gem shop">
+  <meta property="og:image:alt" content="Gemburrow: a cozy gem-digging puzzle set in a mole's underground gem shop">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Gemburrow — Privacy Policy">
-  <meta name="twitter:description" content="What Gemburrow stores on your device, and the one thing that leaves it.">
+  <meta name="twitter:title" content="Gemburrow: Privacy Policy">
+  <meta name="twitter:description" content="How Gemburrow stores progress, uses a random installation ID for leaderboards, handles purchases, and receives reports from Apple.">
   <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260913a">
-  <meta name="twitter:image:alt" content="Gemburrow — a cozy gem-digging puzzle set in a mole's underground gem shop">
+  <meta name="twitter:image:alt" content="Gemburrow: a cozy gem-digging puzzle set in a mole's underground gem shop">
   <link rel="icon" type="image/png" href="app-icon-512.png?v=20260821a">
   <link rel="apple-touch-icon" href="app-icon-512.png?v=20260821a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,13 +51,14 @@
     <p class="updated">Last updated: September 14, 2026</p>
 
     <div class="callout">
-      <strong>The short version.</strong> Gemburrow has no account, no analytics
-      and no advertising SDK. The iPhone app has one in-app purchase, and Apple runs it: we
+      <strong>The short version.</strong> Gemburrow has no account and no third-party analytics
+      or advertising SDK. The iPhone app has one in-app purchase, and Apple runs it: we
       never see or store a card, a name or a billing address. Your progress lives
-      on your device. The one thing that ever leaves it is a
-      <strong>Daily Dig score</strong> —
-      a random ID made on your device, an auto-generated name like
-      <code>MOLE-4F2A</code>, and the numbers from that run.
+      on your device. For the <strong>Daily Dig leaderboard</strong>, the game
+      sends a random ID made on your device, an auto-generated name like
+      <code>MOLE-4F2A</code>, and the numbers from that run. It also uses the same
+      random installation ID to look up your own standing. The public board shows names
+      and scores, not that ID.
     </div>
 
     <h2>What is stored on your device</h2>
@@ -69,17 +70,18 @@
     <ul>
       <li>your coin balance, and which dig walls you have bought and are wearing;</li>
       <li>your career level and the stars earned on each level;</li>
-      <li>your hoard total — the gems you have given to the dragon;</li>
+      <li>your hoard total: the gems you have given to the dragon;</li>
       <li>your best Daily Dig and Free Dig results;</li>
       <li>whether you have seen the first-run coaching, and your sound settings;</li>
-      <li>whether the Full Burrow unlock has been purchased, and a one-way hash of
-          the transaction id it was granted against — so the same purchase is
-          never granted twice. The hash is not the receipt and cannot be turned
-          back into one;</li>
+      <li>whether Full Burrow is unlocked, and transaction-ID hashes that prevent
+          the same purchase from being granted twice;</li>
+      <li>the original App Store transaction identifier, Apple's signed update
+          time, and whether access was revoked: used locally to apply verified
+          purchases, restores and refunds without erasing your progress;</li>
       <li>a random identifier and the display name generated from it (below).</li>
     </ul>
     <p>
-      This save is not sent to us. Deleting the iPhone app deletes it, and so does
+      The full save is not sent to us. Deleting the iPhone app deletes it, and so does
       clearing your browser's data for this site. The app's save may be
       included in your own iCloud or iTunes device backup, which is Apple's
       backup of your phone, not a service of ours.
@@ -88,15 +90,14 @@
     <h2>The random identifier</h2>
     <p>
       The first time Gemburrow runs it generates a random UUID on the device and
-      builds a display name from its first four characters — for example
-      <code>MOLE-4F2A</code>. That identifier exists for exactly one purpose: so
-      the Daily Dig leaderboard can recognise a repeat submission from the same
-      device and keep only your best score for the day.
+      builds a display name from its first four characters: for example
+      <code>MOLE-4F2A</code>. The leaderboard uses that identifier to recognise
+      your scores, keep your best for each day, and return your own standing.
     </p>
     <p>
       It is not your Apple ID, your advertising identifier, or any device
       identifier issued by Apple, and it is not tied to your name, email address
-      or Apple ID — the game never has any of those. It is, though, the key your
+      or Apple ID; the game never has any of those. It is pseudonymous: it links results from the same installation without naming you. It is the key your
       Daily Dig scores are stored under: every score posted from one install
       carries the same identifier and <code>MOLE-</code> name, so the board can
       tell those scores belong together. It is not shared with anyone else and it
@@ -113,40 +114,60 @@
     <ul>
       <li>the day the jar belongs to, and that day's shared jar seed;</li>
       <li>your auto-generated <code>MOLE-</code> name and the random identifier above;</li>
-      <li>the run's results — coins earned and pieces extracted.</li>
+      <li>the run's results: coins earned and pieces extracted.</li>
     </ul>
     <p>
-      Opening a leaderboard fetches its scores. If a Daily score cannot be
+      Opening <strong>SCORES</strong> fetches leaderboard data and looks up your
+      own standing; refreshing its boards repeats those reads. The personal
+      lookup sends the same installation ID to our leaderboard service and
+      returns your own score and rank. The ID is not displayed on the public board;
+      this lookup does not create a score or a public profile. The League adds
+      together your Daily scores from the last 14 days.
+    </p>
+    <p>
+      If a Daily score cannot be
       sent, the game holds it on your device and retries on launch, reconnection
       or resume while that Daily is still current. Pending scores expire at the
       next UTC day. <strong>Career, Free Dig and archive results are not
       uploaded.</strong> A pending Daily score may retry while another mode is
-      open. No individual tap timings, session logs or crash reports are sent.
+      open. The game does not send individual tap timings or custom session and career telemetry to our leaderboard service.
     </p>
     <p>
       Scores are stored for the leaderboard and are visible to other players as a
       name and a number. If you would like a score row removed, email
       <a href="mailto:support@hypersage.ai?subject=Gemburrow%20leaderboard%20row">support@hypersage.ai</a>
-      with the <code>MOLE-</code> name shown on your results screen and we will
-      delete it.
+      with the <code>MOLE-</code> name, day and score shown in the game so we can
+      help identify and remove the right rows. Generated names can be shared by more than one player, so we may need to clarify which results are yours.
     </p>
 
     <h2>What Gemburrow does not do</h2>
     <ul>
       <li><strong>No account.</strong> There is no sign-in, no email, no profile, and no password anywhere in the game.</li>
-      <li><strong>No analytics or crash SDK.</strong> None is linked into the build. We do not know how many levels you cleared or when you played.</li>
+      <li><strong>No third-party analytics or crash SDK.</strong> The game does not send custom session or career telemetry. Apple reports are described below.</li>
       <li><strong>No advertising.</strong> No ad SDK, no ad identifier, no tracking across apps or websites.</li>
-      <li><strong>No payment data.</strong> The iPhone app has one in-app purchase and no subscription, and the browser version has no store at all. If you buy it, the purchase is handled entirely by the App Store: we never see or receive your card, your Apple ID, your name or your billing address, and none of it is stored in the game or sent anywhere by it.</li>
+      <li><strong>No billing details.</strong> The iPhone app has one in-app purchase and no subscription, and the browser version has no store at all. Apple handles the payment: we never receive your card, your Apple ID, your name or your billing address. The local purchase-status records described above are not sent to our leaderboard.</li>
       <li><strong>No location, contacts, photos, microphone or camera.</strong> The game never asks for any of them.</li>
     </ul>
+
+    <h2>Reports from Apple</h2>
+    <p>
+      Apple may provide App Store performance and purchase reports, along with
+      app usage and diagnostic reports when you opt in through Apple's sharing
+      settings. These are Apple's reporting services, separate from the game's
+      leaderboard. We use them to understand App Store performance and improve
+      reliability; we do not add in-app tracking. You can manage diagnostic
+      sharing in your device's settings. See
+      <a href="https://support.apple.com/en-us/108971">Apple's analytics and diagnostic sharing guide</a>.
+    </p>
 
     <h2>Children's privacy</h2>
     <p>
       Gemburrow is a cozy puzzle game suitable for a wide audience and is not
       directed at children under 13 specifically. It asks no one, of any age, for
-      a name, an email address or any contact detail. The only data it sends is
-      the Daily Dig score described above, and a player cannot type any text into
-      it — the leaderboard name is generated by the game and cannot be edited,
+      a name, an email address or any contact detail. Its leaderboard messages
+      contain only the Daily results and random installation identifiers described above.
+      A player cannot type any text into the game. The leaderboard name is
+      generated by the game and cannot be edited,
       precisely so no personal detail can end up on a public board.
     </p>
 
@@ -164,11 +185,10 @@
       The small <strong>jar demo</strong> on the home page runs entirely in your
       browser, sends nothing anywhere, and keeps no state between visits. The
       <strong>full game</strong> at <a href="play/">hypersage.ai/gemburrow/play/</a>
-      behaves exactly like the app described above: it saves your progress in your
-      own browser's local storage, and if you play the Daily Dig it sends that one
-      score — the day and its jar seed, the run's numbers, a generated name like
-      MOLE-4F2A and the random identifier above — to the leaderboard. Nothing else leaves the page, and clearing your browser's data
-      for this site erases the save and the identifier.
+      saves progress in your browser's local storage. Daily scores and personal
+      standing lookups use the same leaderboard service and random installation ID
+      described above. The browser game has no purchase store. Clearing your
+      browser's data for this site erases its save and identifier.
     </p>
 
     <h2>Changes to this policy</h2>
