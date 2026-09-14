@@ -1,7 +1,7 @@
 /* Hoardkeep — single-file canvas tower-defense engine.
  * Defend the sleeping Elder Dragon's gold hoard from waves of "hero" raiders.
  * Raiders that reach the hoard STEAL treasure and flee; kill them to recover it.
- * The hoard is the life bar. Scaffolded by new-game-scaffold — READ HANDOFF.md:
+ * The hoard is the life bar. READ HANDOFF.md:
  * the RNG firewall (§3a) and the fixed-timestep loop (§3b) are load-bearing.
  *
  * Layout (top-down, so greps land):
@@ -549,7 +549,7 @@
                 // machines set further back safe. That IS the trade-off.
                 sapR: 76, sapEvery: 3.2, sapStun: 2.6 },
     // SPLITTER — dies into two Scraplings. Punishes single-target builds and
-    // rewards splash, which is the Bloons lesson VANUS liked: one kill can
+    // rewards splash, which is the lesson VANUS liked: one kill can
     // make your problem WORSE if you brought the wrong tool.
     splitter: { name: 'Hogshead',       hp: 130,  spd: 33, bounty: 14,  steals: 3,  flyer: false,
                 splitInto: 'looter', splitCount: 2, splitHp: 0.55 },
@@ -756,7 +756,7 @@
       // THE DUEL FORMAT. VANUS: "the same map but it's not the same map that
       // I'm on with two different rows and we're both on the same map
       // together". The earlier duel gave each side its own COPY of a board and
-      // showed the opponent in an inset -- the Bloons Battles shape -- and it
+      // showed the opponent in an inset -- and it
       // was not what he was describing. This is: one cavern, split down the
       // middle, your keep on the left and the rival's on the right, one road
       // each, both of you on screen at the same time. No inset, because the
@@ -1092,7 +1092,7 @@
       // noise, and a Scrapling popping was audibly identical to The Hoard King
       // falling after twenty waves.
       //
-      // The Bloons property the owner asked for is not gore -- it is:
+      // The property the owner asked for is not gore -- it is:
       //   1. a fast PITCHED transient (<20ms attack) with a resonant body,
       //      never a noise wash;
       //   2. a fundamental that tracks the target's SIZE -- small dies high and
@@ -1189,7 +1189,7 @@
         master.gain.value = muted ? 0 : 1;
         sfxBus = ac.createGain(); sfxBus.gain.value = 0.9; sfxBus.connect(master);
         // 0.63, not 0.5: the whole music suite masters to -18 LUFS rather than
-        // the fleet's usual -16, so that no crossfade between two tracks is
+        // the usual -16, so that no crossfade between two tracks is
         // also a level jump. 0.5 * 10^(2/20) = 0.629 puts it back where the
         // old placeholder sat relative to the SFX bus.
         musicBus = ac.createGain(); musicBus.gain.value = 0.63; musicBus.connect(master);
@@ -1289,7 +1289,7 @@
     // Everything below is COSMETIC and consumes nothing from the seeded stream —
     // the only randomness is one Math.random() for the retry re-entry offset.
     var BAR_SEC = 2.4;
-    var XFADE = 1.4;                     // the fleet's crossfade law
+    var XFADE = 1.4;                     // the crossfade law
     var SRC_SR = 44100;                  // render rate; decode may resample
     var Music = {
       map: null, buf: {}, loading: false, ready: false,
@@ -1908,8 +1908,7 @@
 
   /// COATS — recoloured from Wick's own plate, NEVER generated.
   /// /v1/images/edits has no identity conditioning: a prompt for "green Wick"
-  /// returns a different dragon, the same way Waddleton's generated penguins
-  /// came back as a different penguin. Hoardling has a written identity law
+  /// returns a different dragon. Hoardling has a written identity law
   /// (vivid red, white-sclera amber iris, faceted hex plates, cream ribbed
   /// belly, brass goggles) and six rounds of icon work behind it.
   ///
@@ -2398,9 +2397,9 @@
              dailyPaidFor: dailyPaidFor, setDailyPaid: setDailyPaid };
   })();
 
-  // ===== Daily leaderboard — the WADDLETON foundation (fail-soft, lane 3) ==
-  // Hoardling is board 'hoardling_daily' in the proven multi-board Supabase
-  // schema PenguinArcade ships (registry + authenticated-only RPCs +
+  // ===== Daily leaderboard (fail-soft, lane 3) ============================
+  // Hoardling is board 'hoardling_daily' in a multi-board Supabase
+  // schema (registry + authenticated-only RPCs +
   // server-timed single-use tokens + monotonic best). Identity: Supabase
   // NATIVE ANONYMOUS sign-in (probed live 2026-08-13: mints a session
   // directly, no relay/captcha). Config via optional lb-config.js
@@ -2408,21 +2407,47 @@
   // every path silently no-ops. NOTHING here touches the seeded stream.
   var Lb = (function () {
     var cfg = (typeof window !== 'undefined' && window.HOARDLING_LB) || null;
-    /// THE POLICY SAYS "OPTIONAL" AND THERE WAS NO WAY TO OPT OUT. The live
-    /// privacy page reads "Hoardling has an optional Daily Siege leaderboard",
-    /// while every Daily run posted automatically with no control anywhere in
-    /// the game. Two ways to make that sentence true; this is the one that
-    /// keeps the promise instead of retracting it.
-    /// configured() is the old on(): "is a board wired up at all". on() is the
-    /// question every caller actually meant: "may we talk to it".
+    /// NOTHING LEAVES THE DEVICE BEFORE A YES (2026-09-13). The opt-OUT switch
+    /// that used to live here sat on the result screen, so starting a first
+    /// Daily minted an anonymous Supabase user and the run's score was posted
+    /// to a public, unretractable board before the player had ever seen the
+    /// switch. A switch you meet after the fact is not consent. Now the Daily
+    /// plate ASKS (see _drawLbAsk) and on() is true only on an explicit 'yes'.
+    ///
+    /// consent() is 'yes' | 'no' | null, and null ("never asked") is its own
+    /// state: it opens the question, it never reads as either answer. It fails
+    /// CLOSED -- a storage read that throws is null, and null is not 'yes'.
+    /// Migration: the old hoardling.lbOut === '1' was a tap on "tap to stop",
+    /// which IS an answer. '0' was only ever written by "tap to join the
+    /// ladder" under a switch that had never explained the board, and an
+    /// absent key is every player the old default posted for without asking:
+    /// both are asked.
+    /// configured() is "is a board wired up at all"; on() is "may we talk to it".
     function configured() { return !!(cfg && cfg.url && cfg.key && cfg.board); }
-    function optedOut() {
-      try { return localStorage.getItem('hoardling.lbOut') === '1'; } catch (e) { return false; }
+    function consent() {
+      try {
+        var c = localStorage.getItem('hoardling.lbConsent');
+        if (c === 'yes' || c === 'no') return c;
+        if (localStorage.getItem('hoardling.lbOut') === '1') {
+          localStorage.setItem('hoardling.lbConsent', 'no');
+          localStorage.removeItem('hoardling.lbOut');
+          return 'no';
+        }
+      } catch (e) {}
+      return null;
     }
-    function setOptOut(v) {
-      try { localStorage.setItem('hoardling.lbOut', v ? '1' : '0'); } catch (e) {}
+    function setConsent(yes) {
+      try {
+        localStorage.setItem('hoardling.lbConsent', yes ? 'yes' : 'no');
+        localStorage.removeItem('hoardling.lbOut');
+        // A NO DISCARDS WHAT HAS NOT BEEN SENT. Queued scores were recorded
+        // under the old default, and holding them to post on some later yes
+        // would send a run the player was never asked about.
+        if (!yes) localStorage.removeItem('hoardling.lbq');
+      } catch (e) {}
+      if (!yes) token = null;
     }
-    function on() { return configured() && !optedOut(); }
+    function on() { return configured() && consent() === 'yes'; }
     var sess = null;
     try { sess = JSON.parse(localStorage.getItem('hoardling.sb') || 'null'); } catch (e) {}
     function saveSess() { try { localStorage.setItem('hoardling.sb', JSON.stringify(sess)); } catch (e) {} }
@@ -2459,13 +2484,16 @@
           .catch(function () { cb(false); });   // network: not a reason to re-mint
       } else doSignup();
     }
+    // Before the first session there is no name to show: tag() would hash the
+    // constant 'wick' and print a WICK-XXXX that is nobody's.
+    function hasId() { return !!(sess && sess.refresh_token); }
     function tag() {   // WICK-XXXX derived from the stored session — no input UI
       var s = (sess && sess.refresh_token) || 'wick';
       var h = 0;
       for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
       return 'WICK-' + ('0000' + ((h >>> 0) % 65536).toString(16).toUpperCase()).slice(-4);
     }
-    // strict-pattern render guard (the Gemburrow safeName lesson): any name
+    // strict-pattern render guard: any name
     // that isn't exactly our tag shape paints as WICK-???? — no sanitizer gaps
     function safeName(s) { return /^WICK-[0-9A-F]{4}$/.test(s) ? s : 'WICK-????'; }
     var token = null;
@@ -2517,13 +2545,17 @@
         })(0);
       });
     }
+    // Returns whether THIS run was queued: a run with no token (started before
+    // a yes, or its start_run failed) has nothing to send, and the result
+    // screen must not tell that player "your run is queued".
     function finishRun(wave, kills, seed, done) {
-      if (!on() || !token || wave < 1) { if (done) done(); return; }
+      if (!on() || !token || wave < 1) { if (done) done(); return false; }
       var list = readQ(), dup = false;
       for (var i = 0; i < list.length; i++) if (list[i].token === token) dup = true;
       if (!dup) { list.push({ token: token, wave: wave, kills: kills, seed: seed, ts: Date.now() }); writeQ(list); }
       token = null;
       flush(done);
+      return true;
     }
     function top(n, cb) {
       if (!on()) { cb(null); return; }
@@ -2538,8 +2570,8 @@
       });
     }
     if (typeof window !== 'undefined') window.addEventListener('online', function () { flush(); });
-    return { on: on, configured: configured, optedOut: optedOut, setOptOut: setOptOut,
-             beginRun: beginRun, finishRun: finishRun, top: top, tag: tag,
+    return { on: on, configured: configured, consent: consent, setConsent: setConsent,
+             beginRun: beginRun, finishRun: finishRun, top: top, tag: tag, hasId: hasId,
              safeName: safeName, flush: flush };
   })();
 
@@ -2805,7 +2837,7 @@
   // ===== R3D — the low-poly 3D renderer (?r3d=1) ==========================
   // The sim never knew it was 2D: update() emits state, a renderer draws it.
   // This module is a SECOND renderer — three.js, low-poly primitives in the
-  // Kingshot-ad style VANUS chose — under the existing 2D canvas, which goes
+  // style VANUS chose — under the existing 2D canvas, which goes
   // transparent and keeps drawing ONLY the HUD/menus/screens on top.
   // Contract: R3D reads sim state, never writes it, never touches the seeded
   // stream. Taps are raycast to the ground so the SAME input logic runs.
@@ -3648,7 +3680,7 @@
     // the same seed played solo.
     this.rivalHoard = CFG.startHoard;
     // ONE CAVERN, TWO SIDES. The duel used to build a SECOND Game and show it
-    // in an inset (the Bloons Battles shape). VANUS described something else --
+    // in an inset. VANUS described something else --
     // "we're both on the same map together" -- and this is that: a single sim,
     // a two-keep map, lane 0 yours and lane 1 hers, both dragons on screen.
     // The second-board machinery is gone rather than left dormant: two ways to
@@ -3966,6 +3998,7 @@
     this.worldT += STEP;
     if (this.infoCard && (this.infoCard.t -= STEP) <= 0) this.infoCard = null;
     if (this.resultLockT > 0) this.resultLockT -= STEP;
+    if (this._lbAskT > 0) this._lbAskT -= STEP;   // UI only: the ask's double-tap guard
     // THE RIVAL NEVER DRAINS THE PLAYER'S TAPS. Input is a module-level queue,
     // so an unguarded rival step swallows every tap before the player's own
     // sim sees it -- the game would simply stop responding during a duel.
@@ -4588,7 +4621,7 @@
           // A BLAST THAT CATCHES FIVE MUST SOUND BIGGER THAN ONE THAT CATCHES
           // ONE. This played `hit` -- a bolt graze, measured 0.98 identical to
           // `thud` -- once, unkeyed, regardless of the catch. The Soot Brazier
-          // is the splash machine, the one that teaches the Bloons lesson the
+          // is the splash machine, the one that teaches the lesson the
           // Hogshead was built for, and its blast was the least audible
           // thing on the board. `caught` is a deterministic count of sim state;
           // the gain rides on the far side of Sfx.play, cosmetic lane.
@@ -5221,13 +5254,14 @@
     this.result.marks = marksEarned;
     Save.write();
     // daily board: submit this run, then pull today's top — UI-only state
+    this._lbJoined = false; this._lbAsk = null;
     if (this.mode === 'daily' && Lb.on()) {
       var self = this;
       this.lbRows = 'loading';
-      Lb.finishRun(this.wave, this.kills, this.seed, function () {
+      this.lbQueued = Lb.finishRun(this.wave, this.kills, this.seed, function () {
         Lb.top(10, function (rows) { self.lbRows = rows || 'error'; });
       });
-    } else this.lbRows = null;
+    } else { this.lbRows = null; this.lbQueued = false; }
     Sfx.play(won ? 'win' : 'lose');
   };
 
@@ -5381,6 +5415,35 @@
       }
     }
 
+    // THE LEADERBOARD QUESTION IS MODAL (§3g), over the title and over a Daily
+    // result alike: nothing under the scrim may take a tap while it is open. A
+    // button answers; the card's own body is inert, so a thumb resting on the
+    // copy answers nothing; anywhere else backs out WITHOUT an answer, because
+    // a dismissal is not a no.
+    if (this._lbAsk && (this.state === 'menu' || this.state === 'won' || this.state === 'lost')) {
+      if (this._lbAskT > 0) return;          // the tap that opened it cannot also answer it
+      var AK = lbAskGeom(this.view, this._lbAsk);
+      var askYes = hit(w, AK.yes), askNo = hit(w, AK.no);
+      if (askYes || askNo) {
+        var askFrom = this._lbAsk;
+        this._lbAsk = null;
+        Lb.setConsent(askYes);
+        Sfx.play('upg');
+        if (askFrom === 'daily') { this.reset(dailySeed(), 'daily'); this.state = 'playing'; return; }
+        // From a result screen: this run had no token and cannot be posted, so
+        // a yes shows the ladder and says the NEXT Daily is the first to post.
+        if (askYes) {
+          var sj = this;
+          this._lbJoined = true; this.lbQueued = false; this.lbRows = 'loading';
+          Lb.top(10, function (rows) { sj.lbRows = rows || 'error'; });
+        }
+        return;
+      }
+      var cd = AK.card;
+      if (w.x >= cd.x && w.x <= cd.x + cd.w && w.y >= cd.y && w.y <= cd.y + cd.h) return;
+      this._lbAsk = null;
+      return;
+    }
     if (this.state === 'menu') {
       // Geometry comes from _titleGeom(), the same call _drawTitle draws from,
       // so a layout change can never move a button away from its hit box.
@@ -5397,12 +5460,20 @@
           this.reset(1, 'campaign', lv); this.state = 'playing'; return;
         }
       }
-      if (hit(w, TG.daily)) { this.reset(dailySeed(), 'daily'); this.state = 'playing'; return; }
+      if (hit(w, TG.daily)) {
+        // ASK BEFORE THE FIRST DAILY, NOT AFTER IT (§3g). The question comes
+        // before reset(), so the seeded run does not exist yet while it is open.
+        if (Lb.configured() && !Lb.consent()) { this._lbAsk = 'daily'; this._lbAskT = 0.35; return; }
+        this.reset(dailySeed(), 'daily'); this.state = 'playing'; return;
+      }
       if (hit(w, TG.duel)) { this.state = 'duel'; return; }
       if (hit(w, TG.pills[0])) { this.state = 'forge'; return; }
       if (hit(w, TG.pills[1])) { if (Save.starsTotal() > 0) this.state = 'trials'; return; }
       if (hit(w, TG.pills[2])) { this.state = 'cavern'; return; }
       if (hit(w, TG.pills[3])) { Sfx.toggle(); return; }
+      for (var lgt = 0; lgt < TG.legal.length; lgt++) {
+        if (hit(w, TG.legal[lgt])) { openLegal(TG.legal[lgt].key); return; }
+      }
       return;
     }
     if (this.state === 'duel') {
@@ -5501,12 +5572,15 @@
       // dismisses it. Its rect is written by the drawer, so it exists only on
       // the frames the control is actually on screen.
       var lo = this._lbOptRect;
+      // STOPPING IS ONE TAP; JOINING IS THE QUESTION. Withdrawing needs no
+      // disclosure, but "join" is a yes to an anonymous identity and a public,
+      // unretractable row, so it opens the same card the Daily plate does.
       if (lo && w.x > lo.x && w.x < lo.x + lo.w && w.y > lo.y && w.y < lo.y + lo.h) {
-        Lb.setOptOut(!Lb.optedOut());
-        if (Lb.on()) { var slf = this; this.lbRows = 'loading';
-                       Lb.top(10, function (rows) { slf.lbRows = rows || 'error'; }); }
-        else this.lbRows = null;
-        Sfx.play('upg');
+        if (Lb.on()) {
+          Lb.setConsent(false);
+          this.lbRows = null; this._lbJoined = false;
+          Sfx.play('upg');
+        } else { this._lbAsk = 'result'; this._lbAskT = 0.35; }
         return;
       }
       // Leaving a duel drops OUT of duel mode: a reset that stayed in 'duel'
@@ -5669,7 +5743,7 @@
     for (var i = 0; i < this.towers.length; i++) if (this.towers[i].tid === tid) return this.towers[i];
     return null;
   };
-  // FREE PLACEMENT (VANUS asked for the Bloons shop model): a machine may go
+  // FREE PLACEMENT (VANUS asked for it): a machine may go
   // anywhere off the road. The old pads are not gone — they are DISCOUNT
   // ground, so the hand-authored chokepoints still mean something.
   Game.prototype._nearestPad = function (x, y) {
@@ -6927,6 +7001,7 @@
     if (this.state === 'cavern') this._drawCavernRoom(ctx);
     if (this.state === 'duel') this._drawDuelSelect(ctx);
     if (this.state === 'won' || this.state === 'lost') this._drawResult(ctx);
+    if (this._lbAsk && (this.state === 'menu' || this.state === 'won' || this.state === 'lost')) this._drawLbAsk(ctx);
     if (this.state === 'paused') {
       ctx.fillStyle = 'rgba(10,6,4,0.55)';
       ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);   // full view
@@ -7333,8 +7408,8 @@
         // die they get bigger first and enlarge or something. It's a little bit
         // weird". It was. The husk overshot to 1.34x and held it for THREE FULL
         // FRAMES at full opacity -- 50ms of a visibly inflating raider. I had
-        // reasoned that a Bloons pop is "instantly BIGGER and brighter", and
-        // that is not what a pop is. The balloon does not grow; it is REPLACED,
+        // reasoned that a pop is "instantly BIGGER and brighter", and
+        // that is not what a pop is. The popped thing does not grow; it is REPLACED,
         // and what reads as the pop is the substitution plus the burst. Scaling
         // a corpse up just animates the corpse.
         //
@@ -8894,6 +8969,39 @@
   var TITLE_ROWS_TOP = 368;      // the art ends at the tagline (baseline 326)
   var TITLE_SLACK_MAX = 240;     // past this the screen gets margin, not a bar the size of a door
 
+  /// THE LEGAL PAGES, REACHABLE FOR AS LONG AS THE GAME RUNS. Their only links
+  /// were in the boot overlay, which is on screen while the art loads and then
+  /// removed -- so after the first second nothing in the game led to the privacy
+  /// policy or the terms at all. They live in the title's two top corners now:
+  /// the bottom stack is sized to the last unit on an SE (see TITLE_STACK), and
+  /// the corners beside the hanging sign are the one place on this screen a
+  /// 44pt target fits without taking room from a control.
+  ///
+  /// Relative URLs, like the boot overlay's: on the web the pages sit next to
+  /// index.html. The iOS app does NOT bundle them -- App.swift catches these two
+  /// paths and shows the published pages in a Safari view over the game, so a
+  /// tap can never navigate the game's own web view away to a missing file.
+  var TITLE_LEGAL = [
+    { key: 'privacy', label: 'PRIVACY', href: 'privacy.html' },
+    { key: 'terms',   label: 'TERMS',   href: 'terms.html' },
+  ];
+  function openLegal(key) {
+    for (var i = 0; i < TITLE_LEGAL.length; i++) {
+      if (TITLE_LEGAL[i].key !== key) continue;
+      var href = TITLE_LEGAL[i].href;
+      try {
+        // An installed home-screen copy has no address bar and no back button,
+        // so a same-window load would strand it the way the app used to be
+        // stranded. There, the page opens in its own window instead.
+        var standalone = (window.navigator && window.navigator.standalone) ||
+          (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+        if (standalone && window.open(href, '_blank')) return;
+        window.location.href = href;
+      } catch (e) {}
+      return;
+    }
+  }
+
   Game.prototype._titleGeom = function () {
     var v = this.view, s = v.scale || 1;
     var minH = Math.max(62, 44 / s);
@@ -8961,8 +9069,26 @@
                    hx: l1, hy: barY - Math.max(0, (minH - H.bar) / 2),
                    hw: r1 - l1, hh: Math.max(H.bar, minH) });
     }
+    // THE LEGAL LINKS sit in the top corners, ABOVE the hanging sign (its top
+    // edge is y 26, and its chamfer starts 16 in from x 38): the label's ink
+    // runs y 5..19 and x 6..58, clear of both. Their centre follows the safe
+    // area down only if a phone ever reports an inset deeper than its own
+    // letterbox band -- no shipped iPhone does. The hit rect is the tap floor
+    // in both axes, clamped to the screen top, and nothing else on this screen
+    // is within 300 units of it.
+    var LGW = Math.max(58, 44 / s), LGH = minH;
+    var lgC = Math.max(12, -(v.oy || 0) + (v.safeT || 0) + 12);
+    var lgHy = Math.max(-(v.oy || 0), lgC - LGH / 2);
+    var legal = [];
+    for (var lgi = 0; lgi < TITLE_LEGAL.length; lgi++) {
+      var lgLeft = lgi === 0;
+      legal.push({ key: TITLE_LEGAL[lgi].key, label: TITLE_LEGAL[lgi].label,
+                   x: lgLeft ? 6 : WORLD_W - 58, y: lgC - 9, w: 52, h: 18,
+                   hx: lgLeft ? 0 : WORLD_W - LGW, hy: lgHy, hw: LGW, hh: LGH });
+    }
     return { rows: rows, ruleY: TITLE_ROWS_TOP - 16, tonightY: tY - H.gapTon,
              daily: half(42, tY, 162, H.ton), duel: half(216, tY, 162, H.ton),
+             legal: legal,
              pills: pills, bar: { x: BX, y: barY, w: BW, h: H.bar },
              bot: bot, screenTop: -(v.oy || 0) };
   };
@@ -9875,7 +10001,7 @@
     }
     ctx.font = '11px system-ui, sans-serif';
     // NOT "two caves". The duel is ONE cavern split down the middle, a keep and
-    // a road each, both dragons on screen -- and "two caves" is the Bloons-inset
+    // a road each, both dragons on screen -- and "two caves" is the inset
     // shape VANUS rejected twice on the way to this one ("I don't see another
     // dragon that's fighting against me"). The button was still selling it.
     inkText(ctx, 'one cavern, two sides', ducx, UN, '#ffc9a8', 4, 1);
@@ -9962,6 +10088,20 @@
                 Sfx.isMuted() ? 'rgba(255,233,196,0.55)' : '#9ef58f', 3, 1);
       }
     }
+
+    // ---- 7. the legal links ------------------------------------------------
+    // The boot overlay's Privacy / Terms pair, kept: same cream, small caps on
+    // the section-label face, a hairline underline so they read as links rather
+    // than as a caption belonging to the art.
+    ctx.font = 'bold 11px system-ui, sans-serif';
+    for (var lgd = 0; lgd < G.legal.length; lgd++) {
+      var LG = G.legal[lgd], lgx = LG.x + LG.w / 2, lgb = LG.y + LG.h / 2 + 4;
+      ctx.textAlign = 'center';
+      inkText(ctx, LG.label, lgx, lgb, 'rgba(255,233,196,0.78)', 4, 1);
+      var lgw = ctx.measureText(LG.label).width;
+      ctx.fillStyle = 'rgba(255,233,196,0.34)';
+      ctx.fillRect(lgx - lgw / 2, lgb + 3, lgw, 1);
+    }
     ctx.textAlign = 'left';
   };
 
@@ -10046,7 +10186,7 @@
   /// Flipping this to true draws a "MORE MARKS" chip that opens a purchase
   /// sheet -- and that sheet needs a store console to exist first (there is no
   /// App Store record for this bundle while the Apple migration is open, and no
-  /// Play Billing plugin in the fleet yet). The layout reserves the space now
+  /// Play Billing plugin yet). The layout reserves the space now
   /// so turning it on is not a re-layout later.
   var STORE_ON = false;
 
@@ -10437,6 +10577,74 @@
   /// The lowest baseline anything on the result screen may use. 'tap for menu'
   /// sits 18 under it; Wick is bottom-anchored 62 above it. Named once so the
   /// ladder, the hero and the footer cannot each guess.
+  /// THE LEADERBOARD QUESTION (HANDOFF §3g). One geometry source for the
+  /// drawer, the tap handler and tools/tap_rooms.js. Centred on what is
+  /// VISIBLE (v.h below -oy), not on the design box, so a tall phone does not
+  /// hang it high. The two answers are the SAME SIZE, same plate, stacked full
+  /// width: a consent question whose no is smaller or dimmer than its yes is
+  /// steering, not asking, and stacking keeps both labels whole on the
+  /// narrowest screen. No randomness anywhere in here -- it sits in front of a
+  /// seeded Daily (check_lb_consent asserts it).
+  var LB_ASK_LINES = [
+    'Yes signs this device in anonymously and lists',
+    'your best wave under a random WICK-XXXX name.',
+    'No name, email or device details are sent.',
+    'A posted score can’t be deleted from the board.',
+  ];
+  function lbAskGeom(v, from) {
+    var s = v.scale || 1;
+    var bh = Math.max(56, 44 / s), gap = 10;
+    var X = 24, W = WORLD_W - 48;
+    var H = 176 + 2 * bh + gap + 34;
+    var visTop = -(v.oy || 0), visH = v.h || WORLD_H;
+    var Y = Math.round(visTop + Math.max(0, (visH - H) / 2));
+    var by = Y + 176, bx = X + 16, bw = W - 32;
+    return {
+      from: from,
+      card: { x: X, y: Y, w: W, h: H },
+      yes: { x: bx, y: by, w: bw, h: bh, hx: bx, hy: by, hw: bw, hh: bh },
+      no:  { x: bx, y: by + bh + gap, w: bw, h: bh, hx: bx, hy: by + bh + gap, hw: bw, hh: bh },
+      foot: by + 2 * bh + gap + 20,
+    };
+  }
+
+  Game.prototype._drawLbAsk = function (ctx) {
+    var v = this.view, A = lbAskGeom(v, this._lbAsk), c = A.card;
+    var CX = c.x + c.w / 2, tw = c.w - 28, fromDaily = this._lbAsk === 'daily';
+    ctx.fillStyle = 'rgba(10,6,4,0.72)';                 // scrim: nothing under it takes a tap
+    ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
+    ctx.fillStyle = 'rgba(38,26,18,0.97)';
+    rr(ctx, c.x, c.y, c.w, c.h, 14); ctx.fill();
+    ctx.strokeStyle = 'rgba(201,184,255,0.7)'; ctx.lineWidth = 2;
+    rr(ctx, c.x, c.y, c.w, c.h, 14); ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 17px Georgia, serif';
+    inkText(ctx, 'DAILY SIEGE LADDER', CX, c.y + 32, '#ffd75e', 4, 1);
+    ctx.font = '14px system-ui, sans-serif'; ctx.fillStyle = '#ffe9c4';
+    ctx.fillText(fitText(ctx, 'Post your Daily Siege waves to', tw), CX, c.y + 60);
+    ctx.fillText(fitText(ctx, 'the public all-time ladder?', tw), CX, c.y + 78);
+    ctx.font = '11px system-ui, sans-serif'; ctx.fillStyle = '#c9b8a8';
+    for (var li = 0; li < LB_ASK_LINES.length; li++) {
+      ctx.fillText(fitText(ctx, LB_ASK_LINES[li], tw), CX, c.y + 106 + li * 16);
+    }
+    var answers = [
+      [A.yes, 'POST MY WAVES', fromDaily ? 'starting with this run' : 'from your next Daily Siege'],
+      [A.no, 'DON’T POST', 'scores stay on this device'],
+    ];
+    for (var ai = 0; ai < answers.length; ai++) {
+      var ar = answers[ai][0], mid = ar.y + ar.h / 2;
+      forgePlate(ctx, ar, 'cold');
+      ctx.font = 'bold 15px system-ui, sans-serif';
+      inkText(ctx, answers[ai][1], CX, mid - 2, '#f0eaff', 4, 1);
+      ctx.font = '10px system-ui, sans-serif';
+      inkText(ctx, answers[ai][2], CX, mid + 14, 'rgba(201,184,255,0.85)', 3, 1);
+    }
+    ctx.font = '10px system-ui, sans-serif'; ctx.fillStyle = 'rgba(201,184,168,0.8)';
+    ctx.fillText(fitText(ctx, fromDaily ? 'change this on any Daily results screen · tap outside to go back'
+                                        : 'tap outside to go back', tw), CX, A.foot);
+    ctx.textAlign = 'left';
+  };
+
   var RESULT_FOOT = 706;
 
   Game.prototype._drawResult = function (ctx) {
@@ -10631,10 +10839,16 @@
     // board is CONFIGURED, not whenever we are posting -- opted out, it is the
     // only way back in, and a toggle that disappears when you use it is not a
     // toggle. Its rect is on the geometry so the tap handler reads the same one.
+    // It says what is TRUE OF THIS RUN: a yes given on this screen cannot post
+    // the run it is looking at (no start_run token), and before the first
+    // session there is no WICK name to print. Stop is one tap; join opens the
+    // question (§3g).
     this._lbOptRect = null;
     if (this.mode === 'daily' && Lb.configured()) {
-      var optTxt = Lb.optedOut() ? 'not posting — tap to join the ladder'
-                                 : 'posting as ' + Lb.tag() + ' — tap to stop';
+      var optTxt = !Lb.on() ? 'not posting — tap to join the ladder'
+        : this._lbJoined ? 'posting from your next Daily Siege — tap to stop'
+        : Lb.hasId() ? 'posting as ' + Lb.tag() + ' — tap to stop'
+        : 'posting is on — tap to stop';
       ctx.font = '11px system-ui, sans-serif';
       var optW = ctx.measureText(optTxt).width + 28;
       var optY = RESULT_FOOT - 6;
@@ -10659,13 +10873,14 @@
         ctx.fillText('fetching the ladder…', CX, LBR);
       } else if (this.lbRows === 'error' || !this.lbRows) {
         ctx.fillStyle = '#8a7f72'; ctx.font = '13px system-ui, sans-serif';
-        ctx.fillText('ladder unreachable — your run is queued', CX, LBR);
+        ctx.fillText(this.lbQueued ? 'ladder unreachable — your run is queued'
+                                   : 'ladder unreachable right now', CX, LBR);
       } else if (!this.lbRows.length) {
         ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
         ctx.fillText('no siegers yet — yours could be first', CX, LBR);
       } else {
         ctx.font = '13px ui-monospace, Menlo, monospace';
-        var mine = Lb.tag();
+        var mine = Lb.hasId() ? Lb.tag() : null;
         var nFit = Math.max(0, Math.floor((RESULT_FOOT - 18 - LBR) / 17) + 1);
         var nShow = Math.min(8, this.lbRows.length, nFit);
         for (var bi = 0; bi < nShow; bi++) {

@@ -33,11 +33,12 @@
 and the Hoardling iPhone app. Hoardling has <strong>no accounts, no sign-up form, and no
 name or email to give us</strong>.
 Your campaign progress is stored on your device, not on our servers. We run
-<strong>no analytics, no advertising, and no third-party trackers</strong>. The only thing that
-leaves your device is an anonymous, auto-created leaderboard identity and the wave number your
-Daily Siege runs post to it — never anything that identifies you. <strong>Daily Siege posting is
-on by default</strong>: your first Daily run is posted before you are shown the switch that turns
-it off. That is spelled out below.</p>
+<strong>no analytics, no advertising, and no third-party trackers</strong>. <strong>Posting Daily
+Siege scores to the public leaderboard is off until you say yes.</strong> The first time you start a
+Daily Siege, the game asks whether to post your waves. Until you say yes, it doesn't connect to the
+leaderboard at all. If you do, the only things that leave your device are an anonymous leaderboard
+identity and the wave numbers your Daily Siege runs reach — never anything that identifies you.
+The details are below.</p>
 </div>
 
 <h2>What stays on your device</h2>
@@ -51,26 +52,43 @@ and the browser keep separate saves. There is no server copy and no backup, so <
 restore your progress</strong> if you clear your browser, switch devices or delete the iPhone app.</p>
 
 <h2>The leaderboard identity</h2>
-<p>Hoardling has a public Daily Siege leaderboard, and <strong>posting to it is on by
-default</strong>. Starting a Daily Siege run issues your browser (or the iPhone app) an <strong>anonymous
-session</strong> from our database provider, Supabase — no email, password, or personal detail is
-asked for or collected — and when that run ends, the wave you reached is submitted to the board
-automatically. There is no confirmation step and no prompt.</p>
-<p><strong>The switch that stops posting is on the results screen at the end of a run, so your
-very first Daily Siege score is posted before you have ever been shown it.</strong> Once you use
-it, the setting is remembered on your device and no further run is posted; the same switch turns
-posting back on. Turning it off stops new scores and holds back any still waiting to be sent — it
-cannot remove a score already on the board (see below). Campaign and Duel runs are never posted;
-only Daily Siege is.</p>
+<p>Hoardling has a public Daily Siege leaderboard, and <strong>posting to it is off until you turn
+it on</strong>. The first time you tap Daily Siege, before the run starts, the game asks whether to
+post your waves to the board, with two choices of the same size: <em>Post my waves</em> or
+<em>Don't post</em>. Tapping outside the question goes back to the title without answering, and you
+will be asked again next time. <strong>Until you choose <em>Post my waves</em>, the game makes no
+connection to the leaderboard at all</strong>: no session is created and no score is sent.</p>
+<p>If you choose <em>Post my waves</em>, then when a Daily Siege run calls its first wave your browser
+(or the iPhone app) is issued an <strong>anonymous session</strong> by our database provider,
+Supabase (no email, password or personal detail is asked for or collected), and the server issues a
+one-run token. When the run ends, the wave you reached is submitted to the board and the board's top
+rows are loaded for the results screen. If you choose <em>Don't post</em>, nothing about your Daily
+Siege runs leaves your device, and your best wave is still kept on it.</p>
+<p>Your answer is remembered on your device, and the results screen at the end of every Daily Siege
+run lets you change it. <em>"posting as WICK-XXXX — tap to stop"</em> turns posting off straight away.
+<em>"not posting — tap to join the ladder"</em> shows the same question again. Joining from a
+results screen starts with your next Daily Siege run: the run you just finished can't be posted,
+because the server only accepts a run it timed from the start. Turning posting off, or choosing
+<em>Don't post</em>, also discards any score still waiting to be sent, but it cannot remove a score
+already on the board (see below). If you turn posting off after it was on, the anonymous session
+stays stored, unused, on your device, so turning posting back on keeps the same name. Clearing the
+site's data or deleting the app removes it. Campaign and Duel runs are never posted; only Daily Siege
+is.</p>
+<p>If you played a Daily Siege before 13 September 2026, when posting was on by default, the game
+asks you the same question the next time you start one and sends nothing until you say yes. If you
+had already switched posting off, that choice is kept and you are not asked again.</p>
 <p>Scores are posted under a name we generate for you, in the fixed shape <code>WICK-XXXX</code>
 (four characters derived from the anonymous session itself). You never type a name, and the app
 never asks you for one. Each submission carries that name, the board, the wave number, and a
 one-run token the server issued when the run began — nothing else about you or your device.</p>
-<p><strong>In a browser only:</strong> hypersage.ai also hosts a 3D build of the game, and a
-browser treats every page on hypersage.ai as one site for storage purposes, so if you play both in
-the same browser they share your anonymous session and your sound setting, the way two tabs of one
-site share a login. Campaign progress is kept separate, and each posts to its own leaderboard. The
-iPhone app runs only its own bundled game and shares nothing with any website.</p>
+<p><strong>In a browser only:</strong> hypersage.ai also hosts an experimental 3D build of the game,
+Hoardling 3D. It has <strong>no leaderboard</strong> and makes no leaderboard connection. A browser
+treats every page on hypersage.ai as one site for storage purposes, so if you play both in the same
+browser they share your sound setting. Before 13 September 2026 Hoardling 3D had a leaderboard of its
+own, and if you played it then it may have left an anonymous session in that shared storage. This
+game uses that session only if you choose <em>Post my waves</em>, and never posts anything because it
+is there. Campaign progress is kept separate. The iPhone app runs only its own bundled game and
+shares nothing with any website.</p>
 <p>If the leaderboard can't be reached — offline, or a slow connection — your pending score is held
 in local storage and retried later, up to six attempts over one hour, then dropped. It never grows
 beyond your ten most recent runs.</p>
@@ -88,9 +106,8 @@ beyond your ten most recent runs.</p>
 <p>A posted Daily Siege score is a row on a public leaderboard, tagged only with your generated
 <code>WICK-XXXX</code> name and a wave number — not your device, browser, or IP address by design.
 Because the tag carries nothing that identifies you, there is currently no way for us to find and
-delete one score out of the board on request; the whole board can be reset. <strong>This applies
-to the first Daily Siege score too — the one posted automatically before you were shown the
-switch.</strong> If that changes, this page will say so on the day it ships.</p>
+delete one score out of the board on request; the whole board can be reset. That is why the game
+asks before it posts anything. If that changes, this page will say so on the day it ships.</p>
 
 <h2>Purchases and ads</h2>
 <p>Hoardling has no in-app purchases, no subscriptions, and no advertising in this build. If that
