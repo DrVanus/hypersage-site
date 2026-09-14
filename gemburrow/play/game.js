@@ -8205,7 +8205,11 @@
     });
     Object.keys(nodes).forEach(function (id) { if (!seen[id]) { nodes[id].remove(); delete nodes[id]; } });
     if (g._accessKeyboard && ((prior && !seen[prior]) || (g._accessScene && g._accessScene !== scene))) {
-      var target = controls.filter(function (d) { return !d.disabled && (g.showSettings || g.choice || g.state !== 'playing' || d.id.indexOf('gem:') === 0); });
+      // Never hand focus to a control that spends on one press. Keyboard
+      // players dig by pressing Enter repeatedly, so whatever takes focus when
+      // a shift ends receives the next press: a focused Deeper Pick bought
+      // 250 coins and restarted the level. Retry or Next takes focus instead.
+      var target = controls.filter(function (d) { return !d.disabled && d.id !== 'deeper-pick' && d.id !== 'buy' && (g.showSettings || g.choice || g.state !== 'playing' || d.id.indexOf('gem:') === 0); });
       if (priorRect && prior && prior.indexOf('gem:') === 0 && g._accessScene === scene) target.sort(function (a, b) {
         function distance(r) { return Math.pow(r.x + r.w / 2 - priorRect.x - priorRect.w / 2, 2) + Math.pow(r.y + r.h / 2 - priorRect.y - priorRect.h / 2, 2); }
         return distance(a.rect) - distance(b.rect);
