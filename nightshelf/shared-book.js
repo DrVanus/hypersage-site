@@ -11,13 +11,19 @@
   if (!card) return;
 
   // The query selects an allowlisted record; it never becomes HTML or a URL.
+  // An Original is AI-written: the card says so in the same words as the app.
+  var original = book.kind === 'original';
   document.getElementById('shared-book-title').textContent = book.title;
-  document.getElementById('shared-book-author').textContent = 'by ' + book.author;
-  document.getElementById('shared-book-description').textContent = book.blurb;
+  document.getElementById('shared-book-author').textContent = original ? 'A Nightshelf Original' : 'by ' + book.author;
+  document.getElementById('shared-book-description').textContent = original
+    ? book.blurb + ' ' + book.disclosure
+    : book.blurb;
   document.getElementById('shared-book-edition').textContent = book.freeTier
     ? 'Free on Nightshelf'
     : 'Included with Nightshelf Pro';
   document.getElementById('shared-book-open').href = 'nightshelf://book/' + encodeURIComponent(id);
-  document.title = book.title + ' by ' + book.author + ' — Nightshelf';
+  document.title = original
+    ? book.title + ' — a Nightshelf Original'
+    : book.title + ' by ' + book.author + ' — Nightshelf';
   card.hidden = false;
 })();

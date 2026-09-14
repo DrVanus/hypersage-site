@@ -30,11 +30,20 @@ for (const [id, book] of Object.entries(catalog)) {
   const { elements, context } = run('?book=' + encodeURIComponent(id));
   assert.equal(elements['shared-book'].hidden, false);
   assert.equal(elements['shared-book-title'].textContent, book.title);
-  assert.equal(elements['shared-book-author'].textContent, 'by ' + book.author);
+  const original = book.kind === 'original';
+  assert.equal(elements['shared-book-author'].textContent, original ? 'A Nightshelf Original' : 'by ' + book.author);
+  if (original) {
+    assert.match(book.disclosure, /Created with AI/, id + ' must carry the AI disclosure');
+    assert.ok(elements['shared-book-description'].textContent.includes(book.disclosure), id + ' card must disclose AI');
+  } else {
+    assert.equal(elements['shared-book-description'].textContent, book.blurb);
+  }
   assert.equal(elements['shared-book-open'].href, 'nightshelf://book/' + id);
   assert.equal(elements['shared-book-edition'].textContent,
     book.freeTier ? 'Free on Nightshelf' : 'Included with Nightshelf Pro');
-  assert.equal(context.document.title, book.title + ' by ' + book.author + ' — Nightshelf');
+  assert.equal(context.document.title, original
+    ? book.title + ' — a Nightshelf Original'
+    : book.title + ' by ' + book.author + ' — Nightshelf');
 }
 const rejected = ['', '?book=', '?book=missing', '?book=custom_private',
   '?book=__proto__', '?book=constructor', '?book=toString',
@@ -49,7 +58,11 @@ for (const search of rejected) {
 assert.match(html, /id="shared-book"[^>]*hidden/);
 assert.match(html, /https:\/\/apps\.apple\.com\/app\/id6792761643/);
 for (const id of Object.keys(run('').elements)) assert.ok(html.includes('id="' + id + '"'), id);
-const books = Object.values(catalog);
+// Shelf counts are the classics; selected tales and Originals carry a kind.
+const books = Object.values(catalog).filter(book => !book.kind);
+const originals = Object.values(catalog).filter(book => book.kind === 'original');
+const selections = Object.values(catalog).filter(book => book.kind === 'selection');
+assert.ok(originals.length > 0 && selections.length > 0, 'catalog must route Originals and selected tales');
 const freeCount = books.filter(book => book.freeTier).length;
 assert.match(html, new RegExp('>' + books.length + '<'));
 assert.match(html, new RegExp('>' + freeCount + '<'));
@@ -65,4 +78,4 @@ for (const name of ['index.html', 'support.html', 'terms.html', 'privacy.html'])
     assert.equal(image[1], '20260914', name + ' must show the current catalog OG card');
   }
 }
-console.log(`PASS: ${books.length} shared books, ${rejected.length} rejected queries, catalog counts and shelf artwork`);
+console.log(`PASS: ${books.length} shared books + ${selections.length} tales + ${originals.length} Originals, ${rejected.length} rejected queries, catalog counts and shelf artwork`);

@@ -1,4 +1,4 @@
-// Generated from Nightshelf SleepCatalog.swift. See tools/export_nightshelf_catalog.swift.
+// Generated from Nightshelf SleepCatalog, BedtimeSelections and OriginalStories. See tools/export_nightshelf_catalog.swift.
 window.nightshelfSharedBooks = {
   "aesops_fables" : {
     "author" : "Aesop",
@@ -42,9 +42,89 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Around the World in Eighty Days"
   },
+  "bedtime_elves_shoemaker" : {
+    "author" : "The Brothers Grimm",
+    "blurb" : "A short tale from Grimm's Fairy Tales.",
+    "collection" : "Grimm's Fairy Tales",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "The Elves and the Shoemaker"
+  },
+  "bedtime_emperors_new_clothes" : {
+    "author" : "Hans Christian Andersen",
+    "blurb" : "A short tale from Andersen's Fairy Tales.",
+    "collection" : "Andersen's Fairy Tales",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "The Emperor’s New Clothes"
+  },
+  "bedtime_fairies_gift" : {
+    "author" : "Johnny Gruelle",
+    "blurb" : "A short tale from Raggedy Ann Stories.",
+    "collection" : "Raggedy Ann Stories",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "The Fairies’ Gift"
+  },
+  "bedtime_gift_of_magi" : {
+    "author" : "O. Henry",
+    "blurb" : "A short tale from The Four Million.",
+    "collection" : "The Four Million",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "The Gift of the Magi"
+  },
+  "bedtime_hare_tortoise" : {
+    "author" : "Aesop",
+    "blurb" : "A short tale from Aesop's Fables.",
+    "collection" : "Aesop's Fables",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "The Hare and the Tortoise"
+  },
+  "bedtime_mercury_woodman" : {
+    "author" : "Aesop",
+    "blurb" : "A short tale from Aesop's Fables.",
+    "collection" : "Aesop's Fables",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "Mercury and the Woodman"
+  },
+  "bedtime_new_sisters" : {
+    "author" : "Johnny Gruelle",
+    "blurb" : "A short tale from Raggedy Ann Stories.",
+    "collection" : "Raggedy Ann Stories",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "Raggedy Ann’s New Sisters"
+  },
+  "bedtime_north_wind_sun" : {
+    "author" : "Aesop",
+    "blurb" : "A short tale from Aesop's Fables.",
+    "collection" : "Aesop's Fables",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "The North Wind and the Sun"
+  },
+  "bedtime_real_princess" : {
+    "author" : "Hans Christian Andersen",
+    "blurb" : "A short tale from Andersen's Fairy Tales.",
+    "collection" : "Andersen's Fairy Tales",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "The Real Princess"
+  },
+  "bedtime_strange_dolls" : {
+    "author" : "Johnny Gruelle",
+    "blurb" : "A short tale from Raggedy Ann Stories.",
+    "collection" : "Raggedy Ann Stories",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "Raggedy Ann and the Strange Dolls"
+  },
   "black_beauty" : {
     "author" : "Anna Sewell",
-    "blurb" : "A horse's quiet memoir of fields and country roads.",
+    "blurb" : "A horse's life among kind and cruel owners, told with compassion.",
     "freeTier" : true,
     "title" : "Black Beauty"
   },
@@ -80,7 +160,7 @@ window.nightshelfSharedBooks = {
   },
   "christmas_carol" : {
     "author" : "Charles Dickens",
-    "blurb" : "Snow, candle-light, and three quiet ghosts.",
+    "blurb" : "A ghostly Christmas journey through regret, kindness, and second chances.",
     "freeTier" : true,
     "title" : "A Christmas Carol"
   },
@@ -258,6 +338,54 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Oliver Twist"
   },
+  "original_clockmaker_garden" : {
+    "author" : "Nightshelf",
+    "blurb" : "When a clockwork plant stand stops turning, a clockmaker finds a little more room for her rosemary beneath a pane of remembered summer light.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : false,
+    "kind" : "original",
+    "title" : "The Clockmaker’s Winter Garden"
+  },
+  "original_cloud_orchard" : {
+    "author" : "Nightshelf",
+    "blurb" : "A preserve maker visits a pear orchard above the clouds and discovers how its pale fruit changes on the gentle walk home.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : false,
+    "kind" : "original",
+    "title" : "The Orchard Above the Clouds"
+  },
+  "original_hill_teahouse" : {
+    "author" : "Nightshelf",
+    "blurb" : "As autumn brings her neighbours indoors, a teahouse keeper finds a more welcoming arrangement for their monthly gathering.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : false,
+    "kind" : "original",
+    "title" : "The Teahouse on the Hill"
+  },
+  "original_lantern_ferry" : {
+    "author" : "Nightshelf",
+    "blurb" : "An evening ferry route gains a little floating library when three passengers find a use for an empty wooden tray.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : true,
+    "kind" : "original",
+    "title" : "The Lantern Ferry"
+  },
+  "original_moonrise_baker" : {
+    "author" : "Nightshelf",
+    "blurb" : "A coastal baker makes a small loaf for tomorrow and discovers that its simplest mark may be its best.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : true,
+    "kind" : "original",
+    "title" : "The Baker at Moonrise"
+  },
+  "original_rain_map" : {
+    "author" : "Nightshelf",
+    "blurb" : "A map restorer follows the covered ways of a small town, making room on her map for the ordinary sounds of rain.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : false,
+    "kind" : "original",
+    "title" : "The Rain Map"
+  },
   "perrault_tales" : {
     "author" : "Charles Perrault",
     "blurb" : "Cinderella, Sleeping Beauty, Puss in Boots — the originals.",
@@ -410,7 +538,7 @@ window.nightshelfSharedBooks = {
   },
   "treasure_island" : {
     "author" : "Robert Louis Stevenson",
-    "blurb" : "An old sea-chest, a map, and pieces of eight.",
+    "blurb" : "A dangerous voyage of pirates, buried treasure, and mutiny.",
     "freeTier" : true,
     "title" : "Treasure Island"
   },
@@ -440,13 +568,13 @@ window.nightshelfSharedBooks = {
   },
   "wilde_happy_prince" : {
     "author" : "Oscar Wilde",
-    "blurb" : "Wilde's tender fairy tales — a gilded statue, a swallow, a nightingale.",
+    "blurb" : "Beautiful, bittersweet fairy tales of kindness, sacrifice, and loss.",
     "freeTier" : false,
     "title" : "The Happy Prince and Other Tales"
   },
   "wilde_pomegranates" : {
     "author" : "Oscar Wilde",
-    "blurb" : "Four jewel-bright, slow-told fairy tales for older listeners.",
+    "blurb" : "Four richly told fairy tales of beauty, longing, and sorrow.",
     "freeTier" : false,
     "title" : "A House of Pomegranates"
   },
