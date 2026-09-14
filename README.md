@@ -131,6 +131,32 @@ repo-specific validator replaces it. The contracts still record evidence behind 
 claims (`no_account`, `no_ads`, `offline`, `no_tracking`); re-derive that evidence whenever
 the product code moves. A gate that certifies a stale fact is worse than no gate.
 
+## Nightshelf shared books
+
+`/nightshelf/?book=peter_pan` shows the book's title, author, description, and
+free/Pro edition, with a user-tapped `nightshelf://book/peter_pan` link and an
+App Store fallback. Only ids in `nightshelf/shared-book-catalog.js` are accepted;
+private generated stories and unknown ids keep the normal welcome page. This
+custom-scheme button works without Associated Domains. Automatic Universal Link
+opening still requires the app entitlement and a matching AASA configuration.
+
+The catalog is exported from the app's actual `SleepCatalog.swift`. To refresh it,
+compile that source together with `tools/export_nightshelf_catalog.swift` using
+`swiftc -parse-as-library`, then redirect the executable's stdout into
+`nightshelf/shared-book-catalog.js`. Update the static book counts and the OG card
+copy when the catalog changes, and bump the two shared-book scripts' version query
+in `nightshelf/index.html` when publishing either script.
+
+```bash
+node tools/check_nightshelf_share.cjs
+python3 tools/check_nightshelf_share_browser.py
+```
+
+The browser check uses Python Playwright and starts a temporary local HTTP server.
+Pass an optional output directory to save mobile and desktop captures. The Node
+check needs no dependencies and covers every catalog id, invalid and duplicate
+queries, free/Pro disclosure, and the visual shelf's book counts.
+
 ## Deploy (GitHub Pages)
 
 ```bash

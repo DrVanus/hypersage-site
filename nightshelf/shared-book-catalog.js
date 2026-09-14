@@ -1,0 +1,483 @@
+// Generated from Nightshelf SleepCatalog.swift. See tools/export_nightshelf_catalog.swift.
+window.nightshelfSharedBooks = {
+  "aesops_fables" : {
+    "author" : "Aesop",
+    "blurb" : "Short, slow fables. A fox, a tortoise, a lamb, a moral.",
+    "freeTier" : true,
+    "title" : "Aesop's Fables"
+  },
+  "alice_wonderland" : {
+    "author" : "Lewis Carroll",
+    "blurb" : "Down the rabbit-hole into a sleepy nonsense garden.",
+    "freeTier" : true,
+    "title" : "Alice's Adventures in Wonderland"
+  },
+  "andersen_fairy_tales" : {
+    "author" : "Hans Christian Andersen",
+    "blurb" : "Danish swans, paper boats, and a stillness only Andersen could write.",
+    "freeTier" : true,
+    "title" : "Andersen's Fairy Tales"
+  },
+  "anne_green_gables" : {
+    "author" : "L. M. Montgomery",
+    "blurb" : "Lake of Shining Waters. Cherry trees. Long quiet evenings.",
+    "freeTier" : false,
+    "title" : "Anne of Green Gables"
+  },
+  "anne_of_avonlea" : {
+    "author" : "L. M. Montgomery",
+    "blurb" : "Anne grown a little older, and Avonlea as green as ever.",
+    "freeTier" : false,
+    "title" : "Anne of Avonlea"
+  },
+  "arabian_nights" : {
+    "author" : "Anonymous",
+    "blurb" : "A thousand and one slow desert nights of stories.",
+    "freeTier" : false,
+    "title" : "The Arabian Nights"
+  },
+  "around_world_80" : {
+    "author" : "Jules Verne",
+    "blurb" : "Fogg's clockwork tour: trains, steamers, and time.",
+    "freeTier" : false,
+    "title" : "Around the World in Eighty Days"
+  },
+  "black_beauty" : {
+    "author" : "Anna Sewell",
+    "blurb" : "A horse's quiet memoir of fields and country roads.",
+    "freeTier" : true,
+    "title" : "Black Beauty"
+  },
+  "blue_fairy_book" : {
+    "author" : "Andrew Lang",
+    "blurb" : "Lang's first lantern-lit gathering of European folktales.",
+    "freeTier" : false,
+    "title" : "The Blue Fairy Book"
+  },
+  "bulfinch_mythology" : {
+    "author" : "Thomas Bulfinch",
+    "blurb" : "Greek myth, the Round Table, and Charlemagne, told in one long volume.",
+    "freeTier" : false,
+    "title" : "Bulfinch's Mythology"
+  },
+  "call_of_wild" : {
+    "author" : "Jack London",
+    "blurb" : "Buck, the Yukon snows, and the song of the younger world.",
+    "freeTier" : false,
+    "title" : "The Call of the Wild"
+  },
+  "celtic_fairy_tales" : {
+    "author" : "Joseph Jacobs",
+    "blurb" : "Misty Irish and Scottish folktales of glens and quiet magic.",
+    "freeTier" : false,
+    "title" : "Celtic Fairy Tales"
+  },
+  "chinese_wonder_book" : {
+    "author" : "Norman Hinsdale Pitman",
+    "blurb" : "Dragon kings, paper lanterns, and quiet wonders from old China.",
+    "freeTier" : false,
+    "title" : "A Chinese Wonder Book"
+  },
+  "christmas_carol" : {
+    "author" : "Charles Dickens",
+    "blurb" : "Snow, candle-light, and three quiet ghosts.",
+    "freeTier" : true,
+    "title" : "A Christmas Carol"
+  },
+  "cranford" : {
+    "author" : "Elizabeth Gaskell",
+    "blurb" : "Small-town gentility, candlelight economies, and gentle gossip.",
+    "freeTier" : false,
+    "title" : "Cranford"
+  },
+  "dracula" : {
+    "author" : "Bram Stoker",
+    "blurb" : "Letters and diaries from a castle in the Carpathians.",
+    "freeTier" : false,
+    "title" : "Dracula"
+  },
+  "east_of_sun" : {
+    "author" : "Asbjørnsen & Moe",
+    "blurb" : "Norwegian tales of white bears, trolls, and the long northern night.",
+    "freeTier" : false,
+    "title" : "East of the Sun and West of the Moon"
+  },
+  "emma" : {
+    "author" : "Jane Austen",
+    "blurb" : "Highbury parlors, picnics, and patient gossip.",
+    "freeTier" : false,
+    "title" : "Emma"
+  },
+  "english_fairy_tales" : {
+    "author" : "Joseph Jacobs",
+    "blurb" : "Jack and the Beanstalk, Tom Tit Tot, and the rest of England's oldest stories.",
+    "freeTier" : false,
+    "title" : "English Fairy Tales"
+  },
+  "five_children_it" : {
+    "author" : "E. Nesbit",
+    "blurb" : "A sand-fairy, English countryside, and one careless wish a day.",
+    "freeTier" : false,
+    "title" : "Five Children and It"
+  },
+  "great_expectations" : {
+    "author" : "Charles Dickens",
+    "blurb" : "Marshes, mists, and a boy named Pip.",
+    "freeTier" : false,
+    "title" : "Great Expectations"
+  },
+  "great_gatsby" : {
+    "author" : "F. Scott Fitzgerald",
+    "blurb" : "A green light across the bay. Long summer parties.",
+    "freeTier" : false,
+    "title" : "The Great Gatsby"
+  },
+  "green_fairy_book" : {
+    "author" : "Andrew Lang",
+    "blurb" : "The third of Lang's rainbow — forests, wishes, and long roads home.",
+    "freeTier" : false,
+    "title" : "The Green Fairy Book"
+  },
+  "grimms_fairy_tales" : {
+    "author" : "The Brothers Grimm",
+    "blurb" : "Old forests, old kings, old stories the way they used to be told.",
+    "freeTier" : true,
+    "title" : "Grimm's Fairy Tales"
+  },
+  "heidi" : {
+    "author" : "Johanna Spyri",
+    "blurb" : "Goats, alpine meadows, and grandfather's hut.",
+    "freeTier" : false,
+    "title" : "Heidi"
+  },
+  "heroes_of_asgard" : {
+    "author" : "Annie & Eliza Keary",
+    "blurb" : "Thor's hammer, Odin's ravens, and the long dusk of the gods.",
+    "freeTier" : false,
+    "title" : "The Heroes of Asgard"
+  },
+  "indian_fairy_tales" : {
+    "author" : "Joseph Jacobs",
+    "blurb" : "Jackals, rajahs, and wise birds from the oldest storyland of all.",
+    "freeTier" : false,
+    "title" : "Indian Fairy Tales"
+  },
+  "irish_fairy_tales" : {
+    "author" : "James Stephens",
+    "blurb" : "Fionn, the Shee, and slow green magic told the Irish way.",
+    "freeTier" : false,
+    "title" : "Irish Fairy Tales"
+  },
+  "jane_eyre" : {
+    "author" : "Charlotte Brontë",
+    "blurb" : "A governess, a moor, and a house with too many shadows.",
+    "freeTier" : false,
+    "title" : "Jane Eyre"
+  },
+  "japanese_fairy_tales" : {
+    "author" : "Yei Theodora Ozaki",
+    "blurb" : "Momotaro, the moon-maiden, and other quiet tales from old Japan.",
+    "freeTier" : false,
+    "title" : "Japanese Fairy Tales"
+  },
+  "jekyll_hyde" : {
+    "author" : "Robert Louis Stevenson",
+    "blurb" : "A London doctor, a locked door, and a strange case indeed.",
+    "freeTier" : false,
+    "title" : "Dr. Jekyll and Mr. Hyde"
+  },
+  "jungle_book" : {
+    "author" : "Rudyard Kipling",
+    "blurb" : "Mowgli, Bagheera, and the slow hum of the Indian forest.",
+    "freeTier" : true,
+    "title" : "The Jungle Book"
+  },
+  "just_so_stories" : {
+    "author" : "Rudyard Kipling",
+    "blurb" : "How the whale got his throat. How the leopard got his spots.",
+    "freeTier" : false,
+    "title" : "Just So Stories"
+  },
+  "king_arthur" : {
+    "author" : "Howard Pyle",
+    "blurb" : "Camelot, the round table, and Excalibur drawn from a still lake.",
+    "freeTier" : false,
+    "title" : "The Story of King Arthur and His Knights"
+  },
+  "little_princess" : {
+    "author" : "Frances Hodgson Burnett",
+    "blurb" : "Sara Crewe keeps her kindness through the cold attic winters.",
+    "freeTier" : false,
+    "title" : "A Little Princess"
+  },
+  "little_women" : {
+    "author" : "Louisa May Alcott",
+    "blurb" : "Four sisters by a New England hearth.",
+    "freeTier" : false,
+    "title" : "Little Women"
+  },
+  "looking_glass" : {
+    "author" : "Lewis Carroll",
+    "blurb" : "A chess board, a mirror, and slower nonsense than before.",
+    "freeTier" : false,
+    "title" : "Through the Looking-Glass"
+  },
+  "lovecraft_weird_tales" : {
+    "author" : "H. P. Lovecraft",
+    "blurb" : "Six eerie tales for a restless, small-hours night.",
+    "freeTier" : false,
+    "title" : "The Colour Out of Space & Other Tales"
+  },
+  "mansfield_park" : {
+    "author" : "Jane Austen",
+    "blurb" : "A quiet girl in a noisy house. Patience as a virtue.",
+    "freeTier" : false,
+    "title" : "Mansfield Park"
+  },
+  "north_wind" : {
+    "author" : "George MacDonald",
+    "blurb" : "A boy named Diamond rides the night wind over sleeping London.",
+    "freeTier" : false,
+    "title" : "At the Back of the North Wind"
+  },
+  "northanger_abbey" : {
+    "author" : "Jane Austen",
+    "blurb" : "Bath in the season. Gothic novels read by candlelight.",
+    "freeTier" : false,
+    "title" : "Northanger Abbey"
+  },
+  "ohenry_four_million" : {
+    "author" : "O. Henry",
+    "blurb" : "Warm New York short stories, each with a small, kind twist.",
+    "freeTier" : false,
+    "title" : "The Four Million"
+  },
+  "oliver_twist" : {
+    "author" : "Charles Dickens",
+    "blurb" : "A parish boy's progress through foggy, lamplit London.",
+    "freeTier" : false,
+    "title" : "Oliver Twist"
+  },
+  "perrault_tales" : {
+    "author" : "Charles Perrault",
+    "blurb" : "Cinderella, Sleeping Beauty, Puss in Boots — the originals.",
+    "freeTier" : false,
+    "title" : "Tales of Mother Goose"
+  },
+  "persuasion" : {
+    "author" : "Jane Austen",
+    "blurb" : "A second chance written in long quiet letters.",
+    "freeTier" : false,
+    "title" : "Persuasion"
+  },
+  "peter_pan" : {
+    "author" : "J. M. Barrie",
+    "blurb" : "Second to the right, and straight on till morning.",
+    "freeTier" : true,
+    "title" : "Peter Pan"
+  },
+  "pink_fairy_book" : {
+    "author" : "Andrew Lang",
+    "blurb" : "Japanese, Danish, and Sicilian tales in Lang's gentlest gathering.",
+    "freeTier" : false,
+    "title" : "The Pink Fairy Book"
+  },
+  "pinocchio" : {
+    "author" : "Carlo Collodi",
+    "blurb" : "An Italian fairy tale carved slowly out of pine.",
+    "freeTier" : false,
+    "title" : "Pinocchio"
+  },
+  "poe_tales" : {
+    "author" : "Edgar Allan Poe",
+    "blurb" : "Poe's atmospheric tales — for the darker, wide-awake hours.",
+    "freeTier" : false,
+    "title" : "Tales of Mystery & Imagination"
+  },
+  "pollyanna" : {
+    "author" : "Eleanor H. Porter",
+    "blurb" : "The glad game, played all through a small Vermont town.",
+    "freeTier" : false,
+    "title" : "Pollyanna"
+  },
+  "pride_prejudice" : {
+    "author" : "Jane Austen",
+    "blurb" : "Long Regency sentences. Drawing rooms. Letters at dawn.",
+    "freeTier" : false,
+    "title" : "Pride and Prejudice"
+  },
+  "princess_goblin" : {
+    "author" : "George MacDonald",
+    "blurb" : "A princess, a thread, and a mountain full of secrets.",
+    "freeTier" : false,
+    "title" : "The Princess and the Goblin"
+  },
+  "raggedy_ann" : {
+    "author" : "Johnny Gruelle",
+    "blurb" : "A rag doll with a candy heart and the kindest nursery adventures.",
+    "freeTier" : false,
+    "title" : "Raggedy Ann Stories"
+  },
+  "railway_children" : {
+    "author" : "E. Nesbit",
+    "blurb" : "Three children, a cottage by the line, and trains to wave at.",
+    "freeTier" : false,
+    "title" : "The Railway Children"
+  },
+  "red_fairy_book" : {
+    "author" : "Andrew Lang",
+    "blurb" : "More of Lang's gilt-edged international fairy tales.",
+    "freeTier" : false,
+    "title" : "The Red Fairy Book"
+  },
+  "robin_hood" : {
+    "author" : "Howard Pyle",
+    "blurb" : "Sherwood in high summer — longbows, ale, and the good greenwood.",
+    "freeTier" : false,
+    "title" : "The Merry Adventures of Robin Hood"
+  },
+  "robinson_crusoe" : {
+    "author" : "Daniel Defoe",
+    "blurb" : "A castaway's slow inventory of an island and a year.",
+    "freeTier" : false,
+    "title" : "Robinson Crusoe"
+  },
+  "scarlet_pimpernel" : {
+    "author" : "Baroness Orczy",
+    "blurb" : "A foppish English lord, a French guillotine, and a small red flower.",
+    "freeTier" : false,
+    "title" : "The Scarlet Pimpernel"
+  },
+  "secret_garden" : {
+    "author" : "Frances Hodgson Burnett",
+    "blurb" : "A walled garden waking up under a Yorkshire moor.",
+    "freeTier" : false,
+    "title" : "The Secret Garden"
+  },
+  "sense_sensibility" : {
+    "author" : "Jane Austen",
+    "blurb" : "Two sisters, two temperaments, one slow English autumn.",
+    "freeTier" : false,
+    "title" : "Sense and Sensibility"
+  },
+  "sherlock_adventures" : {
+    "author" : "Arthur Conan Doyle",
+    "blurb" : "Fog on Baker Street and twelve puzzles solved by lamplight.",
+    "freeTier" : true,
+    "title" : "The Adventures of Sherlock Holmes"
+  },
+  "sketch_book" : {
+    "author" : "Washington Irving",
+    "blurb" : "Rip Van Winkle, Sleepy Hollow, and quiet English Christmases.",
+    "freeTier" : false,
+    "title" : "The Sketch-Book"
+  },
+  "swiss_family_robinson" : {
+    "author" : "Johann David Wyss",
+    "blurb" : "A shipwrecked family builds a whole world on one island.",
+    "freeTier" : false,
+    "title" : "The Swiss Family Robinson"
+  },
+  "tale_two_cities" : {
+    "author" : "Charles Dickens",
+    "blurb" : "Paris, London, and the long shadow of the guillotine.",
+    "freeTier" : false,
+    "title" : "A Tale of Two Cities"
+  },
+  "tanglewood_tales" : {
+    "author" : "Nathaniel Hawthorne",
+    "blurb" : "More Greek myths retold softly for young listeners.",
+    "freeTier" : true,
+    "title" : "Tanglewood Tales"
+  },
+  "the_heroes" : {
+    "author" : "Charles Kingsley",
+    "blurb" : "Perseus, Theseus, and Jason, told slowly for a quiet evening.",
+    "freeTier" : false,
+    "title" : "The Heroes"
+  },
+  "three_men_boat" : {
+    "author" : "Jerome K. Jerome",
+    "blurb" : "An idle row up the Thames, with tea, mishaps, and a dog.",
+    "freeTier" : false,
+    "title" : "Three Men in a Boat"
+  },
+  "tom_sawyer" : {
+    "author" : "Mark Twain",
+    "blurb" : "Summer on the Mississippi at twilight.",
+    "freeTier" : true,
+    "title" : "The Adventures of Tom Sawyer"
+  },
+  "treasure_island" : {
+    "author" : "Robert Louis Stevenson",
+    "blurb" : "An old sea-chest, a map, and pieces of eight.",
+    "freeTier" : true,
+    "title" : "Treasure Island"
+  },
+  "twenty_thousand_leagues" : {
+    "author" : "Jules Verne",
+    "blurb" : "The Nautilus gliding through silent, lamplit deeps.",
+    "freeTier" : false,
+    "title" : "Twenty Thousand Leagues Under the Sea"
+  },
+  "velveteen_rabbit" : {
+    "author" : "Margery Williams",
+    "blurb" : "A short, warm bedtime parable about being loved real.",
+    "freeTier" : true,
+    "title" : "The Velveteen Rabbit"
+  },
+  "violet_fairy_book" : {
+    "author" : "Andrew Lang",
+    "blurb" : "Lilac-bound tales from Romania, Japan, and the Serbian hills.",
+    "freeTier" : false,
+    "title" : "The Violet Fairy Book"
+  },
+  "water_babies" : {
+    "author" : "Charles Kingsley",
+    "blurb" : "A little chimney-sweep slips into a cool green river world.",
+    "freeTier" : false,
+    "title" : "The Water-Babies"
+  },
+  "wilde_happy_prince" : {
+    "author" : "Oscar Wilde",
+    "blurb" : "Wilde's tender fairy tales — a gilded statue, a swallow, a nightingale.",
+    "freeTier" : false,
+    "title" : "The Happy Prince and Other Tales"
+  },
+  "wilde_pomegranates" : {
+    "author" : "Oscar Wilde",
+    "blurb" : "Four jewel-bright, slow-told fairy tales for older listeners.",
+    "freeTier" : false,
+    "title" : "A House of Pomegranates"
+  },
+  "wind_in_willows" : {
+    "author" : "Kenneth Grahame",
+    "blurb" : "Mole, Rat, and Badger drift down a slow English river.",
+    "freeTier" : true,
+    "title" : "The Wind in the Willows"
+  },
+  "wizard_of_oz" : {
+    "author" : "L. Frank Baum",
+    "blurb" : "Yellow brick, slow companions, a soft green city.",
+    "freeTier" : false,
+    "title" : "The Wonderful Wizard of Oz"
+  },
+  "wonder_book" : {
+    "author" : "Nathaniel Hawthorne",
+    "blurb" : "Greek myths retold gently for children, by a New England fireside.",
+    "freeTier" : false,
+    "title" : "A Wonder Book"
+  },
+  "wuthering_heights" : {
+    "author" : "Emily Brontë",
+    "blurb" : "Wind over the moors and a house that remembers everything.",
+    "freeTier" : false,
+    "title" : "Wuthering Heights"
+  },
+  "yellow_fairy_book" : {
+    "author" : "Andrew Lang",
+    "blurb" : "More of Lang's lantern-lit tales, gathered from around the world.",
+    "freeTier" : false,
+    "title" : "The Yellow Fairy Book"
+  }
+};

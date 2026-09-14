@@ -9,23 +9,23 @@
   <meta name="theme-color" content="#0B0E19">
   <title>Nightshelf — sleep stories &amp; bedtime reading for iOS</title>
   
-  <meta name="description" content="Nightshelf is a cozy iOS bedtime-story app: 82 classics read aloud with ambient sound and a sleep timer, plus calm new AI stories with Pro.">
+  <meta name="description" content="Nightshelf is a cozy iOS bedtime-story app: 80 classics read aloud with ambient sound and a sleep timer, plus calm new AI stories with Pro.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/nightshelf/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Nightshelf — Bedtime stories, read aloud">
-  <meta property="og:description" content="82 complete classics and calm new stories written by AI with Nightshelf Pro, read aloud with ambient sound underneath.">
+  <meta property="og:description" content="80 complete classics and calm new stories written by AI with Nightshelf Pro, read aloud with ambient sound underneath.">
   <meta property="og:url" content="https://hypersage.ai/nightshelf/">
   <meta property="og:site_name" content="Nightshelf">
-  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20260821b">
+  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20260914">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Nightshelf — stories to drift off to: stacked books beneath a crescent moon">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Nightshelf — Bedtime stories, read aloud">
   <meta name="twitter:description" content="Bedtime classics, plus AI-written stories with Nightshelf Pro — read aloud in a soft, sleepy voice.">
-  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20260821b">
+  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20260914">
   <meta name="twitter:image:alt" content="Nightshelf — stories to drift off to: stacked books beneath a crescent moon">
 
   <link rel="icon" type="image/png" href="app-icon.png">
@@ -149,6 +149,24 @@
     a { color: var(--accent-bright); text-decoration: none; transition: color .2s; }
     a:hover { color: var(--accent); }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+    /* A shared book gets a clear way into the app, above the usual welcome. */
+    .shared-book[hidden] { display: none; }
+    .shared-book { padding: 36px 0 0; position: relative; z-index: 1; }
+    .shared-book-card {
+      max-width: 800px; margin: 0 auto; padding: clamp(24px, 5vw, 44px);
+      border: 1px solid var(--gold-border); border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, var(--surface), var(--bg-raised));
+      box-shadow: var(--shadow-md); text-align: center;
+    }
+    .shared-book-label { color: var(--accent-bright); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; }
+    .shared-book h2 { margin: 12px 0 6px; font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.2; overflow-wrap: anywhere; }
+    .shared-book-author { color: var(--muted-fg); font-family: var(--font-serif); font-size: 1.15rem; }
+    .shared-book-description { max-width: 540px; margin: 18px auto 0; color: var(--muted-fg); }
+    .shared-book-edition { margin-top: 16px; color: var(--accent-bright); font-size: .9rem; }
+    .shared-book-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 24px; }
+    .shared-book-help { margin: 18px auto 0; max-width: 530px; font-size: .85rem; color: var(--muted-fg); }
+    @media (max-width: 420px) { .shared-book-actions .btn { width: 100%; } }
 
     .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 
@@ -535,9 +553,9 @@
 
 
     /* ====================== FREE / PRO SHELF ========================
-       The shelf itself, as spines: 82 books = 13 free (gold) + 69 with
+       The shelf itself, as spines: 80 books = 14 free (gold) + 66 with
        Pro (dim). Counts mirror the stat strip and the "A Shelf for the
-       Night" card — 13 gold + 69 dim path segments, no more, no fewer.
+       Night" card — 14 gold + 66 dim path segments, no more, no fewer.
        Static by default; the glow is progressive enhancement. */
     .shelfviz { max-width: 740px; margin: 56px auto 0; }
     .shelfviz svg { display: block; width: 100%; height: auto; }
@@ -555,7 +573,7 @@
       font-size: .74rem; font-weight: 600; color: var(--tertiary-fg);
       letter-spacing: .14em; text-transform: uppercase; line-height: 1.6;
     }
-    .shelf-axis .a { flex: 0 0 17.7%; text-align: center; color: var(--accent-bright); }
+    .shelf-axis .a { flex: 0 0 19%; text-align: center; color: var(--accent-bright); }
     .shelf-axis .b { flex: 1 1 auto; text-align: center; }
 
     /* ======================= SCROLL REVEAL ========================== */
@@ -575,7 +593,7 @@
   "name": "Nightshelf",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "iOS",
-  "description": "Nightshelf is a cozy iOS bedtime-story app: 82 complete classics and calm new stories written by AI with Nightshelf Pro, read aloud with ambient sound and a sleep timer.",
+  "description": "Nightshelf is a cozy iOS bedtime-story app: 80 complete classics and calm new stories written by AI with Nightshelf Pro, read aloud with ambient sound and a sleep timer.",
   "url": "https://hypersage.ai/nightshelf/",
   "author": {
     "@type": "Organization",
@@ -602,7 +620,7 @@
       "name": "What's free, and what needs Nightshelf Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Thirteen of the eighty-two classics are free and complete, read aloud by the on-device voice, with every ambient soundscape, the sleep timer, and dimming — no time limit, no ads. Nightshelf Pro opens the other sixty-nine books, the six warm AI narrators, the longer 90- and 120-minute timers, and conjuring Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial — the paywall shows the trial only when your Apple ID is eligible."
+        "text": "Fourteen of the eighty classics are free and complete, read aloud by the on-device voice, with every ambient soundscape, the sleep timer, and dimming — no time limit, no ads. Nightshelf Pro opens the other sixty-six books, the six warm AI narrators, the longer 90- and 120-minute timers, and conjuring Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial — the paywall shows the trial only when your Apple ID is eligible."
       }
     },
     {
@@ -667,6 +685,25 @@
     </div>
   </nav>
 
+  <section class="shared-book" id="shared-book" aria-labelledby="shared-book-title" hidden>
+    <div class="container">
+      <div class="shared-book-card">
+        <p class="shared-book-label">A story shared with you</p>
+        <h2 id="shared-book-title"></h2>
+        <p class="shared-book-author" id="shared-book-author"></p>
+        <p class="shared-book-description" id="shared-book-description"></p>
+        <p class="shared-book-edition" id="shared-book-edition"></p>
+        <div class="shared-book-actions">
+          <a class="btn" id="shared-book-open">Open in Nightshelf</a>
+          <a class="btn ghost" href="https://apps.apple.com/app/id6792761643">Get the iPhone app</a>
+        </div>
+        <p class="shared-book-help">Already have Nightshelf? Open this story on your iPhone. Installing it now? Come back to this link afterward to find the book.</p>
+      </div>
+    </div>
+  </section>
+  <script src="shared-book-catalog.js?v=20260914" defer></script>
+  <script src="shared-book.js?v=20260914" defer></script>
+
   <header class="hero" id="top">
     <div class="container">
       <span class="kicker">
@@ -675,7 +712,7 @@
       </span>
       <img src="app-icon.png" alt="The Nightshelf app icon — books stacked beneath a crescent moon" class="crest" width="512" height="512" fetchpriority="high">
       <h1 class="grad-text">Stories to <em>drift off</em> to</h1>
-      <p class="sub">A shelf of bedtime stories — eighty-two timeless classics, and calm new ones written for you by AI with Nightshelf Pro, read aloud in a soft, sleepy voice with ambient sound underneath.</p>
+      <p class="sub">A shelf of bedtime stories — eighty timeless classics, and calm new ones written for you by AI with Nightshelf Pro, read aloud in a soft, sleepy voice with ambient sound underneath.</p>
       <div class="cta-row">
         <a href="https://apps.apple.com/app/id6792761643" class="btn" target="_blank" rel="noopener">Download on the App Store</a>
         <a href="#screens" class="btn ghost">Take a look</a>
@@ -683,9 +720,9 @@
       <p class="fineprint">No account. No ads. Just goodnights.</p>
       <div class="stat-strip">
         
-        <div class="stat"><div class="num">82</div><div class="lbl">Complete classics</div></div>
+        <div class="stat"><div class="num">80</div><div class="lbl">Complete classics</div></div>
         <div class="stat"><div class="num">6</div><div class="lbl">Warm narrators</div></div>
-        <div class="stat"><div class="num">13</div><div class="lbl">Free, no account</div></div>
+        <div class="stat"><div class="num">14</div><div class="lbl">Free, no account</div></div>
       </div>
     </div>
   </header>
@@ -738,7 +775,7 @@
         <div class="feature reveal">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="4.4" rx="1.2"/><rect x="3.5" y="9.8" width="17" height="4.4" rx="1.2"/><rect x="3.5" y="15.6" width="17" height="4.4" rx="1.2"/><line x1="6.5" y1="6.2" x2="8.2" y2="6.2"/><line x1="6.5" y1="12" x2="8.2" y2="12"/><line x1="6.5" y1="17.8" x2="8.2" y2="17.8"/></svg></div>
           <h3>A Shelf for the Night</h3>
-          <p>Eighty-two timeless tales — Austen, Verne, Grimm, and friends — arranged on beautiful nighttime shelves, with your Continue row waiting right on top. Thirteen are free; Nightshelf Pro opens the other sixty-nine.</p>
+          <p>Eighty timeless tales — Austen, Verne, Grimm, and friends — arranged on beautiful nighttime shelves, with your Continue row waiting right on top. Fourteen are free; Nightshelf Pro opens the other sixty-six.</p>
         </div>
         <div class="feature reveal">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg></div>
@@ -771,19 +808,19 @@
       
       <figure class="shelfviz reveal">
         <svg viewBox="0 0 770 150" aria-hidden="true" focusable="false">
-          <text class="lab" x="14" y="20">82 complete classics</text>
-          <path class="spines free" d="M14 108V48M23 108V36M32 108V48M41 108V36M50 108V52M59 108V36M68 108V56M77 108V50M86 108V39M95 108V36M104 108V50M113 108V39M122 108V50"/>
-          <path class="spines pro" d="M143 108V46M152 108V36M161 108V46M170 108V58M179 108V54M188 108V56M197 108V52M206 108V44M215 108V46M224 108V36M233 108V48M242 108V44M251 108V52M260 108V46M269 108V52M278 108V54M287 108V36M296 108V44M305 108V48M314 108V46M323 108V36M332 108V48M341 108V50M350 108V56M359 108V46M368 108V36M377 108V50M386 108V42M395 108V56M404 108V50M413 108V39M422 108V56M431 108V50M440 108V39M449 108V44M458 108V58M467 108V50M476 108V36M485 108V46M494 108V52M503 108V56M512 108V36M521 108V50M530 108V39M539 108V52M548 108V48M557 108V58M566 108V44M575 108V46M584 108V42M593 108V48M602 108V39M611 108V50M620 108V58M629 108V50M638 108V44M647 108V50M656 108V54M665 108V44M674 108V39M683 108V48M692 108V58M701 108V44M710 108V58M719 108V42M728 108V46M737 108V48M746 108V56M755 108V46"/>
+          <text class="lab" x="14" y="20">80 complete classics</text>
+          <path class="spines free" d="M14 108V48M23 108V36M32 108V48M41 108V36M50 108V52M59 108V36M68 108V56M77 108V50M86 108V39M95 108V36M104 108V50M113 108V39M122 108V50M131 108V46"/>
+          <path class="spines pro" d="M161 108V46M170 108V36M179 108V46M188 108V58M197 108V54M206 108V56M215 108V52M224 108V44M233 108V46M242 108V36M251 108V48M260 108V44M269 108V52M278 108V46M287 108V52M296 108V54M305 108V36M314 108V44M323 108V48M332 108V46M341 108V36M350 108V48M359 108V50M368 108V56M377 108V46M386 108V36M395 108V50M404 108V42M413 108V56M422 108V50M431 108V39M440 108V56M449 108V50M458 108V39M467 108V44M476 108V58M485 108V50M494 108V36M503 108V46M512 108V52M521 108V56M530 108V36M539 108V50M548 108V39M557 108V52M566 108V48M575 108V58M584 108V44M593 108V46M602 108V42M611 108V48M620 108V39M629 108V50M638 108V58M647 108V50M656 108V44M665 108V50M674 108V54M683 108V44M692 108V39M701 108V48M710 108V58M719 108V44M728 108V58M737 108V42M746 108V46"/>
           <rect x="8" y="111" width="754" height="3" rx="1.5" fill="rgba(243,239,230,0.20)"/>
-          <path d="M14 124H122" stroke="rgba(232,177,92,0.45)" stroke-width="2" stroke-linecap="round" fill="none"/>
-          <path d="M143 124H755" stroke="rgba(243,239,230,0.14)" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M14 124H131" stroke="rgba(232,177,92,0.45)" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M161 124H746" stroke="rgba(243,239,230,0.14)" stroke-width="2" stroke-linecap="round" fill="none"/>
           <circle cx="196" cy="18" r="1.2" fill="rgba(243,239,230,0.45)"/>
           <circle cx="452" cy="26" r="1.1" fill="rgba(154,140,214,0.45)"/>
           <circle cx="700" cy="14" r="1.3" fill="rgba(246,200,119,0.4)"/>
         </svg>
         
-        <div class="shelf-axis" aria-hidden="true"><span class="a">13 free</span><span class="b">69 more with Nightshelf Pro</span></div>
-        <figcaption class="wd-cap">Eighty-two complete classics on one shelf — thirteen are free, and Nightshelf Pro opens the other sixty-nine.</figcaption>
+        <div class="shelf-axis" aria-hidden="true"><span class="a">14 free</span><span class="b">66 more with Nightshelf Pro</span></div>
+        <figcaption class="wd-cap">Eighty complete classics on one shelf — fourteen are free, and Nightshelf Pro opens the other sixty-six.</figcaption>
       </figure>
 
       <figure class="listen-card reveal" id="listen">
@@ -800,7 +837,7 @@
           <div class="listen-time" id="listen-time">0:20</div>
         </div>
         <audio id="listen-audio" preload="none" src="audio/nova-alice.mp3?v=20260901a"></audio>
-        <figcaption class="wd-cap">Nova — one of the six warm AI narrators in Nightshelf Pro — rendered by the app's own narration service with its bedtime instructions. The on-device voice reads all thirteen free books aloud free and offline.</figcaption>
+        <figcaption class="wd-cap">Nova — one of the six warm AI narrators in Nightshelf Pro — rendered by the app's own narration service with its bedtime instructions. The on-device voice reads all fourteen free books aloud free and offline.</figcaption>
       </figure>
 
       <figure class="ambient-card reveal" id="ambient">
@@ -902,7 +939,7 @@
         </details>
         <details class="faq">
           <summary>What's free, and what needs Nightshelf Pro?</summary>
-          <p>Thirteen of the eighty-two classics are free and complete, read aloud by the on-device voice, with every ambient soundscape, the sleep timer, and dimming — no time limit, no ads. Nightshelf Pro opens the other sixty-nine books, the six warm AI narrators, the longer 90- and 120-minute timers, and conjuring Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial — the paywall shows the trial only when your Apple ID is eligible.</p>
+          <p>Fourteen of the eighty classics are free and complete, read aloud by the on-device voice, with every ambient soundscape, the sleep timer, and dimming — no time limit, no ads. Nightshelf Pro opens the other sixty-six books, the six warm AI narrators, the longer 90- and 120-minute timers, and conjuring Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial — the paywall shows the trial only when your Apple ID is eligible.</p>
         </details>
         <details class="faq">
           <summary>Does it work offline?</summary>
