@@ -2585,6 +2585,10 @@
     // quick NO -> YES while an old request is still arriving.
     var consentEpoch = 0;
     function setConsent(yes) {
+      if (yes && (deletionLock || deletionRecord && deletionRecord.status === 'pending')) return false;
+      if (yes && deletionRecord && deletionRecord.status === 'deleted') {
+        try { localStorage.removeItem(DELETION_KEY); deletionRecord = null; } catch (e) { return false; }
+      }
       consentEpoch++;
       try {
         localStorage.setItem('hoardling.lbConsent', yes ? 'yes' : 'no');
@@ -2595,12 +2599,110 @@
         if (!yes) localStorage.removeItem('hoardling.lbq');
       } catch (e) {}
       if (!yes) token = null;
+      return true;
     }
-    function on() { return configured() && consent() === 'yes'; }
+    function on() { return configured() && !deletionLock && !deletionRecord && consent() === 'yes'; }
     function current(epoch) { return on() && epoch === consentEpoch; }
     var sess = null;
     try { sess = JSON.parse(localStorage.getItem('hoardling.sb') || 'null'); } catch (e) {}
     function saveSess() { try { localStorage.setItem('hoardling.sb', JSON.stringify(sess)); } catch (e) {} }
+    // Activation belongs to release configuration. Do not publish a deletion
+    // control until its authenticated server route and schema are verified.
+    var DELETION_KEY = 'hoardling.accountDeletion.v1';
+    var deletionRecord = null, deletionLock = false, deletionWait = null, deletionError = '';
+    try { deletionRecord = JSON.parse(localStorage.getItem(DELETION_KEY) || 'null'); } catch (e) {}
+    function deletionEnabled() { return !!(configured() && cfg.deleteUrl && /^https:\/\//.test(cfg.deleteUrl)); }
+    function deletionState() {
+      return { enabled: deletionEnabled(), pending: !!deletionLock || !!(deletionRecord && deletionRecord.status === 'pending'),
+        deleted: !!(deletionRecord && deletionRecord.status === 'deleted'), busy: !!deletionWait,
+        canCancel: !!(deletionRecord && deletionRecord.deletionStarted === false), error: deletionError };
+    }
+    function persistDeletion(record) {
+      localStorage.setItem(DELETION_KEY, JSON.stringify(record)); deletionRecord = record;
+    }
+    function clearDeletedIdentity() {
+      // The confirmed tombstone is written first. If device storage fails,
+      // retry only this cleanup; never silently mint a replacement account.
+      ['hoardling.sb', 'hoardling.lbq', 'hoardling.lbConsent', 'hoardling.lbOut'].forEach(function (key) { localStorage.removeItem(key); });
+      sess = null; token = null; receipt = null;
+      return deletionState();
+    }
+    function cancelDeletion() {
+      if (deletionWait || !deletionRecord || deletionRecord.deletionStarted !== false) return false;
+      try { localStorage.removeItem(DELETION_KEY); deletionRecord = null; deletionError = ''; return true; } catch (e) { return false; }
+    }
+    function deletionRequest(url, options) {
+      if (!deletionLock || !deletionEnabled()) return Promise.reject(new Error('Confirm account deletion first.'));
+      var controller = new AbortController(), timer = setTimeout(function () { controller.abort(); }, 30000);
+      options.signal = controller.signal; options.credentials = 'omit';
+      return fetch(url, options).finally(function () { clearTimeout(timer); });
+    }
+    function deleteAccount(confirmation) {
+      if (deletionWait) return deletionWait;
+      if (!deletionEnabled()) return Promise.reject(new Error('Account deletion is not available in this build.'));
+      if (!deletionRecord && confirmation !== 'DELETE') return Promise.reject(new Error('Confirm deletion first.'));
+      deletionLock = true; deletionError = ''; consentEpoch++; runEpoch++; token = null;
+      deletionWait = (async function () {
+        if (deletionRecord && deletionRecord.status === 'deleted') return clearDeletedIdentity();
+        // Let an existing signup/refresh finish before capturing the identity.
+        // Starting a deletion must never create a new anonymous account itself.
+        if (sessionWaiters) await new Promise(function (resolve, reject) {
+          var timer = setTimeout(function () { reject(new Error('Account verification is taking too long. Reconnect and retry.')); }, 30000);
+          sessionWaiters.push({ epoch: consentEpoch, cb: function (ok) { clearTimeout(timer); resolve(ok); } });
+        });
+        if (!deletionRecord) {
+          if (!sess || !sess.access_token || !sess.refresh_token) throw new Error('No online account is saved on this device.');
+          if (!sess.user_id) {
+            var who = await deletionRequest(cfg.url + '/auth/v1/user', { headers: hdrs() });
+            var identity = who.ok && await who.json();
+            // Pre-user_id saves still own a refresh token. Recover that same
+            // session without ever taking ensureSession's signup fallback.
+            if (!identity && who.status === 401 && sess.refresh_token) {
+              var restored = await deletionRequest(cfg.url + '/auth/v1/token?grant_type=refresh_token', { method: 'POST',
+                headers: { 'apikey': cfg.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: sess.refresh_token }) });
+              var restoredSession = restored.ok && await restored.json();
+              if (restoredSession && restoredSession.access_token && restoredSession.user && restoredSession.user.id) {
+                acceptSession(restoredSession, true); identity = restoredSession.user;
+              }
+            }
+            if (!identity || !identity.id) throw new Error('Your online account could not be verified. Reconnect and try again.');
+            sess.user_id = identity.id; saveSess();
+          }
+          persistDeletion({ status: 'pending', userId: sess.user_id, accessToken: sess.access_token, idempotencyKey: crypto.randomUUID() });
+        }
+        for (var attempt = 0; attempt < 2; attempt++) {
+          var record = Object.assign({}, deletionRecord); delete record.deletionStarted;
+          persistDeletion(record);
+          var response = await deletionRequest(cfg.deleteUrl, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + record.accessToken },
+            body: JSON.stringify({ confirmation: 'DELETE', expectedUserId: record.userId, idempotencyKey: record.idempotencyKey }) });
+          var data = await response.json().catch(function () { return null; });
+          if (response.ok && data && data.deleted === true) {
+            persistDeletion({ status: 'deleted' });
+            return clearDeletedIdentity();
+          }
+          if (data && data.deletionStarted === false) {
+            persistDeletion(Object.assign({}, record, { deletionStarted: false }));
+            if (attempt === 0 && data.code === 'authentication_required' && sess && sess.refresh_token) {
+              var refreshed = await deletionRequest(cfg.url + '/auth/v1/token?grant_type=refresh_token', { method: 'POST',
+                headers: { 'apikey': cfg.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: sess.refresh_token }) });
+              var next = refreshed.ok && await refreshed.json();
+              if (next && next.access_token && next.user && next.user.id === record.userId) {
+                acceptSession(next, true);
+                persistDeletion({ status: 'pending', userId: record.userId, accessToken: next.access_token, idempotencyKey: crypto.randomUUID() });
+                continue;
+              }
+            }
+          }
+          throw new Error('Deletion has not been confirmed. Reconnect and retry. Your campaign progress stays safe.');
+        }
+      })().catch(function (error) {
+        deletionError = deletionRecord && deletionRecord.status === 'deleted'
+          ? 'Your online account was deleted. Retry to finish clearing this device.'
+          : 'Deletion has not been confirmed. Reconnect and retry. Your campaign progress stays safe.';
+        throw error;
+      }).finally(function () { deletionLock = false; deletionWait = null; });
+      return deletionWait;
+    }
     function tagFor(id) {
       var h = 0;
       for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
@@ -2613,6 +2715,13 @@
       saveSess();
     }
     function acceptSession(d, refresh) {
+      // A different tab can finish deletion before its storage event reaches
+      // this tab's already-resolving auth callback. Read the tombstone now.
+      try {
+        var savedDeletion = JSON.parse(localStorage.getItem(DELETION_KEY) || 'null');
+        if (savedDeletion && savedDeletion.status === 'deleted') deletionRecord = savedDeletion;
+      } catch (e) {}
+      if (deletionRecord && deletionRecord.status === 'deleted') return;
       var previous = refresh ? sess : null;
       var uid = d.user && d.user.id || previous && previous.user_id || null;
       sess = { access_token: d.access_token, refresh_token: d.refresh_token,
@@ -2788,10 +2897,23 @@
           .catch(function () { cb(null); });
       });
     }
-    if (typeof window !== 'undefined') window.addEventListener('online', function () { flush(); });
+    if (deletionRecord && deletionRecord.status === 'deleted') {
+      try { clearDeletedIdentity(); }
+      catch (e) { deletionError = 'Your online account was deleted. Retry to finish clearing this device.'; }
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', function () { flush(); });
+      window.addEventListener('storage', function (event) {
+        if (event.key !== DELETION_KEY) return;
+        try { deletionRecord = JSON.parse(localStorage.getItem(DELETION_KEY) || 'null'); } catch (e) { return; }
+        consentEpoch++; runEpoch++; token = null; receipt = null;
+        if (deletionRecord && deletionRecord.status === 'deleted') sess = null;
+      });
+    }
     return { on: on, configured: configured, consent: consent, setConsent: setConsent,
              beginRun: beginRun, finishRun: finishRun, top: top, tag: tag, hasId: hasId,
-             safeName: safeName, flush: flush, status: status };
+             safeName: safeName, flush: flush, status: status,
+             deletionState: deletionState, deleteAccount: deleteAccount, cancelDeletion: cancelDeletion };
   })();
 
   // Placeholder + preview tint per enemy (shared by the enemy drawer and the
@@ -2982,14 +3104,12 @@
         img.onload = function () {
           self.images[id] = img;
           delete self.missing[id];
-          // Warm the decode so the first drawImage cannot stall a frame — but
-          // NEVER WAIT ON IT. In an embedded WebView, decode() on an image
-          // that is not in the document can stay pending forever: measured
-          // here, onload fired at 7ms and the decode promise had still not
-          // settled 3s later on a fully-loaded 519px PNG. Counting the asset
-          // on that promise hung the whole boot behind the 12s bail and put
-          // the player on a splash that looked broken.
-          if (img.decode) { try { img.decode().catch(function () {}); } catch (e) {} }
+          // Bake from the loaded image synchronously. Starting decode() here
+          // and immediately baking in enemyMotionPrewarm races WebKit's
+          // asynchronous decoder: drawImage can copy transparent pixels into
+          // permanent body/limb caches. That produced walking legs without
+          // torsos on iPhone. onload permits synchronous drawImage; the cache
+          // bake itself warms the image without an outstanding decode task.
           tick();
         };
         img.onerror = function () { self.missing[id] = 1; tick(); };
@@ -4545,8 +4665,8 @@
     // Cinder's card ("Works the cavern floor herself") a blurb over a hoardling
     // who did nothing at all. Both dragons work their own floor now.
     for (var oc0 = 0; oc0 < this.towers.length; oc0++) this.towers[oc0]._oc = false;
-    var ocIdx = this._nearestMachineTo(this.hero.x, this.hero.y, 0);
-    var ocIdxR = (this.rivalSide && this.rivalWick)
+    var ocIdx = this.hero.downT > 0 ? -1 : this._nearestMachineTo(this.hero.x, this.hero.y, 0);
+    var ocIdxR = (this.rivalSide && this.rivalWick && !(this.rivalWick.downT > 0))
       ? this._nearestMachineTo(this.rivalWick.x, this.rivalWick.y, 1) : -1;
     // BELLOWS AURA — recomputed each step so selling a post takes its buff
     // with it. O(towers^2) but towers are a handful, not a crowd.
@@ -4621,7 +4741,7 @@
         // the one raider that punishes a built board, countered for her, by you.
         var jw = (this.rivalSide && (tw.own | 0) === 1) ? this.rivalWick : this.hero;
         var pry = 1;
-        if (jw) {
+        if (jw && !(jw.downT > 0)) {
           var jdx = jw.x - tw.x, jdy = jw.y - tw.y;
           var jd2 = jdx * jdx + jdy * jdy;
           pry = (this._mannedTid(tw.own) === tw.tid) ? 5 : jd2 < 52 * 52 ? 2.5 : 1;
@@ -5532,18 +5652,18 @@
   // Read-only ability status: the same live, same-side radius test as casting.
   // Countdown strings change by seconds, not by animation frames.
   Game.prototype._breathStatus = function () {
-    var h=this.hero, n=0, seconds=0, kind, line;
+    var h=this.hero, n=0, foes=0, seconds=0, kind, line;
     if(h.downT>0){kind='recovering';seconds=Math.ceil(h.downT);line='Recovering '+seconds+'s';}
     else if(h.breathCd>0){kind='cooling';seconds=Math.ceil(h.breathCd);line='Ready in '+seconds+'s';}
     else{
       for(var i=0;i<this.enemies.length;i++){var e=this.enemies[i],dx=e.px-h.x,dy=e.py-h.y;
-        if(e.hp>0&&this._sameSide(e.ln,0)&&dx*dx+dy*dy<=h.range*h.range)n++;}
-      kind=n?'ready':'empty';line=n?n+' in reach':'Move closer';
+        if(e.hp>0&&this._sameSide(e.ln,0)){foes++;if(dx*dx+dy*dy<=h.range*h.range)n++;}}
+      kind=n?'ready':'empty';line=n?n+' in reach':foes?'Move closer':'No raiders';
     }
     var ready=kind==='ready'||kind==='empty';
-    return {kind:kind,line:line,count:n,seconds:seconds,ready:ready,canCast:kind==='ready',
+    return {kind:kind,line:line,count:n,foes:foes,seconds:seconds,ready:ready,canCast:kind==='ready',
       fraction:ready?1:kind==='recovering'?clamp(1-h.downT/CFG.heroDownTime,0,1):clamp(1-h.breathCd/(this.mods.breathCd||14),0,1),
-      label:'Use Wick’s breath. '+(kind==='ready'?'Ready. '+n+' nearby '+(n===1?'enemy.':'enemies.'):kind==='empty'?'Ready, but no enemies nearby. Move Wick closer.':kind==='recovering'?'Wick recovers in '+seconds+' seconds.':'Ready in '+seconds+' seconds.')+' Burns nearby enemies through armor.'};
+      label:'Use Wick’s breath. '+(kind==='ready'?'Ready. '+n+' nearby '+(n===1?'enemy.':'enemies.'):kind==='empty'?foes?'Ready, but no enemies nearby. Move Wick closer.':'Ready. No raiders on your road.':kind==='recovering'?'Wick recovers in '+seconds+' seconds.':'Ready in '+seconds+' seconds.')+' Burns nearby enemies through armor.'};
   };
   Game.prototype._requestBreath = function () {
     if (this.mods.breathOff) return;
@@ -5696,6 +5816,7 @@
         }
       }
       if (hit(w, TG.daily)) {
+        if (Lb.deletionState().pending && Lb.deletionState().enabled) { PlayerGuide.open('account'); return; }
         // ASK BEFORE THE FIRST DAILY, NOT AFTER IT (§3g). The question comes
         // before reset(), so the seeded run does not exist yet while it is open.
         if (Lb.configured() && !Lb.consent()) { this._lbAsk = 'daily'; this._lbAskT = 0.35; return; }
@@ -7314,18 +7435,15 @@
         this.particles.push({ kind: 'dot', x: osp.x + (Math.random() - 0.5) * 22, y: osp.y - 20 - Math.random() * 18, vx: (Math.random() - 0.5) * 40, vy: -20 - Math.random() * 30, r: 1.2 + Math.random() * 1.4, life: 0.3, T: 0.3, c: '#ffcf6a' });
       }
     }
-    // heavy footfalls kick dust; laden thieves drip gold sparks (cosmetic scan)
+    // Heavy footfalls kick dust; no ambient coins spill from intact carriers.
     for (var ci = 0; ci < this.enemies.length; ci++) {
       var ce2 = this.enemies[ci];
       if (ce2.hp <= 0) continue;
       if (!ce2.flyer && (ce2.type === 'brute' || ce2.type === 'boss') && ce2.grabT <= 0 && Math.random() < dtRaw * 5) {
         this.particles.push({ kind: 'dot', x: ce2.px + (Math.random() - 0.5) * 10, y: ce2.py + 2, vx: (Math.random() - 0.5) * 30, vy: -10 - Math.random() * 18, r: 1.5 + Math.random() * 2, life: 0.3 + Math.random() * 0.2, T: 0.5, c: 'rgba(120,100,80,0.5)' });
       }
-      // GLITTER WAKE: drip rate scales with the LOAD — a Scrapling sheds the
-      // odd spark; the Hoard King lays a trail down the whole switchback
-      if (ce2.fleeing && ce2.stolen > 0 && Math.random() < dtRaw * Math.min(20, 2 + 1.4 * ce2.stolen)) {
-        this.particles.push({ kind: 'dot', x: ce2.px + (Math.random() - 0.5) * (6 + ce2.stolen), y: ce2.py - 8, vx: (Math.random() - 0.5) * 16, vy: 12 + Math.random() * 14, r: 1.0 + 0.05 * ce2.stolen + Math.random() * 1.2, life: 0.35, T: 0.35, c: '#ffd75e' });
-      }
+      // Carried coins stay in the count badge. Continuous falling gold looked
+      // like actual recoverable pickups; real recovery still emits its own FX.
     }
     this.shake = Math.max(0, this.shake - dtRaw * 2.2);
     // Pin the registered attack pose while paused, just like the walk/crew
@@ -7694,7 +7812,9 @@
       // axis and let foreground stones grow with the world's shallow view.
       for(var ty=0,row=0;ty<WORLD_H;row++){
         var tile=148*depthScale(ty),tileH=tile*.70;
-        for(var tx=-(row%2)*tile*.5;tx<WORLD_W;tx+=tile)rc.drawImage(roadImg,tx,ty,tile,tileH+.15);
+        // A fraction of a texel overlaps both axes. WebKit antialiases the
+        // fractional tile bounds; abutting images left translucent grid seams.
+        for(var tx=-(row%2)*tile*.5;tx<WORLD_W;tx+=tile)rc.drawImage(roadImg,tx,ty,tile+.65,tileH+.65);
         ty+=tileH;
       }
       // UNION THE MASK, THEN CUT ONCE. Stroking each lane with
@@ -7805,6 +7925,31 @@
     }
   };
 
+  // The road already ends at the keep's stair foot. Clear a narrow channel
+  // through the treasure above it, rather than painting paving over coins or
+  // changing the route enemies actually walk. The remaining treasure casts a
+  // small contact shadow into the channel; the road itself stays fully opaque.
+  // Only these bounded mound plates are baked. Warm frames are one image blit.
+  Game.prototype._moundApproachPlate = function (side, plate) {
+    var cache=this._moundApproachCache||(this._moundApproachCache=[]),old=cache[side];
+    if(old&&old.plate===plate&&old.path===this._pathCache&&old.level===this.levelIdx)return old;
+    var m=moundOf(side),w=m.rx*2+30,h=w*plate.height/plate.width,pad=5,res=2;
+    var left=m.x-w/2-pad,top=m.y+m.ry+6-h-pad;
+    var cut=document.createElement('canvas');cut.width=Math.ceil((w+pad*2)*res);cut.height=Math.ceil((h+pad*2)*res);
+    var c=cut.getContext('2d');c.scale(res,res);c.translate(-left,-top);
+    drawSpriteBottom(c,plate,m.x,m.y+m.ry+6,w);
+    c.globalCompositeOperation='destination-out';
+    for(var ln=0;ln<LANES.length;ln++) {
+      if(MAP.keeps&&ln!==side)continue;
+      fillRoadSurface(c,roadSurfaceSamples(ln),MAP.pathW-1,'#000');
+    }
+    var cv=document.createElement('canvas');cv.width=cut.width;cv.height=cut.height;
+    var edge=cv.getContext('2d');
+    edge.shadowColor='rgba(24,12,8,0.72)';edge.shadowBlur=1.4*res;edge.shadowOffsetY=1.1*res;
+    edge.drawImage(cut,0,0);
+    return cache[side]={plate:plate,path:this._pathCache,level:this.levelIdx,canvas:cv,x:left,y:top,w:cv.width/res,h:cv.height/res};
+  };
+
   /// side: which hoard this is. A shared-cavern duel has two, and the warmth
   /// halo has to dim with the hoard it actually belongs to -- drawing both from
   /// this.hoard would show the rival's pile cooling as YOURS was robbed.
@@ -7823,7 +7968,11 @@
     ctx.beginPath();
     ctx.arc(k.x, k.y - 30, 160 + br * 12, 0, 6.283);
     ctx.fill();
-    if (drawSpriteBottom(ctx, this._sidePlate(side, 'hoard', 'mound'), m.x, m.y + m.ry + 6, m.rx * 2 + 30)) { /* sprite */ }
+    var plate=this._sidePlate(side,'hoard','mound');
+    if (plate&&plate.width&&plate.height) {
+      var approach=this._moundApproachPlate(side,plate);
+      ctx.drawImage(approach.canvas,approach.x,approach.y,approach.w,approach.h);
+    }
     else {
       // gold mound: layered warm ellipses + sparkle
       for (var l = 0; l < 3; l++) {
@@ -8214,6 +8363,8 @@
       if(r>140&&b>120&&key>65){a[p+3]=0;}
       if(a[p+3]>32){var at=p/4,x=at%c.width,y=Math.floor(at/c.width);minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}
     }
+    // An empty/undecodable source must not become a permanent blank rig.
+    if(maxX<minX||maxY<minY)return null;
     ctx.putImageData(data,0,0);var trim=document.createElement('canvas');
     trim.width=maxX-minX+1;trim.height=maxY-minY+1;trim.getContext('2d').drawImage(c,minX,minY,trim.width,trim.height,0,0,trim.width,trim.height);
     CROSSBOW_KEY_CACHE.set(img,trim);return trim;
@@ -8742,69 +8893,41 @@
     ctx.restore();
   };
 
-  // THE LOOT LEDGER — the carried amount, baked once into an atlas of 6 cells
-  // (1..5 coins as a constant-width column; 6+ as the boss's sack). Count and
-  // LENGTH and SHAPE carry the read, never hue: colour-blind safe and static,
-  // so it survives reduce-motion too. Cost per carrier: one drawImage.
-  // BOT margin: the capsule and the sack halo both hang ~2u BELOW their own
-  // origin, which without a margin bleeds into the next cell of the atlas and
-  // paints a stray sliver of the neighbouring glyph on every badge.
-  var LEDGER_CELL = 34, LEDGER_S = 3, LEDGER_BOT = 3;
+  // A compact coin-and-count badge replaces columns taller than the thief.
+  // Exact amounts remain legible without growing as a carrier nears the exit.
+  // One bounded atlas shared by every carrier; no per-frame text raster work.
   Game.prototype._bakeLedger = function () {
-    var c = document.createElement('canvas');
-    c.width = LEDGER_CELL * LEDGER_S; c.height = LEDGER_CELL * LEDGER_S * 6;
-    var x = c.getContext('2d');
-    x.scale(LEDGER_S, LEDGER_S);
-    var gw = [], gh = [];
-    for (var i = 0; i < 6; i++) {
-      x.save();
-      x.translate(LEDGER_CELL / 2, (i + 1) * LEDGER_CELL - LEDGER_BOT);   // cell origin
-      if (i < 5) {                                  // 1..5 coins: stacked column
-        var n = i + 1, sh = 4.6 + (n - 1) * 5.6;
-        x.fillStyle = 'rgba(14,9,5,0.88)';
-        rr(x, -5.8, -sh - 1.6, 11.6, sh + 3.2, 5.8); x.fill();
-        x.fillStyle = 'rgba(120,78,26,0.85)';
-        x.fillRect(-0.8, -2.2, 1.6, 3.4);           // tether stub to the crown
-        for (var k = 0; k < n; k++) {
-          var cy = -2.3 - k * 5.6;
-          x.fillStyle = '#ffd75e';
-          x.beginPath(); x.ellipse(0, cy, 3.8, 2.3, 0, 0, 6.283); x.fill();
-          x.fillStyle = 'rgba(255,247,214,0.9)';
-          x.beginPath(); x.ellipse(0, cy - 0.7, 2.3, 0.9, 0, 0, 6.283); x.fill();
-        }
-        gw.push(11.6); gh.push(sh + 3.2);
-      } else {                                      // 6+: a SACK — a different SHAPE, not a taller stack
-        // Kept deliberately TIGHT (~21u): an earlier 32u version out-massed the
-        // 36u raider sprites and read as a pale blob competing with the cast.
-        x.fillStyle = 'rgba(12,8,4,0.92)';          // dark rim carries the silhouette
-        x.beginPath(); x.moveTo(-10.6, -6.4);
-        x.bezierCurveTo(-11.4, -15.6, -6.2, -17.4, -4.2, -19.2);
-        x.lineTo(4.2, -19.2);
-        x.bezierCurveTo(6.2, -17.4, 11.4, -15.6, 10.6, -6.4);
-        x.bezierCurveTo(9.6, -0.6, -9.6, -0.6, -10.6, -6.4);
-        x.closePath(); x.fill();
-        x.fillStyle = '#e8b23c';                    // deeper gold: pale reads as washed out
-        x.beginPath(); x.moveTo(-8.8, -6.6);
-        x.bezierCurveTo(-9.5, -14.6, -5.0, -16.2, -3.4, -17.8);
-        x.lineTo(3.4, -17.8);
-        x.bezierCurveTo(5.0, -16.2, 9.5, -14.6, 8.8, -6.6);
-        x.bezierCurveTo(8.0, -1.8, -8.0, -1.8, -8.8, -6.6);
-        x.closePath(); x.fill();
-        x.strokeStyle = 'rgba(96,58,14,0.75)'; x.lineWidth = 1.1;   // burlap seams
-        for (var bd = 0; bd < 2; bd++) {
-          x.beginPath(); x.ellipse(0, -5.4 + bd * 2.6, 7.6 - bd * 2.6, 2.4 - bd * 0.7, 0, 3.34, 6.08); x.stroke();
-        }
-        x.fillStyle = 'rgba(92,58,16,0.95)';        // cinched neck
-        rr(x, -3.6, -21.4, 7.2, 3.6, 1.4); x.fill();
-        x.fillStyle = '#ffd75e';                    // coins spilling over the tie
-        for (var s2 = 0; s2 < 3; s2++) {
-          x.beginPath(); x.ellipse(-4.2 + s2 * 4.2, -22.6 + (s2 === 1 ? -1.4 : 0), 2.2, 1.6, 0, 0, 6.283); x.fill();
-        }
-        gw.push(21.2); gh.push(23);
-      }
-      x.restore();
+    var w=27,h=15,scale=3,max=CFG.startHoard,c=document.createElement('canvas');
+    c.width=w*scale;c.height=h*scale*max;
+    var x=c.getContext('2d');x.scale(scale,scale);
+    for(var i=1;i<=max;i++){
+      x.save();x.translate(0,(i-1)*h);
+      x.fillStyle='rgba(29,23,17,.92)';x.strokeStyle='#a17b40';x.lineWidth=.65;
+      rr(x,1,1,w-2,h-2,5);x.fill();x.stroke();
+      x.fillStyle='#b67a26';x.beginPath();x.ellipse(7.5,7.8,3.1,3.5,0,0,Math.PI*2);x.fill();
+      x.fillStyle='#edc365';x.beginPath();x.ellipse(7.2,7,2.8,3.1,0,0,Math.PI*2);x.fill();
+      x.strokeStyle='#8d591e';x.lineWidth=.75;x.beginPath();x.moveTo(7.2,5.5);x.lineTo(7.2,8.5);x.stroke();
+      x.fillStyle='#ffe2a1';x.font='bold 10px sans-serif';x.textAlign='center';x.textBaseline='middle';
+      x.fillText(String(i),18,7.8);x.restore();
     }
-    return { c: c, gw: gw, gh: gh };
+    return{c:c,w:w,h:h,scale:scale,max:max};
+  };
+
+  // A soft contact patch lets paving show through. The old two hard ellipses
+  // read as separate platforms; grounding must come from the boots themselves.
+  Game.prototype._drawEnemyShadow = function(ctx,x,y,w,airborne){
+    var plate=this._enemyShadow;
+    if(!plate){
+      plate=document.createElement('canvas');plate.width=96;plate.height=40;
+      var c=plate.getContext('2d');c.scale(1,.4);
+      var shade=c.createRadialGradient(48,50,2,48,50,46);
+      shade.addColorStop(0,'rgba(10,7,5,.30)');shade.addColorStop(.35,'rgba(10,7,5,.19)');
+      shade.addColorStop(.72,'rgba(10,7,5,.07)');shade.addColorStop(1,'rgba(10,7,5,0)');
+      c.fillStyle=shade;c.fillRect(0,0,96,100);this._enemyShadow=plate;
+    }
+    ctx.save();ctx.globalAlpha*=airborne?.55:1;
+    var sw=w*(airborne?.83:.67),sh=w*(airborne?.30:.23);
+    ctx.drawImage(plate,x-sw*.44,y+5-sh*.5,sw,sh);ctx.restore();
   };
 
   // Only _drawEntities supplies live-body metrics; a fading husk never enters
@@ -8812,27 +8935,13 @@
   Game.prototype._drawEnemyIndicators = function (ctx, e, rec) {
     var fy = rec.fy, baseW = rec.baseW, hh2 = rec.spriteH;
     ctx.save();
-    // THE LOOT LEDGER — how much of OUR gold this one is holding, anchored to
-    // the sprite's REAL drawn height (a fixed offset buries it in tall sprites
-    // and floats it off short ones). Inflates + reddens as the mouth nears, so
-    // the biggest badge on screen is always the most urgent target.
-    if (e.stolen > 0) {
-      var L = this._ledger || (this._ledger = this._bakeLedger());
-      var ci2 = e.stolen >= 6 ? 5 : e.stolen - 1;
-      var kk = e.fleeing ? Math.max(0, 1 - e.d / 220) : 0;
-      ctx.save();
-      ctx.translate(rec.px, rec.py + 6 + fy - Math.min(hh2 || 30, 78) - 8);
-      ctx.scale(1 + 0.45 * kk, 1 + 0.45 * kk);
-      if (kk > 0.02) {
-        ctx.fillStyle = 'rgba(255,123,123,' + (0.10 + 0.30 * kk) + ')';
-        ctx.beginPath();
-        ctx.ellipse(0, -L.gh[ci2] * 0.5, L.gw[ci2] * 0.5 + 3 + 4 * kk, L.gh[ci2] * 0.5 + 3 + 4 * kk, 0, 0, 6.283);
-        ctx.fill();
-      }
-      var cell = LEDGER_CELL * LEDGER_S;
-      ctx.drawImage(L.c, 0, ci2 * cell, cell, cell,
-        -LEDGER_CELL / 2, -(LEDGER_CELL - LEDGER_BOT), LEDGER_CELL, LEDGER_CELL);
-      ctx.restore();
+    if(e.stolen>0){
+      var L=this._ledger||(this._ledger=this._bakeLedger()),amount=clamp(Math.ceil(e.stolen),1,L.max);
+      // Clear the head and its health bar, including the tall pavise. Urgency
+      // already lives at the exit and in the wave HUD, not in a second halo.
+      var by=rec.py+fy-hh2-10-L.h;
+      ctx.drawImage(L.c,0,(amount-1)*L.h*L.scale,L.w*L.scale,L.h*L.scale,
+        rec.px-L.w/2,by,L.w,L.h);
     }
     // hp bar (only when hurt)
     // ABOVE THE HEAD, not across the waist. rec.py - 20 is mid-body on a 36-unit
@@ -8896,8 +9005,10 @@
   var ENEMY_LIMBS = {
     looter:{stride:.040,lift:.023,legs:[[[.34,.60],[.26,.75],[.19,.93],.105,.105],[[.55,.63],[.61,.72],[.67,.80],.080,.090]]},
     scout:{stride:.030,lift:.027,legs:[[[.48,.52],[.38,.65],[.43,.73],.075,.085],[[.57,.54],[.66,.75],[.68,.91],.060,.080]]},
-    brute:{stride:.029,lift:.017,legs:[[[.42,.71],[.36,.79],[.30,.865],.070,.070],[[.62,.72],[.65,.84],[.67,.945],.075,.065]]},
-    shield:{stride:.022,lift:.006,legs:[[[.22,.928],[.21,.944],[.20,.951],.085,.060],[[.76,.934],[.76,.958],[.75,.983],.095,.070]]},
+    brute:{stride:.045,lift:.026,legs:[[[.42,.71],[.36,.79],[.30,.865],.070,.085],[[.62,.72],[.65,.84],[.67,.945],.075,.080]]},
+    // Move the visible boots through a readable alternating step. The old
+    // half-pixel sole ripple left the pavise sliding above two almost still feet.
+    shield:{stride:.045,lift:.018,legs:[[[.22,.918],[.21,.940],[.20,.951],.085,.090],[[.76,.910],[.76,.951],[.75,.983],.095,.090]]},
     warlock:{stride:0,lift:0,hem:{x:.58,y:.73,bottom:.947,width:.28,amount:.029}},
     blinker:{stride:0,lift:0,hem:{x:.45,y:.61,bottom:.995,width:.30,amount:.055}},
     boss:{stride:.019,lift:.010,legs:[[[.30,.813],[.28,.85],[.265,.885],.038,.047],[[.63,.835],[.65,.878],[.66,.934],.044,.042]]},
@@ -9231,24 +9342,10 @@
     var bob = pose.active ? Math.sin(this.worldT * 9 + e.id * 1.3) * 2 : 0;
     // a netted flyer sits on the road (groundedT), wings clipped
     var fy = eFly(e) ? -26 + (pose.active ? Math.sin(this.worldT * 4 + e.id) * 1.5 : 0) : 0;
-    // BEAT 1a — the shadow REACHES as he closes on the hoard: it darkens,
-    // widens and flattens over the last 70 units. Zero extra draw calls.
-    var near = e.fleeing ? 0 : Math.max(0, 1 - (laneLen(e.ln) - e.d) / 70);
-    // depth: units grow toward the camera, matching the painted floor
+    // Depth scales with the painted floor; shadows stay small and translucent.
     var dsc = depthScale(p.y);
-    var baseW = (e.type === 'boss' ? 62 : e.type === 'brute' ? 46 : 36) * dsc;
-    // A REAL contact shadow, sized off the body and thrown along the key light
-    // (measured upper-left across the sprite set). The old one was 20u wide
-    // under a 36u body and centred ABOVE the feet, so it read as an ankle
-    // smudge. BEAT 1a is preserved: `near` still widens and darkens it as he
-    // closes on the hoard.
-    // STRENGTH 0.62..0.90, not 1.00..1.45. groundShadow's own contact term is
-    // alpha 0.42 BEFORE this multiplier, so at 1.45 it painted a 0.61-alpha
-    // black ellipse under every raider, and a road full of raiders became a
-    // road full of dark holes. VANUS: "whats with these shadows under the
-    // enemies? too much?". `near` still darkens as they close on the hoard; it
-    // just starts from a shadow rather than from a hole.
-    groundShadow(ctx, p.x, p.y, baseW * (1 + 0.22 * near), eFly(e) ? 26 : 0, 0.62 + 0.28 * near);
+    var baseW = (e.type === 'boss' ? 62 : e.type === 'brute' ? 46 : e.type === 'shield' ? 24 : 36) * dsc;
+    this._drawEnemyShadow(ctx,p.x,p.y,baseW,eFly(e));
     var sid = 'e_' + e.type;
     var img = ART.images[sid];
     if (img) {
@@ -9296,10 +9393,6 @@
         ctx.globalCompositeOperation = 'source-over';
       }
       ctx.restore();
-      if (e.stolen > 0) { // CARRYING our gold (not merely fleeing empty-handed)
-        ctx.fillStyle = 'rgba(255,120,90,0.35)';
-        ctx.beginPath(); ctx.ellipse(p.x, p.y + 3, 12, 5, 0, 0, 6.283); ctx.fill();
-      }
     } else {
       var col = ENEMY_COLORS[e.type];
       var r = e.type === 'boss' ? 19 : e.type === 'brute' ? 13 : 9;
@@ -9369,7 +9462,7 @@
   // Wing motion is independent of machine output. The spread crew painting
   // needs a sustained beat even between shots; ground poses stay restrained.
   // Free wing edges are cut at authored roots; the painted shoulder overlap
-  // stays on the rigid torso. Feet, eyes and the shared muzzle remain fixed.
+  // stays on the rigid torso. Feet, wing roots and shared muzzle stay registered.
   var WICK_PRESENCE = {
     front:{w:783,h:730,parts:[
       {name:'wing',side:1,pivot:[455,352],poly:[[443,319],[474,252],[474,175],[570,170],[688,253],[727,403],[727,472],[572,483],[496,447],[473,400],[449,377]]},
@@ -9386,23 +9479,124 @@
       {name:'wing',side:1,pivot:[466,335],poly:[[449,305],[477,271],[480,223],[481,174],[488,146],[511,137],[550,143],[600,164],[652,200],[699,242],[731,289],[744,340],[703,321],[679,310],[658,311],[645,327],[650,389],[622,370],[598,358],[570,354],[550,363],[532,394],[510,366],[486,359],[467,350],[445,344]]}
     ]}
   };
+  // Face and breastplate landmarks measured on the original paintings. The
+  // painted lip is the head pivot; feet, grip and all simulation anchors stay
+  // fixed. Only a small crop of the existing body canvas is refreshed.
+  var WICK_VITALITY = {
+    front:{w:783,h:730,crop:[128,0,412,635],lip:[168.345,229.95],
+      head:[[136,-8],[518,-8],[518,273],[459,291],[406,299],[354,310],[259,312],[207,311],[136,301]],
+      neck:[331,311,70,15],chest:[276,450,51,120],
+      eyes:[[313,195,25,27,285,146,54,19],[203,190,8,17,188,159,19,13]]},
+    crew:{w:951,h:746,crop:[263,0,385,636],lip:[312,302],
+      head:[[274,-8],[639,-8],[639,192],[605,245],[598,289],[566,321],[508,341],[425,354],[345,353],[294,334],[271,297]],
+      neck:[435,351,77,17],chest:[423,470,55,98],
+      eyes:[[441,231,31,31,411,183,61,19],[316,229,9,19,301,196,21,15]]},
+    breath:{w:783,h:730,crop:[42,0,451,619],lip:[185.571,280.32],
+      head:[[46,-8],[484,-8],[484,165],[475,270],[382,294],[337,316],[310,350],[277,388],[245,412],[142,412],[91,365],[62,316],[43,250]],
+      neck:[303,358,34,30],chest:[282,462,51,89],
+      eyes:[[271,181,29,26,241,130,60,20]]}
+  };
+  Game.prototype._wickVitalityPose = function(kind,mode,work) {
+    if(RM||kind==='back')return{blink:0,tilt:0,breath:0};
+    var t=this.worldT,cycle=Math.floor(t/5.6),within=t-cycle*5.6;
+    var start=1.6+noise01(cycle,0x5749434b)*2.1,elapsed=within-start,blink=0;
+    if(elapsed>=0&&elapsed<.21){
+      blink=elapsed<.065?elapsed/.065:elapsed<.10?1:1-(elapsed-.10)/.11;
+      blink=blink*blink*(3-2*blink);
+    }
+    var attention=(vnoise(t*.19,0x45594553)-.5)*2;
+    var tilt=attention*.021+Math.sin(t*1.7)*.006+(work||0)*.018;
+    var breath=Math.sin(t*2.15)*.012;
+    if(kind==='breath'){
+      // Focus the eyes and brace around the real open-mouth flame source.
+      // The upper horn only tips down, preserving the painting's top margin.
+      var effort=Math.max(clamp((this._breathT||0)/BREATH_BEAT,0,1),clamp((this._spitT||0)/SPIT_BEAT,0,1));
+      var brace=Math.sin(effort*Math.PI);
+      tilt=.022*brace;blink=.18+.25*brace;breath=.008*brace;
+    }else if(mode==='walk')tilt*=.6;
+    return{blink:blink,tilt:tilt,breath:breath};
+  };
+  Game.prototype._animateWickBody = function(body,kind,pose) {
+    var spec=WICK_VITALITY[kind];if(!spec||!body)return;
+    var cache=this._wickVitalityCache||(this._wickVitalityCache=new WeakMap()),rig=cache.get(body);
+    if(!rig){
+      var sx=body.width/spec.w,sy=body.height/spec.h,r=spec.crop;
+      var x0=Math.floor(r[0]*sx),y0=Math.floor(r[1]*sy),w=Math.ceil(r[2]*sx),h=Math.ceil(r[3]*sy);
+      w=Math.min(w,body.width-x0);h=Math.min(h,body.height-y0);
+      function canvas(){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+      var source=canvas(),sc=source.getContext('2d');sc.drawImage(body,x0,y0,w,h,0,0,w,h);
+      var rest=canvas(),rc=rest.getContext('2d');rc.drawImage(source,0,0);
+      rc.save();rc.scale(sx,sy);rc.translate(-x0/sx,-y0/sy);rc.beginPath();
+      spec.head.forEach(function(p,i){if(i)rc.lineTo(p[0],p[1]);else rc.moveTo(p[0],p[1]);});rc.closePath();
+      rc.globalCompositeOperation='destination-out';rc.fill();rc.restore();
+      var lids=spec.eyes.map(function(e){
+        var c=document.createElement('canvas');c.width=Math.ceil((e[2]*2+4)*sx);c.height=Math.ceil((e[3]*2+4)*sy);
+        var ec=c.getContext('2d');
+        // Reuse the painted, already coated brow texture. A blink therefore
+        // keeps the skin's shading instead of stamping a flat cartoon oval.
+        ec.drawImage(source,e[4]*sx-x0,e[5]*sy-y0,e[6]*sx,e[7]*sy,0,0,c.width,c.height);
+        return{image:c,eye:e};
+      });
+      rig={source:source,rest:rest,lids:lids,x:x0,y:y0,w:w,h:h,sx:sx,sy:sy,key:null};cache.set(body,rig);
+    }
+    var key=[pose.blink,pose.tilt,pose.breath].join(':');if(rig.key===key)return;rig.key=key;
+    var c=body.getContext('2d'),sx=rig.sx,sy=rig.sy;
+    c.save();c.setTransform(1,0,0,1,0,0);c.clearRect(rig.x,rig.y,rig.w,rig.h);
+    if(!pose.blink&&!pose.tilt&&!pose.breath){c.drawImage(rig.source,rig.x,rig.y);c.restore();return;}
+    c.drawImage(rig.rest,rig.x,rig.y);c.scale(sx,sy);
+    var lip=spec.lip;
+    c.save();c.translate(lip[0],lip[1]);c.rotate(pose.tilt);c.translate(-lip[0],-lip[1]);
+    c.beginPath();spec.head.forEach(function(p,i){if(i)c.lineTo(p[0],p[1]);else c.moveTo(p[0],p[1]);});c.closePath();c.clip();
+    c.drawImage(rig.source,rig.x/sx,rig.y/sy,rig.w/sx,rig.h/sy);
+    if(pose.blink>.001)rig.lids.forEach(function(lid){
+      var e=lid.eye;
+      c.save();c.beginPath();c.ellipse(e[0],e[1],e[2]+3,e[3]+3,-.1,0,Math.PI*2);c.clip();
+      var ey=e[1]-e[3]-3+(e[3]*2+6)*pose.blink;
+      c.beginPath();c.moveTo(e[0]-e[2]-3,e[1]-e[3]-3);c.lineTo(e[0]+e[2]+3,e[1]-e[3]-3);
+      c.lineTo(e[0]+e[2]+3,ey-3);c.quadraticCurveTo(e[0],ey+5,e[0]-e[2]-3,ey-3);c.closePath();c.clip();
+      c.drawImage(lid.image,e[0]-e[2]-4,e[1]-e[3]-4,e[2]*2+8,e[3]*2+8);
+      // Closed lids meet below the eye's centre. Leaving the crease on the
+      // bottom edge made a blink read as a round, pupil-less red eyeball.
+      var meet=clamp((pose.blink-.7)/.3,0,1);meet=meet*meet*(3-2*meet);
+      var crease=(ey-3)*(1-meet)+(e[1]+e[3]*.16)*meet;
+      c.strokeStyle='rgba(63,24,13,.75)';c.lineWidth=2.3;c.lineCap='round';
+      c.beginPath();c.moveTo(e[0]-e[2]*.82,crease-2);c.quadraticCurveTo(e[0],crease+5,e[0]+e[2]*.82,crease-2);c.stroke();c.restore();
+    });
+    c.restore();
+    // Keep the shoulder/neck overlap on the torso; only the free head inclines.
+    var n=spec.neck;c.save();c.beginPath();c.ellipse(n[0],n[1],n[2],n[3],0,0,Math.PI*2);c.clip();
+    c.drawImage(rig.source,rig.x/sx,rig.y/sy,rig.w/sx,rig.h/sy);c.restore();
+    // Interior breastplate movement follows a slow breath. Its outer contour,
+    // hands and lower belly stay painted in place; no whole-body squash.
+    var b=spec.chest;c.save();c.beginPath();c.ellipse(b[0],b[1],b[2],b[3],.06,0,Math.PI*2);c.clip();
+    c.translate(b[0],b[1]+b[3]);c.scale(1+pose.breath*.3,1+pose.breath);c.translate(-b[0],-b[1]-b[3]);
+    c.drawImage(rig.source,rig.x/sx,rig.y/sy,rig.w/sx,rig.h/sy);c.restore();c.restore();
+  };
   Game.prototype._wickPresencePose = function(mode,work) {
-    if(RM)return{wing:0};
-    var quiet=Math.sin(this.worldT*1.9)*.013,wing=quiet;
+    if(RM)return{wing:0,air:0};
+    var quiet=Math.sin(this.worldT*1.9)*.013,wing=quiet,air=0;
     if(mode==='crew'){
       // A quicker downstroke and softer recovery repeat for the whole crew
       // assignment. Neither a shot timeout nor an idle support post can stop
       // the wings. Fixed-step world time naturally honors pause and speed.
       var phase=this.worldT*2.2*Math.PI*2;
       wing=.22*Math.sin(phase)+.035*Math.sin(phase*2);
-      return{wing:wing};
+      var beat=this.worldT*2.2,part=beat-Math.floor(beat);
+      if(Math.floor(beat)%12===4&&part<.65)air=Math.sin(part/.65*Math.PI)*.26;
+      return{wing:wing,air:air};
     }
     if(mode==='walk')wing+=Math.sin(this.worldT*5.4)*.070;
     else if(mode==='attack'){
       var attack=Math.max(clamp((this._breathT||0)/BREATH_BEAT,0,1),clamp((this._spitT||0)/SPIT_BEAT,0,1));
       wing+=Math.sin(attack*Math.PI)*.075;
-    }else if(mode!=='idle' && mode!=='ready')wing+=(work||0)*.28;
-    return{wing:wing};
+    }else if(mode==='idle'){
+      // An occasional shoulder stretch: two small flexes, then long rest.
+      // Wick keeps standing on the same feet throughout; this is not flight.
+      var cycle=Math.floor(this.worldT/8.6),age=this.worldT-cycle*8.6-2.2-noise01(cycle,0x47555354)*2.6;
+      if(age>0&&age<1.15){var envelope=Math.pow(Math.sin(age/1.15*Math.PI),2),stroke=age*2.1*Math.PI*2;
+        wing+=Math.sin(stroke)*envelope*.125;air=Math.max(0,Math.cos(stroke))*envelope*.22;}
+    }else if(mode!=='ready')wing+=(work||0)*.28;
+    return{wing:wing,air:air};
   };
   Game.prototype._wickPresenceParts = function(img,kind) {
     var spec=WICK_PRESENCE[kind];if(!spec)return null;
@@ -9434,6 +9628,16 @@
   };
   Game.prototype._drawWickPresence = function(ctx,presence,hh,hw,pose) {
     if(!presence)return;
+    if(pose.air>0){
+      // A few short, translucent eddies follow an occasional downstroke.
+      // They are immediate clock-derived strokes, never simulation particles.
+      ctx.save();ctx.lineCap='round';ctx.lineWidth=.65;ctx.strokeStyle='rgba(216,209,188,'+pose.air.toFixed(3)+')';
+      for(var j=0;j<presence.parts.length;j++){
+        var part=presence.parts[j],side=part.side,ax=(part.pivot[0]/presence.w-.5)*hw+side*hw*.20,ay=(part.pivot[1]/presence.h-1)*hh+hh*.10;
+        for(var k=0;k<2;k++){var spread=k*2;ctx.beginPath();ctx.moveTo(ax+side*spread,ay+spread);
+          ctx.quadraticCurveTo(ax+side*(6+spread),ay+3+spread,ax+side*(11+spread),ay+1+spread);ctx.stroke();}
+      }ctx.restore();
+    }
     for(var i=0;i<presence.parts.length;i++){
       var p=presence.parts[i],x=(p.pivot[0]/presence.w-.5)*hw,y=(p.pivot[1]/presence.h-1)*hh;
       ctx.save();ctx.translate(x,y);ctx.rotate(p.side*(pose[p.name]||0));ctx.translate(-x,-y);
@@ -9592,6 +9796,7 @@
       ctx.save();ctx.translate(jx,jy);ctx.rotate(angle);ctx.translate(-jx,-jy);
       ctx.drawImage(plate,-hw/2,-hh,hw,hh);ctx.restore();
     }
+    this._animateWickBody(parts.body,'crew',this._wickVitalityPose('crew',pose.mode,pose.work));
     // Far tool arm sits behind the torso at its shoulder. Its socket stays
     // fixed while the wrench turns; the free hand works the close control.
     this._drawWickPresence(ctx,parts.presence,hh,hw,this._wickPresencePose('crew',pose.work));
@@ -9684,6 +9889,7 @@
     if (!pose || RM) return false;
     var parts = this._footPartsFor(img,kind); if (!parts) return false;
     var rig = parts.rig;
+    this._animateWickBody(parts.body,kind,this._wickVitalityPose(kind,pose.mode,0));
     this._drawWickPresence(ctx,parts.presence,hh,hw,this._wickPresencePose(pose.mode,0));
     for (var i = 0; i < rig.parts.length; i++) {
       var part = rig.parts[i], jx = (part.joint[0] / rig.w - 0.5) * hw, jy = (part.joint[1] / rig.h - 1) * hh;
@@ -9809,11 +10015,8 @@
       if (!crewDrawn && (mnt || !this._drawFootWick(ctx,himg,footKind,hh0,hw0,footPose))) {
         ctx.drawImage(himg, -hw0 / 2, -hh0, hw0, hh0);
       }
-      // THE MOUTH OPENS. The painted plate has a closed muzzle and there is no
-      // open-mouthed variant, so the jaw is drawn: a dark throat wedge at the
-      // snout with a hot core, scaled by the same eased kick. It sits inside
-      // the sprite's own transform, so the mirror puts it on whichever side he
-      // is facing and it can never drift off his face.
+      // The attack painting supplies the open jaw. Heat and the short jet
+      // share its registered mouth, inside the same facing transform.
       if (b > 0.01) {
         var onBreathPlate = breathPose;   // taken before the coat swap -- see above
         var mx = -hw0 * (onBreathPlate ? MUZZLE_B_FWD : MUZZLE_FWD);
@@ -9822,14 +10025,10 @@
         ctx.save();
         ctx.translate(mx, my);
         ctx.scale(1, open);
-        // NO DARK CAVITY. The painted plate has a CLOSED muzzle, so a near-black
-        // ellipse stamped on it does not read as an open mouth -- magnified, it
-        // is a black bar punched through his cheek. On a closed snout the only
-        // honest tell is HEAT: the lips glow, the fire leaves, the head kicks.
-        // (The real open jaw is the sprite swap below, not paint.)
-        ctx.fillStyle = 'rgba(255,150,60,0.55)';
+        // Keep the painted jaw visible through a small reflected throat glow.
+        ctx.fillStyle = 'rgba(255,150,60,0.35)';
         ctx.beginPath(); ctx.ellipse(-0.6, 0.4, 4.2, 3.8, 0, 0, 6.283); ctx.fill();
-        ctx.fillStyle = 'rgba(255,236,180,0.75)';
+        ctx.fillStyle = 'rgba(255,236,180,0.55)';
         ctx.beginPath(); ctx.ellipse(-1.2, 0.6, 2.2, 2.0, 0, 0, 6.283); ctx.fill();
         ctx.restore();
         // the jet leaving the mouth, drawn in the sprite's local frame so it
@@ -9838,7 +10037,7 @@
         // reads as a spark, not as breath. Brightness peaks mid-beat rather
         // than tracking b, so the jet is at its hottest while the jaw is at
         // its widest instead of already fading by the time the mouth is open.
-        var jb = Math.sin(Math.min(1, b * 1.25) * Math.PI);
+        var jb = Math.min(1,.35+(1-b)*8)*Math.min(1,b*5);
         var jl = 30 + 52 * (1 - b);            // it REACHES as the beat plays out
         var jw = 5 + 17 * (1 - b);             // and spreads
         // TONGUES, NOT A CONE, AND NOT ALL ADDITIVE. Two smooth quadratic
@@ -9851,31 +10050,34 @@
         // gives fire its ragged moving edge -- and only the small core is
         // additive. Cosmetic lane: the flicker rides worldT (render time).
         var JT = [
-          { a: -0.54, l: 0.60, w: 0.40, f: 23, c0: '255,166,52', c1: '172,40,10' , al: 0.70 },
-          { a:  0.51, l: 0.56, w: 0.38, f: 19, c0: '255,156,44', c1: '164,36,9'  , al: 0.70 },
-          { a: -0.21, l: 0.93, w: 0.70, f: 27, c0: '255,194,90', c1: '196,56,14' , al: 0.82 },
-          { a:  0.23, l: 1.00, w: 0.74, f: 31, c0: '255,186,78', c1: '190,52,12' , al: 0.80 },
+          { a: -0.30, l: 0.68, w: 0.46, f: 23, c0: '255,166,52', c1: '172,40,10' , al: 0.70 },
+          { a:  0.28, l: 0.63, w: 0.43, f: 19, c0: '255,156,44', c1: '164,36,9'  , al: 0.70 },
+          { a: -0.10, l: 0.93, w: 0.75, f: 27, c0: '255,194,90', c1: '196,56,14' , al: 0.82 },
+          { a:  0.13, l: 1.00, w: 0.78, f: 31, c0: '255,186,78', c1: '190,52,12' , al: 0.80 },
         ];
         var CORE = { a: 0.02, l: 0.36, w: 0.26, f: 37, c0: '255,248,228', c1: '255,186,100', al: 0.46 };
         function tongue(T2, jp) {
           // each tongue flickers on its OWN clock, so the tips never line up
-          var fk = 0.80 + 0.20 * Math.sin(ht * T2.f + jp * 1.7);
+          var fireT=RM?0:ht;
+          var fk = 0.85 + 0.15 * Math.sin(fireT * T2.f + jp * 1.7);
           var tl = jl * T2.l * fk, tw2 = jw * T2.w * fk;
-          var ca = Math.cos(T2.a), sa = Math.sin(T2.a);
-          var tx = mx - tl * ca, ty = my + tl * sa;     // the muzzle axis runs -x
-          var jg = ctx.createLinearGradient(mx, my, tx, ty);
+          var angle=T2.a+(RM?0:Math.sin(fireT*13+jp)*.035);
+          ctx.save();ctx.translate(mx,my);ctx.rotate(-angle);ctx.scale(-1,1);
+          var jg = ctx.createLinearGradient(0,0,tl,0);
           jg.addColorStop(0.00, 'rgba(' + T2.c0 + ',' + (T2.al * jb).toFixed(3) + ')');
           jg.addColorStop(0.55, 'rgba(' + T2.c1 + ',' + (T2.al * 0.62 * jb).toFixed(3) + ')');
           jg.addColorStop(1.00, 'rgba(' + T2.c1 + ',0)');
           ctx.fillStyle = jg;
-          // a leaf: pinched at the lips, belled out, pinched again at the tip
-          ctx.beginPath();
-          ctx.moveTo(mx, my - 3.0 * open);
-          ctx.quadraticCurveTo(mx - tl * 0.45 * ca - tw2 * sa,
-                               my + tl * 0.45 * sa - tw2 * ca, tx, ty);
-          ctx.quadraticCurveTo(mx - tl * 0.45 * ca + tw2 * sa,
-                               my + tl * 0.45 * sa + tw2 * ca, mx, my + 3.0 * open);
-          ctx.closePath(); ctx.fill();
+          // Rolling lobes and staggered tips form a plume, rather than four
+          // broad triangular beams. Every tongue still starts at the lip.
+          ctx.beginPath();ctx.moveTo(0,-2*open);
+          ctx.bezierCurveTo(tl*.16,-tw2*.6,tl*.31,-tw2,tl*.47,-tw2*.52);
+          ctx.quadraticCurveTo(tl*.56,-tw2*.16,tl*.68,-tw2*.58);
+          ctx.quadraticCurveTo(tl*.81,-tw2*.13,tl,0);
+          ctx.quadraticCurveTo(tl*.78,tw2*.18,tl*.66,tw2*.57);
+          ctx.quadraticCurveTo(tl*.55,tw2*.19,tl*.43,tw2*.70);
+          ctx.bezierCurveTo(tl*.28,tw2*.85,tl*.10,tw2*.42,0,2*open);
+          ctx.closePath();ctx.fill();ctx.restore();
         }
         for (var jp = 0; jp < JT.length; jp++) tongue(JT[jp], jp);   // silhouette
         ctx.globalCompositeOperation = 'lighter';
@@ -10810,31 +11012,47 @@
     }
     ctx.textAlign='left';
   };
-  // THE ONE ABILITY SHOULD LOOK LIKE ONE (2026-09-14). VANUS: the rebuilt rail
-  // Breath "doesn't look better" than the old orange button. Same rect, same
-  // words and positions (test-breath owns those); what changed is presence: a
-  // lit plate when a cast would land, a bigger flame, a thick cooldown ring.
-  // The halo breathes slowly and holds still under reduced motion.
+  // Wick's own open-mouth painting identifies his ability. A short flame
+  // leaves the painted muzzle; the ring reports charge, while the warm plate
+  // only promises a cast when a target is actually in reach.
+  Game.prototype._drawBreathEmblem=function(ctx,cx,cy,rad,hot,charged,t){
+    var u=rad/18,img=this._myPlate(ART.images.hero_breathe||ART.images.hero),alpha=ctx.globalAlpha;
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.clip();
+    ctx.fillStyle=hot?'#632b18':charged?'#38281e':'#252222';ctx.fillRect(cx-rad,cy-rad,rad*2,rad*2);
+    if(img){
+      ctx.globalAlpha*=charged?1:.43;
+      // Registered to hero_breathe's goggles, snout and open jaw. Keep the
+      // source painting's aspect, and reserve the left edge for expelled fire.
+      ctx.drawImage(img,img.width*.09,0,img.width*.53,img.height*.565,cx-13*u,cy-17*u,32*u,32*u);
+    }else flameGlyph(ctx,cx,cy,u*.95,t,charged);
+    if(charged){
+      var flick=hot&&!RM?Math.sin(t*8)*.7:0;
+      ctx.globalAlpha=alpha;
+      ctx.fillStyle=hot?'#ef762c':'#c16a31';ctx.beginPath();
+      ctx.moveTo(cx-3*u,cy+5*u);ctx.bezierCurveTo(cx-9*u,cy+2*u,cx-10*u,cy+9*u,cx-20*u,cy+(3+flick)*u);
+      ctx.quadraticCurveTo(cx-16*u,cy+13*u,cx-7*u,cy+10*u);ctx.closePath();ctx.fill();
+      ctx.fillStyle=hot?'#ffe49b':'#e6ba71';ctx.beginPath();ctx.moveTo(cx-4*u,cy+6*u);
+      ctx.quadraticCurveTo(cx-12*u,cy+6*u,cx-16*u,cy+7*u);ctx.quadraticCurveTo(cx-10*u,cy+10*u,cx-5*u,cy+9*u);ctx.closePath();ctx.fill();
+    }
+    ctx.restore();
+  };
   Game.prototype._drawBreathControl=function(ctx,r){
-    var a=this._breathStatus(),u=1/this.view.scale,cx=r.x+25*u,cy=r.y+20*u,rad=16.5*u,hot=a.canCast,t=RM?0:this.worldT;
+    var a=this._breathStatus(),u=1/this.view.scale,cx=r.x+25*u,cy=r.y+22*u,rad=18*u,hot=a.canCast,t=RM?0:this.worldT;
     battlePanel(ctx,r.x,r.y+2*u,r.w,r.h-2*u,9*u,hot?'#4b2616':'#26221f',hot?'#e38a3f':'#5e5547',u);
     if(hot){var sw=RM?.5:.5+.5*Math.sin(t*2.2),halo=ctx.createRadialGradient(cx,cy,rad*.55,cx,cy,rad*1.7);
       halo.addColorStop(0,'rgba(255,150,60,'+(.26+.10*sw)+')');halo.addColorStop(1,'rgba(255,120,40,0)');
       ctx.fillStyle=halo;ctx.beginPath();ctx.arc(cx,cy,rad*1.7,0,Math.PI*2);ctx.fill();}
-    var core=ctx.createRadialGradient(cx,cy-rad*.35,rad*.1,cx,cy,rad);
-    core.addColorStop(0,hot?'#ffb257':a.ready?'#6b4a2b':'#3b3431');core.addColorStop(1,hot?'#b0421c':a.ready?'#2d231c':'#1c1a1b');
-    ctx.fillStyle=core;ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.fill();
-    ctx.lineWidth=3*u;ctx.strokeStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.arc(cx,cy,rad+1.5*u,0,Math.PI*2);ctx.stroke();
+    this._drawBreathEmblem(ctx,cx,cy,rad,hot,a.ready,t);
+    ctx.lineWidth=2*u;ctx.strokeStyle='#181615';ctx.beginPath();ctx.arc(cx,cy,rad+1.5*u,0,Math.PI*2);ctx.stroke();
     ctx.strokeStyle=hot?'#ffd27a':a.ready?'#d9a55a':'#e0873f';ctx.beginPath();ctx.arc(cx,cy,rad+1.5*u,-Math.PI/2,-Math.PI/2+(Math.PI*2)*a.fraction);ctx.stroke();
-    flameGlyph(ctx,cx,cy-u,.92*u,t,hot||a.ready);
     battleText(ctx,'BREATH',cx,r.y+51*u,12,hot?'#ffe3b0':'#d3c3a3','center',u);
     var x=r.x+51*u,w=r.w-53*u;
     if(a.kind==='cooling'||a.kind==='recovering'){
       battleText(ctx,a.seconds+'s',x,r.y+27*u,18,'#e4d6b7','left',u,w,14);
       battleText(ctx,a.kind==='recovering'?'recover':'to ready',x,r.y+41*u,11,'#c1b49c','left',u,w,11);
     }else{
-      battleText(ctx,a.canCast?a.count+' in':'Move',x,r.y+24*u,12,a.canCast?'#ffd788':'#c5b79c','left',u,w,10.5);
-      battleText(ctx,a.canCast?'reach':'closer',x,r.y+40*u,11,'#b7aa91','left',u,w,10.5);
+      battleText(ctx,a.canCast?a.count+' in':a.foes?'Move':'No',x,r.y+24*u,12,a.canCast?'#ffd788':'#c5b79c','left',u,w,10.5);
+      battleText(ctx,a.canCast?'reach':a.foes?'closer':'raiders',x,r.y+40*u,11,'#b7aa91','left',u,w,10.5);
     }
     ctx.textAlign='left';
   };
@@ -12215,7 +12433,7 @@
     'Yes signs this device in anonymously and lists',
     'your best wave under a random WICK-XXXX name.',
     'No name, email or device details are sent.',
-    'A posted score can’t be deleted from the board.',
+    Lb.deletionState().enabled ? 'Delete your online account in the field guide.' : 'A posted score can’t be deleted from the board.',
   ];
   function lbAskGeom(v, from) {
     var s = v.scale || 1;
@@ -13020,6 +13238,7 @@
     var keyboardPoint = null;
     var scout, scoutSignature = '';
     var page = '', tab = 'basics', previousFocus = null, signature = '', campaignLevel = null, briefingReturn = false;
+    var accountConfirm = false;
     var api = { seen: false, isOpen: function () { return !!page; } };
     function el(tag, cls, text) {
       var n = document.createElement(tag);
@@ -13106,13 +13325,58 @@
       body.appendChild(dl);
       paragraph('Duel is a race against a computer rival in one shared cavern. Daily Siege is endless and uses the same starting rules for everyone. Campaign stars unlock machines and Forge upgrades.', 'guide-tip');
     }
+    function onlineAccount() {
+      var state = Lb.deletionState();
+      title.textContent = 'Online account';
+      paragraph('DAILY SIEGE', 'guide-kicker');
+      if (state.error && !state.pending && !state.deleted) paragraph(state.error);
+      if (state.deleted && !state.error) {
+        paragraph('Your online account and its posted scores have been deleted.');
+        paragraph('Your campaign stars, saved workshop and cosmetics stay on this device. Playing offline does not create a new account.', 'guide-tip');
+      } else if (state.pending || state.deleted) {
+        paragraph(state.busy ? 'Deleting your online account…' : state.deleted ? state.error : 'Deletion has not been confirmed. Reconnect and retry.');
+        paragraph('Score posting is stopped. Your campaign progress stays safe.', 'guide-tip');
+        var retry = button(state.busy ? 'Please wait…' : state.deleted ? 'Finish device cleanup' : 'Retry deletion', requestAccountDeletion, 'guide-button guide-primary');
+        retry.disabled = state.busy; body.appendChild(retry);
+        if (!state.busy && state.canCancel) body.appendChild(button('Cancel deletion', function () { if (Lb.cancelDeletion()) { accountConfirm = false; render(); } }));
+      } else if (accountConfirm) {
+        title.textContent = 'Delete online account?';
+        paragraph('Permanently delete ' + Lb.tag() + ' and its posted leaderboard scores. This cannot be undone.');
+        paragraph('Your campaign stars, saved workshop, local Daily best and cosmetics stay on this device.', 'guide-tip');
+        body.appendChild(button('Keep my account', function () { accountConfirm = false; render(); }, 'guide-button guide-primary'));
+        body.appendChild(button('Delete permanently', requestAccountDeletion));
+      } else if (Lb.hasId()) {
+        paragraph(Lb.tag(), 'guide-kicker');
+        paragraph(Lb.on() ? 'Your Daily Siege scores can be posted to the public all-time ladder.' : 'Score posting is off. Your existing online account and posted scores are still stored.');
+        if (Lb.on()) body.appendChild(button('Stop posting scores', function () { Lb.setConsent(false); g.lbRows = null; g._lbJoined = false; render(); }));
+        paragraph('Deleting your online account removes its posted scores. Stopping posting only prevents future scores.');
+        body.appendChild(button('Delete online account', function () { accountConfirm = true; render(); }));
+      } else {
+        paragraph('No online account is saved on this device.');
+        paragraph('Campaign, Duel and offline Daily Siege work without an online account. A new account is created only after you choose to post Daily waves.', 'guide-tip');
+      }
+      if (!state.busy && state.pending) body.appendChild(button('Play Daily offline', function () { hide(); g.reset(dailySeed(), 'daily'); g.state = 'playing'; }));
+      body.appendChild(button('Back to field guide', function () { accountConfirm = false; api.open('guide'); }, 'guide-button guide-quiet'));
+      var status = body.querySelector('p.guide-copy');
+      if (status) { status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); }
+    }
+    function requestAccountDeletion() {
+      var request = Lb.deleteAccount('DELETE');
+      render();
+      request.catch(function () {}).finally(function () {
+        g.lbRows = null; g._lbJoined = false; g.lbQueued = false; signature = '';
+        if (page === 'account') { accountConfirm = false; render(); close.focus({ preventScroll: true }); }
+      });
+    }
     function render() {
       body.replaceChildren(); nav.replaceChildren();
       modal.dataset.page = page;
       close.hidden = page === 'briefing';
       close.textContent = briefingReturn ? 'Back to setup' : page === 'pause' ? 'Resume' : g.state === 'paused' ? 'Back to pause' : 'Close guide';
       title.textContent = page === 'pause' ? 'Paused' : page === 'briefing' ? 'Your first defense' : 'Wick’s field guide';
-      if (page === 'checkpoint') {
+      if (page === 'account') {
+        onlineAccount();
+      } else if (page === 'checkpoint') {
         var saved=g.campaignCheckpoint(); title.textContent='Your workshop is waiting.';
         close.textContent='Back to title';
         if(saved){
@@ -13147,6 +13411,7 @@
           body.appendChild(button('Restart from wave 1',function(){hide();restartRun();}));
         }));
         body.appendChild(button('Field guide & machines',function(){api.open('guide');}));
+        if (Lb.deletionState().enabled) body.appendChild(button('Online account', function () { api.open('account'); }));
         body.appendChild(button('Return to title',function(){
           body.replaceChildren(); title.textContent = 'Leave this defense?';
           paragraph(g.mode==='campaign'&&g.campaignCheckpoint()?'Your latest campaign wave checkpoint stays available. Changes after that checkpoint will be lost.':'This run will end. Earned stars, unlocks, and cosmetics stay with you.');
@@ -13164,6 +13429,7 @@
           var b=button(a[1],function(){tab=a[0];render();nav.querySelector('[aria-pressed="true"]').focus();},'guide-tab');
           b.setAttribute('aria-pressed',String(tab===a[0])); nav.appendChild(b);
         });
+        if (Lb.deletionState().enabled) nav.appendChild(button('Online', function () { api.open('account'); }, 'guide-tab'));
         if (tab==='machines') machines(); else if (tab==='controls') controls(); else basics();
       }
       body.scrollTop=0;
@@ -13186,6 +13452,7 @@
     api.open = function (which, level) {
       if (!g || !modal) return;
       if (!page) previousFocus = document.activeElement;
+      if (which === 'account') accountConfirm = false;
       campaignLevel = which === 'checkpoint' && typeof level === 'number' && level === (level | 0) && level >= 0 && level < CAMPAIGN_MAPS && Save.unlocked(level) ? level : null;
       g.setPaused(true); Input.drain(); page = which || 'guide';
       modal.hidden = false; root.classList.add('has-dialog');
@@ -13484,16 +13751,16 @@
   var bootDev = function () {};
 
   // ===== BOOT ==============================================================
-  // Nothing renders until the art is DECODED. The game used to construct
+  // Nothing renders until the art has LOADED. The game used to construct
   // immediately and run its render loop against an empty ART.images, so the
   // first seconds were the chunky procedural fallbacks — a flat blue-roofed
   // box where the painted keep goes, a bare ellipse for the hoard. VANUS read
   // that (correctly) as broken/stale art that "fixes itself up after a while".
   // A splash that says "loading" is honest; a wrong-looking game is not.
   //
-  // decode() rather than onload: onload only promises the bytes parsed, and
-  // Safari can still stall on the first drawImage of a large texture. Decoding
-  // up front moves that cost into the splash where it belongs.
+  // Runtime cutouts are then baked synchronously behind the splash. Do not
+  // start an asynchronous decode and bake before it settles: WebKit may cache
+  // transparent artwork. ART.load's timeout still permits missing-art fallbacks.
   ART.load(
     function (frac) {
       var fill = document.getElementById('boot-fill');
