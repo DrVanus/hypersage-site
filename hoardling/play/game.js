@@ -6626,7 +6626,10 @@
   Game.prototype._warmFinish = function () {
     for (var i = 0; i < FINISH_PLATES.length; i++) {
       var im = ART.images[FINISH_PLATES[i]];
-      if (im) this._finishPlate(im, 0);
+      if (im) {
+        var finished=this._finishPlate(im,0);
+        if(FINISH_PLATES[i]==='t_brazier')paintedFireRig(finished,'brazier');
+      }
     }
   };
 
@@ -7636,6 +7639,7 @@
         var bs2 = Math.max(v.w / bimg2.width, v.h / bimg2.height);
         var bw2 = bimg2.width * bs2, bh2 = bimg2.height * bs2;
         ctx.drawImage(bimg2, (v.w - bw2) / 2, (v.h - bh2) / 2, bw2, bh2);
+        drawPaintedFire(ctx,bimg2,'cavern',(v.w-bw2)/2,(v.h-bh2)/2,bw2,bh2,RM?0:this.worldT,.31,0,true);
         ctx.fillStyle = 'rgba(10,6,4,0.45)';
         ctx.fillRect(0, 0, v.w, v.h);
       }
@@ -7905,9 +7909,146 @@
     }
   };
 
+  // Fire is articulated from the painting, independently of its fixture.
+  // A bounded, cropped atlas is baked once per source/finish; drawing is only
+  // blits and a few embers. Nothing enters a save, simulation clock or RNG.
+  var PAINTED_FIRE_CACHE = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  var PAINTED_FIRE_FRAMES = 48;
+  function paintedFireRig(img,kind) {
+    if(!img||!img.width||!img.height)return null;
+    var byKind=PAINTED_FIRE_CACHE&&PAINTED_FIRE_CACHE.get(img);
+    if(byKind&&byKind[kind])return byKind[kind];
+    var opaque=kind==='keep'||kind==='cavern',sourceW=kind==='torch'?268:kind==='brazier'?508:kind==='keep'?519:1024;
+    var sourceH=kind==='cavern'?1536:700,scale=Math.min(1,(opaque?1536:384)/img.height);
+    var w=Math.round(img.width*scale),h=Math.round(img.height*scale),sx=w/sourceW,sy=h/sourceH;
+    var plate=document.createElement('canvas');plate.width=w;plate.height=h;
+    var pc=plate.getContext('2d');pc.drawImage(img,0,0,w,h);
+    // Do not cache an undecoded/empty image, especially on cold WebKit boots.
+    var original=pc.getImageData(0,0,w,h),live=false;
+    for(var ai=3;ai<original.data.length;ai+=4)if(original.data[ai]){live=true;break;}
+    if(!live)return null;
+    var defs=kind==='torch'?[{box:[76,0,149,209],root:[131,206],top:25,sway:13,lift:.13}]:
+      kind==='brazier'?[{box:[178,0,182,145],root:[273,143],top:9,sway:14,lift:.14}]:
+      kind==='keep'?[{box:[132,474,35,54],root:[151,527],top:475,sway:5,lift:.09},
+                    {box:[347,490,31,45],root:[361,534],top:491,sway:4,lift:.09}]:
+      [{box:[91,127,67,110],root:[124,236],top:143,sway:6,lift:.07}];
+    var mask=null,mc=null;
+    if(!opaque){
+      mask=document.createElement('canvas');mask.width=w;mask.height=h;mc=mask.getContext('2d');
+      // The Brazier's rear rim begins at source y145. Articulate only the
+      // free plume above y143; the lower flame, coal bed and complete bowl
+      // stay registered. Cutting the old broad wedge also cut moving metal.
+      var pts=kind==='brazier'?[[178/508,0],[360/508,0],[360/508,143/700],[178/508,143/700]]:
+        [[76/268,0],[225/268,0],[225/268,66/700],[190/268,66/700],[181/268,110/700],[181/268,129/700],[189/268,128/700],[191/268,158/700],[178/268,184/700],[150/268,208/700],[110/268,208/700],[91/268,185/700],[79/268,146/700],[83/268,113/700],[93/268,90/700]];
+      function firePath(c){c.beginPath();for(var p=0;p<pts.length;p++){if(p)c.lineTo(pts[p][0]*w,pts[p][1]*h);else c.moveTo(pts[p][0]*w,pts[p][1]*h);}c.closePath();}
+      firePath(mc);mc.fill();
+      // A two-source-pixel overlap below the pinned root fills the fractional
+      // cut edge. Without it two antialiased layers leave a dark seam.
+      if(kind==='brazier')mc.fillRect(178*sx,142*sy,182*sx,3*sy);
+      // Clear geometric coverage, not the flame's own alpha. Subtracting a
+      // translucent painted edge from itself leaves a permanent ghost outline.
+      pc.save();firePath(pc);pc.clip();pc.clearRect(0,0,w,h);pc.restore();
+      mc.globalCompositeOperation='source-in';mc.drawImage(img,0,0,w,h);
+      if(kind==='torch'){
+        // Restore the front iron spike over the moving plume. Rear rail gets
+        // a short continuation where an old flame used to obscure it.
+        pc.save();pc.beginPath();pc.moveTo(110*sx,199*sy);pc.lineTo(129*sx,172*sy);pc.lineTo(136*sx,170*sy);pc.lineTo(151*sx,194*sy);pc.lineTo(148*sx,210*sy);pc.lineTo(112*sx,210*sy);pc.closePath();pc.clip();pc.drawImage(img,0,0,w,h);pc.restore();
+        // The free baked specks are replaced by rising, fading embers.
+        pc.clearRect(76*sx,0,149*sx,66*sy);
+        var mp=mc.getImageData(0,0,w,h),seen=new Uint8Array(w*h),queue=new Int32Array(w*h),best=[],largest=0;
+        for(var at=0;at<seen.length;at++){
+          if(seen[at]||mp.data[at*4+3]<12)continue;
+          var head=0,tail=1;queue[0]=at;seen[at]=1;
+          while(head<tail){var here=queue[head++],xx=here%w;for(var side=0;side<4;side++){var next=side===0?here-w:side===1?here+w:side===2?here-1:here+1;if(next<0||next>=seen.length||(side===2&&xx===0)||(side===3&&xx===w-1)||seen[next]||mp.data[next*4+3]<12)continue;seen[next]=1;queue[tail++]=next;}}
+          if(tail>largest){largest=tail;best=Array.prototype.slice.call(queue,0,tail);}
+        }
+        seen.fill(0);for(var b=0;b<best.length;b++)seen[best[b]]=1;
+        for(var clear=0;clear<seen.length;clear++)if(!seen[clear])mp.data[clear*4+3]=0;
+        mc.putImageData(mp,0,0);
+      }
+    }
+    var pixels=opaque?original.data:mc.getImageData(0,0,w,h).data,regions=[];
+    for(var ri=0;ri<defs.length;ri++){
+      var def=defs[ri],pad=opaque?0:Math.ceil(18*sx),box=def.box;
+      var rx=Math.floor(box[0]*sx)-pad,ry=Math.floor(box[1]*sy)-pad;
+      var rw=Math.ceil(box[2]*sx)+pad*2,rh=Math.ceil(box[3]*sy)+pad*2;
+      var rootX=def.root[0]*sx,rootY=def.root[1]*sy,top=def.top*sy;
+      var atlas=document.createElement('canvas');atlas.width=rw*8;atlas.height=rh*6;
+      var ac=atlas.getContext('2d'),frame=ac.createImageData(rw,rh),dst=frame.data;
+      for(var f=0;f<PAINTED_FIRE_FRAMES;f++){
+        var phase=f/PAINTED_FIRE_FRAMES*Math.PI*2;
+        for(var yy=0;yy<rh;yy++)for(var xx2=0;xx2<rw;xx2++){
+          var x=rx+xx2,y=ry+yy,u=clamp((rootY-y)/Math.max(1,rootY-top),0,1),weight=u*u*(3-2*u);
+          var edge=1;
+          if(opaque){
+            // The patch boundary and bowl are exactly registered. Only the
+            // bright interior flows; the surrounding stone is not a waving
+            // rectangle, and the original flame is replaced, not doubled.
+            edge=Math.min(1,xx2/6,(rw-1-xx2)/6,yy/6,(rh-1-yy)/5);edge=Math.max(0,edge);
+            var oi=(Math.min(h-1,Math.max(0,y))*w+Math.min(w-1,Math.max(0,x)))*4;
+            edge*=clamp((pixels[oi+1]-75)/105,0,1);
+          }
+          var dx=def.sway*sx*weight*edge*(.62*Math.sin(phase*2-u*4.8)+.27*Math.sin(phase*3-u*8.2)+.11*Math.sin(phase+u*3));
+          var dy=(rootY-top)*def.lift*weight*edge*(.65*Math.sin(phase*2+u*2)+.35*Math.sin(phase*3-u*4));
+          var sampleX=x-dx,sampleY=y+dy,ix=Math.floor(sampleX),iy=Math.floor(sampleY),fx=sampleX-ix,fy=sampleY-iy,di=(yy*rw+xx2)*4;
+          var alpha=0,red=0,green=0,blue=0;
+          for(var n=0;n<4;n++){
+            var nx=ix+(n%2),ny=iy+(n>1?1:0);if(nx<0||ny<0||nx>=w||ny>=h)continue;
+            var pi=(ny*w+nx)*4,blend=(n%2?fx:1-fx)*(n>1?fy:1-fy),a=pixels[pi+3]*blend;
+            alpha+=a;red+=pixels[pi]*a;green+=pixels[pi+1]*a;blue+=pixels[pi+2]*a;
+          }
+          dst[di]=alpha?red/alpha:0;dst[di+1]=alpha?green/alpha:0;dst[di+2]=alpha?blue/alpha:0;dst[di+3]=alpha;
+        }
+        ac.putImageData(frame,(f%8)*rw,Math.floor(f/8)*rh);
+      }
+      regions.push({atlas:atlas,x:rx/w,y:ry/h,w:rw/w,h:rh/h,fw:rw,fh:rh,rootX:rootX/w,rootY:rootY/h});
+    }
+    var rig={body:opaque?null:plate,regions:regions,opaque:opaque};
+    if(PAINTED_FIRE_CACHE){if(!byKind){byKind={};PAINTED_FIRE_CACHE.set(img,byKind);}byKind[kind]=rig;}
+    return rig;
+  }
+  function drawPaintedFire(ctx,img,kind,x,y,w,h,time,phase,flare,overlay) {
+    var rig=paintedFireRig(img,kind);if(!rig)return false;
+    time=RM?0:(time||0);phase=phase||0;flare=RM?0:(flare||0);
+    if(rig.opaque&&!overlay)ctx.drawImage(img,x,y,w,h);
+    if(kind==='torch'){
+      ctx.save();ctx.fillStyle='#7d451c';ctx.fillRect(x+w*91/268,y+h*112/700,w*84/268,h*13/700);ctx.restore();
+    }
+    // Different fixtures burn out of phase. A frame atlas avoids per-frame
+    // pixel work and stays stable when paused or reduced motion pins time.
+    for(var i=0;i<rig.regions.length;i++){
+      var frame=Math.floor(((time*.65+phase+i*.273)%1+1)%1*PAINTED_FIRE_FRAMES);
+      var r=rig.regions[i],px=x+r.rootX*w,py=y+r.rootY*h;
+      ctx.save();
+      if(kind==='brazier'){ctx.beginPath();ctx.rect(x-w,y-h,w*3,py-y+h);ctx.clip();}
+      if(flare){ctx.translate(px,py);ctx.scale(1+flare*.035,1+flare*.13);ctx.translate(-px,-py);}
+      ctx.drawImage(r.atlas,(frame%8)*r.fw,Math.floor(frame/8)*r.fh,r.fw,r.fh,x+r.x*w,y+r.y*h,r.w*w,r.h*h);ctx.restore();
+    }
+    if(kind==='brazier'){
+      // Keep the overlap itself stationary even during a shot's flare. Its
+      // original pixels bridge the cut without ever scaling the rear rim.
+      ctx.drawImage(img,img.width*178/508,img.height*141/700,img.width*182/508,img.height*4/700,
+        x+w*178/508,y+h*141/700,w*182/508,h*4/700);
+    }
+    // Flame first, rigid cage/spike in front. Both use the same registration.
+    if(rig.body)ctx.drawImage(rig.body,x,y,w,h);
+    if(!RM&&(kind==='torch'||kind==='brazier')){
+      var count=kind==='brazier'?3:2,root=rig.regions[0];
+      ctx.save();ctx.globalCompositeOperation='lighter';
+      for(var e=0;e<count;e++){
+        var life=((time*(.43+e*.071)+phase+e*.381)%1+1)%1,fade=Math.pow(Math.sin(life*Math.PI),2)*.7;
+        var ex=x+root.rootX*w+Math.sin(life*5.4+phase*6.283+e*2.4)*w*.045,ey=y+root.rootY*h-h*(.04+life*.30);
+        ctx.fillStyle='rgba(255,196,97,'+fade+')';ctx.beginPath();ctx.ellipse(ex,ey,Math.max(.28,w*.008),Math.max(.45,h*.006)*(1-life*.4),-.3,0,6.283);ctx.fill();
+      }ctx.restore();
+    }
+    return true;
+  }
+
   Game.prototype._drawCavern = function (ctx) {
     this._buildSceneCache();
     ctx.drawImage(this._bgCache, 0, 0, WORLD_W, WORLD_H);
+    var img=ART.images.bg;if(img){var s=Math.max(WORLD_W/img.width,WORLD_H/img.height),w=img.width*s,h=img.height*s;
+      drawPaintedFire(ctx,img,'cavern',(WORLD_W-w)/2,(WORLD_H-h)/2,w,h,RM?0:this.worldT,.31,0,true);}
   };
 
   // Decorative fire belongs to a visible, grounded fixture. Previously these
@@ -7934,7 +8075,7 @@
       light.addColorStop(.36,'rgba(249,138,48,'+(.08*heat)+')');
       light.addColorStop(1,'rgba(255,130,40,0)');
       ctx.fillStyle=light;ctx.beginPath();ctx.arc(x,flameY,39,0,6.283);ctx.fill();
-      if(!drawSpriteBottom(ctx,'torch',x,base,w)) {
+      if(!drawPaintedFire(ctx,ART.images.torch,'torch',x-w/2,base-h,w,h,time,t*.193,0)) {
         ctx.fillStyle='#584234';ctx.fillRect(x-2,flameY+7,4,base-flameY-7);
         ctx.fillStyle='#ffbd55';ctx.beginPath();ctx.ellipse(x,flameY,3,6,0,0,6.283);ctx.fill();
       }
@@ -8082,7 +8223,8 @@
       ctx.beginPath(); ctx.arc(k.x, k.y - 30, 158 + mp2 * 10, 0, 6.283); ctx.fill();
     }
     var plate=this._sidePlate(side,'keep','keep'),keepW=this._keepArtWidth(side,plate);
-    if (drawSpriteBottom(ctx,plate,k.x,k.y+40,keepW)) { /* proportional art; unchanged gameplay base */ }
+    if (plate===ART.images.keep&&drawPaintedFire(ctx,plate,'keep',k.x-keepW/2,k.y+40-keepW*plate.height/plate.width,keepW,keepW*plate.height/plate.width,RM?0:this.worldT,side*.29,0)) { /* door sconces only; other keeps have lit windows */ }
+    else if (drawSpriteBottom(ctx,plate,k.x,k.y+40,keepW)) { /* proportional art; unchanged gameplay base */ }
     else {
       // chunky keep: main cylinder + two side turrets, blue conical roofs
       drawTurret(ctx, k.x - 46, k.y - 6, 26, 52, '#8d8577', '#655e52', '#3e6bd6');
@@ -8276,15 +8418,53 @@
       }
       else this._drawHero(ctx);
     }
+    this._drawProjectiles(ctx);
+    // Readability pass: the living raiders' health and stolen gold stay above
+    // foreground bodies and bolts. Husks keep their fading art without badges.
+    for (i = 0; i < n; i++) {
+      var indicator = draws[i];
+      if (indicator.kind === 'enemy' && indicator.ref.hp > 0)
+        this._drawEnemyIndicators(ctx, indicator.ref, indicator);
+    }
+  };
+
+  Game.prototype._drawProjectiles = function (ctx) {
     // projectiles on top
-    for (i = 0; i < this.projectiles.length; i++) {
+    for (var i = 0; i < this.projectiles.length; i++) {
       var pr = this.projectiles[i];
       var pp=this._projectilePresentation(pr);
       if (pr.kind === 'lob') {
-        ctx.fillStyle = '#ff8a3c';
-        ctx.beginPath(); ctx.arc(pp.x, pp.y, 5, 0, 6.283); ctx.fill();
-        ctx.fillStyle = 'rgba(255,180,90,0.5)';
-        ctx.beginPath(); ctx.arc(pp.x, pp.y, 8, 0, 6.283); ctx.fill();
+        // Follow this shot's actual arc backward: the wake belongs to where
+        // the ember travelled, not a detached glow or a second projectile.
+        var la = clamp(pr.t / pr.dur, 0, 1), lm = Math.max(0, la - .055), lb = Math.max(0, la - .12);
+        var lx = pr.tx - pr.sx, ly = pr.ty - pr.sy;
+        var mx = pr.sx + lx * lm, my = pr.sy + ly * lm - Math.sin(lm * Math.PI) * 60;
+        var bx = pr.sx + lx * lb, by = pr.sy + ly * lb - Math.sin(lb * Math.PI) * 60;
+        var vx = lx, vy = ly - Math.cos(la * Math.PI) * Math.PI * 60;
+        var vl = Math.sqrt(vx * vx + vy * vy) || 1, nx = -vy / vl, ny = vx / vl;
+        var fireTime = RM ? 0 : this.worldT, phase = pr.sx * .13 + pr.sy * .09 + pr.tx * .07;
+        var curl = Math.sin(fireTime * 13 + phase) * 2.4;
+        ctx.save();
+        var wake = ctx.createLinearGradient(bx,by,pp.x,pp.y);
+        wake.addColorStop(0,'rgba(193,63,20,0)');wake.addColorStop(.42,'rgba(227,87,22,.65)');wake.addColorStop(1,'#ffaf45');
+        ctx.fillStyle = wake;
+        ctx.beginPath();ctx.moveTo(pp.x + nx * 3.8, pp.y + ny * 3.8);
+        ctx.quadraticCurveTo(mx + nx * (3.4 + curl), my + ny * (3.4 + curl), bx + nx * curl, by + ny * curl);
+        ctx.quadraticCurveTo(mx - nx * 2, my - ny * 2, pp.x - nx * 3.3, pp.y - ny * 3.3);ctx.closePath();ctx.fill();
+        ctx.fillStyle = 'rgba(255,191,77,.82)';
+        ctx.beginPath();ctx.moveTo(pp.x + nx * 2, pp.y + ny * 2);
+        ctx.quadraticCurveTo(mx + nx * curl, my + ny * curl, bx * .38 + mx * .62, by * .38 + my * .62);
+        ctx.quadraticCurveTo(mx - nx, my - ny, pp.x - nx * 1.8, pp.y - ny * 1.8);ctx.closePath();ctx.fill();
+        // A small tumbling coal gives the fire a material centre. Cosmetic
+        // phase is steady under reduced motion; the real flight still moves.
+        ctx.translate(pp.x, pp.y);ctx.rotate((RM ? 0 : fireTime * 8) + phase);
+        var coal = ctx.createRadialGradient(-1.2,-1.4,.3,0,0,5);
+        coal.addColorStop(0,'#fff0bd');coal.addColorStop(.34,'#ffcf69');coal.addColorStop(.72,'#f08229');coal.addColorStop(1,'#84391e');
+        ctx.fillStyle = coal;
+        ctx.beginPath();ctx.moveTo(-4,-1.8);ctx.quadraticCurveTo(-3.7,-4,-.6,-4.2);ctx.quadraticCurveTo(3,-4,4,-.9);ctx.quadraticCurveTo(4.3,2.3,1.5,3.5);ctx.quadraticCurveTo(-2,4.4,-4,-1.8);ctx.fill();
+        ctx.strokeStyle = 'rgba(100,43,22,.75)';ctx.lineWidth = .8;
+        ctx.beginPath();ctx.moveTo(2.7,-2.1);ctx.lineTo(1,-.8);ctx.lineTo(2.5,.7);ctx.moveTo(-2.7,1.2);ctx.lineTo(-1.4,2.1);ctx.stroke();
+        ctx.restore();
       } else if (pr.kind === 'fire') {   // Wick's fireball: a comet with a tail
         var fdx2 = pp.dx, fdy2 = pp.dy;
         var flick = 0.75 + 0.25 * Math.sin(this.worldT * 40 + pr.target);
@@ -8332,13 +8512,6 @@
         ctx.restore();
       }
     }
-    // Readability pass: the living raiders' health and stolen gold stay above
-    // foreground bodies and bolts. Husks keep their fading art without badges.
-    for (i = 0; i < n; i++) {
-      var indicator = draws[i];
-      if (indicator.kind === 'enemy' && indicator.ref.hp > 0)
-        this._drawEnemyIndicators(ctx, indicator.ref, indicator);
-    }
   };
 
   // BEAT 4 — THE MOUTH WAKES. One scalar for the whole screen: how close the
@@ -8372,20 +8545,42 @@
     }
   };
   Game.prototype._drawTar = function (ctx) {
+    var time = RM ? 0 : this.worldT;
     for (var i = 0; i < this.tar.length; i++) {
       var tp = this.tar[i];
-      var fade = Math.min(1, (tp.until - this.worldT) / 0.6);   // last 0.6s cools off
-      var a = pathPointAt(tp.d, tp.ln);
-      var gl = 0.55 + 0.25 * Math.sin(this.worldT * 5 + tp.d);  // ember shimmer
-      ctx.fillStyle = 'rgba(24,14,8,' + (0.75 * fade) + ')';
-      ctx.beginPath(); ctx.ellipse(a.x, a.y, tp.w * 0.62, tp.w * 0.30, 0, 0, 6.283); ctx.fill();
-      ctx.fillStyle = 'rgba(255,120,40,' + (0.30 * gl * fade) + ')';
-      ctx.beginPath(); ctx.ellipse(a.x, a.y, tp.w * 0.45, tp.w * 0.20, 0, 0, 6.283); ctx.fill();
-      ctx.fillStyle = 'rgba(255,190,90,' + (0.35 * gl * fade) + ')';
+      var fade = clamp((tp.until - this.worldT) / .6, 0, 1); // the real patch cools away
+      if (fade <= 0) continue;
+      var a = pathPointAt(tp.d, tp.ln), heat = .72 + .12 * Math.sin(time * 5 + tp.d);
+      // A low pool and a hot inner seam keep the effect on the paving. No
+      // range halo: only the existing patch's footprint carries its fire.
+      ctx.save();ctx.globalAlpha *= fade;
+      ctx.save();ctx.translate(a.x,a.y);ctx.scale(1,.48);
+      var soot = ctx.createRadialGradient(0,0,tp.w*.12,0,0,tp.w*.62);
+      soot.addColorStop(0,'rgba(26,15,8,.70)');soot.addColorStop(.65,'rgba(26,15,8,.50)');soot.addColorStop(1,'rgba(26,15,8,0)');
+      ctx.fillStyle=soot;ctx.beginPath();ctx.arc(0,0,tp.w*.62,0,6.283);ctx.fill();ctx.restore();
+      ctx.fillStyle = 'rgba(175,69,23,'+(.13*heat)+')';
+      ctx.beginPath();ctx.ellipse(a.x,a.y,tp.w*.40,tp.w*.16,0,0,6.283);ctx.fill();
       for (var s = 0; s < 3; s++) {
-        var sa = pathPointAt(tp.d + (s - 1) * tp.w * 0.3, tp.ln);
-        ctx.beginPath(); ctx.arc(sa.x + Math.sin(this.worldT * 3 + s * 2.1 + tp.d) * 4, sa.y - 1, 1.6, 0, 6.283); ctx.fill();
+        var sa = pathPointAt(tp.d + (s - 1) * tp.w * .3, tp.ln);
+        var phase = tp.d * .17 + tp.tid * .73 + s * 2.17;
+        var flameH = (s === 1 ? 9 : s === 0 ? 5.5 : 6.5) * (.86 + .14 * Math.sin(time * (7 + s) + phase)) * (.5 + .5 * fade);
+        var lean = Math.sin(time * 5.4 + phase) * 1.7;
+        var rootX = sa.x + Math.sin(phase*.6)*1.4, rootY = sa.y - .5 + Math.sin(phase*1.7)*1.3;
+        // Three independent tongues, each rooted in a coal. Their upper tips
+        // move while the fuel stays fixed, and bodies render above this pass.
+        ctx.fillStyle = 'rgba(32,20,12,.62)';ctx.beginPath();ctx.moveTo(rootX-3.2,rootY+.8);ctx.lineTo(rootX-1.6,rootY-.2);ctx.lineTo(rootX+.7,rootY+.1);ctx.lineTo(rootX+3,rootY+1.1);ctx.lineTo(rootX+.6,rootY+2);ctx.closePath();ctx.fill();
+        ctx.fillStyle = 'rgba(230,101,31,.88)';
+        ctx.beginPath();ctx.moveTo(rootX-2.2,rootY+1);
+        ctx.quadraticCurveTo(rootX-3,rootY-flameH*.38,rootX+lean,rootY-flameH);
+        ctx.quadraticCurveTo(rootX+lean*.25+.8,rootY-flameH*.43,rootX+2.4,rootY-.5);
+        ctx.quadraticCurveTo(rootX+1,rootY+1.6,rootX-2.2,rootY+1);ctx.fill();
+        ctx.fillStyle = '#ffc660';
+        ctx.beginPath();ctx.moveTo(rootX-1.2,rootY+.7);
+        ctx.quadraticCurveTo(rootX-1.3,rootY-flameH*.24,rootX+lean*.25,rootY-flameH*.57);
+        ctx.quadraticCurveTo(rootX+1.6,rootY-flameH*.17,rootX+1.2,rootY+.7);ctx.closePath();ctx.fill();
+        ctx.fillStyle = '#ffe5a0';ctx.beginPath();ctx.ellipse(rootX,rootY+.3,.8,.65,0,0,6.283);ctx.fill();
       }
+      ctx.restore();
     }
   };
   /// Split a machine plate into a fixed BASE and a rotating TURRET, once.
@@ -8676,6 +8871,7 @@
     var turn = motion && tw.type === 'rotor' && since >= 0 && since < .68
       ? 6.2831853 * (1 - Math.pow(1 - since / .68, 3)) : 0;
     return { jam: jam, shot: shot, flash: RM ? 0 : shot, kick: motion ? shot : 0, turn: turn, working: working,
+      fireTime: RM || this._previewMachine ? 0 : this.worldT, firePhase: ((tw.x||0)*.017+(tw.y||0)*.009)%1,
       pump: motion && working ? Math.sin(this.worldT * 5.5) : 0,
       press: motion && working ? (.5 - .5 * Math.cos(this.worldT * 4)) : 0 };
   };
@@ -8687,7 +8883,6 @@
     mimic: { points:[[0,0],[1,0],[1,.45],[.88,.48],[.70,.41],[.23,.34],[0,.39]], pivot:[.53,.40] },
     rotor: { points:[[.43,.18],[.61,0],[.71,0],[.85,.075],[.79,.15],[.54,.23],[.72,.27],[1,.32],[1,.38],[.88,.48],[.79,.48],[.46,.29],[.30,.49],[.19,.51],[.07,.44],[.055,.39],[.33,.23],[.075,.22],[0,.185],[0,.14],[.13,.02],[.20,.04]], pivot:[.455,.235] },
     bellows: { points:[[0,0],[1,0],[1,.46],[.69,.43],[.43,.37],[.02,.35]], pivot:[.45,.33] },
-    brazier: { points:[[.30,0],[.73,0],[.73,.24],[.63,.35],[.45,.38],[.35,.30]], pivot:[.51,.34] },
     crystal: { points:[[.36,.07],[.50,.08],[.63,.19],[.64,.31],[.42,.31],[.36,.19]], pivot:[.50,.27], overlay:true }
   };
   var MACHINE_WORK_CACHE = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
@@ -8765,6 +8960,10 @@
   }
   function paintMachineWork(ctx,img,w,h,type,pose) {
     if(type==='press'){paintPressWork(ctx,img,w,h,pose);return;}
+    if(type==='brazier'){
+      if(!drawPaintedFire(ctx,img,'brazier',-w/2,-h,w,h,pose.fireTime,pose.firePhase,pose.jam?0:pose.kick))ctx.drawImage(img,-w/2,-h,w,h);
+      return;
+    }
     var layers=machineWorkParts(img,type);
     if(!layers){ctx.drawImage(img,-w/2,-h,w,h);return;}
     var px=(layers.spec.pivot[0]-.5)*w, py=(layers.spec.pivot[1]-1)*h;
@@ -8783,7 +8982,6 @@
       // Rotate in the rotor's foreshortened plane, about the painted axle.
       ctx.scale(1,.53);ctx.rotate(pose.turn);ctx.scale(1,1/.53);
     }else if(type==='bellows')ctx.rotate(pose.pump*.045);
-    else if(type==='brazier')ctx.scale(1+pose.kick*.045,1+pose.kick*.24);
     if(type==='crystal'){
       ctx.globalCompositeOperation='lighter';ctx.globalAlpha*=pose.flash*.55;
     }
@@ -11436,6 +11634,7 @@
       var bs = Math.max(v.w / bi.width, v.h / bi.height);
       ctx.drawImage(bi, -v.ox + (v.w - bi.width * bs) / 2, -v.oy + (v.h - bi.height * bs) / 2,
                     bi.width * bs, bi.height * bs);
+      drawPaintedFire(ctx,bi,'cavern',-v.ox+(v.w-bi.width*bs)/2,-v.oy+(v.h-bi.height*bs)/2,bi.width*bs,bi.height*bs,t,.31,0,true);
     }
     // A GRADED scrim, not a flat one: the painting survives at the top where
     // nothing sits on it and is buried under the buttons where legibility is
@@ -11588,7 +11787,7 @@
         ctx.fillStyle = tg; ctx.fillRect(X, Y, W, H);
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = ti ? 0.72 : 1;
-        ctx.drawImage(torch, tx, tbase - th, tw, th);
+        drawPaintedFire(ctx,torch,'torch',tx,tbase-th,tw,th,t,phz,0);
         ctx.globalAlpha = 1;
         // ---- ALIVE ------------------------------------------------------
         // The braziers were a static blit under a slow glow: a painted torch,
@@ -13915,6 +14114,12 @@
     function (loaded, total) {
       enemyMotionPrewarm();
       game = new Game(canvas);
+      // Bake the small flame atlases behind the loading screen, so placing
+      // the first fire weapon or entering a cavern does not stall combat.
+      paintedFireRig(ART.images.torch,'torch');
+      paintedFireRig(ART.images.keep,'keep');
+      paintedFireRig(ART.images.bg,'cavern');
+      paintedFireRig(game._finishPlate(ART.images.t_brazier,0),'brazier');
       window.addEventListener('resize', function () { game.resize(); });
       var boot = document.getElementById('boot');
       if (boot) {
