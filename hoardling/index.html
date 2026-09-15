@@ -144,6 +144,10 @@
     }
     nav.site .links a.nav-play:hover { color: #fff; }
 
+    /* THE HEADER ALWAYS OFFERS PLAY. Below 53.75em the links fold into the menu, and "Play free" went with them,
+       so a 320-wide phone or a phone on its side showed no Play control on the first screen. The header is sticky,
+       so this also stays in reach the whole way down the page. */
+    nav.site .nav-play-m { display: none; }
     .mobile-menu { display: none; position: relative; }
     .mobile-menu summary {
       list-style: none; cursor: pointer; color: var(--muted);
@@ -201,8 +205,8 @@
     /* THREE LINES, SO PLAY STAYS ON THE FIRST SCREEN. "so he built his own." is
        the long line; at the page-wide h1 size it wrapped to a fourth line and
        pushed "Play Hoardling free" below the fold at 360x640 and 1280x720.
-       8.6vw lets it fit its column on phones; 3.75rem does on desktop. */
-    .hero h1 { font-size: clamp(2rem, 8.6vw, 3.75rem); }
+       8.6vw lets it fit its column on phones; 3.35rem does on desktop. */
+    .hero h1 { font-size: clamp(2rem, 8.6vw, 3.35rem); }
     .hero h1 .hl {
       background: linear-gradient(100deg, #ffd75e, #ffb43c 60%, #ff9a3c);
       -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -451,7 +455,16 @@
     @media (max-width: 53.75em) {
       nav.site .links { display: none; }
       .mobile-menu { display: block; }
+      nav.site .nav-play-m {
+        display: inline-flex; align-items: center; gap: 0.3em; min-height: 44px; margin-left: auto; padding: 0 17px;
+        border-radius: 999px; font-weight: 700; font-size: 0.95rem; color: var(--cta-ink); white-space: nowrap;
+        background: linear-gradient(180deg, var(--red-hi), var(--red) 32%, var(--red-lo));
+        box-shadow: inset 0 0 0 1px rgba(255, 215, 94, 0.55);
+      }
+      nav.site .nav-play-m:hover { color: #fff; }
     }
+    @media (max-width: 400px) { nav.site .nav-play-m .free { display: none; } }
+    @media (max-width: 344px) { nav.site .container { padding-left: 16px; padding-right: 16px; gap: 10px; } }
     @media (max-width: 760px) {
       .hero { padding: 48px 0 52px; }
       .hero-art img { object-position: 50% 0; }
@@ -585,6 +598,7 @@
         <a href="#faq">FAQ</a>
         <a class="nav-play" href="play/">Play free</a>
       </div>
+      <a class="nav-play-m" href="play/">Play<span class="free">free</span></a>
       <details class="mobile-menu">
         <summary aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></summary>
         <div class="mobile-links">
