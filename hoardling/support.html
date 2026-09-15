@@ -22,7 +22,16 @@
 <link rel="stylesheet" href="legal.css">
 </head>
 <body>
-<header class="site"><span class="mark"></span><a class="brand" href="./">Hoardling</a><a class="play" href="play/">Play free <span aria-hidden="true">→</span></a></header>
+<header class="site"><span class="mark"></span><a class="brand" href="./">Hoardling</a><a class="play" id="back-to-game" href="play/" hidden><span aria-hidden="true">←</span> Back to the game</a></header>
+<script>
+/* Offered only to someone who came here FROM the game: the iPhone app opens this page in a Safari sheet with no
+   referrer, and a play link there would start a second web copy of the game with its own separate save. */
+(function () { try { var a = document.getElementById('back-to-game');
+  if (document.referrer.indexOf(location.origin + '/hoardling/play/') !== 0) return;
+  a.hidden = false;
+  a.addEventListener('click', function (e) { if (history.length > 1) { e.preventDefault(); history.back(); } });
+} catch (e) {} })();
+</script>
 <main class="wrap">
 <h1>Support</h1>
 <p class="lede">A real person reads this mailbox.

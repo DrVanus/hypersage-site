@@ -34,9 +34,12 @@ header.site .brand {
   color: #ffd75e; text-shadow: 0 2px 0 #7a4a12;
 }
 /* THE WAY BACK TO THE GAME. The game opens these pages in its own tab, and
-   since 2026-09-15 the brand link above is the product page, not the game —
-   so without this a player who read the privacy policy had no route back to
-   play except the page's own buttons. Same target as the page's "Play free". */
+   since 2026-09-15 the brand link above is the product page, not the game.
+   The button is shown (by each page's inline script) only when the visitor
+   came from /hoardling/play/: inside the iPhone app's Safari sheet it would
+   start a second copy of the game with a separate save. [hidden] must beat
+   the display rule below, or the attribute does nothing. */
+header.site .play[hidden] { display: none; }
 header.site .play {
   margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
   min-height: 44px; padding: 0 18px; border-radius: 999px;

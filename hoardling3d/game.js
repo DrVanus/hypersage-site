@@ -4786,7 +4786,7 @@
     embers(ctx, t, 18, 22, 1.4, 0.70);         // near-field parallax layer
 
     ctx.font = 'italic 16px Georgia, serif';
-    inkText(ctx, 'Too young for dragonfire. Built his own.', 210, 326, '#ffb469', 5, 2);
+    inkText(ctx, 'Too young for dragonfire, so he built his own.', 210, 326, '#ffb469', 5, 2);
 
     // ---- 5. sections ------------------------------------------------------
     var G = this._titleGeom();

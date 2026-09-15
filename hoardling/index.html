@@ -198,6 +198,11 @@
       border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 15px; margin-bottom: 22px;
     }
     .eyebrow svg { flex: 0 0 auto; }
+    /* THREE LINES, SO PLAY STAYS ON THE FIRST SCREEN. "so he built his own." is
+       the long line; at the page-wide h1 size it wrapped to a fourth line and
+       pushed "Play Hoardling free" below the fold at 360x640 and 1280x720.
+       8.6vw lets it fit its column on phones; 3.75rem does on desktop. */
+    .hero h1 { font-size: clamp(2rem, 8.6vw, 3.75rem); }
     .hero h1 .hl {
       background: linear-gradient(100deg, #ffd75e, #ffb43c 60%, #ff9a3c);
       -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -676,9 +681,9 @@
         <figure class="shot-figure reveal">
           <div class="phone">
             <img src="shots/getaway-recovered.webp" width="640" height="1385" loading="lazy"
-                 alt="Wave 12 of 20: three armored raiders with coin stacks over their heads leave the castle's gold pile, while the words '+5 recovered!' float where a fourth carrier fell. Treasure reads 45 of 60 and the wave panel reads 15 stolen.">
+                 alt="Wave 12 of 20: three armored raiders, each with a 5-coin badge over its head, carry their loot away from the castle's gold pile, while '+5 recovered!' rises over a fourth carrier the defenses have just stopped, its coins flying back toward the pile. Treasure reads 45 of 60 and the wave panel reads 15 stolen.">
           </div>
-          <figcaption>Wave 12 on The Coldroot Stair. One carrier down, and its five coins are on their way home.</figcaption>
+          <figcaption>Wave 12 on The Coldroot Stair. One carrier stopped, and its five coins are on their way home.</figcaption>
         </figure>
       </div>
     </section>
@@ -933,7 +938,7 @@
             <figcaption><div class="screen-kind">Final upgrade</div><div class="screen-name">Pick one path, for good</div></figcaption>
           </figure>
           <figure class="screen-card reveal">
-            <div class="screen-frame"><img src="shots/duel.webp" width="640" height="1385" loading="lazy" alt="A cavern split in two: a blue-roofed castle on gold at the top left and a dark castle on a pile of gems at the top right, with raiders marching down both roads past bronze machines on the left and silver machines on the right, where a purple dragon crews one of them. A bar reads 60 Cinder."></div>
+            <div class="screen-frame"><img src="shots/duel.webp" width="640" height="1385" loading="lazy" alt="A cavern split in two: a blue-roofed castle on gold at the top left and a dark castle on a pile of gems at the top right, with raiders marching up both roads past bronze machines on the left and silver machines on the right, where a purple dragon crews one of them. A bar reads 60 Cinder."></div>
             <figcaption><div class="screen-kind">Duel</div><div class="screen-name">Same raiders, two roads</div></figcaption>
           </figure>
           <figure class="screen-card reveal">
@@ -941,7 +946,7 @@
             <figcaption><div class="screen-kind">Your Cavern</div><div class="screen-name">Paid for in earned marks</div></figcaption>
           </figure>
           <figure class="screen-card reveal">
-            <div class="screen-frame"><img src="shots/guide.webp" width="640" height="1385" loading="lazy" alt="Wick's field guide open on its Machines tab, listing Gemsinger, Kobold Crossbow, Latch Mimic, Gargoyle Roost, Whirlyjack and Soot Brazier with their prices and one-line roles."></div>
+            <div class="screen-frame"><img src="shots/guide.webp" width="640" height="1385" loading="lazy" alt="Wick's field guide open on its Machines tab, listing Gemsinger, Kobold Crossbow, Latch Mimic, Gargoyle Roost, Whirlyjack and Soot Brazier with their prices and short roles."></div>
             <figcaption><div class="screen-kind">Field guide</div><div class="screen-name">Every machine, explained</div></figcaption>
           </figure>
           <figure class="screen-card reveal">
