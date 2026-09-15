@@ -485,7 +485,7 @@
     // first keep stays forgiving and the Coldroot Stair is where the same
     // mistake costs the hoard -- so L1 takes the forgiving side of the cliff
     // and L2/L3 do the discriminating.
-    campRampByLevel: [0.16, 0.26, 0.48],
+    campRampByLevel: [0.16, 0.26, 0.48, 0.24],
     campRampFrom: 4,
   };
   function crowdMul(n) { return Math.min(TUNE.crowdMax, 1 + TUNE.crowdStep * n); }
@@ -600,11 +600,38 @@
     [{ type: 'boss',   count: 2,  gap: 24.0, delay: 0, hpMul: 0.85 }, { type: 'shield', count: 10, gap: 1.3, delay: 4 }, { type: 'warlock', count: 5, gap: 4.5, delay: 10 }],
   ];
 
-  var WAVE_TABLES = [LEVEL1_WAVES, LEVEL2_WAVES, LEVEL3_WAVES];
+  // Level 4 — the Twin Throats. One party alternates between two entrances,
+  // then converges on the upper climb. Shorter roads make time, not raw HP,
+  // the pressure: separated Pry-Hands teach repairs before Hogshead crowds
+  // test splash coverage. Each five-wave act earns room for the next counter.
+  var LEVEL4_WAVES = [
+    [{ type: 'looter', count: 12, gap: 1.4, delay: 0 }],
+    [{ type: 'looter', count: 12, gap: 1.1, delay: 0 }, { type: 'scout', count: 4, gap: 1.6, delay: 11 }],
+    [{ type: 'looter', count: 12, gap: 1.1, delay: 0 }, { type: 'sapper', count: 2, gap: 8, delay: 5 }],
+    [{ type: 'shield', count: 4, gap: 3.2, delay: 0 }, { type: 'scout', count: 6, gap: 1.2, delay: 6 }],
+    [{ type: 'splitter', count: 4, gap: 4.2, delay: 0 }, { type: 'looter', count: 10, gap: 1.1, delay: 3 }],
+    [{ type: 'bat', count: 8, gap: 1.8, delay: 0 }, { type: 'looter', count: 12, gap: 0.9, delay: 4 }],
+    [{ type: 'brute', count: 4, gap: 4.8, delay: 0 }, { type: 'sapper', count: 2, gap: 9, delay: 6 }, { type: 'scout', count: 6, gap: 1.0, delay: 10 }],
+    [{ type: 'splitter', count: 6, gap: 3.2, delay: 0 }, { type: 'shield', count: 4, gap: 3.0, delay: 5 }],
+    [{ type: 'blinker', count: 6, gap: 2.2, delay: 0 }, { type: 'bat', count: 8, gap: 1.4, delay: 7 }],
+    [{ type: 'boss', count: 1, gap: 1, delay: 0, hpMul: 0.4 }, { type: 'looter', count: 16, gap: 0.85, delay: 4 }, { type: 'warlock', count: 2, gap: 8, delay: 10 }],
+    [{ type: 'scout', count: 14, gap: 0.75, delay: 0 }, { type: 'sapper', count: 4, gap: 4.0, delay: 4 }],
+    [{ type: 'splitter', count: 8, gap: 2.4, delay: 0 }, { type: 'warlock', count: 2, gap: 8, delay: 6 }, { type: 'looter', count: 12, gap: 0.7, delay: 9 }],
+    [{ type: 'shield', count: 8, gap: 1.9, delay: 0 }, { type: 'bat', count: 12, gap: 1.0, delay: 4 }],
+    [{ type: 'brute', count: 6, gap: 3.2, delay: 0 }, { type: 'sapper', count: 4, gap: 4.5, delay: 5 }, { type: 'warlock', count: 2, gap: 7, delay: 8 }],
+    [{ type: 'looter', count: 26, gap: 0.5, delay: 0 }, { type: 'splitter', count: 6, gap: 2.8, delay: 3 }, { type: 'scout', count: 10, gap: 0.8, delay: 9 }],
+    [{ type: 'blinker', count: 10, gap: 1.5, delay: 0 }, { type: 'bat', count: 12, gap: 1.0, delay: 5 }, { type: 'sapper', count: 4, gap: 4.0, delay: 7 }],
+    [{ type: 'splitter', count: 10, gap: 1.9, delay: 0 }, { type: 'shield', count: 8, gap: 2.2, delay: 4 }, { type: 'warlock', count: 4, gap: 5, delay: 8 }],
+    [{ type: 'boss', count: 1, gap: 1, delay: 0, hpMul: 0.55 }, { type: 'bat', count: 10, gap: 1.1, delay: 4 }, { type: 'sapper', count: 4, gap: 4.5, delay: 7 }],
+    [{ type: 'brute', count: 8, gap: 2.4, delay: 0 }, { type: 'splitter', count: 8, gap: 2.2, delay: 3 }, { type: 'blinker', count: 8, gap: 1.8, delay: 8 }],
+    [{ type: 'boss', count: 1, gap: 1, delay: 0 }, { type: 'shield', count: 10, gap: 1.8, delay: 4 }, { type: 'sapper', count: 6, gap: 4.2, delay: 8 }, { type: 'splitter', count: 8, gap: 2.6, delay: 13 }],
+  ];
+
+  var WAVE_TABLES = [LEVEL1_WAVES, LEVEL2_WAVES, LEVEL3_WAVES, LEVEL4_WAVES];
 
   // The maps — hand-authored to echo the reference fantasy: a torch-lit
   // cavern, the keep on a mountain of gold at the top, raiders entering from a
-  // cave mouth and winding up through chokepoints. Three campaign levels with
+  // cave mouth and winding up through chokepoints. Four campaign levels with
   // distinct path geometry; the keep/mound sit fixed so the fantasy reads the
   // same on every map.
   var MAPS = [
@@ -670,7 +697,7 @@
       heroStart: { x: 385, y: 675 },   // was (300,610): 2.8u from the road — standing ON it
       pathW: 32,
     },
-    { // Arena A — "The Twin Throats": two cave mouths, ONE shared climb.
+    { // Level 4 — "The Twin Throats": two cave mouths, ONE shared climb.
       // The first map in the game with more than one road. The two throats run
       // up the outer walls and MERGE at (210,410), so the top third is ground
       // both raiding columns must cross: 7 of its 10 pads reach both roads and
@@ -689,11 +716,11 @@
          [210, 410], [150, 382], [104, 326], [124, 266], [176, 232]],
       ],
       pads: [
-        { x: 152, y: 434 }, { x: 212, y: 482 }, { x: 152, y: 302 }, { x: 260, y: 428 },
-        { x: 296, y: 494 }, { x: 314, y: 602 }, { x: 200, y: 368 }, { x: 92, y: 254 },
+        { x: 152, y: 434 }, { x: 212, y: 482 }, { x: 210, y: 552 }, { x: 260, y: 428 },
+        { x: 296, y: 494 }, { x: 314, y: 602 }, { x: 200, y: 368 }, { x: 54, y: 434 },
         { x: 80, y: 356 }, { x: 122, y: 500 },
       ],
-      torches: [[249, 618], [266, 380], [290, 710], [34, 311], [78, 494], [344, 500]],
+      torches: [[254, 618], [266, 380], [290, 710], [34, 311], [78, 518], [344, 500]],
       heroStart: { x: 212, y: 716 },
       pathW: 34,
     },
@@ -764,10 +791,10 @@
   // HOW MANY OF THOSE ARE CAMPAIGN LEVELS. MAPS.length used to answer both
   // "what ground can be played" and "how many campaign levels are there", and
   // those stopped being the same number the moment duel-only arenas existed.
-  // Save.data.stars is [0,0,0], the campaign menu has three rows, and the
-  // trials screen lays its chips out at x = W-168 + i*46, which runs off a
-  // 420-wide world at four. Everything that means CAMPAIGN reads this.
-  var CAMPAIGN_MAPS = 3;
+  // Campaign progression and title rows share this count. Daily deliberately
+  // keeps its original roster: adding a chapter must not change a shared seed.
+  var CAMPAIGN_MAPS = 4;
+  var DAILY_MAPS = [0, 1, 2];
   var MAP = MAPS[0];   // switched by setLevel(); every drawer/updater reads MAP
 
   // ===== PATH — pure geometry, built once ==================================
@@ -1647,8 +1674,8 @@
   // v2 (levels): stars is an array, one slot per campaign level. A v1 save's
   // single campaignStars migrates into stars[0]; unknown/corrupt data never
   // crashes the boot.
-  // The Forge — the star-tree the design studio specced. 9 total ranks = the
-  // 9 campaign stars; free respec; CAMPAIGN-ONLY effects (daily-neutrality law).
+  // The Forge keeps its original nine-rank power ceiling as chapters grow.
+  // Further campaign stars still earn marks. Free respec; campaign effects only.
   var FORGE_NODES = [
     { id: 'dmg',    name: 'Whetted Fangs',   desc: '+8% tower damage / rank',  ranks: 3 },
     { id: 'range',  name: 'Far-Seeing Eyes', desc: '+6% tower range / rank',   ranks: 2 },
@@ -1774,20 +1801,9 @@
   // was a level you had played, with a scoreboard. VANUS: "why is our dual game
   // just the same as any other game and every map is all the same".
   //
-  // *** MAPS 3 AND 4 ARE ORPHANED. READ THIS BEFORE BELIEVING ANYTHING ABOUT
-  // THEM. *** The Twin Throats and the Sunder were built as the duel's two-road
-  // arenas and this comment described them as such for two days after they
-  // stopped being used. Every DUEL_ARENAS entry below is `map: 5` -- The Split
-  // Cavern, ONE cavern down the middle with a keep and a road each and both
-  // dragons on screen, which is the shape VANUS actually asked for and the
-  // second one built (the two-road maps read to him as the two PLAYERS' lanes,
-  // which is why the split road confused him). So maps 3 and 4 are reachable
-  // from NOTHING: the campaign clamps to 0..CAMPAIGN_MAPS-1, the daily is
-  // seed % CAMPAIGN_MAPS, and the duel is map 5 six times over. That is 20 pads
-  // and 12 torches of hand-placed level art drawn by no code path.
-  // They are KEPT, not deleted, because wiring one back costs a wave table and
-  // a campaign row and the art is already done. Nothing in the game may claim
-  // they are in it until that happens.
+  // Map 3, the Twin Throats, is now the fourth campaign chapter. Map 4,
+  // the Sunder, remains a deliberately unshipped two-front layout. All Duel
+  // arenas still use map 5, the Split Cavern with a keep for each player.
   var DUEL_ARENAS = [
     // at 3-4, not the 5-10 the one-road arenas used. Swept: on two roads at>=5
     // wipes every rival but cinder, which is the DEAD-arena pattern (see the
@@ -2135,7 +2151,7 @@
   /// the Cavern drew it as a plain gold ball beside four real tiles, which
   /// reads as a missing asset rather than as "the one you already had".
   var SLOTS = [
-    { id: 'coat',  name: 'DRAGON', items: COATS,  base: null },
+    { id: 'coat',  name: 'WICK',   items: COATS,  base: null },
     { id: 'coin',  name: 'COIN',   items: COINS,  base: null },
     { id: 'hoard', name: 'HOARD',  items: HOARDS, base: 'mound' },
     { id: 'keep',  name: 'KEEP',   items: KEEPS,  base: 'keep' },
@@ -2148,11 +2164,16 @@
   /// item(slot, id) -> the item, or the slot's default (index 0, always free).
   /// NEVER returns null: every draw path calls this and a missing skin must
   /// render the stock game, not throw.
+  function exactCosItem(slot, id) {
+    if (typeof slot !== 'string' || typeof id !== 'string' ||
+        !Object.prototype.hasOwnProperty.call(SLOT_BY_ID, slot)) return null;
+    var items = SLOT_BY_ID[slot].items;
+    for (var i = 0; i < items.length; i++) if (items[i].id === id) return items[i];
+    return null;
+  }
   function cosItem(slot, id) {
-    var s = SLOT_BY_ID[slot];
-    if (!s) return null;
-    for (var i = 0; i < s.items.length; i++) if (s.items[i].id === id) return s.items[i];
-    return s.items[0];
+    if (!Object.prototype.hasOwnProperty.call(SLOT_BY_ID, slot)) return null;
+    return exactCosItem(slot, id) || SLOT_BY_ID[slot].items[0];
   }
 
   /// MARKS — what each milestone pays, ONCE. Every payout below is keyed on a
@@ -2177,7 +2198,7 @@
     // equip: { <slot>: <itemId> }. All three are additive on the SAME v2 key --
     // an existing save just reads the defaults, so there is no migration and no
     // v3 loader to keep in step with this one.
-    var data = { stars: [0, 0, 0], dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {}, trials: {}, duels: {},
+    var data = { stars: Array(CAMPAIGN_MAPS).fill(0), dailyBestWave: 0, tut: 0, daily: { day: 0, best: 0 }, forge: {}, seen: {}, trials: {}, duels: {},
     // dailyPaid: the daily payout LEDGER, newest last, capped at DAILY_LEDGER.
     // An ARRAY rather than a map so the eviction order is the data itself --
     // daily seeds are (day+1)*2654435761>>>0 and therefore NOT monotonic, so
@@ -2207,7 +2228,7 @@
           for (var tl in p.trials) {
             var li = tl | 0;
             // exact-key check: 'junk'|0 is 0 and must not touch level 0's row
-            if (String(li) !== tl || li < 0 || li > 2) continue;
+            if (String(li) !== tl || li < 0 || li >= CAMPAIGN_MAPS) continue;
             if (!p.trials[tl] || typeof p.trials[tl] !== 'object') continue;
             data.trials[li] = data.trials[li] || {};
             // whitelist-iterate OUR keys, never for-in over hostile input —
@@ -2306,14 +2327,9 @@
     /// successful grant it could not persist, because the loader whitelists
     /// unknown ids straight back out.
     function owns(slot, id) {
-      var s2 = SLOT_BY_ID[slot];
-      if (!s2) return false;
-      for (var i = 0; i < s2.items.length; i++) {
-        if (s2.items[i].id !== id) continue;
-        if (!s2.items[i].price) return true;
-        return !!(data.owned[slot] && data.owned[slot][id]);
-      }
-      return false;                       // no such item in this slot
+      var it = exactCosItem(slot, id);
+      if (!it) return false;
+      return !it.price || !!(data.owned[slot] && data.owned[slot][id]);
     }
     function equipped(slot) {
       var s2 = SLOT_BY_ID[slot];
@@ -2325,7 +2341,7 @@
     /// grant calls grant() directly and never touches the wallet -- which is why
     /// they are two functions and not one.
     function buy(slot, id) {
-      var it = cosItem(slot, id);
+      var it = exactCosItem(slot, id);
       if (!it || owns(slot, id)) return false;
       if ((data.marks | 0) < it.price) return false;
       data.marks -= it.price;
@@ -2333,7 +2349,7 @@
       return true;
     }
     function grant(slot, id) {
-      var it = cosItem(slot, id);
+      var it = exactCosItem(slot, id);
       if (!it) return false;
       (data.owned[slot] = data.owned[slot] || {})[id] = 1;
       write();
@@ -2344,7 +2360,17 @@
       data.equip[slot] = id; write(); return true;
     }
     function unlocked(level) { return level === 0 || data.stars[level - 1] > 0; }
-    function starsTotal() { return (data.stars[0] | 0) + (data.stars[1] | 0) + (data.stars[2] | 0); }
+    function starsTotal() {
+      var s = 0;
+      for (var i = 0; i < CAMPAIGN_MAPS; i++) s += data.stars[i] | 0;
+      return s;
+    }
+    function forgeCapacity() {
+      var capacity = 0;
+      for (var i = 0; i < FORGE_NODES.length; i++) capacity += FORGE_NODES[i].ranks;
+      return capacity;
+    }
+    function forgeAvailable() { return Math.max(0, Math.min(starsTotal(), forgeCapacity()) - forgeSpent()); }
     function forgeSpent() {
       var s = 0;
       for (var i = 0; i < FORGE_NODES.length; i++) s += data.forge[FORGE_NODES[i].id] | 0;
@@ -2361,7 +2387,7 @@
       };
     }
     return { data: data, write: write, unlocked: unlocked,
-             starsTotal: starsTotal, forgeSpent: forgeSpent, forgeMods: forgeMods,
+             starsTotal: starsTotal, forgeSpent: forgeSpent, forgeAvailable: forgeAvailable, forgeCapacity: forgeCapacity, forgeMods: forgeMods,
              addMarks: addMarks, owns: owns, equipped: equipped,
              buy: buy, grant: grant, equip: equip,
              dailyPaidFor: dailyPaidFor, setDailyPaid: setDailyPaid };
@@ -3930,7 +3956,7 @@
     this.seed = (seed >>> 0) || dailySeed();
     // level select: campaign takes the chosen map; the Daily rotates its map
     // as a PURE function of the seed, so every player fights the same layout
-    if (this.mode === 'daily') this.levelIdx = setLevel(this.seed % CAMPAIGN_MAPS);
+    if (this.mode === 'daily') this.levelIdx = setLevel(DAILY_MAPS[this.seed % DAILY_MAPS.length]);
     else if (this.mode === 'duel') this.levelIdx = setLevel(duelMapAt(this.duelSeedIdx));
     else {
       // CLAMP TO THE CAMPAIGN RANGE. Leaving a duel calls reset(1, 'campaign')
@@ -5849,25 +5875,15 @@
       return;
     }
     if (this.state === 'trials') {
-      var TGt = trialGeom(this.view);
-      for (var tr = 0; tr < TRIAL_ORDER.length; tr++) {
-        var try2 = TGt.top + tr * TGt.pitch;
-        if (w.y > try2 && w.y < try2 + TGt.h) {
-          for (var tlv = 0; tlv < CAMPAIGN_MAPS; tlv++) {
-            // the chip's OWN inflated rect, offset onto this row
-            var cq = TGt.chips[tlv];
-            if (w.x >= cq.hx && w.x <= cq.hx + cq.hw &&
-                w.y >= try2 + cq.hy && w.y <= try2 + cq.hy + cq.hh) {
-              if (!(Save.data.stars[tlv] > 0)) return;       // trial needs the level won first
-              this.reset(1, 'campaign', tlv, TRIAL_ORDER[tr]);
-              this.state = 'playing'; return;
-            }
-          }
-        }
+      var TGt=trialGeom(this.view,this.trialPage),tlv=this._trialLevel();
+      for(var ti=0;ti<TGt.levels.length;ti++)if(hit(w,TGt.levels[ti])){this.trialPick=ti;return;}
+      if(TGt.prev&&hit(w,TGt.prev)){this.trialPage=Math.max(0,TGt.page-1);return;}
+      if(TGt.next&&hit(w,TGt.next)){this.trialPage=Math.min(TGt.pages-1,TGt.page+1);return;}
+      for(var tr=0;tr<TGt.rows.length;tr++)if(hit(w,TGt.rows[tr])){
+        if(!(Save.data.stars[tlv]>0))return;
+        this.reset(1,'campaign',tlv,TRIAL_ORDER[TGt.rows[tr].index]);this.state='playing';return;
       }
-      if (hit(w, TGt.back)) {
-        this.state = 'menu'; return;
-      }
+      if(hit(w,TGt.back)){this.state='menu';return;}
       return;
     }
     if (this.state === 'cavern') {
@@ -5888,6 +5904,7 @@
         if (!hit(w, CG.cards[ci])) continue;
         this.cavInspect = cslot.items[ci].id; Sfx.play('place'); return;
       }
+      if (hit(w, CG.rewards)) { PlayerGuide.open('rewards'); return; }
       if (hit(w, CG.back)) { this.state = 'menu'; return; }
       return;
     }
@@ -5905,7 +5922,7 @@
         if (w.y > fb.hy && w.y < fb.hy + fb.hh && w.x > fb.hx && w.x < fb.hx + fb.hw) {
           var node = FORGE_NODES[fn];
           var cur = Save.data.forge[node.id] | 0;
-          if (cur < node.ranks && Save.starsTotal() - Save.forgeSpent() > 0) {
+          if (cur < node.ranks && Save.forgeAvailable() > 0) {
             Save.data.forge[node.id] = cur + 1; Save.write(); Sfx.play('upg');
           }
           return;
@@ -7925,29 +7942,84 @@
     }
   };
 
-  // The road already ends at the keep's stair foot. Clear a narrow channel
-  // through the treasure above it, rather than painting paving over coins or
-  // changing the route enemies actually walk. The remaining treasure casts a
-  // small contact shadow into the channel; the road itself stays fully opaque.
-  // Only these bounded mound plates are baked. Warm frames are one image blit.
+  // A low stone causeway holds the treasure back from the approach. Its coping
+  // follows the real route, with a small landing registered to the painted
+  // stair foot. Inspired by gatehouse causeways (English Heritage, Kenilworth);
+  // the 3u riser is exaggerated so the edge reads on a phone. No route changes.
+  // Everything is baked into this bounded mound plate, never per-frame geometry.
+  Game.prototype._keepArtWidth = function (side, plate) {
+    var w=158,k=keepOf(side);
+    if(!this.isRival&&plate){
+      var H=this._hudGeom(),below=H.infoY-this.view.oy+1/this.view.scale;
+      w*=Math.min(1,Math.max(.25,(k.y+40-below)/(158*plate.height/plate.width)));
+    }
+    return w;
+  };
   Game.prototype._moundApproachPlate = function (side, plate) {
+    var keep=this._sidePlate(side,'keep','keep'),keepW=this._keepArtWidth(side,keep);
     var cache=this._moundApproachCache||(this._moundApproachCache=[]),old=cache[side];
-    if(old&&old.plate===plate&&old.path===this._pathCache&&old.level===this.levelIdx)return old;
-    var m=moundOf(side),w=m.rx*2+30,h=w*plate.height/plate.width,pad=5,res=2;
+    if(old&&old.plate===plate&&old.keep===keep&&old.keepW===keepW&&old.path===this._pathCache&&old.level===this.levelIdx)return old;
+    var m=moundOf(side),k=keepOf(side),w=m.rx*2+30,h=w*plate.height/plate.width,pad=5,res=2;
     var left=m.x-w/2-pad,top=m.y+m.ry+6-h-pad;
     var cut=document.createElement('canvas');cut.width=Math.ceil((w+pad*2)*res);cut.height=Math.ceil((h+pad*2)*res);
     var c=cut.getContext('2d');c.scale(res,res);c.translate(-left,-top);
     drawSpriteBottom(c,plate,m.x,m.y+m.ry+6,w);
+    var original=c.getImageData(0,0,cut.width,cut.height).data;
+    function onTreasure(x,y){var px=Math.floor((x-left)*res),py=Math.floor((y-top)*res);return px>=0&&py>=0&&px<cut.width&&py<cut.height&&original[(py*cut.width+px)*4+3]>150;}
     c.globalCompositeOperation='destination-out';
+    var lanes=[];
     for(var ln=0;ln<LANES.length;ln++) {
       if(MAP.keeps&&ln!==side)continue;
-      fillRoadSurface(c,roadSurfaceSamples(ln),MAP.pathW-1,'#000');
+      var samples=roadSurfaceSamples(ln);lanes.push(samples);
+      fillRoadSurface(c,samples,MAP.pathW-1,'#000');
     }
+    // The landing is a small fan of stone under the existing staircase, not a
+    // second path or a glowing objective. Its width tracks responsive keep art.
+    var landingX=k.x,landingY=k.y+39,landingW=keepW*.19,landingH=6.5;
+    c.beginPath();c.ellipse(landingX,landingY,landingW,landingH+2,0,0,6.283);c.fill();
     var cv=document.createElement('canvas');cv.width=cut.width;cv.height=cut.height;
     var edge=cv.getContext('2d');
     edge.shadowColor='rgba(24,12,8,0.72)';edge.shadowBlur=1.4*res;edge.shadowOffsetY=1.1*res;
-    edge.drawImage(cut,0,0);
-    return cache[side]={plate:plate,path:this._pathCache,level:this.levelIdx,canvas:cv,x:left,y:top,w:cv.width/res,h:cv.height/res};
+    edge.drawImage(cut,0,0);edge.shadowColor='transparent';edge.shadowBlur=0;edge.shadowOffsetY=0;
+    edge.scale(res,res);edge.translate(-left,-top);
+    var stone=['#554d47','#82776a','#b7a58b'];
+    // Match both the player's masonry and each rival's fixed keep finish.
+    var masonry=this._sideItem(side,'keep');
+    if(masonry&&masonry.id==='slate')stone=['#323e48','#586773','#88949e'];
+    else if(masonry&&masonry.id==='sand')stone=['#69503c','#9b7955','#c4a575'];
+    else if(masonry&&masonry.id==='basalt')stone=['#29252a','#494247','#71646a'];
+    function poly(ctx,pts,color){ctx.fillStyle=color;ctx.beginPath();for(var n=0;n<pts.length;n++){if(!n)ctx.moveTo(pts[n][0],pts[n][1]);else ctx.lineTo(pts[n][0],pts[n][1]);}ctx.closePath();ctx.fill();}
+    var blocks=document.createElement('canvas');blocks.width=cv.width;blocks.height=cv.height;
+    var bc=blocks.getContext('2d');bc.scale(res,res);bc.translate(-left,-top);
+    for(var li=0;li<lanes.length;li++){
+      var route=lanes[li];
+      for(var i=Math.max(1,route.length-35);i<route.length-1;i+=2)for(var sideEdge=-1;sideEdge<=1;sideEdge+=2){
+        var a=route[i],b=route[Math.min(i+2,route.length-1)],oa=(MAP.pathW*.5+(sideEdge<0?a.r:a.l))*sideEdge,ob=(MAP.pathW*.5+(sideEdge<0?b.r:b.l))*sideEdge;
+        var ax=a.x+a.nx*oa,ay=a.y+a.ny*oa,bx=b.x+b.nx*ob,by=b.y+b.ny*ob;
+        if(!onTreasure((ax+bx)*.5,(ay+by)*.5)||Math.min(ay,by)<k.y+40)continue;
+        var gap=.07,dx=bx-ax,dy=by-ay;ax+=dx*gap;ay+=dy*gap;bx-=dx*gap;by-=dy*gap;
+        var nx=(a.nx+b.nx)*.5*sideEdge,ny=(a.ny+b.ny)*.5*sideEdge,thick=3.3;
+        var pts=[[ax-nx*.5,ay-ny*.5-2],[bx-nx*.5,by-ny*.5-2],[bx+nx*thick,by+ny*thick-2],[ax+nx*thick,ay+ny*thick-2]];
+        poly(bc,pts.map(function(p){return[p[0],p[1]+2.7]}),stone[0]);
+        poly(bc,pts,stone[1]);
+        bc.strokeStyle=stone[2];bc.lineWidth=.6;bc.beginPath();bc.moveTo(pts[0][0],pts[0][1]);bc.lineTo(pts[1][0],pts[1][1]);bc.stroke();
+        bc.strokeStyle='rgba(22,18,20,.24)';bc.lineWidth=.45;bc.beginPath();bc.moveTo(pts[2][0]-.4,pts[2][1]);bc.lineTo((pts[2][0]+pts[0][0])*.5,(pts[2][1]+pts[0][1])*.5);bc.stroke();
+      }
+    }
+    // Shared approaches must not acquire a curb across the other lane.
+    bc.globalCompositeOperation='destination-out';for(var l=0;l<lanes.length;l++)fillRoadSurface(bc,lanes[l],MAP.pathW-5,'#000');
+    edge.drawImage(blocks,left,top,cv.width/res,cv.height/res);
+    edge.fillStyle=stone[0];edge.beginPath();edge.ellipse(landingX,landingY+2,landingW,landingH,0,0,6.283);edge.fill();
+    var slab=edge.createLinearGradient(landingX,landingY-landingH,landingX,landingY+landingH);slab.addColorStop(0,stone[0]);slab.addColorStop(.5,stone[1]);slab.addColorStop(1,stone[1]);
+    edge.fillStyle=slab;edge.beginPath();edge.ellipse(landingX,landingY,landingW,landingH,0,0,6.283);edge.fill();
+    edge.save();edge.beginPath();edge.ellipse(landingX,landingY,landingW,landingH,0,0,6.283);edge.clip();
+    // Worn grain breaks up the large flat slab without introducing animated
+    // glitter or another texture download. Positional noise is cosmetic only.
+    for(var g=0;g<54;g++){var gx=landingX+(noise01(g,702)-.5)*landingW*2,gy=landingY+(noise01(g,319)-.5)*landingH*2;edge.fillStyle=g%3?'rgba(20,16,18,.10)':'rgba(238,216,179,.14)';edge.fillRect(gx,gy,.5+noise01(g,934)*1.5,.35);}
+    edge.strokeStyle=stone[0];edge.lineWidth=.7;
+    for(var j=-2;j<=2;j++){edge.beginPath();edge.moveTo(landingX+j*landingW*.22,landingY-5);edge.lineTo(landingX+j*landingW*.5,landingY+10);edge.stroke();}
+    edge.restore();edge.strokeStyle=stone[2];edge.lineWidth=.7;edge.beginPath();edge.ellipse(landingX,landingY,landingW-.6,landingH-.4,0,0,Math.PI);edge.stroke();
+    return cache[side]={plate:plate,keep:keep,keepW:keepW,path:this._pathCache,level:this.levelIdx,canvas:cv,x:left,y:top,w:cv.width/res,h:cv.height/res};
   };
 
   /// side: which hoard this is. A shared-cavern duel has two, and the warmth
@@ -8009,12 +8081,7 @@
       ctx.fillStyle = mg2;
       ctx.beginPath(); ctx.arc(k.x, k.y - 30, 158 + mp2 * 10, 0, 6.283); ctx.fill();
     }
-    var plate=this._sidePlate(side,'keep','keep'),keepW=158;
-    if(!this.isRival&&plate){
-      var H=this._hudGeom(),below=H.infoY-this.view.oy+1/this.view.scale;
-      var naturalH=158*plate.height/plate.width;
-      keepW*=Math.min(1,Math.max(0.25,(k.y+40-below)/naturalH));
-    }
+    var plate=this._sidePlate(side,'keep','keep'),keepW=this._keepArtWidth(side,plate);
     if (drawSpriteBottom(ctx,plate,k.x,k.y+40,keepW)) { /* proportional art; unchanged gameplay base */ }
     else {
       // chunky keep: main cylinder + two side turrets, blue conical roofs
@@ -10816,45 +10883,33 @@
              back:   uiBtn(scale, WORLD_W / 2 + 10,  btnY, 140, 40) };
   }
 
-  function trialGeom(v) {
-    var scale = v && v.scale, n = TRIAL_ORDER.length;
-    var top = 214, gap = 8;
-    var backY = roomBackY(v, 40);
-    // last row's BOTTOM is top + n*pitch - gap, and it must clear BACK
-    var L = centredList(top, backY - 30, n, 108, gap);
-    var pitch = L.pitch, h = L.h;
-    top = L.top;
-    // The level chips run the FULL height of the row and are the tap targets,
-    // so a compact row shrinks the text, never the thing you have to hit. At
-    // the old (h - 46) they collapsed to 14 units on a six-trial list — about
-    // 14 CSS px, a third of the 44pt minimum.
-    // THE CHIPS WERE 40 WIDE ON A PITCH OF 46, which is 34.2pt across on an
-    // SE 3 -- and no amount of hit inflation fixes it, because inflating to the
-    // full 46 pitch only reaches 39.3pt. The strip had to WIDEN. 44 wide on a
-    // pitch of 56 gives the hit rect the whole pitch (46.2pt) and still leaves
-    // 12 units of visible gutter; the row's text loses 14 units, which fitText
-    // already handles. The last chip's right edge lands exactly on the panel's.
-    var CW = 44, CP = 56, CX = WORLD_W - 26 - CW - (CAMPAIGN_MAPS - 1) * CP;
-    var chipH = Math.max(30, h - 16);
-    var chips = [];
-    for (var ci = 0; ci < CAMPAIGN_MAPS; ci++) {
-      var cbx = CX + ci * CP;
-      var cb = uiBtn(scale, cbx, 8, CW, chipH);
-      // THE HIT RECT IS THE PITCH, not the chip. Inflating the 44-wide chip to
-      // the 44/scale floor and THEN insetting 1 a side for the abutting
-      // neighbour lands at 42 units -- 42.0pt at scale 1, which is under the
-      // floor the inflation existed to clear. Claim the whole pitch first, then
-      // inset: hit() is inclusive on both bounds, so two touching rects give
-      // the shared column to whichever branch is tested first.
-      cb.hx = cbx - (CP - CW) / 2 + 1;
-      cb.hw = CP - 2;
-      chips.push(cb);
+  // Select a keep once, then read six named challenges. Four tiny level
+  // columns left no room for their names. Compact/landscape screens page the
+  // rows instead of shrinking their physical targets below 44 CSS pixels.
+  function trialGeom(v, page) {
+    var s=(v&&v.scale)||1,u=1/s,screenTop=-(v.oy||0)+(v.safeT||0);
+    var width=Math.max(WORLD_W-52,280*u),x=(WORLD_W-width)/2,gap=6*u;
+    var top=screenTop+158*u,footer=roomBottom(v)-44*u;
+    var avail=footer-12*u-top,n=TRIAL_ORDER.length;
+    var perPage=Math.max(1,Math.min(n,Math.floor((avail+gap)/(52*u+gap))));
+    var pages=Math.ceil(n/perPage),pg=clamp(page|0,0,pages-1);
+    var h=Math.min(70*u,(avail-gap*(perPage-1))/perPage),pitch=h+gap;
+    top+=Math.max(0,avail-(perPage*pitch-gap))*.5;
+    function box(x,y,w,h){return{x:x,y:y,w:w,h:h,hx:x,hy:y,hw:w,hh:h};}
+    var levels=[],cw=(width-gap*(CAMPAIGN_MAPS-1))/CAMPAIGN_MAPS;
+    for(var i=0;i<CAMPAIGN_MAPS;i++)levels.push(box(x+i*(cw+gap),screenTop+62*u,cw,44*u));
+    var rows=[];
+    for(var r=0;r<perPage&&pg*perPage+r<n;r++){
+      var row=box(x,top+r*pitch,width,h);row.index=pg*perPage+r;
+      row.button=box(x+width-64*u,row.y+(h-44*u)/2,56*u,44*u);rows.push(row);
     }
-    return { top: top, pitch: pitch, h: h, chipY: 8, chipH: chipH,
-             chips: chips, textW: CX - 42 - 10,
-             back: uiBtn(scale, WORLD_W / 2 - 70, backY, 140, 40),
-             backY: backY };
+    return {top:top,pitch:pitch,h:h,x:x,w:width,screenTop:screenTop,levels:levels,rows:rows,
+      page:pg,pages:pages,perPage:perPage,
+      prev:pages>1?box(x,footer,76*u,44*u):null,
+      next:pages>1?box(x+width-76*u,footer,76*u,44*u):null,
+      back:box(WORLD_W/2-52*u,footer,104*u,44*u)};
   }
+  Game.prototype._trialLevel = function () { return clamp(this.trialPick|0,0,CAMPAIGN_MAPS-1); };
 
   /// THE TITLE LAYOUT. One layout, not four: variants 0-2 were built to be
   /// compared and are in git (see "The home screen: one lit row, plain labels,
@@ -10935,7 +10990,9 @@
     var big=Math.max(74,62*u)+extra*.20,small=Math.max(60,48*u)+extra*.12;
     var modeH=Math.max(76,64*u)+extra*.24,barH=Math.max(66,60*u)+extra*.16;
     var modeGap=24*u+extra*.04,barGap=14*u+extra*.04;
-    var block=(nx>=0?big:small)+small*2+gap*2+modeGap+modeH+barGap+barH;
+    var compact=(v.ch||WORLD_H*s)-((v.safeT||0)+(v.safeB||0))*s<540;
+    if(compact){gap=4*u;big=58*u;small=48*u;modeH=54*u;barH=50*u;modeGap=18*u;barGap=8*u;}
+    var block=(nx>=0?big:small)+small*(CAMPAIGN_MAPS-1)+gap*(CAMPAIGN_MAPS-1)+modeGap+modeH+barGap+barH;
     var top=bot-block,rows=[],y=top;
     function box(x,y,w,h){return{x:x,y:y,w:w,h:h,hx:x,hy:y,hw:w,hh:h};}
     for(var i=0;i<CAMPAIGN_MAPS;i++){
@@ -10952,12 +11009,12 @@
       var r=box(lx,headerY,66*u,44*u);r.key=TITLE_LEGAL[k].key;r.label=TITLE_LEGAL[k].label;legal.push(r);
     }
     var artTop=headerY+46*u,artBottom=top-36*u;
-    var artScale=Math.min(1.02,Math.max(.3,(artBottom-artTop)/300));
+    var artScale=compact?50*u/300:Math.min(1.02,Math.max(.3,(artBottom-artTop)/300));
     artTop+=Math.max(0,artBottom-artTop-300*artScale)*.5;
     return{rows:rows,ruleY:top-13*u,tonightY:modeY-11*u,
       daily:box(x,modeY,half,modeH),duel:box(x+half+10*u,modeY,half,modeH),
       legal:legal,help:box(210-62*u,headerY,124*u,44*u),pills:pills,bar:bar,
-      artTop:artTop,artScale:artScale,bot:bot,screenTop:-(v.oy||0)};
+      artTop:artTop,artScale:artScale,compactArt:compact,bot:bot,screenTop:-(v.oy||0)};
   };
 
   function hit(w, r) {
@@ -11419,6 +11476,19 @@
 
     embers(ctx, t, 0, 18, 1.0, 1.0);           // back layer, behind the sign
 
+    if(G.compactArt){
+      // A short safe-area viewport gets a readable brand lockup, not the
+      // complete illustrated scene scaled into an illegible postage stamp.
+      var brandX=210-116*u,brandY=G.artTop;
+      var sign={x:brandX+44*u,y:brandY+3*u,w:188*u,h:44*u};
+      forgePlate(ctx,sign,'util');
+      ctx.textAlign='center';ctx.font='bold '+22*u+'px Georgia,serif';
+      inkText(ctx,'HOARDLING',sign.x+sign.w/2,brandY+25*u,'#ffdd79',3,1);
+      ctx.font='bold '+10.5*u+'px system-ui,sans-serif';
+      inkText(ctx,'WICK’S WORKSHOP',sign.x+sign.w/2,brandY+39*u,'#cbb68a',2,1);
+      var compactWick=this._myPlate(ART.images.hero_title||ART.images.hero);
+      if(compactWick){var ch=50*u,cw=ch*compactWick.width/compactWick.height;ctx.drawImage(compactWick,brandX+(44*u-cw)/2,brandY,cw,ch);}
+    }else{
     ctx.save();ctx.translate(210,G.artTop);ctx.scale(G.artScale,G.artScale);ctx.translate(-210,-26);
     // ---- 2. the hanging nameplate ---------------------------------------
     ctx.textAlign = 'center';
@@ -11665,6 +11735,7 @@
     inkText(ctx, 'Too young for dragonfire, so he built his own.', 210, 326, '#ffb469', 5, 2);
 
     ctx.restore();
+    }
 
     // ---- 5. sections ------------------------------------------------------
     // NO HAIRLINE RULES. Two lines with a word in the gap is ornament doing a
@@ -11714,7 +11785,7 @@
           var bc = r.y + r.h / 2;
           ctx.font = 'bold '+Math.max(10,10.5*u)+'px system-ui, sans-serif';
           var checkpoint = this.campaignCheckpoint();
-          inkText(ctx, checkpoint && checkpoint.level === li ? 'RESUME · WAVE ' + checkpoint.wave : (Save.data.stars[li] | 0) > 0 ? 'PLAY AGAIN' : li===0?'BEGIN HERE':'CONTINUE CAMPAIGN',
+          inkText(ctx, checkpoint && checkpoint.level === li ? 'RESUME · WAVE ' + checkpoint.wave : (Save.data.stars[li] | 0) > 0 ? 'PLAY AGAIN' : li===0?'BEGIN HERE':li===3?'TWO ENTRANCES':'CONTINUE CAMPAIGN',
                   r.x + 30, bc - 8, 'rgba(255,226,170,0.9)', 3, 1);
           ctx.font = 'bold '+Math.max(18,14*u)+'px system-ui, sans-serif';
           inkText(ctx, MAPS[li].name, r.x + 30, bc + 14, '#fff6e6', 4, 1.5);
@@ -11816,10 +11887,10 @@
             ducx, US, 'rgba(255,201,168,0.75)', 4, 1);
 
     // ---- 6. utility row ---------------------------------------------------
-    var fAvail = Save.starsTotal() - Save.forgeSpent();
+    var fAvail = Save.forgeAvailable();
     var anyWon = Save.starsTotal() > 0;
     var tDone = 0;
-    for (var tb = 0; tb < 3; tb++) { var tRow = Save.data.trials[tb] || {}; for (var tk in tRow) tDone++; }
+    for (var tb = 0; tb < CAMPAIGN_MAPS; tb++) { var tRow = Save.data.trials[tb] || {}; for (var tk in tRow) tDone++; }
     // VARIANT 3: ONE plate under all four cells, hairline-divided. Four separate
     // chips were the screen's third UI family (after the ember ladder and the
     // cold Tonight pair) and the busiest of the three -- sixteen rivets, four
@@ -11871,7 +11942,7 @@
         rr(ctx, pcx - 8, ICO - 7, 16, 14, 3); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(pcx - 4, ICO - 3); ctx.lineTo(pcx + 4, ICO - 3);
         ctx.moveTo(pcx - 4, ICO + 2); ctx.lineTo(pcx + 4, ICO + 2); ctx.stroke();
-        // 6 trials x 3 levels = 18 badges. '/9' dated from when there were
+        // Count badges across every campaign keep. '/9' dated from when there were
         // three trials and quietly told the player they were twice as done
         // as they were — and it can never be reached, so it reads as broken.
         ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
@@ -11987,9 +12058,8 @@
         ? { x: 300, y: 104, w: 108, h: 30,
             hx: 296, hy: 104 - (minH - 30) / 2, hw: 116, hh: minH }
         : { x: 300, y: 104, w: 108, h: 30 },
-      back:   { x: WORLD_W / 2 - 70, y: backY, w: 140, h: 40,
-                hx: WORLD_W / 2 - 78, hy: backY - Math.max(0, (minH - 40) / 2),
-                hw: 156, hh: Math.max(40, minH) },
+      rewards: uiBtn(s, 20, backY, 180, 40),
+      back: uiBtn(s, 220, backY, 180, 40),
     };
   }
 
@@ -12006,6 +12076,33 @@
     ctx.beginPath();for(var i=0;i<8;i++){var a=(i+.5)*Math.PI/4;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.fill();ctx.stroke();
     ctx.fillStyle='#bad9c5';ctx.beginPath();ctx.moveTo(0,-r*.6);ctx.lineTo(r*.38,0);ctx.lineTo(0,r*.6);ctx.lineTo(-r*.38,0);ctx.closePath();ctx.fill();ctx.restore();
   }
+  // Display-only reward accounting: derive every total from the current
+  // chapter and item tables. Inspecting this plan never awards or spends.
+  Game.prototype._cosmeticRewardGuide = function () {
+    var slot = SLOTS[this.cavSlot | 0] || SLOTS[0], selected = this._cavernSelection();
+    var goal = !Save.owns(slot.id, selected.id) ? selected : null;
+    if (!goal) for (var gi = 0; gi < slot.items.length; gi++) {
+      if (!Save.owns(slot.id, slot.items[gi].id)) { goal = slot.items[gi]; break; }
+    }
+    var starsLeft = 0, badgesLeft = 0, rivalsLeft = 0, next = null, replay = null, trialReady = false;
+    for (var lv = 0; lv < CAMPAIGN_MAPS; lv++) {
+      var earned = Math.max(0, Math.min(3, Save.data.stars[lv] | 0));
+      starsLeft += 3 - earned;
+      if (Save.unlocked(lv) && earned === 0 && !next) next = {kind:'campaign',level:lv,name:MAPS[lv].name,newStars:3};
+      if (Save.unlocked(lv) && earned > 0 && earned < 3 && !replay) replay = {kind:'campaign',level:lv,name:MAPS[lv].name,newStars:3-earned};
+      var badges = Save.data.trials[lv] || {};
+      for (var ti = 0; ti < TRIAL_ORDER.length; ti++) if (!badges[TRIAL_ORDER[ti]]) {
+        badgesLeft++; if (earned > 0) trialReady = true;
+      }
+    }
+    for (var ri = 0; ri < RIVAL_ORDER.length; ri++) if (!(Save.data.duels[RIVAL_ORDER[ri]] || {}).w) rivalsLeft++;
+    next = next || replay || (trialReady ? {kind:'trials'} : rivalsLeft ? {kind:'duel'} : {kind:'daily'});
+    return {slot:slot,goal:goal,wallet:Save.data.marks | 0,
+      short:goal ? Math.max(0,goal.price-(Save.data.marks | 0)) : 0,
+      starsLeft:starsLeft,badgesLeft:badgesLeft,rivalsLeft:rivalsLeft,
+      campaignMarks:starsLeft*MARK_AWARDS.starFirst,trialMarks:badgesLeft*MARK_AWARDS.trialBadge,
+      rivalMarks:rivalsLeft*MARK_AWARDS.rivalFirst,dailyPaid:Save.dailyPaidFor(String(dailySeed() >>> 0)),next:next};
+  };
   Game.prototype._cavernSelection = function () {
     var slot = SLOTS[this.cavSlot | 0] || SLOTS[0], selected = this.cavInspect;
     return slot.items.find(function (it) { return it.id === selected; }) || Save.equipped(slot.id) || slot.items[0];
@@ -12019,7 +12116,7 @@
       disabled: worn || !owned && short > 0 };
   };
   Game.prototype._drawCavernRoom = function (ctx) {
-    var G = cavernRoomGeom(this.view), i;
+    var G = cavernRoomGeom(this.view), i, css = 1 / this.view.scale;
     var slot = SLOTS[this.cavSlot | 0] || SLOTS[0];
     ctx.fillStyle = 'rgba(12,7,5,0.88)';
     ctx.fillRect(-this.view.ox - 60, -this.view.oy - 60, this.view.w + 120, this.view.h + 120);
@@ -12028,8 +12125,8 @@
     inkText(ctx, 'YOUR CAVERN', WORLD_W / 2, 72, '#ffe9c4', 6, 2);
     // UNDER the title, not over it: at y 62 this ran through the serif
     // ascenders and both lines became unreadable.
-    ctx.font = '11px system-ui, sans-serif';
-    inkText(ctx, 'Preview a look. Equip it when you are ready.', WORLD_W / 2, 90,
+    ctx.font = Math.max(11,10.5*css)+'px system-ui, sans-serif';
+    inkText(ctx, 'Earned by playing. Looks only — no stat changes.', WORLD_W / 2, 90,
             'rgba(255,201,168,0.6)', 4, 1);
 
     // ---- wallet -----------------------------------------------------------
@@ -12037,7 +12134,7 @@
     hoardMarkGlyph(ctx, G.wallet.x + 15, G.wallet.y + 15, 12);
     ctx.font = 'bold 20px Georgia, serif';
     inkText(ctx, String(Save.data.marks | 0), G.wallet.x + 34, G.wallet.y + 22, '#ffe9c4', 4, 1);
-    ctx.font = 'bold 10px system-ui, sans-serif';
+    ctx.font = 'bold '+Math.max(10,10.5*css)+'px system-ui, sans-serif';
     inkText(ctx, 'HOARD MARKS', G.wallet.x + 34 + ctx.measureText(String(Save.data.marks | 0)).width + 34,
             G.wallet.y + 21, 'rgba(185,162,127,0.9)', 3, 1);
     if (STORE_ON) {
@@ -12055,7 +12152,7 @@
       ctx.strokeStyle = on ? 'rgba(255,215,110,0.9)' : 'rgba(120,100,78,0.5)';
       ctx.lineWidth = on ? 2 : 1;
       rr(ctx, tb.x, tb.y, tb.w, tb.h, 8); ctx.stroke();
-      ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.font = 'bold '+Math.max(10,10.5*css)+'px system-ui, sans-serif';
       inkText(ctx, SLOTS[i].name, tb.x + tb.w / 2, tb.y + 17,
               on ? '#ffe9c4' : 'rgba(200,180,150,0.75)', 3, 1);
       // OWNED / TOTAL, so the tab says whether there is anything to look at
@@ -12063,7 +12160,7 @@
       for (var oi = 0; oi < SLOTS[i].items.length; oi++) {
         if (Save.owns(SLOTS[i].id, SLOTS[i].items[oi].id)) own++;
       }
-      ctx.font = 'bold 9px system-ui, sans-serif';
+      ctx.font = 'bold '+Math.max(9,10.5*css)+'px system-ui, sans-serif';
       inkText(ctx, own + '/' + SLOTS[i].items.length, tb.x + tb.w / 2, tb.y + 30,
               on ? 'rgba(255,233,196,0.8)' : 'rgba(185,162,127,0.6)', 3, 1);
     }
@@ -12072,16 +12169,16 @@
     var P = G.preview, eq = Save.equipped(slot.id), selected = this._cavernSelection(), action = this._cavernAction();
     uiPanel(ctx, P.x, P.y, P.w, P.h, 12);
     this._drawCosPreview(ctx, slot.id, selected, {x:P.x+2,y:P.y+6,w:150,h:116});
-    ctx.textAlign = 'left'; ctx.font = 'bold 17px Georgia, serif';
+    ctx.textAlign = 'left'; ctx.font = 'bold '+Math.max(17,13*css)+'px Georgia, serif';
     inkText(ctx, fitText(ctx, selected.name, 218), G.action.x, P.y + 27, '#ffe9c4', 4, 1);
-    ctx.font = '12px system-ui, sans-serif';
+    ctx.font = Math.max(12,10.5*css)+'px system-ui, sans-serif';
     inkText(ctx, slot.id === 'coat' ? 'Wick’s scale colour' : selected.how ? fitText(ctx, selected.how, 216) : 'A new look for your cavern',
       G.action.x, P.y + 46, '#c3b29b', 3, 1);
     ctx.fillStyle = action.disabled ? '#302b26' : '#634829';
     rr(ctx,G.action.x,G.action.y,G.action.w,G.action.h,9);ctx.fill();
     ctx.strokeStyle = action.disabled ? '#77644b' : '#d5ad65';ctx.lineWidth=1.4;
     rr(ctx,G.action.x,G.action.y,G.action.w,G.action.h,9);ctx.stroke();
-    ctx.textAlign='center';ctx.font='bold 15px system-ui, sans-serif';
+    ctx.textAlign='center';ctx.font='bold '+Math.max(15,12*css)+'px system-ui, sans-serif';
     inkText(ctx,action.title,G.action.x+G.action.w/2,G.action.y+G.action.h/2+5,action.disabled?'#c5b7a3':'#ffedc8',3,1);
 
     // ---- the shelf --------------------------------------------------------
@@ -12099,32 +12196,34 @@
       // swatch
       this._drawCosSwatch(ctx, slot.id, it, cd.x + 34, cd.y + cd.h / 2, 24);
       ctx.textAlign = 'left';
-      ctx.font = 'bold 14px Georgia, serif';
+      ctx.font = 'bold '+Math.max(14,12*css)+'px Georgia, serif';
       inkText(ctx, fitText(ctx, it.name, cd.w-72), cd.x + 64, cd.y + 28,
               owned ? '#ffe9c4' : 'rgba(230,214,190,0.85)', 3, 1);
-      ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.font = 'bold '+Math.max(10,10.5*css)+'px system-ui, sans-serif';
       if (worn) {
         inkText(ctx, 'EQUIPPED', cd.x + 64, cd.y + 48, '#ffd75e', 3, 1);
       } else if (owned) {
         inkText(ctx, inspecting ? 'PREVIEWING' : 'OWNED · PREVIEW', cd.x + 64, cd.y + 48, 'rgba(217,242,255,0.9)', 3, 1);
       } else {
         inkText(ctx, it.price + ' MARKS', cd.x + 64, cd.y + 48,
-                afford ? '#ffe9c4' : 'rgba(200,120,100,0.9)', 3, 1);
+                afford ? '#ffe9c4' : '#d7ab8e', 3, 1);
         if (!afford) {
-          ctx.font = 'bold 9px system-ui, sans-serif';
+          ctx.font = 'bold '+Math.max(9,10.5*css)+'px system-ui, sans-serif';
           inkText(ctx, 'need ' + (it.price - (Save.data.marks | 0)) + ' more', cd.x + 64, cd.y + 63,
-                  'rgba(200,120,100,0.75)', 3, 1);
+                  '#bb9d87', 3, 1);
         }
       }
       ctx.textAlign = 'center';
     }
 
-    ctx.textAlign='center';ctx.font='11px system-ui, sans-serif';
-    inkText(ctx,'Earn marks from stars, trials, rivals and Daily Siege.',WORLD_W/2,G.back.y-18,'#b8aa95',3,1);
+    ctx.textAlign='center';ctx.font=Math.max(11,10.5*css)+'px system-ui, sans-serif';
+    inkText(ctx,'New star: +'+MARK_AWARDS.starFirst+' marks. Find your next reward below.',WORLD_W/2,G.back.y-18,'#b8aa95',3,1);
 
-    // ---- back -------------------------------------------------------------
+    // ---- earning guidance and back ----------------------------------------
+    forgePlate(ctx, G.rewards, 'util');
     forgePlate(ctx, G.back, 'util');
-    ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.font = 'bold '+Math.max(13,11*css)+'px system-ui, sans-serif';
+    inkText(ctx, 'EARN MARKS', G.rewards.x + G.rewards.w / 2, G.rewards.y + 26, '#ffe9c4', 3, 1);
     inkText(ctx, 'BACK', G.back.x + G.back.w / 2, G.back.y + 26, '#ffe9c4', 3, 1);
     ctx.textAlign = 'left';
   };
@@ -12226,9 +12325,9 @@
     ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
     ctx.fillText('Campaign stars buy lasting craft. Campaign only —', WORLD_W / 2, 182);
     ctx.fillText('the Daily Siege is the same fair fight for everyone.', WORLD_W / 2, 198);
-    var avail = Save.starsTotal() - Save.forgeSpent();
+    var avail = Save.forgeAvailable();
     ctx.font = 'bold 17px Georgia, serif';
-    var spendTxt = avail + ' to spend';
+    var spendTxt = avail ? avail + ' to spend' : Save.forgeSpent() >= Save.forgeCapacity() ? 'Fully trained' : 'Earn stars in campaign';
     var spendW = ctx.measureText(spendTxt).width;
     starCoin(ctx, WORLD_W / 2 - spendW / 2 - 13, 222, 11, avail > 0);
     ctx.textAlign = 'left';
@@ -12388,49 +12487,42 @@
   };
 
   Game.prototype._drawTrials = function (ctx) {
-    var v = this.view;
-    ctx.fillStyle = 'rgba(12,7,5,0.85)';
-    ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 34px Georgia, serif';
-    inkText(ctx, 'TRIALS', WORLD_W / 2, 150, '#ffd75e');
-    ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
-    ctx.fillText('Wick sets himself a challenge on a keep he has held.', WORLD_W / 2, 182);
-    ctx.fillText('Win the level first; forge craft still counts.', WORLD_W / 2, 198);
-    for (var i = 0; i < TRIAL_ORDER.length; i++) {
-      var TG = trialGeom(this.view);
-      var key = TRIAL_ORDER[i], tr = TRIALS[key], ry = TG.top + i * TG.pitch;
-      uiPanel(ctx, 26, ry, WORLD_W - 52, TG.h, 11);
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 15px Georgia, serif';
-      var textW = TG.textW;                   // stop before the L1 chip
-      ctx.fillText(fitText(ctx, tr.name, textW), 42, ry + 24);
-      ctx.fillStyle = '#b9a27f'; ctx.font = '11px system-ui, sans-serif';
-      ctx.fillText(fitText(ctx, tr.pitch, textW), 42, ry + 42);
-      for (var lv2 = 0; lv2 < CAMPAIGN_MAPS; lv2++) {
-        var chp = TG.chips[lv2], chx = chp.x;
-        var wonLv = Save.data.stars[lv2] > 0;
-        var badge = wonLv && Save.data.trials[lv2] && Save.data.trials[lv2][key];
-        // The level chips are controls, so they are forge plates like the
-        // Forge's buttons: UTIL to play, brass with a struck star once this
-        // trial is won there, LOCK before the keep itself is won. They were
-        // flat red, gold and umber pills, the star the '\u2605' character.
-        var chip = { x: chx, y: ry + TG.chipY, w: chp.w, h: TG.chipH };
-        var ccx = chx + chp.w / 2, ccy = chip.y + chip.h / 2;
-        forgePlate(ctx, chip, badge ? 'brasslit' : wonLv ? 'util' : 'lock');
-        if (badge) starCoin(ctx, ccx, ccy, 8, true);
-        else {
-          ctx.font = 'bold 13px Georgia, serif'; ctx.textAlign = 'center';
-          inkText(ctx, 'L' + (lv2 + 1), ccx, ccy + 5, wonLv ? '#ffe9c4' : '#7d6d5e', 3, 1);
-        }
-        ctx.textAlign = 'left';
-      }
+    var v=this.view,u=1/(v.scale||1),G=trialGeom(v,this.trialPage),lv=this._trialLevel(),won=Save.data.stars[lv]>0;
+    ctx.fillStyle='rgba(12,7,5,0.85)';ctx.fillRect(-v.ox-60,-v.oy-60,v.w+120,v.h+120);
+    ctx.textAlign='center';ctx.font='bold '+26*u+'px Georgia,serif';
+    inkText(ctx,'TRIALS',WORLD_W/2,G.screenTop+29*u,'#ffd75e');
+    ctx.font=12*u+'px system-ui,sans-serif';ctx.fillStyle='#e8cbb4';
+    ctx.fillText('Choose a keep, then a challenge.',WORLD_W/2,G.screenTop+48*u);
+    for(var i=0;i<G.levels.length;i++){
+      var c=G.levels[i],held=Save.data.stars[i]>0;
+      forgePlate(ctx,c,i===lv?'brasslit':held?'util':'lock');
+      ctx.font='bold '+13*u+'px Georgia,serif';
+      inkText(ctx,'KEEP '+(i+1),c.x+c.w/2,c.y+c.h/2+4*u,i===lv?'#ffedb2':held?'#ffe9c4':'#a99c88',3,1);
     }
-    var TB = trialGeom(this.view).back;
-    forgePlate(ctx, TB, 'util');
-    ctx.textAlign = 'center'; ctx.font = 'bold 13px system-ui, sans-serif';
-    inkText(ctx, 'BACK', TB.x + TB.w / 2, TB.y + 26, '#ffe9c4', 3, 1);
-    ctx.textAlign = 'left';
+    ctx.font='bold '+14*u+'px Georgia,serif';
+    inkText(ctx,MAPS[lv].name,WORLD_W/2,G.screenTop+125*u,'#ffdf92');
+    ctx.font=11*u+'px system-ui,sans-serif';ctx.fillStyle=won?'#cdbd9d':'#edc19a';
+    ctx.fillText(won?'Forge craft counts. First clear: '+MARK_AWARDS.trialBadge+' marks.':'Win this keep in campaign to unlock its trials.',WORLD_W/2,G.screenTop+143*u);
+    for(var r=0;r<G.rows.length;r++){
+      var row=G.rows[r],key=TRIAL_ORDER[row.index],tr=TRIALS[key],badge=!!(Save.data.trials[lv]&&Save.data.trials[lv][key]);
+      uiPanel(ctx,row.x,row.y,row.w,row.h,11);ctx.textAlign='left';
+      var tx=row.x+12*u,textW=row.button.x-tx-10*u;
+      ctx.font='bold '+13*u+'px Georgia,serif';ctx.fillStyle='#fff2d8';
+      ctx.fillText(fitText(ctx,tr.name,textW),tx,row.y+17*u);
+      ctx.font=10*u+'px system-ui,sans-serif';ctx.fillStyle='#c4b293';
+      var words=tr.pitch.split(' '),line='',lines=[];
+      for(var wi=0;wi<words.length;wi++){
+        var candidate=line?line+' '+words[wi]:words[wi];
+        if(line&&ctx.measureText(candidate).width>textW){lines.push(line);line=words[wi];}else line=candidate;
+      }
+      if(line)lines.push(line);
+      for(var li=0;li<Math.min(2,lines.length);li++)ctx.fillText(fitText(ctx,lines[li],textW),tx,row.y+(31+li*11)*u);
+      forgePlate(ctx,row.button,won?badge?'brasslit':'util':'lock');
+      ctx.textAlign='center';ctx.font='bold '+11*u+'px system-ui,sans-serif';
+      inkText(ctx,!won?'LOCKED':badge?'REPLAY':'PLAY',row.button.x+row.button.w/2,row.button.y+26*u,won?'#ffe9c4':'#a99c88',3,1);
+    }
+    function foot(rect,label,enabled){if(!rect)return;forgePlate(ctx,rect,enabled?'util':'lock');ctx.textAlign='center';ctx.font='bold '+11*u+'px system-ui,sans-serif';inkText(ctx,label,rect.x+rect.w/2,rect.y+27*u,enabled?'#ffe9c4':'#a99c88',3,1);}
+    foot(G.prev,'PREVIOUS',G.page>0);foot(G.next,'NEXT',G.page<G.pages-1);foot(G.back,'BACK',true);ctx.textAlign='left';
   };
 
   /// The lowest baseline anything on the result screen may use. 'tap for menu'
@@ -13375,6 +13467,36 @@
       var status = body.querySelector('p.guide-copy');
       if (status) { status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); }
     }
+    function earningRewards() {
+      var r = g._cosmeticRewardGuide(); title.textContent = 'Earn your next look'; close.textContent = 'Back to looks';
+      var hero = el('div','guide-hero'), preview = el('canvas'); preview.width = 300; preview.height = 232;
+      if (r.goal) {
+        var pc = preview.getContext('2d'); pc.scale(2,2); g._drawCosPreview(pc,r.slot.id,r.goal,{x:0,y:0,w:150,h:116});
+        var im = el('img'); im.src = preview.toDataURL(); im.alt = r.goal.name + ' preview'; hero.appendChild(im);
+      }
+      var copy = el('div'); copy.appendChild(el('p','guide-kicker','HOARD MARKS · '+r.wallet+' saved'));
+      copy.appendChild(el('h3','',r.goal ? r.goal.name : 'Your collection'));
+      copy.appendChild(el('p','',r.goal ? r.short ? r.goal.price+' marks · '+r.short+' more to unlock.' : 'You have enough marks to unlock this look.' : 'You own every look in this collection.'));
+      hero.appendChild(copy); body.appendChild(hero);
+      if (r.goal && !r.short) {
+        body.appendChild(button('Preview '+r.goal.name,function(){g.cavInspect=r.goal.id;hide();},'guide-button guide-primary'));
+      } else {
+        var next = r.next, label = next.kind==='campaign' ? 'Play '+next.name : next.kind==='trials' ? 'Choose a Trial' : next.kind==='duel' ? 'Challenge an AI rival' : 'Play Daily Siege';
+        if (next.kind==='campaign') paragraph('Next: '+next.name+'. Earn up to '+(next.newStars*MARK_AWARDS.starFirst)+' marks from its '+next.newStars+' unearned '+(next.newStars===1?'star':'stars')+'.','guide-tip');
+        else if (next.kind==='trials') paragraph('A first Trial clear pays '+MARK_AWARDS.trialBadge+' marks. Choose a challenge on a keep you have already won.','guide-tip');
+        else if (next.kind==='duel') paragraph('Each computer rival pays '+MARK_AWARDS.rivalFirst+' marks for your first win.','guide-tip');
+        else paragraph('Raise today’s paid best beyond wave '+r.dailyPaid+'. Each new wave adds '+MARK_AWARDS.dailyWave+' marks when the run ends.','guide-tip');
+        body.appendChild(button(label,function(){
+          if(next.kind==='campaign'){if(g.campaignCheckpoint())api.open('checkpoint',next.level);else api.startCampaign(next.level);}
+          else {hide();g.state=next.kind==='trials'?'trials':next.kind==='duel'?'duel':'menu';if(next.kind==='daily'){var d=g._titleGeom().daily;tap(d.x+d.w/2,d.y+d.h/2);}}
+        },'guide-button guide-primary'));
+      }
+      lesson('1','Campaign stars · +'+MARK_AWARDS.starFirst,r.starsLeft+' new stars across '+CAMPAIGN_MAPS+' keeps: '+r.campaignMarks+' marks left. Improve a previous clear to earn its new stars.');
+      lesson('2','Trial badges · +'+MARK_AWARDS.trialBadge,r.badgesLeft+' first clears: '+r.trialMarks+' marks left. Each Trial on each keep has its own badge.');
+      lesson('3','AI rivals · +'+MARK_AWARDS.rivalFirst,r.rivalsLeft+' first wins: '+r.rivalMarks+' marks left. Repeating a win does not pay again.');
+      lesson('4','Daily Siege · +'+MARK_AWARDS.dailyWave+' per new wave','Today has paid through wave '+r.dailyPaid+'. Only new best waves pay; a new Daily starts fresh. Playing offline earns the same marks.');
+      paragraph('Marks unlock looks only. The Forge has '+FORGE_NODES.reduce(function(n,node){return n+node.ranks;},0)+' craft ranks: one earned star per rank, with free redistribution. Further campaign stars still earn marks. Forge spending never removes marks, map access or machine unlocks.','guide-tip');
+    }
     function requestAccountDeletion() {
       var request = Lb.deleteAccount('DELETE');
       render();
@@ -13391,6 +13513,8 @@
       title.textContent = page === 'pause' ? 'Paused' : page === 'briefing' ? 'Your first defense' : 'Wick’s field guide';
       if (page === 'account') {
         onlineAccount();
+      } else if (page === 'rewards') {
+        earningRewards();
       } else if (page === 'checkpoint') {
         var saved=g.campaignCheckpoint(); title.textContent='Your workshop is waiting';
         close.textContent='Back to title';
@@ -13537,7 +13661,7 @@
       var breathButton=hits.querySelector('[data-breath-action]');
       if(breathButton){var ability=g._breathStatus();if(breathButton.getAttribute('aria-label')!==ability.label)breathButton.setAttribute('aria-label',ability.label);
         if(breathButton.getAttribute('aria-disabled')!==String(!ability.canCast))breathButton.setAttribute('aria-disabled',String(!ability.canCast));}
-      var key=[g.state,g.view.cw,g.view.ch,g.view.safeT,g.view.safeB,g.shopPick,g.shopPage,g.shopOpen,!!g.mods.breathOff,g._shelf().join(','),g.waveActive,g.wave,g.menu?g._machineMenuSignature():'',!!g._lbAsk,Sfx.isMuted(),g.cavSlot,g.cavInspect,g.state==='cavern'?g._cavernAction().label:'',Save.forgeSpent(),Save.data.marks,Save.data.stars.join(',')].join('|');
+      var key=[g.state,g.view.cw,g.view.ch,g.view.safeT,g.view.safeB,g.shopPick,g.shopPage,g.shopOpen,!!g.mods.breathOff,g._shelf().join(','),g.waveActive,g.wave,g.menu?g._machineMenuSignature():'',!!g._lbAsk,Sfx.isMuted(),g.cavSlot,g.cavInspect,g.trialPick,g.trialPage,g.state==='cavern'?g._cavernAction().label:'',Save.forgeSpent(),Save.data.marks,Save.data.stars.join(',')].join('|');
       if (g.state==='won'||g.state==='lost') { var ls=Lb.status(); key += '|'+ls.pending+'|'+ls.sending+'|'+ls.outcome+'|'+!!g._lbRetryRect+'|'+!!g._lbOptRect; }
       if (signature===key) return; signature=key;
       var focusedLabel=hits.contains(document.activeElement)?document.activeElement.getAttribute('aria-label'):null;
@@ -13579,13 +13703,13 @@
           var unlocked=Save.unlocked(i),name=cp&&cp.level===i?'Resume '+cp.name+' from wave '+cp.wave:MAPS[i].name;
           proxy(name,r,true,function(){tap(r.x+r.w/2,r.y+r.h/2);},!unlocked);
           var info=!unlocked?'Locked. Win '+MAPS[i-1].name+' to unlock.':cp&&cp.level===i?'Saved workshop. Continue from wave '+cp.wave+'.':(Save.data.stars[i]|0)>0?'Replay this keep. '+Save.data.stars[i]+' of 3 stars earned.':'Start keep '+(i+1)+'. 20 waves.';
-          hits.lastChild.setAttribute('aria-description',info);
+          hits.lastChild.setAttribute('aria-description',info+(i===3?' Two entrances converge on one keep.':''));
           if(i===recommended)hits.lastChild.setAttribute('aria-current','step');
         });
         [[T.daily,'Daily Siege','Endless survival. A new shared challenge each day.'],[T.duel,'Duel against a computer rival','Choose one of four AI dragon rivals.']].forEach(function(a){proxy(a[1],a[0],true,function(){tap(a[0].x+a[0].w/2,a[0].y+a[0].h/2);});hits.lastChild.setAttribute('aria-description',a[2]);});
         ['Forge upgrades','Challenge trials','Cavern cosmetics','Toggle sound'].forEach(function(name,i){
           var r=T.pills[i];proxy(name,r,true,function(){tap(r.x+r.w/2,r.y+r.h/2);},i===1&&!Save.starsTotal());
-          hits.lastChild.setAttribute('aria-description',i===0?(Save.starsTotal()-Save.forgeSpent())+' stars available for upgrades.':i===1?Save.starsTotal()?'Special campaign challenges.':'Win a keep to unlock trials.':i===2?'Customize Wick, machines and your cavern. '+(Save.data.marks|0)+' Hoard Marks.':Sfx.isMuted()?'Sound is off. Turn sound on.':'Sound is on. Turn sound off.');
+          hits.lastChild.setAttribute('aria-description',i===0?(Save.forgeAvailable())+' stars available for upgrades.':i===1?Save.starsTotal()?'Special campaign challenges.':'Win a keep to unlock trials.':i===2?'Customize Wick, machines and your cavern. '+(Save.data.marks|0)+' Hoard Marks.':Sfx.isMuted()?'Sound is off. Turn sound on.':'Sound is on. Turn sound off.');
           if(i===3)hits.lastChild.setAttribute('aria-pressed',String(!Sfx.isMuted()));
         });
         T.legal.forEach(function(r){
@@ -13620,18 +13744,25 @@
         if(opt)proxy(Lb.on()?'Stop posting scores':'Join the public all-time ladder',opt,true,function(){tap(opt.x+opt.w/2,opt.y+opt.h/2);});
         proxy('Return to title',{x:70,y:RESULT_FOOT+22,w:280,h:Math.max(44,44/g.view.scale)},true,function(){tap(210,RESULT_FOOT+42);});
       } else if (g._ownsViewport()) {
-        var G=g.state==='forge'?forgeGeom(g.view):g.state==='trials'?trialGeom(g.view):g.state==='cavern'?cavernRoomGeom(g.view):duelGeom(g.view);
+        var G=g.state==='forge'?forgeGeom(g.view):g.state==='trials'?trialGeom(g.view,g.trialPage):g.state==='cavern'?cavernRoomGeom(g.view):duelGeom(g.view);
         if(g.state==='duel') RIVALS.forEach(function(r,i){var row={x:G.x,y:G.top+i*G.pitch,w:G.w,h:G.h};proxy('Challenge '+r.name,row,true,function(){tap(row.x+row.w/2,row.y+row.h/2);},!rivalReady(i));});
         if(g.state==='forge'){
-          G.rows.forEach(function(r,i){var n=FORGE_NODES[i];proxy('Upgrade '+n.name,r.band,true,function(){tap(r.band.hx+r.band.hw/2,r.band.hy+r.band.hh/2);},Save.forgeSpent()>=Save.starsTotal()||(Save.data.forge[n.id]||0)>=n.ranks);});
+          G.rows.forEach(function(r,i){var n=FORGE_NODES[i];proxy('Upgrade '+n.name,r.band,true,function(){tap(r.band.hx+r.band.hw/2,r.band.hy+r.band.hh/2);},!Save.forgeAvailable()||(Save.data.forge[n.id]||0)>=n.ranks);});
           proxy('Reset Forge upgrades',G.respec,true,function(){tap(G.respec.x+G.respec.w/2,G.respec.y+G.respec.h/2);});
         }
-        if(g.state==='trials') TRIAL_ORDER.forEach(function(k,i){G.chips.forEach(function(c,lv){var row={hx:c.hx,hy:G.top+i*G.pitch+c.hy,hw:c.hw,hh:c.hh};proxy(TRIALS[k].name+' in '+MAPS[lv].name,row,true,function(){tap(row.hx+row.hw/2,row.hy+row.hh/2);},!(Save.data.stars[lv]>0));});});
+        if(g.state==='trials'){
+          var selected=g._trialLevel(),held=Save.data.stars[selected]>0;
+          G.levels.forEach(function(c,lv){proxy('Select '+MAPS[lv].name+' trials',c,true,function(){tap(c.x+c.w/2,c.y+c.h/2);});hits.lastChild.setAttribute('aria-pressed',String(lv===selected));hits.lastChild.setAttribute('aria-description',Save.data.stars[lv]>0?'Trials unlocked.':'Locked. Win '+MAPS[lv].name+' in campaign first.');});
+          G.rows.forEach(function(row){var k=TRIAL_ORDER[row.index];proxy(TRIALS[k].name+' in '+MAPS[selected].name,row,true,function(){tap(row.x+row.w/2,row.y+row.h/2);},!held);hits.lastChild.setAttribute('aria-description',TRIALS[k].pitch+' '+(held?(Save.data.trials[selected]&&Save.data.trials[selected][k]?'Already cleared. Replay earns no additional marks.':'First clear earns '+MARK_AWARDS.trialBadge+' marks.'):'Win this keep in campaign first.'));});
+          if(G.prev)proxy('Previous trials',G.prev,true,function(){tap(G.prev.x+G.prev.w/2,G.prev.y+G.prev.h/2);},G.page===0);
+          if(G.next)proxy('Next trials',G.next,true,function(){tap(G.next.x+G.next.w/2,G.next.y+G.next.h/2);},G.page===G.pages-1);
+        }
         if(g.state==='cavern'){
           G.tabs.forEach(function(r,i){proxy(SLOTS[i].name+' cosmetics',r,true,function(){tap(r.x+r.w/2,r.y+r.h/2);});});
           var slot=SLOTS[g.cavSlot|0]||SLOTS[0];
           slot.items.forEach(function(it,i){var r=G.cards[i];if(!r)return;proxy('Preview '+it.name,r,true,function(){tap(r.x+r.w/2,r.y+r.h/2);});});
           var ca=g._cavernAction(),cr=G.action;proxy(ca.label,cr,true,function(){tap(cr.x+cr.w/2,cr.y+cr.h/2);},ca.disabled);
+          proxy('Earn Hoard Marks',G.rewards,true,function(){tap(G.rewards.x+G.rewards.w/2,G.rewards.y+G.rewards.h/2);});
         }
         proxy('Back to title',G.back,true,function(){tap(G.back.x+G.back.w/2,G.back.y+G.back.h/2);});
       }
