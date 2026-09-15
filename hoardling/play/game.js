@@ -12221,9 +12221,9 @@
     ctx.fillStyle = 'rgba(12,7,5,0.85)';
     ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 34px Georgia, serif';
-    ctx.fillText('THE FORGE', WORLD_W / 2, 150);
-    ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
+    ctx.font = 'bold 34px Georgia, serif';
+    inkText(ctx, 'THE FORGE', WORLD_W / 2, 150, '#ffd75e');
+    ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
     ctx.fillText('Campaign stars buy lasting craft. Campaign only —', WORLD_W / 2, 182);
     ctx.fillText('the Daily Siege is the same fair fight for everyone.', WORLD_W / 2, 198);
     var avail = Save.starsTotal() - Save.forgeSpent();
@@ -12246,6 +12246,7 @@
       // would leave the three lines hugging the top of it. At h 62 the derived
       // values are 24, 43 and 54 exactly, so nothing moves on the design box.
       var rc = ry + FG.rows[i].h / 2;
+      ctx.font = 'bold 16px Georgia, serif';
       ctx.fillText(node.name, 42, rc - 7);
       ctx.fillStyle = '#b9a27f'; ctx.font = '12px system-ui, sans-serif';
       ctx.fillText(node.desc, 42, rc + 12);
@@ -12253,26 +12254,36 @@
         ctx.fillStyle = rp2 < cur ? '#ffd75e' : 'rgba(255,215,94,0.2)';
         ctx.beginPath(); ctx.arc(42 + rp2 * 16, rc + 23, 4, 0, 6.283); ctx.fill();
       }
-      var can = cur < node.ranks && avail > 0;
-      var fbtn = FG.rows[i].btn;
-      ctx.fillStyle = can ? 'rgba(214,69,69,0.9)' : 'rgba(70,52,44,0.7)';
-      rr(ctx, fbtn.x, fbtn.y, fbtn.w, fbtn.h, 10); ctx.fill();
-      ctx.fillStyle = can ? '#fff' : '#8a7f72';
-      ctx.font = 'bold 14px system-ui, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(cur >= node.ranks ? 'MAX' : 'FORGE ★',
-                   fbtn.x + fbtn.w / 2, fbtn.y + fbtn.h / 2 + 5);
+      // THE FORGE'S BUTTONS WERE FLAT FILLS -- a CSS-red pill, a violet one
+      // and a red BACK -- in a game where every other control is a forge
+      // plate, and the star was the '★' character, which changes face
+      // between devices. Now: UTIL while a star can be spent here, brass once
+      // the craft is maxed, LOCK when there is nothing to spend; the star is a
+      // struck coin. No ember: several rows can be live at once, and the
+      // screen gets one ember or none.
+      var maxed = cur >= node.ranks, can = !maxed && avail > 0;
+      var fbtn = FG.rows[i].btn, fcx = fbtn.x + fbtn.w / 2, fcy = fbtn.y + fbtn.h / 2;
+      forgePlate(ctx, fbtn, maxed ? 'brasslit' : can ? 'util' : 'lock');
+      // 88 wide less the rivets leaves ~60 of clear face: 12px caps, a
+      // 4-unit gap and a 12-unit coin fit it without touching a rivet.
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      if (maxed) {
+        ctx.textAlign = 'center';
+        inkText(ctx, 'MAX', fcx, fcy + 4.5, '#ffd75e', 3, 1);
+      } else {
+        var fw = ctx.measureText('FORGE').width, fx = fcx - (fw + 16) / 2;
+        ctx.textAlign = 'left';
+        inkText(ctx, 'FORGE', fx, fcy + 4.5, can ? '#ffe9c4' : '#8a7f72', 3, 1);
+        starCoin(ctx, fx + fw + 10, fcy, 6, can);
+      }
       ctx.textAlign = 'left';
     }
-    ctx.textAlign = 'center';
-    var FR = FG.respec, FB = FG.back;
-    ctx.fillStyle = 'rgba(80,60,140,0.9)';
-    rr(ctx, FR.x, FR.y, FR.w, FR.h, 10); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 14px system-ui, sans-serif';
-    ctx.fillText('RESPEC (free)', FR.x + FR.w / 2, FR.y + FR.h / 2 + 5);
-    ctx.fillStyle = 'rgba(214,69,69,0.9)';
-    rr(ctx, FB.x, FB.y, FB.w, FB.h, 10); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.fillText('BACK', FB.x + FB.w / 2, FB.y + FB.h / 2 + 5);
+    var FR = FG.respec, FB = FG.back, spent = Save.forgeSpent() > 0;
+    forgePlate(ctx, FR, spent ? 'util' : 'lock');
+    forgePlate(ctx, FB, 'util');
+    ctx.textAlign = 'center'; ctx.font = 'bold 13px system-ui, sans-serif';
+    inkText(ctx, 'RESPEC · FREE', FR.x + FR.w / 2, FR.y + 26, spent ? '#ffe9c4' : '#8a7f72', 3, 1);
+    inkText(ctx, 'BACK', FB.x + FB.w / 2, FB.y + 26, '#ffe9c4', 3, 1);
     ctx.textAlign = 'left';
   };
 
@@ -12381,9 +12392,9 @@
     ctx.fillStyle = 'rgba(12,7,5,0.85)';
     ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#a8e6ff'; ctx.font = 'bold 34px Georgia, serif';
-    ctx.fillText('TRIALS', WORLD_W / 2, 150);
-    ctx.fillStyle = '#c9b8ff'; ctx.font = '13px system-ui, sans-serif';
+    ctx.font = 'bold 34px Georgia, serif';
+    inkText(ctx, 'TRIALS', WORLD_W / 2, 150, '#ffd75e');
+    ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
     ctx.fillText('Wick sets himself a challenge on a keep he has held.', WORLD_W / 2, 182);
     ctx.fillText('Win the level first; forge craft still counts.', WORLD_W / 2, 198);
     for (var i = 0; i < TRIAL_ORDER.length; i++) {
@@ -12391,7 +12402,7 @@
       var key = TRIAL_ORDER[i], tr = TRIALS[key], ry = TG.top + i * TG.pitch;
       uiPanel(ctx, 26, ry, WORLD_W - 52, TG.h, 11);
       ctx.textAlign = 'left';
-      ctx.fillStyle = '#d9f2ff'; ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.fillStyle = '#fff2d8'; ctx.font = 'bold 15px Georgia, serif';
       var textW = TG.textW;                   // stop before the L1 chip
       ctx.fillText(fitText(ctx, tr.name, textW), 42, ry + 24);
       ctx.fillStyle = '#b9a27f'; ctx.font = '11px system-ui, sans-serif';
@@ -12400,21 +12411,25 @@
         var chp = TG.chips[lv2], chx = chp.x;
         var wonLv = Save.data.stars[lv2] > 0;
         var badge = wonLv && Save.data.trials[lv2] && Save.data.trials[lv2][key];
-        ctx.fillStyle = badge ? 'rgba(255,215,94,0.9)' : wonLv ? 'rgba(214,69,69,0.85)' : 'rgba(70,52,44,0.6)';
-        rr(ctx, chx, ry + TG.chipY, chp.w, TG.chipH, 8); ctx.fill();
-        ctx.fillStyle = badge ? '#3a2c14' : wonLv ? '#fff' : '#8a7f72';
-        ctx.font = 'bold 12px system-ui, sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(badge ? '\u2605' : 'L' + (lv2 + 1),
-                     chx + chp.w / 2, ry + TG.chipY + TG.chipH * 0.66);
+        // The level chips are controls, so they are forge plates like the
+        // Forge's buttons: UTIL to play, brass with a struck star once this
+        // trial is won there, LOCK before the keep itself is won. They were
+        // flat red, gold and umber pills, the star the '\u2605' character.
+        var chip = { x: chx, y: ry + TG.chipY, w: chp.w, h: TG.chipH };
+        var ccx = chx + chp.w / 2, ccy = chip.y + chip.h / 2;
+        forgePlate(ctx, chip, badge ? 'brasslit' : wonLv ? 'util' : 'lock');
+        if (badge) starCoin(ctx, ccx, ccy, 8, true);
+        else {
+          ctx.font = 'bold 13px Georgia, serif'; ctx.textAlign = 'center';
+          inkText(ctx, 'L' + (lv2 + 1), ccx, ccy + 5, wonLv ? '#ffe9c4' : '#7d6d5e', 3, 1);
+        }
         ctx.textAlign = 'left';
       }
     }
-    ctx.textAlign = 'center';
     var TB = trialGeom(this.view).back;
-    ctx.fillStyle = 'rgba(214,69,69,0.9)';
-    rr(ctx, TB.x, TB.y, TB.w, TB.h, 10); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 14px system-ui, sans-serif';
-    ctx.fillText('BACK', TB.x + TB.w / 2, TB.y + TB.h / 2 + 5);
+    forgePlate(ctx, TB, 'util');
+    ctx.textAlign = 'center'; ctx.font = 'bold 13px system-ui, sans-serif';
+    inkText(ctx, 'BACK', TB.x + TB.w / 2, TB.y + 26, '#ffe9c4', 3, 1);
     ctx.textAlign = 'left';
   };
 
@@ -13275,13 +13290,13 @@
       var im = el('img'); im.src = ART.images.hero_title ? ART.images.hero_title.src : assetURL(ART.manifest.hero_title); im.alt = 'Wick, the dragon inventor';
       hero.appendChild(im); var caption = el('div');
       caption.appendChild(el('p','guide-kicker',"WICK’S WORKSHOP"));
-      caption.appendChild(el('h3','', 'Small dragon. Clever defenses.'));
+      caption.appendChild(el('h3','', 'Small dragon, clever defenses'));
       caption.appendChild(el('p','', 'The Guild wants your treasure. Make them work for it.'));
       hero.appendChild(caption); body.appendChild(hero);
-      lesson('01','Protect your treasure', 'TREASURE is the 60 coins in your keep: lose them and the defense ends. BUILD GOLD pays for machines and upgrades. Spending build gold never empties your treasure.');
-      lesson('02','Build, then call the wave', 'Pick a machine from the bar at the bottom, then tap clear ground beside the road. Round pads give a 20% discount. Dimmed machines show the stars that unlock them; › shows more.');
-      lesson('03','Put Wick to work', 'Tap the floor to move Wick. Tap a built machine, then Send Wick here, to put him to work. His BREATH button burns nearby enemies through armor.');
-      lesson('04','Catch the thieves coming back', 'Raiders steal coins, then run for the exit. Move Wick beside a fleeing carrier to shake coins loose, or defeat it to recover the rest. Escaped coins are lost and lower your star rating.');
+      lesson('1','Protect your treasure', 'TREASURE is the 60 coins in your keep: lose them and the defense ends. BUILD GOLD pays for machines and upgrades. Spending build gold never empties your treasure.');
+      lesson('2','Build, then call the wave', 'Pick a machine from the bar at the bottom, then tap clear ground beside the road. Round pads give a 20% discount. Dimmed machines show the stars that unlock them; › shows more.');
+      lesson('3','Put Wick to work', 'Tap the floor to move Wick. Tap a built machine, then Send Wick here, to put him to work. His BREATH button burns nearby enemies through armor.');
+      lesson('4','Catch the thieves coming back', 'Raiders steal coins, then run for the exit. Move Wick beside a fleeing carrier to shake coins loose, or defeat it to recover the rest. Escaped coins are lost and lower your star rating.');
       paragraph('A good first build: a Crossbow on a round pad, then a Gemsinger to slow the raiders. Read the next wave before you call it.', 'guide-tip');
     }
     // THE GUIDE SHOWS THE MACHINE THE BATTLEFIELD DRAWS (2026-09-14). The
@@ -13377,7 +13392,7 @@
       if (page === 'account') {
         onlineAccount();
       } else if (page === 'checkpoint') {
-        var saved=g.campaignCheckpoint(); title.textContent='Your workshop is waiting.';
+        var saved=g.campaignCheckpoint(); title.textContent='Your workshop is waiting';
         close.textContent='Back to title';
         if(saved){
           var chosen = campaignLevel === null ? saved.level : campaignLevel, changing = chosen !== saved.level;
@@ -13419,9 +13434,9 @@
           body.appendChild(button('Return to title',function(){hide();g.reset(1,'campaign');g.state='menu';}));
         },'guide-button guide-quiet'));
       } else if (page === 'briefing') {
-        lesson('01','Protect your treasure', 'Keep your 60 treasure safe. Build gold pays for machines.');
-        lesson('02','Place a machine', 'Pick a machine from the bar and build beside the road. Round pads save 20%.');
-        lesson('03','Start when ready', 'Build at your pace. Call the first wave when you’re ready.');
+        lesson('1','Protect your treasure', 'Keep your 60 treasure safe. Build gold pays for machines.');
+        lesson('2','Place a machine', 'Pick a machine from the bar and build beside the road. Round pads save 20%.');
+        lesson('3','Start when ready', 'Build at your pace. Call the first wave when you’re ready.');
         body.appendChild(button('Let’s build',dismiss,'guide-button guide-primary'));
         body.appendChild(button('How to play',function(){briefingReturn=true;tab='basics';api.open('guide');},'guide-button guide-quiet'));
       } else {

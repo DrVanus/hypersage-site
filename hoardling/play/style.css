@@ -39,72 +39,144 @@ html, body {
   right: max(14px, env(safe-area-inset-right));
 }
 
-/* Real controls share the canvas hit geometry, with visible keyboard focus. */
-#player-ui { position:fixed; inset:0; z-index:5; pointer-events:none; color:#f8edda; }
+/* Real controls share the canvas hit geometry, with visible keyboard focus.
+   THE OVERLAYS ARE THE CANVAS KIT IN CSS (2026-09-15). They were a web sheet —
+   23px radius, a 1px hairline border, a cool gradient, flat CSS-red buttons —
+   laid over a game whose every control is a forge plate. The tokens below are
+   forgePlate's own numbers (game.js): a cast fill, a 1.5px brass rim at 55%, a
+   1px lit lip 13 in from each end, four struck rivets centred 11 in, a 0 3px 8px
+   drop, radius 12. Change the plate there and it belongs here too. */
+#player-ui {
+  position:fixed; inset:0; z-index:5; pointer-events:none; color:#f8edda;
+  --rim: rgba(255,215,94,.55);
+  --rivet: radial-gradient(circle at 50% 38%, #fff0b8 0 .7px, #d4a840 1.3px 2.1px, rgba(58,34,8,.95) 2.5px, transparent 2.9px);
+  --rivets: var(--rivet) left 8px top 8px / 7px 7px no-repeat, var(--rivet) right 8px top 8px / 7px 7px no-repeat,
+            var(--rivet) left 8px bottom 8px / 7px 7px no-repeat, var(--rivet) right 8px bottom 8px / 7px 7px no-repeat;
+  --lip: linear-gradient(90deg, transparent 13px, rgba(255,220,170,.34) 13px calc(100% - 13px), transparent calc(100% - 13px)) left 0 top 1.5px / 100% 1px no-repeat;
+  --ember: linear-gradient(180deg, #e05a4a, #b93636 52%, #8e2626);
+  --util: linear-gradient(180deg, rgba(52,32,20,.96), rgba(20,12,9,.97));
+  --brasslit: linear-gradient(180deg, #8a5f22, #634214 55%, #4a3110);
+  --drop: 0 3px 8px rgba(0,0,0,.45);
+  --ink: 0 2px 5px rgba(0,0,0,.85), 0 1px 1px rgba(0,0,0,.6);
+}
 #player-ui [hidden] { display:none !important; }
 #player-ui button, #player-ui summary { -webkit-tap-highlight-color:transparent; }
 .guide-hits { position:absolute; inset:0; pointer-events:none; }
 .guide-scout { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
 .guide-hit { position:absolute; pointer-events:auto; border:0; padding:0; margin:0; background:transparent; border-radius:12px; color:transparent; }
 .guide-hit:disabled { pointer-events:none; }
-#player-ui :focus-visible { outline:3px solid #a9e6ee; outline-offset:3px; }
-.guide-hit:focus-visible { background:rgba(168,230,255,.14); outline-offset:-2px !important; }
+/* Focus is gold, the way the canvas marks the recommended row and the inspected card. */
+#player-ui :focus-visible { outline:2.5px solid rgba(255,215,94,.9); outline-offset:2px; }
+.guide-hit:focus-visible { background:rgba(255,215,94,.12); outline-offset:-2px !important; }
 #player-ui .guide-hit[data-machine-action]:focus-visible { outline:2px solid #ffe3a5; background:transparent; outline-offset:-3px !important; }
 #player-ui:not(.keyboard-controls) .guide-hit[data-machine-action]:focus-visible { outline:none; }
 .guide-launch { position:absolute; left:50%; transform:translateX(-50%); min-height:44px; padding:4px 16px; border:0; border-radius:12px; color:#f2d5a2; background:transparent; font:700 11px system-ui,sans-serif; text-transform:uppercase; letter-spacing:.04em; text-shadow:0 1px 3px #000; pointer-events:auto; }
-.guide-modal { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:max(16px,var(--hoardling-safe-top, env(safe-area-inset-top))) max(12px,env(safe-area-inset-right)) max(16px,var(--hoardling-safe-bottom, env(safe-area-inset-bottom))) max(12px,env(safe-area-inset-left)); background:rgba(9,6,6,.82); pointer-events:auto; touch-action:pan-y; }
-.guide-panel { width:min(100%,540px); max-height:100%; display:flex; flex-direction:column; overflow:hidden; border:1px solid #9b743e; border-radius:23px; background:linear-gradient(145deg,#33251b,#1b1513 55%,#1a181f); box-shadow:0 24px 70px #0008,inset 0 1px #efcf9c30; font-family:system-ui,sans-serif; }
-.guide-header { padding:22px 22px 17px; display:flex; flex-direction:column; align-items:flex-start; gap:14px; border-bottom:1px solid #d1a76726; }
-.guide-kicker { font:750 10px/1.4 system-ui,sans-serif; letter-spacing:.16em; color:#c8a574; margin:0 0 7px; }
-.guide-header h2 { font:700 clamp(23px,6vw,30px)/1.12 Georgia,serif; letter-spacing:-.025em; margin:0; color:#ffedc5; }
-.guide-close { color:#e9d8bd; border:1px solid #b38a4f70; border-radius:10px; background:#ffffff08; min-height:44px; padding:9px 15px; font:650 13px system-ui,sans-serif; }
-.guide-tabs { display:flex; flex-shrink:0; gap:4px; padding:10px 16px 0; }
+
+/* THE SIGN. A modal is the title's nameplate: a riveted cast panel inside a
+   brass frame, hung on two chains that run up past the top of the screen. */
+.guide-modal { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:max(16px,var(--hoardling-safe-top, env(safe-area-inset-top))) max(12px,env(safe-area-inset-right)) max(16px,var(--hoardling-safe-bottom, env(safe-area-inset-bottom))) max(12px,env(safe-area-inset-left)); background:radial-gradient(ellipse 90% 70% at 50% 42%, rgba(24,12,7,.62), rgba(6,3,2,.9)); pointer-events:auto; touch-action:pan-y; }
+.guide-panel { position:relative; width:min(100%,520px); max-height:100%; display:flex; flex-direction:column; border-radius:14px; font-family:system-ui,sans-serif;
+  background:var(--rivets), linear-gradient(180deg, rgba(48,29,19,.98), rgba(26,16,11,.98) 42%, rgba(17,10,8,.99));
+  box-shadow:inset 0 0 0 2px rgba(212,168,64,.62), inset 0 0 0 5px rgba(17,10,8,.95), inset 0 0 0 6px rgba(212,168,64,.2), 0 28px 70px rgba(0,0,0,.72); }
+/* The title's chain: open 2px brass rings, end to end, at centre ±75. One ring
+   per tile, and the ring fits its tile, so no link is clipped flat. */
+.guide-panel::before, .guide-panel::after { content:''; position:absolute; bottom:calc(100% - 4px); width:12px; height:100vh; pointer-events:none;
+  background:radial-gradient(ellipse 4.6px 5.6px at 50% 50%, transparent 50%, #6f5220 54%, #e2b852 66%, #c89a3c 81%, #6f5220 93%, transparent 100%) center bottom / 12px 11.2px repeat-y;
+  filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.7)); }
+.guide-panel::before { left:calc(50% - 81px); }
+.guide-panel::after { right:calc(50% - 81px); }
+/* 66 a side: the corner plate is 44 wide, 16 in, so the title keeps 6 of air
+   from it on both sides and stays centred on the sign. */
+.guide-header { position:relative; display:flex; flex-direction:column; align-items:center; text-align:center; padding:26px 66px 14px; }
+.guide-header > div { width:100%; }
+.guide-kicker { font:700 10.5px/1.4 system-ui,sans-serif; letter-spacing:.25em; color:#c9a86a; margin:0 0 6px; }
+/* A keep's name is a name, not an eyebrow: Title Case Georgia, never tracked. */
+.guide-modal[data-page="checkpoint"] .guide-body .guide-kicker { margin:0 0 6px; font:700 18px/1.25 Georgia,serif; letter-spacing:0; color:#ffe9c4; }
+/* The wordmark's casting: cream-gold-amber fill, a dark outline, a +3 drop.
+   UPPERCASE and no negative tracking, like every title the canvas draws. */
+.guide-header h2 { margin:0; font:700 clamp(20px,6vw,25px)/1.12 Georgia,serif; letter-spacing:.02em; text-transform:uppercase; text-wrap:balance; color:#ffd75e;
+  background:linear-gradient(180deg, #fff3cf 0%, #ffd75e 42%, #e8a02a 78%, #b96a12 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 .7px #5b2a10) drop-shadow(0 0 .7px #5b2a10) drop-shadow(0 3px 1.5px rgba(8,4,3,.8)); }
+/* Close / Resume / Back: a small riveted plate in the sign's corner. The words
+   stay in the DOM as the accessible name; the eye gets a drawn cross. */
+.guide-close { position:absolute; top:16px; right:16px; width:44px; height:44px; padding:0; border:0; border-radius:11px; font-size:0; color:transparent;
+  background:var(--lip), var(--util); box-shadow:inset 0 0 0 1.5px var(--rim), var(--drop); }
+.guide-close::before, .guide-close::after { content:''; position:absolute; left:50%; top:50%; width:16px; height:2.5px; margin:-1.25px 0 0 -8px; border-radius:2px; background:#ffe9c4; box-shadow:0 1.5px 2px rgba(0,0,0,.75); transform:rotate(45deg); }
+.guide-close::after { transform:rotate(-45deg); }
+/* Tabs are containers, not controls: brass rim, no rivets; the open one brass-lit with the gold selection ring. */
+.guide-tabs { display:flex; flex-shrink:0; gap:8px; padding:4px 18px 2px; }
 .guide-tabs:empty { display:none; }
-.guide-tab { flex:1; min-height:44px; border:1px solid transparent; border-radius:10px; color:#bfb0a0; background:transparent; font:650 13px system-ui,sans-serif; }
-.guide-tab[aria-pressed=true] { color:#ffe0a6; background:#cba96a15; border-color:#ae844d55; }
-.guide-body { padding:20px 22px 24px; overflow-y:auto; overscroll-behavior:contain; touch-action:pan-y; -webkit-overflow-scrolling:touch; }
-.guide-copy { color:#cfc0ac; font-size:14px; line-height:1.6; margin:0 0 18px; }
-.guide-hero { display:flex; align-items:center; gap:13px; margin:0 0 22px; }
+.guide-tab { flex:1; min-height:44px; padding:4px 6px; border:0; border-radius:8px; color:#cdbb9c; font:700 11.5px/1.2 system-ui,sans-serif; letter-spacing:.06em; text-transform:uppercase; text-shadow:var(--ink); background:var(--util); box-shadow:inset 0 0 0 1.5px rgba(212,168,64,.26); }
+.guide-tab[aria-pressed=true] { color:#ffe7a8; background:var(--lip), var(--brasslit); box-shadow:inset 0 0 0 2px rgba(255,215,94,.7), 0 2px 6px rgba(0,0,0,.45); }
+.guide-body { min-height:0; padding:16px 22px 22px; overflow-y:auto; overscroll-behavior:contain; touch-action:pan-y; -webkit-overflow-scrolling:touch; border-radius:0 0 14px 14px; }
+.guide-copy { color:#e4d4ba; font-size:14px; line-height:1.55; margin:0 0 16px; }
+.guide-body .guide-kicker { color:#e8b86a; letter-spacing:.2em; }
+.guide-hero { display:flex; align-items:center; gap:13px; margin:0 0 20px; }
 .guide-hero img { width:88px; height:100px; object-fit:contain; flex-shrink:0; filter:drop-shadow(0 8px 10px #0005); }
-.guide-hero h3 { font:700 20px/1.13 Georgia,serif; color:#f7dfb4; margin:0 0 7px; }
-.guide-hero p:not(.guide-kicker) { margin:0; color:#bda995; font-size:12px; line-height:1.45; }
-.guide-lesson { display:flex; align-items:flex-start; gap:12px; margin-bottom:21px; }
-.guide-number { border:1px solid #ad875447; border-radius:9px; width:32px; height:32px; flex-shrink:0; display:grid; place-items:center; font:700 12px system-ui,sans-serif; color:#e4bd79; background:#b7873c0b; }
-.guide-lesson h3 { font:700 14px/1.3 system-ui,sans-serif; color:#f5e4c6; margin:0 0 6px; }
-.guide-lesson p { margin:0; font-size:13px; color:#c7b8a5; line-height:1.6; }
-.guide-tip { color:#dcc69f; background:#cfa9590b; border-left:2px solid #ae844d; padding:12px 14px; font-size:12px; line-height:1.65; margin:5px 0 20px; }
-.guide-button { display:block; width:100%; min-height:48px; padding:13px 17px; margin-top:10px; border:1px solid #af8b515c; border-radius:12px; background:#ffffff04; color:#ead6b6; font:700 14px system-ui,sans-serif; }
-.guide-primary { background:linear-gradient(#d9533d,#ac352e); border-color:#eda463; color:#fff4e0; box-shadow:inset 0 1px #ffffff22,0 3px 10px #0003; }
-.guide-pair { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
-.guide-pair .guide-button { margin-top:0; }
-.guide-quiet { border-color:transparent; color:#b9a591; font-weight:500; }
-.guide-stats { display:grid; grid-template-columns:repeat(3,1fr); background:#0e0b0966; border:1px solid #ab834a33; border-radius:13px; margin:0 0 22px; padding:16px 8px; text-align:center; }
-.guide-stats span { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#b9a27f; margin-bottom:7px; }
-.guide-stats strong { font:700 27px Georgia,serif; color:#ffe3b0; }
-.guide-machine { border:1px solid #ad87543b; border-radius:13px; background:#0002; margin-bottom:10px; }
-.guide-machine summary { display:flex; align-items:center; gap:10px; padding:13px 10px; list-style:none; cursor:pointer; }
+.guide-hero h3 { margin:0 0 6px; font:700 20px/1.15 Georgia,serif; color:#ffd75e; background:linear-gradient(180deg, #fff3cf, #ffd75e 45%, #e8a02a); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 2px 1px rgba(8,4,3,.8)); }
+.guide-hero p:not(.guide-kicker) { margin:0; color:#cdbb9c; font-size:12.5px; line-height:1.45; }
+/* Step numbers are struck coins, the keep rows' medallion, not outlined web boxes. */
+.guide-lesson { display:flex; align-items:flex-start; gap:14px; margin-bottom:16px; }
+.guide-number { width:34px; height:34px; flex-shrink:0; display:grid; place-items:center; border-radius:50%; border:1.5px solid rgba(120,74,12,.9); background:radial-gradient(circle at 36% 30%, #fff3c4 0 10%, #ffd24a 52%, #a86c14 100%); color:#3b2410; font:700 16px/1 Georgia,serif; box-shadow:0 2px 5px rgba(0,0,0,.55), inset 0 -2px 3px rgba(90,50,8,.35); }
+.guide-lesson h3 { font:700 17px/1.25 Georgia,serif; color:#ffe9c4; margin:4px 0 4px; }
+.guide-lesson p { margin:0; font-size:13px; color:#e4d4ba; line-height:1.5; }
+/* An aside is sunk into the plate, not ruled off with a coloured edge. */
+.guide-tip { margin:6px 0 18px; padding:12px 16px; border-radius:10px; color:#dcc8a6; font:italic 13.5px/1.55 Georgia,serif; background:linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.22)); box-shadow:inset 0 2px 4px rgba(0,0,0,.6), inset 0 -1px 0 rgba(255,226,170,.08); }
+.guide-button + .guide-tip { margin-top:16px; }
+/* Actions are forge plates: UTIL for the rest, EMBER for the one next action. */
+.guide-button { position:relative; display:block; width:100%; min-height:52px; margin-top:11px; padding:12px 28px; border:0; border-radius:12px; color:#fff6e6; font:700 14px/1.25 system-ui,sans-serif; letter-spacing:.06em; text-transform:uppercase; text-shadow:var(--ink);
+  background:var(--rivets), var(--lip), var(--util); box-shadow:inset 0 0 0 1.5px var(--rim), var(--drop); }
+/* press darkens, never moves: :active can stick after a touch, and a 1px
+   nudge left SPEED standing a pixel below SOUND in the pause row */
+.guide-button:active { filter:brightness(.88); }
+.guide-primary { min-height:56px; font-size:15.5px; color:#fff; background:var(--rivets), var(--lip), var(--ember); box-shadow:inset 0 0 0 1.5px var(--rim), 0 4px 12px rgba(120,20,12,.45), 0 0 22px rgba(255,120,60,.14); }
+.guide-pair { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:11px; }
+.guide-pair .guide-button { margin-top:0; padding-inline:14px; font-size:13px; }
+.guide-quiet { min-height:44px; margin-top:6px; background:none; box-shadow:none; color:rgba(255,233,196,.74); font-size:12px; letter-spacing:.14em; text-decoration:underline; text-underline-offset:4px; text-decoration-color:rgba(212,168,64,.5); }
+/* The pause readout is the HUD rail's sunk plate; cells split by the canon's dark-plus-pale pair. */
+.guide-stats { display:grid; grid-template-columns:repeat(3,1fr); margin:0 0 18px; padding:15px 0 13px; text-align:center; border-radius:12px; background:linear-gradient(180deg, rgba(22,13,9,.95), rgba(12,8,6,.97)); box-shadow:inset 0 0 0 1.5px rgba(212,168,64,.42), inset 0 2px 7px rgba(0,0,0,.6); }
+.guide-stats > div + div { box-shadow:inset 1px 0 rgba(0,0,0,.34), inset 2px 0 rgba(255,214,140,.10); }
+.guide-stats span { display:block; margin-bottom:6px; font:700 10px/1.2 system-ui,sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#c4b594; }
+.guide-stats strong { font:700 26px/1 Georgia,serif; color:#ffd75e; filter:drop-shadow(0 2px 2px rgba(0,0,0,.8)); }
+/* Machine rows are Cavern cards: brass rim, no rivets, the open one ringed in gold. */
+.guide-machine { margin-bottom:10px; border-radius:10px; background:var(--util); box-shadow:inset 0 0 0 1.5px rgba(212,168,64,.34), 0 2px 6px rgba(0,0,0,.35); }
+.guide-machine[open] { box-shadow:inset 0 0 0 2px rgba(255,215,94,.7), 0 2px 6px rgba(0,0,0,.35); }
+.guide-machine summary { display:flex; align-items:center; gap:10px; padding:12px 14px 12px 10px; list-style:none; cursor:pointer; border-radius:10px; }
 .guide-machine summary::-webkit-details-marker { display:none; }
-.guide-machine summary img { width:48px; height:56px; object-fit:contain; flex-shrink:0; }
+.guide-machine summary img { width:48px; height:56px; object-fit:contain; flex-shrink:0; filter:drop-shadow(0 3px 4px rgba(0,0,0,.5)); }
 .guide-machine summary div { flex:1; }
-.guide-machine h3 { font-size:13px; margin:0 0 5px; color:#f2d9aa; }
-.guide-machine summary p { font-size:11px; line-height:1.5; color:#c2b09b; margin:0; }
-.guide-price { color:#ebc67f; font-size:12px; font-weight:750; white-space:nowrap; }
-.guide-price::after { content:'⌄'; display:block; text-align:center; margin-top:7px; }
-.guide-machine[open] .guide-price::after { content:'⌃'; }
-.guide-machine-detail { padding:2px 14px 14px; font-size:12px; line-height:1.65; color:#bdac97; }
-.guide-machine-detail p { margin:10px 0 0; }
-.guide-machine-detail strong { color:#e5cc9e; }
-.guide-keys { display:grid; grid-template-columns:1fr 1.25fr; gap:0 13px; font-size:12px; margin:10px 0 24px; }
-.guide-keys dt,.guide-keys dd { margin:0; padding:11px 0; border-bottom:1px solid #ffffff0a; line-height:1.4; }
-.guide-keys dt { color:#e4c18d; font-weight:650; }
-.guide-keys dd { color:#bcac97; }
-@media (min-height:780px) { .guide-header { flex-direction:row; align-items:center; justify-content:space-between; } .guide-close { flex-shrink:0; max-width:110px; } }
-@media (max-width:350px) { .guide-header { padding:18px 16px 14px; } .guide-body { padding:16px; } .guide-hero img { width:70px; } }
-/* Pause remains compact on short phones; the full guide keeps its reading layout. */
-.guide-modal[data-page="pause"] .guide-header { flex-direction:row; align-items:center; justify-content:space-between; }
-.guide-modal[data-page="pause"] .guide-close { flex-shrink:0; }
+.guide-machine h3 { font:700 15px/1.2 Georgia,serif; margin:0 0 4px; color:#ffe9c4; }
+.guide-machine summary p { font-size:11.5px; line-height:1.45; color:#cdbb9c; margin:0; }
+.guide-price { color:#ffd75e; font:700 15px Georgia,serif; white-space:nowrap; text-align:center; text-shadow:var(--ink); }
+/* a drawn chevron: the ⌄ / ⌃ characters changed face from device to device */
+.guide-price::after { content:''; display:block; width:7px; height:7px; margin:7px auto 0; border-right:2px solid #d4a840; border-bottom:2px solid #d4a840; transform:rotate(45deg); }
+.guide-machine[open] .guide-price::after { transform:translateY(3px) rotate(-135deg); }
+.guide-machine-detail { padding:0 16px 14px; font-size:12.5px; line-height:1.6; color:#d8c7ab; }
+.guide-machine-detail p { margin:9px 0 0; }
+.guide-machine-detail strong { color:#ffe3a5; }
+.guide-keys { display:grid; grid-template-columns:1fr 1.25fr; gap:0 13px; font-size:12.5px; margin:8px 0 22px; }
+.guide-keys dt,.guide-keys dd { margin:0; padding:9px 0; line-height:1.4; }
+.guide-keys dt { color:#ffd75e; font-weight:700; }
+.guide-keys dd { color:#d8c7ab; }
+.guide-modal[data-page="briefing"] .guide-header { padding-inline:24px; }
 .guide-modal[data-page="pause"] .guide-stats strong { font-size:clamp(20px,5.8vw,24px); }
-.guide-placement { position:absolute; width:38px; height:38px; border:2px solid #a9efc0; outline:1px solid #17231d; border-radius:50%; transform:translate(-50%,-50%); background:#a9efc025; color:#edffe7; font:700 10px system-ui,sans-serif; text-align:center; padding-top:41px; white-space:nowrap; text-shadow:0 1px 4px #000,0 1px 5px #000; pointer-events:none; }
+/* Short phones keep every plate a 44pt target; only the air and the type tighten. */
+@media (max-height:700px) {
+  .guide-header { padding-top:20px; padding-bottom:8px; }
+  .guide-header h2 { font-size:clamp(20px,6vw,24px); }
+  .guide-body { padding:12px 18px 16px; }
+  .guide-lesson { gap:12px; margin-bottom:11px; }
+  .guide-number { width:30px; height:30px; font-size:14px; }
+  .guide-lesson h3 { font-size:15px; margin:3px 0 2px; }
+  .guide-lesson p { font-size:12.5px; line-height:1.42; }
+  .guide-button { min-height:46px; margin-top:9px; padding-block:10px; }
+  .guide-primary { min-height:50px; }
+  .guide-quiet { min-height:44px; margin-top:4px; }
+  .guide-stats { padding:12px 0 10px; margin-bottom:12px; }
+}
+@media (max-width:350px) { .guide-header { padding-inline:56px; } .guide-body { padding-inline:16px; } .guide-hero img { width:70px; } }
+@media (forced-colors:active) { .guide-header h2, .guide-hero h3 { -webkit-text-fill-color:currentColor; background:none; } }
+.guide-placement { position:absolute; width:38px; height:38px; border:2px solid #ffd75e; outline:1px solid #2a1a0a; border-radius:50%; transform:translate(-50%,-50%); background:rgba(255,215,94,.16); color:#fff2d8; font:700 10px system-ui,sans-serif; text-align:center; padding-top:41px; white-space:nowrap; text-shadow:0 1px 4px #000,0 1px 5px #000; pointer-events:none; }
 .guide-placement.blocked { border-color:#ff9d81; background:#ff7a5625; color:#ffcfbc; }
 
 #game-canvas:focus-visible { outline: 2px solid #e1bd69; outline-offset: -2px; }
