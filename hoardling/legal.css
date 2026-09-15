@@ -33,6 +33,19 @@ header.site .brand {
   font-weight: 700; font-size: 20px; letter-spacing: 0.02em;
   color: #ffd75e; text-shadow: 0 2px 0 #7a4a12;
 }
+/* THE WAY BACK TO THE GAME. The game opens these pages in its own tab, and
+   since 2026-09-15 the brand link above is the product page, not the game —
+   so without this a player who read the privacy policy had no route back to
+   play except the page's own buttons. Same target as the page's "Play free". */
+header.site .play {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 44px; padding: 0 18px; border-radius: 999px;
+  font: 700 15px/1 Georgia, "Times New Roman", serif; color: #fff4e0;
+  background: linear-gradient(180deg, #d9533d, #ac352e);
+  box-shadow: inset 0 0 0 1px rgba(255, 215, 94, 0.45), 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+header.site .play:hover { text-decoration: none; filter: brightness(1.08); }
+header.site .play:focus-visible { outline: 2.5px solid rgba(255, 215, 94, 0.9); outline-offset: 2px; }
 
 main.wrap {
   max-width: 720px;

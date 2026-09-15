@@ -462,7 +462,7 @@ CARDS = {
 """,
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="13" r="4"/><path d="M12 2c1.6 2.1 2.5 3.9 2.5 5.6A2.6 2.6 0 0 1 12 10a2.6 2.6 0 0 1-2.5-2.4C9.5 5.9 10.4 4.1 12 2z"/></svg>',
         "kicker": "Play free in your browser",
-        "h1": 'Too young for dragonfire.<br><span class="grad">Built his own.</span>',
+        "h1": 'Too young for dragonfire,<br><span class="grad">so he built his own.</span>',
         "sub": "Tower defense from the dragon\u2019s side of the cave. Raiders grab the hoard and run; kill the carrier and the coins fly home.",
     },
     "holohound": {
