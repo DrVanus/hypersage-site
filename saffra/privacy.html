@@ -39,7 +39,7 @@
 <main>
   <div class="container">
     <h1>Privacy Policy</h1>
-    <p class="last-updated">Last updated: August 24, 2026</p>
+    <p class="last-updated">Last updated: September 15, 2026</p>
 
     <div class="draft-note">
       This policy covers both the Saffra iOS app and the email you give us on the early-access list on this website. We will flag material changes here and in-app before they take effect.
@@ -49,7 +49,7 @@
 
     <h2>The short version</h2>
     <ul>
-      <li>We collect only what the app needs to work: your identity (via Sign in with Apple or Google), your cooking profile (equipment, allergies, preferences), your pantry, your conversation history with the chef, and recipes you import.</li>
+      <li>We collect only what the app needs to work: your identity (via Sign in with Apple or Google), your cooking profile (equipment, allergies, preferences), your pantry, your conversation history with the chef, and recipes you import or write yourself.</li>
       <li>We use this data <strong>solely to operate the app</strong> — personalize the chef, remember your pantry, adapt recipes for you. We do not sell it, we do not use it to train models, we do not share it with advertisers.</li>
       <li>Voice commands are transcribed by <strong>Apple's speech recognition service</strong>, which processes audio on Apple's servers.</li>
       <li>Your conversations with the chef do leave your device: each message, along with a summary of your profile and pantry, goes to our server and on to <strong>OpenAI</strong> to generate the reply. Two more things can leave to be read by an AI model — a photo of a shelf when you ask Saffra to identify what's on it, and the audio clip of any question you ask in Cooking Mode, which is re-transcribed by OpenAI's Whisper; those two are read, then discarded. All of it is detailed below.</li>
@@ -90,6 +90,7 @@
     <h3>Recipes</h3>
     <ul>
       <li>Recipes you import via URL or cookbook photo, and adapted versions created for you.</li>
+      <li><strong>Recipes you write yourself</strong> — the title, ingredients, steps, an optional family or author credit, and an optional photo. They are private to your account: no other user can see or search them, and they are never used in anyone else's recommendations. Saving one does not send it to OpenAI or any other AI model. Its photo is stored on our server with location and camera details removed, and is shown only to you. If you ask Saffra to adapt one of your recipes, its text is sent to OpenAI like any other recipe she adapts.</li>
     </ul>
 
     <h3>Community content (opt-in)</h3>
@@ -151,6 +152,7 @@
       <li><strong>Account + profile + pantry</strong> — until you delete your account.</li>
       <li><strong>Conversations</strong> — individual messages may be auto-summarized and deleted after ~20 turns; summaries persist until you delete the conversation.</li>
       <li><strong>TTS audio cache</strong> — until you delete your account.</li>
+      <li><strong>Recipes you write yourself, and their photos</strong> — until you delete your account, which deletes them.</li>
       <li><strong>Voice audio sent to Whisper</strong> — not stored; discarded after transcription.</li>
       <li><strong>Ingredient/shelf photos</strong> — not stored; held only for the length of the request that identifies the foods in them, then discarded.</li>
       <li><strong>Community posts, photos, comments, likes, follows, blocks, notifications</strong> (only if community sharing becomes available; none exist today) — until you delete them individually or delete your account. When you delete your account we hard-delete the photos from object storage and remove the associated rows. Reports you've filed are retained in an anonymized form so we can keep acting on repeat abuse.</li>
