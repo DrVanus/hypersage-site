@@ -6727,15 +6727,15 @@
   Game.prototype._machineMenuSignature = function () {
     var tw = this._machineMenuTower(), m = this.menu || {};
     return [m.towerIdx, m.forkFor, m.forkChoice, !!m.confirmSell, !!m.aimMenu, tw && tw.tid,
-      tw && tw.level, tw && tw.fork, tw && tw.targeting,
+      tw && tw.level, tw && tw.fork, tw && tw.targeting, !!(tw && tw.jamT > 0),
       this.gold, this.hero.manTid, this.hero.manned, this.hero.downT > 0].join(':');
   };
   Game.prototype._machineMenuGeom = function (tw) {
     var v = this.view, u = 1 / v.scale, m = this.menu || {}, H = this._hudGeom();
     var aimed = !TOWER_TYPES[tw.type].support && tw.type !== 'crystal' && tw.type !== 'rotor';
     var fork = m.forkFor !== undefined, compact = v.cw <= 340;
-    var height = fork ? 234 : m.aimMenu ? 246 : m.confirmSell ? 176 : compact ? 184 : 196;
-    var w = Math.min(v.w - 24 * u, 288 * u), h = height * u, anchor = this._uiAnchor(tw);
+    var height = fork ? 234 : m.aimMenu ? 204 : m.confirmSell ? 190 : 250;
+    var w = Math.min(v.w - 24 * u, 296 * u), h = height * u, anchor = this._uiAnchor(tw);
     // Keep the actual machine in view. The dock yields its space while these
     // local controls are open; the battle and its top status bar remain visible.
     var img = ART.images['t_' + tw.type], sw = 54 * (1 + tw.level * 0.12);
@@ -6767,6 +6767,26 @@
       if (value < score) { score = value; best = { x: x, y: y, placement: c.placement }; }
     });
     var x = best.x, y = best.y, width = w / u, inner = width - 20;
+    var panels = [{ x: x, y: y, w: w, h: h }], split = 0, lowerY = 0;
+    // A phone cannot fit a tall, full-width card beside a central machine.
+    // Split only BETWEEN complete sections, leaving the machine in the gap.
+    // No control shrinks, scrolls away, or becomes detached from its hit area.
+    var overlap = Math.max(0, Math.min(x + w, bounds.x + bounds.w) - Math.max(x, bounds.x)) *
+      Math.max(0, Math.min(y + h, bounds.y + bounds.h) - Math.max(y, bounds.y));
+    if (overlap > 0) {
+      var above = bounds.y - gap - top, below = bottom + h - bounds.y - bounds.h - gap;
+      var cuts = fork ? [52, 132, 166] : m.aimMenu ? [52, 108] : m.confirmSell ? [52, 120] : [52, 122, 180];
+      for (var ci = 0; ci < cuts.length; ci++) {
+        var cut = cuts[ci], upperH = cut * u, lowerH = h - upperH;
+        if (upperH <= above && lowerH <= below) {
+          split = cut; y = bounds.y - gap - upperH; lowerY = bounds.y + bounds.h + gap;
+          x = clamp(anchor.x - w / 2, left, right);
+          panels = [{ x: x, y: y, w: w, h: upperH }, { x: x, y: lowerY, w: w, h: lowerH }];
+          best.placement = 'split'; break;
+        }
+      }
+    }
+    function at(py) { return split && py >= split ? lowerY + (py - split) * u : y + py * u; }
     // Tether joins the two closest edges. It remains short when the panel is
     // clamped near a screen edge instead of pretending to be a bottom drawer.
     var tx = clamp(anchor.x, x + 16 * u, x + w - 16 * u);
@@ -6777,21 +6797,22 @@
       source = { x: onLeft ? bounds.x : bounds.x + bounds.w, y: bounds.y + bounds.h / 2 };
       target = { x: onLeft ? x + w : x, y: clamp(source.y, y + 16 * u, y + h - 16 * u) };
     }
-    function rect(px, py, pw, ph) { return { x: x + px * u, y: y + py * u, w: pw * u, h: ph * u }; }
-    var row = compact ? 126 : 134, smallW = aimed ? 62 : 74, crewW = aimed ? 98 : inner - smallW - 6;
-    return { x: x, y: y, w: w, h: h, u: u, aimed: aimed, fork: fork, compact: compact,
+    if (split) { source = { x: bounds.x, y: bounds.y + bounds.h / 2 }; target = { x: x, y: y + panels[0].h }; }
+    function rect(px, py, pw, ph) { return { x: x + px * u, y: at(py), w: pw * u, h: ph * u }; }
+    return { x: x, y: y, w: w, h: split ? lowerY + panels[1].h - y : h, u: u, aimed: aimed, fork: fork, compact: compact,
+      panels: panels, split: split, at: at, footerY: at(height - 7),
       anchor: { x: anchor.x, y: anchor.y }, machineBounds: bounds, placement: best.placement,
       tether: { source: source, target: target },
       close: rect(width - 54, 6, 44, 44), pause: rect(width - 100, 6, 44, 44),
       stats: rect(10, 46, inner, 16),
-      upgrade: rect(10, m.confirmSell ? 56 : compact ? 64 : 68, inner, m.confirmSell ? 60 : compact ? 56 : 60),
-      crew: rect(10, row, crewW, compact ? 48 : 52),
-      aim: rect(10 + crewW + 6, row, inner - crewW - smallW - 12, compact ? 48 : 52),
-      sell: rect(width - 10 - smallW, row, smallW, compact ? 48 : 52),
+      upgrade: rect(10, m.confirmSell ? 56 : 54, inner, m.confirmSell ? 60 : 64),
+      crew: rect(10, 128, inner, 48),
+      aim: rect(10, 184, inner - 88, 44),
+      sell: rect(width - 90, 184, 80, 44),
       keep: rect(10, 122, inner, 44),
-      cards: [rect(10, 54, (inner - 6) / 2, 84), rect(13 + inner / 2, 54, (inner - 6) / 2, 84)],
-      buy: rect(10, 182, inner, 44),
-      aimCards: [0, 1, 2, 3].map(function (i) { return rect(10, 54 + i * 46, inner, 44); }) };
+      cards: [rect(10, 54, (inner - 6) / 2, 74), rect(13 + inner / 2, 54, (inner - 6) / 2, 74)],
+      buy: rect(10, 168, inner, 44),
+      aimCards: [0, 1, 2, 3].map(function (i) { return rect(10 + (i % 2) * (inner + 6) / 2, 54 + Math.floor(i / 2) * 56, (inner - 6) / 2, 50); }) };
   };
   // Portraits use the battle renderer with an isolated, still machine. Four
   // tiers share one crop, so their real size and equipment remain comparable.
@@ -6947,13 +6968,13 @@
       add('confirmSell', G.upgrade, 'Sell this machine', ['You receive ' + refund + ' gold. Its upgrades are lost.', 'Gold ' + this.gold + ' → ' + (this.gold + refund)], '+' + refund + 'g');
       add('keep', G.keep, 'Keep machine', ['Return to its controls']);
     } else {
-      add('upgrade', G.upgrade, tw.level === 0 ? 'Upgrade to Level 2' : tw.level === 1 ? 'Choose specialization' : row.name,
+      if (tw.level < 2) add('upgrade', G.upgrade, tw.level === 0 ? 'Upgrade to Level 2' : 'Upgrade to MAX',
         tw.level === 0 ? machineUpgradeLines(tw) : tw.level === 1 ? ['Compare two permanent paths', this.gold < cost ? 'Need ' + (cost - this.gold) + 'g more to buy one' : 'Choose what this machine does best'] : [row.pitch, 'Fully upgraded · this path is permanent'],
         tw.level < 2 ? cost + 'g' : 'MAX', tw.level === 2 || tw.level === 0 && this.gold < cost);
       if (G.aimed) add('aim', G.aim, 'Aim: ' + AIM_MODES[tw.targeting | 0],
         [['Closest to hoard', 'Most health', 'Newest arrival', 'Healers first'][tw.targeting | 0] + ' · carriers take priority']);
       var assigned = this.hero.manTid === tw.tid;
-      add('crew', G.crew, this.hero.downT > 0 ? 'Wick is recovering' : assigned ? this.hero.manned ? 'Release Wick' : 'Cancel crew order' : 'Crew with Wick',
+      add('crew', G.crew, this.hero.downT > 0 ? 'Wick is recovering' : assigned ? this.hero.manned ? 'Release Wick' : 'Cancel crew order' : 'Send Wick here',
         [this.hero.downT > 0 ? 'Crew available when Wick recovers' : assigned ? this.hero.manned ? 'Wick returns to the floor' : 'Bonus starts when Wick arrives'
           : tw.type === 'bellows' ? '+60% aura strength' : tw.type === 'press' ? '+50% gold income' : '+70% fire rate · +30% damage'], '', this.hero.downT > 0);
       add('sell', G.sell, 'Sell…', [this._sellValue(tw) + 'g refund']);
@@ -6975,7 +6996,7 @@
       if (tap.x >= r.x && tap.x <= r.x + r.w && tap.y >= r.y && tap.y <= r.y + r.h) { hit = actions[i]; break; }
     }
     if (!hit) {
-      if (tap.x < G.x || tap.x > G.x + G.w || tap.y < G.y || tap.y > G.y + G.h) {
+        if (!G.panels.some(function (r) { return tap.x >= r.x && tap.x <= r.x + r.w && tap.y >= r.y && tap.y <= r.y + r.h; })) {
         // A visible neighbouring machine takes one tap to select. Empty floor
         // only dismisses; this same tap must not also move Wick or place a build.
         this.menu = null;
@@ -10326,7 +10347,7 @@
     add(H.barX,H.topY,H.barW,H.barH);
     if(this.rival)add(H.barX,H.topY+H.barH+4,H.barW,26);
     if(this.trial)add(H.barX,H.topY+H.barH,H.barW,18);
-    if(this.menu){var tw=this._machineMenuTower();if(tw)out.push(this._machineMenuGeom(tw));return out;}
+    if(this.menu){var tw=this._machineMenuTower();if(tw)out=out.concat(this._machineMenuGeom(tw).panels);return out;}
     if(H.commandRow)add(H.commandRow.x,H.commandRow.y,H.commandRow.w,H.commandRow.h);
     // The corner action cards own their screen area whenever they are shown.
     if(this.shopPick<0){if(!this.mods.breathOff)add(H.breathRect.x,H.breathRect.y,H.breathRect.w,H.breathRect.h);add(H.startRect.x,H.startRect.y,H.startRect.w,H.startRect.h);}
@@ -10975,122 +10996,146 @@
     }
   };
 
-  Game.prototype._drawMenus = function (ctx) {
-    var tw = this._machineMenuTower();
-    if (!tw) return;
-    var m = this.menu, G = this._machineMenuGeom(tw), u = G.u;
-    var tt = TOWER_TYPES[tw.type], row = lvlRow(tw), actions = this._machineMenuActions();
-    var wallet = this.gold, cream = '#fff0d5', gold = '#eac583', muted = '#c1b6a3';
-    function font(size, bold) { ctx.font = (bold ? '650 ' : '') + (size * u) + 'px system-ui, sans-serif'; }
-    function label(text, x, y, size, color, bold, max) {
-      font(size, bold); ctx.fillStyle = color; ctx.textAlign = 'left';
-      ctx.fillText(max ? fitText(ctx, text, max) : text, x, y);
-    }
-    function wrap(text, x, y, width, size, color, limit) {
-      font(size, false); ctx.fillStyle = color; ctx.textAlign = 'left';
-      var words = text.split(' '), line = '', lines = [];
-      words.forEach(function (word) { var next = line ? line + ' ' + word : word;
-        if (line && ctx.measureText(next).width > width) { lines.push(line); line = word; } else line = next; });
-      if (line) lines.push(line);
-      lines.slice(0, limit).forEach(function (s, i) { ctx.fillText(i === limit - 1 && lines.length > limit ? fitText(ctx, lines.slice(i).join(' '), width) : s, x, y + i * (size + 3) * u); });
-    }
-    function panel(r, fill, stroke, radius) {
-      ctx.fillStyle = fill; rr(ctx, r.x, r.y, r.w, r.h, (radius || 7) * u); ctx.fill();
-      ctx.strokeStyle = stroke; ctx.lineWidth = u; rr(ctx, r.x, r.y, r.w, r.h, (radius || 7) * u); ctx.stroke();
-    }
+  Game.prototype._drawWickPortrait = function (ctx, r, dim) {
+    var img = this._myPlate(ART.images.hero_title || ART.images.hero);
     ctx.save();
-    // World-attached controls. No screen scrim: the selected machine and the
-    // neighbouring battlefield stay readable while a player makes a decision.
-    var stem = G.tether;
-    ctx.lineCap = 'round'; ctx.strokeStyle = '#241e1b'; ctx.lineWidth = 4 * u;
-    ctx.beginPath(); ctx.moveTo(stem.source.x, stem.source.y); ctx.lineTo(stem.target.x, stem.target.y); ctx.stroke();
-    ctx.strokeStyle = gold; ctx.lineWidth = 1.5 * u; ctx.stroke();
-    ctx.fillStyle = gold; ctx.beginPath(); ctx.arc(stem.source.x, stem.source.y, 2.4 * u, 0, 6.283); ctx.fill();
-    ctx.shadowColor = 'rgba(0,0,0,0.65)'; ctx.shadowBlur = 12 * u; ctx.shadowOffsetY = 3 * u;
-    var bg = ctx.createLinearGradient(G.x, G.y, G.x, G.y + G.h);
-    bg.addColorStop(0, '#302b27'); bg.addColorStop(1, '#1e1d20');
-    panel(G, bg, '#a58353', 10); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-    ctx.fillStyle = '#c99f61'; ctx.fillRect(G.x + 12 * u, G.y, Math.min(74 * u, G.w / 3), 2 * u);
-    var subview = G.fork || m.confirmSell || m.aimMenu;
-    label(G.fork ? 'Final upgrade' : m.confirmSell ? 'Sell machine?' : m.aimMenu ? 'Target priority' : tt.name,
-      G.x + 12 * u, G.y + 23 * u, 14, cream, true, G.w - 115 * u);
-    var waveLabel = this._battleWaveLabel().replace('WAVE ', 'Wave ').replace(' / ', '/') + (this.waveActive ? '' : ' next');
-    var subtitle = subview ? tt.short + ' · ' + waveLabel : 'L' + (tw.level + 1) + ' · ' + waveLabel + ' · ' + (tw.jamT > 0 ? 'Jammed' : this.hero.manTid === tw.tid ? this.hero.manned ? 'Wick aboard' : 'Wick on way' : this.waveActive ? 'Fighting' : 'Ready');
-    label(subtitle, G.x + 12 * u, G.y + 41 * u, 10.5, muted, false, G.w - 114 * u);
-    if (!subview) {
-      var stats = machineStats(tw, row), summary;
-      if (tw.type === 'press') summary = stats[0].value + ' / wave · ' + stats[1].value + ' / kill';
-      else if (tw.type === 'bellows') summary = stats[0].value + ' ' + stats[0].label.toLowerCase() + ' · ' + row.range + ' reach';
-      else summary = row.dmg + ' damage · ' + machineNumber(row.rate) + '/sec · ' + row.range + ' reach';
-      label('Base · ' + summary, G.stats.x + 2 * u, G.stats.y + 11 * u, 10.5, gold, false, G.stats.w - 4 * u);
+    ctx.beginPath(); ctx.arc(r.x+r.w/2,r.y+r.h/2,r.w/2,0,Math.PI*2); ctx.clip();
+    ctx.fillStyle='#492a20'; ctx.fillRect(r.x,r.y,r.w,r.h);
+    if (dim) ctx.globalAlpha*=.48;
+    if(img)ctx.drawImage(img,img.width*.145,0,img.width*.58,img.height*.516,r.x,r.y,r.w,r.h);
+    ctx.restore();
+  };
+  Game.prototype._drawMenus = function (ctx) {
+    var tw = this._machineMenuTower(); if (!tw) return;
+    var m=this.menu,G=this._machineMenuGeom(tw),u=G.u,tt=TOWER_TYPES[tw.type],row=lvlRow(tw);
+    var actions=this._machineMenuActions(),cream='#fff0d5',gold='#eac583',muted='#c9bda9',ember='#dd986b',steel='#a8c9cf',red='#efa18f';
+    function font(size,bold){ctx.font=(bold?'650 ':'')+(size*u)+'px system-ui, sans-serif';}
+    function label(s,x,y,size,color,bold,max){font(size,bold);ctx.fillStyle=color;ctx.textAlign='left';ctx.fillText(max?fitText(ctx,s,max):s,x,y);}
+    function panel(r,fill,stroke,radius){ctx.fillStyle=fill;rr(ctx,r.x,r.y,r.w,r.h,(radius||7)*u);ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=u;rr(ctx,r.x,r.y,r.w,r.h,(radius||7)*u);ctx.stroke();}}
+    function gradient(r,a,b){var g=ctx.createLinearGradient(r.x,r.y,r.x,r.y+r.h);g.addColorStop(0,a);g.addColorStop(1,b);return g;}
+    function summary(){
+      if(tw.type==='press')return row.waveGold+'g / wave · '+(row.killGold||0)+'g / kill';
+      if(tw.type==='bellows')return '+'+Math.round((row.auraDmg||row.auraRate)*100)+'% '+(row.auraDmg?'damage':'fire rate')+' · '+row.range+' reach';
+      return row.dmg+' damage · '+machineNumber(row.rate)+'/sec · '+row.range+' reach';
     }
-    if (G.fork) {
-      var selected = m.forkChoice === 1 ? 1 : 0, fk = tt.forks[selected], lines = machineForkLines(tw, fk);
-      label(MACHINE_PERK_LABELS[tw.type][selected], G.x + 13 * u, G.y + 151 * u, 10.5, cream, true, G.w - 26 * u);
-      label(lines[0], G.x + 13 * u, G.y + 164 * u, 10.5, muted, false, G.w - 26 * u);
-      label(lines[1], G.x + 13 * u, G.y + 177 * u, 10.5, muted, false, G.w - 26 * u);
+    function check(x,y,color){ctx.strokeStyle=color;ctx.lineWidth=1.8*u;ctx.beginPath();ctx.moveTo(x-4*u,y);ctx.lineTo(x-u,y+3*u);ctx.lineTo(x+5*u,y-4*u);ctx.stroke();}
+    var sub=G.fork||m.confirmSell||m.aimMenu;
+    ctx.save();ctx.lineCap='round';
+    var stem=G.tether;
+    ctx.strokeStyle='#241e1b';ctx.lineWidth=4*u;ctx.beginPath();ctx.moveTo(stem.source.x,stem.source.y);ctx.lineTo(stem.target.x,stem.target.y);ctx.stroke();
+    ctx.strokeStyle=gold;ctx.lineWidth=1.5*u;ctx.stroke();
+    G.panels.forEach(function(r){
+      ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=12*u;ctx.shadowOffsetY=3*u;
+      panel(r,gradient(r,'#302b27','#1e1d20'),'#a58353',10);
+      ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    });
+    ctx.fillStyle=gold;ctx.fillRect(G.x+12*u,G.y,65*u,2*u);
+    label(G.fork?'Final upgrade':m.confirmSell?'Sell machine?':m.aimMenu?'Target priority':tt.name,G.x+12*u,G.y+21*u,13,cream,true,G.w-114*u);
+    if(sub){
+      label(G.fork?'Level 2 → 3 · choose one path':m.aimMenu?tt.short+' · change aim':tt.short+' · upgrades will be lost',G.x+12*u,G.y+40*u,10,muted,false,G.w-114*u);
+    }else{
+      // Exactly three level markers. Future prices are shown only on the
+      // purchase action, so the last-step price cannot imply total cost to MAX.
+      var positions=[12,44,76],widths=[25,25,48];
+      for(var i=0;i<3;i++){
+        var r={x:G.x+positions[i]*u,y:G.y+29*u,w:widths[i]*u,h:18*u},built=i<=tw.level;
+        panel(r,i===tw.level?'#6a502d':'#242222',built?'#c7a162':'#6d6254',4);
+        font(10,true);ctx.fillStyle=built?cream:muted;ctx.textAlign='center';ctx.fillText(i===2?'3 MAX':String(i+1),r.x+r.w/2,r.y+13*u);
+        if(i<2){ctx.strokeStyle='#96846a';ctx.lineWidth=u;ctx.beginPath();ctx.moveTo(r.x+r.w+2*u,r.y+9*u);ctx.lineTo(r.x+r.w+5*u,r.y+9*u);ctx.stroke();}
+      }
+      label(tw.level===2?'Done':(2-tw.level)+' left',G.x+132*u,G.y+42*u,10.5,tw.level===2?gold:muted,false);
     }
-    actions.forEach(function (a) {
-      var r = a.rect, isBuy = /^fork[01]$/.test(a.id), preview = /^preview[01]$/.test(a.id);
-      var aimChoice = /^aim[0-3]$/.test(a.id), danger = a.id === 'confirmSell';
-      var chosen = preview ? Number(a.id.slice(-1)) === (m.forkChoice === 1 ? 1 : 0) : aimChoice && Number(a.id.slice(-1)) === (tw.targeting | 0);
-      var primary = a.id === 'upgrade' && tw.level < 2 || isBuy;
-      var accent = danger ? '#dc9b85' : gold;
-      panel(r, danger ? '#4a2927' : chosen ? '#473b2a' : primary && !a.disabled ? '#413526' : '#272528',
-        a.disabled ? '#5d5449' : chosen || primary || danger ? accent : '#5c5045');
-      if (a.id === 'close') {
-        font(25, false); ctx.fillStyle = cream; ctx.textAlign = 'center';
-        ctx.fillText(subview ? '‹' : '×', r.x + r.w / 2, r.y + 30 * u); ctx.textAlign = 'left'; return;
-      }
-      if (a.id === 'pause') {
-        ctx.fillStyle = muted; ctx.fillRect(r.x + 17 * u, r.y + 10 * u, 3 * u, 12 * u);
-        ctx.fillRect(r.x + 24 * u, r.y + 10 * u, 3 * u, 12 * u);
-        font(8.5, false); ctx.textAlign = 'center'; ctx.fillText('Pause', r.x + r.w / 2, r.y + 35 * u); ctx.textAlign = 'left'; return;
-      }
-      var tx = r.x + 10 * u, max = r.w - 20 * u;
-      if (preview) {
-        var optionIndex = Number(a.id.slice(-1));
-        this._drawMachinePortrait(ctx, tw.type, 2, optionIndex, {x:r.x+12*u,y:r.y+5*u,w:r.w-24*u,h:56*u});
-        machineAbilityGlyph(ctx,tw.type,optionIndex,r.x+r.w-17*u,r.y+18*u,11*u);
-        font(11, true); ctx.fillStyle = chosen ? cream : muted; ctx.textAlign = 'center';
-        ctx.fillText(fitText(ctx, a.title, max), r.x + r.w / 2, r.y + 75 * u); ctx.textAlign = 'left';
-        if (chosen) { ctx.fillStyle = gold; ctx.fillRect(r.x + 12 * u, r.y + r.h - 3 * u, r.w - 24 * u, 2 * u); }
-      } else if (aimChoice) {
-        ctx.strokeStyle = chosen ? gold : muted; ctx.lineWidth = u;
-        ctx.beginPath(); ctx.arc(tx + 6 * u, r.y + 22 * u, 6 * u, 0, 6.283); ctx.stroke();
-        if (chosen) { ctx.fillStyle = gold; ctx.beginPath(); ctx.arc(tx + 6 * u, r.y + 22 * u, 3 * u, 0, 6.283); ctx.fill(); }
-        label(a.title, tx + 22 * u, r.y + 18 * u, 12.5, cream, true, max - 22 * u);
-        label(a.detail[0], tx + 22 * u, r.y + 34 * u, 10, muted, false, max - 22 * u);
-      } else if (isBuy) {
-        label(a.disabled ? 'Need ' + (row.upgradeCost - wallet) + 'g more' : a.title, tx, r.y + 19 * u, 12.5, a.disabled ? muted : cream, true, max - 52 * u);
-        label('Permanent choice · balance ' + wallet + 'g', tx, r.y + 34 * u, 9.5, muted, false, max - 48 * u);
-        font(14, true); ctx.fillStyle = gold; ctx.textAlign = 'right'; ctx.fillText(row.upgradeCost + 'g', r.x + r.w - 10 * u, r.y + 27 * u); ctx.textAlign = 'left';
-      } else if (a.id === 'upgrade' || danger) {
-        if (!danger) {
-          this._drawMachinePortrait(ctx, tw.type, Math.min(2, tw.level + 1), tw.fork || 0, {x:r.x+5*u,y:r.y+4*u,w:44*u,h:r.h-8*u});
-          tx += 44*u; max -= 44*u;
+    if(G.fork){
+      var selected=m.forkChoice===1?1:0,fk=tt.forks[selected],lines=machineForkLines(tw,fk);
+      label(MACHINE_PERK_LABELS[tw.type][selected],G.x+12*u,G.at(139),10.5,cream,true,G.w-24*u);
+      label(lines[0],G.x+12*u,G.at(151),10.5,muted,false,G.w-24*u);
+      label(lines[1],G.x+12*u,G.at(163),10.5,muted,false,G.w-24*u);
+    }else if(m.aimMenu){
+      label('Stolen-coin carriers always take priority.',G.x+12*u,G.at(179),10,muted,false,G.w-24*u);
+    }else if(!m.confirmSell&&tw.level===2){
+      // A finished upgrade is a status plaque, never a disabled purchase tile.
+      var r=G.upgrade;ctx.fillStyle='#d0ae73';ctx.fillRect(r.x,r.y+7*u,2*u,r.h-14*u);
+      this._drawMachinePortrait(ctx,tw.type,2,tw.fork||0,{x:r.x+5*u,y:r.y+4*u,w:42*u,h:48*u});
+      label(row.name,r.x+53*u,r.y+17*u,12.5,cream,true,r.w-106*u);
+      check(r.x+r.w-43*u,r.y+13*u,gold);label('MAX',r.x+r.w-33*u,r.y+17*u,11,gold,true);
+      label(MACHINE_PERK_LABELS[tw.type][tw.fork||0],r.x+53*u,r.y+33*u,10,muted,false,r.w-59*u);
+      label('Base · '+summary(),r.x+53*u,r.y+48*u,10,muted,false,r.w-59*u);
+      label('Fully upgraded · permanent path',r.x+53*u,r.y+61*u,10,gold,false,r.w-59*u);
+    }
+    if(!sub&&!G.aimed){
+      label('No target setting',G.aim.x+2*u,G.aim.y+17*u,11.5,muted,true,G.aim.w-4*u);
+      label(tt.support?'Supports your workshop':'Targets automatically',G.aim.x+2*u,G.aim.y+33*u,10,muted,false,G.aim.w-4*u);
+    }
+    var wave=this._battleWaveLabel().replace('WAVE ','Wave ').replace(' / ','/');
+    label(wave+' · '+(tw.jamT>0?'Jammed · machine stopped':this.waveActive?'Battle continues':'Ready for next wave'),G.x+12*u,G.footerY,10,tw.jamT>0?red:muted,false,G.w-24*u);
+    actions.forEach(function(a){
+      var r=a.rect,tx=r.x+10*u,max=r.w-20*u,isBuy=/^fork[01]$/.test(a.id),preview=/^preview[01]$/.test(a.id),aimChoice=/^aim[0-3]$/.test(a.id);
+      var chosen=preview?Number(a.id.slice(-1))===(m.forkChoice===1?1:0):aimChoice&&Number(a.id.slice(-1))===(tw.targeting|0);
+      if(a.id==='close'||a.id==='pause'){
+        panel(r,'#262322','#72614a',7);
+        if(a.id==='pause'){
+          ctx.fillStyle=cream;ctx.fillRect(r.x+16*u,r.y+9*u,4*u,12*u);ctx.fillRect(r.x+24*u,r.y+9*u,4*u,12*u);
+        }else{
+          ctx.strokeStyle=cream;ctx.lineWidth=2*u;ctx.beginPath();
+          if(sub){ctx.moveTo(r.x+25*u,r.y+8*u);ctx.lineTo(r.x+18*u,r.y+15*u);ctx.lineTo(r.x+25*u,r.y+22*u);}
+          else{ctx.moveTo(r.x+16*u,r.y+9*u);ctx.lineTo(r.x+28*u,r.y+21*u);ctx.moveTo(r.x+28*u,r.y+9*u);ctx.lineTo(r.x+16*u,r.y+21*u);}ctx.stroke();
         }
-        label(a.title, tx, r.y + 18 * u, 12.5, a.disabled ? muted : cream, true, max - 46 * u);
-        font(13, true); ctx.fillStyle = gold; ctx.textAlign = 'right'; ctx.fillText(a.price, r.x + r.w - 10 * u, r.y + 18 * u); ctx.textAlign = 'left';
-        label(a.id === 'upgrade' && tw.level === 0 && a.disabled ? 'Need ' + (row.upgradeCost - wallet) + 'g more · ' + a.detail[0] : a.detail[0], tx, r.y + 35 * u, 10.5, muted, false, max);
-        label(a.detail[1], tx, r.y + 49 * u, 10, muted, false, max);
-      } else if (a.id === 'crew') {
-        var assigned = this.hero.manTid === tw.tid;
-        label(a.disabled ? 'Recovering' : assigned ? this.hero.manned ? 'Release Wick' : 'Cancel order' : 'Crew Wick', tx, r.y + 18 * u, 11.5, a.disabled ? muted : cream, true, max);
-        var benefit = a.disabled ? 'Crew unavailable' : assigned ? this.hero.manned ? 'Back to the floor' : 'Wick is on his way' : tw.type === 'press' ? '+50% income' : tw.type === 'bellows' ? '+60% aura' : '+70% fire rate';
-        label(benefit, tx, r.y + 33 * u, 9, muted, false, max);
-        if (!a.disabled && !assigned && !tt.support) label('+30% damage', tx, r.y + 44 * u, 9, muted, false, max);
-      } else if (a.id === 'aim') {
-        label('Aim: ' + AIM_MODES[tw.targeting | 0], tx, r.y + 19 * u, 10.5, cream, true, max);
-        label('Choose ▾', tx, r.y + 36 * u, 9.5, muted, false, max);
-      } else if (a.id === 'sell') {
-        label('Sell…', tx, r.y + 19 * u, 12, cream, true, max);
-        label(this._sellValue(tw) + 'g', tx, r.y + 36 * u, 10, muted, false, max);
-      } else {
-        font(12.5, true); ctx.fillStyle = cream; ctx.textAlign = 'center';
-        ctx.fillText(a.title, r.x + r.w / 2, r.y + 28 * u); ctx.textAlign = 'left';
+        font(10,false);ctx.textAlign='center';ctx.fillStyle=muted;ctx.fillText(a.id==='pause'?'Pause':sub?'Back':'Close',r.x+r.w/2,r.y+36*u);return;
       }
-    }, this);
+      if(a.id==='upgrade'){
+        panel(r,gradient(r,a.disabled?'#39332a':'#e2bd78',a.disabled?'#2b2825':'#b98944'),a.disabled?'#8e7c5e':'#f3d89b');
+        var ink=a.disabled?cream:'#302213',secondary=a.disabled?muted:'#47331c';
+        if(tw.level===0)this._drawMachinePortrait(ctx,tw.type,1,0,{x:r.x+5*u,y:r.y+5*u,w:42*u,h:46*u});
+        else{
+          ctx.strokeStyle=ink;ctx.lineWidth=2*u;ctx.beginPath();ctx.moveTo(r.x+26*u,r.y+40*u);ctx.lineTo(r.x+26*u,r.y+26*u);ctx.lineTo(r.x+15*u,r.y+17*u);ctx.moveTo(r.x+26*u,r.y+26*u);ctx.lineTo(r.x+37*u,r.y+17*u);ctx.stroke();
+          [15,37].forEach(function(x){ctx.beginPath();ctx.moveTo(r.x+(x-4)*u,r.y+17*u);ctx.lineTo(r.x+x*u,r.y+13*u);ctx.lineTo(r.x+(x+4)*u,r.y+17*u);ctx.stroke();});
+        }
+        tx=r.x+53*u;max=r.w-63*u;
+        label(a.title,tx,r.y+17*u,12.5,ink,true,max-43*u);
+        font(13,true);ctx.fillStyle=ink;ctx.textAlign='right';ctx.fillText(a.price,r.x+r.w-9*u,r.y+17*u);
+        var detail=tw.level===0?a.detail.map(function(s){return s.replace(' attacks/sec','/sec').replace(' · affects nearby machines','');}):['Choose 1 of 2 permanent paths','Base · '+summary()];
+        label(detail[0],tx,r.y+33*u,10,secondary,false,max);
+        label(detail[1],tx,r.y+47*u,10,secondary,false,max);
+        if(this.gold<row.upgradeCost)label('Need '+(row.upgradeCost-this.gold)+'g more'+(tw.level===1?' · compare now':''),tx,r.y+60*u,10,ink,true,max);
+      }else if(a.id==='crew'){
+        var assigned=this.hero.manTid===tw.tid,aboard=assigned&&this.hero.manned;
+        panel(r,gradient(r,a.disabled?'#302d2a':aboard?'#42392a':'#493025','#2b2421'),a.disabled?'#73665a':aboard?'#b8ae78':'#ae7953');
+        this._drawWickPortrait(ctx,{x:r.x+6*u,y:r.y+5*u,w:38*u,h:38*u},a.disabled);
+        label(a.disabled?'Wick recovering':aboard?'Release Wick':assigned?'Cancel Wick’s order':'Send Wick here',r.x+52*u,r.y+19*u,12.5,a.disabled?muted:cream,true,r.w-76*u);
+        var benefit=a.disabled?'Available when Wick recovers':aboard?tw.jamT>0?'Jammed · Wick clearing jam':'Wick aboard · bonus active':assigned?'Wick is on his way':tw.jamT>0?'Send Wick to clear the jam':tt.support?tw.type==='press'?'+50% gold income':'+60% aura strength':'+70% fire rate · +30% damage';
+        label(benefit,r.x+52*u,r.y+36*u,10,a.disabled?muted:ember,false,r.w-61*u);
+        if(!a.disabled){if(aboard)check(r.x+r.w-17*u,r.y+17*u,gold);else{ctx.strokeStyle=ember;ctx.lineWidth=1.6*u;ctx.beginPath();ctx.moveTo(r.x+r.w-21*u,r.y+17*u);ctx.lineTo(r.x+r.w-13*u,r.y+17*u);if(!assigned){ctx.moveTo(r.x+r.w-17*u,r.y+13*u);ctx.lineTo(r.x+r.w-17*u,r.y+21*u);}ctx.stroke();}}
+      }else if(a.id==='aim'){
+        panel(r,'#252e31','#647e83');ctx.strokeStyle=steel;ctx.lineWidth=1.3*u;
+        var cx=r.x+19*u,cy=r.y+22*u;ctx.beginPath();ctx.arc(cx,cy,6*u,0,6.283);ctx.moveTo(cx-10*u,cy);ctx.lineTo(cx+10*u,cy);ctx.moveTo(cx,cy-10*u);ctx.lineTo(cx,cy+10*u);ctx.stroke();
+        label('Aim: '+AIM_MODES[tw.targeting|0],r.x+36*u,r.y+18*u,12,cream,true,r.w-43*u);
+        label('Change priority ›',r.x+36*u,r.y+34*u,10,steel,false,r.w-43*u);
+      }else if(a.id==='sell'){
+        panel(r,'#302422','#8e5d50');label('Sell',tx,r.y+18*u,12.5,red,true,max);label(this._sellValue(tw)+'g refund',tx,r.y+34*u,10,muted,false,max);
+      }else if(preview){
+        panel(r,chosen?'#51412d':'#282625',chosen?gold:'#716354');
+        var option=Number(a.id.slice(-1));this._drawMachinePortrait(ctx,tw.type,2,option,{x:r.x+8*u,y:r.y+3*u,w:r.w-16*u,h:48*u});
+        machineAbilityGlyph(ctx,tw.type,option,r.x+r.w-15*u,r.y+16*u,9*u);
+        font(12,true);ctx.fillStyle=cream;ctx.textAlign='center';ctx.fillText(fitText(ctx,a.title,max),r.x+r.w/2,r.y+65*u);
+        if(chosen){ctx.fillStyle=gold;ctx.fillRect(r.x+10*u,r.y+r.h-3*u,r.w-20*u,2*u);}
+      }else if(aimChoice){
+        panel(r,chosen?'#3b5155':'#252e31',chosen?steel:'#60767a');
+        var ai=Number(a.id.slice(-1));label(a.title,tx,r.y+19*u,12,cream,true,max-15*u);
+        label(['Closest to hoard','Most health','Newest arrival','Healers first'][ai],tx,r.y+36*u,10,muted,false,max);
+        if(chosen)check(r.x+r.w-14*u,r.y+15*u,steel);
+      }else if(isBuy){
+        panel(r,gradient(r,a.disabled?'#39332a':'#e2bd78',a.disabled?'#2b2825':'#b98944'),a.disabled?'#8e7c5e':'#f3d89b');
+        var ink=a.disabled?cream:'#302213';label(a.title,tx,r.y+18*u,12.5,ink,true,max-48*u);
+        label(a.disabled?'Need '+(row.upgradeCost-this.gold)+'g more':'Permanent choice · Level 3 / MAX',tx,r.y+34*u,10,a.disabled?muted:'#47331c',false,max-42*u);
+        font(14,true);ctx.fillStyle=ink;ctx.textAlign='right';ctx.fillText(row.upgradeCost+'g',r.x+r.w-10*u,r.y+26*u);
+      }else if(a.id==='confirmSell'){
+        panel(r,'#4a2927','#c78975');label('Sell for '+this._sellValue(tw)+'g',tx,r.y+19*u,12.5,cream,true,max);
+        label('Machine and upgrades are removed.',tx,r.y+36*u,10.5,muted,false,max);
+        label('Gold '+this.gold+' → '+(this.gold+this._sellValue(tw)),tx,r.y+51*u,10.5,red,false,max);
+      }else{
+        panel(r,'#302e29','#96866d');font(12.5,true);ctx.fillStyle=cream;ctx.textAlign='center';ctx.fillText(a.title,r.x+r.w/2,r.y+28*u);
+      }
+    },this);
     ctx.restore();
   };
 
@@ -13016,7 +13061,7 @@
       hero.appendChild(caption); body.appendChild(hero);
       lesson('01','Protect your treasure', 'TREASURE is the 60 coins in your keep: lose them and the defense ends. BUILD GOLD pays for machines and upgrades. Spending build gold never empties your treasure.');
       lesson('02','Build, then call the wave', 'Pick a machine from the bar at the bottom, then tap clear ground beside the road. Round pads give a 20% discount. Dimmed machines show the stars that unlock them; › shows more.');
-      lesson('03','Put Wick to work', 'Tap the floor to move Wick. Tap a built machine, then Crew Wick, to put him to work. His BREATH button burns nearby enemies through armor.');
+      lesson('03','Put Wick to work', 'Tap the floor to move Wick. Tap a built machine, then Send Wick here, to put him to work. His BREATH button burns nearby enemies through armor.');
       lesson('04','Catch the thieves coming back', 'Raiders steal coins, then run for the exit. Move Wick beside a fleeing carrier to shake coins loose, or defeat it to recover the rest. Escaped coins are lost and lower your star rating.');
       paragraph('A good first build: a Crossbow on a round pad, then a Gemsinger to slow the raiders. Read the next wave before you call it.', 'guide-tip');
     }
@@ -13217,7 +13262,7 @@
       var focusedMachine=hits.contains(document.activeElement)?document.activeElement.getAttribute('data-machine-action'):null;
       hits.replaceChildren();
       if (!launch.hidden) {var help=g._titleGeom().help;launch.style.top=((help.y+g.view.oy)*g.view.scale)+'px';}
-      hits.removeAttribute('role'); hits.removeAttribute('aria-modal'); hits.setAttribute('aria-label','Game controls');
+      hits.removeAttribute('role'); hits.removeAttribute('aria-modal'); hits.removeAttribute('aria-describedby'); hits.setAttribute('aria-label','Game controls');
       if (g._lbAsk) {
         var A=lbAskGeom(g.view,g._lbAsk);
         hits.setAttribute('role','dialog'); hits.setAttribute('aria-modal','true');
@@ -13235,8 +13280,13 @@
           if (/^preview[01]$/.test(a.id)) hits.lastChild.setAttribute('aria-pressed', String(Number(a.id.slice(-1)) === (g.menu.forkChoice === 1 ? 1 : 0)));
           if (/^aim[0-3]$/.test(a.id)) hits.lastChild.setAttribute('aria-pressed', String(Number(a.id.slice(-1)) === (machine.targeting | 0)));
         });
+        if(machine){
+          var progress=el('p','guide-scout','Level '+(machine.level+1)+' of 3. '+(machine.level===2?lvlRow(machine).name+'. Fully upgraded. MAX. This path is permanent.':(2-machine.level)+' upgrade'+(machine.level===0?'s':'')+' left to MAX.'));
+          if(machine.jamT>0)progress.textContent+=' Jammed. Machine stopped.'+(g.hero.manTid===machine.tid&&g.hero.manned?' Wick is clearing the jam.':' Send Wick here to clear the jam faster.');
+          progress.id='machine-upgrade-status';hits.appendChild(progress);hits.setAttribute('aria-describedby',progress.id);
+        }
         var same=focusedMachine&&Array.prototype.find.call(hits.children,function(b){return b.getAttribute('data-machine-action')===focusedMachine&&!b.disabled;});
-        var first=hits.querySelector('button[data-machine-action="upgrade"]:not([disabled]),button[data-machine-action="preview0"],button[data-machine-action="aim0"],button[data-machine-action="keep"]');
+        var first=hits.querySelector('button[data-machine-action="upgrade"]:not([disabled]),button[data-machine-action="preview0"],button[data-machine-action="aim0"],button[data-machine-action="keep"],button[data-machine-action="crew"]:not([disabled])');
         var next=same||first||hits.firstChild;
         if(next)next.focus({preventScroll:true});
         return;
