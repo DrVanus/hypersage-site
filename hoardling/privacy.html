@@ -11,21 +11,22 @@
 <meta property="og:url" content="https://hypersage.ai/hoardling/privacy.html">
 <meta property="og:type" content="article">
 
-<meta property="og:image" content="https://hypersage.ai/hoardling/og-image.png">
+<meta property="og:image" content="https://hypersage.ai/hoardling/og-image.png?v=20260915a">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hypersage.ai/hoardling/og-image.png">
+<meta name="twitter:image" content="https://hypersage.ai/hoardling/og-image.png?v=20260915a">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#17100e">
-<link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=85d6295b91">
+<link rel="icon" type="image/png" sizes="192x192" href="app-icon-192.png?v=20260915a">
+<link rel="apple-touch-icon" href="app-icon-180.png?v=20260915a">
 <link rel="stylesheet" href="legal.css">
 </head>
 <body>
 <header class="site"><span class="mark"></span><a class="brand" href="./">Hoardling</a></header>
 <main class="wrap">
 <h1>Privacy</h1>
-<p class="updated">Last updated 13 September 2026</p>
+<p class="updated">Last updated 15 September 2026</p>
 
 <div class="card">
 <h2 style="margin-top:0">The short version</h2>
@@ -42,8 +43,9 @@ The details are below.</p>
 </div>
 
 <h2>What stays on your device</h2>
-<p>Everything about your run of the game — campaign stars, your best Daily Siege wave, which
-Forge upgrades you've bought, which trial badges you've earned, which raiders you've met, and
+<p>Everything about your run of the game — campaign stars and any campaign checkpoint, your best
+Daily Siege wave, which Forge upgrades you've bought, which trial badges you've earned, your Duel
+wins, your Hoard Marks and the looks you've unlocked or equipped, which raiders you've met, and
 your sound preference — is saved on your device. In the <strong>iPhone app</strong> the game
 is bundled inside the app and saves to the app's own storage on your phone; deleting the app
 deletes it. In a <strong>browser</strong> it is written to that browser's local storage, and
@@ -58,10 +60,11 @@ post your waves to the board, with two choices of the same size: <em>Post my wav
 <em>Don't post</em>. Tapping outside the question goes back to the title without answering, and you
 will be asked again next time. <strong>Until you choose <em>Post my waves</em>, the game makes no
 connection to the leaderboard at all</strong>: no session is created and no score is sent.</p>
-<p>If you choose <em>Post my waves</em>, then when a Daily Siege run calls its first wave your browser
+<p>If you choose <em>Post my waves</em>, then the first time the game needs the board your browser
 (or the iPhone app) is issued an <strong>anonymous session</strong> by our database provider,
-Supabase (no email, password or personal detail is asked for or collected), and the server issues a
-one-run token. When the run ends, the wave you reached is submitted to the board and the board's top
+Supabase (no email, password or personal detail is asked for or collected). That is when a Daily
+Siege run calls its first wave, when the server also issues a one-run token, or straight away if you
+said yes from a results screen, so the board can load there. When the run ends, the wave you reached is submitted to the board and the board's top
 rows are loaded for the results screen. If you choose <em>Don't post</em>, nothing about your Daily
 Siege runs leaves your device, and your best wave is still kept on it.</p>
 <p>Your answer is remembered on your device, and the results screen at the end of every Daily Siege
@@ -90,8 +93,10 @@ game uses that session only if you choose <em>Post my waves</em>, and never post
 is there. Campaign progress is kept separate. The iPhone app runs only its own bundled game and
 shares nothing with any website.</p>
 <p>If the leaderboard can't be reached — offline, or a slow connection — your pending score is held
-in local storage and retried later, up to six attempts over one hour, then dropped. It never grows
-beyond your ten most recent runs.</p>
+in local storage and tried again while the game is open, for example when your connection comes
+back. There is no background timer. It is dropped after seven failed attempts, or when an attempt
+fails more than an hour after the run ended. The queue never grows beyond your ten most recent
+runs.</p>
 
 <h2>What we never collect</h2>
 <ul>
@@ -99,8 +104,17 @@ beyond your ten most recent runs.</p>
   <li>No advertising identifiers, no ad SDK, no cross-app or cross-site tracking.</li>
   <li>No analytics or crash-reporting service is loaded by this build.</li>
   <li>No camera, microphone, contacts, or location access is requested — Hoardling is a
-  canvas game with touch/tap controls only.</li>
+  canvas game played with taps, clicks or the keyboard.</li>
 </ul>
+
+<h2>Who sees your requests</h2>
+<p>The Hoardling pages and the browser game are static files on hypersage.ai, which is hosted by
+<strong>GitHub Pages</strong>. Like any web host, GitHub's servers handle each request and see your IP
+address and browser details (<a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub privacy statement</a>).
+The pages set no cookies and load no web fonts, and until you say yes to the leaderboard neither the
+pages nor the game contact any other site. After a yes, leaderboard requests go to Supabase, as
+described above. The iPhone app carries the game inside it, so it loads nothing from hypersage.ai
+unless you open these pages from the app.</p>
 
 <h2>What we can't remove</h2>
 <p>A posted Daily Siege score is a row on a public leaderboard, tagged only with your generated

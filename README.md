@@ -9,9 +9,9 @@
 Static, no-build site for **HyperSage AI Labs**, the parent studio, plus the product
 sites that live under it as subfolders.
 
-Sixteen products: Holohound, Wingmate, Loam, Quietoak, CryptoSage AI, Saffra, StoryVault AI,
+Products: Holohound, Wingmate, Loam, Quietoak, CryptoSage AI, Saffra, StoryVault AI,
 Nightshelf, Rowan, Alder, Mythkin, Hexhunter, Mythwright, Waddleton, Hoardling and Gemburrow.
-Thirteen are iOS apps; **Waddleton, Hoardling and Gemburrow are browser games**. Portfolio
+Most are iOS apps; **Waddleton, Hoardling and Gemburrow are browser games**. Portfolio
 copy should say "consumer products" unless it is intentionally describing a specific
 platform. The page's own `id="product-*"` anchors are the count of record.
 
@@ -51,6 +51,12 @@ product on the studio page (`/alder/`, `/gemburrow/`, `/hexhunter/`, `/hoardling
 `/rowan/`, `/saffra/`, `/storyvault/`, `/waddleton/`, `/wingmate/`). One domain and one
 certificate serve the whole portfolio. CryptoSage AI (`cryptosageai.io`) is the one product
 still on its own origin.
+
+- `gemburrow/play/` and `hoardling/play/` are the playable browser builds (noindex), written
+  by each game's own ship script (for Hoardling: hoardkeep `tools/ship.sh`, guarded by
+  `tools/site_clobber_guard.sh`). Never hand-edit them here. `gemburrow/` and `hoardling/`
+  are the marketing pages. `hoardling/privacy.html`, `terms.html` and `support.html` stay at
+  `/hoardling/` because the iOS app and App Store Connect link them there.
 
 ### Studio pages
 

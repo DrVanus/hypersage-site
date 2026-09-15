@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    (function () {
+      try {
+        var q = location.search, mm = window.matchMedia;
+        var installed = navigator.standalone === true || !!(mm && mm('(display-mode: standalone)').matches);
+        var fromSite = document.referrer.indexOf(location.origin + '/') === 0;
+        if ((installed && !fromSite) || /[?&](r3d|seed|dev)=/.test(q)) location.replace('play/' + q + location.hash);
+      } catch (e) {}
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17100e">
+  <title>Hoardling: dragon tower defense</title>
+  <meta name="description" content="Free tower defense in your browser. Wick, a young dragon, builds machines to guard the hoard: raiders grab coins and run, and a fallen carrier's coins fly home.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://hypersage.ai/hoardling/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="HyperSage">
+  <meta property="og:title" content="Hoardling: Too young for dragonfire. Built his own.">
+  <meta property="og:description" content="Tower defense from the dragon's side of the cave. Raiders grab the hoard and run; kill the carrier and the coins fly home. Free in your browser.">
+  <meta property="og:url" content="https://hypersage.ai/hoardling/">
+  <meta property="og:image" content="https://hypersage.ai/hoardling/og-image.png?v=20260915a">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Hoardling: Wick, a young red dragon in brass goggles holding a wrench, beside the line Too young for dragonfire. Built his own.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hoardling: Too young for dragonfire. Built his own.">
+  <meta name="twitter:description" content="Tower defense from the dragon's side of the cave. Raiders grab the hoard and run; kill the carrier and the coins fly home.">
+  <meta name="twitter:image" content="https://hypersage.ai/hoardling/og-image.png?v=20260915a">
+  <meta name="twitter:image:alt" content="Hoardling: Wick, a young red dragon in brass goggles holding a wrench, beside the line Too young for dragonfire. Built his own.">
+
+  <link rel="icon" type="image/png" sizes="192x192" href="app-icon-192.png?v=20260915a">
+  <link rel="apple-touch-icon" href="app-icon-180.png?v=20260915a">
+  <link rel="preload" as="image" href="img/hero-cavern-1600.webp" imagesrcset="img/hero-cavern-900.webp 900w, img/hero-cavern-1600.webp 1600w" imagesizes="100vw" media="(min-width: 761px)">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* Hoardling's own palette: the game's boot splash, title plates and HUD. */
+      --bg: #17100e;
+      --bg-deep: #0c0705;
+      --glow: #2a1710;
+      --card: #2e1c12;
+      --card-deep: #1b110c;
+      --ink: #f2e6d4;
+      --ink-strong: #fff0d5;
+      --cream: #ffe9c4;
+      --muted: #c9bda9;
+      --tertiary: #ab9a82;
+      --label: #c4b594;
+      --gold: #ffd75e;
+      --gold-hi: #fff3cf;
+      --gold-deep: #7a4a12;
+      --amber: #ffb43c;
+      --ember: #ff9a3c;
+      --ember-soft: #ffb469;
+      --brass: #d4a840;
+      --brass-soft: #eac583;
+      --red-hi: #e05a4a;
+      --red: #b93636;
+      --red-lo: #8e2626;
+      --cta-ink: #fff4e0;
+      --violet-hi: #6a4fb0;
+      --violet: #4c357f;
+      --violet-lo: #3b2a6e;
+      --violet-ink: #bcaaf6;
+      --steel: #a8c9cf;
+      --success: #9ef58f;
+      --line: rgba(212, 168, 64, 0.20);
+      --line-strong: rgba(212, 168, 64, 0.44);
+      --radius: 14px;
+      --radius-lg: 20px;
+      --display: Georgia, 'Times New Roman', serif;
+      --ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 84px; color-scheme: dark; background: var(--bg); }
+    body {
+      font-family: var(--ui);
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.62;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    /* Torchlight from above and a warm pool at the foot, the way the cavern is lit. */
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 180, 60, 0.10), transparent 60%),
+        radial-gradient(ellipse 70% 45% at 50% 110%, rgba(122, 74, 18, 0.18), transparent 68%);
+    }
+
+    h1, h2, h3, .brand, .foot-brand, .plate-name { font-family: var(--display); line-height: 1.14; text-wrap: balance; overflow-wrap: break-word; }
+    p, li, summary, figcaption { overflow-wrap: break-word; }
+    h1 { font-size: clamp(2.5rem, 6.2vw, 4.1rem); font-weight: 700; letter-spacing: -0.005em; color: var(--ink-strong); }
+    h2 { font-size: clamp(1.85rem, 4vw, 2.7rem); font-weight: 700; color: var(--ink-strong); }
+    h3 { font-size: 1.24rem; font-weight: 700; color: var(--ink-strong); }
+
+    a { color: var(--gold); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--gold-hi); }
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+
+    .skip {
+      position: absolute; left: 16px; top: 12px; z-index: 100; transform: translateY(-160%);
+      background: var(--gold); color: #2a1a08; font-weight: 700; padding: 10px 16px; border-radius: 10px;
+    }
+    .skip:focus { transform: none; color: #2a1a08; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    main:focus { outline: none; }
+
+    .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ===== NAV ===== */
+    nav.site {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(23, 16, 14, 0.82);
+      backdrop-filter: saturate(150%) blur(14px);
+      -webkit-backdrop-filter: saturate(150%) blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    nav.site .container { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-top: 11px; padding-bottom: 11px; }
+    nav.site .brand {
+      display: flex; align-items: center; gap: 11px;
+      font-weight: 700; font-size: 1.3rem; color: var(--gold);
+      text-shadow: 0 2px 0 var(--gold-deep);
+    }
+    nav.site .brand img { width: 38px; height: 38px; border-radius: 10px; box-shadow: 0 0 18px rgba(255, 180, 60, 0.30); }
+    nav.site .links { display: flex; align-items: center; gap: 20px; font-size: 0.92rem; white-space: nowrap; }
+    nav.site .links a { color: var(--muted); font-weight: 600; padding: 10px 0; }
+    nav.site .links a:hover { color: var(--gold); }
+    nav.site .links a.nav-play {
+      color: var(--cta-ink); padding: 6px 15px; border: 1px solid transparent; border-radius: 999px;
+      background: linear-gradient(180deg, var(--red-hi), var(--red) 32%, var(--red-lo));
+      box-shadow: inset 0 0 0 1px rgba(255, 215, 94, 0.55);
+    }
+    nav.site .links a.nav-play:hover { color: #fff; }
+
+    .mobile-menu { display: none; position: relative; }
+    .mobile-menu summary {
+      list-style: none; cursor: pointer; color: var(--muted);
+      padding: 9px; border-radius: 10px; border: 1px solid var(--line-strong);
+      display: flex; align-items: center; min-width: 44px; min-height: 44px; justify-content: center;
+    }
+    .mobile-menu summary::-webkit-details-marker { display: none; }
+    .mobile-menu .mobile-links {
+      position: absolute; right: 0; top: calc(100% + 10px);
+      background: #21150f; border: 1px solid var(--line-strong);
+      border-radius: var(--radius); padding: 10px; min-width: 210px;
+      display: flex; flex-direction: column; gap: 2px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+      max-height: calc(100vh - 84px); max-height: calc(100dvh - 84px);
+      overflow-y: auto; overscroll-behavior: contain;
+    }
+    .mobile-menu .mobile-links a { color: var(--muted); font-weight: 600; padding: 11px 12px; border-radius: 8px; }
+    .mobile-menu .mobile-links a:hover { color: var(--gold); background: rgba(255, 215, 94, 0.07); }
+
+    /* ===== BUTTONS: the game's own ember plate with a gold rim ===== */
+    .btn-primary, .btn-ghost {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      min-height: 50px; padding: 13px 26px; border-radius: 999px;
+      font-weight: 700; font-size: 1.02rem; border: 1px solid transparent;
+      transition: transform .18s, box-shadow .18s, border-color .18s, color .18s;
+    }
+    .btn-primary {
+      color: var(--cta-ink);
+      background: linear-gradient(180deg, var(--red-hi), var(--red) 32%, var(--red-lo));
+      box-shadow: inset 0 0 0 1.5px rgba(255, 215, 94, 0.6), inset 0 1px 0 rgba(255, 233, 196, 0.35), 0 12px 30px rgba(185, 54, 54, 0.30);
+      text-shadow: 0 1px 0 rgba(90, 20, 12, 0.6);
+    }
+    .btn-primary:hover { transform: translateY(-2px); color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 215, 94, 0.85), inset 0 1px 0 rgba(255, 233, 196, 0.4), 0 16px 36px rgba(185, 54, 54, 0.40); }
+    .btn-ghost { color: var(--ink); background: rgba(212, 168, 64, 0.06); border-color: var(--line-strong); }
+    .btn-ghost:hover { transform: translateY(-2px); color: var(--gold-hi); border-color: var(--brass); }
+
+    /* ===== HERO ===== */
+    .hero { position: relative; overflow: hidden; padding: 74px 0 64px; isolation: isolate; }
+    .hero-art { position: absolute; inset: 0; z-index: -1; }
+    .hero-art img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; display: block; }
+    .hero-art::after {
+      content: ''; position: absolute; inset: 0;
+      background:
+        linear-gradient(90deg, rgba(12, 7, 5, 0.94) 0%, rgba(12, 7, 5, 0.82) 38%, rgba(12, 7, 5, 0.30) 70%, rgba(12, 7, 5, 0.45) 100%),
+        linear-gradient(180deg, rgba(23, 16, 14, 0.2) 0%, rgba(23, 16, 14, 0) 55%, #17100e 100%);
+    }
+    .hero .container { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 48px; align-items: center; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ember-soft); background: rgba(12, 7, 5, 0.55);
+      border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 15px; margin-bottom: 22px;
+    }
+    .eyebrow svg { flex: 0 0 auto; }
+    .hero h1 .hl {
+      background: linear-gradient(100deg, #ffd75e, #ffb43c 60%, #ff9a3c);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .lede { font-size: 1.13rem; color: var(--muted); margin: 22px 0 30px; max-width: 35rem; }
+    .lede strong { color: var(--ink); font-weight: 600; }
+    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .hero-note { font-size: 0.86rem; color: var(--tertiary); margin-top: 18px; letter-spacing: 0.01em; }
+
+    .hero-stage { position: relative; display: flex; justify-content: center; padding-left: 40px; }
+    .phone {
+      position: relative; width: 100%; max-width: 300px;
+      border-radius: 42px; padding: 11px;
+      background: linear-gradient(160deg, #3b2a1c, #150d09 62%);
+      border: 1px solid rgba(212, 168, 64, 0.34);
+      box-shadow: 0 34px 70px rgba(0, 0, 0, 0.62), 0 0 70px rgba(255, 170, 60, 0.12);
+    }
+    .phone img { display: block; width: 100%; height: auto; border-radius: 32px; }
+    /* Wick stands at the phone's lower-left corner, measured against the phone
+       itself so he covers only its bezel at every width, never its screen. */
+    .hero-stage .phone .hero-wick {
+      position: absolute; right: calc(100% - 12px); bottom: -30px; width: 200px; height: auto;
+      border-radius: 0; filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.6)); pointer-events: none;
+    }
+    @media (max-width: 1140px) { .hero-stage .phone .hero-wick { width: 164px; right: calc(100% - 14px); } }
+    @media (max-width: 1040px) { .hero-stage .phone .hero-wick { width: 140px; } }
+    @media (max-width: 980px) { .hero-stage .phone .hero-wick { width: 200px; right: calc(100% - 12px); } }
+
+    /* Embers drifting up through the hero, as on the game's loading screen. */
+    .embers { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .embers i {
+      position: absolute; bottom: -12px; width: 4px; height: 4px; border-radius: 50%;
+      background: radial-gradient(circle, #ffd75e 0%, #ff9a3c 55%, rgba(255, 154, 60, 0) 72%);
+      opacity: 0; animation: ember 9s linear infinite;
+    }
+    .embers i:nth-child(1) { left: 58%; animation-delay: 0s; }
+    .embers i:nth-child(2) { left: 66%; animation-delay: 2.3s; animation-duration: 11s; }
+    .embers i:nth-child(3) { left: 74%; animation-delay: 4.1s; }
+    .embers i:nth-child(4) { left: 82%; animation-delay: 1.2s; animation-duration: 12s; }
+    .embers i:nth-child(5) { left: 90%; animation-delay: 5.6s; animation-duration: 10s; }
+    .embers i:nth-child(6) { left: 49%; animation-delay: 7s; animation-duration: 13s; }
+    @keyframes ember {
+      0% { transform: translate(0, 0) scale(1); opacity: 0; }
+      12% { opacity: 0.9; }
+      60% { opacity: 0.55; }
+      100% { transform: translate(-40px, -560px) scale(0.4); opacity: 0; }
+    }
+
+    /* ===== SECTIONS ===== */
+    main { position: relative; z-index: 1; }
+    .section-block { padding: 80px 0; position: relative; }
+    .section-block.panel { background: linear-gradient(180deg, rgba(46, 28, 18, 0.55), rgba(23, 16, 14, 0)); border-top: 1px solid var(--line); }
+    .section-eyebrow {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.76rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--ember); margin-bottom: 14px;
+    }
+    .section-eyebrow::before { content: ''; width: 26px; height: 1px; background: linear-gradient(90deg, transparent, var(--brass)); }
+    .center .section-eyebrow, .section-eyebrow.center { justify-content: center; }
+    .center .section-eyebrow::after, .section-eyebrow.center::after { content: ''; width: 26px; height: 1px; background: linear-gradient(90deg, var(--brass), transparent); }
+    .section-lede { color: var(--muted); max-width: 46rem; margin-top: 16px; font-size: 1.04rem; }
+    .section-lede em { color: var(--ink); font-style: italic; font-family: var(--display); }
+    .center { text-align: center; }
+    .center .section-lede { margin-left: auto; margin-right: auto; }
+    .fine { font-size: 0.9rem; color: var(--tertiary); margin-top: 22px; max-width: 46rem; }
+    .fine b { color: var(--muted); }
+
+    /* Forge plate: the game's riveted brass-edged panel. */
+    .plate {
+      position: relative;
+      background: linear-gradient(180deg, var(--card), var(--card-deep));
+      border: 1px solid var(--line); border-radius: var(--radius-lg);
+      box-shadow: inset 0 1px 0 rgba(255, 233, 196, 0.05), 0 14px 34px rgba(0, 0, 0, 0.32);
+    }
+    .plate::before {
+      content: ''; position: absolute; inset: 8px; border-radius: calc(var(--radius-lg) - 6px); pointer-events: none;
+      background:
+        radial-gradient(circle at 0 0, rgba(212, 168, 64, 0.75) 0 2px, transparent 2.6px) top left / 10px 10px no-repeat,
+        radial-gradient(circle at 100% 0, rgba(212, 168, 64, 0.75) 0 2px, transparent 2.6px) top right / 10px 10px no-repeat,
+        radial-gradient(circle at 0 100%, rgba(212, 168, 64, 0.75) 0 2px, transparent 2.6px) bottom left / 10px 10px no-repeat,
+        radial-gradient(circle at 100% 100%, rgba(212, 168, 64, 0.75) 0 2px, transparent 2.6px) bottom right / 10px 10px no-repeat;
+      opacity: 0.55;
+    }
+
+    /* ===== THE GETAWAY ===== */
+    .getaway { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 56px; align-items: center; }
+    .steps { list-style: none; margin-top: 34px; display: flex; flex-direction: column; gap: 16px; counter-reset: step; }
+    .step { display: grid; grid-template-columns: 92px 1fr; gap: 20px; align-items: center; padding: 18px 22px 18px 18px; }
+    .step .art {
+      width: 92px; height: 92px; border-radius: 16px; display: grid; place-items: center;
+      background: radial-gradient(circle at 50% 42%, rgba(255, 180, 60, 0.18), transparent 70%), rgba(12, 7, 5, 0.55);
+      border: 1px solid var(--line);
+    }
+    .step .art img { max-width: 76px; max-height: 80px; width: auto; height: auto; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+    .step .kind { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--ember); }
+    .step .kind::before { counter-increment: step; content: counter(step) ' · '; color: var(--brass); }
+    .step h3 { margin: 4px 0 6px; }
+    .step p { color: var(--muted); font-size: 0.97rem; }
+    .shot-figure { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .shot-figure figcaption { font-size: 0.86rem; color: var(--tertiary); text-align: center; max-width: 300px; }
+
+    /* ===== FEATURE CARDS ===== */
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 42px; }
+    .card { padding: 26px 26px 24px; transition: transform .2s, border-color .2s; }
+    .card:hover { border-color: var(--line-strong); }
+    .card .ico {
+      width: 48px; height: 48px; border-radius: 13px; display: grid; place-items: center;
+      background: rgba(255, 180, 60, 0.08); border: 1px solid var(--line-strong);
+      margin-bottom: 16px; color: var(--gold);
+    }
+    .card .ico svg { display: block; }
+    .card p { color: var(--muted); font-size: 0.97rem; margin-top: 9px; }
+
+    /* ===== MACHINES (the field guide) ===== */
+    .machines { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-top: 42px; }
+    .machine { display: flex; flex-direction: column; padding: 16px 18px 20px; }
+    .machine .art {
+      height: 150px; border-radius: 14px; display: grid; place-items: center; margin-bottom: 14px;
+      background: radial-gradient(ellipse 70% 62% at 50% 58%, rgba(255, 180, 60, 0.16), transparent 72%), rgba(12, 7, 5, 0.45);
+      border: 1px solid rgba(212, 168, 64, 0.12);
+    }
+    .machine .art img { max-height: 128px; max-width: 86%; width: auto; height: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55)); }
+    .machine .head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .plate-name { font-size: 1.14rem; font-weight: 700; color: var(--ink-strong); }
+    .price { font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; font-size: 0.95rem; white-space: nowrap; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 9px 0 10px; }
+    .chip {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--label);
+      background: rgba(12, 7, 5, 0.45);
+    }
+    .chip.air { color: var(--steel); border-color: rgba(168, 201, 207, 0.38); }
+    .chip.ground { color: var(--ember-soft); border-color: rgba(255, 180, 105, 0.36); }
+    .chip.support { color: var(--success); border-color: rgba(158, 245, 143, 0.32); }
+    .machine .quote { color: var(--muted); font-size: 0.93rem; font-style: italic; font-family: var(--display); }
+    .machine .forms { margin-top: auto; padding-top: 12px; font-size: 0.86rem; color: var(--tertiary); border-top: 1px dashed rgba(212, 168, 64, 0.18); }
+    .machine .forms b { color: var(--brass-soft); font-weight: 600; white-space: nowrap; }
+    .machine .unlock { font-size: 0.8rem; color: var(--tertiary); margin-top: 6px; }
+
+    /* ===== RAIDERS ===== */
+    .raiders { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; margin-top: 42px; }
+    .raider { padding: 14px 16px 18px; text-align: center; }
+    .raider .art { height: 124px; display: grid; place-items: end center; margin-bottom: 10px;
+      background: radial-gradient(ellipse 60% 40% at 50% 92%, rgba(0, 0, 0, 0.45), transparent 70%); }
+    .raider .art img { max-height: 118px; max-width: 100%; width: auto; height: auto; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.5)); }
+    .raider h3 { font-size: 1.04rem; }
+    .raider p { color: var(--muted); font-size: 0.88rem; margin-top: 6px; }
+    .raider.boss { border-color: rgba(255, 215, 94, 0.34); background: linear-gradient(180deg, #3a2412, var(--card-deep)); }
+
+    /* ===== MODES ===== */
+    .modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 42px; }
+    .mode { padding: 28px 28px 26px; border-top: 3px solid var(--accent, var(--gold)); }
+    .mode .kind { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--accent-ink, var(--gold)); }
+    .mode h3 { margin: 8px 0 10px; font-size: 1.36rem; }
+    .mode p { color: var(--muted); font-size: 0.98rem; }
+    .mode ul { list-style: none; margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+    .mode li { color: var(--tertiary); font-size: 0.92rem; padding-left: 18px; position: relative; }
+    .mode li::before { content: '◆'; content: '◆' / ''; position: absolute; left: 0; top: 0.12em; font-size: 0.62rem; color: var(--accent-ink, var(--gold)); }
+
+    /* ===== SCREENS ===== */
+    .screens { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 44px; }
+    .screen-card { display: flex; flex-direction: column; gap: 12px; }
+    .screen-frame {
+      border-radius: 28px; padding: 8px; background: linear-gradient(160deg, #3a2a1c, #150d09 62%);
+      border: 1px solid rgba(212, 168, 64, 0.24); box-shadow: 0 20px 42px rgba(0, 0, 0, 0.5);
+    }
+    .screen-frame img { display: block; width: 100%; height: auto; border-radius: 21px; }
+    .screen-card figcaption { text-align: center; }
+    .screen-kind { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ember); font-weight: 700; }
+    .screen-name { font-weight: 700; font-size: 1rem; color: var(--ink); }
+
+    /* ===== THE DEAL ===== */
+    .honest { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 40px; }
+    .honest > div { display: flex; gap: 14px; align-items: flex-start; padding: 18px 22px; }
+    .honest > div > div { flex: 1 1 auto; min-width: 0; }
+    .honest .tick {
+      flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; margin-top: 1px;
+      background: rgba(158, 245, 143, 0.10); border: 1px solid rgba(158, 245, 143, 0.35); color: var(--success);
+    }
+    .honest h3 { display: block; margin-bottom: 3px; color: var(--ink-strong); font-family: var(--display); font-size: 1.05rem; line-height: 1.62; }
+    .honest p { color: var(--muted); font-size: 0.93rem; }
+
+    /* ===== FAQ ===== */
+    .faq-list { max-width: 50rem; margin: 36px auto 0; display: flex; flex-direction: column; gap: 12px; }
+    details.faq { background: linear-gradient(180deg, var(--card), var(--card-deep)); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 22px; }
+    details.faq[open] { border-color: var(--line-strong); padding-bottom: 18px; }
+    details.faq summary {
+      cursor: pointer; font-weight: 700; list-style: none; display: flex; min-height: 58px;
+      justify-content: space-between; align-items: center; gap: 16px; color: var(--ink-strong);
+    }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after { content: '+'; content: '+' / ''; color: var(--gold); font-size: 1.45rem; font-weight: 700; line-height: 1; flex: 0 0 auto; }
+    details.faq[open] summary::after { content: '–'; content: '–' / ''; }
+    details.faq p { color: var(--muted); font-size: 0.98rem; }
+
+    /* ===== ABOUT / CTA / FOOTER ===== */
+    .about-card { display: grid; grid-template-columns: 100px 1fr; gap: 26px; align-items: center; padding: 28px 30px; }
+    .about-card img { width: 100px; height: 100px; border-radius: 24px; box-shadow: 0 0 26px rgba(255, 180, 60, 0.22); }
+    .about-card p { color: var(--muted); margin-top: 8px; max-width: 42rem; }
+    .about-card .about-title { font-size: 1.24rem; }
+
+    .cta-strip {
+      position: relative; z-index: 1; text-align: center; padding: 84px 24px 90px;
+      background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(255, 180, 60, 0.13), transparent 70%);
+      border-top: 1px solid var(--line); overflow: hidden;
+    }
+    .cta-strip .wick-crew { width: 190px; height: auto; margin: 0 auto 10px; display: block; filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.55)); }
+    .cta-strip p { color: var(--muted); max-width: 36rem; margin: 14px auto 28px; }
+    .cta-strip .row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    footer.site { position: relative; z-index: 1; border-top: 1px solid var(--line); padding: 46px 24px 42px; text-align: center; }
+    .foot-brand { font-weight: 700; font-size: 1.3rem; color: var(--gold); text-shadow: 0 2px 0 var(--gold-deep); }
+    footer.site .links { display: flex; gap: 8px 22px; justify-content: center; flex-wrap: wrap; margin: 16px 0 24px; font-size: 0.94rem; }
+    footer.site .links a { color: var(--muted); font-weight: 600; padding: 6px 2px; }
+    footer.site .links a:hover { color: var(--gold); }
+    .copyright { color: var(--tertiary); font-size: 0.85rem; }
+    .copyright a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+    /* ===== REVEAL — progressive enhancement only =====
+       Content is visible by default. The hidden state exists only once the
+       head script has seen that motion is welcome and IntersectionObserver is
+       available, so no-JS and reduced-motion readers never see a blank page. */
+    .js-reveal .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+    .js-reveal .reveal.in { opacity: 1; transform: none; }
+    @media print { .js-reveal .reveal { opacity: 1 !important; transform: none !important; transition: none !important; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      .embers { display: none; }
+    }
+
+    @media (max-width: 1060px) {
+      .machines { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .raiders { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      nav.site .links { gap: 16px; }
+    }
+    @media (max-width: 980px) {
+      .hero .container { grid-template-columns: minmax(0, 1fr); gap: 56px; }
+      .hero-stage { padding-left: 0; }
+      .getaway { grid-template-columns: minmax(0, 1fr); gap: 44px; }
+      .grid-3, .screens { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .machines { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .raiders { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 53.75em) {
+      nav.site .links { display: none; }
+      .mobile-menu { display: block; }
+    }
+    @media (max-width: 760px) {
+      .hero { padding: 48px 0 52px; }
+      .hero-art img { object-position: 50% 0; }
+      .hero-art::after {
+        background:
+          linear-gradient(180deg, rgba(12, 7, 5, 0.78) 0%, rgba(12, 7, 5, 0.70) 42%, rgba(12, 7, 5, 0.55) 70%, #17100e 100%);
+      }
+      .phone { max-width: 270px; }
+      .hero-stage { justify-content: flex-end; }
+      .hero-stage .phone { max-width: 240px; }
+      .hero-stage .phone .hero-wick { width: 132px; bottom: -16px; right: calc(100% - 12px); }
+      .eyebrow { font-size: 0.66rem; letter-spacing: 0.06em; padding: 6px 12px; }
+      .section-block { padding: 64px 0; }
+      .grid-3, .screens, .honest, .modes { grid-template-columns: minmax(0, 1fr); }
+      .machines { grid-template-columns: minmax(0, 1fr); }
+      .machine { display: grid; grid-template-columns: 112px minmax(0, 1fr); column-gap: 16px; padding: 14px 16px 16px; }
+      .machine .art { grid-row: span 5; height: 124px; margin-bottom: 0; align-self: start; }
+      .machine .art img { max-height: 108px; }
+      .machine .forms { grid-column: 2; }
+      .raiders { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .raider .art { height: 104px; }
+      .raider .art img { max-height: 100px; }
+      .step { grid-template-columns: 72px 1fr; gap: 16px; padding: 16px; }
+      .step .art { width: 72px; height: 72px; }
+      .step .art img { max-width: 60px; max-height: 62px; }
+      .about-card { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+      .screens { max-width: 340px; margin-left: auto; margin-right: auto; }
+      .btn-primary, .btn-ghost { width: 100%; }
+    }
+    @media (max-width: 380px) {
+      .container { padding: 0 18px; }
+      .hero-stage .phone { max-width: 214px; }
+      .hero-stage .phone .hero-wick { width: 108px; right: calc(100% - 20px); }
+      .machine { grid-template-columns: minmax(0, 1fr); }
+      .machine .art { grid-row: auto; margin-bottom: 12px; }
+      .machine .forms { grid-column: auto; }
+    }
+  </style>
+
+  <script>
+    (function () {
+      try {
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+          document.documentElement.classList.add('js-reveal');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Hoardling",
+    "applicationCategory": "Game",
+    "genre": "Tower defense",
+    "operatingSystem": "Web",
+    "playMode": "SinglePlayer",
+    "isAccessibleForFree": true,
+    "description": "A tower defense game played from the dragon's side of the cave. Wick, a young dragon who builds his own machines, defends the hoard from raiders who grab coins and run; killing a carrier sends its coins home. Free in your browser, with nothing to buy.",
+    "url": "https://hypersage.ai/hoardling/",
+    "image": "https://hypersage.ai/hoardling/og-image.png?v=20260915a",
+    "author": {
+      "@type": "Organization",
+      "name": "HyperSage AI Labs LLC",
+      "url": "https://hypersage.ai/"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Where can I play Hoardling?",
+        "acceptedAnswer": { "@type": "Answer", "text": "In your browser, at hypersage.ai/hoardling/play/. It's made for a phone held upright; on a computer it plays in a tall window framed by the cavern. It needs a connection to load. The browser keeps its own save and the iPhone app keeps a separate one, so the two don't share progress." }
+      },
+      {
+        "@type": "Question",
+        "name": "Does it cost anything?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. Hoardling is free in your browser, and there is nothing to buy in this build: no purchases, no subscriptions and no ads. Every look you unlock in the Cavern is paid for with Hoard Marks you earn by playing." }
+      },
+      {
+        "@type": "Question",
+        "name": "How is my progress saved?",
+        "acceptedAnswer": { "@type": "Answer", "text": "On your device. Stars, Forge upgrades, trial badges, Hoard Marks and looks are kept in your browser's storage. A campaign keep also saves a checkpoint at the start of each wave, so you can close the game and pick up from the start of that wave. Daily Siege and Duel runs are played in one sitting. There's no sign-up and no cloud copy of your progress, so clearing site data, using a private window or switching browsers starts a fresh save." }
+      },
+      {
+        "@type": "Question",
+        "name": "What does the leaderboard share?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Only what you agree to. The first time you open Daily Siege, the game asks whether to post your waves to a public all-time ladder. Say yes and it signs your browser in anonymously and posts your wave count under a random WICK-XXXX name; it never asks for your name or email. Say no and the game makes no leaderboard connection at all. You can stop posting from any Daily Siege results screen, and a score that has been posted can't be deleted. Campaign and Duel runs are never posted." }
+      },
+      {
+        "@type": "Question",
+        "name": "How does Daily Siege work?",
+        "acceptedAnswer": { "@type": "Answer", "text": "It's one endless siege per UTC day, the same for every player: the same keep and the same waves. Your score is how many waves you survive. Everyone starts with 120 gold and all eight machines, with no Forge upgrades, and a Hoard King arrives every tenth wave. Restart as often as you like; your best wave is the one that stands." }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the controls?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Everything works with a tap or a click: pick a machine from the bar and tap the floor to build it, tap a machine to upgrade it or send Wick aboard, and tap the floor to move him. On a keyboard, Space calls the next wave, B breathes, 1 to 8 pick a machine, the arrow keys or WASD move Wick, Enter builds, Esc or P pauses, H opens the field guide and M turns sound on or off." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the art hand-painted?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. It's AI-generated, and we'd rather say so. Wick, the machines, the raiders and the cavern come from AI image models working under one painted art direction; our own tools then cut them out, clean their edges and recolour them to sit together. The music is composed in code and rendered by our own synthesis scripts, with no samples and no licensed audio, and the sound effects are generated as you play." }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <nav class="site" id="top" aria-label="Hoardling">
+    <div class="container">
+      <a class="brand" href="#top" aria-label="Hoardling: back to top">
+        <img src="app-icon-192.png?v=20260915a" alt="" width="192" height="192">
+        Hoardling
+      </a>
+      <div class="links">
+        <a href="#getaway">The getaway</a>
+        <a href="#play">How it plays</a>
+        <a href="#machines">Machines</a>
+        <a href="#raiders">Raiders</a>
+        <a href="#modes">Modes</a>
+        <a href="#honest">The deal</a>
+        <a href="#faq">FAQ</a>
+        <a class="nav-play" href="play/">Play free</a>
+      </div>
+      <details class="mobile-menu">
+        <summary aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></summary>
+        <div class="mobile-links">
+          <a href="play/">Play free</a>
+          <a href="#getaway">The getaway</a>
+          <a href="#play">How it plays</a>
+          <a href="#machines">Machines</a>
+          <a href="#raiders">Raiders</a>
+          <a href="#modes">Modes</a>
+          <a href="#honest">The deal</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </details>
+    </div>
+  </nav>
+
+  <main id="main" tabindex="-1">
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-art" aria-hidden="true">
+      <picture>
+        <source media="(max-width: 760px)" srcset="img/hero-cavern-portrait-900.webp" width="900" height="1350">
+        <img src="img/hero-cavern-1600.webp" srcset="img/hero-cavern-900.webp 900w, img/hero-cavern-1600.webp 1600w" sizes="100vw" width="1600" height="1000" alt="" fetchpriority="high">
+      </picture>
+    </div>
+    <div class="embers" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="container">
+      <div>
+        <span class="eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="14" r="4.2"/><path d="M12 2c1.7 2.2 2.6 4.1 2.6 5.9A2.7 2.7 0 0 1 12 10.5a2.7 2.7 0 0 1-2.6-2.6C9.4 6.1 10.3 4.2 12 2z"/></svg>Tower defense &middot; in your browser</span>
+        <h1 id="hero-title">Too young for dragonfire.<br><span class="hl">Built his own.</span></h1>
+        <p class="lede">
+          Wick is a young dragon with a wrench, a workshop and a hoard to keep.
+          Raiders march in, grab the treasure and run for the cave mouth.
+          Stop them with the machines he built himself, and <strong>kill a
+          carrier before it gets out: its coins fly home.</strong>
+        </p>
+        <div class="hero-cta">
+          <a class="btn-primary" href="play/">
+            <span>Play Hoardling free</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="btn-ghost" href="#getaway">How the getaway works</a>
+        </div>
+        <p class="hero-note">Free &middot; no ads &middot; nothing to buy &middot; no sign-up</p>
+      </div>
+      <div class="hero-stage">
+        <div class="phone">
+          <img src="shots/battle.webp" width="640" height="1385"
+               alt="Wave 9 of 20 on The Coldroot Stair: a long column of helmeted raiders climbs a winding cobbled road below a blue-roofed castle on a heap of gold, past crossbows, gargoyle statues, a toothed treasure chest, a fire brazier and a propeller machine, while a small red dragon crews a crossbow in the middle. Treasure reads 60 of 60.">
+          <img class="hero-wick" src="img/wick-hero-460.webp" width="460" height="516" alt="">
+        </div>
+      </div>
+    </div>
+  </section>
+
+    <section class="section-block" id="getaway">
+      <div class="container getaway">
+        <div>
+          <div class="section-eyebrow">The getaway</div>
+          <h2>They grab the gold. Then they have to get it out.</h2>
+          <p class="section-lede">
+            Your treasure is sixty coins in the keep, and it is your life: lose
+            it all and the defense ends. Build gold is a separate purse, so
+            spending on machines never touches it. The raiders want the treasure.
+          </p>
+          <ol class="steps">
+            <li class="step plate reveal">
+              <div class="art"><img src="img/raider-scrapling.webp" width="204" height="300" alt="" loading="lazy"></div>
+              <div>
+                <div class="kind">Grab</div>
+                <h3>They reach the pile</h3>
+                <p>A raider that makes it to the hoard takes coins: one for a Scrapling, up to twenty-five for the Hoard King. Then it turns for the cave mouth.</p>
+              </div>
+            </li>
+            <li class="step plate reveal">
+              <div class="art"><img src="img/raider-filcher.webp" width="316" height="300" alt="" loading="lazy"></div>
+              <div>
+                <div class="kind">Run</div>
+                <h3>Heavier loot, slower getaway</h3>
+                <p>The heavier the load, the slower the getaway. Your Crossbows, Mimics, Roosts and Braziers go after fleeing carriers before anything else.</p>
+              </div>
+            </li>
+            <li class="step plate reveal">
+              <div class="art"><img src="img/hoard-coin-bank.webp" width="180" height="125" alt="" loading="lazy"></div>
+              <div>
+                <div class="kind">Home</div>
+                <h3>Kill the carrier</h3>
+                <p>Every coin a carrier is still holding when it falls flies back to the pile. Coins that reach the cave mouth are gone for good, and your stars count them.</p>
+              </div>
+            </li>
+          </ol>
+          <p class="fine"><b>Wick can win coins back without a kill, too.</b> Stand him in a fleeing thief's path and he shakes its coins loose, one at a time.</p>
+        </div>
+        <figure class="shot-figure reveal">
+          <div class="phone">
+            <img src="shots/getaway-recovered.webp" width="640" height="1385" loading="lazy"
+                 alt="Wave 12 of 20: three armored raiders with coin stacks over their heads leave the castle's gold pile, while the words '+5 recovered!' float where a fourth carrier fell. Treasure reads 45 of 60 and the wave panel reads 15 stolen.">
+          </div>
+          <figcaption>Wave 12 on The Coldroot Stair. One carrier down, and its five coins are on their way home.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section-block panel" id="play">
+      <div class="container">
+        <div class="section-eyebrow">How it plays</div>
+        <h2>Small dragon. Clever defenses.</h2>
+        <p class="section-lede">
+          Pick a machine from the bar, set it down beside the road, and upgrade it
+          as the waves get worse. Then decide where Wick himself should stand.
+        </p>
+        <div class="grid-3">
+          <article class="card plate reveal">
+            <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20c3-1 5-3 6-6"/><path d="M9 14c2-5 6-8 12-9"/><circle cx="17" cy="17" r="3.2"/><path d="M17 12.3v1.5M17 20.2v1.5M12.3 17h1.5M20.2 17h1.5"/></svg></div>
+            <h3>Build beside the road</h3>
+            <p>There are no fixed tower slots. Set a machine on clear floor beside the road, wherever the fight needs it. Round stone pads take 20% off the price.</p>
+          </article>
+          <article class="card plate reveal">
+            <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></div>
+            <h3>Put Wick to work</h3>
+            <p>Send Wick to crew a weapon and it fires 70% faster and hits 30% harder; aboard a Bellows Post or Coin Press he strengthens its aura by 60% or its gold by 50%. Even just standing close, he overclocks the machine nearest him by 25%.</p>
+          </article>
+          <article class="card plate reveal">
+            <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-2.7 7-6.6 0-3.1-1.8-5-3.4-6.9-.4 1.6-1.3 2.6-2.3 3.1.2-3.6-1.5-6.6-4.3-8.6.1 3-1.5 5.1-3 7C4.6 11.7 5 13.3 5 15.4 5 19.3 8 22 12 22z"/></svg></div>
+            <h3>Wick's Breath</h3>
+            <p>Tap BREATH to scorch every raider in Wick's reach for 26 damage, straight through armor, flyers included. It recharges in 14 seconds.</p>
+          </article>
+          <article class="card plate reveal">
+            <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13L6 7"/><path d="M12 13l6-6"/><path d="M4 9V5h4"/><path d="M20 9V5h-4"/></svg></div>
+            <h3>Two final forms each</h3>
+            <p>Upgrade a machine twice and it asks you to choose its MAX form: one of two specializations, for good. Eight machines, sixteen final forms.</p>
+          </article>
+          <article class="card plate reveal">
+            <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></div>
+            <h3>Machines that don't shoot</h3>
+            <p>A Bellows Post fans the machines around it to fire faster. A Coin Press mints gold when each wave ends. Neither one fires a shot.</p>
+          </article>
+          <article class="card plate reveal">
+            <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V10l3-2 3 2V7l2-3 2 3v3l3-2 3 2v11z"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/></svg></div>
+            <h3>Mother stirs</h3>
+            <p>Let the treasure fall to 15 and the keep begins to glow. Tap it and Wick's sleeping mother breathes, once a run: 60 damage to every raider on your road.</p>
+          </article>
+        </div>
+        <p class="fine">Between waves a seven-second clock runs down. Call the next wave early for a little bonus gold, or use the time to build. On a regular campaign keep the first wave waits until you're ready; trials, Daily Siege and Duels start after a short countdown.</p>
+      </div>
+    </section>
+
+    <section class="section-block" id="machines">
+      <div class="container">
+        <div class="section-eyebrow">Wick's field guide</div>
+        <h2>Eight machines. Sixteen final forms.</h2>
+        <p class="section-lede">
+          Three are ready on your first keep, and campaign stars unlock the rest.
+          Daily Siege and Duels always hand you all eight. The lines in italics
+          are the field guide's own; prices are base prices, before a pad's 20% off.
+        </p>
+        <div class="machines">
+          <article class="machine plate reveal">
+            <div class="art"><img src="img/machine-gemsinger.webp" width="300" height="324" alt="A brass-banded drum topped by a ring cage around a glowing teal crystal" loading="lazy"></div>
+            <div class="head"><h3 class="plate-name">Gemsinger</h3><span class="price"><span aria-hidden="true">50g</span><span class="sr-only">50 gold</span></span></div>
+            <div class="chips"><span class="chip air">Ground + air</span></div>
+            <p class="quote">“Chills raiders slow. Hits flyers. Low damage.”</p>
+            <p class="forms">Final forms: <b>Deepchill Coil</b> or <b>Tuning Fork</b></p>
+            <p class="unlock">Campaign: from the start</p>
+          </article>
+          <article class="machine plate reveal">
+            <div class="art"><img src="img/machine-kobold-crossbow.webp" width="413" height="324" alt="A wooden crossbow on a round turntable, worked by a small crewman" loading="lazy"></div>
+            <div class="head"><h3 class="plate-name">Kobold Crossbow</h3><span class="price"><span aria-hidden="true">70g</span><span class="sr-only">70 gold</span></span></div>
+            <div class="chips"><span class="chip air">Ground + air</span></div>
+            <p class="quote">“Fast bolts, long reach. Hits flyers.”</p>
+            <p class="forms">Final forms: <b>Overwinder</b> or <b>Windlass Rig</b></p>
+            <p class="unlock">Campaign: from the start</p>
+          </article>
+          <article class="machine plate reveal">
+            <div class="art"><img src="img/machine-latch-mimic.webp" width="233" height="324" alt="A toothed treasure chest full of coins" loading="lazy"></div>
+            <div class="head"><h3 class="plate-name">Latch Mimic</h3><span class="price"><span aria-hidden="true">80g</span><span class="sr-only">80 gold</span></span></div>
+            <div class="chips"><span class="chip ground">Ground only</span></div>
+            <p class="quote">“Hard bite, short reach. Ground only.”</p>
+            <p class="forms">Final forms: <b>Gearjaw</b> or <b>Magnet Jaws</b></p>
+            <p class="unlock">Campaign: from the start</p>
+          </article>
+          <article class="machine plate reveal">
+            <div class="art"><img src="img/machine-gargoyle-roost.webp" width="193" height="324" alt="A winged stone gargoyle crouched on a spring-loaded pedestal" loading="lazy"></div>
+            <div class="head"><h3 class="plate-name">Gargoyle Roost</h3><span class="price"><span aria-hidden="true">90g</span><span class="sr-only">90 gold</span></span></div>
+            <div class="chips"><span class="chip air">Ground + air</span></div>
+            <p class="quote">“Longest reach. Best vs air. Ground pierce only.”</p>
+            <p class="forms">Final forms: <b>Drillbolt</b> or <b>Netcaster</b></p>
+            <p class="unlock">Campaign: unlocks at 1 star</p>
+          </article>
+          <article class="machine plate reveal">
+            <div class="art"><img src="img/machine-whirlyjack.webp" width="272" height="324" alt="A four-bladed rotor on a brass post, wound by a small crewman" loading="lazy"></div>
+            <div class="head"><h3 class="plate-name">Whirlyjack</h3><span class="price"><span aria-hidden="true">110g</span><span class="sr-only">110 gold</span></span></div>
+            <div class="chips"><span class="chip air">Ground + air</span></div>
+            <p class="quote">“Spinning blades cut a whole ring. Hits flyers.”</p>
+            <p class="forms">Final forms: <b>Updraft Rotor</b> or <b>Threshing Rotor</b></p>
+            <p class="unlock">Campaign: unlocks at 3 stars</p>
+          </article>
+          <article class="machine plate reveal">
+            <div class="art"><img src="img/machine-soot-brazier.webp" width="235" height="324" alt="An iron furnace pot full of flame, stoked by a small helper" loading="lazy"></div>
+            <div class="head"><h3 class="plate-name">Soot Brazier</h3><span class="price"><span aria-hidden="true">100g</span><span class="sr-only">100 gold</span></span></div>
+            <div class="chips"><span class="chip ground">Ground only</span></div>
+            <p class="quote">“Lobs fire — splashes a crowd. Ground only.”</p>
+            <p class="forms">Final forms: <b>Whistlepot</b> or <b>Tar Boiler</b></p>
+            <p class="unlock">Campaign: unlocks at 2 stars</p>
+          </article>
+          <article class="machine plate reveal">
+            <div class="art"><img src="img/machine-bellows-post.webp" width="337" height="324" alt="A brass bellows with a fan on top and two small helpers on a seesaw" loading="lazy"></div>
+            <div class="head"><h3 class="plate-name">Bellows Post</h3><span class="price"><span aria-hidden="true">120g</span><span class="sr-only">120 gold</span></span></div>
+            <div class="chips"><span class="chip support">Support</span></div>
+            <p class="quote">“NOT A WEAPON — machines near it fire +15%.”</p>
+            <p class="forms">Final forms: <b>Gale Bellows</b> or <b>Tempering Post</b></p>
+            <p class="unlock">Campaign: unlocks at 4 stars</p>
+          </article>
+          <article class="machine plate reveal">
+            <div class="art"><img src="img/machine-coin-press.webp" width="252" height="324" alt="A brass screw press with trays of fresh coins" loading="lazy"></div>
+            <div class="head"><h3 class="plate-name">Coin Press</h3><span class="price"><span aria-hidden="true">140g</span><span class="sr-only">140 gold</span></span></div>
+            <div class="chips"><span class="chip support">Support</span></div>
+            <p class="quote">“NOT A WEAPON — mints 26g when a wave ends.”</p>
+            <p class="forms">Final forms: <b>Royal Mint</b> or <b>Tithe Press</b></p>
+            <p class="unlock">Campaign: unlocks at 6 stars</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block panel" id="raiders">
+      <div class="container">
+        <div class="section-eyebrow">The raiders</div>
+        <h2>Ten kinds of thief.</h2>
+        <p class="section-lede">
+          <em>“The Guild wants your treasure. Make them work for it.”</em> Every
+          raider needs a different answer. The first time each one turns up, a
+          card tells you what it does and how to stop it.
+        </p>
+        <div class="raiders">
+          <article class="raider plate reveal">
+            <div class="art"><img src="img/raider-scrapling.webp" width="204" height="300" alt="A grinning thief in a bucket helmet with a loot sack" loading="lazy"></div>
+            <h3>Scrapling</h3>
+            <p>Fodder with a loot sack. Everything works on him.</p>
+          </article>
+          <article class="raider plate reveal">
+            <div class="art"><img src="img/raider-filcher.webp" width="316" height="300" alt="A hooded rogue in mid-leap" loading="lazy"></div>
+            <h3>Filcher</h3>
+            <p>The fastest thief on the road, and he grabs three coins.</p>
+          </article>
+          <article class="raider plate reveal">
+            <div class="art"><img src="img/raider-bulwark.webp" width="233" height="300" alt="A knight in heavy plate armor with a spiked mace" loading="lazy"></div>
+            <h3>Bulwark</h3>
+            <p>Armor takes 5 off every direct hit. Burns, Gemsinger pulses and Breath go straight through.</p>
+          </article>
+          <article class="raider plate reveal">
+            <div class="art"><img src="img/raider-shellback.webp" width="127" height="300" alt="A raider hidden behind a tall wooden pavise" loading="lazy"></div>
+            <h3>Shellback</h3>
+            <p>A pavise halves Crossbow and Roost bolts, until a Drillbolt breaks it for good.</p>
+          </article>
+          <article class="raider plate reveal">
+            <div class="art"><img src="img/raider-gloomwing.webp" width="276" height="300" alt="A feathered, griffin-like flyer carrying a satchel" loading="lazy"></div>
+            <h3>Gloomwing</h3>
+            <p>Flies over ground-only machines. Bring something that hits air.</p>
+          </article>
+          <article class="raider plate reveal">
+            <div class="art"><img src="img/raider-greed-hexer.webp" width="212" height="300" alt="A robed cleric clutching coins and a crystal staff" loading="lazy"></div>
+            <h3>Greed Hexer</h3>
+            <p>Heals the raiders around him. Set an aiming machine to HEXER to hunt him.</p>
+          </article>
+          <article class="raider plate reveal">
+            <div class="art"><img src="img/raider-blinker.webp" width="232" height="300" alt="A hooded rogue wreathed in purple flame" loading="lazy"></div>
+            <h3>Blinker</h3>
+            <p>Teleports up the road every few seconds, unless a Gemsinger has it chilled.</p>
+          </article>
+          <article class="raider plate reveal">
+            <div class="art"><img src="img/raider-pry-hand.webp" width="219" height="300" alt="A masked, goggled thief with a crowbar" loading="lazy"></div>
+            <h3>Pry-Hand</h3>
+            <p>Jams the machines he passes. Wick clears a jam fastest by climbing aboard.</p>
+          </article>
+          <article class="raider plate reveal">
+            <div class="art"><img src="img/raider-hogshead.webp" width="188" height="300" alt="A stout armored man with a round shield" loading="lazy"></div>
+            <h3>Hogshead</h3>
+            <p>Splits into two Scraplings when he falls. Bring splash.</p>
+          </article>
+          <article class="raider plate boss reveal">
+            <div class="art"><img src="img/raider-hoard-king.webp" width="236" height="300" alt="A crowned king in gilded armor holding a scepter" loading="lazy"></div>
+            <h3>The Hoard King</h3>
+            <p>Grabs up to 25 coins at once. His war drum hurries his court, and at half health he calls more.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block" id="modes">
+      <div class="container">
+        <div class="section-eyebrow">Ways to hold the hoard</div>
+        <h2>Three keeps, one endless siege, four rivals.</h2>
+        <div class="modes">
+          <article class="mode plate reveal" style="--accent: var(--red-hi); --accent-ink: var(--ember-soft);">
+            <div class="kind">Campaign</div>
+            <h3>Three keeps, twenty waves each</h3>
+            <p>Hold The Long Sleep, The Undergallery and The Coldroot Stair, each ending with the Hoard King. Win with treasure left, and your stars count the coins that got away.</p>
+            <ul>
+              <li>Three stars if five coins or fewer escape</li>
+              <li>Stars unlock machines and buy lasting upgrades in the Forge, with a free respec</li>
+              <li>Six trials remix a keep you've already won</li>
+              <li>A checkpoint saves at the start of every wave</li>
+            </ul>
+          </article>
+          <article class="mode plate reveal" style="--accent: var(--violet-hi); --accent-ink: var(--violet-ink);">
+            <div class="kind">Daily Siege</div>
+            <h3>An endless siege, the same for everyone</h3>
+            <p>One siege per UTC day, with the same keep and the same waves for every player. There is no last wave. How many can you hold?</p>
+            <ul>
+              <li>Everyone starts equal: 120 gold, all eight machines, no Forge upgrades</li>
+              <li>A Hoard King every tenth wave</li>
+              <li>Restart as often as you like; your best wave stands</li>
+              <li>An all-time ladder of the deepest sieges, if you say yes</li>
+            </ul>
+          </article>
+          <article class="mode plate reveal" style="--accent: var(--steel); --accent-ink: var(--steel);">
+            <div class="kind">Duel</div>
+            <h3>One cavern, two dragons</h3>
+            <p>Face a computer rival in The Split Cavern. The same raiders march down both roads for twelve waves: keep more treasure than your rival, or sack their hoard outright.</p>
+            <ul>
+              <li>Four rivals, Tallow, Flint, Ember and Cinder, each with their own way of building</li>
+              <li>No Forge upgrades, and all eight machines on your bar</li>
+              <li>Your first win against each rival pays Hoard Marks</li>
+            </ul>
+          </article>
+          <article class="mode plate reveal" style="--accent: var(--gold); --accent-ink: var(--gold);">
+            <div class="kind">Your Cavern</div>
+            <h3>New looks are earned, not bought</h3>
+            <p>Spend Hoard Marks across six shelves: recolour Wick, re-mint your coins, swap the keep, repave the road. Preview any look free before you unlock it.</p>
+            <ul>
+              <li>Marks come from new stars, first trial badges, first rival wins and deeper Daily Sieges</li>
+              <li>Looks never change a single number</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block panel" id="screens">
+      <div class="container">
+        <div class="section-eyebrow center">Screens</div>
+        <h2 class="center">Torchlight, brass and a great deal of gold.</h2>
+        <div class="screens">
+          <figure class="screen-card reveal">
+            <div class="screen-frame"><img src="shots/getaway.webp" width="640" height="1385" loading="lazy" alt="Wave 10 of 20: a crowned raider in gold armor and a red cape walks back down the road from the castle's coin pile with a loot sack icon over a nearly empty health bar, a crossbow bolt flying at him from the red dragon's crossbow. The wave panel reads 25 stolen."></div>
+            <figcaption><div class="screen-kind">The getaway</div><div class="screen-name">The Hoard King, 25 coins heavier</div></figcaption>
+          </figure>
+          <figure class="screen-card reveal">
+            <div class="screen-frame"><img src="shots/forks.webp" width="640" height="1385" loading="lazy" alt="A Final upgrade panel over the battlefield offers two crossbow cards, Overwinder and Windlass Rig. The selected Overwinder reads: every fifth shot deals double damage, damage 20 to 34, reach 118 to 130, with a gold button reading Build Overwinder, permanent choice, 110g."></div>
+            <figcaption><div class="screen-kind">Final upgrade</div><div class="screen-name">Pick one path, for good</div></figcaption>
+          </figure>
+          <figure class="screen-card reveal">
+            <div class="screen-frame"><img src="shots/duel.webp" width="640" height="1385" loading="lazy" alt="A cavern split in two: a blue-roofed castle on gold at the top left and a dark castle on a pile of gems at the top right, with raiders marching down both roads past bronze machines on the left and silver machines on the right, where a purple dragon crews one of them. A bar reads 60 Cinder."></div>
+            <figcaption><div class="screen-kind">Duel</div><div class="screen-name">Same raiders, two roads</div></figcaption>
+          </figure>
+          <figure class="screen-card reveal">
+            <div class="screen-frame"><img src="shots/cavern.webp" width="640" height="1385" loading="lazy" alt="The Your Cavern screen previewing Cobalt, a blue coat for Wick, with a button reading Unlock, 200 marks, above a grid of eight dragon colours, Ember equipped and the other seven priced in marks, and tabs for Dragon, Coin, Hoard, Keep, Road and Works."></div>
+            <figcaption><div class="screen-kind">Your Cavern</div><div class="screen-name">Paid for in earned marks</div></figcaption>
+          </figure>
+          <figure class="screen-card reveal">
+            <div class="screen-frame"><img src="shots/guide.webp" width="640" height="1385" loading="lazy" alt="Wick's field guide open on its Machines tab, listing Gemsinger, Kobold Crossbow, Latch Mimic, Gargoyle Roost, Whirlyjack and Soot Brazier with their prices and one-line roles."></div>
+            <figcaption><div class="screen-kind">Field guide</div><div class="screen-name">Every machine, explained</div></figcaption>
+          </figure>
+          <figure class="screen-card reveal">
+            <div class="screen-frame"><img src="shots/title.webp" width="640" height="1385" loading="lazy" alt="The Hoardling title screen: a small red dragon in goggles holding a wrench stands on a heap of gold between two lit braziers, under a sign reading Hoardling, Wick's Workshop. Below are the three campaign keeps with their stars and buttons for Daily Siege and Duel."></div>
+            <figcaption><div class="screen-kind">Wick's Workshop</div><div class="screen-name">Where every defense starts</div></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block" id="honest">
+      <div class="container">
+        <div class="section-eyebrow">The deal</div>
+        <h2>Free, and nothing for sale.</h2>
+        <p class="section-lede">
+          A game about guarding treasure shouldn't be busy taking yours. In this
+          build there is nothing to buy and nothing to watch: every new look and every
+          upgrade is earned by playing.
+        </p>
+        <div class="honest">
+          <div class="plate reveal"><span class="tick" aria-hidden="true">✓</span><div><h3>Nothing to buy</h3><p>No purchases, no subscriptions, no coin packs. Hoard Marks are earned in play and can't be bought.</p></div></div>
+          <div class="plate reveal"><span class="tick" aria-hidden="true">✓</span><div><h3>No ads</h3><p>Not before a wave, not after a loss, not anywhere in the game.</p></div></div>
+          <div class="plate reveal"><span class="tick" aria-hidden="true">✓</span><div><h3>No sign-up</h3><p>There's no account to make and nothing to type in: no name, no email, no password.</p></div></div>
+          <div class="plate reveal"><span class="tick" aria-hidden="true">✓</span><div><h3>The ladder asks first</h3><p>Daily Siege posts your best wave to a public all-time ladder only if you say yes, under a random WICK-XXXX name. Say no and nothing is posted. A score that has been posted can't be deleted. <a href="privacy.html">The details</a>.</p></div></div>
+          <div class="plate reveal"><span class="tick" aria-hidden="true">✓</span><div><h3>Saved on your device</h3><p>Progress lives in your browser, with no copy on our servers. Clearing site data or switching browsers starts a fresh save.</p></div></div>
+          <div class="plate reveal"><span class="tick" aria-hidden="true">✓</span><div><h3>A fair Daily</h3><p>Everyone starts a Daily Siege on 120 gold with all eight machines and no Forge upgrades. Looks never change a number.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block panel" id="faq">
+      <div class="container">
+        <div class="section-eyebrow center">Common questions</div>
+        <h2 class="center">FAQ</h2>
+        <div class="faq-list">
+          <details class="faq">
+            <summary>Where can I play Hoardling?</summary>
+            <p>In your browser, at <a href="play/">hypersage.ai/hoardling/play/</a>. It's made for a phone held upright; on a computer it plays in a tall window framed by the cavern. It needs a connection to load. The browser keeps its own save and the iPhone app keeps a separate one, so the two don't share progress.</p>
+          </details>
+          <details class="faq">
+            <summary>Does it cost anything?</summary>
+            <p>No. Hoardling is free in your browser, and there is nothing to buy in this build: no purchases, no subscriptions and no ads. Every look you unlock in the Cavern is paid for with Hoard Marks you earn by playing.</p>
+          </details>
+          <details class="faq">
+            <summary>How is my progress saved?</summary>
+            <p>On your device. Stars, Forge upgrades, trial badges, Hoard Marks and looks are kept in your browser's storage. A campaign keep also saves a checkpoint at the start of each wave, so you can close the game and pick up from the start of that wave. Daily Siege and Duel runs are played in one sitting. There's no sign-up and no cloud copy of your progress, so clearing site data, using a private window or switching browsers starts a fresh save.</p>
+          </details>
+          <details class="faq">
+            <summary>What does the leaderboard share?</summary>
+            <p>Only what you agree to. The first time you open Daily Siege, the game asks whether to post your waves to a public all-time ladder. Say yes and it signs your browser in anonymously and posts your wave count under a random WICK-XXXX name; it never asks for your name or email. Say no and the game makes no leaderboard connection at all. You can stop posting from any Daily Siege results screen, and a score that has been posted can't be deleted. Campaign and Duel runs are never posted. <a href="privacy.html">Read the privacy policy</a>.</p>
+          </details>
+          <details class="faq">
+            <summary>How does Daily Siege work?</summary>
+            <p>It's one endless siege per UTC day, the same for every player: the same keep and the same waves. Your score is how many waves you survive. Everyone starts with 120 gold and all eight machines, with no Forge upgrades, and a Hoard King arrives every tenth wave. Restart as often as you like; your best wave is the one that stands.</p>
+          </details>
+          <details class="faq">
+            <summary>What are the controls?</summary>
+            <p>Everything works with a tap or a click: pick a machine from the bar and tap the floor to build it, tap a machine to upgrade it or send Wick aboard, and tap the floor to move him. On a keyboard, Space calls the next wave, B breathes, 1 to 8 pick a machine, the arrow keys or WASD move Wick, Enter builds, Esc or P pauses, H opens the field guide and M turns sound on or off.</p>
+          </details>
+          <details class="faq">
+            <summary>Is the art hand-painted?</summary>
+            <p>No. It's AI-generated, and we'd rather say so. Wick, the machines, the raiders and the cavern come from AI image models working under one painted art direction; our own tools then cut them out, clean their edges and recolour them to sit together. The music is composed in code and rendered by our own synthesis scripts, with no samples and no licensed audio, and the sound effects are generated as you play.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block" id="about">
+      <div class="container">
+        <div class="about-card plate">
+          <img src="app-icon-192.png?v=20260915a" width="192" height="192" loading="lazy" alt="The Hoardling app icon: Wick, a red dragon in brass goggles, on a pile of gold and gems">
+          <div>
+            <div class="section-eyebrow">The studio</div>
+            <h2 class="about-title">From HyperSage</h2>
+            <p>Hoardling is made by <a href="https://hypersage.ai/">HyperSage</a>, an independent studio building opinionated, carefully made apps and games. AI-generated art under one painted art direction, a score composed in code, and one seed per UTC day, so a Daily Siege is the same siege for everyone who plays it that day. <a href="https://hypersage.ai/">See the studio <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <section class="cta-strip" id="start" aria-labelledby="start-title">
+    <img class="wick-crew" src="img/wick-crew.webp" width="570" height="450" alt="" loading="lazy">
+    <h2 id="start-title">The raiders are already on the road.</h2>
+    <p>Hoardling is free in your browser. Questions, bugs, or a complaint about the Hoard King? A real person reads <a href="mailto:support@hypersage.ai?subject=Hoardling">support@hypersage.ai</a>.</p>
+    <div class="row">
+      <a class="btn-primary" href="play/">
+        <span>Play Hoardling free</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="btn-ghost" href="support.html">Get support</a>
+    </div>
+  </section>
+
+  </main>
+
+  <footer class="site">
+    <div class="foot-brand">Hoardling</div>
+    <nav class="links" aria-label="Hoardling links">
+      <a href="play/">Play</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="mailto:support@hypersage.ai">Contact</a>
+    </nav>
+    <div class="copyright">© 2026 <a href="https://hypersage.ai/">HyperSage AI Labs LLC</a>. Mind the hoard.</div>
+  </footer>
+
+  <script>
+    (function () {
+      var menu = document.querySelector('.mobile-menu');
+      if (menu) {
+        menu.addEventListener('click', function (e) {
+          if (e.target.closest && e.target.closest('.mobile-links a')) menu.removeAttribute('open');
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && menu.hasAttribute('open')) { menu.removeAttribute('open'); menu.querySelector('summary').focus(); }
+        });
+        document.addEventListener('pointerdown', function (e) {
+          if (menu.open && !menu.contains(e.target)) menu.removeAttribute('open');
+        });
+        menu.addEventListener('focusout', function (e) {
+          if (e.relatedTarget && !menu.contains(e.relatedTarget)) menu.removeAttribute('open');
+        });
+      }
+      if (!document.documentElement.classList.contains('js-reveal')) return;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+      document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+</body>
+</html>

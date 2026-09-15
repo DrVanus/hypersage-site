@@ -23,7 +23,7 @@
 - [Alder](https://hypersage.ai/alder/): sobriety and recovery app that keeps the count and walks through a slip without erasing what you have built (iOS, coming soon)
 - [Waddleton](https://waddleton.pages.dev/): snowy social world in the browser, free to play (live, [about](https://hypersage.ai/waddleton/))
 - [Mythkin](https://hypersage.ai/mythkin/): original AI characters plus figures from history and myth (iOS, coming soon)
-- [Hoardling](https://hypersage.ai/hoardling/): hoard-defence game — hold the chokepoints, kill the carrier and the coins fly home; free in the browser (live on the web, not on the App Store)
+- [Hoardling](https://hypersage.ai/hoardling/): hoard-defence game — hold the chokepoints, kill the carrier and the coins fly home; free in the browser (live on the web, not on the App Store, [play](https://hypersage.ai/hoardling/play/))
 - [Gemburrow](https://hypersage.ai/gemburrow/): cozy gem-digging puzzle where every gem and rock is real physics; free in the browser (live on the web, not on the App Store, [play](https://hypersage.ai/gemburrow/play/))
 
 ## Studio

@@ -435,35 +435,35 @@ CARDS = {
         "sub": "Every gem and rock is real physics: pull one out and the whole pile settles. Fill the orders on the line \u2014 and decide what the dragon keeps.",
     },
     # Replaces the hand-made 2026-08 plate whose baked subhead said "recover
-    # every stolen coin" \u2014 refuted by game.js:4211-4215 (a laden raider that
-    # reaches the exit escapes permanently) and called out as OPEN in the page's
-    # own og:image comment. Copy below is the page's meta description verbatim,
-    # which carries the conditional truth: kill the carrier and the coins fly
-    # home (game.js:5054-5058 credits the carried amount back).
+    # every stolen coin", refuted by game.js:4486-4490 (a laden raider that
+    # reaches the exit escapes permanently). The sub below is the page's
+    # twitter:description with a typographic apostrophe (og:description minus
+    # "Free in your browser."), which carries the conditional truth: kill the
+    # carrier and the coins fly home (game.js:5348-5351 credits it back).
     "hoardling": {
-        "art": "art/hero_title.webp",
+        "art": "img/wick-hero.webp",
         "css": """
-  /* Every colour is the page's own #boot splash: bg radial #2a1710->#17100e->
-     #0c0705, gold mark #ffd75e over #7a4a12, italic sub #ff9a3c, cream track
-     rgba(255,233,196,*). The page ships no webfont; Georgia is its stack. */
+  /* Every colour is a token in hoardling/index.html :root (the game's own boot
+     splash and title plates): bg radial #2a1710->#17100e->#0c0705, gold
+     #ffd75e over #7a4a12, amber #ffb43c, ember #ff9a3c, cream rgba(255,233,196,*).
+     The page ships no webfont; Georgia is its stack. */
   .og { background:
         radial-gradient(120% 80% at 50% 38%, #2a1710 0%, #17100e 55%, #0c0705 100%); }
   .kicker { color: #ff9a3c; font-size: 20px; letter-spacing: 0.12em; white-space: nowrap; }
-  /* The cream is the page's own boot-track ink rgba(255,233,196,*) at text
-     strength; every hex is a page literal. */
   h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 700;
        font-size: 56px; letter-spacing: 0.01em;
        background-image: linear-gradient(178deg, rgba(255,233,196,1) 55%, rgba(255,233,196,0.62) 160%); }
   h1 .grad { background-image: linear-gradient(100deg, #ffd75e, #ffb43c 60%, #ff9a3c); }
   .sub { font-family: Georgia, 'Times New Roman', serif; font-style: italic;
          color: rgba(255,233,196,0.88); max-width: 545px; font-size: 25px; }
-  /* hero_title.webp is 596x662; 470x522 keeps the whole dragon, wrench to tail. */
+  /* img/wick-hero.webp is 867x972 (the hero_title master, no upscale);
+     470x522 keeps the whole dragon, wrench to tail. */
   .art { width: 470px; height: 522px; object-fit: contain; }
 """,
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="13" r="4"/><path d="M12 2c1.6 2.1 2.5 3.9 2.5 5.6A2.6 2.6 0 0 1 12 10a2.6 2.6 0 0 1-2.5-2.4C9.5 5.9 10.4 4.1 12 2z"/></svg>',
-        "kicker": "Play in your browser",
+        "kicker": "Play free in your browser",
         "h1": 'Too young for dragonfire.<br><span class="grad">Built his own.</span>',
-        "sub": "Hoardling \u2014 defend the sleeping dragon's hoard: hold the chokepoints, kill the carrier and the coins fly home.",
+        "sub": "Tower defense from the dragon\u2019s side of the cave. Raiders grab the hoard and run; kill the carrier and the coins fly home.",
     },
     "holohound": {
         "art": "app-icon.png",
