@@ -325,7 +325,7 @@
   // the ENGINE was not finishing the job: shadows were drawn narrower than the
   // sprites that covered them (so nothing ever touched the ground), sprite
   // size was constant across a 530-unit depth range on a background painted
-  // with real floor perspective, and the six torches each map declares lit
+  // with real floor perspective, and the torches each map declares lit
   // nothing at all. These four helpers fix that. All render-lane, no sim state.
   var LIGHT_DX = 0.55, LIGHT_DY = 0.34;      // key light from upper-left, one law for everything
   function depth01(y) { return clamp((y - 150) / (WORLD_H - 180), 0, 1); }
@@ -347,7 +347,7 @@
     ctx.fill();
   }
   // Torchlight that actually touches a body: warm additive keyed to the
-  // nearest declared light. The maps have always carried these six positions.
+  // nearest declared fixture. The same floor anchors position the visible braziers.
   function torchWarm(x, y) {
     var t = MAP.torches, best = 0;
     for (var i = 0; i < t.length; i++) {
@@ -646,7 +646,7 @@
         { x: 226, y: 486 }, { x: 138, y: 328 }, { x: 356, y: 262 },
         { x: 44, y: 348 }, { x: 288, y: 356 }, { x: 140, y: 630 },
       ],
-      torches: [[32, 690], [396, 565], [135, 496], [338, 223], [398, 440]],
+      torches: [[32, 690], [396, 565], [135, 504], [338, 223], [398, 440]],
       heroStart: { x: 124, y: 636 },   // was (150,600): 18u from the road, inside the toll reach
       pathW: 34,
     },
@@ -666,7 +666,7 @@
         { x: 222, y: 384 }, { x: 62, y: 584 }, { x: 372, y: 484 },
         { x: 62, y: 384 }, { x: 300, y: 282 },
       ],
-      torches: [[46, 730], [391, 665], [46, 530], [396, 410], [32, 300]],
+      torches: [[46, 730], [396, 680], [46, 530], [396, 410], [32, 300]],
       heroStart: { x: 385, y: 675 },   // was (300,610): 2.8u from the road — standing ON it
       pathW: 32,
     },
@@ -693,7 +693,7 @@
         { x: 296, y: 494 }, { x: 314, y: 602 }, { x: 200, y: 368 }, { x: 92, y: 254 },
         { x: 80, y: 356 }, { x: 122, y: 500 },
       ],
-      torches: [[249, 606], [266, 380], [290, 710], [34, 311], [78, 494], [344, 500]],
+      torches: [[249, 618], [266, 380], [290, 710], [34, 311], [78, 494], [344, 500]],
       heroStart: { x: 212, y: 716 },
       pathW: 34,
     },
@@ -756,7 +756,7 @@
         { x: 110, y: 306 }, { x: 44, y: 276 }, { x: 86, y: 462 }, { x: 98, y: 576 }, { x: 32, y: 666 },
         { x: 310, y: 306 }, { x: 376, y: 276 }, { x: 334, y: 462 }, { x: 322, y: 576 }, { x: 388, y: 666 },
       ],
-      torches: [[186, 700], [242, 700], [184, 420], [240, 413], [167, 570], [259, 572]],
+      torches: [[176, 710], [244, 710], [176, 406], [244, 406]],
       heroStart: { x: 150, y: 690 },
       pathW: 34,
     },
@@ -3956,6 +3956,7 @@
     this.resultLockT = 0;
     this._ocSeen = false;
     this.infoCard = null;
+    this._introQueue = [];
     this.speed = 1;                         // every run starts at 1x
     this.result = null;
   };
@@ -4208,8 +4209,26 @@
     return best;
   };
 
+  // New raiders wait their turn while another panel owns the screen. A type
+  // counts as taught only after its full readable interval or an explicit tap.
+  Game.prototype._enemyIntroVisible = function () {
+    return !!this.infoCard && this.state === 'playing' && !this.isRival &&
+      !this.menu && this.shopPick < 0 && !this.shopOpen && !PlayerGuide.isOpen();
+  };
+  Game.prototype._queueEnemyIntro = function (type) {
+    if (this.isRival || Save.data.seen[type] || !ENEMY_CARDS[type]) return;
+    if (this.infoCard && this.infoCard.type === type || this._introQueue.indexOf(type) >= 0) return;
+    if (!this.infoCard) this.infoCard = { type: type, t: 6 };
+    else this._introQueue.push(type);
+  };
+  Game.prototype._finishEnemyIntro = function () {
+    if (this.infoCard && !Save.data.seen[this.infoCard.type]) {
+      Save.data.seen[this.infoCard.type] = 1; Save.write();
+    }
+    this.infoCard = this._introQueue.length ? { type: this._introQueue.shift(), t: 6 } : null;
+  };
+
   Game.prototype.update = function (STEP) {
-    if (this.infoCard && (this.infoCard.t -= STEP) <= 0) this.infoCard = null;
     if (this.resultLockT > 0) this.resultLockT -= STEP;
     if (this._lbAskT > 0) this._lbAskT -= STEP;   // UI only: the ask's double-tap guard
     // THE RIVAL NEVER DRAINS THE PLAYER'S TAPS. Input is a module-level queue,
@@ -4228,6 +4247,10 @@
       if (this.state !== 'paused') this.worldT += STEP;
       return;
     }
+
+    // Menu, placement and pause time never spend a hidden introduction. The
+    // interval remains six reading seconds when the player chooses 2x combat.
+    if (this._enemyIntroVisible() && (this.infoCard.t -= STEP / this.speed) <= 0) this._finishEnemyIntro();
 
     // hit-stop: an event-driven, DETERMINISTIC beat of frozen sim (same for
     // every replay of the same run -- it lives in the sim, not the renderer)
@@ -4258,10 +4281,7 @@
       while (this.spawnQueue.length && this.spawnQueue[0].t <= this.waveT) {
         var sp = this.spawnQueue.shift();
         var base = ENEMY_TYPES[sp.type];
-        if (!this.isRival && !Save.data.seen[sp.type] && ENEMY_CARDS[sp.type]) {
-          Save.data.seen[sp.type] = 1; Save.write();
-          this.infoCard = { type: sp.type, t: 6 };   // display-only; sim ignores it
-        }
+        this._queueEnemyIntro(sp.type);
         this.enemies.push({
           id: this.nextId++, type: sp.type, d: 0,
           hp: Math.round(base.hp * sp.hpMul), maxHp: Math.round(base.hp * sp.hpMul),
@@ -5399,7 +5419,7 @@
     // Defeat: the bed STOPS. They carried it out, and the room has nothing to
     // say about it. The asymmetry is the point.
     this._mCue = won ? { name: 'win' } : { name: 'lose', stop: true };
-    this.menu = null; this.infoCard = null; // an open chooser/menu must not outlive the run
+    this.menu = null; this.infoCard = null; this._introQueue = []; // panels must not outlive the run
     // AND THE FLOATS. reset() clears them on the way IN, nothing cleared them on
     // the way OUT, and the result scrim is only rgba(12,7,5,0.75) -- so the last
     // wave's "-1 treasure!" printed through the story, and the build-hint variant
@@ -5539,7 +5559,8 @@
   Game.prototype._selectMachine = function (index) {
     if(index<0||index>=this._shelf().length)return;
     this.shopPick=this.shopPick===index?-1:index;
-    this.shopPage=Math.floor(index/4);this.shopOpen=false;this.placeHint=null;
+    var Gd=this._hudGeom();for(var di=0;di<Gd.dock.length;di++)if(Gd.dock[di].index===index){this.shopPage=Math.floor(di/Gd.shopPerPage);break;}
+    this.shopOpen=false;this.placeHint=null;
     Sfx.play('place');
   };
 
@@ -5553,7 +5574,7 @@
     if(tap.intent){
       if(this.state==='playing'&&!this.menu){
         if(tap.intent==='build')this._selectMachine(tap.x|0);
-        else if(tap.intent==='shop'){this.shopOpen=!this.shopOpen;this.shopPick=-1;this.placeHint=null;}
+        else if(tap.intent==='shop'){var Gs=this._hudGeom();this.shopPage=(Gs.shopPage+1)%Gs.shopPages;}
         else if(this.shopPick<0){
           if(tap.intent==='wave')this.startWave();
           else if(tap.intent==='breath')this._requestBreath();
@@ -5584,11 +5605,11 @@
     }
     // an open enemy card swallows its tap (dismiss) — x-bounded to the panel,
     // so a world tap beside the card still reaches pads under the band
-    if (this.infoCard && this.state === 'playing') {
+    if (this._enemyIntroVisible()) {
       var Gc = this._hudGeom();
       var cw2 = Math.min(this.view.w - 24, 372);
       if (vy > Gc.infoY && vy < Gc.infoY + 58 &&
-          vx > this.view.w / 2 - cw2 / 2 && vx < this.view.w / 2 + cw2 / 2) { this.infoCard = null; return; }
+          vx > this.view.w / 2 - cw2 / 2 && vx < this.view.w / 2 + cw2 / 2) { this._finishEnemyIntro(); return; }
     }
     // SCREEN-ANCHORED HUD first — it lives in the bands on tall phones
     if (this.state === 'playing') {
@@ -5602,19 +5623,21 @@
       // The opaque tray owns its actual screen area. A machine's invisible
       // base-disc/slop cannot steal a button; painted bodies above it remain
       // normal world targets. While building the tray is absent altogether.
+      // Corner actions step aside while a machine is in hand, so the pads under
+      // them stay buildable; the machine bar itself is always live.
+      // A MACHINE UNDER A CARD IS STILL YOURS. On 320-375 px phones the corner
+      // cards sit over 75-95% of a machine built on the lowest pads (measured);
+      // a tap on its painted body selects it, and the card fades while it is
+      // there so the machine can be seen.
+      var underCard=this.shopPick<0?this._towerHitAt(wl):-1;
+      if(underCard<0&&this.shopPick<0&&!this.mods.breathOff&&inside(G.breathRect)){this._requestBreath();return;}
+      if(underCard<0&&this.shopPick<0&&inside(G.startRect)){if(!this.waveActive&&this.wave<this.totalWaves())this.startWave();return;}
       if(inside(G.commandRow)){
-        if(inside(G.shopToggle)){this.shopOpen=true;Sfx.play('place');}
-        else if(!this.mods.breathOff&&inside(G.breathRect))this._requestBreath();
-        else if(!this.waveActive&&this.wave<this.totalWaves()&&inside(G.startRect))this.startWave();
-        return;
-      }
-      if(inside(G.shopHeader)){
-        if(inside(G.shopToggle)){this.shopOpen=false;Sfx.play('place');}
-        else if(inside(G.shopMore)){this.shopPage=(G.shopPage+1)%G.shopPages;Sfx.play('place');}
-        return;
-      }
-      if(G.shopExpanded&&vy>=G.shopY-8&&vy<=this.view.h){
-        for(var sc=0;sc<G.shopCards.length;sc++)if(inside(G.shopCards[sc])){this._selectMachine(G.shopCards[sc].index);return;}
+        if(inside(G.pager)){this.shopPage=(G.shopPage+1)%G.shopPages;Sfx.play('place');return;}
+        for(var sc=0;sc<G.chips.length;sc++){var chipHit=G.chips[sc];if(!inside(chipHit))continue;
+          if(chipHit.locked){this.fxQueue.push({k:'float',x:chipHit.x+chipHit.w/2-v.ox,y:chipHit.y-10/v.scale-v.oy,txt:'Earn '+chipHit.stars+'\u2605 to unlock '+TOWER_TYPES[chipHit.id].short,c:'#e7c7a8'});Sfx.play('sell');}
+          else this._selectMachine(chipHit.index);
+          return;}
         return;
       }
       if(this.shopPick>=0&&inside(G.buildCancel)){this.shopPick=-1;this.shopOpen=false;this.placeHint=null;return;}
@@ -7479,6 +7502,7 @@
     // the gold ghosted through the cobbles at the keep door.
     this._drawPath(ctx);
     for (var kq = 0; kq < (MAP.keeps ? MAP.keeps.length : 1); kq++) this._drawMoundAndKeep(ctx, kq);
+    this._drawSceneTorches(ctx); // visible fixtures over the paving, beneath actors
     this._drawMouthAlarm(ctx);    // escape pressure, UNDER the entities
     this._drawTar(ctx);           // slag sits ON the road, under everyone
     for (var kr2 = 0; kr2 < (MAP.keeps ? MAP.keeps.length : 1); kr2++) this._drawKeep(ctx, kr2);
@@ -7726,37 +7750,37 @@
   Game.prototype._drawCavern = function (ctx) {
     this._buildSceneCache();
     ctx.drawImage(this._bgCache, 0, 0, WORLD_W, WORLD_H);
-    // TORCH LIGHT FLICKERS, IT DOES NOT FLASH (2026-09-14). The glow used to
-    // swell 45 -> 60 units once a second, and three of Long Sleep's six torches
-    // stood ON the road, which is painted after this pass -- so the sprite was
-    // buried and only its pulsing light showed, as "lights flashing on the road
-    // in random places". Every map's torches now clear the road bed, the pads,
-    // the mound and the keep (tools/torch_clearance.js holds it), and the light
-    // moves a few percent on two slow, detuned waves; still under reduced motion.
-    for (var t = 0; t < MAP.torches.length; t++) {
-      var tc = MAP.torches[t];
-      var pulse = RM ? 1 : 0.95 + 0.03 * Math.sin(this.worldT * 2.3 + t * 1.7) + 0.02 * Math.sin(this.worldT * 5.3 + t * 2.9);
-      // A POOL AT THE FOOT, NOT A DISC ON THE FLOOR. A 60u circle at 55% read
-      // as "glowing circles all over the road" even once no torch stood on it.
-      // The light sits at the base, flattened into floor perspective, and fades
-      // with no edge the eye can find.
-      var lx = tc[0], ly = tc[1] + 12, lr = 42 * pulse;
+  };
+
+  // Decorative fire belongs to a visible, grounded fixture. Previously these
+  // were painted BEFORE the opaque road: several stands vanished under the
+  // paving while their broad floor-centered halos kept pulsing on either side.
+  // Authored floor anchors now clear roads/pads; flames and their light share
+  // one pose above the road, with a steady radius and restrained intensity.
+  Game.prototype._drawSceneTorches = function (ctx) {
+    var time=RM?0:this.worldT;
+    for (var t=0;t<MAP.torches.length;t++) {
+      var tc=MAP.torches[t],x=tc[0],base=tc[1],w=21*depthScale(base);
+      var h=w*(700/268),flameY=base-h*.79;
+      var heat=.86+.08*Math.sin(time*2.7+t*1.9)+.06*Math.sin(time*5.3+t);
       ctx.save();
-      ctx.translate(lx, ly); ctx.scale(1, 0.55);
-      var rg = ctx.createRadialGradient(0, 0, 0, 0, 0, lr);
-      rg.addColorStop(0, 'rgba(255,170,60,0.34)');
-      rg.addColorStop(0.45, 'rgba(255,145,45,0.14)');
-      rg.addColorStop(1, 'rgba(255,120,30,0)');
-      ctx.fillStyle = rg;
-      ctx.beginPath(); ctx.arc(0, 0, lr, 0, 6.283); ctx.fill();
-      ctx.restore();
-      if (!drawSpriteBottom(ctx, 'torch', tc[0], tc[1] + 16, 26)) {
-        // flame + stick fallback
-        ctx.fillStyle = '#ffcf6a';
-        ctx.beginPath(); ctx.ellipse(tc[0], tc[1] - 4, 3.5, 6 + pulse * 2, 0, 0, 6.283); ctx.fill();
-        ctx.fillStyle = '#6b4a33';
-        ctx.fillRect(tc[0] - 1.5, tc[1], 3, 12);
+      groundShadow(ctx,x,base,w,0,.38);
+      // A shallow warm reflection stays at the foot of the stand.
+      ctx.save();ctx.translate(x,base-1);ctx.scale(1,.36);
+      var pool=ctx.createRadialGradient(0,0,1,0,0,30);
+      pool.addColorStop(0,'rgba(229,136,56,'+(.12*heat)+')');pool.addColorStop(1,'rgba(229,136,56,0)');
+      ctx.fillStyle=pool;ctx.beginPath();ctx.arc(0,0,30,0,6.283);ctx.fill();ctx.restore();
+      // Light is centered on the actual painted flame, not on the road floor.
+      var light=ctx.createRadialGradient(x,flameY,1,x,flameY,39);
+      light.addColorStop(0,'rgba(255,180,76,'+(.22*heat)+')');
+      light.addColorStop(.36,'rgba(249,138,48,'+(.08*heat)+')');
+      light.addColorStop(1,'rgba(255,130,40,0)');
+      ctx.fillStyle=light;ctx.beginPath();ctx.arc(x,flameY,39,0,6.283);ctx.fill();
+      if(!drawSpriteBottom(ctx,'torch',x,base,w)) {
+        ctx.fillStyle='#584234';ctx.fillRect(x-2,flameY+7,4,base-flameY-7);
+        ctx.fillStyle='#ffbd55';ctx.beginPath();ctx.ellipse(x,flameY,3,6,0,0,6.283);ctx.fill();
       }
+      ctx.restore();
     }
   };
 
@@ -7947,12 +7971,12 @@
     for (i = 0; i < this.enemies.length; i++) {
       var en = this.enemies[i];
       rec = slot(); n++;
-      rec.y = en.py + (en.flyer ? 28 : 0); rec.kind = 'enemy'; rec.ref = en; rec.px = en.px; rec.py = en.py;
+      rec.y = en.py + (eFly(en) ? 28 : 0); rec.kind = 'enemy'; rec.ref = en; rec.px = en.px; rec.py = en.py;
     }
     for (i = 0; i < this.husks.length; i++) {
       var hs = this.husks[i];
       rec = slot(); n++;
-      rec.y = hs.y + (hs.e.flyer ? 28 : 0); rec.kind = 'husk'; rec.ref = hs;
+      rec.y = hs.y + (eFly(hs.e) ? 28 : 0); rec.kind = 'husk'; rec.ref = hs;
       rec.px = hs.x; rec.py = hs.y;
     }
     if (this.rivalSide && this.rival) {
@@ -8829,7 +8853,7 @@
       wing:active && eFly(e)?Math.sin(time*18+e.id*1.7):0,
       staff:walking?Math.sin(cycle)*.022:0,hem:walking?Math.sin(cycle-.8):0,
       type:e.type,d:e.d,ln:e.ln,fleeing:!!e.fleeing,
-      facing:e.type==='looter'?this._enemyFacing(e):1};
+      facing:e.type==='looter'||e.type==='scout'?this._enemyFacing(e):1};
   };
 
   // Look back along the travelled road when its current tangent is vertical.
@@ -8938,6 +8962,7 @@
         if(type==='looter'&&looterPuppet()){
           ['body','arm','upper','lower','boot'].forEach(function(part){enemyFrameRim(LOOTER_PUPPET[part]);});return;
         }
+        if(type==='scout'&&scoutPuppet()){['body','upper','lower','boot'].forEach(function(part){enemyFrameRim(SCOUT_PUPPET[part]);});return;}
         var rig=enemyRig(img,type);source=rig?rig.body:img;
         enemyFrameRim(source);
         if(rig)rig.parts.forEach(function(part){enemyFrameRim(part.image);});
@@ -8961,6 +8986,7 @@
       var puppet=LOOTER_PUPPET,bytes=0;['body','arm','leg','upper','lower','boot'].forEach(function(part){var p=puppet[part];bytes+=p.width*p.height*4;if(part!=='leg'){var r=enemyFrameRim(p);bytes+=r.width*r.height*4;}});
       return {kind:'puppet',frames:0,bytes:bytes,prewarmMs:ENEMY_MOTION_PREWARM_MS};
     }
+    if(type==='scout'&&scoutPuppet()){var sb=0;['body','leg','upper','lower','boot'].forEach(function(part){var p=SCOUT_PUPPET[part];sb+=p.width*p.height*4;if(part!=='leg'){var r=enemyFrameRim(p);sb+=r.width*r.height*4;}});return {kind:'puppet',frames:0,bytes:sb,prewarmMs:ENEMY_MOTION_PREWARM_MS};}
     var rig=enemyRig(img,type),bank=enemyLimbBank(rig?rig.body:img,type);
     return bank?{frames:bank.baked,limit:ENEMY_LIMB_STEPS,bytes:bank.bytes+bank.frames.reduce(function(n,c){return n+c.width*c.height*4;},0),width:bank.w,height:bank.rows,prewarmMs:ENEMY_MOTION_PREWARM_MS}:null;};
 
@@ -9092,8 +9118,66 @@
     ctx.drawImage(plate(rig.body),-w/2,-h,w,bodyH);
     return true;
   }
+  // Filcher's extended painted leg supplies both complete limbs. The original
+  // tucked leg cannot reach the floor; merely warping it leaves a skating pose.
+  // Cutouts and rims are shared outside simulation/checkpoint state.
+  var SCOUT_PUPPET=null;
+  var SCOUT_JOINTS={hip:{x:.563,y:.536},knee:{x:.674,y:.756},ankle:{x:.704,y:.907}};
+  function scoutPuppet(){
+    if(SCOUT_PUPPET)return SCOUT_PUPPET;
+    var img=ART.images.e_scout;if(!img)return null;
+    var h=Math.min(384,img.height),w=Math.round(h*img.width/img.height);
+    function plate(){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+    function path(x,points){x.beginPath();points.forEach(function(p,i){x[i?'lineTo':'moveTo'](p[0]*w,p[1]*h);});x.closePath();}
+    var legPoints=[[.49,.50],[.59,.50],[.64,.56],[.68,.64],[.735,.72],[.77,.80],[.76,.88],[.75,.95],[.72,1],[.65,1],[.63,.96],[.63,.91],[.65,.86],[.61,.81],[.56,.76],[.52,.69],[.49,.61]];
+    var leg=plate(),lx=leg.getContext('2d');lx.save();path(lx,legPoints);lx.clip();lx.drawImage(img,0,0,w,h);lx.restore();
+    var body=plate(),bx=body.getContext('2d');bx.drawImage(img,0,0,w,h);
+    bx.globalCompositeOperation='destination-out';path(bx,[[.39,.52],[.48,.48],[.59,.50],[.65,.60],[.77,.70],[.80,1],[.24,1],[.25,.67],[.33,.56]]);bx.fill();bx.globalCompositeOperation='source-over';
+    // A narrow original belt/hip bridge covers both rotating thigh roots.
+    bx.save();bx.beginPath();bx.ellipse(w*.524,h*.521,w*.088,h*.030,0,0,6.2831853);bx.clip();bx.drawImage(img,0,0,w,h);bx.restore();
+    function cut(top,bottom,a,b){var c=plate(),x=c.getContext('2d');x.save();x.beginPath();x.rect(0,top*h,w,(bottom-top)*h);
+      [a,b].forEach(function(j){if(!j)return;x.moveTo((j.x+.08)*w,j.y*h);x.ellipse(j.x*w,j.y*h,w*.08,h*.022,0,0,6.2831853);});x.clip();x.drawImage(leg,0,0);x.restore();return c;}
+    SCOUT_PUPPET={body:body,leg:leg,upper:cut(0,SCOUT_JOINTS.knee.y,null,SCOUT_JOINTS.knee),lower:cut(SCOUT_JOINTS.knee.y,SCOUT_JOINTS.ankle.y,SCOUT_JOINTS.knee,SCOUT_JOINTS.ankle),boot:cut(SCOUT_JOINTS.ankle.y,1,SCOUT_JOINTS.ankle,null)};
+    return SCOUT_PUPPET;
+  }
+  function scoutLegPose(w,h,pose,far){
+    var legW=w*1.20,legH=h*1.20,hip={x:w*(far?-.035:.063),y:-h+h*.536+(far?-.3:0)};
+    var phase=((pose.cycle/6.2831853+(far?.5:0))%1+1)%1,span=pose.stride/4;
+    var x=0,lift=0,bootAngle=0,stance=true;
+    if(pose.articulated){
+      if(phase<.5)x=-span+4*span*phase;
+      else{var u=phase*2-1,u2=u*u,u3=u2*u;x=(2*u3-3*u2+1)*span+(u3-2*u2+u)*2*span+(-2*u3+3*u2)*-span+(u3-u2)*2*span;
+        lift=Math.sin(u*Math.PI)*h*.15;bootAngle=Math.sin(u*6.2831853)*.32;stance=false;}
+    }
+    var groundX=x,groundY=0;
+    if(pose.articulated&&Number.isFinite(pose.d)){
+      var road=pathPointAt(pose.d,pose.ln),contact=pathPointAt(pose.d+(pose.fleeing?-1:1)*-x,pose.ln);
+      groundX=(contact.x-road.x)*pose.facing;groundY=(contact.y-road.y)*.4;
+    }
+    var ankle={x:hip.x+groundX,y:(far?-.65:0)+groundY-lift-(1-SCOUT_JOINTS.ankle.y)*legH};
+    var a=SCOUT_JOINTS.hip,b=SCOUT_JOINTS.knee,c=SCOUT_JOINTS.ankle;
+    var l1=Math.hypot((b.x-a.x)*legW,(b.y-a.y)*legH),l2=Math.hypot((c.x-b.x)*legW,(c.y-b.y)*legH);
+    var dx=ankle.x-hip.x,dy=ankle.y-hip.y,raw=Math.hypot(dx,dy),d=Math.min(l1+l2-.01,Math.max(Math.abs(l1-l2)+.01,raw));
+    if(raw!==d){ankle.x=hip.x+dx*d/(raw||1);ankle.y=hip.y+dy*d/(raw||1);dx=ankle.x-hip.x;dy=ankle.y-hip.y;}
+    var along=(l1*l1-l2*l2+d*d)/(2*d),bend=Math.sqrt(Math.max(0,l1*l1-along*along));
+    var knee={x:hip.x+dx/d*along-dy/d*bend,y:hip.y+dy/d*along+dx/d*bend};
+    return{hip:hip,knee:knee,ankle:ankle,w:legW,h:legH,stance:stance,lift:lift,phase:phase,bootAngle:bootAngle,reachError:Math.abs(raw-d)};
+  }
+  Game.prototype._scoutLegPose=function(e,far){var img=ART.images.e_scout;if(!img||!scoutPuppet())return null;var w=36*depthScale(e.py);return scoutLegPose(w,w*img.height/img.width,this._enemyPose(e,this.worldT),far);};
+  function paintScoutPuppet(ctx,w,h,pose,isRim){
+    var rig=scoutPuppet();if(!rig)return false;
+    function plate(p){return isRim?enemyFrameRim(p):p;}
+    function bone(image,leg,start,end,a,b){var angle=Math.atan2(end.y-start.y,end.x-start.x)-Math.atan2((b.y-a.y)*leg.h,(b.x-a.x)*leg.w);
+      ctx.save();ctx.translate(start.x,start.y);ctx.rotate(angle);ctx.drawImage(plate(image),-a.x*leg.w,-a.y*leg.h,leg.w,leg.h);ctx.restore();}
+    for(var i=0;i<2;i++){var far=i===0,leg=scoutLegPose(w,h,pose,far);ctx.save();if(far)ctx.globalAlpha*=.88;
+      bone(rig.lower,leg,leg.knee,leg.ankle,SCOUT_JOINTS.knee,SCOUT_JOINTS.ankle);bone(rig.upper,leg,leg.hip,leg.knee,SCOUT_JOINTS.hip,SCOUT_JOINTS.knee);
+      ctx.save();ctx.translate(leg.ankle.x,leg.ankle.y);ctx.rotate(leg.bootAngle);ctx.drawImage(plate(rig.boot),-SCOUT_JOINTS.ankle.x*leg.w,-SCOUT_JOINTS.ankle.y*leg.h,leg.w,leg.h);ctx.restore();ctx.restore();}
+    ctx.drawImage(plate(rig.body),-w/2,-h,w,h);return true;
+  }
+
   function paintEnemyArt(ctx,img,w,h,pose,isRim) {
     if(pose.type==='looter'&&paintLooterPuppet(ctx,w,h,pose,isRim))return;
+    if(pose.type==='scout'&&paintScoutPuppet(ctx,w,h,pose,isRim))return;
     var rig=enemyRig(img,pose.type);
     if(rig){
       for(var i=0;i<rig.parts.length;i++){
@@ -10118,7 +10202,7 @@
     if (coins > 0) {
       key = 'recover'; color = '#ffd486';
       label = coins + (coins === 1 ? ' COIN' : ' COINS') + ' CAN STILL BE SAVED';
-      detail = 'Catch ' + carriers + (carriers === 1 ? ' carrier' : ' carriers') + ' before the exit.';
+      detail = 'Move Wick beside a fleeing carrier to shake coins loose.';
     } else if (jammed > 0) {
       key = 'jammed'; color = '#ffc78e';
       label = jammed + (jammed === 1 ? ' MACHINE JAMMED' : ' MACHINES JAMMED');
@@ -10244,11 +10328,11 @@
     if(this.trial)add(H.barX,H.topY+H.barH,H.barW,18);
     if(this.menu){var tw=this._machineMenuTower();if(tw)out.push(this._machineMenuGeom(tw));return out;}
     if(H.commandRow)add(H.commandRow.x,H.commandRow.y,H.commandRow.w,H.commandRow.h);
-    if(H.shopExpanded)add(H.shopX-12,H.shopY-8,420,v.h-H.shopY+8);
-    if(H.shopHeader)add(H.shopHeader.x,H.shopHeader.y,H.shopHeader.w,H.shopHeader.h);
+    // The corner action cards own their screen area whenever they are shown.
+    if(this.shopPick<0){if(!this.mods.breathOff)add(H.breathRect.x,H.breathRect.y,H.breathRect.w,H.breathRect.h);add(H.startRect.x,H.startRect.y,H.startRect.w,H.startRect.h);}
     if(this.shopPick>=0)add(H.buildInfo.x,H.buildInfo.y,H.buildInfo.w,H.buildInfo.h);
     else if(this.shopOpen)add(H.barX,H.infoY,H.barW,88);
-    else if(this.infoCard)add(v.w/2-Math.min(v.w-24,372)/2,H.infoY,Math.min(v.w-24,372),58);
+    else if(this._enemyIntroVisible())add(v.w/2-Math.min(v.w-24,372)/2,H.infoY,Math.min(v.w-24,372),58);
     return out;
   };
   Game.prototype._feedbackLayout = function (ctx) {
@@ -10321,23 +10405,59 @@
     return { w: w, step: w + 7 };
   }
 
+  /// EVERY MACHINE, ALWAYS ON SCREEN (2026-09-14). VANUS: "i only see 3 and you
+  /// have to click build machines first". Unlocked machines come first, then
+  /// the locked ones by the stars they need, so the bar also shows what is
+  /// coming. Trial bans leave the bar entirely: a ban is not a lock.
+  Game.prototype._machineDock = function () {
+    var shelf = this._shelf(), open = [], locked = [];
+    for (var i = 0; i < TOWER_ORDER.length; i++) {
+      var id = TOWER_ORDER[i];
+      if (this.mods && this.mods.bannedTower === id) continue;
+      var si = shelf.indexOf(id);
+      if (si >= 0) open.push({ id: id, index: si, locked: false, stars: 0 });
+      else locked.push({ id: id, index: -1, locked: true, stars: MACHINE_UNLOCK[id] || 0 });
+    }
+    locked.sort(function (x, y) { return x.stars - y.stars; });
+    return open.concat(locked);
+  };
+
+  /// Does one of YOUR machines stand under this HUD card (view-space rect)?
+  /// Draw lane only: reads positions, touches no stream.
+  Game.prototype._cardOverMachine = function (r) {
+    if (!r) return false;
+    var v = this.view;
+    for (var i = 0; i < this.towers.length; i++) {
+      var tw = this.towers[i]; if (!this._sameSide(tw.own, 0)) continue;
+      var x0 = tw.x - 27 + v.ox, x1 = tw.x + 27 + v.ox, y0 = tw.y - 62 + v.oy, y1 = tw.y + 10 + v.oy;
+      if (x1 > r.x && x0 < r.x + r.w && y1 > r.y && y0 < r.y + r.h) return true;
+    }
+    return false;
+  };
+
+  /// THE MACHINE BAR replaces the Build drawer: one row at the bottom, chips at
+  /// least 48 CSS px wide, the last slot a › pager when they cannot all fit.
+  /// Breath and the wave button float above the bar's corners -- measured, the
+  /// corners cover the fewest authored pads of four placements -- and neither
+  /// takes a tap while a machine is in hand, so every pad stays buildable.
   Game.prototype._hudGeom = function () {
-    var v=this.view,u=1/v.scale,shelf=this.mode?this._shelf():[];
-    var pages=Math.max(1,Math.ceil(shelf.length/4)),page=clamp(this.shopPage|0,0,pages-1);
-    var first=page*4,visible=shelf.slice(first,first+4),chip=shopChip(visible.length),cx=v.w/2;
-    var topY=Math.max(8,v.safeT+4),bm=Math.max(10,v.safeB+6);
-    var shopY=v.h-bm-76,shopX=cx-WORLD_W/2+12;
+    var v=this.view,u=1/v.scale,cx=v.w/2,dock=this.mode?this._machineDock():[];
+    var topY=Math.max(8,v.safeT+4);
+    var shopX=cx-WORLD_W/2+12,actionW=WORLD_W-24;
     var buttonSize=Math.max(44,44*u),barX=Math.max(8,v.ox+8),barW=Math.min(v.w-16,WORLD_W-16);
-    var pauseX=barX+barW-8-buttonSize,spdX=pauseX-buttonSize-5,expanded=!!this.shopOpen||this.shopPick>=0;
+    var pauseX=barX+barW-8-buttonSize,spdX=pauseX-buttonSize-5;
     var resourceX=barX+10*u,resourceW=(spdX-resourceX-8*u)/2;
-    // Closed controls occupy one 54 CSS-pixel tray. The catalog replaces it
-    // during planning; an armed machine hides the catalog header as well.
-    var actionY=v.h-Math.max(8*u,v.safeB+6*u)-54*u,actionH=54*u,gap=8*u;
-    var abilityW=clamp(v.cw*.28,96,114)*u,shopButtonW=84*u,actionW=WORLD_W-24;
-    var breathRect={x:shopX,y:actionY,w:abilityW,h:actionH};
-    var startX=shopX+(this.mods.breathOff?0:abilityW+gap);
-    var toggle={x:shopX+actionW-shopButtonW,y:expanded?shopY-52*u:actionY,w:shopButtonW,h:expanded?44*u:actionH};
-    var startRect={x:startX,y:actionY,w:toggle.x-gap-startX,h:actionH};
+    var actionH=54*u,actionY=v.h-Math.max(8*u,v.safeB+6*u)-actionH,gap=5*u,minW=48*u;
+    var slots=Math.max(2,Math.floor((actionW+gap)/(minW+gap))),paged=dock.length>slots;
+    var perPage=paged?slots-1:Math.max(1,dock.length),pages=Math.max(1,Math.ceil(dock.length/perPage));
+    var page=clamp(this.shopPage|0,0,pages-1),cells=paged?slots:Math.max(1,dock.length);
+    var chipW=Math.min(92*u,(actionW-(cells-1)*gap)/cells),rowX=cx-(cells*chipW+(cells-1)*gap)/2;
+    var chips=dock.slice(page*perPage,page*perPage+perPage).map(function(c,i){
+      return{id:c.id,index:c.index,locked:c.locked,stars:c.stars,x:rowX+i*(chipW+gap),y:actionY,w:chipW,h:actionH};});
+    var pager=paged?{x:rowX+(cells-1)*(chipW+gap),y:actionY,w:chipW,h:actionH}:null;
+    var floatY=actionY-8*u-actionH,abilityW=clamp(v.cw*.28,96,114)*u,startW=132*u;
+    var breathRect={x:shopX,y:floatY,w:abilityW,h:actionH};
+    var startRect={x:shopX+actionW-startW,y:floatY,w:startW,h:actionH};
     return {
       topY:topY,cx:cx,barH:buttonSize+12,
       infoY:topY+buttonSize+12+(this.rival?34:this.trial?20:8),barX:barX,barW:barW,
@@ -10347,13 +10467,8 @@
       mute:null,pause:pauseX,spd:spdX,
       treasureRect:{x:resourceX,y:topY,w:resourceW,h:buttonSize+12},
       goldRect:{x:resourceX+resourceW,y:topY,w:resourceW,h:buttonSize+12},
-      shopY:shopY,shopX:shopX,shopW:chip.w,shopStep:chip.step,shopH:76,
-      shopPage:page,shopPages:pages,shopExpanded:expanded,
-      shopCards:expanded?visible.map(function(id,i){return{id:id,index:first+i,x:shopX+i*chip.step,y:shopY,w:chip.w,h:76};}):[],
-      shopToggle:this.shopPick<0?toggle:null,
-      shopHeader:this.shopOpen&&this.shopPick<0?{x:shopX,y:toggle.y,w:actionW,h:44*u}:null,
-      shopMore:this.shopOpen&&this.shopPick<0&&pages>1?{x:toggle.x-gap-52*u,y:toggle.y,w:52*u,h:44*u}:null,
-      commandRow:!expanded?{x:0,y:actionY-6*u,w:v.w,h:v.h-actionY+6*u}:null,
+      dock:dock,chips:chips,pager:pager,shopPage:page,shopPages:pages,shopPerPage:perPage,
+      commandRow:{x:0,y:actionY-6*u,w:v.w,h:v.h-actionY+6*u},
       breathRect:breathRect,startRect:startRect,
       breathX:breathRect.x,breathY:breathRect.y,startY:startRect.y
     };
@@ -10703,8 +10818,8 @@
     ctx.textAlign='left';
   };
   Game.prototype._drawBattleWaveStatus=function(ctx,r){
-    var u=1/this.view.scale,live=this._battleIntel(),line=live.onRoad+' raiders',detail=live.incoming?live.incoming+' incoming':'Last group';
-    if(live.key==='recover'){line=live.coinsAtRisk+' stolen';detail='Catch carriers';}
+    var u=1/this.view.scale,live=this._battleIntel(),line=live.onRoad+(live.onRoad===1?' raider':' raiders'),detail=live.incoming?live.incoming+' incoming':'Last group';
+    if(live.key==='recover'){line=live.coinsAtRisk+' stolen';detail='Move Wick close';}
     else if(live.key==='jammed'){line=live.jammed+' jammed';detail='Wick repairs';}
     battleText(ctx,this._battleWaveLabel(),r.x+r.w/2,r.y+10*u,9,'#b1a18a','center',u,r.w-8*u,9);
     battleText(ctx,line,r.x+r.w/2,r.y+30*u,13,live.color,'center',u,r.w-8*u,11);
@@ -10714,37 +10829,34 @@
 
   Game.prototype._drawBuildDock = function (ctx, G) {
     var self = this, ownN = this.towers.filter(function(t){return self._sameSide(t.own,0);}).length;
-    var u=1/this.view.scale;
-    if(G.commandRow){
-      var tray=G.commandRow,m=G.shopToggle;
-      var shade=ctx.createLinearGradient(0,tray.y,0,tray.y+tray.h);shade.addColorStop(0,'#25221f');shade.addColorStop(1,'#111215');
-      ctx.fillStyle=shade;ctx.fillRect(tray.x,tray.y,tray.w,tray.h);ctx.strokeStyle='#78613c';ctx.lineWidth=u;ctx.beginPath();ctx.moveTo(0,tray.y);ctx.lineTo(this.view.w,tray.y);ctx.stroke();
-      battlePanel(ctx,m.x,m.y+2*u,m.w,m.h-2*u,7*u,'#403628','#a28a59',u);
-      battleText(ctx,'BUILD',m.x+m.w/2,m.y+24*u,13,'#f6dfad','center',u);
-      battleText(ctx,'Machines',m.x+m.w/2,m.y+42*u,10.5,'#bead8e','center',u);
-      if(this.waveActive)this._drawBattleWaveStatus(ctx,G.startRect);
-      ctx.textAlign='left';return;
-    }
-    var shade = ctx.createLinearGradient(0, G.shopY - 9, 0, this.view.h);
-    shade.addColorStop(0, 'rgba(15,11,10,0)'); shade.addColorStop(0.18, 'rgba(15,11,10,0.96)'); shade.addColorStop(1, '#0f0b0a');
-    ctx.fillStyle = shade; ctx.fillRect(G.shopX - 12, G.shopY - 9, WORLD_W, this.view.h - G.shopY + 9);
-    G.shopCards.forEach(function (r) {
-      var type = TOWER_TYPES[r.id], cost = Math.round(type.cost * crowdMul(ownN));
-      var picked = self.shopPick === r.index, can = self.gold >= cost;
-      var fill = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
-      fill.addColorStop(0, picked ? '#69502b' : '#302923'); fill.addColorStop(1, picked ? '#312319' : '#191513');
-      ctx.fillStyle = fill; rr(ctx,r.x,r.y,r.w,r.h,10);ctx.fill();
-      ctx.strokeStyle = picked ? '#ffda7c' : can ? '#9d8050' : '#54483b'; ctx.lineWidth = picked ? 2.5 : 1;
-      rr(ctx,r.x+1,r.y+1,r.w-2,r.h-2,9);ctx.stroke();
-      ctx.globalAlpha=can||picked?1:0.55;
-      self._drawMachinePortrait(ctx,r.id,0,0,{x:r.x+8,y:r.y+3,w:r.w-16,h:46});
+    var u=1/this.view.scale,tray=G.commandRow;
+    var shade=ctx.createLinearGradient(0,tray.y,0,tray.y+tray.h);shade.addColorStop(0,'#25221f');shade.addColorStop(1,'#111215');
+    ctx.fillStyle=shade;ctx.fillRect(tray.x,tray.y,tray.w,tray.h);ctx.strokeStyle='#78613c';ctx.lineWidth=u;ctx.beginPath();ctx.moveTo(0,tray.y);ctx.lineTo(this.view.w,tray.y);ctx.stroke();
+    G.chips.forEach(function (c) {
+      var type=TOWER_TYPES[c.id],cost=Math.round(type.cost*crowdMul(ownN));
+      var picked=!c.locked&&self.shopPick===c.index,can=!c.locked&&self.gold>=cost;
+      var fill=ctx.createLinearGradient(0,c.y,0,c.y+c.h);
+      fill.addColorStop(0,picked?'#69502b':c.locked?'#1f1c1a':'#302923');fill.addColorStop(1,picked?'#312319':c.locked?'#141211':'#191513');
+      ctx.fillStyle=fill;rr(ctx,c.x,c.y,c.w,c.h,8*u);ctx.fill();
+      ctx.strokeStyle=picked?'#ffda7c':c.locked?'#3d352c':can?'#9d8050':'#54483b';ctx.lineWidth=picked?2.5*u:u;
+      rr(ctx,c.x+u,c.y+u,c.w-2*u,c.h-2*u,7*u);ctx.stroke();
+      ctx.globalAlpha=c.locked?.3:can||picked?1:.55;
+      self._drawMachinePortrait(ctx,c.id,0,0,{x:c.x+3*u,y:c.y+3*u,w:c.w-6*u,h:c.h-21*u});
       ctx.globalAlpha=1;
-      ctx.textAlign='center';ctx.font='bold '+Math.max(12,11/self.view.scale)+'px system-ui, sans-serif';
-      ctx.fillStyle=can||picked?'#f6e7cd':'#b4a48e';ctx.fillText(type.short,r.x+r.w/2,r.y+59);
-      ctx.font='bold '+Math.max(13,11*u)+'px system-ui, sans-serif';ctx.fillStyle=can?'#ffda7c':'#c2ad93';
-      ctx.fillText(cost+'g',r.x+r.w/2,r.y+73);
-      if(picked){ctx.fillStyle='#ffda7c';ctx.beginPath();ctx.arc(r.x+r.w-10,r.y+10,3,0,Math.PI*2);ctx.fill();}
+      var ty=c.y+c.h-7*u;
+      if(c.locked){
+        var lx=c.x+c.w/2-15*u,ly=ty-9*u;
+        ctx.strokeStyle='#bfae92';ctx.lineWidth=1.6*u;ctx.beginPath();ctx.arc(lx+4*u,ly+1.5*u,3*u,Math.PI,0);ctx.stroke();
+        ctx.fillStyle='#bfae92';ctx.fillRect(lx,ly+1.5*u,8*u,7*u);
+        battleText(ctx,'\u2605'+c.stars,c.x+c.w/2+6*u,ty,11,'#d9c7a6','center',u,c.w-18*u,10);
+      } else battleText(ctx,cost+'g',c.x+c.w/2,ty,12,can?'#ffda7c':'#c2ad93','center',u,c.w-6*u,10.5);
+      if(picked){ctx.fillStyle='#ffda7c';ctx.beginPath();ctx.arc(c.x+c.w-7*u,c.y+7*u,3*u,0,Math.PI*2);ctx.fill();}
     });
+    if(G.pager){
+      var pg=G.pager;battlePanel(ctx,pg.x,pg.y,pg.w,pg.h,8*u,'#403628','#a28a59',u);
+      battleText(ctx,'\u203a',pg.x+pg.w/2,pg.y+28*u,24,'#ffda7c','center',u);
+      battleText(ctx,(G.shopPage+1)+'/'+G.shopPages,pg.x+pg.w/2,pg.y+46*u,10.5,'#d9c7a6','center',u);
+    }
     ctx.textAlign='left';
     if (this.shopPick >= 0) {
       var id=this._shelf()[this.shopPick], type=TOWER_TYPES[id]; if(!type)return;
@@ -10757,14 +10869,6 @@
       battleText(ctx,this.gold>=pad?'Floor '+price+'g · Stone pad '+pad+'g':'Need '+(pad-this.gold)+'g more for a stone pad',x+12*u,y+77*u,11,this.gold>=pad?'#ffda7c':'#e6ac9a','left',u,w-24*u,11);
       var cr=G.buildCancel,cX=cr.x+cr.w/2,cY=cr.y+cr.h/2;uiPanel(ctx,cr.x,cr.y,cr.w,cr.h,9);
       ctx.strokeStyle='#f0d8b6';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cX-6,cY-6);ctx.lineTo(cX+6,cY+6);ctx.moveTo(cX+6,cY-6);ctx.lineTo(cX-6,cY+6);ctx.stroke();
-    } else if(G.shopHeader){
-      var r=G.shopHeader,m=G.shopToggle;
-      uiPanel(ctx,r.x,r.y,r.w,r.h,10*u);ctx.fillStyle='#e8d7b6';ctx.font='bold '+12*u+'px system-ui, sans-serif';
-      ctx.fillText('BUILD MACHINES',r.x+10*u,r.y+27*u);
-      uiPanel(ctx,m.x,m.y,m.w,m.h,9*u);ctx.textAlign='center';ctx.fillStyle='#fff0d4';
-      ctx.fillText('Close ×',m.x+m.w/2,m.y+27*u);
-      if(G.shopMore){var more=G.shopMore;uiPanel(ctx,more.x,more.y,more.w,more.h,9*u);ctx.fillStyle='#ffda7c';ctx.fillText((G.shopPage+1)+'/'+G.shopPages+' ›',more.x+more.w/2,more.y+27*u);}
-      ctx.textAlign='left';
     }
   };
 
@@ -10825,12 +10929,14 @@
     // Smothered Fire takes the flame away, so the button goes with it — an
     // unusable control that still sits there reads as a bug, not a rule.
     if (this.state === 'playing' && !this.menu && this.shopPick < 0 && !this.shopOpen && !this.mods.breathOff) {
+      ctx.globalAlpha=this._cardOverMachine(G.breathRect)?.45:1;
       this._drawBreathControl(ctx,G.breathRect);
+      ctx.globalAlpha=1;
     }
     // Speed and Pause stay on the shared resource rail in every battle mode.
     // Sound is available in Pause and on M, including Smothered Fire.
     // first-encounter enemy card: sprite + the counter line
-    if (this.infoCard && this.state === 'playing' && !this.menu && this.shopPick < 0 && !this.shopOpen) {
+    if (this._enemyIntroVisible()) {
       var card = ENEMY_CARDS[this.infoCard.type];
       var fade = Math.min(1, this.infoCard.t / 0.4);
       ctx.globalAlpha = fade;
@@ -10849,7 +10955,9 @@
       ctx.globalAlpha = 1;
     }
     // bottom: start-wave button + sprite wave preview + hint
+    var startFade=this.state==='playing'&&this._cardOverMachine(G.startRect)?.45:1;
     if (this.state === 'playing' && !this.menu && this.shopPick < 0 && !this.shopOpen && !this.waveActive && this.wave < this.totalWaves()) {
+      ctx.globalAlpha=startFade;
       var r=G.startRect,u=1/v.scale,cx=r.x+r.w/2;
       var red=ctx.createLinearGradient(0,r.y,0,r.y+r.h);red.addColorStop(0,'#874437');red.addColorStop(1,'#4e2826');
       battlePanel(ctx,r.x,r.y+2*u,r.w,r.h-2*u,7*u,red,'#bd9253',u);
@@ -10857,9 +10965,14 @@
       battleText(ctx,this.wave===0?'START WAVE':'NEXT WAVE',cx,r.y+30*u,12,'#ffedc7','center',u,r.w-12*u,11.5);
       var detail=this.wave===0?this._waveIntel().total+' raiders':Math.ceil(this.countdown)+'s · +'+Math.ceil(this.countdown)+'g';
       battleText(ctx,detail,cx,r.y+47*u,10.5,'#dbc3a2','center',u,r.w-8*u,10.5);
-      ctx.textAlign='left';
+      ctx.textAlign='left';ctx.globalAlpha=1;
     }
-    if(this.state==='playing'&&!this.menu&&this.shopOpen&&this.shopPick<0)this._drawWaveIntel(ctx,{x:G.barX,y:G.infoY,w:G.barW,h:88});
+    // During a wave the corner card reports the fight instead of calling one.
+    if (this.state === 'playing' && !this.menu && this.shopPick < 0 && this.waveActive) {
+      var sr=G.startRect,su=1/v.scale;ctx.globalAlpha=startFade;
+      battlePanel(ctx,sr.x,sr.y+2*su,sr.w,sr.h-2*su,7*su,'#26221f','#5e5547',su);
+      this._drawBattleWaveStatus(ctx,sr);ctx.globalAlpha=1;
+    }
   };
 
   Game.prototype._drawMenus = function (ctx) {
@@ -12421,8 +12534,16 @@
         var rh = Math.min(109.3, RESULT_FOOT - 62 - wickTop);
         if (rh >= 54) {
           var rw = rh * (rimg.width / rimg.height);
-          var rb = Math.sin(this.worldT * 4) * 2;
-          ctx.drawImage(rimg, WORLD_W / 2 - rw / 2, 668 - rh + rb, rw, rh);
+          // HE FLIES, HE DOES NOT FLOAT (2026-09-14). VANUS: "at the end screen
+          // wick is floating not flapping wings". A still plate bobbing on a
+          // sine read as a cut-out drifting. The crew pose's wing rig beats here
+          // and the lift rides its downstroke; reduced motion keeps him still.
+          var flap = RM ? 0 : Math.sin(this.worldT * 2.2 * Math.PI * 2);
+          var rb = RM ? 0 : -Math.max(0, flap) * 3;
+          ctx.save(); ctx.translate(WORLD_W / 2, 668 + rb);
+          if (!this._drawFootWick(ctx, rimg, 'front', rh, rw, { mode: 'crew', far: 0, near: 0, farLift: 0, nearLift: 0, tool: 0 }))
+            ctx.drawImage(rimg, -rw / 2, -rh, rw, rh);
+          ctx.restore();
         }
       }
     }
@@ -12894,16 +13015,32 @@
       caption.appendChild(el('p','', 'The Guild wants your treasure. Make them work for it.'));
       hero.appendChild(caption); body.appendChild(hero);
       lesson('01','Protect your treasure', 'TREASURE is the 60 coins in your keep: lose them and the defense ends. BUILD GOLD pays for machines and upgrades. Spending build gold never empties your treasure.');
-      lesson('02','Build, then call the wave', 'Tap Machines to open the catalog, choose a card, then tap clear ground beside the road. Round pads give a 20% discount. Your catalog closes after building; tap Machines to build again.');
+      lesson('02','Build, then call the wave', 'Pick a machine from the bar at the bottom, then tap clear ground beside the road. Round pads give a 20% discount. Dimmed machines show the stars that unlock them; › shows more.');
       lesson('03','Put Wick to work', 'Tap the floor to move Wick. Tap a built machine, then Crew Wick, to put him to work. His BREATH button burns nearby enemies through armor.');
-      lesson('04','Catch the thieves coming back', 'Raiders steal coins, then run for the exit. Defeat a carrier to recover its coins. Escaped coins are lost and lower your star rating.');
+      lesson('04','Catch the thieves coming back', 'Raiders steal coins, then run for the exit. Move Wick beside a fleeing carrier to shake coins loose, or defeat it to recover the rest. Escaped coins are lost and lower your star rating.');
       paragraph('A good first build: a Crossbow on a round pad, then a Gemsinger to slow the raiders. Read the next wave before you call it.', 'guide-tip');
+    }
+    // THE GUIDE SHOWS THE MACHINE THE BATTLEFIELD DRAWS (2026-09-14). The
+    // crossbow and bellows are painted from layered v2 parts at runtime, and the
+    // guide still loaded their single legacy plates -- VANUS saw two different
+    // crossbows ("whys the crossbow wrong again"). The same portrait renderer as
+    // the machine bar and panel paints every row; a failure keeps the plate.
+    var guideImages = {};
+    function machineGuideImage(id) {
+      if (guideImages[id]) return guideImages[id];
+      try {
+        var c = document.createElement('canvas'); c.width = 144; c.height = 144;
+        g._drawMachinePortrait(c.getContext('2d'), id, 0, 0, { x: 0, y: 0, w: 144, h: 144 });
+        return (guideImages[id] = c.toDataURL('image/png'));
+      } catch (e) {
+        return ART.images['t_' + id] ? ART.images['t_' + id].src : assetURL(ART.manifest['t_' + id]);
+      }
     }
     function machines() {
       paragraph('Every machine has a job. Upgrade one twice to choose its final specialization. Prices below are base prices; round pads give a 20% discount.');
       TOWER_ORDER.forEach(function (id) {
         var t = TOWER_TYPES[id], card = el('details','guide-machine');
-        var sum = el('summary'), im = el('img'); im.src = ART.images['t_' + id] ? ART.images['t_' + id].src : assetURL(ART.manifest['t_' + id]); im.alt = '';
+        var sum = el('summary'), im = el('img'); im.src = machineGuideImage(id); im.alt = '';
         sum.appendChild(im); var words = el('div'); words.appendChild(el('h3','', t.name));
         words.appendChild(el('p','',t.blurb)); sum.appendChild(words);
         var unlock = MACHINE_UNLOCK[id] || 0;
@@ -12916,11 +13053,11 @@
       });
     }
     function controls() {
-      lesson('⌘','Choose your machine', 'Tap Machines to open the catalog and scout report. Browse four machines per page using the page arrow. Select a card, then tap clear floor or a stone pad; tap the selected card or × to cancel. Close returns to the battle.');
+      lesson('⌘','Choose your machine', 'Every machine sits in the bar at the bottom; › shows the next page. Select one, then tap clear floor or a stone pad; tap the selected machine or × to cancel.');
       lesson('↗','Tap to move', 'Tap clear floor to send Wick there. He attacks automatically. Tapping a machine opens its attached popup. Upgrade, choose a target priority, crew it with Wick, or sell it. Tap another machine to switch; tap the floor to close. Support machines have no aim setting.');
       lesson('Ⅱ','Plan at your pace', 'Pause holds the battle and includes the sound switch. Leaving the app pauses too; returning waits for you. Between later waves, call early for bonus gold or use the countdown to prepare.');
       var dl = el('dl','guide-keys');
-      [['Space','Call the next wave'],['B','Use Wick’s breath'],['1–8','Select a machine from the catalog'],['Arrows / WASD','Move Wick, or aim a machine placement'],['Enter','Build at the keyboard marker'],['Esc / P','Pause or resume; Esc closes Machines or cancels placement'],['H','Open this guide'],['M','Toggle sound'],['Tab / Enter','Focus and activate menu controls']].forEach(function (r) {dl.appendChild(el('dt','',r[0])); dl.appendChild(el('dd','',r[1]));});
+      [['Space','Call the next wave'],['B','Use Wick’s breath'],['1–8','Select a machine from the bar'],['Arrows / WASD','Move Wick, or aim a machine placement'],['Enter','Build at the keyboard marker'],['Esc / P','Pause or resume; Esc closes Machines or cancels placement'],['H','Open this guide'],['M','Toggle sound'],['Tab / Enter','Focus and activate menu controls']].forEach(function (r) {dl.appendChild(el('dt','',r[0])); dl.appendChild(el('dd','',r[1]));});
       body.appendChild(dl);
       paragraph('Duel is a race against a computer rival in one shared cavern. Daily Siege is endless and uses the same starting rules for everyone. Campaign stars unlock machines and Forge upgrades.', 'guide-tip');
     }
@@ -12973,7 +13110,7 @@
         },'guide-button guide-quiet'));
       } else if (page === 'briefing') {
         lesson('01','Protect your treasure', 'Keep your 60 treasure safe. Build gold pays for machines.');
-        lesson('02','Place a machine', 'Open Machines and build beside the road. Round pads save 20%.');
+        lesson('02','Place a machine', 'Pick a machine from the bar and build beside the road. Round pads save 20%.');
         lesson('03','Start when ready', 'Build at your pace. Call the first wave when you’re ready.');
         body.appendChild(button('Let’s build',dismiss,'guide-button guide-primary'));
         body.appendChild(button('How to play',function(){briefingReturn=true;tab='basics';api.open('guide');},'guide-button guide-quiet'));
@@ -13128,10 +13265,11 @@
         var H=g._hudGeom();
         [['Pause',H.pause],['Toggle game speed',H.spd]].forEach(function(a){proxy(a[0],{x:a[1],y:H.btnY,w:H.buttonW,h:H.buttonH},false,function(){tap(a[1]+H.buttonW/2-g.view.ox,H.btnY+H.buttonH/2-g.view.oy);});});
         if(!g.menu){
-          if(g.shopOpen){var report=el('p','guide-scout',g._waveIntel().announcement);report.setAttribute('role','note');report.setAttribute('aria-label','Scout report');hits.appendChild(report);}
-          if(H.shopToggle)proxy(g.shopOpen?'Close machines':'Open machines',H.shopToggle,false,function(){Input.intent('shop');});
-          H.shopCards.forEach(function(r){proxy('Build '+TOWER_TYPES[r.id].name,r,false,function(){tap(r.x+r.w/2-g.view.ox,r.y+r.h/2-g.view.oy);});});
-          if(g.shopPick<0&&H.shopMore){var more=H.shopMore;proxy('More machines. Page '+(H.shopPage+1)+' of '+H.shopPages,more,false,function(){g.shopPage=(H.shopPage+1)%H.shopPages;signature='';});}
+          if(!g.waveActive&&g.shopPick<0){var report=el('p','guide-scout',g._waveIntel().announcement);report.setAttribute('role','note');report.setAttribute('aria-label','Scout report');hits.appendChild(report);}
+          H.chips.forEach(function(r){var t=TOWER_TYPES[r.id];
+            proxy(r.locked?'Locked: '+t.name+'. Earn '+r.stars+' stars to unlock.':'Build '+t.name,r,false,function(){tap(r.x+r.w/2-g.view.ox,r.y+r.h/2-g.view.oy);});
+            if(!r.locked)hits.lastChild.setAttribute('aria-pressed',String(g.shopPick===r.index));});
+          if(H.pager){var more=H.pager;proxy('More machines. Page '+(H.shopPage+1)+' of '+H.shopPages,more,false,function(){g.shopPage=(H.shopPage+1)%H.shopPages;signature='';});}
           if(g.shopPick>=0)proxy('Cancel placement',H.buildCancel,false,function(){g.shopPick=-1;g.placeHint=null;signature='';});
         }
         if (!g.menu && g.shopPick<0 && !g.shopOpen) {
