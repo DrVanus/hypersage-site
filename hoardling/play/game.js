@@ -5662,6 +5662,9 @@
     }
     if (marksEarned > 0) Save.addMarks(marksEarned);
     this.result.marks = marksEarned;
+    // Hold the screen until the award has actually finished drawing (see
+    // RESULT_MARKS_FULL). A run that earned nothing keeps the old 0.8s.
+    if (marksEarned > 0) this.resultLockT = RESULT_MARKS_FULL;
     Save.write();
     // daily board: submit this run, then pull today's top — UI-only state
     this._lbJoined = false; this._lbAsk = null;
@@ -5776,8 +5779,17 @@
       // a tap on its painted body selects it, and the card fades while it is
       // there so the machine can be seen.
       var underCard=this.shopPick<0?this._towerHitAt(wl):-1;
-      if(underCard<0&&this.shopPick<0&&!this.mods.breathOff&&inside(G.breathRect)){this._requestBreath();return;}
-      if(underCard<0&&this.shopPick<0&&inside(G.startRect)){if(!this.waveActive&&this.wave<this.totalWaves())this.startWave();return;}
+      // THE VISIBLE STATE MUST PREDICT THE BEHAVIOUR. `underCard` exists so a
+      // machine built on the lowest pads stays selectable under the corner
+      // cards — but it was tested against _towerHitAt's pixel mask while the
+      // GHOSTING is decided by _cardOverMachine's coarse box, so the two
+      // disagreed: a card could be drawn solid and still be dead, with nothing
+      // on screen to say so, exactly when the board fills up (late game). One
+      // predicate for both lanes now — a card only defers to the machine when
+      // it is actually drawn ghosted, so a solid card always fires.
+      var bGhost=this._cardOverMachine(G.breathRect),sGhost=this._cardOverMachine(G.startRect);
+      if(this.shopPick<0&&!(bGhost&&underCard>=0)&&!this.mods.breathOff&&inside(G.breathRect)){this._requestBreath();return;}
+      if(this.shopPick<0&&!(sGhost&&underCard>=0)&&inside(G.startRect)){if(!this.waveActive&&this.wave<this.totalWaves())this.startWave();return;}
       if(inside(G.commandRow)){
         if(inside(G.pager)){this.shopPage=(G.shopPage+1)%G.shopPages;Sfx.play('place');return;}
         for(var sc=0;sc<G.chips.length;sc++){var chipHit=G.chips[sc];if(!inside(chipHit))continue;
@@ -5947,6 +5959,20 @@
           this.lbRows = null; this._lbJoined = false;
           Sfx.play('upg');
         } else { this._lbAsk = 'result'; this._lbAskT = 0.35; }
+        return;
+      }
+      // The two plates are tested before the catch-all, in the same order and
+      // from the same geometry the drawer used (see resultGeom).
+      var RG = this._resultRects;
+      var inRect = function (q) { return q && w.x >= q.x && w.x <= q.x + q.w && w.y >= q.y && w.y <= q.y + q.h; };
+      if (RG && inRect(RG.primary)) {
+        Sfx.play('upg');
+        if (RG.nextLv >= 0) { this.reset(1, 'campaign', RG.nextLv); this.state = 'playing'; return; }
+        if (this.mode === 'daily') { this.reset(dailySeed(), 'daily'); this.state = 'menu'; return; }
+        // Replay THIS fight: same level, same trial, same rival.
+        this.reset(this.mode === 'duel' ? this.seed : 1, this.mode, this.levelIdx, this.trial,
+                   this.rival ? this.duelSeedIdx : undefined);
+        this.state = 'playing';
         return;
       }
       // Leaving a duel drops OUT of duel mode: a reset that stayed in 'duel'
@@ -8329,9 +8355,19 @@
       if (armed && legal && pickedType) {
         ctx.strokeStyle = afford ? 'rgba(184,224,164,0.85)' : 'rgba(214,145,116,0.7)'; ctx.lineWidth = 1.8;
         ctx.beginPath(); ctx.ellipse(p.x,p.y,24,15,0,0,Math.PI*2); ctx.stroke();
-        ctx.fillStyle = 'rgba(20,17,13,0.92)'; rr(ctx,p.x-20,p.y+17,40,17,6);ctx.fill();
-        ctx.textAlign='center';ctx.font='bold 11px system-ui, sans-serif';ctx.fillStyle=afford?'#d3f0b8':'#efb9a5';
-        ctx.fillText(padPrice+'g',p.x,p.y+29);ctx.textAlign='left';
+        // THE PRICE FLIPS ABOVE THE RING RATHER THAN UNDER THE TRAY. On the
+        // lowest row of pads this chip was guillotined by the machine bar —
+        // and while a machine is in hand the price IS the decision, so the
+        // player was being asked to commit gold to a number cut in half. Every
+        // authored pad has clear air above its ring, and only the chip moves.
+        // commandRow.y is view space and p.y is world space, hence the +v.oy.
+        var vv = this.view, trayY = this._hudGeom().commandRow.y;
+        var below = p.y + 34 + (vv.oy || 0) <= trayY;
+        var cy = below ? p.y + 17 : p.y - 34;
+        forgePlate(ctx, { x: p.x - 22, y: cy, w: 44, h: 18 }, 'util');
+        ctx.textAlign='center';ctx.font='bold 11px system-ui, sans-serif';
+        inkText(ctx, padPrice+'g', p.x, cy + 13, afford?'#d3f0b8':'#efb9a5', 3, 1);
+        ctx.textAlign='left';
       }
     }
   };
@@ -10935,14 +10971,28 @@
     var buttonSize=Math.max(44,44*u),barX=Math.max(8,v.ox+8),barW=Math.min(v.w-16,WORLD_W-16);
     var pauseX=barX+barW-8-buttonSize,spdX=pauseX-buttonSize-5;
     var resourceX=barX+10*u,resourceW=(spdX-resourceX-8*u)/2;
-    var actionH=54*u,actionY=v.h-Math.max(8*u,v.safeB+6*u)-actionH,gap=5*u,minW=48*u;
+    // A TILE HAS TO BE WIDE ENOUGH TO NAME ITS MACHINE. At minW 48 the rail
+    // asked the player to choose between eight things by price and a thumbnail
+    // and then told them what they chose — the owner's "the buttons all look
+    // the same", one layer below the machine panel. 64 buys the name band; the
+    // cost is that the SE gains a third page, which is only tolerable because
+    // the ragged last page is fixed on the next line.
+    var actionH=54*u,actionY=v.h-Math.max(8*u,v.safeB+6*u)-actionH,gap=5*u,minW=64*u;
     var slots=Math.max(2,Math.floor((actionW+gap)/(minW+gap))),paged=dock.length>slots;
     var perPage=paged?slots-1:Math.max(1,dock.length),pages=Math.max(1,Math.ceil(dock.length/perPage));
     var page=clamp(this.shopPage|0,0,pages-1),cells=paged?slots:Math.max(1,dock.length);
-    var chipW=Math.min(92*u,(actionW-(cells-1)*gap)/cells),rowX=cx-(cells*chipW+(cells-1)*gap)/2;
+    // CENTRE WHAT IS ACTUALLY DRAWN. rowX was centred on a full row of `cells`
+    // while the last page draws only its remainder, so the pager stayed pinned
+    // to the final lane and left a 115-215 pt hole beside three tiles — the
+    // late-game machines a 20-wave run is built around, on a page that read as
+    // UI that failed to load. chipW still comes from `cells`, so tiles are the
+    // same size on every page; only the row's origin moves.
+    var chipW=Math.min(92*u,(actionW-(cells-1)*gap)/cells);
+    var shown=Math.max(1,Math.min(perPage,dock.length-page*perPage)),lanes=shown+(paged?1:0);
+    var rowX=cx-(lanes*chipW+(lanes-1)*gap)/2;
     var chips=dock.slice(page*perPage,page*perPage+perPage).map(function(c,i){
       return{id:c.id,index:c.index,locked:c.locked,stars:c.stars,x:rowX+i*(chipW+gap),y:actionY,w:chipW,h:actionH};});
-    var pager=paged?{x:rowX+(cells-1)*(chipW+gap),y:actionY,w:chipW,h:actionH}:null;
+    var pager=paged?{x:rowX+shown*(chipW+gap),y:actionY,w:chipW,h:actionH}:null;
     var floatY=actionY-8*u-actionH,abilityW=clamp(v.cw*.28,96,114)*u,startW=132*u;
     var breathRect={x:shopX,y:floatY,w:abilityW,h:actionH};
     var startRect={x:shopX+actionW-startW,y:floatY,w:startW,h:actionH};
@@ -11291,23 +11341,36 @@
     }
     ctx.restore();
   };
-  Game.prototype._drawBreathControl=function(ctx,r){
+  Game.prototype._drawBreathControl=function(ctx,r,ground){
     var a=this._breathStatus(),u=1/this.view.scale,cx=r.x+25*u,cy=r.y+22*u,rad=18*u,hot=a.canCast,t=RM?0:this.worldT;
-    battlePanel(ctx,r.x,r.y+2*u,r.w,r.h-2*u,9*u,hot?'#4b2616':'#26221f',hot?'#e38a3f':'#5e5547',u);
+    // The two corner cards are ONE PAIR: same plate, different tone. This one
+    // was a flat battlePanel while its neighbour became an ember forge plate,
+    // which is how the rail came to read as furniture from another game.
+    ctx.save();ctx.globalAlpha=ground===undefined?1:ground;
+    forgePlate(ctx,{x:r.x,y:r.y+2*u,w:r.w,h:r.h-2*u},hot?'brasslit':'util');
     if(hot){var sw=RM?.5:.5+.5*Math.sin(t*2.2),halo=ctx.createRadialGradient(cx,cy,rad*.55,cx,cy,rad*1.7);
       halo.addColorStop(0,'rgba(255,150,60,'+(.26+.10*sw)+')');halo.addColorStop(1,'rgba(255,120,40,0)');
       ctx.fillStyle=halo;ctx.beginPath();ctx.arc(cx,cy,rad*1.7,0,Math.PI*2);ctx.fill();}
     this._drawBreathEmblem(ctx,cx,cy,rad,hot,a.ready,t);
+    ctx.restore();
     ctx.lineWidth=2*u;ctx.strokeStyle='#181615';ctx.beginPath();ctx.arc(cx,cy,rad+1.5*u,0,Math.PI*2);ctx.stroke();
     ctx.strokeStyle=hot?'#ffd27a':a.ready?'#d9a55a':'#e0873f';ctx.beginPath();ctx.arc(cx,cy,rad+1.5*u,-Math.PI/2,-Math.PI/2+(Math.PI*2)*a.fraction);ctx.stroke();
-    battleText(ctx,'BREATH',cx,r.y+51*u,12,hot?'#ffe3b0':'#d3c3a3','center',u);
+    // CENTRED ON THE CARD, NOT ON THE EMBLEM. At 12*u the word is ~58 world
+    // units wide and the emblem's centre is 29 from the card's left edge, so
+    // it started 0.2 units inside the rounded corner and read as spilling off
+    // the plate onto the cave floor. The existing bounds gate passed it by
+    // 0.2 of a unit. The clamp is the backstop the call never had.
+    battleText(ctx,'BREATH',r.x+r.w/2,r.y+51*u,12,hot?'#ffe3b0':'#d3c3a3','center',u,r.w-14*u,12);
     var x=r.x+51*u,w=r.w-53*u;
     if(a.kind==='cooling'||a.kind==='recovering'){
-      battleText(ctx,a.seconds+'s',x,r.y+27*u,18,'#e4d6b7','left',u,w,14);
-      battleText(ctx,a.kind==='recovering'?'recover':'to ready',x,r.y+41*u,11,'#c1b49c','left',u,w,11);
+      // LIFTED CLEAR OF THE LABEL. 'to ready' sat on baseline 41 with the
+      // 12*u 'BREATH' cap top at 40.9 — the two overprinted by 2.5 units on
+      // every cooling frame, which is most of the run.
+      battleText(ctx,a.seconds+'s',x,r.y+24*u,18,'#e4d6b7','left',u,w,14);
+      battleText(ctx,a.kind==='recovering'?'recover':'to ready',x,r.y+36*u,11,'#c1b49c','left',u,w,11);
     }else{
-      battleText(ctx,a.canCast?a.count+' in':a.foes?'Move':'No',x,r.y+24*u,12,a.canCast?'#ffd788':'#c5b79c','left',u,w,10.5);
-      battleText(ctx,a.canCast?'reach':a.foes?'closer':'raiders',x,r.y+40*u,11,'#b7aa91','left',u,w,10.5);
+      battleText(ctx,a.canCast?a.count+' in':a.foes?'Move':'No',x,r.y+22*u,12,a.canCast?'#ffd788':'#c5b79c','left',u,w,10.5);
+      battleText(ctx,a.canCast?'reach':a.foes?'closer':'raiders',x,r.y+36*u,11,'#b7aa91','left',u,w,10.5);
     }
     ctx.textAlign='left';
   };
@@ -11329,21 +11392,27 @@
     G.chips.forEach(function (c) {
       var type=TOWER_TYPES[c.id],cost=Math.round(type.cost*crowdMul(ownN));
       var picked=!c.locked&&self.shopPick===c.index,can=!c.locked&&self.gold>=cost;
-      var fill=ctx.createLinearGradient(0,c.y,0,c.y+c.h);
-      fill.addColorStop(0,picked?'#69502b':c.locked?'#1f1c1a':'#302923');fill.addColorStop(1,picked?'#312319':c.locked?'#141211':'#191513');
-      ctx.fillStyle=fill;rr(ctx,c.x,c.y,c.w,c.h,8*u);ctx.fill();
-      ctx.strokeStyle=picked?'#ffda7c':c.locked?'#3d352c':can?'#9d8050':'#54483b';ctx.lineWidth=picked?2.5*u:u;
-      rr(ctx,c.x+u,c.y+u,c.w-2*u,c.h-2*u,7*u);ctx.stroke();
-      ctx.globalAlpha=c.locked?.3:can||picked?1:.55;
-      self._drawMachinePortrait(ctx,c.id,0,0,{x:c.x+3*u,y:c.y+3*u,w:c.w-6*u,h:c.h-21*u});
+      // The tiles are forge plates now, not hand-rolled gradients: the locked
+      // one is the 'lock' tone rather than a bespoke #1f1c1a ramp with a
+      // hand-drawn padlock, which is exactly what the tone was written for.
+      forgePlate(ctx,{x:c.x,y:c.y,w:c.w,h:c.h},picked?'brasslit':c.locked?'lock':'util');
+      if(picked){ctx.strokeStyle='#ffda7c';ctx.lineWidth=2.5*u;rr(ctx,c.x+u,c.y+u,c.w-2*u,c.h-2*u,Math.min(11,Math.min(c.w,c.h)*.26));ctx.stroke();}
+      ctx.globalAlpha=c.locked?.34:can||picked?1:.55;
+      self._drawMachinePortrait(ctx,c.id,0,0,{x:c.x+4*u,y:c.y+2*u,w:c.w-8*u,h:c.h-30*u});
       ctx.globalAlpha=1;
-      var ty=c.y+c.h-7*u;
+      // A TILE NAMES ITS MACHINE. It showed a price and a thumbnail, and the
+      // name was already computed one line away for VoiceOver \u2014 sighted players
+      // were the only ones who could not read it.
+      var ty=c.y+c.h-6*u,ny=c.y+c.h-18*u;
+      battleText(ctx,type.short,c.x+c.w/2,ny,9.5,c.locked?'#9a8d7a':can||picked?'#ffe9c4':'#c2ad93','center',u,c.w-8*u,7.5);
       if(c.locked){
-        var lx=c.x+c.w/2-15*u,ly=ty-9*u;
-        ctx.strokeStyle='#bfae92';ctx.lineWidth=1.6*u;ctx.beginPath();ctx.arc(lx+4*u,ly+1.5*u,3*u,Math.PI,0);ctx.stroke();
-        ctx.fillStyle='#bfae92';ctx.fillRect(lx,ly+1.5*u,8*u,7*u);
-        battleText(ctx,'\u2605'+c.stars,c.x+c.w/2+6*u,ty,11,'#d9c7a6','center',u,c.w-18*u,10);
-      } else battleText(ctx,cost+'g',c.x+c.w/2,ty,12,can?'#ffda7c':'#c2ad93','center',u,c.w-6*u,10.5);
+        // The struck coin the file wrote starCoin for, not the '\u2605' CHARACTER \u2014
+        // that glyph falls through to the platform's emoji font and changes
+        // typeface between devices, which is the rule this line was breaking.
+        var sc=c.x+c.w/2-7*u;
+        starCoin(ctx,sc,ty-4*u,5.5*u,false);
+        battleText(ctx,String(c.stars),sc+11*u,ty,11,'#d9c7a6','center',u,c.w-24*u,9);
+      } else battleText(ctx,cost+'g',c.x+c.w/2,ty,11.5,can?'#ffda7c':'#c2ad93','center',u,c.w-8*u,10);
       if(picked){ctx.fillStyle='#ffda7c';ctx.beginPath();ctx.arc(c.x+c.w-7*u,c.y+7*u,3*u,0,Math.PI*2);ctx.fill();}
     });
     if(G.pager){
@@ -11373,10 +11442,21 @@
     // game that had not started — inert, but it read as leftover UI and it is
     // the first thing on the screen.
     if (this._ownsViewport()) return;
+    // RUN CHROME MUST NOT OUTLIVE ITS RUN. Every other part of this function is
+    // gated on state==='playing' (build dock, breath, wave status) or on a live
+    // duel — the resource rail itself was the one thing nobody guarded, so a
+    // finished run kept a lit BUILD GOLD readout for a board nothing can be
+    // built on, at full strength ON TOP of the result scrim (the scrim is drawn
+    // inside the world transform; this runs after the restore), competing with
+    // the headline and restating `treasure kept` in a different typography.
+    // _gameOver already clears the floats for exactly this reason: "a live
+    // affordance on a dead screen". Not via _ownsViewport() — that flag also
+    // suppresses the letterbox feather, which _drawResult genuinely needs.
+    if (this.state === 'won' || this.state === 'lost') return;
     this._drawBattleResources(ctx,G);
     var lx=G.barX+14;
     if (this.trial) {   // which trial this run is — always visible, never loud
-      ctx.fillStyle = 'rgba(168,230,255,0.85)'; ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(234,197,131,0.9)'; ctx.font = 'bold 10px system-ui, sans-serif';   // brass, not cyan
       ctx.fillText('TRIAL: ' + TRIALS[this.trial].name.toUpperCase(), lx + 27, G.topY + G.barH + 12);
     }
     // ---- THE DUEL STRIP ---------------------------------------------------
@@ -11423,9 +11503,13 @@
     // Smothered Fire takes the flame away, so the button goes with it — an
     // unusable control that still sits there reads as a bug, not a rule.
     if (this.state === 'playing' && !this.menu && this.shopPick < 0 && !this.shopOpen && !this.mods.breathOff) {
-      ctx.globalAlpha=this._cardOverMachine(G.breathRect)?.45:1;
-      this._drawBreathControl(ctx,G.breathRect);
-      ctx.globalAlpha=1;
+      // FADE THE GROUND, NEVER THE INK. globalAlpha over the whole draw faded
+      // the plate's dark ground at exactly the same rate as the type on it, so
+      // the contrast ratio could only halve — 1.02:1, measured, on a live
+      // control whose countdown you are timing. The cue survives (the plate
+      // goes translucent so the machine under it shows through); the numbers
+      // stay at full strength.
+      this._drawBreathControl(ctx,G.breathRect,this._cardOverMachine(G.breathRect)?.42:1);
     }
     // Speed and Pause stay on the shared resource rail in every battle mode.
     // Sound is available in Pause and on M, including Smothered Fire.
@@ -11442,30 +11526,56 @@
         var eh2 = 44, ew2 = eh2 * (ei2.width / ei2.height);
         ctx.drawImage(ei2, cx2 + 10, cy2 + 7, ew2, eh2);
       }
+      // CLAMPED TO ITS OWN PLATE. The counter line is the half of the card
+      // that teaches ("Roost L3 breaks it; fire does not care") and the longest
+      // three of the ten shipped cards ran straight off the panel it is drawn
+      // on — the first time a player meets a Shellback, a Hoard King or a
+      // Pry-Hand, which is exactly when the sentence matters.
+      var tw2 = cw2 - 68;
       ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif'; ctx.textAlign = 'left';
-      ctx.fillText(card[0], cx2 + 58, cy2 + 22);
-      ctx.fillStyle = '#e8dcc8'; ctx.font = '11.5px system-ui, sans-serif';
-      ctx.fillText(card[1], cx2 + 58, cy2 + 40);
+      ctx.fillText(fitText(ctx, card[0], tw2), cx2 + 58, cy2 + 22);
+      // SHRINK BEFORE TRUNCATING. This line is the half of the card that
+      // teaches, so losing its tail to an ellipsis is worse than losing a
+      // point of size: PRY-HAND measures 335 and SHELLBACK 314.5 against a
+      // 304-unit plate. fitText stays as the backstop below the floor.
+      var cf = 11.5;
+      ctx.font = cf + 'px system-ui, sans-serif';
+      while (cf > 10 && ctx.measureText(card[1]).width > tw2) {
+        cf -= 0.25; ctx.font = cf + 'px system-ui, sans-serif';
+      }
+      ctx.fillStyle = '#e8dcc8';
+      ctx.fillText(fitText(ctx, card[1], tw2), cx2 + 58, cy2 + 40);
       ctx.globalAlpha = 1;
     }
     // bottom: start-wave button + sprite wave preview + hint
     var startFade=this.state==='playing'&&this._cardOverMachine(G.startRect)?.45:1;
     if (this.state === 'playing' && !this.menu && this.shopPick < 0 && !this.shopOpen && !this.waveActive && this.wave < this.totalWaves()) {
-      ctx.globalAlpha=startFade;
       var r=G.startRect,u=1/v.scale,cx=r.x+r.w/2;
-      var red=ctx.createLinearGradient(0,r.y,0,r.y+r.h);red.addColorStop(0,'#874437');red.addColorStop(1,'#4e2826');
-      battlePanel(ctx,r.x,r.y+2*u,r.w,r.h-2*u,7*u,red,'#bd9253',u);
-      battleText(ctx,this._battleWaveLabel(),cx,r.y+11*u,9,'#dbc3a2','center',u,r.w-8*u,9);
-      battleText(ctx,this.wave===0?'START WAVE':'NEXT WAVE',cx,r.y+30*u,12,'#ffedc7','center',u,r.w-12*u,11.5);
+      // THE PRIMARY BATTLE CTA WEARS THE PRIMARY TONE. It hand-rolled a
+      // #874437 -> #4e2826 maroon that is darker than the darkest stop of the
+      // language's own 'ember' — so the one button that starts the fight was
+      // dimmer than a secondary on the pause sheet, which is the plate the
+      // player has already been taught to read as "press me". Ground only:
+      // the ink never fades (see the breath control).
+      ctx.save();ctx.globalAlpha=startFade;
+      forgePlate(ctx,{x:r.x,y:r.y+2*u,w:r.w,h:r.h-2*u},'ember');
+      ctx.restore();
+      battleText(ctx,this._battleWaveLabel(),cx,r.y+11*u,9,'#f4d9b4','center',u,r.w-8*u,9);
+      battleText(ctx,this.wave===0?'START WAVE':'NEXT WAVE',cx,r.y+30*u,12,'#fff3d8','center',u,r.w-12*u,11.5);
       var detail=this.wave===0?this._waveIntel().total+' raiders':Math.ceil(this.countdown)+'s · +'+Math.ceil(this.countdown)+'g';
-      battleText(ctx,detail,cx,r.y+47*u,10.5,'#dbc3a2','center',u,r.w-8*u,10.5);
-      ctx.textAlign='left';ctx.globalAlpha=1;
+      battleText(ctx,detail,cx,r.y+47*u,10.5,'#f4d9b4','center',u,r.w-8*u,10.5);
+      ctx.textAlign='left';
     }
     // During a wave the corner card reports the fight instead of calling one.
     if (this.state === 'playing' && !this.menu && this.shopPick < 0 && this.waveActive) {
-      var sr=G.startRect,su=1/v.scale;ctx.globalAlpha=startFade;
-      battlePanel(ctx,sr.x,sr.y+2*su,sr.w,sr.h-2*su,7*su,'#26221f','#5e5547',su);
-      this._drawBattleWaveStatus(ctx,sr);ctx.globalAlpha=1;
+      // During a wave the corner card REPORTS instead of calling, so it drops
+      // to the util tone — a live plate and a dead read-out must not be the
+      // same object. Ground only; the counts stay legible.
+      var sr=G.startRect,su=1/v.scale;
+      ctx.save();ctx.globalAlpha=startFade;
+      forgePlate(ctx,{x:sr.x,y:sr.y+2*su,w:sr.w,h:sr.h-2*su},'util');
+      ctx.restore();
+      this._drawBattleWaveStatus(ctx,sr);
     }
   };
 
@@ -11481,7 +11591,11 @@
   Game.prototype._drawMenus = function (ctx) {
     var tw = this._machineMenuTower(); if (!tw) return;
     var m=this.menu,G=this._machineMenuGeom(tw),u=G.u,tt=TOWER_TYPES[tw.type],row=lvlRow(tw);
-    var actions=this._machineMenuActions(),cream='#fff0d5',gold='#eac583',muted='#c9bda9',ember='#dd986b',steel='#a8c9cf',red='#efa18f';
+    // `steel` was #a8c9cf — the whole aim sub-screen was built out of a teal
+    // that appears nowhere else in this game, on the one control that is about
+    // choosing a target rather than about cold. It is brass now, like every
+    // other selectable thing in the building.
+    var actions=this._machineMenuActions(),cream='#fff0d5',gold='#eac583',muted='#c9bda9',ember='#dd986b',steel='#e0bd7f',red='#efa18f';
     function font(size,bold){ctx.font=(bold?'650 ':'')+(size*u)+'px system-ui, sans-serif';}
     function label(s,x,y,size,color,bold,max){font(size,bold);ctx.fillStyle=color;ctx.textAlign='left';ctx.fillText(max?fitText(ctx,s,max):s,x,y);}
     function panel(r,fill,stroke,radius){ctx.fillStyle=fill;rr(ctx,r.x,r.y,r.w,r.h,(radius||7)*u);ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=u;rr(ctx,r.x,r.y,r.w,r.h,(radius||7)*u);ctx.stroke();}}
@@ -11494,18 +11608,35 @@
     function check(x,y,color){ctx.strokeStyle=color;ctx.lineWidth=1.8*u;ctx.beginPath();ctx.moveTo(x-4*u,y);ctx.lineTo(x-u,y+3*u);ctx.lineTo(x+5*u,y-4*u);ctx.stroke();}
     var sub=G.fork||m.confirmSell||m.aimMenu;
     ctx.save();ctx.lineCap='round';
+    // A CHAIN, NOT A WIRE. Everything in this game that hangs, hangs on the
+    // sign's brass links; this panel was tethered to its machine by a 4px
+    // stroke. Same two endpoints, same length — the link pitch just follows it.
     var stem=G.tether;
-    ctx.strokeStyle='#241e1b';ctx.lineWidth=4*u;ctx.beginPath();ctx.moveTo(stem.source.x,stem.source.y);ctx.lineTo(stem.target.x,stem.target.y);ctx.stroke();
-    ctx.strokeStyle=gold;ctx.lineWidth=1.5*u;ctx.stroke();
+    var sdx=stem.target.x-stem.source.x,sdy=stem.target.y-stem.source.y;
+    var slen=Math.sqrt(sdx*sdx+sdy*sdy)||1,links=Math.max(1,Math.round(slen/(5*u)));
+    ctx.strokeStyle='rgba(0,0,0,0.55)';ctx.lineWidth=4*u;
+    ctx.beginPath();ctx.moveTo(stem.source.x,stem.source.y);ctx.lineTo(stem.target.x,stem.target.y);ctx.stroke();
+    ctx.strokeStyle='#d4a840';ctx.lineWidth=1.4*u;
+    for(var li=0;li<links;li++){
+      var lt=(li+0.5)/links,lx=stem.source.x+sdx*lt,ly=stem.source.y+sdy*lt;
+      ctx.beginPath();ctx.ellipse(lx,ly,1.7*u,2.5*u,Math.atan2(sdy,sdx)+Math.PI/2,0,6.283);ctx.stroke();
+    }
     G.panels.forEach(function(r){
+      // THE PANEL IS A FORGE PLATE NOW. It was a flat slate card — its own
+      // gradient, its own rim, no rivets — in a game whose every other surface
+      // is riveted cast metal, which is most of why VANUS read this screen as
+      // "not matching the style of the game". Geometry is untouched: the panel
+      // tests require each control rect to keep its exact coordinates.
       ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=12*u;ctx.shadowOffsetY=3*u;
-      panel(r,gradient(r,'#302b27','#1e1d20'),'#a58353',10);
+      forgePlate(ctx,r,'util');
       ctx.shadowBlur=0;ctx.shadowOffsetY=0;
     });
     ctx.fillStyle=gold;ctx.fillRect(G.x+12*u,G.y,65*u,2*u);
     label(G.fork?'Final upgrade':m.confirmSell?'Sell machine?':m.aimMenu?'Target priority':tt.name,G.x+12*u,G.y+21*u,13,cream,true,G.w-114*u);
     if(sub){
-      label(G.fork?'Level 2 → 3 · choose one path':m.aimMenu?tt.short+' · change aim':tt.short+' · upgrades will be lost',G.x+12*u,G.y+40*u,10,muted,false,G.w-114*u);
+      // ...and it names the machine the way the panel one tap earlier named it
+      // ('Kobold Crossbow'), not by its rail abbreviation ('CROSSBOW').
+      label(G.fork?'Level 2 → 3 · choose one path':m.aimMenu?tt.short+' · change aim':tt.name+' · upgrades lost',G.x+12*u,G.y+40*u,10,muted,false,G.w-114*u);
     }else{
       // Exactly three level markers. Future prices are shown only on the
       // purchase action, so the last-step price cannot imply total cost to MAX.
@@ -11540,7 +11671,10 @@
       label(tt.support?'Supports your workshop':'Targets automatically',G.aim.x+2*u,G.aim.y+33*u,10,muted,false,G.aim.w-4*u);
     }
     var wave=this._battleWaveLabel().replace('WAVE ','Wave ').replace(' / ','/');
-    label(wave+' · '+(tw.jamT>0?'Jammed · machine stopped':this.waveActive?'Battle continues':'Ready for next wave'),G.x+12*u,G.footerY,10,tw.jamT>0?red:muted,false,G.w-24*u);
+    // CLEAR OF THE RIVETS. The plate's studs sit 11 units in from each corner
+    // and this line started at 12*u, so its first glyph printed on the
+    // bottom-left rivet. Both ends move in by the same amount.
+    label(wave+' · '+(tw.jamT>0?'Jammed · machine stopped':this.waveActive?'Battle continues':'Ready for next wave'),G.x+19*u,G.footerY,10,tw.jamT>0?red:muted,false,G.w-38*u);
     actions.forEach(function(a){
       var r=a.rect,tx=r.x+10*u,max=r.w-20*u,isBuy=/^fork[01]$/.test(a.id),preview=/^preview[01]$/.test(a.id),aimChoice=/^aim[0-3]$/.test(a.id);
       var chosen=preview?Number(a.id.slice(-1))===(m.forkChoice===1?1:0):aimChoice&&Number(a.id.slice(-1))===(tw.targeting|0);
@@ -11592,7 +11726,7 @@
         font(12,true);ctx.fillStyle=cream;ctx.textAlign='center';ctx.fillText(fitText(ctx,a.title,max),r.x+r.w/2,r.y+65*u);
         if(chosen){ctx.fillStyle=gold;ctx.fillRect(r.x+10*u,r.y+r.h-3*u,r.w-20*u,2*u);}
       }else if(aimChoice){
-        panel(r,chosen?'#3b5155':'#252e31',chosen?steel:'#60767a');
+        panel(r,chosen?'#4a3a1e':'#2a2620',chosen?steel:'#6b6152');
         var ai=Number(a.id.slice(-1));label(a.title,tx,r.y+19*u,12,cream,true,max-15*u);
         label(['Closest to hoard','Most health','Newest arrival','Healers first'][ai],tx,r.y+36*u,10,muted,false,max);
         if(chosen)check(r.x+r.w-14*u,r.y+15*u,steel);
@@ -11602,9 +11736,22 @@
         label(a.disabled?'Need '+(row.upgradeCost-this.gold)+'g more':'Permanent choice · Level 3 / MAX',tx,r.y+34*u,10,a.disabled?muted:'#47331c',false,max-42*u);
         font(14,true);ctx.fillStyle=ink;ctx.textAlign='right';ctx.fillText(row.upgradeCost+'g',r.x+r.w-10*u,r.y+26*u);
       }else if(a.id==='confirmSell'){
-        panel(r,'#4a2927','#c78975');label('Sell for '+this._sellValue(tw)+'g',tx,r.y+19*u,12.5,cream,true,max);
-        label('Machine and upgrades are removed.',tx,r.y+36*u,10.5,muted,false,max);
+        // A CONFIRM DIALOG MUST NOT RECOMMEND THE DESTRUCTIVE ANSWER. This
+        // panel drew Sell as the filled, lit tile and Keep as a flat outline —
+        // the exact inverse of the pause sheet, which is where the player
+        // learned "the lit plate is the one to press". Three confirmations ship
+        // in this game and this was the one pointing at the wrong door. Sell
+        // drops to dead metal and keeps only its refund numeral warm; KEEP
+        // takes the lit tone below. Both rects and both action ids are
+        // untouched — the panel tests resolve actions by id and require a
+        // coordinate-identical DOM proxy for each.
+        panel(r,'#2b211d','#6d5c4e');label('Sell for '+this._sellValue(tw)+'g',tx,r.y+19*u,12.5,muted,true,max);
+        label('Machine and upgrades are removed.',tx,r.y+36*u,10.5,'#a99c88',false,max);
         label('Gold '+this.gold+' → '+(this.gold+this._sellValue(tw)),tx,r.y+51*u,10.5,red,false,max);
+      }else if(a.id==='keep'){
+        panel(r,gradient(r,'#e05a4a','#8e2626'),'#f0b49b');
+        font(12.5,true);ctx.fillStyle='#fff3d8';ctx.textAlign='center';
+        ctx.fillText('KEEP MACHINE',r.x+r.w/2,r.y+r.h/2+5*u);
       }else{
         panel(r,'#302e29','#96866d');font(12.5,true);ctx.fillStyle=cream;ctx.textAlign='center';ctx.fillText(a.title,r.x+r.w/2,r.y+28*u);
       }
@@ -11717,17 +11864,13 @@
     pg.addColorStop(0, 'rgba(255,150,62,0.10)'); pg.addColorStop(1, 'rgba(255,150,62,0)');
     ctx.fillStyle = pg; ctx.fillRect(X, Y, W, H);
     ctx.globalCompositeOperation = 'source-over';
-    function platePath(x, y, w, h, c) {        // chamfered lozenge, not a rect
-      ctx.beginPath();
-      ctx.moveTo(x + c, y); ctx.lineTo(x + w - c, y); ctx.lineTo(x + w, y + h / 2);
-      ctx.lineTo(x + w - c, y + h); ctx.lineTo(x + c, y + h); ctx.lineTo(x, y + h / 2);
-      ctx.closePath();
-    }
+    // platePath is module scope now (see "THE SIGN, HOISTED") so the rooms and
+    // the result screen can hang their own sign from the same cut corners.
     var bg2 = ctx.createLinearGradient(0, py, 0, py + ph);
     bg2.addColorStop(0, 'rgba(46,28,18,0.92)'); bg2.addColorStop(1, 'rgba(18,10,8,0.95)');
-    ctx.fillStyle = bg2; platePath(px, py, plateW, ph, ch); ctx.fill();
+    ctx.fillStyle = bg2; platePath(ctx, px, py, plateW, ph, ch); ctx.fill();
     ctx.strokeStyle = 'rgba(212,168,64,0.62)'; ctx.lineWidth = 2;
-    platePath(px + 1, py + 1, plateW - 2, ph - 2, ch); ctx.stroke();
+    platePath(ctx, px + 1, py + 1, plateW - 2, ph - 2, ch); ctx.stroke();
     for (var rvi = 0; rvi < 4; rvi++) {
       var rvx = px + (rvi % 2 ? plateW - 22 : 22), rvy = py + (rvi < 2 ? 18 : ph - 18);
       ctx.fillStyle = '#d4a840';
@@ -12136,24 +12279,39 @@
         ctx.font=Math.max(10,10.5*u)+'px system-ui, sans-serif';
         inkText(ctx, fAvail>0?fAvail+' stars':'Upgrades', pcx, numY, fAvail>0?'#ffd75e':'#beac8d', 3, 1);
       } else if (pi === 1) {
-        ctx.strokeStyle = live ? 'rgba(217,242,255,0.9)' : 'rgba(138,127,114,0.7)';
-        ctx.lineWidth = 2;
-        rr(ctx, pcx - 8, ICO - 7, 16, 14, 3); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(pcx - 4, ICO - 3); ctx.lineTo(pcx + 4, ICO - 3);
-        ctx.moveTo(pcx - 4, ICO + 2); ctx.lineTo(pcx + 4, ICO + 2); ctx.stroke();
+        // A STRUCK TOKEN, NOT A WIREFRAME. This cell was the bar's only
+        // ice-blue and its icon the only 2px outline drawing among three
+        // struck-metal tokens — four cells in three colour families, in a row
+        // the eye reads as one object. It is a brass tablet now, lit when the
+        // room is open and dead metal when it is not, like its neighbours.
+        var tg = ctx.createLinearGradient(0, ICO - 8, 0, ICO + 8);
+        if (live) { tg.addColorStop(0, '#f4d98c'); tg.addColorStop(1, '#8f6a20'); }
+        else { tg.addColorStop(0, '#6a5a4a'); tg.addColorStop(1, '#332721'); }
+        ctx.fillStyle = tg; rr(ctx, pcx - 9, ICO - 8, 18, 16, 3); ctx.fill();
+        ctx.strokeStyle = live ? 'rgba(120,88,26,0.9)' : 'rgba(40,32,26,0.9)';
+        ctx.lineWidth = 1.2; rr(ctx, pcx - 9, ICO - 8, 18, 16, 3); ctx.stroke();
+        ctx.strokeStyle = live ? 'rgba(52,36,12,0.85)' : 'rgba(150,132,110,0.30)';
+        ctx.lineWidth = 1.6; ctx.beginPath();
+        ctx.moveTo(pcx - 4.5, ICO - 3); ctx.lineTo(pcx + 4.5, ICO - 3);
+        ctx.moveTo(pcx - 4.5, ICO + 1); ctx.lineTo(pcx + 4.5, ICO + 1);
+        ctx.moveTo(pcx - 4.5, ICO + 5); ctx.lineTo(pcx + 1.5, ICO + 5); ctx.stroke();
         // Count badges across every campaign keep. '/9' dated from when there were
         // three trials and quietly told the player they were twice as done
         // as they were — and it can never be reached, so it reads as broken.
         ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
-        inkText(ctx, 'TRIALS', pcx, nameY, live ? '#d9f2ff' : '#8a7f72', 3, 1);
+        inkText(ctx, 'TRIALS', pcx, nameY, live ? '#ffe9c4' : '#8a7f72', 3, 1);
         if (live) inkText(ctx, tDone + '/' + (TRIAL_ORDER.length * CAMPAIGN_MAPS),
-                          pcx, numY, 'rgba(217,242,255,0.75)', 3, 1);
+                          pcx, numY, '#ffd75e', 3, 1);
         else {ctx.font=10.5*u+'px system-ui, sans-serif';inkText(ctx,'Win a keep',pcx,numY,'#a89980',3,1);}
       } else if (pi === 2) {
         // the wallet is the label: a shop with nothing in the purse should say
         // so on the door rather than after the tap
         var mk = Save.data.marks | 0;
-        drawCoin(ctx, pcx, ICO, G.bar ? 11 : 9, Save.equipped('coin'));
+        // MARKS, NOT BUILD GOLD. This cell counts Hoard Marks and stamped them
+        // with the coin the player spends inside a run — the currency marks are
+        // NOT, and which is worthless the moment the run ends. Same signature,
+        // and it drops the radius mismatch against the star coin beside it.
+        hoardMarkGlyph(ctx, pcx, ICO, G.bar ? 11 : 9);
         ctx.font = 'bold ' + PF + 'px system-ui, sans-serif';
         inkText(ctx, 'CAVERN', pcx, nameY,
                 '#ffe9c4', 3, 1);
@@ -12320,12 +12478,12 @@
     ctx.fillStyle = 'rgba(12,7,5,0.88)';
     ctx.fillRect(-this.view.ox - 60, -this.view.oy - 60, this.view.w + 120, this.view.h + 120);
     ctx.textAlign = 'center';
-    ctx.font = 'bold 26px Georgia, serif';
-    inkText(ctx, 'YOUR CAVERN', WORLD_W / 2, 72, '#ffe9c4', 6, 2);
-    // UNDER the title, not over it: at y 62 this ran through the serif
-    // ascenders and both lines became unreadable.
+    // UNDER the plate, not through it: this room's band is 104 units deep
+    // (the wallet starts there), so the title rides up and the line takes the
+    // air the plate used to overprint.
+    roomHeader(ctx, this.view, 'YOUR CAVERN', 66, 26);
     ctx.font = Math.max(11,10.5*css)+'px system-ui, sans-serif';
-    inkText(ctx, 'Earned by playing. Looks only — no stat changes.', WORLD_W / 2, 90,
+    inkText(ctx, 'Earned by playing. Looks only — no stat changes.', WORLD_W / 2, 96,
             'rgba(255,201,168,0.6)', 4, 1);
 
     // ---- wallet -----------------------------------------------------------
@@ -12406,9 +12564,15 @@
       } else {
         inkText(ctx, it.price + ' MARKS', cd.x + 64, cd.y + 48,
                 afford ? '#ffe9c4' : '#d7ab8e', 3, 1);
-        if (!afford) {
+        // THE SHORTFALL IS ONLY NEWS WHEN IT DIFFERS FROM THE PRICE. At zero
+        // marks — every new player, and the state this room opens in — 'need
+        // 120 more' restates '120 MARKS' directly underneath it, so all eight
+        // cards printed their price twice, stacked. Say it once until the
+        // player has actually part-paid for something.
+        var held = Save.data.marks | 0;
+        if (!afford && held > 0) {
           ctx.font = 'bold '+Math.max(9,10.5*css)+'px system-ui, sans-serif';
-          inkText(ctx, 'need ' + (it.price - (Save.data.marks | 0)) + ' more', cd.x + 64, cd.y + 63,
+          inkText(ctx, 'need ' + (it.price - held) + ' more', cd.x + 64, cd.y + 63,
                   '#bb9d87', 3, 1);
         }
       }
@@ -12519,8 +12683,7 @@
     ctx.fillStyle = 'rgba(12,7,5,0.85)';
     ctx.fillRect(-v.ox - 60, -v.oy - 60, v.w + 120, v.h + 120);
     ctx.textAlign = 'center';
-    ctx.font = 'bold 34px Georgia, serif';
-    inkText(ctx, 'THE FORGE', WORLD_W / 2, 150, '#ffd75e');
+    roomHeader(ctx, v, 'THE FORGE', 150);
     ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
     ctx.fillText('Campaign stars buy lasting craft. Campaign only —', WORLD_W / 2, 182);
     ctx.fillText('the Daily Siege is the same fair fight for everyone.', WORLD_W / 2, 198);
@@ -12601,8 +12764,7 @@
     hg.addColorStop(0.75, 'rgba(10,6,4,0.72)');
     hg.addColorStop(1, 'rgba(10,6,4,0)');
     ctx.fillStyle = hg; ctx.fillRect(0, 96, WORLD_W, 128);
-    ctx.fillStyle = '#ffc9a8'; ctx.font = 'bold 28px Georgia, serif';
-    ctx.fillText('DUEL · AI RIVALS', WORLD_W / 2, 142);
+    roomHeader(ctx, v, 'DUEL · AI RIVALS', 136, 28);
     ctx.fillStyle = '#e8cbb4'; ctx.font = '13px system-ui, sans-serif';
     // IT SAID "two caves". That is the shape VANUS rejected twice -- a second
     // board in an inset -- and the mode has been ONE cavern with two sides
@@ -12688,10 +12850,14 @@
   Game.prototype._drawTrials = function (ctx) {
     var v=this.view,u=1/(v.scale||1),G=trialGeom(v,this.trialPage),lv=this._trialLevel(),won=Save.data.stars[lv]>0;
     ctx.fillStyle='rgba(12,7,5,0.85)';ctx.fillRect(-v.ox-60,-v.oy-60,v.w+120,v.h+120);
-    ctx.textAlign='center';ctx.font='bold '+26*u+'px Georgia,serif';
-    inkText(ctx,'TRIALS',WORLD_W/2,G.screenTop+29*u,'#ffd75e');
-    ctx.font=12*u+'px system-ui,sans-serif';ctx.fillStyle='#e8cbb4';
-    ctx.fillText('Choose a keep, then a challenge.',WORLD_W/2,G.screenTop+48*u);
+    ctx.textAlign='center';
+    // THE TIGHTEST HEADER BAND IN THE GAME: the keep chips start 62*u below the
+    // screen top, so a plate AND a subtitle cannot both fit above them. The
+    // subtitle went — 'Choose a keep, then a challenge.' described the two rows
+    // immediately under it, which name themselves (KEEP 1-4, then the keep's
+    // own name and its trials). The sign stays, so this room reads as a room of
+    // the same building as the Forge rather than as bare gold text.
+    roomHeader(ctx,v,'TRIALS',G.screenTop+38*u,22*u);
     for(var i=0;i<G.levels.length;i++){
       var c=G.levels[i],held=Save.data.stars[i]>0;
       forgePlate(ctx,c,i===lv?'brasslit':held?'util':'lock');
@@ -12796,6 +12962,49 @@
   };
 
   var RESULT_FOOT = 706;
+  /// THE PAYOFF SCREEN HAD NO ACTION. It was a whole-screen tap target with a
+  /// lavender hint — and a dead end in both directions: the loss copy promised
+  /// "Wick will not let it happen twice" with no way to try again, and a win
+  /// sent you to the front door instead of the next keep. The 80-unit band
+  /// under Wick is exactly where the pause sheet puts its primary. ONE
+  /// geometry, four readers: the drawer, the tap handler, the DOM proxies and
+  /// tools/tap_rooms.js — the same law _titleGeom/trialGeom/duelGeom follow.
+  function resultGeom(g) {
+    var v = g.view, r = g.result || {}, h = Math.max(46, 44 / (v.scale || 1));
+    var W = 300, X = WORLD_W / 2 - W / 2, gap = 8;
+    // ANCHORED TO THE GLASS, NOT TO A LITERAL. A stack sized from view.scale
+    // (51.5 units at the SE3's 0.8551) walked straight off the bottom when it
+    // was hung off a fixed y. Measure UP from the visible floor instead, the
+    // way lbAskGeom centres on what is visible rather than on the design box.
+    var floor = Math.min(WORLD_H, (v.h || WORLD_H) - (v.oy || 0)) - 10;
+    // A win with another keep behind it offers that keep; everything else
+    // offers the run you just played. Never both plus a third — a result
+    // screen with three choices is a menu, and the menu is one tap away.
+    var nextLv = (r.won && !r.rival && !r.trial && g.mode === 'campaign' &&
+                  g.levelIdx + 1 < CAMPAIGN_MAPS && Save.unlocked(g.levelIdx + 1)) ? g.levelIdx + 1 : -1;
+    // THE DAILY ALREADY OWNS THIS BAND. Its ladder, posting status, opt-out and
+    // RETRY plate all live above RESULT_FOOT; a second lit primary underneath
+    // them would be the fifth control on the busiest result this game draws.
+    // One way out, and the Daily plate on the title is the way back in.
+    var solo = g.mode === 'daily';
+    var backY = floor - h, primaryY = backY - h - gap;
+    return {
+      nextLv: nextLv, solo: solo,
+      primary: solo ? null : { x: X, y: primaryY, w: W, h: h, hx: X, hy: primaryY, hw: W, hh: h,
+                   label: nextLv >= 0 ? 'NEXT KEEP' : r.trial ? 'TRIAL AGAIN'
+                          : g.mode === 'duel' ? 'REMATCH' : 'DEFEND AGAIN' },
+      back: { x: X, y: backY, w: W, h: h, hx: X, hy: backY, hw: W, hh: h },
+      top: solo ? backY : primaryY,
+    };
+  }
+  // THE AWARD MUST OUTLIVE THE LOCK. `resultLockT` exists so a battle tap in
+  // flight cannot skip the result screen, and it was 0.8s — while the HOARD
+  // MARKS chip only begins to fade in at 1.05s and is not solid until 1.33s.
+  // So a player who tapped on the third star's landing dismissed the screen a
+  // quarter-second BEFORE the one thing that tells them they earned the
+  // currency the entire shop runs on. The draw was added; the window was never
+  // moved. Named once here so the drawer and the lock cannot drift again.
+  var RESULT_MARKS_IN = 1.05, RESULT_MARKS_FULL = RESULT_MARKS_IN + 0.28;
 
   Game.prototype._retryLeaderboard = function () {
     if (this.mode !== 'daily' || (this.state !== 'won' && this.state !== 'lost') || !Lb.on()) return false;
@@ -12818,6 +13027,11 @@
 
   Game.prototype._drawResult = function (ctx) {
     var r = this.result || {};
+    // ONE GEOMETRY, FOUR READERS (the drawer, the tap handler, the DOM proxies
+    // and tools/tap_rooms.js). Computed FIRST so the hero and the Daily's own
+    // controls can be laid out against the band the buttons occupy instead of
+    // against a literal that predates them.
+    var RG = this._resultRects = resultGeom(this);
     // Daily posting controls need room after the fullest toll/leak story.
     var resultRise = this.mode === 'daily' && Lb.on() ? 60 : 0;
     ctx.fillStyle = 'rgba(12,7,5,0.75)';
@@ -12835,34 +13049,68 @@
     rs.addColorStop(1, 'rgba(10,6,4,0)');
     ctx.fillStyle = rs; ctx.fillRect(18, 270, WORLD_W - 36, 430);
     ctx.textAlign = 'center';
-    ctx.fillStyle = r.won ? '#9ef58f' : '#ff7b7b';
-    ctx.font = 'bold 42px Georgia, serif';
-    // A duel is won on the MARGIN, so it gets its own headline: "HOARD HELD"
-    // on a run you finished 3 coins behind would be a lie about the only
-    // number the mode is about.
+    // ---- THE HEADLINE HANGS ON THE SIGN ----------------------------------
+    // This screen used to be the one surface in the game that spoke none of the
+    // forged-sign language: a bare 42px fill on the battlefield, with the run's
+    // three facts under it as lowercase colon fragments. It gets the masthead
+    // now, and — the actual defect VANUS photographed — THE HEADLINE IS SIZED
+    // FROM THE STRING. 'DEAD LEVEL — YOU KEEP IT' measured 585 units in a
+    // 420-unit box and ran 88.5 past BOTH edges, because the author's own
+    // corrective `if (tie) ctx.font = 'bold 25px…'` was written one statement
+    // AFTER the fillText it was meant to govern and was then overwritten on the
+    // next line: dead code that had never touched a pixel. fitFont makes the
+    // size a function of the string, so no future headline can do it again.
+    // tools/text_overlap.js now measures left and right edges and carries a
+    // margin-0 duel case, which is what the old gate was missing.
+    var HEAD_W = WORLD_W - 52, headY = (r.rival ? 314 : 320 - resultRise);
+    var head = r.rival
+      ? (r.won ? (r.knockout && (r.rivalHoard | 0) <= 0 ? 'SACKED THEM!'
+                  : (r.margin | 0) === 0 ? 'DEAD LEVEL — YOU KEEP IT' : 'DUEL WON!')
+               : 'DUEL LOST')
+      : (r.won ? 'HOARD HELD!' : 'HOARD LOST');
+    var headPx = fitFont(ctx, head, HEAD_W, r.rival ? 38 : 42, 'Georgia, serif', 18);
+    var signW = Math.min(WORLD_W - 30, Math.max(214, ctx.measureText(head).width + 52));
+    signPlate(ctx, this.view, WORLD_W / 2 - signW / 2, headY - headPx * 0.80 - 13, signW, headPx * 1.18 + 22, false);
+    signTitle(ctx, head, WORLD_W / 2, headY, headPx);
+    // The outcome is a colour on the plate's rim, not on the word: green and
+    // red at 42px were two combat-HUD signal colours promoted to display type.
+    ctx.strokeStyle = r.won ? 'rgba(158,245,143,0.55)' : 'rgba(255,123,123,0.55)';
+    ctx.lineWidth = 2;
+    platePath(ctx, WORLD_W / 2 - signW / 2 + 3, headY - headPx * 0.80 - 10, signW - 6, headPx * 1.18 + 16,
+              Math.min(16, (headPx * 1.18 + 16) * 0.21));
+    ctx.stroke();
+    // THE CURSOR STARTS AT THE SIGN'S OWN BOTTOM EDGE. The margin line and the
+    // trial line were literals at 340 and 345, chosen when the headline was a
+    // bare fill with no plate under it — both now printed inside the sign's
+    // bottom chamfer, and the medallion row (a fixed 360) clipped the feet of
+    // the trial line beneath it. Every block from here down measures from the
+    // block above it, so a plate that grows or shrinks with its string moves
+    // what follows instead of overprinting it.
+    var CY = headY + headPx * 0.38 + 11;
     if (r.rival) {
-      ctx.font = 'bold 38px Georgia, serif';
-      // A TIE IS NOT A WIN, even though it is scored as one. Ties go to the
-      // player (`hoard >= rivalHoard`), so "DUEL WON!" over a dead-level
-      // scoreline is true by the rule and reads as a lie by the number -- the
-      // margin line right underneath says +0. Name it for what it is.
-      var tie = (r.margin | 0) === 0 && r.won;
-      ctx.fillText(r.won ? (r.knockout && (r.rivalHoard | 0) <= 0 ? 'SACKED THEM!'
-                            : tie ? 'DEAD LEVEL — YOU KEEP IT' : 'DUEL WON!')
-                         : 'DUEL LOST', WORLD_W / 2, 314);
-      if (tie) ctx.font = 'bold 25px Georgia, serif';
+      // A duel is won on the MARGIN, so it gets its own headline: "HOARD HELD"
+      // on a run you finished 3 coins behind would be a lie about the only
+      // number the mode is about. A TIE IS NOT A WIN either, even though it is
+      // scored as one (ties go to the player), so it is named for what it is.
       ctx.font = 'bold 15px system-ui, sans-serif';
       ctx.fillStyle = r.won ? 'rgba(158,245,143,0.9)' : 'rgba(255,154,106,0.9)';
       var mg2 = r.margin | 0;
-      ctx.fillText('you ' + (r.hoard | 0) + '   ·   ' + r.rival + ' ' + Math.max(0, r.rivalHoard | 0) +
-                   '   ·   ' + (mg2 >= 0 ? '+' + mg2 : String(mg2)), WORLD_W / 2, 340);
-    } else {
-      ctx.fillText(r.won ? 'HOARD HELD!' : 'HOARD LOST', WORLD_W / 2, 320 - resultRise);
+      ctx.fillText(fitText(ctx, 'you ' + (r.hoard | 0) + '   ·   ' + r.rival + ' ' + Math.max(0, r.rivalHoard | 0) +
+                   '   ·   ' + (mg2 >= 0 ? '+' + mg2 : String(mg2)), HEAD_W), WORLD_W / 2, CY + 11);
+      CY += 20;
     }
     if (r.trial) {
-      ctx.font = 'bold 15px system-ui, sans-serif';
-      ctx.fillStyle = '#a8e6ff';
-      ctx.fillText(r.won ? 'TRIAL COMPLETE — ' + r.trial + ' ★' : 'TRIAL: ' + r.trial, WORLD_W / 2, 345);
+      // THE TRIAL LINE WAS THE SCREEN'S ONLY CYAN, and it shipped a raw '★'
+      // fifteen units from three struck-coin medallions — the exact glyph
+      // starCoin was written to retire, in a colour that means "cold" in a
+      // game where cold is the Daily's violet. Gold caps and a struck coin.
+      ctx.font = 'bold 14px system-ui, sans-serif';
+      var trialTxt = (r.won ? 'TRIAL COMPLETE · ' : 'TRIAL · ') + r.trial.toUpperCase();
+      trialTxt = fitText(ctx, trialTxt, WORLD_W - 110);
+      var trialW = ctx.measureText(trialTxt).width;
+      inkText(ctx, trialTxt, WORLD_W / 2 - (r.won ? 9 : 0), CY + 11, r.won ? '#ffd75e' : '#e8cbb4', 4, 1);
+      if (r.won) starCoin(ctx, WORLD_W / 2 - 9 + trialW / 2 + 12, CY + 6, 8, true);
+      CY += 19;
     }
     // Stars grade coins lost forever, which is not what a duel is scored on —
     // and the medallion row would land on top of the margin line. A duel is
@@ -12880,8 +13128,9 @@
           if (since <= 0) continue;                       // not landed yet
           pop = 1 + 0.55 * Math.exp(-since * 9) * Math.cos(since * 22);
         }
-        starCoin(ctx, WORLD_W / 2 - 46 + s * 46, 360 - resultRise, 19 * pop, earned);
+        starCoin(ctx, WORLD_W / 2 - 46 + s * 46, CY + 19, 19 * pop, earned);
       }
+      CY += 42;
     }
     // ---- EVERYTHING BELOW FLOWS FROM ONE CURSOR ---------------------------
     // Every y under here used to be a literal, and they collided the moment two
@@ -12893,9 +13142,7 @@
     // own header did not follow it, because the header was a literal.
     // A cursor cannot do that: a block that is not drawn advances nothing.
     var CX = WORLD_W / 2;
-    var RY = r.rival ? 352 : (r.trial ? 357 : 332);       // under the headline
-    if (r.won && !r.rival) RY = 379;                      // under the medallions
-    RY -= resultRise;
+    var RY = CY;                                          // whatever ran above it
 
     // ---- HOARD MARKS EARNED ----------------------------------------------
     // _gameOver() writes result.marks and NOTHING READ IT: a player earned the
@@ -12908,7 +13155,7 @@
     // punches straight through it mid-animation. The third star lands at
     // 0.22 + 2*0.26 = 0.74s and settles shortly after, so the chip fades in at
     // 1.05s -- which is also the better beat: stars, then the reward.
-    var mkFade = RM ? 1 : Math.max(0, Math.min(1, ((this._resultT || 0) - 1.05) / 0.28));
+    var mkFade = RM ? 1 : Math.max(0, Math.min(1, ((this._resultT || 0) - RESULT_MARKS_IN) / (RESULT_MARKS_FULL - RESULT_MARKS_IN)));
     if ((r.marks | 0) > 0 && mkFade > 0) {
       ctx.save(); ctx.globalAlpha = mkFade;
       // IT RIDES THE CURSOR NOW. It used to be wedged into the one 24-unit gap
@@ -12924,30 +13171,54 @@
       rr(ctx, mkX, RY + 2, mkW, 24, 8); ctx.fill();
       ctx.strokeStyle = 'rgba(255,215,110,0.75)'; ctx.lineWidth = 1.5;
       rr(ctx, mkX, RY + 2, mkW, 24, 8); ctx.stroke();
-      drawCoin(ctx, mkX + 15, RY + 14, 8, Save.equipped('coin'));
+      // THE MARK'S OWN TOKEN, NOT BUILD GOLD'S. This chip stamped the award the
+      // whole meta-game runs on with `drawCoin` — the icon of the currency
+      // marks are NOT, the one the player just spent all run and which is
+      // worthless the second the run ends — while the Cavern, where marks are
+      // spent, showed a different glyph entirely. Same (ctx,x,y,r) signature,
+      // so the chip's width arithmetic is untouched.
+      hoardMarkGlyph(ctx, mkX + 15, RY + 14, 8);
       ctx.textAlign = 'left';
       inkText(ctx, mkTxt, mkX + 28, RY + 18, '#ffe9c4', 3, 1);
       ctx.textAlign = 'center';
       ctx.restore();
     }
     if ((r.marks | 0) > 0) RY += 26;
+    // ---- THE RUN, AS A PLATED LEDGER -------------------------------------
+    // It was three run-on sentences in one weight — 'treasure kept: 35 / 60' —
+    // with no plate, no column and no case rule, while the PAUSE sheet, a mere
+    // utility surface, engraved the same kind of facts in tracked caps over
+    // struck gold numerals. On the payoff screen the NUMBERS are the content,
+    // so they get the loud voice and the words that name them get the quiet
+    // one. Same three facts, same vertical budget: two plated rows cost 44+40
+    // where the sentences cost 78-104, so the daily ladder's `hasLadderRoom`
+    // arithmetic still seats its eight rows on a clean run.
+    RY += 8;
+    var LEDGER_W = 344, LX = CX - LEDGER_W / 2;
+    // EVERY FACT IN ONE LEDGER, CHUNKED. The daily's wave count and Wick's own
+    // toll are optional, and giving them a plate of their own cost this screen
+    // 60 units on exactly the mode that has the least to spare — the Daily also
+    // carries a ladder, a posting status, an opt-out and a RETRY plate. Up to
+    // four cells share a row; a fifth starts a second one. Win-green on a loss
+    // screen read as a second success, so the toll is gold like every other
+    // number Wick earned.
+    // Each fact carries a long and a short label: a three-up row has 101 units
+    // a cell and can say 'TREASURE KEPT'; a four-up row has 76 and cannot.
+    var facts = [
+      ['treasure kept', 'kept', (r.hoard | 0) + ' / ' + CFG.startHoard, r.won ? '#ffd75e' : '#ff9a9a'],
+      ['carried off', 'carried off', r.lost | 0, (r.lost | 0) > 0 ? '#ff9a9a' : '#ffd75e'],
+      ['raiders slain', 'slain', r.kills | 0],
+    ];
+    if (this.mode === 'daily') facts.push(['waves survived', 'waves', r.wave | 0]);
+    if (r.toll > 0) facts.push(['wick shook loose', 'wick freed', r.toll | 0]);
+    var per = facts.length > 4 ? 3 : facts.length;
+    for (var fi = 0; fi < facts.length; fi += per) {
+      var chunk = facts.slice(fi, fi + per), short = chunk.length >= 4;
+      var rowW = chunk.length >= 3 ? LEDGER_W : Math.max(190, LEDGER_W * chunk.length / 3);
+      RY += statRow(ctx, { x: CX - rowW / 2, y: RY, w: rowW, h: 58 },
+                    chunk.map(function (f) { return [short ? f[1] : f[0], f[2], f[3]]; })) + 6;
+    }
     ctx.fillStyle = '#ffe9c4'; ctx.font = '17px system-ui, sans-serif';
-    var LINE = 26;
-    RY += 15;
-    ctx.fillText('treasure kept: ' + (r.hoard | 0) + ' / ' + CFG.startHoard, CX, RY); RY += LINE;
-    ctx.fillText('coins carried off: ' + (r.lost | 0), CX, RY); RY += LINE;
-    ctx.fillText('raiders slain: ' + (r.kills | 0), CX, RY); RY += LINE;
-    // THE DAILY'S OWN LINE BELONGS IN THE STATS BLOCK. It was drawn at a
-    // literal 498 four blocks further down, which is how it came to be printed
-    // on top of the leak header.
-    if (this.mode === 'daily') {
-      ctx.fillText('waves survived: ' + (r.wave | 0), CX, RY); RY += LINE;
-    }
-    if (r.toll > 0) {
-      ctx.fillStyle = '#9ef58f';
-      ctx.fillText('Wick shook loose: ' + (r.toll | 0), CX, RY); RY += LINE;
-      ctx.fillStyle = '#ffe9c4';
-    }
     // WHO TOOK IT. "coins carried off: 25" told the player they had failed and
     // nothing about why. The top three thieves, with the wave they first got
     // through, turn a loss into a next attempt: the answer to a Gloomwing is a
@@ -12956,11 +13227,11 @@
     // The block is only drawn when something LEAKED, so a clean run keeps the
     // tight layout and the story beat stays where it was.
     if (r.leaks && r.leaks.length) {
-      RY += 6;
-      ctx.font = 'bold 11px system-ui, sans-serif';
-      ctx.fillStyle = '#c9b8a8';
-      ctx.fillText('WHO GOT THROUGH', CX, RY);
-      RY += 16;
+      RY += 8;
+      // The section label speaks the game's eyebrow voice — tracked caps in
+      // dead brass — instead of reading as slightly-smaller body text.
+      trackedCaps(ctx, 'who got through', CX, RY, 10, '#c4b594');
+      RY += 17;
       for (var lz = 0; lz < Math.min(3, r.leaks.length); lz++) {
         var lr = r.leaks[lz], ly = RY + lz * 18;
         var card = ENEMY_CARDS[lr.type];
@@ -13023,7 +13294,7 @@
         : 'posting is on — tap to stop';
       ctx.font = '11px system-ui, sans-serif';
       var optW = ctx.measureText(optTxt).width + 28;
-      var optY = RESULT_FOOT - 6;
+      var optY = RG.top - 16;
       var optH = Math.max(26, 44 / this.view.scale);
       this._lbOptRect = { x: CX - optW / 2, y: optY - 4 - optH / 2, w: optW, h: optH };
       ctx.fillStyle = 'rgba(255,233,196,0.40)';
@@ -13040,14 +13311,14 @@
       var LBY = storyY + 45, LBR = LBY + 41, posting = Lb.status();
       if (posting.pending) {
         var retryH = Math.max(44, 44 / this.view.scale);
-        var retry = this._lbRetryRect = { x: CX - 92, y: RESULT_FOOT - 45 - retryH, w: 184, h: retryH };
+        var retry = this._lbRetryRect = { x: CX - 92, y: RG.top - 55 - retryH, w: 184, h: retryH };
         ctx.fillStyle = posting.sending ? '#473830' : '#745028';
         rr(ctx, retry.x, retry.y, retry.w, retry.h, 9); ctx.fill();
         ctx.strokeStyle = '#be965b'; ctx.lineWidth = 1; ctx.stroke();
         ctx.fillStyle = '#fff0d3'; ctx.font = 'bold 13px system-ui, sans-serif';
         ctx.fillText(posting.sending ? 'SENDING…' : 'RETRY SCORE', CX, retry.y + retry.h / 2 + 4);
       }
-      var ladderBottom = this._lbRetryRect ? this._lbRetryRect.y - 12 : RESULT_FOOT - 42;
+      var ladderBottom = this._lbRetryRect ? this._lbRetryRect.y - 12 : RG.top - 52;
       var hasLadderRoom = LBR <= ladderBottom;
       if (hasLadderRoom) {
         ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif';
@@ -13055,7 +13326,13 @@
       }
       ctx.fillStyle = posting.outcome === 'posted' ? '#9ef58f' : '#c9b8ff';
       ctx.font = '11px system-ui, sans-serif';
-      ctx.fillText(this._leaderboardStatusText(), CX, hasLadderRoom ? LBY + 21 : Math.min(storyY + 43, ladderBottom - 4));
+      // THE RECEIPT SITS IN THE GAP, NOT ON THE STORY. `ladderBottom - 4`
+      // is the floor for the LADDER's rows, and using it for the status line
+      // put the receipt ABOVE the story's second line whenever the blocks
+      // above ran long — 4.2 units of overprint, measured. The gap between
+      // the story and the retry plate is what this line is for.
+      ctx.fillText(this._leaderboardStatusText(), CX,
+                   hasLadderRoom ? LBY + 21 : Math.min(storyY + 43, ladderBottom + 6));
       if (!hasLadderRoom) {
         // Keep the story and a usable retry; do not squeeze tiny rank rows in.
       } else if (this.lbRows === 'loading') {
@@ -13100,7 +13377,7 @@
         // and if that is less than 54 he does not draw at all, because a
         // squashed thumbnail of the hero is worse than no hero.
         var wickTop = Math.max(storyY + 31, 540);
-        var rh = Math.min(109.3, RESULT_FOOT - 62 - wickTop);
+        var rh = Math.min(109.3, RG.top - 14 - wickTop);
         if (rh >= 54) {
           var rw = rh * (rimg.width / rimg.height);
           // HE FLIES, HE DOES NOT FLOAT (2026-09-14). VANUS: "at the end screen
@@ -13109,15 +13386,27 @@
           // and the lift rides its downstroke; reduced motion keeps him still.
           var flap = RM ? 0 : Math.sin(this.worldT * 2.2 * Math.PI * 2);
           var rb = RM ? 0 : -Math.max(0, flap) * 3;
-          ctx.save(); ctx.translate(WORLD_W / 2, 668 + rb);
+          ctx.save(); ctx.translate(WORLD_W / 2, RG.top - 14 + rb);
           if (!this._drawFootWick(ctx, rimg, 'front', rh, rw, { mode: 'crew', far: 0, near: 0, farLift: 0, nearLift: 0, tool: 0 }))
             ctx.drawImage(rimg, -rw / 2, -rh, rw, rh);
           ctx.restore();
         }
       }
     }
-    ctx.font = 'bold 15px system-ui, sans-serif'; ctx.fillStyle = '#c9b8ff';
-    ctx.fillText('tap for menu', CX, RESULT_FOOT + 42);
+    // ---- WHAT NOW ---------------------------------------------------------
+    // Two plates in the language the pause sheet uses: one lit ember primary
+    // that continues the run you are in, one util secondary out. The lavender
+    // 'tap for menu' hint is gone — it was the challenge/Daily ink used on a
+    // campaign screen, and it described a gesture instead of offering a choice.
+    // Tapping anywhere else still returns to the title, so nothing a player
+    // already learned stops working.
+    var RG = this._resultRects;
+    if (RG.primary) {
+      forgePlate(ctx, RG.primary, 'ember');
+      trackedCaps(ctx, RG.primary.label, CX, RG.primary.y + RG.primary.h / 2 + 6, 15, '#fff0d5');
+    }
+    forgePlate(ctx, RG.back, 'util');
+    trackedCaps(ctx, 'to the title', CX, RG.back.y + RG.back.h / 2 + 5, 13, '#e9dac2');
     ctx.textAlign = 'left';
   };
 
@@ -13338,24 +13627,26 @@
     else if (tone === 'lock') { g.addColorStop(0, '#3b2c25'); g.addColorStop(1, '#241a16'); }
     else if (tone === 'brasslit') { g.addColorStop(0, '#8a5f22'); g.addColorStop(0.55, '#634214'); g.addColorStop(1, '#4a3110'); }
     else { g.addColorStop(0, 'rgba(46,28,18,0.88)'); g.addColorStop(1, 'rgba(18,10,8,0.92)'); }
-    ctx.fillStyle = g; rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.fill();
+    // THE RADIUS AND THE LIP ARE DERIVED, NOT ABSOLUTE. A flat 12-unit radius
+    // and a 13-unit lip inset were fine on the title's 300-unit plates and
+    // collapsed on small ones — MEASURED on the Trials keep chips at iPad
+    // scale, where the four studs land on top of the word. Everything scales
+    // with the plate now so one primitive serves a 300-unit CTA and a 60-unit
+    // machine tile, which is what stops the next small surface hand-rolling
+    // its own rectangle.
+    var rad = Math.min(12, Math.min(r.w, r.h) * 0.26);
+    var lip = Math.max(5, Math.min(13, r.w * 0.11));
+    ctx.fillStyle = g; rr(ctx, r.x, r.y, r.w, r.h, rad); ctx.fill();
     ctx.restore();
     // a 1px lit lip along the top — the entire "this is metal" cue
     ctx.strokeStyle = tone === 'cold' ? 'rgba(190,175,255,0.42)' : 'rgba(255,220,170,0.34)';
     ctx.lineWidth = 1; ctx.beginPath();
-    ctx.moveTo(r.x + 13, r.y + 1.5); ctx.lineTo(r.x + r.w - 13, r.y + 1.5); ctx.stroke();
+    ctx.moveTo(r.x + lip, r.y + 1.5); ctx.lineTo(r.x + r.w - lip, r.y + 1.5); ctx.stroke();
     ctx.strokeStyle = tone === 'cold' ? 'rgba(160,138,223,0.72)'
                     : tone === 'lock' ? 'rgba(212,168,64,0.20)' : 'rgba(255,215,94,0.55)';
-    ctx.lineWidth = 1.5; rr(ctx, r.x + 0.75, r.y + 0.75, r.w - 1.5, r.h - 1.5, 11); ctx.stroke();
+    ctx.lineWidth = 1.5; rr(ctx, r.x + 0.75, r.y + 0.75, r.w - 1.5, r.h - 1.5, Math.max(1, rad - 1)); ctx.stroke();
     // four struck rivets: the contraption cue, and what stops it reading as a sticker
-    var rv = [[r.x + 11, r.y + 11], [r.x + r.w - 11, r.y + 11],
-              [r.x + 11, r.y + r.h - 11], [r.x + r.w - 11, r.y + r.h - 11]];
-    for (var i = 0; i < 4; i++) {
-      ctx.fillStyle = tone === 'cold' ? '#8f7cc4' : '#d4a840';
-      ctx.beginPath(); ctx.arc(rv[i][0], rv[i][1], 2.4, 0, 6.283); ctx.fill();
-      ctx.fillStyle = 'rgba(0,0,0,0.42)';
-      ctx.beginPath(); ctx.arc(rv[i][0], rv[i][1], 2.4, 0.5, 2.6); ctx.fill();
-    }
+    plateRivets(ctx, r.x, r.y, r.w, r.h, tone);
     // The Daily Siege is the one COLD object in a hot room, so it gets an edge
     // the forge cannot reach. Inverting the light source is what makes it read
     // as a different mode rather than a differently-coloured button.
@@ -13366,6 +13657,188 @@
     }
   }
 
+  // ===== THE SIGN, HOISTED ================================================
+  // The masthead, the chains and the plated stat ledger used to be NESTED
+  // FUNCTIONS INSIDE _drawTitle. That is the mechanism behind half of the
+  // 2026-09-15 UI audit: the language's top-level object was trapped in a
+  // closure, so every other canvas surface re-derived a header, a stat row and
+  // a button by hand and drifted — four rooms grew four different headers, the
+  // result screen grew none at all, and the machine panel grew a second design
+  // system. They are module scope now, and _drawTitle composes from the same
+  // three calls as everything else. The BODIES are unchanged: the title must
+  // keep producing byte-identical pixels (proved by re-shooting __title.png).
+
+  /// The chamfered lozenge the wordmark hangs on. Not a rect — the cut corners
+  /// are what make it read as cast metal rather than a UI panel.
+  function platePath(ctx, x, y, w, h, c) {
+    ctx.beginPath();
+    ctx.moveTo(x + c, y); ctx.lineTo(x + w - c, y); ctx.lineTo(x + w, y + h / 2);
+    ctx.lineTo(x + w - c, y + h); ctx.lineTo(x + c, y + h); ctx.lineTo(x, y + h / 2);
+    ctx.closePath();
+  }
+
+  /// Four struck rivets on a plate's corners. forgePlate insets them by a flat
+  /// 11 units, which collapses the studs onto the word on any plate under about
+  /// 46 units — MEASURED on the Trials keep chips at iPad scale. Derive the
+  /// inset from the plate instead so one helper serves both sizes.
+  function plateRivets(ctx, x, y, w, h, tone) {
+    var ins = Math.max(6, Math.min(11, Math.min(w, h) * 0.24));
+    for (var i = 0; i < 4; i++) {
+      var rx = x + (i % 2 ? w - ins : ins), ry = y + (i < 2 ? ins : h - ins);
+      ctx.fillStyle = tone === 'cold' ? '#8f7cc4' : '#d4a840';
+      ctx.beginPath(); ctx.arc(rx, ry, 2.4, 0, 6.283); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.42)';
+      ctx.beginPath(); ctx.arc(rx, ry, 2.4, 0.5, 2.6); ctx.fill();
+    }
+  }
+
+  /// The hanging sign itself: chains up past the top of the SCREEN (not the
+  /// design box — on a 19.5:9 phone the box ceiling is ~65 units below the
+  /// glass, and a sign hung from the box floats in mid-air), then the plate.
+  function signPlate(ctx, v, x, y, w, h, chain) {
+    if (chain !== false) {
+      var chTop = -(v && v.oy || 0) - 12;
+      for (var cxi = 0; cxi < 2; cxi++) {
+        var chx = x + (cxi ? w - 30 : 30);
+        var cg = ctx.createLinearGradient(0, chTop, 0, y);
+        cg.addColorStop(0, '#8f7038'); cg.addColorStop(1, '#d4a840');
+        ctx.strokeStyle = cg; ctx.lineWidth = 2;
+        for (var lky = y - 6; lky > chTop; lky -= 9) {
+          ctx.beginPath(); ctx.ellipse(chx, lky, 3.5, 4.5, 0, 0, 6.283); ctx.stroke();
+        }
+      }
+    }
+    var ch = Math.min(16, h * 0.21);
+    var bg = ctx.createLinearGradient(0, y, 0, y + h);
+    bg.addColorStop(0, 'rgba(46,28,18,0.92)'); bg.addColorStop(1, 'rgba(18,10,8,0.95)');
+    ctx.fillStyle = bg; platePath(ctx, x, y, w, h, ch); ctx.fill();
+    ctx.strokeStyle = 'rgba(212,168,64,0.62)'; ctx.lineWidth = 2;
+    platePath(ctx, x + 1, y + 1, w - 2, h - 2, ch); ctx.stroke();
+    plateRivets(ctx, x, y, w, h);
+  }
+
+  /// The wordmark: six passes over one position. Struck, not filled — that
+  /// stack is the difference between "gold text" and "a cast letter".
+  /// `t` is the world clock; it only drives the final warm pass.
+  function signTitle(ctx, txt, cx, by, size, t) {
+    ctx.textAlign = 'center';
+    ctx.font = 'bold ' + size.toFixed(1) + 'px Georgia, serif';
+    ctx.fillStyle = 'rgba(8,4,3,0.78)'; ctx.fillText(txt, cx, by + 3);
+    ctx.strokeStyle = '#5b2a10'; ctx.lineWidth = Math.max(2, size * 0.065); ctx.lineJoin = 'round';
+    ctx.strokeText(txt, cx, by);
+    var mg = ctx.createLinearGradient(0, by - size * 0.72, 0, by + size * 0.10);
+    mg.addColorStop(0.00, '#fff3cf'); mg.addColorStop(0.42, '#ffd75e');
+    mg.addColorStop(0.78, '#e8a02a'); mg.addColorStop(1.00, '#b96a12');
+    ctx.fillStyle = mg; ctx.fillText(txt, cx, by);
+    var hg = ctx.createLinearGradient(0, by - size * 0.72, 0, by + size * 0.10);
+    hg.addColorStop(0.00, 'rgba(255,255,235,0.55)');
+    hg.addColorStop(0.30, 'rgba(255,255,235,0.10)');
+    hg.addColorStop(0.46, 'rgba(255,255,235,0)');
+    ctx.fillStyle = hg; ctx.fillText(txt, cx, by);
+    ctx.strokeStyle = 'rgba(255,225,160,0.42)'; ctx.lineWidth = 1;
+    ctx.strokeText(txt, cx, by);
+    if (t !== undefined) {
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = 'rgba(255,190,90,' + (0.10 + 0.06 * Math.sin(t * 1.7)).toFixed(3) + ')';
+      ctx.fillText(txt, cx, by);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+  }
+
+  /// FOUR ROOMS OF ONE BUILDING. The Forge, the Trials, the Duel table and the
+  /// Cavern each grew their own header — 34px gold, 26px gold, 28px SALMON and
+  /// 26px cream, at four baselines — because the sign lived inside _drawTitle
+  /// and none of them could reach it. One call now: the same chamfered plate,
+  /// the same struck gold wordmark, sized from the string. Chains only where
+  /// there is screen above the plate to hang them from.
+  function roomHeader(ctx, v, title, baseY, maxSize) {
+    var top = -(v && v.oy || 0) + ((v && v.safeT) || 0);
+    var size = fitFont(ctx, title, WORLD_W - 96, maxSize || 30, 'Georgia, serif', 16);
+    var w = Math.min(WORLD_W - 28, Math.max(206, ctx.measureText(title).width + 54));
+    var h = size * 1.18 + 22, y = baseY - size * 0.80 - 11;
+    signPlate(ctx, v, WORLD_W / 2 - w / 2, y, w, h, y - top > 26);
+    signTitle(ctx, title, WORLD_W / 2, baseY, size);
+    return { y: y, h: h, bottom: y + h };
+  }
+
+  /// A DISPLAY STRING MUST NEVER BE WIDER THAN THE BOX. The duel-tie headline
+  /// shipped at 585 units in a 420-unit box because the author's own corrective
+  /// size was written one statement AFTER the fillText it was meant to govern,
+  /// and nothing measured. Size is a function of the string now, so the class
+  /// cannot come back: pick the largest step that fits, floor at `min`.
+  function fitFont(ctx, txt, maxW, px, face, min) {
+    face = face || 'Georgia, serif'; min = min || 11;
+    var s = px;
+    ctx.font = 'bold ' + s + 'px ' + face;
+    while (s > min && ctx.measureText(txt).width > maxW) {
+      s = Math.max(min, s - (s > 24 ? 2 : 1));
+      ctx.font = 'bold ' + s + 'px ' + face;
+    }
+    return s;
+  }
+
+  /// Tracked caps. The eyebrow/label voice of this game is letterspaced small
+  /// caps, and it was implemented exactly once (inside _drawTitle) — which is
+  /// why every canvas surface that needed it drifted to lowercase body text.
+  /// Manual advance, because ctx.letterSpacing is not portable.
+  function trackedCaps(ctx, txt, cx, y, size, fill, track, align) {
+    txt = String(txt).toUpperCase(); track = track === undefined ? size * 0.14 : track;
+    ctx.font = 'bold ' + size + 'px system-ui, sans-serif';
+    var total = 0, i;
+    for (i = 0; i < txt.length; i++) total += ctx.measureText(txt[i]).width + track;
+    total -= track;
+    var x = align === 'left' ? cx : cx - total / 2;
+    ctx.textAlign = 'left';
+    for (i = 0; i < txt.length; i++) {
+      inkText(ctx, txt[i], x, y, fill, 4, 1);
+      x += ctx.measureText(txt[i]).width + track;
+    }
+    ctx.textAlign = 'center';
+    return total;
+  }
+
+  /// THE PLATED STAT LEDGER — the pause sheet's TREASURE / BUILD GOLD / WAVE
+  /// row, available to every surface. Labels are tracked caps in dead brass,
+  /// values are struck gold Georgia: the number is the loud thing, which is the
+  /// whole point and exactly what the result screen's lowercase colon
+  /// fragments ('treasure kept: 35 / 60') got backwards.
+  /// THE RIVETS ARE PART OF THE FRAME, SO THE CONTENT LIVES INSIDE THEM. The
+  /// first cut put the cells edge to edge and the outer labels printed straight
+  /// through the corner studs; the value then climbed into the label because
+  /// both were measured from opposite edges of a plate too short to hold them.
+  /// The plate is sized from its content here: PAD clears the rivet columns,
+  /// and MIN_H guarantees a label baseline and a 24px numeral cannot meet.
+  var STAT_PAD = 20, STAT_MIN_H = 58;
+  function statRow(ctx, r, cells, valueInk) {
+    r = { x: r.x, y: r.y, w: r.w, h: Math.max(STAT_MIN_H, r.h) };
+    forgePlate(ctx, r, 'util');
+    var inner = r.w - STAT_PAD * 2, cw = inner / cells.length;
+    for (var i = 0; i < cells.length; i++) {
+      var cx = r.x + STAT_PAD + cw * (i + 0.5);
+      if (i) {                                   // a struck seam, not a border
+        var sx = r.x + STAT_PAD + cw * i;
+        ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(sx, r.y + 14); ctx.lineTo(sx, r.y + r.h - 14); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,226,170,0.10)';
+        ctx.beginPath(); ctx.moveTo(sx + 1, r.y + 14); ctx.lineTo(sx + 1, r.y + r.h - 14); ctx.stroke();
+      }
+      // SHRINK, THEN TRUNCATE — never overflow. The tracked advance is part of
+      // the width, and without the second step a four-cell row printed the last
+      // glyph of one label on the first glyph of the next ('...SLAIN' into
+      // 'WICK...'), which the overlap gate catches per GLYPH.
+      var lbl = String(cells[i][0]).toUpperCase(), ls = 9.5, budget = cw - 8;
+      function tw2(t, sz) { ctx.font = 'bold ' + sz + 'px system-ui, sans-serif';
+                            return ctx.measureText(t).width + Math.max(0, t.length - 1) * sz * 0.14; }
+      while (ls > 6.5 && tw2(lbl, ls) > budget) ls -= 0.5;
+      while (lbl.length > 3 && tw2(lbl, ls) > budget) lbl = lbl.slice(0, -1).replace(/[ ·]+$/, '');
+      trackedCaps(ctx, lbl, cx, r.y + 21, ls, '#c4b594');
+      var vs = fitFont(ctx, String(cells[i][1]), cw - 8, 24, 'Georgia, serif', 13);
+      ctx.font = 'bold ' + vs + 'px Georgia, serif';
+      inkText(ctx, String(cells[i][1]), cx, r.y + r.h - 14, cells[i][2] || valueInk || '#ffd75e', 5, 2);
+    }
+    return r.h;
+  }
+
   /// A star struck into a coin. The screen used the '★' / '☆' / '🔒' CHARACTERS
   /// before; those fall through to the platform's colour-emoji font, so on iOS
   /// the padlock rendered as a full-colour Apple glyph from a different game
@@ -13374,22 +13847,42 @@
   function starCoin(ctx, cx, cy, rad, earned) {
     ctx.save();
     ctx.translate(cx, cy);
+    // AN UNEARNED STAR IS AN EMPTY SOCKET, NOT A DIM STAR. Both halves were
+    // drawn at 0.45 alpha, so the token took its colour from whatever was
+    // behind it — and the ember ground of the CONTINUE plate is exactly what it
+    // composites best against. MEASURED on a brand-new save: the first screen
+    // the game ever shows paints what reads as a finished three-star rating on
+    // the loudest plate on it, on a keep with zero stars, destroying the one
+    // incentive the row exists to create. Struck opaque now, with the star cut
+    // INTO the metal by the engrave idiom (dark above, light below) instead of
+    // filled. Radius is untouched: test-homepage.cjs recomputes the cluster
+    // edge from the caller's `big ? 10 : 9` and asserts labels clear it by 3.
+    var i, a, rr2;
+    if (!earned) {
+      ctx.fillStyle = '#241b16';
+      ctx.beginPath(); ctx.arc(0, 0, rad, 0, 6.283); ctx.fill();
+    }
     var g = ctx.createRadialGradient(-rad * 0.3, -rad * 0.4, rad * 0.15, 0, 0, rad);
     if (earned) { g.addColorStop(0, '#fff3c4'); g.addColorStop(0.55, '#ffd24a'); g.addColorStop(1, '#a86c14'); }
-    else { g.addColorStop(0, 'rgba(120,102,86,0.45)'); g.addColorStop(1, 'rgba(50,40,33,0.45)'); }
+    else { g.addColorStop(0, '#6a5a4a'); g.addColorStop(1, '#332721'); }
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(0, 0, rad, 0, 6.283); ctx.fill();
-    ctx.strokeStyle = earned ? 'rgba(120,74,12,0.9)' : 'rgba(90,76,62,0.45)';
+    ctx.strokeStyle = earned ? 'rgba(120,74,12,0.9)' : 'rgba(90,76,62,0.9)';
     ctx.lineWidth = 1.2; ctx.stroke();
-    ctx.beginPath();
-    for (var i = 0; i < 10; i++) {
-      var a = -Math.PI / 2 + i * Math.PI / 5;
-      var rr2 = (i % 2 ? rad * 0.36 : rad * 0.78);
-      ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * rr2, Math.sin(a) * rr2);
+    function starPath(dy) {
+      ctx.beginPath();
+      for (i = 0; i < 10; i++) {
+        a = -Math.PI / 2 + i * Math.PI / 5;
+        rr2 = (i % 2 ? rad * 0.36 : rad * 0.78);
+        ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * rr2, Math.sin(a) * rr2 + dy);
+      }
+      ctx.closePath();
     }
-    ctx.closePath();
-    ctx.fillStyle = earned ? '#fffbe8' : 'rgba(28,22,18,0.55)';
-    ctx.fill();
+    if (earned) { starPath(0); ctx.fillStyle = '#fffbe8'; ctx.fill(); }
+    else {
+      starPath(0); ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fill();
+      starPath(rad * 0.075); ctx.fillStyle = 'rgba(255,226,170,0.16)'; ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -13941,7 +14434,14 @@
         }
         var opt=g._lbOptRect;
         if(opt)proxy(Lb.on()?'Stop posting scores':'Join the public all-time ladder',opt,true,function(){tap(opt.x+opt.w/2,opt.y+opt.h/2);});
-        proxy('Return to title',{x:70,y:RESULT_FOOT+22,w:280,h:Math.max(44,44/g.view.scale)},true,function(){tap(210,RESULT_FOOT+42);});
+        // The result screen's two plates, from the drawer's own geometry.
+        // 'Return to title' keeps its name and its behaviour — the leaderboard
+        // gate test resolves that exact accessible name and clicks it.
+        var RG=g._resultRects||resultGeom(g);
+        // primary is null on the Daily, whose band is already full (see resultGeom)
+        if(RG.primary)proxy(RG.primary.label.charAt(0)+RG.primary.label.slice(1).toLowerCase(),RG.primary,true,
+              function(){tap(RG.primary.x+RG.primary.w/2,RG.primary.y+RG.primary.h/2);});
+        proxy('Return to title',RG.back,true,function(){tap(RG.back.x+RG.back.w/2,RG.back.y+RG.back.h/2);});
       } else if (g._ownsViewport()) {
         var G=g.state==='forge'?forgeGeom(g.view):g.state==='trials'?trialGeom(g.view,g.trialPage):g.state==='cavern'?cavernRoomGeom(g.view):duelGeom(g.view);
         if(g.state==='duel') RIVALS.forEach(function(r,i){var row={x:G.x,y:G.top+i*G.pitch,w:G.w,h:G.h};proxy('Challenge '+r.name,row,true,function(){tap(row.x+row.w/2,row.y+row.h/2);},!rivalReady(i));});

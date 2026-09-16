@@ -108,7 +108,13 @@ html, body {
 .guide-tabs:empty { display:none; }
 .guide-tab { flex:1; min-height:44px; padding:4px 6px; border:0; border-radius:8px; color:#cdbb9c; font:700 11.5px/1.2 system-ui,sans-serif; letter-spacing:.06em; text-transform:uppercase; text-shadow:var(--ink); background:var(--util); box-shadow:inset 0 0 0 1.5px rgba(212,168,64,.26); }
 .guide-tab[aria-pressed=true] { color:#ffe7a8; background:var(--lip), var(--brasslit); box-shadow:inset 0 0 0 2px rgba(255,215,94,.7), 0 2px 6px rgba(0,0,0,.45); }
-.guide-body { min-height:0; padding:16px 22px 22px; overflow-y:auto; overscroll-behavior:contain; touch-action:pan-y; -webkit-overflow-scrolling:touch; border-radius:0 0 14px 14px; }
+/* THE SCROLLER MUST STOP AT THE FRAME. The sign's rim is three inset
+   box-shadows on .guide-panel, and an inset shadow paints under its own
+   children — so the scrolling body ran straight over it and the last row
+   was sliced across the gold rim on every long page. The panel cannot take
+   overflow:hidden (its ::before/::after are the chains, which reach above
+   it), so the scroller insets past the 6px frame instead. */
+.guide-body { min-height:0; margin:0 6px 6px; padding:16px 16px 18px; overflow-y:auto; overscroll-behavior:contain; touch-action:pan-y; -webkit-overflow-scrolling:touch; border-radius:0 0 9px 9px; }
 .guide-copy { color:#e4d4ba; font-size:14px; line-height:1.55; margin:0 0 16px; }
 .guide-body .guide-kicker { color:#e8b86a; letter-spacing:.2em; }
 .guide-hero { display:flex; align-items:center; gap:13px; margin:0 0 20px; }
@@ -164,7 +170,7 @@ html, body {
 @media (max-height:700px) {
   .guide-header { padding-top:20px; padding-bottom:8px; }
   .guide-header h2 { font-size:clamp(20px,6vw,24px); }
-  .guide-body { padding:12px 18px 16px; }
+  .guide-body { padding:12px 12px 14px; }
   .guide-lesson { gap:12px; margin-bottom:11px; }
   .guide-number { width:30px; height:30px; font-size:14px; }
   .guide-lesson h3 { font-size:15px; margin:3px 0 2px; }
@@ -174,7 +180,7 @@ html, body {
   .guide-quiet { min-height:44px; margin-top:4px; }
   .guide-stats { padding:12px 0 10px; margin-bottom:12px; }
 }
-@media (max-width:350px) { .guide-header { padding-inline:56px; } .guide-body { padding-inline:16px; } .guide-hero img { width:70px; } }
+@media (max-width:350px) { .guide-header { padding-inline:56px; } .guide-body { padding-inline:10px; } .guide-hero img { width:70px; } }
 @media (forced-colors:active) { .guide-header h2, .guide-hero h3 { -webkit-text-fill-color:currentColor; background:none; } }
 .guide-placement { position:absolute; width:38px; height:38px; border:2px solid #ffd75e; outline:1px solid #2a1a0a; border-radius:50%; transform:translate(-50%,-50%); background:rgba(255,215,94,.16); color:#fff2d8; font:700 10px system-ui,sans-serif; text-align:center; padding-top:41px; white-space:nowrap; text-shadow:0 1px 4px #000,0 1px 5px #000; pointer-events:none; }
 .guide-placement.blocked { border-color:#ff9d81; background:#ff7a5625; color:#ffcfbc; }
