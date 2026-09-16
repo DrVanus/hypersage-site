@@ -3916,6 +3916,11 @@
     this.view = { cw: 1, ch: 1, dpr: 1, scale: 1, w: VIEW_MIN_W, h: VIEW_H, ox: 0, oy: 0 };
     this._last = 0; this._acc = 0;
     this.particles = []; this.floats = []; this.husks = []; this.shake = 0;
+    // The player's own screen-shake switch, remembered like `hoardling.muted`.
+    // Read at render (see draw), so it is never sim state and reset() must not
+    // clear it — a preference does not belong to a run.
+    this.shakeOff = false;
+    try { this.shakeOff = localStorage.getItem('hoardling.shake') === '0'; } catch (e) {}
     this.fxQueue = [];                      // update() emits events; _cosmetic() spends them
     this.mode = 'campaign';                 // 'campaign' | 'daily'
     this.state = 'menu';                    // 'menu' | 'playing' | 'won' | 'lost' | 'paused'
@@ -5755,10 +5760,8 @@
     // an open enemy card swallows its tap (dismiss) — x-bounded to the panel,
     // so a world tap beside the card still reaches pads under the band
     if (this._enemyIntroVisible()) {
-      var Gc = this._hudGeom();
-      var cw2 = Math.min(this.view.w - 24, 372);
-      if (vy > Gc.infoY && vy < Gc.infoY + 58 &&
-          vx > this.view.w / 2 - cw2 / 2 && vx < this.view.w / 2 + cw2 / 2) { this._finishEnemyIntro(); return; }
+      var ic = this._hudGeom().introCard;
+      if (vy > ic.y && vy < ic.y + ic.h && vx > ic.x && vx < ic.x + ic.w) { this._finishEnemyIntro(); return; }
     }
     // SCREEN-ANCHORED HUD first — it lives in the bands on tall phones
     if (this.state === 'playing') {
@@ -7672,8 +7675,17 @@
     }
     ctx.save();
     // cosmetic screenshake (lane 3 state, applied at render)
-    var shx = this.shake > 0 ? (Math.random() - 0.5) * 8 * this.shake : 0;
-    var shy = this.shake > 0 ? (Math.random() - 0.5) * 6 * this.shake : 0;
+    // THE ONE MOTION EFFECT WITH NO REDUCED-MOTION GATE. Every other animation
+    // in this file checks RM — the ember drift, the star landings, Wick's
+    // wingbeat, the painted fire, the keep's breath — and the single effect
+    // that moves the WHOLE SCREEN did not. Gate the read, not the dozen
+    // writers: shake stays in the fx queue and simply stops being applied.
+    // `shakeOff` is the player's own switch, for people who want the rest of
+    // the motion and not this. Render-only, read after update, so the seeded
+    // firewall and prove-determinism are untouched.
+    var sk = (RM || this.shakeOff) ? 0 : this.shake;
+    var shx = sk > 0 ? (Math.random() - 0.5) * 8 * sk : 0;
+    var shy = sk > 0 ? (Math.random() - 0.5) * 6 * sk : 0;
     ctx.translate(v.ox + shx, v.oy + shy);
 
     if (menuish) {
@@ -10856,7 +10868,7 @@
     if(this.shopPick<0){if(!this.mods.breathOff)add(H.breathRect.x,H.breathRect.y,H.breathRect.w,H.breathRect.h);add(H.startRect.x,H.startRect.y,H.startRect.w,H.startRect.h);}
     if(this.shopPick>=0)add(H.buildInfo.x,H.buildInfo.y,H.buildInfo.w,H.buildInfo.h);
     else if(this.shopOpen)add(H.barX,H.infoY,H.barW,88);
-    else if(this._enemyIntroVisible())add(v.w/2-Math.min(v.w-24,372)/2,H.infoY,Math.min(v.w-24,372),58);
+    else if(this._enemyIntroVisible()){var ic2=H.introCard;add(ic2.x,ic2.y,ic2.w,ic2.h);}
     return out;
   };
   Game.prototype._feedbackLayout = function (ctx) {
@@ -10999,6 +11011,12 @@
     return {
       topY:topY,cx:cx,barH:buttonSize+12,
       infoY:topY+buttonSize+12+(this.rival?34:this.trial?20:8),barX:barX,barW:barW,
+      // THE INTRO CARD'S RECT, ONCE. It was hardcoded as
+      // `Math.min(v.w-24,372)` and `58` in THREE places — the draw, the
+      // dismiss hit test and the float-obstacle list — so a change at the
+      // draw site alone would have moved the card away from its own tap.
+      introCard:{x:cx-Math.min(v.w-24,372)/2,y:topY+buttonSize+12+(this.rival?34:this.trial?20:8),
+                 w:Math.min(v.w-24,372),h:58},
       btnY:topY+6,buttonW:buttonSize,buttonH:buttonSize,
       buildCancel:{x:barX+barW-8-buttonSize,y:topY+buttonSize+24,w:buttonSize,h:buttonSize},
       buildInfo:{x:barX,y:topY+buttonSize+20,w:barW,h:88*u},
@@ -11412,7 +11430,18 @@
         var sc=c.x+c.w/2-7*u;
         starCoin(ctx,sc,ty-4*u,5.5*u,false);
         battleText(ctx,String(c.stars),sc+11*u,ty,11,'#d9c7a6','center',u,c.w-24*u,9);
-      } else battleText(ctx,cost+'g',c.x+c.w/2,ty,11.5,can?'#ffda7c':'#c2ad93','center',u,c.w-8*u,10);
+      } else {
+        battleText(ctx,cost+'g',c.x+c.w/2,ty,11.5,can?'#ffda7c':'#c2ad93','center',u,c.w-8*u,10);
+        // AFFORDABILITY WAS VALUE-ONLY — #ffda7c vs #c2ad93 and a 0.55 alpha,
+        // which is one channel, and the one that dies in greyscale, on a dim
+        // display or with a colour-vision difference. A price you cannot pay is
+        // struck through: a shape, and the same idiom a shop uses everywhere.
+        if(!can){
+          var cw3=ctx.measureText(cost+'g').width;
+          ctx.strokeStyle='rgba(214,145,116,0.95)';ctx.lineWidth=1.4*u;
+          ctx.beginPath();ctx.moveTo(c.x+c.w/2-cw3/2-2*u,ty-3.5*u);ctx.lineTo(c.x+c.w/2+cw3/2+2*u,ty-3.5*u);ctx.stroke();
+        }
+      }
       if(picked){ctx.fillStyle='#ffda7c';ctx.beginPath();ctx.arc(c.x+c.w-7*u,c.y+7*u,3*u,0,Math.PI*2);ctx.fill();}
     });
     if(G.pager){
@@ -11518,9 +11547,11 @@
       var card = ENEMY_CARDS[this.infoCard.type];
       var fade = Math.min(1, this.infoCard.t / 0.4);
       ctx.globalAlpha = fade;
-      var cw2 = Math.min(v.w - 24, 372);
-      var cx2 = v.w / 2 - cw2 / 2, cy2 = G.infoY;
-      uiPanel(ctx, cx2, cy2, cw2, 58, 12);
+      // A FORGE PLATE, FROM THE ONE RECT. It was a pre-forge `uiPanel` slate
+      // card — the last surface in the battle HUD still speaking the old
+      // vocabulary — and it read as a different game's toast.
+      var ic3 = G.introCard, cw2 = ic3.w, cx2 = ic3.x, cy2 = ic3.y;
+      forgePlate(ctx, ic3, 'util');
       var ei2 = ART.images['e_' + this.infoCard.type];
       if (ei2) {
         var eh2 = 44, ew2 = eh2 * (ei2.width / ei2.height);
@@ -11531,20 +11562,20 @@
       // three of the ten shipped cards ran straight off the panel it is drawn
       // on — the first time a player meets a Shellback, a Hoard King or a
       // Pry-Hand, which is exactly when the sentence matters.
-      var tw2 = cw2 - 68;
-      ctx.fillStyle = '#ffd75e'; ctx.font = 'bold 14px system-ui, sans-serif'; ctx.textAlign = 'left';
-      ctx.fillText(fitText(ctx, card[0], tw2), cx2 + 58, cy2 + 22);
+      // SCALE-CORRECTED, like every other card in this rail. It was the one
+      // battle overlay whose type was fixed in WORLD units inside a
+      // world-capped box, so the same sentence rendered 9.8pt on an iPhone SE
+      // and 16.4pt on an iPad — and the name is Georgia now, like every other
+      // name this game prints on metal.
+      var iu = 1 / (v.scale || 1), tw2 = cw2 - 70;
+      ctx.textAlign = 'left';
+      ctx.font = 'bold ' + 13 * iu + 'px Georgia, serif';
+      inkText(ctx, fitText(ctx, card[0], tw2), cx2 + 58, cy2 + 22, '#ffd75e', 4, 1);
       // SHRINK BEFORE TRUNCATING. This line is the half of the card that
       // teaches, so losing its tail to an ellipsis is worse than losing a
       // point of size: PRY-HAND measures 335 and SHELLBACK 314.5 against a
       // 304-unit plate. fitText stays as the backstop below the floor.
-      var cf = 11.5;
-      ctx.font = cf + 'px system-ui, sans-serif';
-      while (cf > 10 && ctx.measureText(card[1]).width > tw2) {
-        cf -= 0.25; ctx.font = cf + 'px system-ui, sans-serif';
-      }
-      ctx.fillStyle = '#e8dcc8';
-      ctx.fillText(fitText(ctx, card[1], tw2), cx2 + 58, cy2 + 40);
+      battleText(ctx, card[1], cx2 + 58, cy2 + 40, 11.5, '#e8dcc8', 'left', iu, tw2, 10.5);
       ctx.globalAlpha = 1;
     }
     // bottom: start-wave button + sprite wave preview + hint
@@ -11640,14 +11671,34 @@
     }else{
       // Exactly three level markers. Future prices are shown only on the
       // purchase action, so the last-step price cannot imply total cost to MAX.
-      var positions=[12,44,76],widths=[25,25,48];
+      // A STATUS LADDER, NOT THREE DEAD BUTTONS. These wore the same `panel()`
+      // primitive as every real control on this screen, at 18*u — about 15pt —
+      // with NO hit area at all: three things that look pressable, are under
+      // the 44pt floor, and do nothing. (They cannot simply BECOME controls:
+      // three 44pt-wide markers plus the 'N left' label do not fit the panel
+      // on an iPhone SE, and both panel gates require every action to be
+      // >=44x44 with a coordinate-identical DOM proxy. So they stop pretending
+      // instead.) Struck discs, linked — the same metal vocabulary the stars
+      // and the level seals use, which nothing in this game can mistake for a
+      // button.
       for(var i=0;i<3;i++){
-        var r={x:G.x+positions[i]*u,y:G.y+29*u,w:widths[i]*u,h:18*u},built=i<=tw.level;
-        panel(r,i===tw.level?'#6a502d':'#242222',built?'#c7a162':'#6d6254',4);
-        font(10,true);ctx.fillStyle=built?cream:muted;ctx.textAlign='center';ctx.fillText(i===2?'3 MAX':String(i+1),r.x+r.w/2,r.y+13*u);
-        if(i<2){ctx.strokeStyle='#96846a';ctx.lineWidth=u;ctx.beginPath();ctx.moveTo(r.x+r.w+2*u,r.y+9*u);ctx.lineTo(r.x+r.w+5*u,r.y+9*u);ctx.stroke();}
+        var pcx2=G.x+(22+i*24)*u,pcy=G.y+38*u,prad=9.5*u,built=i<=tw.level,live=i===tw.level;
+        if(i<2){ctx.strokeStyle=i<tw.level?'#96846a':'#4a4038';ctx.lineWidth=1.6*u;
+          ctx.beginPath();ctx.moveTo(pcx2+prad,pcy);ctx.lineTo(pcx2+24*u-prad,pcy);ctx.stroke();}
+        var pg2=ctx.createRadialGradient(pcx2-prad*.3,pcy-prad*.4,prad*.15,pcx2,pcy,prad);
+        if(built){pg2.addColorStop(0,live?'#f4d98c':'#c9a95e');pg2.addColorStop(1,live?'#8f6a20':'#6b4d16');}
+        else{pg2.addColorStop(0,'#5a4c3f');pg2.addColorStop(1,'#2b221c');}
+        ctx.fillStyle='#241b16';ctx.beginPath();ctx.arc(pcx2,pcy,prad,0,6.283);ctx.fill();
+        ctx.fillStyle=pg2;ctx.beginPath();ctx.arc(pcx2,pcy,prad,0,6.283);ctx.fill();
+        ctx.strokeStyle=built?'rgba(120,88,26,0.95)':'rgba(90,76,62,0.85)';ctx.lineWidth=1.2*u;
+        ctx.beginPath();ctx.arc(pcx2,pcy,prad,0,6.283);ctx.stroke();
+        ctx.font='bold '+10*u+'px Georgia, serif';ctx.textAlign='center';
+        ctx.fillStyle=built?'rgba(30,20,8,0.9)':'rgba(0,0,0,0.5)';ctx.fillText(String(i+1),pcx2,pcy+3.6*u);
+        if(!built){ctx.fillStyle='rgba(255,226,170,0.14)';ctx.fillText(String(i+1),pcx2,pcy+4.6*u);}
       }
-      label(tw.level===2?'Done':(2-tw.level)+' left',G.x+132*u,G.y+42*u,10.5,tw.level===2?gold:muted,false);
+      ctx.textAlign='left';
+      label(tw.level===2?'Fully upgraded':(2-tw.level)+' upgrade'+(tw.level===1?'':'s')+' left',
+            G.x+96*u,G.y+42*u,10.5,tw.level===2?gold:muted,false,G.w-108*u);
     }
     if(G.fork){
       var selected=m.forkChoice===1?1:0,fk=tt.forks[selected],lines=machineForkLines(tw,fk);
@@ -13292,13 +13343,19 @@
         : this._lbJoined ? 'posting from your next Daily Siege — tap to stop'
         : Lb.hasId() ? 'posting as ' + Lb.tag() + ' — tap to stop'
         : 'posting is on — tap to stop';
-      ctx.font = '11px system-ui, sans-serif';
-      var optW = ctx.measureText(optTxt).width + 28;
+      // A CONSENT CONTROL YOU CANNOT SEE IS NOT A CONTROL. This was 11px at
+      // 0.40 alpha — about 3.3:1 — floating on an invisible 44pt target, and
+      // it is the only way back in after opting out, which the privacy page
+      // promises. Plated and legible; the RECT is unchanged in height and
+      // centre, because the leaderboard gate asserts its 44pt size and that
+      // the retry plate clears it by 4.
+      ctx.font = '12px system-ui, sans-serif';
+      var optW = ctx.measureText(optTxt).width + 36;
       var optY = RG.top - 16;
       var optH = Math.max(26, 44 / this.view.scale);
       this._lbOptRect = { x: CX - optW / 2, y: optY - 4 - optH / 2, w: optW, h: optH };
-      ctx.fillStyle = 'rgba(255,233,196,0.40)';
-      ctx.fillText(optTxt, CX, optY);
+      forgePlate(ctx, this._lbOptRect, 'util');
+      inkText(ctx, optTxt, CX, optY, '#ffe9c4', 4, 1);
     }
     if (this.mode === 'daily' && Lb.on()) {
       // THE LADDER FOLLOWS THE STORY, and takes only the rows that fit above
@@ -14233,6 +14290,18 @@
         var speed=button('Speed: '+g.speed+'×',function(){g.speed=g.speed===1?2:1;speed.textContent='Speed: '+g.speed+'×';speed.setAttribute('aria-pressed',String(g.speed===2));});
         speed.setAttribute('aria-pressed',String(g.speed===2));speed.setAttribute('data-pause-speed','');settings.appendChild(speed);
         body.appendChild(settings);
+        // FULL WIDTH, NOT A THIRD CELL. style.css pins .guide-pair to
+        // `1fr 1fr` and tools/test-pause-menu.cjs asserts sound and speed share
+        // one row, so a third cell would wrap and fail the gate.
+        var shake=button(g.shakeOff?'Screen shake: off':'Screen shake: on',function(){
+          g.shakeOff=!g.shakeOff;
+          try{localStorage.setItem('hoardling.shake',g.shakeOff?'0':'1');}catch(e){}
+          shake.textContent=g.shakeOff?'Screen shake: off':'Screen shake: on';
+          shake.setAttribute('aria-pressed',String(!g.shakeOff));
+        });
+        shake.setAttribute('aria-pressed',String(!g.shakeOff));
+        shake.setAttribute('data-pause-shake','');
+        body.appendChild(shake);
         body.appendChild(button(g.mode==='daily'?'Restart Daily Siege':g.mode==='duel'?'Restart duel':'Restart keep',function(){
           body.replaceChildren(); title.textContent = 'Restart this run?';
           paragraph(g.mode==='daily'?'Today’s Daily Siege starts over on the same map with the same waves. Your best wave so far is kept.'
@@ -14415,7 +14484,21 @@
         if(!g.menu){
           if(!g.waveActive&&g.shopPick<0){var report=el('p','guide-scout',g._waveIntel().announcement);report.setAttribute('role','note');report.setAttribute('aria-label','Scout report');hits.appendChild(report);}
           H.chips.forEach(function(r){var t=TOWER_TYPES[r.id];
-            proxy(r.locked?'Locked: '+t.name+'. Earn '+r.stars+' stars to unlock.':'Build '+t.name,r,false,function(){tap(r.x+r.w/2-g.view.ox,r.y+r.h/2-g.view.oy);});
+            // THE NAME CARRIED NEITHER PRICE NOR SHORTFALL, so a screen-reader
+            // player could not tell an affordable machine from one they cannot
+            // buy — the sighted cue was a lightness difference and nothing else.
+            // 'Build …' stays the first words: test-build-dock.cjs matches
+            // locked chips by /^Locked: / and finds the rest by 'Build <name>'.
+            var ownN2=g.towers.filter(function(tw2){return g._sameSide(tw2.own,0);}).length;
+            var cost2=Math.round(t.cost*crowdMul(ownN2)),short2=cost2-g.gold;
+            proxy(r.locked?'Locked: '+t.name+'. Earn '+r.stars+' stars to unlock.':'Build '+t.name,
+                  r,false,function(){tap(r.x+r.w/2-g.view.ox,r.y+r.h/2-g.view.oy);});
+            // The price rides aria-description, NOT the label: the name stays
+            // exactly 'Build <machine>' because tools/test-hud-layout.cjs
+            // resolves it with `exact:true`. AT announces a description after
+            // the name, so the shortfall is spoken without renaming the control.
+            if(!r.locked)hits.lastChild.setAttribute('aria-description',
+              cost2+' gold.'+(short2>0?' Need '+short2+' more.':' You can afford it.'));
             if(!r.locked)hits.lastChild.setAttribute('aria-pressed',String(g.shopPick===r.index));});
           if(H.pager){var more=H.pager;proxy('More machines. Page '+(H.shopPage+1)+' of '+H.shopPages,more,false,function(){g.shopPage=(H.shopPage+1)%H.shopPages;signature='';});}
           if(g.shopPick>=0)proxy('Cancel placement',H.buildCancel,false,function(){g.shopPick=-1;g.placeHint=null;signature='';});
@@ -14426,6 +14509,38 @@
             hits.lastChild.setAttribute('data-breath-action','cast');hits.lastChild.setAttribute('aria-disabled',String(!ability.canCast));}
         }
       } else if (g.state==='won'||g.state==='lost') {
+        // THE PAYOFF SCREEN SAID NOTHING. Everything on it is canvas, and the
+        // live region is cleared the instant the run ends — so a screen-reader
+        // player finished a 20-wave defence and was told only that there were
+        // two buttons. It is a SECOND status node, appended before the daily
+        // one: tools/test-leaderboard-ui.cjs resolves '.guide-hits
+        // [role="status"]' and reads .textContent on a strict locator, so
+        // overwriting the leaderboard paragraph would break that assertion.
+        var rr2 = g.result || {};
+        var said = [rr2.rival ? (rr2.won ? ((rr2.margin|0)===0 ? 'Dead level. You keep it.' : 'Duel won.') : 'Duel lost.')
+                              : (rr2.won ? 'Hoard held.' : 'Hoard lost.')];
+        if (rr2.rival) said.push('You ' + (rr2.hoard|0) + ', ' + rr2.rival + ' ' + Math.max(0, rr2.rivalHoard|0) + '.');
+        else if (rr2.won) said.push((rr2.stars|0) + ' of 3 stars.');
+        if (rr2.trial) said.push('Trial: ' + rr2.trial + '.');
+        if ((rr2.marks|0) > 0) said.push((rr2.marks|0) + ' hoard marks earned.');
+        said.push('Treasure kept ' + (rr2.hoard|0) + ' of ' + CFG.startHoard + '.');
+        said.push('Coins carried off ' + (rr2.lost|0) + '.');
+        said.push('Raiders slain ' + (rr2.kills|0) + '.');
+        if (g.mode==='daily') said.push('Waves survived ' + (rr2.wave|0) + '.');
+        if (rr2.toll > 0) said.push('Wick shook loose ' + (rr2.toll|0) + '.');
+        (rr2.leaks||[]).slice(0,3).forEach(function(lk){
+          var cd2=ENEMY_CARDS[lk.type];
+          said.push((cd2?cd2[0]:lk.type) + ' took ' + lk.coins + ', from wave ' + lk.wave + '.');
+        });
+        // NOT role="status": tools/test-leaderboard-ui.cjs resolves
+        // '.guide-hits [role="status"]' with a STRICT locator, so a second such
+        // node breaks it. aria-live="polite" + aria-atomic is what role=status
+        // expands to anyway, so this announces identically and collides with
+        // nothing.
+        var outcome=el('p','guide-scout guide-result-say',said.join(' '));
+        outcome.setAttribute('aria-live','polite');
+        outcome.setAttribute('aria-atomic','true');
+        hits.appendChild(outcome);
         if (g.mode==='daily' && Lb.on()) {
           var statusNote=el('p','guide-scout',g._leaderboardStatusText());
           statusNote.setAttribute('role','status'); hits.appendChild(statusNote);
