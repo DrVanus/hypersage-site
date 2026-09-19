@@ -86,7 +86,7 @@ nav.site .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-
 .hero-trust span::before{content:"✓ ";color:var(--up)}
 
 .device-stage{display:flex;justify-content:center}
-.device{width:240px;aspect-ratio:390/844;border-radius:34px;background:var(--surface);
+.device{width:240px;aspect-ratio:440/956;border-radius:34px;background:var(--surface);
   border:1px solid var(--border);box-shadow:0 30px 70px rgba(0,0,0,.28);overflow:hidden;position:relative}
 .device img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 /* Base state (also what reduced-motion and no-CSS-animation users get):
