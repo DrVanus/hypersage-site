@@ -30,4 +30,4 @@
 
 - [Press kit](https://hypersage.ai/press.html): boilerplate, fact sheet, downloadable marks
 - [Support](https://hypersage.ai/support.html)
-- [Privacy](https://hypersage.ai/privacy.html): the studio site collects nothing; each product has its own policy
+- [Privacy](https://hypersage.ai/privacy.html): the website sets no cookies and keeps only anonymous daily visit totals; each product has its own policy

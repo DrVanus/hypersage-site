@@ -6,12 +6,12 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#080B11">
   <title>Privacy Policy — HyperSage AI Labs</title>
-  <meta name="description" content="How the HyperSage AI Labs website handles data — it collects nothing, sets no cookies, and runs no analytics. Each product has its own policy.">
+  <meta name="description" content="How the HyperSage AI Labs website handles data — no cookies, no ads, no identifiers; only anonymous daily visit totals. Each app has its own policy.">
   
   <link rel="canonical" href="https://hypersage.ai/privacy.html">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Privacy Policy — HyperSage AI Labs">
-  <meta property="og:description" content="How the HyperSage AI Labs website handles data — it collects nothing, sets no cookies, and runs no analytics. Each product has its own policy.">
+  <meta property="og:description" content="How the HyperSage AI Labs website handles data — no cookies, no ads, no identifiers; only anonymous daily visit totals. Each app has its own policy.">
   <meta property="og:url" content="https://hypersage.ai/privacy.html">
   <meta property="og:site_name" content="HyperSage AI Labs">
   <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260913b">
@@ -23,6 +23,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="stylesheet" href="fonts/fonts.css?v=20260907f">
   <link rel="stylesheet" href="legal.css?v=20260907f">
+  <script src="/v.js" defer></script>
 </head>
 <body>
 
@@ -44,28 +45,32 @@
 
   <main class="legal" id="main" tabindex="-1">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 2026-09-04 · This policy covers <strong>this website</strong> only.</p>
+    <p class="updated">Last updated: 2026-09-19 · This policy covers <strong>this website</strong> — every page on hypersage.ai — and none of our apps.</p>
 
     <div class="note">
-      <strong>Each product has its own privacy policy.</strong> This page is about the HyperSage AI Labs studio site you are reading right now. What an individual app does with your data is covered by that app's own policy, linked from its own site.
+      <strong>Each product has its own privacy policy.</strong> This page is about the website you are reading: the studio pages and every product page under hypersage.ai, such as hypersage.ai/nightshelf/. What an app, or a game you play here, does with your data is covered by its own policy.
     </div>
 
-    <h2>What this website collects</h2>
+    <h2 id="visit-counter">What this website collects</h2>
     
-    <p><strong>Nothing.</strong> The studio pages — this one, the home page, terms and support — are static. There is no account, no login, no form, no comment box, and no newsletter sign-up on them, we set <strong>no cookies</strong>, and we run <strong>no analytics</strong> — no Google Analytics, no Plausible, no tracking pixels, no advertising networks, and no session recording.</p>
+    <p><strong>Daily visit totals, and nothing that identifies you.</strong> The pages are static: there is no account, no login, no form, no comment box and no newsletter sign-up. We set <strong>no cookies</strong>, and there is no Google Analytics, no advertising network, no tracking pixel and no session recording.</p>
+    <p>On the studio pages and the Wingmate, Saffra, StoryVault AI, Nightshelf and Hexhunter pages, a short script of ours sends one message when a page opens and one when you tap an App Store button. It carries only the page's path, the domain of the site that sent you (not the full address), a campaign label if the link you followed had one (its src, utm_source or utm_campaign), and, for a tap, which app's button it was and where it sits on the page. Our counter, which runs on Cloudflare, adds your country (looked up from the connection) and whether you are on a phone, tablet or computer, then adds 1 to that day's total. It never stores your IP address, your browser's user-agent string, the time of day or any identifier for you or your device, so the totals cannot tell one visitor from another. We keep the totals for up to 25 months and use them only to learn which pages are read, where readers come from and which App Store buttons they use, relying on our legitimate interest in running this site (GDPR Article 6(1)(f)). Every other page, including the games you can play here, carries no counter.</p>
+    <p><strong>Not being counted:</strong> the script does nothing if your browser sends Global Privacy Control or Do Not Track. You can also switch it off for this site by opening any counted page with <code style="white-space: nowrap">?count=off</code> at the end of its address, such as <a href="https://hypersage.ai/?count=off">hypersage.ai/?count=off</a>. That saves one 'do not count' flag in your browser's storage for hypersage.ai, which is the only thing the counted pages ever store on your device; <code style="white-space: nowrap">?count=on</code> removes it.</p>
     <p>If you email us, we obviously have your email and whatever you wrote in it. We keep that correspondence only for as long as it takes to deal with it.</p>
 
     <h2>Who does see something when you visit</h2>
-    <p>One third party is involved in simply serving the studio pages, and it necessarily sees your IP address:</p>
+    <p>Three companies handle requests when you visit, and each necessarily sees your IP address while doing so:</p>
     <ul>
-      <li><strong>GitHub Pages</strong> hosts this site, so GitHub's servers handle your request. <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub privacy statement</a></li>
+      <li><strong>GitHub Pages</strong> hosts this site. <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub privacy statement</a></li>
+      <li><strong>Cloudflare</strong> runs our visit counter on the counted pages and answers requests to www.hypersage.ai by redirecting them here. Our counter uses your browser details only to tell phone from tablet from computer, never reads your IP address, and stores neither. <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare privacy policy</a></li>
+      <li><strong>Google Fonts</strong> serves the typefaces on the Gemburrow, Hexhunter, Mythwright, Nightshelf, Quietoak, Saffra, StoryVault AI and Wingmate pages, so opening one sends your IP address and browser details to Google. <a href="https://policies.google.com/privacy" rel="noopener">Google privacy policy</a></li>
     </ul>
     
-    <p>The typefaces on the studio pages are served from this site itself — loading them sends no request to Google or any other font host. (Individual product pages on this domain may still load fonts from Google; each product's own policy covers its pages.)</p>
-    <p>GitHub is not something we ask for data from, and it gets nothing from us about you.</p>
+    <p>The typefaces on the studio pages are served from this site itself — loading them sends no request to Google or any other font host.</p>
+    <p>None of them gets anything else from us about you.</p>
 
     <h2>Links out</h2>
-    <p>This site links to our products' own websites, and those sites may link on to an app store. Once you follow a link, that destination's privacy policy applies rather than this one.</p>
+    <p>This site links to app stores and to other websites. Once you follow a link off this site, the destination's privacy policy applies rather than this one.</p>
 
     <h2>Our products</h2>
     <p>Each product states plainly what it collects. If you are trying to find a specific app's policy, start at its site:</p>
@@ -89,11 +94,11 @@
     </ul>
 
     <h2>Your rights</h2>
-    <p>Because this website holds nothing about you, there is nothing here to access, correct, or delete. If you have emailed us and would like that correspondence deleted, or you have a question about a specific product's data, write to <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> and we'll handle it.</p>
+    <p>This website keeps only daily totals that cannot be traced back to any visitor, so there is nothing about you here to access, correct or delete. You can object to being counted at any time with the switch above. If you have emailed us and would like that correspondence deleted, or you have a question about a specific product's data, write to <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> and we'll handle it.</p>
     <p><strong>We do not sell or share personal information</strong>, and we will not discriminate against anyone for exercising a privacy right.</p>
 
     <h2>Children</h2>
-    <p>This website is not directed at children and collects nothing from anyone. Individual products state their own age requirements — several of our apps are 18+, and our game Waddleton is made for a general audience.</p>
+    <p>This website is not directed at children and keeps nothing that identifies anyone. The Waddleton and Hoardling pages, and the games you can play here, carry no counter. Individual products state their own age requirements — several of our apps are 18+, and our game Waddleton is made for a general audience.</p>
 
     <h2>Changes</h2>
     <p>If we change this policy we'll update the date above and post the new version here.</p>
