@@ -37,7 +37,24 @@ COUNTED = {"wingmate": "Wingmate", "saffra": "Saffra", "storyvault": "StoryVault
 PRIVACY_PAGE = {"hexhunter": "hexhunter/privacy-policy.html"}
 TAG = '<script src="/v.js" defer></script>'
 RETIRED = ("we run no analytics", "collects nothing", "holds nothing about you",
-           "it collects nothing, sets no cookies", "runs no analytics")
+           "it collects nothing, sets no cookies", "runs no analytics",
+           # The product pages' unscoped sentences (PLAN section 4B "Current"), as
+           # visible_text() renders them. Each was replaced by an app-scoped one; a
+           # revert would make the page deny the counter it loads.
+           "we do not use tracking pixels, advertising identifiers, or third-party analytics",
+           "we don't use advertising identifiers or third-party analytics",
+           "we don’t use advertising identifiers or third-party analytics",
+           "the email you give us on the early-access list on this website",
+           "early-access waitlist (this website)",
+           "for the early-access waitlist on this website only",
+           "no account needed to read or play, no ads, no tracking",
+           "there is no account, no sign-in and no analytics, so there is nothing to collect",
+           "no account, no sign-in, no ads, no trackers.",
+           "short version: no account, no sign-in, no analytics",
+           "no tracking. we do not use analytics sdks",
+           "nothing. there are no ads, no analytics, no tracking",
+           "woodcut style — no backend, no account, no tracking",
+           "hexhunter has no account of ours, no tracking")
 SKIP_DIRS = {".git", "node_modules"}
 LOADABLE = (".html", ".htm", ".js", ".mjs", ".cjs", ".css", ".svg", ".xml", ".json", ".webmanifest")
 
