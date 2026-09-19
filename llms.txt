@@ -1,29 +1,32 @@
 # HyperSage AI Labs
 
-> HyperSage AI Labs is an independent product studio building distinctive consumer
-> apps for relationships, health, recovery, food, stories, markets, and sleep —
-> alongside original games. Some of its products use AI for a specific task, such
-> as explaining a portfolio move, adapting a recipe, or preparing a visit brief.
-> The studio designs, builds, and operates the entire portfolio in-house. Legal
-> entity: HyperSage AI Labs LLC (Delaware, USA). Contact: support@hypersage.ai.
+> HyperSage AI Labs is an independent studio that makes consumer apps and original
+> games. Its apps cover crypto markets, relationships, health, recovery, food,
+> stories, and sleep. Where an app uses AI, it has a specific job, such as
+> explaining why a portfolio moved, adapting a recipe to what's in the kitchen, or
+> preparing a brief for a doctor's visit. The studio designs, builds, and runs all
+> of it in-house. Legal entity: HyperSage AI Labs LLC (Delaware, USA). Contact:
+> support@hypersage.ai.
+
+CryptoSage AI provides market information, not investment advice. Rowan, Quietoak and Alder support self-care and do not provide medical or mental-health treatment.
 
 ## Products
 
-- [Holohound](https://hypersage.ai/holohound/): trading-card scanner and binder for Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam; every price names its source (iOS, in development)
-- [Wingmate](https://hypersage.ai/wingmate/): AI dating coach that organizes context by connection (iOS, live — [App Store](https://apps.apple.com/app/id6792772729))
-- [Quietoak](https://hypersage.ai/quietoak/): DBT skills app with a daily diary card; not therapy or crisis care (iOS, coming soon)
-- [Loam](https://hypersage.ai/loam/): consent-first AI notes companion — every companion change recorded in a Ledger, attributed, undoable and redoable (iOS, coming soon)
-- [CryptoSage AI](https://cryptosageai.io/): market-research workspace; informational, not investment advice (iOS, live — [App Store](https://apps.apple.com/app/id6792761331))
-- [Saffra](https://hypersage.ai/saffra/): AI cooking companion that adapts prepared recipes to your kitchen (iOS, live — [App Store](https://apps.apple.com/app/id6792760857))
-- [StoryVault AI](https://hypersage.ai/storyvault/): interactive fiction where story state shapes each new page (iOS, live — [App Store](https://apps.apple.com/app/id6792759454))
-- [Nightshelf](https://hypersage.ai/nightshelf/): wind-down app of calming books, narration, and ambient sound (iOS, live — [App Store](https://apps.apple.com/app/id6792761643))
-- [Hexhunter](https://hypersage.ai/hexhunter/): gothic horde-survivor game (iOS, live — [App Store](https://apps.apple.com/app/id6792798732))
-- [Mythwright](https://hypersage.ai/mythwright/): tactical card battler with literary heroes (iOS, coming soon)
-- [Rowan](https://hypersage.ai/rowan/): chronic illness diary that turns what you tell it into symptom logs and visit briefs; it does not diagnose or treat (iOS, live — [App Store](https://apps.apple.com/app/id6797693737))
-- [Alder](https://hypersage.ai/alder/): sobriety and recovery app that keeps the count and walks through a slip without erasing what you have built (iOS, coming soon)
-- [Waddleton](https://waddleton.pages.dev/): snowy social world in the browser, free to play (live, [about](https://hypersage.ai/waddleton/))
-- [Mythkin](https://hypersage.ai/mythkin/): original AI characters plus figures from history and myth (iOS, coming soon)
-- [Hoardling](https://hypersage.ai/hoardling/): hoard-defence game — hold the chokepoints, kill the carrier and the coins fly home; free in the browser (live on the web, not on the App Store, [play](https://hypersage.ai/hoardling/play/))
+- [Holohound](https://hypersage.ai/holohound/): trading-card scanner and binder for Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam; every price names its source, and an AI called Hound knows your binder (iOS, in development)
+- [Wingmate](https://hypersage.ai/wingmate/): four AI dating coaches that remember the people you're talking to and turn a screenshot of your chat into suggested replies (iOS, live — [App Store](https://apps.apple.com/app/id6792772729))
+- [Quietoak](https://hypersage.ai/quietoak/): self-help DBT skills app with an AI companion that remembers you, mood logging, a daily diary card, and an always-free crisis kit (iOS, coming soon)
+- [Loam](https://hypersage.ai/loam/): AI notes companion that asks before it acts, tidies slips in place, and records every change it makes in a Ledger with undo and redo (iOS, coming soon)
+- [CryptoSage AI](https://cryptosageai.io/): crypto portfolio tracker and market-research app; its AI knows what you hold, where you're exposed, and what moved your portfolio (iOS, live — [App Store](https://apps.apple.com/app/id6792761331))
+- [Saffra](https://hypersage.ai/saffra/): AI recipe app whose recipes arrive complete, then adapt to your pantry, allergies, and time (iOS, live — [App Store](https://apps.apple.com/app/id6792760857))
+- [StoryVault AI](https://hypersage.ai/storyvault/): branching interactive fiction written with AI; step into classics such as Beowulf and Dracula, or start your own world from a single line (iOS, live — [App Store](https://apps.apple.com/app/id6792759454))
+- [Nightshelf](https://hypersage.ai/nightshelf/): bedtime-story app that reads complete classics aloud over ambient sound, with a sleep timer; Nightshelf Pro adds new AI-written stories (iOS, live — [App Store](https://apps.apple.com/app/id6792761643))
+- [Hexhunter](https://hypersage.ai/hexhunter/): gothic horde-survivor game with nine heroes; pick a hero, draft upgrades as you level up, and survive three dark biomes (iOS, live — [App Store](https://apps.apple.com/app/id6792798732))
+- [Mythwright](https://hypersage.ai/mythwright/): tactical card battler where the heroes and monsters of classic literature duel across three lanes (iOS, coming soon)
+- [Rowan](https://hypersage.ai/rowan/): AI symptom tracker for chronic conditions; you describe your day in plain words and it becomes symptom logs and a visit brief for your doctor (iOS, live — [App Store](https://apps.apple.com/app/id6797693737))
+- [Alder](https://hypersage.ai/alder/): private AI companion for sobriety and recovery that keeps your sober count, helps with cravings, and walks you through a slip without erasing what you've built (iOS, coming soon)
+- [Waddleton](https://waddleton.pages.dev/): free-to-play snowy social world in the browser where you make a penguin, meet other players, and play 17 arcade games (live, [about](https://hypersage.ai/waddleton/))
+- [Mythkin](https://hypersage.ai/mythkin/): AI character app for adults; talk to 470 figures from history, myth, literature and scripture, or write your own (iOS, coming soon)
+- [Hoardling](https://hypersage.ai/hoardling/): hoard-defense game played from the dragon's side of the cave, where you hold the chokepoints and kill a carrier to send its coins home; free in the browser (live on the web, not on the App Store, [play](https://hypersage.ai/hoardling/play/))
 - [Gemburrow](https://hypersage.ai/gemburrow/): cozy gem-digging puzzle where every gem and rock is real physics; free in the browser (live on the web, not on the App Store, [play](https://hypersage.ai/gemburrow/play/))
 
 ## Studio

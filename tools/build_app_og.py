@@ -88,7 +88,7 @@ CARDS = {
         # "with Nightshelf Pro" is load-bearing and must never be trimmed away:
         # conjuring a story is Pro-only with NO free allowance (the backend hard-402s,
         # index.html:706-711). An unqualified "AI stories" line overclaims the free tier.
-        "sub": "Eighty timeless classics, and calm new ones written by AI with Nightshelf&nbsp;Pro, read aloud in a soft, sleepy voice with ambient sound underneath.",
+        "sub": "80 complete classics, read aloud over rain or firelight. Nightshelf&nbsp;Pro adds calm new stories written by AI.",
     },
     "mythwright": {
         "art": "app-icon.png",
@@ -176,7 +176,7 @@ CARDS = {
         # It shipped INTO THE RENDERED PNG, which is the card people see when the
         # link is shared, so fixing the page alone would have left it live.
         # Completeness is measured and gated: see saffra-ios store/check_frame_claims.py.
-        "sub": "Premium recipes you can trust — every amount measured, every step cued, then rewritten for your pantry.",
+        "sub": "Premium recipes you can trust, adapted to your kitchen. Then cook hands-free while she talks you through it.",
     },
     "quietoak": {
         "art": "companions/group-painting.png",
@@ -217,7 +217,7 @@ CARDS = {
 """,
         "kicker": 'Quiet<span class="oak">oak</span>',
         "h1": 'Talk it through.<br><em>Find a next step.</em>',
-        "sub": "A companion who listens. Mood logging, DBT tools, and a daily diary.",
+        "sub": "An AI companion that remembers you. Practice DBT skills and keep a one-minute diary card.",
     },
     "rowan": {
         "art": "art/rowan_welcome.png",
@@ -251,7 +251,7 @@ CARDS = {
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
         "kicker": "Health companion · iOS",
         "h1": "The health<br>companion that<br><em>knows your story.</em>",
-        "sub": "Talk about your day in plain words. Rowan turns it into a record you can use — and a brief you hand your doctor.",
+        "sub": "Talk about your day in plain words. Rowan keeps the record and turns it into a brief for your doctor.",
     },
     "alder": {
         "art": "art/alder_steady.png",
@@ -287,7 +287,7 @@ CARDS = {
 """,
         "kicker": "Sobriety companion · Coming to iOS · 18+",
         "h1": "Someone to<br>talk to <em>at 3am.</em>",
-        "sub": "It counts your sober time, sits with you through an urge, and never makes you feel small for having one. No account, no name, no email.",
+        "sub": "It counts your sober time, sits with you through a craving, and never shames a lapse. No account.",
     },
     "wingmate": {
         "art": "app-icon.png",
@@ -321,7 +321,7 @@ CARDS = {
         # "coming". Follows the fleet's "<category> · iOS" kicker convention.
         "kicker": "Dating coach · iOS",
         "h1": 'AI dating<br>coaches that<br><em>actually get&nbsp;it.</em>',
-        "sub": "Four coaches, four perspectives. Drop in a screenshot and get replies you can make your own — for Tinder, Hinge, Bumble, Instagram, Snapchat, Messages, or any app.",
+        "sub": "Four coaches, four perspectives. Share a screenshot and get a reply that fits the app you&rsquo;re on.",
     },
     "waddleton": {
         "art": "waddleton-icon.png",
@@ -394,7 +394,7 @@ CARDS = {
         # which appears on the page any more.
         "kicker": "AI characters · 18+",
         "h1": "Every conversation<br><em>you never got to have.</em>",
-        "sub": "Cleopatra. Sherlock Holmes. Marcus Aurelius. Ada Lovelace. Hundreds of figures out of history, myth and literature — written at length, painted once, and ready to talk.",
+        "sub": "Cleopatra. Sherlock Holmes. Marcus Aurelius. Ada Lovelace. 470 figures from history, myth and literature, each written at length. They remember what you tell them.",
     },
     "gemburrow": {
         "art": "shots/daily.jpg",
@@ -487,7 +487,7 @@ CARDS = {
         # "In development" positioning on 2026-09-01 and the card lagged it.
         "kicker": "TCG scanner \u00b7 Coming to iOS",
         "h1": "Hound knows your binder \u2014<br>and the market.",
-        "sub": "Ask what you\u2019re missing, what\u2019s worth flipping, or what a card is really worth \u2014 sources named every time. Scanning stays free and unlimited.",
+        "sub": "Ask what you\u2019re missing or what a card is worth. Prices name their source, and scanning is free and unlimited.",
     },
     "hexhunter": {
         "art": "assets/art/cover.jpg",

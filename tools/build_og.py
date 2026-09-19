@@ -189,7 +189,7 @@ def build_html() -> str:
     </div>
     <h1>Software with<br><span class="grad">a point of view.</span></h1>
     <div class="rule"></div>
-    <p>Distinctive consumer apps and original games.<br>Context-aware AI where it improves the product.</p>
+    <p>iPhone apps and original games.<br>Dinner from your pantry, a classic at bedtime.</p>
     <div class="og-apps">
       <div class="cap">{cap}</div>
       <div class="tiles">{tiles}</div>

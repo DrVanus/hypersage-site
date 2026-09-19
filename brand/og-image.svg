@@ -47,8 +47,8 @@
     <text x="0" y="0" fill="#eaeef5" font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="68" font-weight="700" letter-spacing="-2.5">Software with</text>
     <text x="0" y="80" fill="#2dd4bf" font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="68" font-weight="700" letter-spacing="-2.5">a point of view.</text>
     <rect x="0" y="111" width="575" height="4" rx="2" fill="url(#brand)"/>
-    <text x="0" y="167" fill="#bdc8d9" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="400">Distinctive consumer apps and original games.</text>
-    <text x="0" y="201" fill="#bdc8d9" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="400">Context-aware AI where it improves the product.</text>
+    <text x="0" y="167" fill="#bdc8d9" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="400">iPhone apps and original games.</text>
+    <text x="0" y="201" fill="#bdc8d9" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="400">Dinner from your pantry, a classic at bedtime.</text>
   </g>
 
   <g clip-path="url(#rightPanel)" opacity="0.94">

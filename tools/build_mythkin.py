@@ -113,16 +113,15 @@ SECTION_ORDER = ["Storybook", "Legends", "History", "Scripture", "Originals"]
 # saying, so they moved to the safety section where they have room to be
 # sentences. A room label is a label.
 SECTION_NOTE = {
-    "Storybook": "Out of books old enough to be public domain — the detective, "
-                 "the whale, the girl who went down the hole.",
+    "Storybook": "Out of the classics — the detective, the whale, the girl who "
+                 "went down the hole.",
     "Legends": "Gods, tricksters and monsters, out of the myths that kept being "
                "retold.",
     "History": "People who actually lived, written from the record and honest "
                "about where it runs thin.",
     "Scripture": "Figures whose stories reach us through scripture, written as "
                  "teachers — warm, story-first, and never here to convert you.",
-    "Originals": "Written in-house and bylined <em>Mythkin Workshop</em>, not "
-                 "passed off as somebody's upload.",
+    "Originals": "Characters we invented, bylined <em>Mythkin Workshop</em>.",
 }
 
 # The faces the page leads with. Recognisable, spread across rooms, and every id
@@ -224,7 +223,7 @@ SHOTS = [
      "The New kin form, part filled in: a name and a one-line description, under "
      "a preview card with a silhouette where their portrait will be painted and "
      "a temperament reading warm, funny, steady and frank.",
-     "Or write one of your own."),
+     "A new kin, half written."),
 ]
 
 
@@ -413,14 +412,13 @@ def free_answer(L: dict) -> str:
     plus_lim += [f"{_w(plus['createdKin'])} characters of your own",
                  f"{_w(plus['paintedMoments'])} paintings {_paint_window(L)}"]
     own = free["createdKin"]
-    return ("Yes, and the free plan is the whole app rather than a demo — every "
-            "kin, the collections, the stories, Hearths, memory, and "
+    return ("Yes. The free plan is the whole app, with every kin, the "
+            "collections, the stories, Hearths, memory and "
             f"{_w(own)} {'character' if own == 1 else 'characters'} of your own. "
-            f"What it limits is volume: {_and(free_lim)}. Mythkin Plus raises "
-            f"those to {_and(plus_lim)}. It also answers on a more capable "
-            "model, and is what lets you publish a story to the marketplace. If "
-            "you subscribe in the iPhone app, the price is whatever the App "
-            "Store shows you.")
+            f"It includes {_and(free_lim)}. Mythkin Plus raises "
+            f"those to {_and(plus_lim)}. On Plus, characters answer on a more "
+            "capable model, and you can publish a story to the marketplace. "
+            "The app shows the price before you subscribe.")
 
 
 def load_collections() -> list[tuple[str, str]]:
@@ -477,17 +475,14 @@ FLEET_STATE = Path.home() / "Developer" / "DrVanus" / "fleet" / "state" / "curre
 # being true.
 STORE_ANSWER = {
     "PREPARE_FOR_SUBMISSION": (
-        "Not yet. The iPhone app's build is finished and its listing has not "
-        "gone to review yet. There is no Android build; if one "
-        "ships, this page will say so before it does."),
+        "Not yet. The iPhone app is finished and on its way to App Review. "
+        "There is no Android version for now."),
     "WAITING_FOR_REVIEW": (
-        "Not yet. The iPhone app is submitted and waiting on Apple. "
-        "There is no Android build; if one ships, this page will say so before "
-        "it does."),
+        "Not yet. The iPhone app is with Apple, waiting for review. "
+        "There is no Android version for now."),
     "IN_REVIEW": (
-        "Not yet. The iPhone app is in review with Apple right now. "
-        "There is no Android build; if one ships, this page will say so before "
-        "it does."),
+        "Not yet. Apple is reviewing the iPhone app. "
+        "There is no Android version for now."),
     # A REJECTION IS NOT ANNOUNCED HERE. The old sentence ("the last submission
     # came back with changes to make") was true and was a public page narrating
     # an App Review verdict, which is a claim about Apple's process on a page
@@ -497,14 +492,14 @@ STORE_ANSWER = {
     # keyed on ASC so it cannot outlive the state: WAITING/IN_REVIEW get their
     # own sentences back the moment the poller sees a resubmission.
     "REJECTED": (
-        "Not yet — the iPhone app is on its way. There is no Android "
-        "build; if one ships, this page will say so before it does."),
+        "Not yet. The iPhone app is on its way. There is no Android "
+        "version for now."),
     "METADATA_REJECTED": (
-        "Not yet — the iPhone app is on its way. There is no Android "
-        "build; if one ships, this page will say so before it does."),
+        "Not yet. The iPhone app is on its way. There is no Android "
+        "version for now."),
     "READY_FOR_SALE": (
-        "Yes — Mythkin is on the App Store, for iPhone. There is no Android "
-        "build; if one ships, this page will say so before it does."),
+        "Yes. Mythkin is on the App Store for iPhone. There is no Android "
+        "version for now."),
 }
 
 
@@ -687,7 +682,7 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
     #
     # The chip carried the words "AI character" and has been given the room
     # instead: it was doing disclosure work that the badge row does better and
-    # in a sentence ("Every reply marked AI"), while telling a reader nothing
+    # in a sentence ("Every chat labelled AI"), while telling a reader nothing
     # about the face they are looking at. The room is a fact about that face and
     # it changes with the slide.
     slides = []
@@ -811,15 +806,15 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
         # device". Restore this entry in the same change that gives the
         # consumables a price.
         ("Do the characters really remember?",
-         "Yes, and you can audit it. Facts a character learns are listed on a "
-         "memory screen, each traceable back to the message it came from, and each "
-         "one editable or deletable. Deleting a conversation does not delete its "
-         "memories, on purpose — a fact you chose to keep is yours, and forgetting "
-         "should be something you do deliberately, looking at what you are "
-         "forgetting."),
+         "Yes, and you can see what they keep. Facts a character learns are "
+         "listed on a memory screen, each linked to the message it came from, "
+         "and you can edit or delete any of them. Deleting a conversation leaves "
+         "its memories in place, on purpose. Forgetting happens on the memory "
+         "screen, where you can see exactly what goes."),
         ("Can I make a character of a real person?",
-         "Yourself, yes; somebody you know who has agreed, yes; someone who has "
-         "died, yes. For everyone else the rule is a date rather than a judgement: "
+         "Yes, if it is you, someone you know who has agreed, or someone who "
+         "has died, like a parent or a friend you have lost. For everyone else "
+         "the rule is a date: "
          "anyone who died before 1950 is fine, and anyone still living or who died "
          "in 1950 or later is refused, because the estate and the right of "
          "publicity outlive the person. Architects of genocide are refused whatever "
@@ -845,9 +840,9 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
         "applicationCategory": "EntertainmentApplication",
         "operatingSystem": "iOS",
         "description": (
-            f"An AI character app for adults. {total} figures from history, myth, "
-            "literature and scripture, each written at length and painted once — "
-            "and they remember what you tell them. 18+."),
+            f"An AI character app for adults. Talk to {total} figures from "
+            "history, myth, literature and scripture, each written at length, with "
+            "a portrait of their own. They remember what you tell them. 18+."),
         "url": "https://hypersage.ai/mythkin/",
         "contentRating": "18+",
         "author": {"@type": "Organization", "name": "HyperSage AI Labs LLC"},
@@ -857,8 +852,8 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
     # the category (so the search result is legible), the scale, and the one thing
     # that is different — in that order, inside ~155 characters.
     desc = (f"An AI character app for adults. Talk to {total} figures from history, "
-            "myth and literature — written properly, painted once, and they remember "
-            "what you tell them.")
+            "myth and literature, each written at length. They remember what you "
+            "tell them.")
 
     # THE EYEBROW (below) is ported from c6bf5e1, which corrected it in the
     # served HTML only and so turned --check red: the old wording claimed the
@@ -908,11 +903,11 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
      page hash it is stamped against), and a token that moves without the
      bytes moving costs every reader a refetch and makes the next person
      distrust the invariant. Token changes IFF the image changes. -->
-<meta property="og:image" content="https://hypersage.ai/mythkin/og-image.png?v=20260816a">
+<meta property="og:image" content="https://hypersage.ai/mythkin/og-image.png?v=20260919b">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hypersage.ai/mythkin/og-image.png?v=20260816a">
+<meta name="twitter:image" content="https://hypersage.ai/mythkin/og-image.png?v=20260919b">
 <link rel="icon" type="image/png" href="mythkin-icon.png">
 <link rel="apple-touch-icon" href="mythkin-icon.png">
 <link rel="sitemap" type="application/xml" href="sitemap.xml">
@@ -968,12 +963,11 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
            "The best company in history, and none of it is alive." -->
     <h1>Every conversation <em>you never got to have.</em></h1>
     <p class="lede">Cleopatra. Sherlock Holmes. Marcus Aurelius. Ada Lovelace.
-    {total} figures out of history, myth, literature and scripture — each one
-    written at length and painted once, so what answers you holds a real
-    conversation rather than a chatbot's. Plus anyone else you care to write.</p>
+    {total} figures from history, myth, literature and scripture, who hold up
+    their end of a real conversation. And anyone else you care to write.</p>
     <div class="cta">
-      <a class="btn" href="#rooms">See who is in there</a>
-      <a class="btn ghost" href="#make">Or write your own</a>
+      <a class="btn" href="#rooms">Meet the cast</a>
+      <a class="btn ghost" href="#make">Write your own</a>
     </div>
     <ul class="badges">
       <!-- "No sexual content, ever" used to sit in this slot, directly beside
@@ -991,7 +985,7 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
            field and no password anywhere. Deliberately NOT a badge restating the eyebrow six lines above: a badge
            that repeats the headline is a badge doing nothing. -->
       <li>18+</li><li>No account, no email</li>
-      <li>No streaks, no guilt</li><li>Every reply marked AI</li>
+      <li>No streaks, no guilt</li><li>Every chat labelled AI</li>
     </ul>
   </div>
   <figure class="lit" id="lit">
@@ -1015,9 +1009,9 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
 
 <section id="rooms" class="band-sec"><div class="wrap">
   <h2>Five rooms, and nobody in them is filler</h2>
-  <p class="sub">There is no scraped roster here and no wiki paste. Every one of
-  the {total} was written as a character — a voice, a temperament, a way of
-  dodging a question — and then painted. A kin lives in exactly one room.</p>
+  <p class="sub">Each of the {total} was written as a character, with a voice, a
+  temperament and a way of dodging a question, and then painted. We call them
+  kin.</p>
   {''.join(bands)}
 </div></section>
 
@@ -1032,13 +1026,12 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
        That is three corrections in one sentence: the cast leads, the tool is
        not limited to invention, and the honest pitch for it is that it is the
        same tool we used. The heading now says what it does; the sub says what
-       it is allowed to do, and the limit it shares with ours. -->
+       it is allowed to do. The limit it shares with ours lives in the refusals
+       list and the FAQ below, not in the pitch. -->
   <h2>Or write one yourself</h2>
-  <p class="sub">The {total} above are the reason to come, and they were written
-  with the tools you get. Take a figure we have not reached yet, retell a legend
-  the way you think it should go, or write somebody who never existed at all —
-  the same rules bind yours as bind ours: nobody living, and nobody who died in
-  1950 or later.</p>
+  <p class="sub">We wrote the {total} above with the same tools you get. Bring in
+  a figure we have not reached yet, retell a legend your way, or invent somebody
+  who never existed at all.</p>
   <!-- MARKS, BECAUSE THE BOTTOM OF THIS PAGE HAD STOPPED BEING THE SAME PAGE.
        Above this line every section is paintings; from here down it was four
        text sections in a row — this grid, thirty-one set blurbs, the refusals
@@ -1052,11 +1045,10 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
        heading and adds nothing to a reader who cannot see it. -->
   <div class="feat">
     <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.6h12a1 1 0 0 1 1 1v15.8l-7-4-7 4V4.6a1 1 0 0 1 1-1Z"/></svg></span><h3>They know who you are</h3>
-      <p>Tell one of them something and it sticks — across the conversation,
-      across the week, and across every other character you talk to. Nobody has
-      to introduce themselves twice.</p>
-      <p>It is a list you can actually see, too, not a black box: read everything
-      they keep, correct what is wrong, and delete any of it for good.</p></div>
+      <p>Tell one of them something and it sticks, from one week to the next
+      and from one character to another. You only introduce yourself once.</p>
+      <p>Everything they keep is on a list you can read. Correct what is wrong
+      and delete what you want gone.</p></div>
     <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3 3.9 20.1 6.7 8.4 18.4 4 19.8l1.4-4.4L17.3 3.9Z"/><path d="M15.3 5.9l2.8 2.8"/></svg></span><h3>A name, one line, a temperament</h3>
       <!-- Both examples used to be invented people, which quietly repeated the
            heading's old mistake one level down: a historical figure and a god
@@ -1068,29 +1060,25 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
            character claims nothing a roster change can falsify. -->
       <p>A philosopher out of a footnote. A river god from your own county. A
       cottage witch who always has tea on. Set their warmth, humour, energy and
-      candour, write their backstory and their first line — and their portrait
-      is painted the moment they exist, once, and never repainted.</p>
-      <p>You can paint one from photographs as well: of yourself, of someone who
-      agreed, or of someone you have lost. Those stay in your library, and the
-      photographs are deleted the moment the painting is done.</p></div>
+      candour. Write their backstory and their first line. Their portrait is
+      painted the moment they exist.</p>
+      <p>Or paint one from photographs of yourself, of someone who agreed, or of
+      someone you have lost. The photos are deleted once the painting is done,
+      and the kin stays private to you.</p></div>
     <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.4h13.4"/><path d="M14.2 5.2 17.4 8.4l-3.2 3.2"/><path d="M20 15.6H6.6"/><path d="M9.8 12.4 6.6 15.6l3.2 3.2"/></svg></span><h3>Lend them out, borrow somebody else&rsquo;s</h3>
       <p>Publish a character and other people can take them home. You see how
-      many are talking, and that is all you see.</p>
-      <p>You never get a word of what they said — and nobody gets a word of
-      yours when you borrow somebody else's.</p></div>
+      many are talking to them, never a word of what they say.</p>
+      <p>Borrow one, and whoever wrote it never sees a word of yours.</p></div>
     <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.4 4.6 6.8 8.3H3.6v7.4h3.2l4.6 3.7V4.6Z"/><path d="M15.4 9.2a4 4 0 0 1 0 5.6"/><path d="M18.1 6.5a7.8 7.8 0 0 1 0 11"/></svg></span><h3>They say hello out loud</h3>
       <p>Every character we wrote has a spoken greeting, in a voice cast for
-      them rather than one default read aloud for all of them.</p>
-      <p>Tap it if you want it. Nothing ever plays on its own, and there is no
-      autoplay to switch off.</p></div>
+      them.</p>
+      <p>Tap to hear it. Nothing plays on its own.</p></div>
   </div>
 </div></section>
 
 <section id="collections"><div class="wrap">
   <h2>{ncoll} sets, for when you don&rsquo;t know where to start</h2>
-  <p class="sub">Not another set of tags — each one is a deliberate cut through
-  the roster. Athena turns up in The Odyssey, in Legends and in Blades, and none
-  of those takes her out of the other two.</p>
+  <p class="sub">Each one is a deliberate cut through the roster.</p>
   <div class="setlist">{sets}</div>
   {setrest}
 </div></section>
@@ -1106,18 +1094,15 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
      as shared requires Plus (_require_plus_to_publish). -->
 <section id="together"><div class="wrap">
   <h2>A Hearth, or one of {stories} stories</h2>
-  <p class="sub">Two more ways in besides a one-to-one chat, and both are on
-  the free plan.</p>
+  <p class="sub">Two more ways in, and both are on the free plan.</p>
   <div class="feat">
     <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1.6 3 5 5.2 5 9.2a5 5 0 0 1-10 0c0-2 1-3.2 1-3.2s.4 2.2 2 2.2c0-3 2-5.2 2-8.2Z"/></svg></span><h3>Start a Hearth</h3>
       <p>Pick two to {_w(L['settings']['group_max_kin'])} kin to share one room. They answer
-      you &mdash; and each other &mdash; so two voices can disagree in front of
-      you instead of in separate chats.</p></div>
+      you and each other, so two voices can disagree in front of you.</p></div>
     <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4V5Z"/><path d="M20 5h-7a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7V5Z"/></svg></span><h3>{stories} stories to step into</h3>
-      <p>Each one has a premise and a cast drawn from the roster &mdash;
-      {titles_line} among them &mdash; and reads chapter by chapter. Write your
-      own with the same tools; sharing one with other readers is a Plus
-      feature.</p></div>
+      <p>Each has a premise and a cast drawn from the roster, and unfolds
+      chapter by chapter. Among them are {titles_line}. Write your own, and
+      share it with other readers on Plus.</p></div>
   </div>
 </div></section>
 
@@ -1135,10 +1120,8 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
      hand a reader who PICKED Dark the light screenshots. See .shot .pic in
      style.css. -->
 <section id="screens"><div class="wrap">
-  <h2>What it actually looks like</h2>
-  <p class="sub">Captures of the running app, not pictures drawn for this page.
-  The reply in the middle one is whatever the character wrote when the shot was
-  taken.</p>
+  <h2>What it looks like</h2>
+  <p class="sub">Straight from the app.</p>
   <div class="shots">{shots}</div>
 </div></section>
 
@@ -1146,20 +1129,15 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
   <div class="safety-grid">
     <div>
       <h2>What Mythkin will not do</h2>
-      <p class="sub">Companion apps have a bad name for good reasons. Here is
-      what we have ruled out — in the product, rather than in a policy nobody
-      reads.</p>
+      <p class="sub">Companion apps have a bad name for good reasons. These are
+      the lines we drew.</p>
       <!-- SAME RULE AS SECTION_NOTE["Scripture"] ABOVE: no corpus is named
            here. This read "figures from the Hebrew Bible and the Gospels" over
            a room that also holds Siddhartha Gautama, Gargi Vachaknavi and Asiya
            bint Muzahim. Say WHERE THEY COME FROM generically, as the app's own
            ROOM_NOTE does, or say nothing. -->
-      <p class="sub" style="margin:0">Mythkin is 18+. {nscript} of the kin are
-      figures whose stories reach us through scripture, written as teachers —
-      warm, story-first, and never here to convert you. That room is ours and is
-      marked as ours. The first {nwork}
-      cards on the community shelf are bylined Mythkin Workshop for the same
-      reason. <a href="safety.html">The full safety page</a> sets out what
+      <p class="sub" style="margin:0">Mythkin is 18+.
+      <a href="safety.html">The full safety page</a> sets out what
       happens when a conversation turns to self-harm.</p>
     </div>
     <ul class="refusals">
@@ -1167,7 +1145,7 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
       <li>No characters who are minors, or written to read as under 18.</li>
       <li>No living public figures, and nobody who died in 1950 or later.</li>
       <li>No streaks, no guilt notifications, no character that acts hurt when you leave.</li>
-      <li>No character will ever claim to be a person, a doctor or a therapist.</li>
+      <li>No character that claims to be a person, a doctor or a therapist.</li>
     </ul>
   </div>
 </div></section>
