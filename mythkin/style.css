@@ -161,6 +161,9 @@ p,li{color:var(--text)}
   font-weight:800;letter-spacing:.15em;text-transform:uppercase;
   color:var(--goldText);margin-bottom:1rem}
 .eyebrow::before{content:"";width:26px;height:1px;background:var(--gold)}
+/* One unbreakable clause. The eyebrow broke at the hyphen on desktop and read
+   "PORTRAITS AI-" / "GENERATED"; the line may still wrap, but only before it. */
+.nw{white-space:nowrap}
 
 section{padding:3.1rem 0}
 @media(max-width:820px){section{padding:2.4rem 0}}
@@ -404,9 +407,12 @@ section{padding:3.1rem 0}
   border:1px solid var(--border);box-shadow:var(--shadow-soft)}
 .shot img{width:100%;height:auto;display:block;border-radius:20px}
 .shot figcaption{margin-top:.7rem;color:var(--dim);font-size:.86rem;line-height:1.45}
+/* THREE ACROSS ON A PHONE TOO. Two columns put Discover and Chat side by side
+   and left Create alone on a row of its own, under the shots it is the answer
+   to. Three narrow phones read as one set of screens, as they do on desktop. */
 @media(max-width:520px){
-  .shots{grid-template-columns:repeat(2,1fr);gap:1.2rem .8rem}
-  .shot figcaption{font-size:.8rem}
+  .shots{grid-template-columns:repeat(3,minmax(0,1fr));gap:1.1rem .55rem}
+  .shot figcaption{font-size:.76rem;line-height:1.35}
 }
 
 /* Feature cards / collections / refusals */
@@ -451,6 +457,10 @@ section{padding:3.1rem 0}
   display:flex;align-items:center;gap:.5rem;min-height:44px;font-size:.95rem}
 .setall summary::-webkit-details-marker{display:none}
 .setall summary span{font-weight:400;color:var(--dim);font-size:.88rem}
+/* "See all 86 sets" is one phrase; on a phone the flex item shrank and broke it
+   after the number. The dim clause after it is the part that wraps. */
+.setall summary{white-space:nowrap}
+.setall summary span{white-space:normal}
 .setall summary::after{content:'+';margin-left:auto;color:var(--tintText);
   font-size:1.3rem;line-height:1;flex:0 0 auto}
 @media (prefers-reduced-motion:no-preference){
@@ -582,3 +592,9 @@ html[data-theme="dark"] .shot .pic img.lt{display:none}
 html[data-theme="dark"] .shot .pic img.dk{display:block}
 html[data-theme="light"] .shot .pic img.lt{display:block}
 html[data-theme="light"] .shot .pic img.dk{display:none}
+/* The narrow frame of the three-across phone layout above; here, after the
+   .shot .pic rules, so it is not overridden by them. */
+@media(max-width:520px){
+  .shot .pic{border-radius:13px;padding:3px}
+  .shot .pic img{border-radius:9px}
+}

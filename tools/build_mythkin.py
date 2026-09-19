@@ -12,14 +12,16 @@ else's commit.
 
 So every count, every room name, every kin name and tagline on the built page is
 read out of mythkin-api/app/characters/seed.py and mythkin-api/app/collections/
-seed.py at build time. If the roster moves, you re-run this; you do not edit
-index.html. `--check` re-derives everything and diffs it against the file on
-disk, so CI (or a pre-commit hook) can fail when the two disagree rather than
-waiting for a human to notice.
+seed.py at build time — at API_REF, the commit the live server was deployed
+from, never off the working tree (see API_REF). If the roster moves, you move
+the pin and re-run this; you do not edit index.html. `--check` re-derives
+everything and diffs it against the file on disk, so CI (or a pre-commit hook)
+can fail when the two disagree rather than waiting for a human to notice.
 
     python3 tools/build_mythkin.py            # write index.html + copy assets
     python3 tools/build_mythkin.py --check    # fail if the page is stale
     python3 tools/build_mythkin.py --shots DIR-light --shots-dark DIR-dark
+    python3 tools/build_mythkin.py --verify-live   # pin vs GET /v1/plans
 
 WHAT IS DELIBERATELY *NOT* HERE: a price. Nothing in the client hardcodes one —
 the store is the source — so printing one here would be a claim this script
@@ -43,6 +45,41 @@ SITE = Path(__file__).resolve().parent.parent
 OUT = SITE / "mythkin"
 API = Path.home() / "Developer" / "DrVanus" / "mythkin-api"
 APP = Path.home() / "Developer" / "DrVanus" / "mythkin-app"
+
+# THE PAGE DESCRIBES THE DEPLOYED BACKEND, NOT WHATEVER IS IN SOMEBODY'S TREE.
+# Every backend source below is read with `git show API_REF:<path>`, never off
+# the mythkin-api working tree. The working tree is shared: on 2026-09-19 it
+# held another session's uncommitted port of API-107, which deleted
+# free_max_memories, so this script refused to build at all — and had it built,
+# it would have described code no server runs. The reverse hazard is worse: a
+# half-finished edit in that tree would have been printed on a public page as a
+# fact, with every gate green.
+#
+# So the page is pinned to the commit the server was deployed FROM: Fly release
+# v107 of mythkin-api (2026-09-14T18:08Z) was deployed from 3720f58 on
+# claude/mythkin-api-107-fixes. Pinning is still parsing, not typing — every
+# number is read out of that commit's config.py and plans.py. Move this pin in
+# the same change that follows a deploy, and run `--verify-live` to prove the
+# pin and the live GET /v1/plans agree before trusting it.
+API_REF = "3720f58140c41dc04acf5f68aac2fc1743ffc9da"
+PLANS_URL = "https://mythkin-api.fly.dev/v1/plans"
+
+
+def api_text(rel: str, required: bool = True) -> str | None:
+    """One file of mythkin-api AT API_REF, or None if that commit lacks it."""
+    ok = subprocess.run(["git", "-C", str(API), "cat-file", "-e",
+                         f"{API_REF}^{{commit}}"], capture_output=True)
+    if ok.returncode:
+        sys.exit(f"FAIL: mythkin-api has no commit {API_REF} — the page is "
+                 f"pinned to the deployed backend. Fetch it into {API}, or "
+                 "pass --api-ref for the commit the server now runs.")
+    r = subprocess.run(["git", "-C", str(API), "show", f"{API_REF}:{rel}"],
+                       capture_output=True, text=True)
+    if r.returncode:
+        if required:
+            sys.exit(f"FAIL: {rel} not found at mythkin-api@{API_REF[:8]}")
+        return None
+    return r.stdout
 
 SECTION_ORDER = ["Storybook", "Legends", "History", "Scripture", "Originals"]
 
@@ -129,7 +166,7 @@ MARQUEE_ROWS = 3       # drifting rows; the whole roster is dealt across them
 
 
 # ---------------------------------------------------------------- source data
-def _tuples(path: Path, names: tuple[str, ...]) -> dict:
+def _tuples(src: str, where: str, names: tuple[str, ...]) -> dict:
     """literal_eval the named module-level tuples.
 
     OFFICIAL_KIN is an AnnAssign (`OFFICIAL_KIN: tuple[dict, ...] = (`), not an
@@ -137,7 +174,7 @@ def _tuples(path: Path, names: tuple[str, ...]) -> dict:
     entries and reports success — which is how a roster gate once validated the
     roster's absence. Both node types, on purpose.
     """
-    tree = ast.parse(path.read_text())
+    tree = ast.parse(src)
     found: dict = {}
     for node in ast.walk(tree):
         target = None
@@ -152,36 +189,41 @@ def _tuples(path: Path, names: tuple[str, ...]) -> dict:
                 pass
     missing = [n for n in names if n not in found]
     if missing:
-        sys.exit(f"FAIL: could not read {missing} out of {path}")
+        sys.exit(f"FAIL: could not read {missing} out of {where}")
     return found
 
 
 def load_roster() -> list[dict]:
-    src = API / "app" / "characters" / "seed.py"
-    if not src.exists():
-        sys.exit(f"FAIL: {src} not found — is mythkin-api checked out?")
-    got = _tuples(src, ("OFFICIAL_KIN", "WORKSHOP_KIN"))
+    rel = "app/characters/seed.py"
+    got = _tuples(api_text(rel), rel, ("OFFICIAL_KIN", "WORKSHOP_KIN"))
     kin = list(got["OFFICIAL_KIN"]) + list(got["WORKSHOP_KIN"])
     if not kin:
         sys.exit("FAIL: roster parsed as empty")
     return kin
 
 
-SHOT_V = "20260824a"   # bump when any screenshot is re-exported
+SHOT_V = "20260919a"   # bump when any screenshot is re-exported
+# 20260919a: re-shot on build 1.0 (23) (mythkin-app d2d90fa, captured from the
+# claude/mythkin-1.0-b23-fixes working copy at 5f45e23, which differs from d2d90fa
+# only under tools/). The 08-24 set showed a Discover with no "Legends to
+# meet" line or Find/Read/Create row, a Create form still captioned "(the model
+# reads every word)", and a chat whose last reply ran under the composer.
 # Which captures reach the page, in order, with the caption each one earns.
 # site_shots.py writes more than this; a gallery is an edit, not a dump.
 SHOTS = [
     ("01-discover",
-     "The Discover shelf: a featured character of the week above rows of painted "
-     "portraits and collections.",
+     "The Discover shelf: buttons to find a kin, read a story or create a kin, "
+     "then a featured character of the week above a row of painted portraits "
+     "and the collections.",
      "The shelf you open on."),
     ("02-chat",
      "A conversation with Sherlock Holmes, who is reasoning about a torn ticket "
      "found in a coat pocket.",
      "A character, mid-conversation."),
     ("04-create",
-     "The New kin form, part filled in: a name, a one-line description, and dials "
-     "for warmth, humour, energy and candour.",
+     "The New kin form, part filled in: a name and a one-line description, under "
+     "a preview card with a silhouette where their portrait will be painted and "
+     "a temperament reading warm, funny, steady and frank.",
      "Or write one of your own."),
 ]
 
@@ -202,42 +244,120 @@ def shot_figures() -> str:
     return "".join(out)
 
 
-def load_limits() -> dict[str, int]:
-    """The tier numbers, read from the settings that ENFORCE them.
+def load_settings() -> dict[str, int]:
+    """Every integer default in app/config.py's Settings, by field name."""
+    got: dict[str, int] = {}
+    for node in ast.walk(ast.parse(api_text("app/config.py"))):
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) \
+                and isinstance(node.value, ast.Constant) \
+                and isinstance(node.value.value, int) \
+                and not isinstance(node.value.value, bool):
+            got[node.target.id] = node.value.value
+    return got
+
+
+# What the FAQ needs out of each tier of GET /v1/plans. `borrowedKin` is None on
+# Plus (unlimited, "and the gate agrees"), so presence is checked, not value.
+PLAN_KEYS = ("windowMessages", "windowHours", "createdKin", "borrowedKin",
+             "memoryFacts", "paintedMoments")
+
+
+def load_limits() -> dict:
+    """The tier numbers, read from the settings that ENFORCE them — THROUGH the
+    mapping GET /v1/plans serves.
 
     Same argument as the roster above, and the FAQ used to lose it: the answer
     said "a set number of replies in a rolling window" — true, and it named
     nothing, so a reader learned no more than that a limit existed. Meanwhile
     the standalone mythkin-site source carried a hand-typed "200 replies a day"
     against a server that allows 600. That is the drift this whole file exists
-    to stop, so the cure is the same: parse app/config.py, never retype it.
+    to stop, so the cure is the same: parse the backend, never retype it.
 
-    These are the same fields app/plans.py renders into GET /v1/plans, which is
-    what the app's own paywall draws — so the page and the paywall cannot say
-    different things about the same limit.
+    WHY plans.py AND NOT JUST config.py. This read config field names directly,
+    so it had its own private copy of the plans route's field-to-tier mapping —
+    and when API-107 replaced the free plan's fifty-fact memory cap with one
+    10,000-fact ceiling for every plan (`memoryFacts: s.memory_storage_limit`
+    on BOTH tiers), the page kept promising "fifty remembered facts" free and
+    "no fifty-fact cap" on Plus: a paid upgrade the server does not sell. Now
+    the tier dicts are read out of render_plans()'s own return statement and
+    each `s.<field>` is resolved against config.py, so the page and the paywall
+    cannot disagree about which setting belongs to which tier.
+
+    Returns {"free": {...}, "plus": {...}, "settings": {...}}; the settings are
+    for the two numbers the plans route does not carry (the paint window, and
+    group_max_kin — a Hearth is 2..group_max_kin kin; routes.py enforces it).
     """
-    src = API / "app" / "config.py"
-    if not src.exists():
-        sys.exit(f"FAIL: {src} not found — is mythkin-api checked out?")
-    want = {
-        "free_window_messages", "free_window_hours", "plus_window_messages",
-        "free_max_borrowed_characters", "free_max_memories",
-        "plus_max_created_characters", "moment_paint_free", "moment_paint_plus",
-        "moment_paint_window_hours",
-        "group_max_kin",  # a Hearth is 2..group_max_kin kin; routes.py enforces it
-    }
-    got: dict[str, int] = {}
-    for node in ast.walk(ast.parse(src.read_text())):
-        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            name = node.target.id
-            if name in want and isinstance(node.value, ast.Constant) \
-                    and isinstance(node.value.value, int):
-                got[name] = node.value.value
-    missing = want - set(got)
-    if missing:
-        sys.exit("FAIL: config.py no longer defines " + ", ".join(sorted(missing))
-                 + " — the FAQ's numbers cannot be derived, so the page is not built")
-    return got
+    cfg = load_settings()
+    ret = None
+    for node in ast.walk(ast.parse(api_text("app/plans.py"))):
+        if isinstance(node, ast.FunctionDef) and node.name == "render_plans":
+            for sub in ast.walk(node):
+                if isinstance(sub, ast.Return) and isinstance(sub.value, ast.Dict):
+                    ret = sub.value
+    if ret is None:
+        sys.exit("FAIL: app/plans.py has no render_plans() returning a dict — "
+                 "the FAQ's numbers cannot be derived, so the page is not built")
+    out: dict = {}
+    for k, v in zip(ret.keys, ret.values):
+        tier = k.value if isinstance(k, ast.Constant) else None
+        if tier not in ("free", "plus") or not isinstance(v, ast.Dict):
+            continue
+        plan: dict = {}
+        for fk, fv in zip(v.keys, v.values):
+            key = fk.value if isinstance(fk, ast.Constant) else None
+            if key not in PLAN_KEYS:
+                continue
+            if isinstance(fv, ast.Attribute) and isinstance(fv.value, ast.Name):
+                if fv.attr not in cfg:
+                    sys.exit(f"FAIL: plans.py serves {tier}.{key} from "
+                             f"settings.{fv.attr}, which config.py does not "
+                             "define as an integer")
+                plan[key] = cfg[fv.attr]
+            elif isinstance(fv, ast.Constant):
+                plan[key] = fv.value
+            else:
+                sys.exit(f"FAIL: cannot resolve plans.py {tier}.{key} "
+                         f"({ast.unparse(fv)}) to a number")
+        missing = [k2 for k2 in PLAN_KEYS if k2 not in plan]
+        if missing:
+            sys.exit(f"FAIL: plans.py {tier} tier no longer serves {missing} — "
+                     "the FAQ's numbers cannot be derived, so the page is not built")
+        out[tier] = plan
+    if set(out) != {"free", "plus"}:
+        sys.exit("FAIL: plans.py render_plans() no longer returns free and plus")
+    for name in ("moment_paint_window_hours", "group_max_kin"):
+        if name not in cfg:
+            sys.exit(f"FAIL: config.py no longer defines {name} — the page "
+                     "is not built")
+    out["settings"] = cfg
+    return out
+
+
+def verify_live(L: dict) -> int:
+    """Prove the pin: every number the FAQ prints, against the running server.
+
+    Not part of --check, because a gate that needs the network fails for the
+    wrong reasons. Run it after moving API_REF, and whenever the API deploys.
+    """
+    import urllib.request
+    try:
+        with urllib.request.urlopen(PLANS_URL, timeout=30) as r:
+            live = json.load(r)
+    except Exception as exc:  # noqa: BLE001
+        print(f"LIVE: could not read {PLANS_URL}: {exc}")
+        return 1
+    bad = [f"{t}.{k}: page {L[t][k]!r} vs live {live.get(t, {}).get(k)!r}"
+           for t in ("free", "plus") for k in PLAN_KEYS
+           if live.get(t, {}).get(k) != L[t][k]]
+    if bad:
+        print(f"LIVE: mythkin-api@{API_REF[:8]} is NOT what {PLANS_URL} "
+              "serves — move API_REF to the deployed commit:")
+        for b in bad:
+            print("  " + b)
+        return 1
+    print(f"LIVE: {PLANS_URL} agrees with mythkin-api@{API_REF[:8]} on all "
+          f"{2 * len(PLAN_KEYS)} plan numbers")
+    return 0
 
 
 # The page spells small numbers out; anything not here falls back to digits
@@ -253,18 +373,61 @@ def _w(n: int) -> str:
     return _WORDS.get(n, f"{n:,}")
 
 
-def _paint_window(L: dict[str, int]) -> str:
+def _paint_window(L: dict) -> str:
     """720 hours is 30 days is 'a month'. Any other window says its own
     length rather than being rounded into a word that would be wrong."""
-    days = L["moment_paint_window_hours"] // 24
+    days = L["settings"]["moment_paint_window_hours"] // 24
     return "a month" if days == 30 else f"every {_w(days)} days"
 
 
+def _and(items: list[str]) -> str:
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def free_answer(L: dict) -> str:
+    """The "Is this free?" answer, every number out of GET /v1/plans' mapping.
+
+    MEMORY IS SAID ONLY WHERE THE TIERS DIFFER. This printed "fifty remembered
+    facts" for free and "memory with no fifty-fact cap" for Plus, and on
+    2026-09-14 the server stopped selling that: API-107 serves one 10,000-fact
+    ceiling to BOTH plans (plans.py: "Memory retention and recall are shared
+    features, not a paid upgrade"). A limit both tiers share is not a reason to
+    pay, and naming it in a sentence about what Plus raises would say it is.
+    So the clause is derived from the comparison, not from a field: equal, and
+    memory stays where it already is — in the list of what the free plan
+    includes; unequal, and both halves say so.
+    """
+    free, plus = L["free"], L["plus"]
+    h = free["windowHours"]
+    free_lim = [f"{_w(free['windowMessages'])} replies every {_w(h)} hours"]
+    if free["borrowedKin"] is not None:
+        free_lim.append(f"{_w(free['borrowedKin'])} borrowed kin")
+    per = "a day" if plus["windowHours"] == 24 else f"every {_w(plus['windowHours'])} hours"
+    plus_lim = [f"{_w(plus['windowMessages'])} replies {per} with no {_w(h)}-hour window"]
+    if free["memoryFacts"] != plus["memoryFacts"]:
+        free_lim.append(f"{_w(free['memoryFacts'])} remembered facts")
+        plus_lim.append(f"memory with no {_w(free['memoryFacts'])}-fact cap"
+                        if plus["memoryFacts"] is None
+                        else f"{_w(plus['memoryFacts'])} remembered facts")
+    free_lim.append(f"{_w(free['paintedMoments'])} paintings {_paint_window(L)}")
+    plus_lim += [f"{_w(plus['createdKin'])} characters of your own",
+                 f"{_w(plus['paintedMoments'])} paintings {_paint_window(L)}"]
+    own = free["createdKin"]
+    return ("Yes, and the free plan is the whole app rather than a demo — every "
+            "kin, the collections, the stories, Hearths, memory, and "
+            f"{_w(own)} {'character' if own == 1 else 'characters'} of your own. "
+            f"What it limits is volume: {_and(free_lim)}. Mythkin Plus raises "
+            f"those to {_and(plus_lim)}. It also answers on a more capable "
+            "model, and is what lets you publish a story to the marketplace. If "
+            "you subscribe in the iPhone app, the price is whatever the App "
+            "Store shows you.")
+
+
 def load_collections() -> list[tuple[str, str]]:
-    src = API / "app" / "collections" / "seed.py"
-    if not src.exists():
+    src = api_text("app/collections/seed.py", required=False)
+    if src is None:
         return []
-    tree = ast.parse(src.read_text())
+    tree = ast.parse(src)
     for node in ast.walk(tree):
         target = None
         if isinstance(node, ast.AnnAssign):
@@ -283,20 +446,20 @@ def load_collections() -> list[tuple[str, str]]:
 
 
 def count_stories() -> int:
-    src = API / "app" / "stories" / "seed.py"
-    if not src.exists():
+    src = api_text("app/stories/seed.py", required=False)
+    if src is None:
         return 0
-    return len(re.findall(r'^\s*"slug":', src.read_text(), re.M)) or \
-        len(re.findall(r'^\s*"title":', src.read_text(), re.M))
+    return len(re.findall(r'^\s*"slug":', src, re.M)) or \
+        len(re.findall(r'^\s*"title":', src, re.M))
 
 
 def story_titles(n: int) -> list[str]:
     """The first n seeded story titles, read from the seed so the page can name
     stories that exist. A title typed here would outlive the story it names."""
-    src = API / "app" / "stories" / "seed.py"
-    if not src.exists():
+    src = api_text("app/stories/seed.py", required=False)
+    if src is None:
         return []
-    return re.findall(r'^\s*"title":\s*"([^"]+)"', src.read_text(), re.M)[:n]
+    return re.findall(r'^\s*"title":\s*"([^"]+)"', src, re.M)[:n]
 
 
 FLEET_STATE = Path.home() / "Developer" / "DrVanus" / "fleet" / "state" / "current.json"
@@ -325,10 +488,20 @@ STORE_ANSWER = {
         "Not yet. The iPhone app is in review with Apple right now. "
         "There is no Android build; if one ships, this page will say so before "
         "it does."),
+    # A REJECTION IS NOT ANNOUNCED HERE. The old sentence ("the last submission
+    # came back with changes to make") was true and was a public page narrating
+    # an App Review verdict, which is a claim about Apple's process on a page
+    # meant for readers who only need to know whether they can download it.
+    # "On its way" is true in every rejected state — the app is not on the
+    # store and is being worked towards it — and says nothing more. It is still
+    # keyed on ASC so it cannot outlive the state: WAITING/IN_REVIEW get their
+    # own sentences back the moment the poller sees a resubmission.
     "REJECTED": (
-        "Not yet. The iPhone app's last submission came back with "
-        "changes to make, and it goes again once they are done. There is no "
-        "Android build; if one ships, this page will say so before it does."),
+        "Not yet — the iPhone app is on its way. There is no Android "
+        "build; if one ships, this page will say so before it does."),
+    "METADATA_REJECTED": (
+        "Not yet — the iPhone app is on its way. There is no Android "
+        "build; if one ships, this page will say so before it does."),
     "READY_FOR_SALE": (
         "Yes — Mythkin is on the App Store, for iPhone. There is no Android "
         "build; if one ships, this page will say so before it does."),
@@ -625,20 +798,7 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
         else (titles[0] if titles else "")
 
     faq = [
-        ("Is this free?",
-         "Yes, and the free plan is the whole app rather than a demo — every kin, "
-         "the collections, the stories, Hearths, memory, and one character of your own. "
-         f"What it limits is volume: {_w(L['free_window_messages'])} replies every "
-         f"{_w(L['free_window_hours'])} hours, {_w(L['free_max_borrowed_characters'])} "
-         f"borrowed kin, {_w(L['free_max_memories'])} remembered facts, and "
-         f"{_w(L['moment_paint_free'])} paintings {_paint_window(L)}. Mythkin Plus "
-         f"raises those to {_w(L['plus_window_messages'])} replies a day with no "
-         f"{_w(L['free_window_hours'])}-hour window, memory with no "
-         f"{_w(L['free_max_memories'])}-fact cap, {_w(L['plus_max_created_characters'])} "
-         f"characters of your own and {_w(L['moment_paint_plus'])} paintings "
-         f"{_paint_window(L)}. It also answers on a more capable model, and is what "
-         "lets you publish a story to the marketplace. If you subscribe in the "
-         "iPhone app, the price is whatever the App Store shows you."),
+        ("Is this free?", free_answer(L)),
         # SPARKS FAQ REMOVED 2026-08-22, and it must stay out until they can be
         # BOUGHT. Both consumables sit in MISSING_METADATA on App Store Connect
         # with no price schedule, so StoreKit prices neither and the app's own
@@ -700,6 +860,14 @@ def build_html(kin: list[dict], collections_: list[tuple[str, str]],
             "myth and literature — written properly, painted once, and they remember "
             "what you tell them.")
 
+    # THE EYEBROW (below) is ported from c6bf5e1, which corrected it in the
+    # served HTML only and so turned --check red: the old wording claimed the
+    # portraits were made by hand, and they are AI-generated. Its last clause
+    # is ONE nowrap unit (.nw in style.css): at desktop width the eyebrow broke
+    # at the hyphen, leaving "PORTRAITS AI-" over "GENERATED". The text sits in
+    # its own <span> because .eyebrow is inline-flex: a bare .nw would become a
+    # second flex item beside the text rather than a phrase inside it. The retired
+    # wording stays out of every served comment — a comment is served.
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -748,7 +916,7 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
 <link rel="icon" type="image/png" href="mythkin-icon.png">
 <link rel="apple-touch-icon" href="mythkin-icon.png">
 <link rel="sitemap" type="application/xml" href="sitemap.xml">
-<link rel="stylesheet" href="style.css?v=20260824-screens">
+<link rel="stylesheet" href="style.css?v=20260919-screens">
 <script type="application/ld+json">
 {app_ld}
 </script>
@@ -779,7 +947,7 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
 
 <section class="hero"><div class="wrap hero-grid">
   <div class="hero-copy">
-    <span class="eyebrow">{total} characters, written and painted by hand</span>
+    <span class="eyebrow"><span>{total} characters, each written at length &middot; <span class="nw">portraits AI-generated</span></span></span>
     <!-- THE HOOK IS ACCESS TO THESE PEOPLE, not the memory feature.
          Two earlier drafts led on memory — "characters that remember you" — and
          that is the wrong argument twice over. It is table stakes (every
@@ -820,10 +988,8 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
            mythkin/site-audit-contract.json, evidenced down to the line —
            identity is a client-minted device UUID in X-Device-Id
            (mythkin-api/app/deps.py), and the API has no auth routes, no email
-           field and no password anywhere. Deliberately NOT "314 characters,
-           painted by hand", which was the first draft: the eyebrow six lines
-           above already says exactly that, and a badge that repeats the
-           headline is a badge doing nothing. -->
+           field and no password anywhere. Deliberately NOT a badge restating the eyebrow six lines above: a badge
+           that repeats the headline is a badge doing nothing. -->
       <li>18+</li><li>No account, no email</li>
       <li>No streaks, no guilt</li><li>Every reply marked AI</li>
     </ul>
@@ -944,7 +1110,7 @@ if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}}catch(e){{
   the free plan.</p>
   <div class="feat">
     <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1.6 3 5 5.2 5 9.2a5 5 0 0 1-10 0c0-2 1-3.2 1-3.2s.4 2.2 2 2.2c0-3 2-5.2 2-8.2Z"/></svg></span><h3>Start a Hearth</h3>
-      <p>Pick two to {_w(L['group_max_kin'])} kin to share one room. They answer
+      <p>Pick two to {_w(L['settings']['group_max_kin'])} kin to share one room. They answer
       you &mdash; and each other &mdash; so two voices can disagree in front of
       you instead of in separate chats.</p></div>
     <div class="card"><span class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4V5Z"/><path d="M20 5h-7a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7V5Z"/></svg></span><h3>{stories} stories to step into</h3>
@@ -1172,16 +1338,29 @@ def export_portraits(kin: list[dict], src_dir: Path, dst: Path,
 
 
 def export_shots(light: Path | None, dark: Path | None, dst: Path) -> int:
-    """PNG captures -> JPGs at the size the page declares."""
+    """PNG captures -> JPGs at the size the page declares.
+
+    ONLY THE ONES THE PAGE SHOWS, and nothing else left behind. site_shots.py
+    writes five screens and the gallery shows three, so this used to export all
+    ten and 03-kin/05-story sat in screens/ unreferenced for a month: still
+    served, still indexable, and a picture of a build that no longer exists is
+    a claim whether or not a page links it. Same rule as export_portraits.
+    """
     from PIL import Image
     if not light:
         return 0
+    keys = {k for k, _, _ in SHOTS}
     dst.mkdir(parents=True, exist_ok=True)
+    for old in dst.glob("*.jpg"):
+        if old.stem.removesuffix("-dark") not in keys:
+            old.unlink()
     n = 0
     for src_dir in (light, dark):
         if not src_dir or not src_dir.exists():
             continue
         for png in sorted(src_dir.glob("*.png")):
+            if png.stem.removesuffix("-dark") not in keys:
+                continue
             im = Image.open(png).convert("RGB")
             out = dst / (png.stem + ".jpg")
             im.save(out, "JPEG", quality=82, optimize=True, progressive=True)
@@ -1196,7 +1375,14 @@ def main() -> int:
                     help="fail if index.html differs from what the roster implies")
     ap.add_argument("--shots", help="directory of light-scheme PNG captures")
     ap.add_argument("--shots-dark", help="directory of dark-scheme PNG captures")
+    ap.add_argument("--api-ref", help="mythkin-api commit to read instead of "
+                    "API_REF (to preview a deploy; move API_REF to commit it)")
+    ap.add_argument("--verify-live", action="store_true",
+                    help=f"also compare every plan number against {PLANS_URL}")
     args = ap.parse_args()
+    if args.api_ref:
+        global API_REF
+        API_REF = args.api_ref
 
     kin = load_roster()
     colls = load_collections()
@@ -1214,6 +1400,8 @@ def main() -> int:
 
     store_line, store_state = store_answer()
     page = build_html(kin, colls, have_art, stories, store_line)
+    if args.verify_live and verify_live(load_limits()):
+        return 1
 
     # THE EXPORT SET IS READ BACK OUT OF THE PAGE, not recomputed from the same
     # inputs a second time. Deriving it independently drifted immediately — the
@@ -1247,7 +1435,8 @@ def main() -> int:
         # deliberately NOT using. Report both, in the order the page cares about.
         print(f"OK: page matches the roster ({len(painted)} painted of "
               f"{len(kin)} seeded, {len(colls)} "
-              f"collections, {stories} stories)")
+              f"collections, {stories} stories; mythkin-api@{API_REF[:8]}, "
+              f"store {store_state})")
         return 0
 
     wrote = export_portraits(kin, art_dir, OUT / "kin", referenced)
@@ -1262,6 +1451,7 @@ def main() -> int:
 
     print(f"roster      {len(painted)} painted of {len(kin)} seeded  "
           f"{ {s: len(by_section.get(s, [])) for s in SECTION_ORDER} }")
+    print(f"backend     mythkin-api@{API_REF[:8]} (git show, not the working tree)")
     print(f"collections {len(colls)}")
     print(f"store       {store_state} (from fleet/state/current.json)")
     print(f"stories     {stories}")
