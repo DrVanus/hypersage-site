@@ -16,14 +16,14 @@
   <meta property="og:description" content="A cozy gem-digging puzzle you can play in your browser. Every gem and rock is real physics: pull one out and the whole pile settles.">
   <meta property="og:url" content="https://hypersage.ai/gemburrow/">
   <meta property="og:site_name" content="Gemburrow">
-  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260913a">
+  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260919a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Gemburrow: a cozy gem-digging puzzle set in a mole's underground gem shop">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Gemburrow: Dig the jar. Fill the orders. Feed the dragon.">
   <meta name="twitter:description" content="A cozy gem-digging puzzle you can play in your browser. Pull one gem and the whole pile settles.">
-  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260913a">
+  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260919a">
   <meta name="twitter:image:alt" content="Gemburrow: a cozy gem-digging puzzle set in a mole's underground gem shop">
 
   <link rel="icon" type="image/png" href="app-icon-512.png?v=20260821a">
@@ -456,6 +456,12 @@
       .bag li { width: 34px; height: 34px; }
       .bag li img { width: 25px; height: 25px; }
     }
+    /* The full eyebrow is ~440px of tracked capitals; on a phone it broke into
+       "…PLAY IN / YOUR BROWSER". The h1 and lede already say what the game is,
+       so a narrow screen keeps only the part that scopes every claim below it. */
+    @media (max-width: 520px) {
+      .eyebrow .eb-long { display: none; }
+    }
   </style>
 
   <script>
@@ -496,7 +502,7 @@
         "name": "Where can I play Gemburrow?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "In your browser, at hypersage.ai/gemburrow/play/, which you can add to your home screen. The browser version saves your progress in that browser; the iPhone app saves it on your phone, and the two don't share a save."
+          "text": "In your browser, at hypersage.ai/gemburrow/play/, which you can add to your home screen. Your progress is saved in that browser. Gemburrow is also coming to iPhone; the iPhone version will keep its own save on the phone, separate from the browser's."
         }
       },
       {
@@ -512,7 +518,7 @@
         "name": "Does it cost anything, and are there ads?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Gemburrow is free to play, and there is one optional in-app purchase: The Full Burrow, a single one-time unlock that opens career levels 11–40 and the 14-day dig archive. Everything else is free forever: free digs, the Daily Dig with its leaderboard, career levels 1–10, twenty-five of the 27 contracts (the last two need levels past 10), and the whole shop and wardrobe, though four of the six pickaxes take more stars than levels 1–10 can give. That one unlock is the entire catalogue: no subscription, no coin packs, no ads and no energy meter. The coins you spend in the mole's shop are earned by digging and are not for sale. The browser version at hypersage.ai/gemburrow/play/ has no store, and its whole 40-level ladder is open. ARCHIVE shows recent Daily results there; replaying past jars is part of the iPhone unlock."
+          "text": "Not in your browser. The browser version at hypersage.ai/gemburrow/play/ has no store and no ads, and all 40 career levels are open, along with the Daily Dig and its leaderboard, Free Dig, and the whole shop and wardrobe. ARCHIVE there shows your recent Daily results; replaying past jars is not part of the browser version. The coins you spend in the mole's shop are earned by digging and are not for sale. Gemburrow is also coming to iPhone, free to play with one optional purchase: The Full Burrow, a single one-time unlock that opens career levels 11–40 and the 14-day dig archive. On iPhone, free digs, the Daily Dig with its leaderboard, career levels 1–10, twenty-five of the 27 contracts and the whole shop and wardrobe stay free, and there is no subscription, no coin pack, no ads and no energy meter."
         }
       },
       {
@@ -536,7 +542,7 @@
         "name": "Can I play without a connection?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Career, Free Dig and the Daily Dig all play offline, and your progress is stored on your device. Leaderboards need a connection. A queued Daily score retries on launch, reconnection or resume while that Daily is current, and expires at the next midnight UTC. It may retry while another mode is open. Purchases and restoring the paid unlock also need an App Store connection."
+          "text": "Not reliably. The browser version loads over the network and does not install itself for offline play, though your progress is stored in your browser either way. Leaderboards need a connection. A queued Daily score retries on launch, reconnection or resume while that Daily is current, and expires at the next midnight UTC. It may retry while another mode is open."
         }
       },
       {
@@ -596,7 +602,7 @@
   <header class="hero">
     <div class="container">
       <div>
-        <span class="eyebrow">Cozy gem-digging puzzle &middot; play in your browser</span>
+        <span class="eyebrow"><span class="eb-long">Cozy gem-digging puzzle &middot; </span>play in your browser</span>
         <h1>Dig the jar.<br>Fill the orders.<br><span class="hl">Feed the dragon.</span></h1>
         <p class="lede">
           A jar packed with gems and rocks, and someone plucking the treasures out to
@@ -608,12 +614,12 @@
             <span>Play Gemburrow free</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </a>
-          <a class="btn-ghost" href="#honest">What's free, what's paid</a>
+          <a class="btn-ghost" href="#honest">What's free, and why</a>
         </div>
-        <p class="hero-note">No ads · no energy meter · no sign-in · one optional unlock</p>
+        <p class="hero-note">No ads · no energy meter · no sign-in · all 40 levels free in your browser</p>
       </div>
       <div class="phone">
-        <img src="shots/daily.jpg?v=20260901a" width="828" height="1795" loading="eager"
+        <img src="shots/daily.jpg?v=20260919a" width="828" height="1795" loading="eager"
              alt="A Daily Dig in progress: five order cards pegged to a line above a glass jar packed with gems and rocks, the heart-glowing Heartstone boulder buried mid-pile, and the sleeping dragon curled on its hoard of twenty at the bottom of the screen">
       </div>
     </div>
@@ -626,7 +632,7 @@
         <h2>Try the digging loop.</h2>
         <p class="section-lede">
           One order, a satchel, and a pickaxe with a fixed number of swings. It plays by the
-          app's real rules, including the one that makes it a puzzle instead of
+          full game's real rules, including the one that makes it a puzzle instead of
           a grab bag: <strong>a gem with anything resting on top of it will not
           come out.</strong> Try one and it just shifts in place. Clear what's
           above it and the whole pile falls into the hole.
@@ -671,7 +677,7 @@
           </ul>
 
           <p class="jar-foot">
-            The app is deeper than this: five orders on the line at once, 55 swings
+            The full game is deeper than this: five orders on the line at once, 55 swings
             in a standard dig, rare prisms a dragon wants, and a Heartstone that takes three
             pries to free.
           </p>
@@ -826,15 +832,15 @@
       <h2 class="center">Lantern light, all the way down.</h2>
       <div class="screens">
         <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/dig.jpg?v=20260901a" width="828" height="1795" loading="lazy" alt="A career shift in progress: two of ten orders already paid, ticks landing on the cards, six finds in the satchel: one struck through: and the pace line reading 49 swings, 8 left, comfortably ahead"></div>
+          <div class="screen-frame"><img src="shots/dig.jpg?v=20260919a" width="828" height="1795" loading="lazy" alt="A shift in progress: two of ten orders already paid, ticks landing on the cards, six finds in the satchel with one struck through, and the pace line reading 49 swings for 8 orders, comfortably ahead"></div>
           <figcaption><div class="screen-kind">The shift</div><div class="screen-name">Read the line, then dig</div></figcaption>
         </figure>
         <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/choice.jpg?v=20260901a" width="828" height="1795" loading="lazy" alt="A prism has been unearthed and the game asks, on two labelled plates: USE IT into your satchel, or HOARD: Hoardling keeps it: with a countdown ring closing around the gem and the dragon's portrait glowing in the corner"></div>
+          <div class="screen-frame"><img src="shots/choice.jpg?v=20260919a" width="828" height="1795" loading="lazy" alt="A prism has been unearthed and the game asks on two labelled plates, USE IT (into your satchel) or HOARD (Hoardling keeps it), with a countdown ring closing around the gem and the dragon's portrait glowing in the corner"></div>
           <figcaption><div class="screen-kind">The dilemma</div><div class="screen-name">Use it, or hoard it</div></figcaption>
         </figure>
         <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/dragon.jpg?v=20260901a" width="828" height="1795" loading="lazy" alt="The Golden Hoardling milestone fires as the twentieth gem joins the dragon's hoard"></div>
+          <div class="screen-frame"><img src="shots/dragon.jpg?v=20260919a" width="828" height="1795" loading="lazy" alt="The Golden Hoardling milestone fires as the twentieth gem joins the dragon's hoard"></div>
           <figcaption><div class="screen-kind">The hoard</div><div class="screen-name">Twenty gems kept forever</div></figcaption>
         </figure>
         <figure class="screen-card reveal">
@@ -842,11 +848,11 @@
           <figcaption><div class="screen-kind">The bell</div><div class="screen-name">Three stars, coins banked</div></figcaption>
         </figure>
         <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/shop.jpg?v=20260901a" width="828" height="1795" loading="lazy" alt="The mole's shop on its Dig Walls tab: Hoardling and Pickaxe tabs beside it: listing six walls: Burrow Clay worn, Amber Seam and Frost Vein owned, Malachite, Rose Quartz and Deep Basalt still priced in coins"></div>
+          <div class="screen-frame"><img src="shots/shop.jpg?v=20260901a" width="828" height="1795" loading="lazy" alt="The mole's shop on its Dig Walls tab, with Hoardling and Pickaxe tabs beside it, listing six walls: Burrow Clay worn, Amber Seam and Frost Vein owned, and Malachite, Rose Quartz and Deep Basalt still priced in coins"></div>
           <figcaption><div class="screen-kind">The shop</div><div class="screen-name">Six walls, all cosmetic</div></figcaption>
         </figure>
         <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/menu.jpg?v=20260901a" width="828" height="1795" loading="lazy" alt="The Gemburrow title screen in the mole's shop: the mole holding up a ruby, the career path strip on level 13, today's daily dig waiting with its badge progress, and the three big doors: Career, Daily Dig, Free Dig"></div>
+          <div class="screen-frame"><img src="shots/menu.jpg?v=20260919a" width="828" height="1795" loading="lazy" alt="The Gemburrow title screen in the mole's shop: the mole holding up a ruby, the career path strip on level 13, today's daily dig card with its badge progress and a SCORES link, and the three big doors: Career, Daily Dig, Free Dig"></div>
           <figcaption><div class="screen-kind">The shop room</div><div class="screen-name">Where every shift starts</div></figcaption>
         </figure>
       </div>
@@ -860,15 +866,15 @@
       <h2>An honest game about greed.</h2>
       <p class="section-lede">
         Gemburrow is about hoarding treasure. It would be a poor joke to build that
-        on a slot machine, so we didn't: there is one optional purchase in the whole
-        game, the paid unlock adds places to dig, and Daily and Free digs stay free.
+        on a slot machine, so we didn't: in your browser there is no store at all, and
+        the iPhone version on its way has one optional purchase that only adds places to dig.
       </p>
       <div class="honest">
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>One optional purchase</b><p>The browser game has no store, and its whole 40-level career is open; archive replays belong to the iPhone unlock. In the iPhone app, The Full Burrow is the one optional purchase: it unlocks career levels 11–40 and the 14-day dig archive. That is the entire catalogue: no subscription, no coin pack, no starter bundle. Free digs, the Daily Dig and career levels 1–10 stay free forever.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>Free in your browser</b><p>The browser game has no store, and its whole 40-level career is open. Gemburrow is coming to iPhone too, with one optional purchase, The Full Burrow: it opens career levels 11–40 and replays of the 14-day dig archive. That is the entire catalogue: no subscription, no coin pack, no starter bundle, and free digs, the Daily Dig and career levels 1–10 stay free there.</p></div></div>
         <div><span class="tick" aria-hidden="true">✓</span><div><b>No ads</b><p>No ads to watch, skip, or accidentally tap.</p></div></div>
         <div><span class="tick" aria-hidden="true">✓</span><div><b>No energy meter</b><p>Play as long as you like. Nothing recharges on a clock, and nothing asks you to come back in four hours. A Rush order does run its own 45-second countdown; that is the puzzle, not a wait.</p></div></div>
         <div><span class="tick" aria-hidden="true">✓</span><div><b>No account</b><p>No sign-in, no email, no profile. The leaderboard names you MOLE-something and gets on with it.</p></div></div>
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>The paid unlock never changes a dig</b><p>The Full Burrow opens career levels 11–40 and the Daily archive. It never adds swings, satchel slots or different jar contents. Earned coins buy cosmetic walls or a Deeper Pick for one career retry; the Daily stays the same for everyone.</p></div></div>
+        <div><span class="tick" aria-hidden="true">✓</span><div><b>Money never changes a dig</b><p>Coins are earned by digging and are not for sale. They buy cosmetic walls or a Deeper Pick for one career retry, and the Daily stays the same jar for everyone. On iPhone, The Full Burrow opens levels and the archive only: never swings, satchel slots or different jar contents.</p></div></div>
         <div><span class="tick" aria-hidden="true">✓</span><div><b>Only Daily results are shared</b><p>A Daily Dig score: a random ID made on your device, an auto-generated name and the run's numbers. Career, Free Dig and archive results are not uploaded. A pending Daily score can retry while another mode is open. Your random installation ID also looks up your own ranking. <a href="privacy.html">The details</a>.</p></div></div>
       </div>
     </div>
@@ -881,7 +887,7 @@
       <div class="faq-list">
         <details class="faq">
           <summary>Where can I play Gemburrow?</summary>
-          <p>In your browser, at <a href="play/">hypersage.ai/gemburrow/play/</a>, which you can add to your home screen. The browser version saves your progress in that browser; the iPhone app saves it on your phone, and the two don't share a save.</p>
+          <p>In your browser, at <a href="play/">hypersage.ai/gemburrow/play/</a>, which you can add to your home screen. Your progress is saved in that browser. Gemburrow is also coming to iPhone; the iPhone version will keep its own save on the phone, separate from the browser's.</p>
         </details>
         <details class="faq">
           <summary>What kind of puzzle is it?</summary>
@@ -889,7 +895,7 @@
         </details>
         <details class="faq">
           <summary>Does it cost anything, and are there ads?</summary>
-          <p>Gemburrow is free to play, and there is one optional in-app purchase: The Full Burrow, a single one-time unlock that opens career levels 11–40 and the 14-day dig archive. Everything else is free forever: free digs, the Daily Dig with its leaderboard, career levels 1–10, twenty-five of the 27 contracts (the last two need levels past 10), and the whole shop and wardrobe, though four of the six pickaxes take more stars than levels 1–10 can give. That one unlock is the entire catalogue: no subscription, no coin packs, no ads and no energy meter. The coins you spend in the mole's shop are earned by digging and are not for sale. The browser version at hypersage.ai/gemburrow/play/ has no store, and its whole 40-level ladder is open. ARCHIVE shows recent Daily results there; replaying past jars is part of the iPhone unlock.</p>
+          <p>Not in your browser. The browser version at <a href="play/">hypersage.ai/gemburrow/play/</a> has no store and no ads, and all 40 career levels are open, along with the Daily Dig and its leaderboard, Free Dig, and the whole shop and wardrobe. ARCHIVE there shows your recent Daily results; replaying past jars is not part of the browser version. The coins you spend in the mole's shop are earned by digging and are not for sale. Gemburrow is also coming to iPhone, free to play with one optional purchase: The Full Burrow, a single one-time unlock that opens career levels 11–40 and the 14-day dig archive. On iPhone, free digs, the Daily Dig with its leaderboard, career levels 1–10, twenty-five of the 27 contracts and the whole shop and wardrobe stay free, and there is no subscription, no coin pack, no ads and no energy meter.</p>
         </details>
         <details class="faq">
           <summary>What do coins actually do?</summary>
@@ -901,7 +907,7 @@
         </details>
         <details class="faq">
           <summary>Can I play without a connection?</summary>
-          <p>Yes. Career, Free Dig and the Daily Dig all play offline, and your progress is stored on your device. Leaderboards need a connection. A queued Daily score retries on launch, reconnection or resume while that Daily is current, and expires at the next midnight UTC. It may retry while another mode is open. Purchases and restoring the paid unlock also need an App Store connection.</p>
+          <p>Not reliably. The browser version loads over the network and does not install itself for offline play, though your progress is stored in your browser either way. Leaderboards need a connection. A queued Daily score retries on launch, reconnection or resume while that Daily is current, and expires at the next midnight UTC. It may retry while another mode is open.</p>
         </details>
         <details class="faq">
           <summary>How long is a shift, and is there a timer?</summary>
@@ -1184,7 +1190,7 @@
 
     function endShift() {
       over = true;
-      say('Out of swings. You earned ' + coins + 'c. In the app a standard dig starts with 55 swings and five orders hang on the line at once. Start a new jar and try reading the card before you dig.', 'good');
+      say('Out of swings. You earned ' + coins + 'c. In the full game a standard dig starts with 55 swings and five orders hang on the line at once. Start a new jar and try reading the card before you dig.', 'good');
       el.dig.disabled = true;
     }
 
