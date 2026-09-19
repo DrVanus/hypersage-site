@@ -9,17 +9,20 @@
     if (l.hostname !== 'hypersage.ai' || !n.sendBeacon) return;
     var APPS = { '6792772729': 'wingmate', '6792760857': 'saffra', '6792759454': 'storyvault', '6792761643': 'nightshelf',
       '6792798732': 'hexhunter', '6797693737': 'rowan', '6792761331': 'cryptosage' };
-    var tag = function (v) { return String(v || '').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24); };
+    // A value that could name a person is dropped: an email address, or more than 8 digits (a phone number, a member id).
+    var tag = function (v) { v = String(v || ''); return /@|(\d\D*){9}/.test(v) ? '' : v.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24); };
     var send = function (o) { try { n.sendBeacon(W, JSON.stringify(o)); } catch (e) {} };
     // Canonical path: "/x/index.html" -> "/x/", "/x/privacy" -> "/x/privacy.html". A 404 page reports only
-    // "/<counted folder>/404" (or "/404"), never the address that was mistyped.
+    // "/<counted folder>/404" (or "/404" for a miss at the top level), never the address that was mistyped,
+    // and nothing at all for a miss inside an uncounted folder (e.g. /waddleton/..., /rowan/...).
     var p = l.pathname.replace(/\/index\.html$/, '/').replace(/\/([^\/.]+)$/, '/$1.html');
     if (/\/404\.html$/.test(p) || d.querySelector('meta[name="robots"][content*="noindex"]')) {
-      var f = p.split('/')[1];
-      p = (/^(wingmate|saffra|storyvault|nightshelf|hexhunter)$/.test(f) ? '/' + f : '') + '/404';
+      var seg = l.pathname.split('/'), f = seg.length > 2 ? seg[1] : '';
+      if (f && !/^(wingmate|saffra|storyvault|nightshelf|hexhunter)$/.test(f)) return;
+      p = (f ? '/' + f : '') + '/404';
     }
+    // Referrer host only ("hypersage.ai" for a move between pages, "" for none).
     var r = ''; try { r = new URL(d.referrer).hostname.toLowerCase().replace(/^www\./, '').slice(0, 100); } catch (e) {}
-    if (r === l.hostname) r = '';
     var src = tag(q.get('src') || q.get('utm_source')), cmp = tag(q.get('utm_campaign'));
     var c = cmp ? src + '.' + cmp : src; // "<src>" or "<src>.<campaign>"; each part [a-z0-9-]{0,24}
     send({ p: p, r: r, e: 'pv', c: c, a: '', s: '' });
