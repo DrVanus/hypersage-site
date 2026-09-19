@@ -153,10 +153,9 @@ CARDS = {
   .og { background:
         radial-gradient(circle at 79% 52%, rgba(224,130,48,0.16), transparent 55%),
         linear-gradient(160deg, #1A1612 0%, #0E0C0A 62%); }
-  /* The page is pre-release ("Coming Soon to iOS", waitlist CTA, no App Store
-     link), so the kicker carries that instead of the fleet's "<category> · iOS".
-     It is longer, so it is sized down and pinned to one row — a wrapped kicker
-     shoves the headline off the card. Measured: 424px of the 568px column. */
+  /* Sized down and pinned to one row — a wrapped kicker shoves the headline off
+     the card. It read "Coming soon to iOS" (424px of the 568px column) until
+     2026-09-19, days after Saffra went live; now the fleet's "<category> · iOS". */
   .kicker { color: #E08230; font-size: 19px; letter-spacing: 0.10em; white-space: nowrap; }
   h1 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 78px;
        background-image: linear-gradient(178deg, #F5EFE5 40%, #9A8E80 122%); }
@@ -169,7 +168,7 @@ CARDS = {
   .sub { color: #9A8E80; }
   .art { width: 470px; height: 470px; }
 """,
-        "kicker": "AI recipe app · Coming soon to iOS",
+        "kicker": "AI recipe app · iOS",
         "h1": 'Your kitchen,<br><span class="ital">understood.</span>',
         # 2026-08-19: was "built from a weighted consensus of tested, editor-vetted
         # sources" — a sourcing claim saffra-api cannot support (no request to any
@@ -250,7 +249,7 @@ CARDS = {
   .art { width: 432px; height: 486px; object-fit: contain; }
 """,
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-        "kicker": "Health companion · Coming to iOS",
+        "kicker": "Health companion · iOS",
         "h1": "The health<br>companion that<br><em>knows your story.</em>",
         "sub": "Talk about your day in plain words. Rowan turns it into a record you can use — and a brief you hand your doctor.",
     },
@@ -266,7 +265,8 @@ CARDS = {
         radial-gradient(ellipse 55% 45% at 94% 4%, rgba(143,185,150,0.07), transparent 66%),
         #171310; }
   /* The site's eyebrow is a pill, not bare text: --tint on --tint-soft, --border-strong. */
-  .kicker { display: inline-flex; font-size: 19px; letter-spacing: 0.16em; color: #E0A458;
+  /* Pinned to one row: at 0.16em the pill wrapped and left "18+" alone. */
+  .kicker { display: inline-flex; font-size: 19px; letter-spacing: 0.09em; white-space: nowrap; color: #E0A458;
             font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, system-ui, sans-serif;
             padding: 9px 20px; background: #3A2E1F; border: 1px solid #4A3D30; border-radius: 999px; }
   /* Alder loads no webfont: h1 is the page's ui-serif stack, body text its system stack. */
@@ -485,7 +485,7 @@ CARDS = {
 """,
         # Mirrors the page's own hero eyebrow verbatim \u2014 it moved to multi-TCG
         # "In development" positioning on 2026-09-01 and the card lagged it.
-        "kicker": "TCG scanner + AI companion \u00b7 In development",
+        "kicker": "TCG scanner \u00b7 Coming to iOS",
         "h1": "Hound knows your binder \u2014<br>and the market.",
         "sub": "Ask what you\u2019re missing, what\u2019s worth flipping, or what a card is really worth \u2014 sources named every time. Scanning stays free and unlimited.",
     },
@@ -515,7 +515,7 @@ CARDS = {
 """,
         # "Coming to iOS" outlived the 2026-08-26 release by six days of link
         # previews; the page's own hero eyebrow is the source of this string.
-        "kicker": "Gothic horde-survivor · Out now on iOS",
+        "kicker": "Gothic horde-survivor · iOS",
         "h1": 'Survive the Horde.<br>Draft Your <span class="grad">Doom.</span>',
         "sub": "Pick a hero, draft upgrades every level, evolve your weapons into ascended forms, and fight to survive the endless dark.",
     },
@@ -531,6 +531,9 @@ SHELL = """<!DOCTYPE html><html><head><meta charset="utf-8">
             font-size: 21px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
             margin-bottom: 30px; }}
   .kicker svg {{ width: 22px; height: 22px; }}
+  /* The kicker is set in capitals, which spelled Apple's platform "IOS" on every
+     card. The name keeps its own case. */
+  .kicker .ios {{ text-transform: none; }}
   h1 {{ line-height: 1.12; letter-spacing: 0.005em; padding-bottom: 0.12em;
        -webkit-background-clip: text; background-clip: text; color: transparent;
        margin-bottom: 26px; }}
@@ -728,7 +731,11 @@ def render(names: list[str]) -> None:
             font_link = (f'<link href="https://fonts.googleapis.com/css2?{q}&display=block" '
                          f'rel="stylesheet">') if q else ""
             html = SHELL.format(w=W, h=H, font_link=font_link, css=c["css"],
-                                kicker_svg=c.get("kicker_svg", ""), kicker=c["kicker"],
+                                kicker_svg=c.get("kicker_svg", ""),
+                                # ONE flex item: .kicker is a flex row, so a bare
+                                # span would split the line into separate items.
+                                kicker="<span>" + re.sub(r"\biOS\b", '<span class="ios">iOS</span>',
+                                                         c["kicker"]) + "</span>",
                                 h1=c["h1"], sub=c["sub"], art=c["art"])
             # Written into the SUBSITE dir so the art path resolves as it does live.
             tmp = ROOT / name / "_og_render.html"

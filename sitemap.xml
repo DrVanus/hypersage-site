@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Sitemap INDEX for the whole hypersage.ai origin.
-     EVERY product subfolder that has a sitemap.xml on disk must have a child entry
-     here, or its pages go undeclared. This file previously listed 3 of the 11 product
-     folders (rowan, alder, waddleton) while hexhunter, mythkin, mythwright, nightshelf,
-     quietoak, saffra, storyvault and wingmate all shipped a valid sitemap.xml that
-     nothing pointed at. holohound, hoardling and hoardling3d were added later as each
-     shipped its own sitemap.xml. All 16 are listed below; add the seventeenth when it arrives.
-     CryptoSage AI and The One are NOT here on purpose — they are served from other
-     origins (cryptosageai.io, drvanus.github.io/theone-app), and a sitemap index may
-     only reference sitemaps on its own host.
-     A sitemap only covers descendants of its own directory unless it is submitted
-     through Search Console — so submit THIS url there.
+<!-- Sitemap index for hypersage.ai. Every product subfolder that ships a sitemap.xml
+     needs a child entry here, and only sitemaps on this host may be listed.
      <lastmod> is the date the child sitemap FILE changed, not its page content. -->
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
