@@ -13,16 +13,16 @@
   <meta property="og:title" content="StoryVault — AI Adventures">
   <meta property="og:description" content="Write a world from a single line and the AI builds it out. Or step inside one of eighty complete classics and change where it goes.">
   <meta property="og:url" content="https://hypersage.ai/storyvault/">
-  <meta property="og:site_name" content="StoryVault AI">
+  <meta property="og:site_name" content="StoryVault">
   <meta property="og:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260919a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="StoryVault AI — branching tales, written with you: a glowing gilded storybook">
+  <meta property="og:image:alt" content="StoryVault — branching tales, written with you: a glowing gilded storybook">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="StoryVault — AI Adventures">
   <meta name="twitter:description" content="Write your own world and the AI builds it out — or play one of eighty complete classics.">
   <meta name="twitter:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260919a">
-  <meta name="twitter:image:alt" content="StoryVault AI — branching tales, written with you: a glowing gilded storybook">
+  <meta name="twitter:image:alt" content="StoryVault — branching tales, written with you: a glowing gilded storybook">
 
   <link rel="icon" type="image/png" href="storyvault-mark.png">
   <link rel="apple-touch-icon" href="storyvault-mark.png">
@@ -870,6 +870,30 @@
     @media (max-width: 880px) {
       .screens-grid { grid-template-columns: repeat(2, 1fr); gap: 40px 20px; }
     }
+    /* On a phone the 2x2 grid shrank each capture to ~150px wide — too small
+       to read a word of it. Below 560px the strip becomes a swipe row of
+       near-full-size phones, bled to the screen edge, with the next one
+       peeking in so the row reads as scrollable. The row scrolls inside
+       itself; the page never scrolls sideways. */
+    @media (max-width: 560px) {
+      .screens-grid {
+        display: flex;
+        gap: 18px;
+        margin: 0 -24px;
+        padding: 12px 24px 44px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        scroll-padding: 0 24px;
+        scrollbar-width: none;
+      }
+      .screens-grid::-webkit-scrollbar { display: none; }
+      .screens-grid > .screen-card {
+        flex: 0 0 76%;
+        max-width: 280px;
+        scroll-snap-align: start;
+      }
+    }
     .screen-card { text-align: center; }
     .screen-card .device {
       transition: transform .35s var(--ease), box-shadow .35s var(--ease);
@@ -1433,7 +1457,7 @@
       "name": "What if the AI says something off?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "It happens. Tap \"Try again\" on any turn to regenerate, or type a different choice to steer the story. The system prompt is tuned to keep prose in-period and on-tone, but AI is AI."
+        "text": "It happens. Choose Undo last turn from the menu at the top right to take the turn back and pick again, or type a different move to steer the story. It's tuned to stay in period and on tone, but it can still miss."
       }
     },
     {
@@ -1473,7 +1497,7 @@
       "name": "Which devices does it run on?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "iPhone first. iPad and Mac are on the roadmap; Android is not committed."
+        "text": "StoryVault is for iPhone today, on iOS 17 or later."
       }
     },
     {
@@ -1481,7 +1505,7 @@
       "name": "I'm a teacher / parent / reviewer — how do I evaluate it?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "StoryVault AI is rated 13+ on the App Store — the community Tales feed sets that floor. The bundled library is public-domain literature, and the AI Adventure system prompt explicitly excludes explicit sexual content and any content that sexualizes minors. Reach out at support@hypersage.ai for review codes."
+        "text": "StoryVault is rated 13+ on the App Store — the community Tales feed sets that floor. The bundled library is public-domain literature, and AI Adventure is instructed never to write explicit sexual content or anything that sexualizes minors; if a choice pushes that way, the story turns aside. Reach out at support@hypersage.ai for review codes."
       }
     }
   ]
@@ -1493,9 +1517,9 @@
 
   <nav class="site">
     <div class="container">
-      <a class="brand" href="#top" aria-label="StoryVault AI home">
+      <a class="brand" href="#top" aria-label="StoryVault home">
         <img src="storyvault-mark.png" alt="" width="640" height="640">
-        StoryVault&nbsp;AI
+        StoryVault
       </a>
       <div class="links">
         <a href="#how">How it works</a>
@@ -1506,7 +1530,7 @@
         <a href="#faq">FAQ</a>
         <a href="support.html">Support</a>
       </div>
-      <a href="https://apps.apple.com/app/id6792759454" class="btn-nav" target="_blank" rel="noopener" aria-label="Download StoryVault AI on the App Store">Download</a>
+      <a href="https://apps.apple.com/app/id6792759454" class="btn-nav" target="_blank" rel="noopener" aria-label="Download StoryVault: AI Adventures on the App Store">Download</a>
       <details class="mobile-menu">
         <summary aria-label="Open menu">☰</summary>
         <div class="mobile-links">
@@ -1530,7 +1554,7 @@
           <h1>Branching tales,<br><span class="italic-anything grad">written with you.</span></h1>
           <p class="lede">Step into Beowulf, Dracula, or a world only the AI has dreamed. Pick from offered choices — or type whatever you want. Every choice rewrites the next page.</p>
           <div class="hero-buttons">
-            <a href="https://apps.apple.com/app/id6792759454" class="btn-warm" target="_blank" rel="noopener" aria-label="Download StoryVault AI on the App Store">
+            <a href="https://apps.apple.com/app/id6792759454" class="btn-warm" target="_blank" rel="noopener" aria-label="Download StoryVault: AI Adventures on the App Store">
               <span>Download on the App Store</span>
               <span aria-hidden="true">↗</span>
             </a>
@@ -1550,12 +1574,12 @@
           <div class="device-stage">
             <div class="device device-hero">
               <div class="hero-carousel">
-                <img src="screenshots/home.jpg?v=20260902a" width="720" height="1564" fetchpriority="high" alt="StoryVault AI home in light mode — Continue Reading Alice's Adventures in Wonderland, Write a Story and AI Adventure buttons, and Most Popular classics">
-                <img data-allow-duplicate="true" src="screenshots/adventure-turn.jpg?v=20260902a" width="720" height="1564" alt="A live AI Adventure turn — The Prismshard Heist, Chapter 1 of 7, with a scene the app paints for the turn with Pro above the story text, and a 'Type a custom move, or ask a what-if' box" loading="lazy">
+                <img src="screenshots/home.jpg?v=20260902a" width="720" height="1564" fetchpriority="high" alt="StoryVault home in light mode — Continue Reading Alice's Adventures in Wonderland, Write a Story and AI Adventure buttons, and Most Popular classics">
+                <img data-allow-duplicate="true" src="screenshots/adventure-turn.jpg?v=20260919a" width="720" height="1564" alt="A live AI Adventure turn — The Prismshard Heist, Chapter 1 of 7, with a scene the app paints for the turn with Pro above the story text, and a 'Type a custom move, or ask a what-if' box" loading="lazy">
                 <img data-allow-duplicate="true" src="screenshots/library.jpg?v=20260902a" width="720" height="1564" alt="Your Vault library in light mode — the Prismshard Heist adventure beside Alice, Dracula, and Frankenstein" loading="lazy">
                 <img src="screenshots/reader-dark.jpg?v=20260902a" width="720" height="1564" alt="The reader in dark mode — Alice in Wonderland in a clean night-reading view" loading="lazy">
                 <img data-allow-duplicate="true" src="screenshots/write-story.jpg?v=20260902a" width="720" height="1564" alt="Write Your Own Story composer in light mode — quick-start flavors and Conjure a Story" loading="lazy">
-                <img data-allow-duplicate="true" src="screenshots/home-dark.jpg?v=20260902a" width="720" height="1564" alt="StoryVault AI home in dark mode — the same literary home by night" loading="lazy">
+                <img data-allow-duplicate="true" src="screenshots/home-dark.jpg?v=20260919a" width="720" height="1564" alt="StoryVault home in dark mode — the same literary home by night" loading="lazy">
               </div>
             </div>
           </div>
@@ -1611,7 +1635,7 @@
         <div class="reveal">
           <div class="device-stage">
             <div class="device" style="max-width: 320px;">
-              <img src="screenshots/book-detail-dark.jpg?v=20260902a" width="720" height="1564" alt="Alice in Wonderland book detail in dark mode — painted cover, Fantasy tag, chapters, and first-pages preview" loading="lazy">
+              <img src="screenshots/book-detail-dark.jpg?v=20260919a" width="720" height="1564" alt="Alice in Wonderland book detail in dark mode — painted cover, Fantasy tag, chapters, and first-pages preview" loading="lazy">
             </div>
           </div>
         </div>
@@ -1747,7 +1771,7 @@
     <div class="container">
       <div class="section-eyebrow">What's inside</div>
       <h2 class="reveal">Every classic. <em class="grad">Every choice.</em></h2>
-      <p class="lede reveal">A literary engine, a quiet reader, a trophy gallery — built like a chef's knife, not a Swiss army.</p>
+      <p class="lede reveal">A literary engine, a quiet reader, a trophy gallery — built like a chef's knife, not a Swiss Army knife.</p>
 
       <div class="features-grid reveal-stagger">
         <div class="feature-card">
@@ -1796,7 +1820,7 @@
           <div class="device-stage">
             <div class="device">
               
-              <img data-allow-duplicate="true" src="screenshots/home-dark.jpg?v=20260902a" width="720" height="1564" alt="StoryVault AI home in dark mode — Continue Your Tale: The Prismshard Heist, AI Adventure and Write a Story buttons, Most Popular shelf" loading="lazy">
+              <img data-allow-duplicate="true" src="screenshots/home-dark.jpg?v=20260919a" width="720" height="1564" alt="StoryVault home in dark mode — Continue Your Tale: The Prismshard Heist, AI Adventure and Write a Story buttons, Most Popular shelf" loading="lazy">
             </div>
           </div>
           <div class="screen-label">
@@ -1807,7 +1831,7 @@
         <div class="screen-card">
           <div class="device-stage">
             <div class="device">
-              <img src="screenshots/adventure-dark.jpg?v=20260902a" width="720" height="1564" alt="AI Adventure picker in dark mode — Tonight's Tale: The Prismshard Heist under a full moon, Write Your Own Tale, and Browse by mood" loading="lazy">
+              <img src="screenshots/adventure-dark.jpg?v=20260919a" width="720" height="1564" alt="AI Adventure picker in dark mode — Tonight's Tale: The Prismshard Heist under a full moon, Write Your Own Tale, and Browse by mood" loading="lazy">
             </div>
           </div>
           <div class="screen-label">
@@ -1872,7 +1896,7 @@
         <div class="screen-card">
           <div class="device-stage">
             <div class="device">
-              <img src="screenshots/profile-dark.jpg?v=20260902a" width="720" height="1564" alt="Profile in dark mode — books, adventures, and unlocks at a glance, recent achievements, and appearance themes" loading="lazy">
+              <img src="screenshots/profile-dark.jpg?v=20260919a" width="720" height="1564" alt="Profile in dark mode — books, adventures, and unlocks at a glance, recent achievements, and appearance themes" loading="lazy">
             </div>
           </div>
           <div class="screen-label">
@@ -1883,7 +1907,7 @@
         <div class="screen-card">
           <div class="device-stage">
             <div class="device">
-              <img src="screenshots/tales-dark.jpg?v=20260902a" width="720" height="1564" alt="Tales in dark mode — the community Discover feed, featuring the StoryVault Original Letters We Never Sent by Cordelia Irving, with The Anchored Charts, The Sixth Door and The Iron River listed beneath" loading="lazy">
+              <img src="screenshots/tales-dark.jpg?v=20260919a" width="720" height="1564" alt="Tales in dark mode — the community Discover feed, featuring the StoryVault Original The Iron River by Theo Marsden, with The Anchored Charts, The Sixth Door and Letters We Never Sent listed beneath" loading="lazy">
             </div>
           </div>
           <div class="screen-label">
@@ -1961,7 +1985,7 @@
     <div class="container">
       <div class="section-eyebrow center">Common questions</div>
       <h2 style="text-align:center;" class="reveal">FAQ</h2>
-      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Everything reviewers, readers, and parents ask us.</p>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Everything readers and parents ask us.</p>
       <div class="faq-list reveal">
         <details class="faq">
           <summary>Is the AI just rewriting the original book?</summary>
@@ -1969,7 +1993,7 @@
         </details>
         <details class="faq">
           <summary>What if the AI says something off?</summary>
-          <p>It happens. Tap "Try again" on any turn to regenerate, or type a different choice to steer the story. The system prompt is tuned to keep prose in-period and on-tone, but AI is AI.</p>
+          <p>It happens. Choose Undo last turn from the menu at the top right to take the turn back and pick again, or type a different move to steer the story. It's tuned to stay in period and on tone, but it can still miss.</p>
         </details>
         <details class="faq">
           <summary>Does the AI train on my stories?</summary>
@@ -2027,12 +2051,12 @@
         <details class="faq">
           
           <summary>Which devices does it run on?</summary>
-          <p>iPhone first. iPad and Mac are on the roadmap; Android is not committed.</p>
+          <p>StoryVault is for iPhone today, on iOS 17 or later.</p>
         </details>
         <details class="faq">
           <summary>I'm a teacher / parent / reviewer — how do I evaluate it?</summary>
           
-          <p>StoryVault AI is rated 13+ on the App Store — the community Tales feed sets that floor. The bundled library is public-domain literature, and the AI Adventure system prompt explicitly excludes explicit sexual content and any content that sexualizes minors. Reach out at <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> for review codes.</p>
+          <p>StoryVault is rated 13+ on the App Store — the community Tales feed sets that floor. The bundled library is public-domain literature, and AI Adventure is instructed never to write explicit sexual content or anything that sexualizes minors; if a choice pushes that way, the story turns aside. Reach out at <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> for review codes.</p>
         </details>
       </div>
     </div>
@@ -2042,7 +2066,7 @@
     <div class="ornament" aria-hidden="true">✦</div>
     <h2 class="reveal">The page is <em class="grad">open.</em></h2>
     <p class="reveal">Free to try. Eighty classics already in the vault. The next one is yours to write.</p>
-    <a href="https://apps.apple.com/app/id6792759454" class="btn-warm" target="_blank" rel="noopener" aria-label="Download StoryVault AI on the App Store">
+    <a href="https://apps.apple.com/app/id6792759454" class="btn-warm" target="_blank" rel="noopener" aria-label="Download StoryVault: AI Adventures on the App Store">
       <span>Download on the App Store</span>
       <span aria-hidden="true">↗</span>
     </a>
@@ -2052,7 +2076,7 @@
     <div class="footer-inner">
       <div class="brand">
         <img src="storyvault-mark.png" alt="" width="640" height="640" loading="lazy">
-        <span>StoryVault AI
+        <span>StoryVault
           <small>Branching tales, written with you.</small>
         </span>
       </div>
@@ -2080,7 +2104,7 @@
           <a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a>
         </div>
       </div>
-      <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. StoryVault AI — all tales told are your own.</div>
+      <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. StoryVault — all tales told are your own.</div>
     </div>
   </footer>
 
