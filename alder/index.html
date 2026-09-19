@@ -560,7 +560,7 @@
       "name": "Is my data private?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "There's no account, no name, and no email, and your recovery record is kept on your phone — we run no database of it. There are no ads and no third-party analytics, and we don't sell or share anything. Your messages are sent to Anthropic to generate replies, along with a slice of that record. You are told exactly who and exactly which fields, and asked to agree, before a single message is sent — the consent check sits in the transport rather than the screen, so nothing can slip past it. Full detail is in the privacy policy. What we won't do is claim a kind of legal confidentiality this app doesn't have."
+        "text": "There's no account, no name, and no email, and your recovery record is kept on your phone — we run no database of it. There are no ads and no third-party analytics, and we don't sell or share anything. Your messages are sent to Anthropic to generate replies, along with a slice of that record. You're told exactly who receives it and exactly which fields, and nothing is sent until you've agreed. Full detail is in the privacy policy. What we won't do is claim a kind of legal confidentiality this app doesn't have."
       }
     },
     {
@@ -576,7 +576,7 @@
       "name": "When can I use it?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Alder is iPhone-first, US-first, and 18+. Leave your email and we'll get you in."
+        "text": "Alder isn't on the App Store yet. It's iPhone-first, US-first, and 18+ — send us a note and we'll email you the day it launches."
       }
     },
     {
@@ -634,7 +634,7 @@
           <p class="lede">Recovery is mostly the hours nobody sees — the craving at 2:40 in the morning, the day after a slip, the week where nothing feels like progress. Alder is a private companion for those hours: it counts your sober time, sits with you through an urge, and never makes you feel small for having one.</p>
           <div class="hero-buttons">
             <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Alder%20launches" class="btn-warm">
-              <span>Get early access</span>
+              <span>Email me at launch</span>
               <span aria-hidden="true">→</span>
             </a>
             <a href="#how" class="btn-outline">See how it works</a>
@@ -719,12 +719,12 @@
         <div class="clock-card">
           <svg class="clock-dial" viewBox="0 0 96 96" aria-hidden="true" focusable="false">
             <circle class="clock-ring" cx="48" cy="48" r="40"/>
-            <circle class="clock-arc" cx="48" cy="48" r="40" stroke-dasharray="21 252" transform="rotate(-90 48 48)"/>
+            <circle class="clock-arc" cx="48" cy="48" r="40" stroke-dasharray="8 252" transform="rotate(-90 48 48)"/>
             <g class="clock-hand"><circle cx="48" cy="8" r="3.2"/></g>
             <circle class="clock-pin" cx="48" cy="48" r="2.4"/>
           </svg>
           <span class="clock-target">Vaping</span>
-          <span class="clock-count">30<small> days</small></span>
+          <span class="clock-count">12<small> days</small></span>
         </div>
         <div class="clock-card">
           <svg class="clock-dial" viewBox="0 0 96 96" aria-hidden="true" focusable="false">
@@ -751,7 +751,7 @@
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
           <h3>A clock for each thing</h3>
-          <p>Track more than one at once, each with its own count — and a running total across every attempt you've made, so restarting never zeroes out your history. You pick your targets when you first open Alder; changing them afterwards is still to come.</p>
+          <p>Track more than one at once, each with its own count — and a running total across every attempt you've made, so restarting never zeroes out your history. You choose what to track when you first open Alder, and can rename them anytime.</p>
         </div>
 
         <div class="feature-card">
@@ -783,7 +783,7 @@
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
           <h3>Private by default</h3>
           
-          <p>No account, no name, no email — your recovery record is stored on your phone, not in a database of ours. To write a reply, Alder sends your message and a slice of that record to Anthropic; the <a href="privacy.html">privacy policy</a> lists exactly which fields. A discreet alternate app icon is drawn and bundled, but the control to switch it on isn't built yet, so the home screen still says Alder.</p>
+          <p>No account, no name, no email — your recovery record is stored on your phone, not in a database of ours. To write a reply, Alder sends your message and a slice of that record to Anthropic; the <a href="privacy.html">privacy policy</a> lists exactly which fields.</p>
         </div>
 
         <div class="feature-card">
@@ -809,28 +809,28 @@
 
       <div class="screens-grid" id="screens-grid">
         <div class="screen-card">
-          <div class="screen-frame"><img data-shot="home" src="shots/home-dark.webp?v=20260902a" alt="Alder's Today screen at late night: a painted tree under a dark sky, 90 days plus 3 hours 12 minutes, 90 days sober across all attempts, per-target counts of 90 for alcohol and 12 for vaping, Talk to Alder and Check in buttons, and the next chip two weeks away" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="home" src="shots/home-dark.webp?v=20260919a" alt="Alder's Today screen at late night: a painted tree under a dark sky, 90 days plus 3 hours 12 minutes, 90 days sober across all attempts, per-target counts of 90 for alcohol and 12 for vaping, Talk to Alder and Check in buttons, and the next chip two weeks away" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Today</strong>Your clock, and what's next</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img data-shot="chat" src="shots/chat-dark.webp?v=20260902a" alt="A conversation with Alder: the user says they are having a craving right now, and Alder answers that it crests and breaks — usually inside twenty minutes, loudest right before it turns — then asks where this one is sitting on a scale of zero to ten, with an Open SOS button underneath" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="chat" src="shots/chat-dark.webp?v=20260919a" alt="A conversation with Alder: the user says they are having a craving right now, and Alder answers that it crests and breaks — usually inside twenty minutes, loudest right before it turns — then asks how strong this one is and what is going on around it, with an Open SOS button underneath" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Alder</strong>Awake when you are</div>
         </div>
         
         <div class="screen-card">
-          <div class="screen-frame"><img data-shot="sos" src="shots/sos-dark.webp?v=20260902a" alt="Alder's SOS screen: a 20-minute ride-it-out timer counting down from 19:58 under the line Cravings crest and break, an I'm okay — stop early button, and Your people listing Sam and Mia with Call and Text buttons" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="sos" src="shots/sos-dark.webp?v=20260919a" alt="Alder's SOS screen: a 20-minute ride-it-out timer counting down from 19:58 under the line Cravings crest and break, a quiet I'm okay — stop early line beneath it, and Your people listing Sam, Mia and Devon with Call and Text buttons" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>SOS</strong>The 20 minutes, and your people</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img data-shot="toolbox" src="shots/toolbox-dark.webp?v=20260902a" alt="Alder's toolbox of short practical things to do during an urge, each labelled with how long it takes" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="toolbox" src="shots/toolbox-dark.webp?v=20260919a" alt="Alder's toolbox of short practical things to do during an urge — urge surfing, playing the tape forward, DEADS and SOBER breathing — each labeled with how long it takes" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Toolbox</strong>Something to do with your hands</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img data-shot="progress" src="shots/progress-dark.webp?v=20260902a" alt="Alder's progress screen: the bronze chip ladder from 24 hours to a year, and a seven-day craving chart" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="progress" src="shots/progress-dark.webp?v=20260919a" alt="Alder's progress screen: the bronze chip ladder from 24 hours to a year, with a seven-day craving chart starting below it" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Progress</strong>A record of what you've done</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img data-shot="checkin" src="shots/checkin-dark.webp?v=20260902a" alt="Alder's daily check-in, filled in — how the day went, craving level per target, what's underneath it, and one line to remember" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="checkin" src="shots/checkin-dark.webp?v=20260919a" alt="Alder's daily check-in, filled in — how the day went, craving level per target, what's underneath it, one line to remember, and the Save check-in button" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Check in</strong>One honest minute</div>
         </div>
       </div>
@@ -841,7 +841,7 @@
     <div class="container">
       <div class="spotlight-grid">
         <div class="spotlight-phone">
-          <div class="screen-frame"><img src="shots/debrief-dark.webp?v=20260902a" alt="Alder's relapse debrief, headed &quot;What happened&quot;: a note that this is not a post-mortem or a confession but a search for the link in the chain, then questions about what set it off and what made the day harder" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/debrief-dark.webp?v=20260919a" alt="Alder's relapse debrief, headed &quot;What happened&quot;: a note that this is not a post-mortem or a confession but a search for the link in the chain, then questions about what set it off and what made the day harder" width="780" height="1688" loading="lazy"></div>
         </div>
         <div>
           <div class="section-eyebrow">The part most apps get wrong</div>
@@ -901,7 +901,7 @@
           </ul>
         </div>
         <div class="spotlight-phone">
-          <div class="screen-frame"><img src="shots/ceremony-dark.webp?v=20260902a" alt="Alder's milestone screen: the companion above a bronze chip, the heading &quot;Still here, 89 days on&quot;, and a short letter signed by Alder" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/ceremony-dark.webp?v=20260919a" alt="Alder's milestone screen: a bronze 30-day chip as the centerpiece, the heading &quot;Still here, 30 days on&quot;, a short letter signed by Alder, and buttons to share the chip or keep going" width="780" height="1688" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -948,11 +948,10 @@
       <div class="spotlight-grid flip">
         <div>
           <div class="section-eyebrow">Privacy</div>
-          <h2>Nobody has to know <em>you have this.</em></h2>
-          <p style="color: var(--muted-fg); font-size: 1.04rem;">For a lot of people the risk isn't the data — it's someone picking up the phone. Alder is built around that.</p>
+          <h2>Your recovery is <em>your business.</em></h2>
+          <p style="color: var(--muted-fg); font-size: 1.04rem;">Alder asks for nothing that identifies you, and keeps your recovery record on your phone.</p>
           <ul class="spotlight-points" role="list">
             <li><strong>No account, no name, no email.</strong> There is nothing to sign up for and nothing to sign in to.</li>
-            <li><strong>A discreet app icon is planned</strong> so what's on your home screen is your business — the artwork is drawn and bundled, but the switch to turn it on isn't built yet.</li>
             
             <li><strong>Your record is kept on your device</strong> — the clocks, the check-ins, the debriefs — and a slice of it, your last seven check-ins among them, goes out with each message you send Alder.</li>
             <li><strong>No ads and no third-party analytics.</strong> Not now, not later. We don't sell or share anything.</li>
@@ -961,7 +960,7 @@
           <p style="margin-top: 22px;"><a href="privacy.html" style="font-weight:700;">Read the full privacy policy →</a></p>
         </div>
         <div class="spotlight-phone">
-          <div class="screen-frame"><img src="shots/you-dark.webp?v=20260902a" alt="Alder's You screen: Recovery rows for what I'm quitting (Alcohol, Vaping), my people (Sam, Mia, Devon), my reasons, tonight's check-in and walk through a slip, then Privacy rows to export my data, withdraw consent — Alder stays on this device, nothing more is sent — and delete everything, gone means gone" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/you-dark.webp?v=20260919a" alt="Alder's You screen: Recovery rows for what I'm quitting (Alcohol, Vaping), my people (Sam, Mia, Devon), my reasons, tonight's check-in and walk through a slip, then Privacy rows for what Alder remembers, export my data, withdraw consent — Alder stays on this device, nothing more is sent — and delete everything, gone means gone" width="780" height="1688" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -999,7 +998,7 @@
         <details class="faq">
           <summary>Is my data private?</summary>
           
-          <p>There's no account, no name, and no email, and your recovery record is kept on your phone — we run no database of it. There are no ads and no third-party analytics, and we don't sell or share anything. Your messages are sent to <strong>Anthropic</strong> to generate replies, along with a slice of that record. You are told exactly who and exactly which fields, and asked to agree, before a single message is sent — the consent check sits in the transport rather than the screen, so nothing can slip past it. Full detail is in the <a href="privacy.html">privacy policy</a>. What we won't do is claim a kind of legal confidentiality this app doesn't have.</p>
+          <p>There's no account, no name, and no email, and your recovery record is kept on your phone — we run no database of it. There are no ads and no third-party analytics, and we don't sell or share anything. Your messages are sent to <strong>Anthropic</strong> to generate replies, along with a slice of that record. You're told exactly who receives it and exactly which fields, and nothing is sent until you've agreed. Full detail is in the <a href="privacy.html">privacy policy</a>. What we won't do is claim a kind of legal confidentiality this app doesn't have.</p>
         </details>
         <details class="faq">
           <summary>What does it cost?</summary>
@@ -1008,7 +1007,7 @@
         </details>
         <details class="faq">
           <summary>When can I use it?</summary>
-          <p>Alder is iPhone-first, US-first, and 18+. Leave your email and we'll get you in.</p>
+          <p>Alder isn't on the App Store yet. It's iPhone-first, US-first, and 18+ — send us a note and we'll email you the day it launches.</p>
         </details>
         <details class="faq">
           <summary>Who is Alder for?</summary>
@@ -1020,9 +1019,9 @@
 
   <section class="cta-strip">
     <h2>For the hours nobody else is up.</h2>
-    <p>Alder is built for iPhone. Leave your email and we'll get you in.</p>
+    <p>Alder is built for iPhone and isn't on the App Store yet. Send us a note and we'll email you the day it launches.</p>
     <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Alder%20launches" class="btn-warm">
-      <span>Get early access</span>
+      <span>Email me at launch</span>
       <span aria-hidden="true">→</span>
     </a>
   </section>
@@ -1065,7 +1064,7 @@
       var grid = document.getElementById('screens-grid');
       var buttons = document.querySelectorAll('.scheme-toggle button');
       if (!grid || !buttons.length) return;
-      var VERSION = '?v=20260902a';
+      var VERSION = '?v=20260919a';
       buttons.forEach(function (btn) {
         btn.addEventListener('click', function () {
           var scheme = btn.dataset.scheme;
