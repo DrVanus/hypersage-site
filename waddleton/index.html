@@ -103,7 +103,7 @@
         "name": "Is the chat safe?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Anything typed goes through one filter that the browser and the server both run, so a patched client doesn't get around it: profanity is masked, anything shaped like a phone number, an email, a link or an address is blocked outright, and leetspeak is normalised first so the obvious dodges collapse to the same word. Players under 13 don't type at all — they use a list of ready-made phrases, and they never see anyone else's typed text. Everyone can mute or block any player, and report anyone who's being a problem. To be straight with you: reports are recorded but there is no full-time moderation team reading them, so please use mute and block — they work immediately."
+          "text": "Anything typed goes through one filter that the browser and the server both run, so it can't be bypassed: profanity is masked, anything shaped like a phone number, an email, a link or an address is blocked outright, and leetspeak is normalized first so the obvious dodges collapse to the same word. Players under 13 don't type at all — they use a list of ready-made phrases, and they never see anyone else's typed text. Everyone can mute or block any player, and report anyone who's being a problem. To be straight with you: reports are recorded but there is no full-time moderation team reading them, so please use mute and block — they work immediately."
         }
       },
       {
@@ -334,7 +334,7 @@
       border: 1px solid var(--border-strong); background: var(--surface);
       box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(79,208,192,0.08);
     }
-    .tour-stage video { width: 100%; height: auto; display: block; aspect-ratio: 1100 / 732; }
+    .tour-stage img { width: 100%; height: auto; display: block; aspect-ratio: 1100 / 733; }
     .tour-stage figcaption {
       padding: 14px 18px 16px; color: var(--muted-fg); font-size: 0.92rem;
       border-top: 1px solid var(--border);
@@ -553,7 +553,7 @@
       <p class="hero-note">Works on a phone, tablet, or computer. Nothing to install.</p>
 
       <div class="hero-shot">
-        <img src="rooms/plaza.jpg?v=20260901a" width="1100" height="733" fetchpriority="high" alt="Waddleton's Town Square in play: four penguins, two of them in beanies and red scarves, standing on the oval ice rink under a green-and-violet aurora, a glowing ice sculpture of a penguin behind them, lit signs reading COZY BEAK, SHOP and GOLDEN KRILL on the buildings around the square, wooden signposts pointing to the Slopes, the Shore and Snow Forts, and the game's own chat bar along the bottom of the screen">
+        <img src="rooms/plaza.jpg?v=20260919a" width="1100" height="733" fetchpriority="high" alt="Waddleton's Town Square in play: four penguins, two of them in beanies and red scarves, standing on the oval ice rink under a green-and-violet aurora, a glowing ice sculpture of a penguin behind them, lit signs reading COZY BEAK, SHOP and GOLDEN KRILL on the buildings around the square, wooden signposts pointing to the Slopes, the Shore and Snow Forts, an Island Guide button in the corner, and the game's own chat bar along the bottom of the screen">
       </div>
 
       <div class="stats">
@@ -575,13 +575,13 @@
       </div>
       
       <figure class="tour-stage">
-        <video src="shots/tour.mp4?v=20260901a" poster="shots/tour-poster.jpg?v=20260901a" width="1100" height="732" muted loop playsinline preload="metadata" aria-label="A continuous capture of Waddleton being played: four penguins on the Town Square rink, the player waddling across the ice, the island map opening, and the walk coming out at the Shore beside a driftwood campfire"></video>
-        <figcaption>That walk, live: the Town Square, two waddles across the rink, the map — and out at the Shore, by the bonfire. One continuous capture of the game, straight through.</figcaption>
+        <img src="shots/map.jpg?v=20260919a" width="1100" height="733" loading="lazy" alt="Waddleton's island map open over the Town Square: a painted island at night with labeled pins for Mountain Peak, The Slopes, Town Square, The Shore, Ice Fishing, Snow Forts and Aurora City, a flat floe out on the water with no label at all, and the start of the game directory underneath, listing Ice Fishing at the Shore dock and Waddle Waves at the Shore break">
+        <figcaption>The island map. Tap an area and you're there; the game directory underneath drops you straight into a game without the walk.</figcaption>
       </figure>
       <div class="places">
         <figure class="place">
           <span class="tag" aria-hidden="true">The Shore</span>
-          <img src="rooms/shore.jpg?v=20260901a" width="1100" height="733" alt="The Shore in play: five penguins gathered at a driftwood campfire on the snow — one in a pirate hat, one in a horned helmet — a glass-domed aquarium glowing turquoise on the left, painted signs reading AQUARIUM, LAZY FLOE, GLIMMER DEEP, ICE FISHING and WADDLE WAVES around the bay, a red-and-white lighthouse and a moonlit sea of drifting ice behind" loading="lazy">
+          <img src="rooms/shore.jpg?v=20260919a" width="1100" height="733" alt="The Shore in play: four penguins gathered at a driftwood campfire on the snow — one in a pirate hat, one in a horned helmet — a glass-domed aquarium glowing turquoise on the left, painted signs reading AQUARIUM, BONKBERG, LAZY FLOE, ICE FISHING and WADDLE WAVES around the bay, a red-and-white lighthouse and a moonlit sea of drifting ice behind" loading="lazy">
           <figcaption class="cap">
             <h3>The Shore</h3>
             <p>Fishing, surfing, a lazy drift down the floe — and the way into the aquarium.</p>
@@ -589,7 +589,7 @@
         </figure>
         <figure class="place">
           <span class="tag" aria-hidden="true">The Slopes</span>
-          <img src="rooms/slopes.jpg?v=20260901a" width="1100" height="733" alt="The Slopes in play: three penguins and a scarf-wearing snowman on the snow below a peak with a trail winding to the summit, painted signs reading SLED RUSH, PEAKLING, AVALANCHE ESCAPE, AVALANCHE DASH, MOUNTAIN PEAK and MY IGLOO, a timber lodge with a sled ramp on the left and a cluster of lit igloos on the right" loading="lazy">
+          <img src="rooms/slopes.jpg?v=20260919a" width="1100" height="733" alt="The Slopes in play: three penguins and a scarf-wearing snowman on the snow below a peak with a trail winding to the summit, painted signs reading SLED RUSH, PEAKLING, AVALANCHE ESCAPE, AVALANCHE DASH, MOUNTAIN PEAK and MY IGLOO, a timber lodge with a sled ramp on the left, a cluster of lit igloos on the right, and an Island Guide button in the corner" loading="lazy">
           <figcaption class="cap">
             <h3>The Slopes</h3>
             <p>Sledding, climbing, outrunning an avalanche. Your igloo's up here too.</p>
@@ -597,7 +597,7 @@
         </figure>
         <figure class="place">
           <span class="tag" aria-hidden="true">Snow Forts</span>
-          <img src="rooms/forts.jpg?v=20260901a" width="1100" height="733" alt="Snow Forts in play: three penguins in the middle of an open snow arena, a turreted fort with a blue flag signed SNOWBALL FIGHT on the left, a bunting-strung archway signed PENGUIN LEAP in the middle, and a domed ice pavilion flying a red flag, its painted sign reading THIN ICE, on the right" loading="lazy">
+          <img src="rooms/forts.jpg?v=20260919a" width="1100" height="733" alt="Snow Forts in play: three penguins in the middle of an open snow arena, a turreted fort with a blue flag signed SNOWBALL FIGHT on the left, a bunting-strung archway signed PENGUIN LEAP in the middle, and a domed ice pavilion flying a red flag, its sign reading MELTDOWN, on the right" loading="lazy">
           <figcaption class="cap">
             <h3>Snow Forts</h3>
             <p>Built for exactly one purpose. Snowball fights, leaping, and very thin ice.</p>
@@ -605,7 +605,7 @@
         </figure>
         <figure class="place">
           <span class="tag" aria-hidden="true">Aurora City</span>
-          <img src="rooms/aurora.jpg?v=20260901a" width="1100" height="733" alt="Aurora City in play: three penguins by a glowing pillar in a neon-lit night square, a driftwood-timbered building signed DRIFTWOOD on the left, a venue signed FLOE ARCADE in the middle and a domed hall edged in pink neon signed CLUB AURORA on the right, strung lights overhead" loading="lazy">
+          <img src="rooms/aurora.jpg?v=20260919a" width="1100" height="733" alt="Aurora City in play: three penguins by a glowing pillar in a neon-lit night square, a driftwood-timbered building signed DRIFTWOOD on the left, a venue signed FLOE ARCADE in the middle and a domed hall edged in pink neon signed CLUB AURORA on the right, strung lights overhead" loading="lazy">
           <figcaption class="cap">
             <h3>Aurora City</h3>
             <p>Where the island stays up late — the arcade, the lounge, and the club.</p>
@@ -613,7 +613,7 @@
         </figure>
         <figure class="place">
           <span class="tag" aria-hidden="true">Step inside</span>
-          <img src="rooms/coffee.jpg?v=20260901a" width="1100" height="733" alt="Inside the Cozy Beak coffee house: two penguins standing on the wooden floor, deep armchairs in green, red, blue and mustard around little round tables and patterned rugs, a stone fireplace burning under a framed mountain painting, tall bookshelves with a sliding ladder, and a brass espresso machine steaming on a counter lined with mugs" loading="lazy">
+          <img src="rooms/coffee.jpg?v=20260919a" width="1100" height="733" alt="Inside the Cozy Beak coffee house: two penguins in knit beanies standing on the wooden floor, deep armchairs in green, red, blue and mustard around little round tables and patterned rugs, a stone fireplace burning under a framed mountain painting, tall bookshelves with a sliding ladder, and a brass espresso machine steaming on a counter lined with mugs" loading="lazy">
           <figcaption class="cap">
             <h3>The Cozy Beak</h3>
             <p>Not an area — an interior. Doors like this one are cut into the areas around them, and there are seven of them.</p>
@@ -622,7 +622,7 @@
         <figure class="place">
           <span class="tag secret" aria-hidden="true">Somewhere else</span>
           
-          <img src="rooms/iceberg.jpg?v=20260901a" width="1100" height="733" alt="Four penguins standing together on the wide snowy plateau of a flat-topped floe, two snow-capped driftwood logs and a wooden crate beside them, ice cliffs glowing turquoise where they meet the dark ocean, and the moon and a green-and-violet aurora behind" loading="lazy">
+          <img src="rooms/iceberg.jpg?v=20260919a" width="1100" height="733" alt="Four penguins standing together on the wide snowy plateau of a flat-topped floe, two snow-capped driftwood logs and a wooden crate around them, ice cliffs glowing turquoise where they meet the dark ocean, and the moon and a green-and-violet aurora behind" loading="lazy">
           <figcaption class="cap">
             <h3>The place with no name</h3>
             <p>On the map it's only an unnamed shimmer out on the water. Click it once and it finally gets a name — which this page isn't going to spoil.</p>
@@ -639,7 +639,7 @@
         <div>
           <div class="section-eyebrow">The arcade</div>
           <h2>Seventeen games. <em>Most have a door.</em></h2>
-          <p style="color: var(--muted-fg); font-size: 1.04rem;">Twelve of them live out on the island — you walk up to the dock, the trailhead, the fort, the shore ice, the diving bell off the Shore, and go in. Four are cartridges in the Floe Arcade, the room in Aurora City: Aurora Alley, Arctic Hockey, Meltdown and Jet Pack Adventure. Meltdown is on both lists — it has a fort of its own at Snow Forts as well as a slot in the cabinet — which leaves Cavern Rescue and Igloo Fort, the two games with no way in from the world at all. The only door to them is the directory the map carries, and that will take you straight to any of the seventeen. Snowflakes you earn playing them buy hats you'll wear back outside.</p>
+          <p style="color: var(--muted-fg); font-size: 1.04rem;">Eleven of them have a door out on the island — you walk up to the dock, the trailhead, the fort or the shore ice, and go in. The rest are cabinets in the Floe Arcade, the room in Aurora City, and the map's game directory takes you straight to any of the seventeen. Snowflakes you earn playing them buy hats you'll wear back outside.</p>
           <ul class="split-points" role="list">
             <li><strong>Every game keeps your personal best</strong> on the device you played it on.</li>
             <li><strong>Play together</strong> — start a party and launch a game as a group.</li>
@@ -647,7 +647,7 @@
           </ul>
         </div>
         <div>
-          <img src="rooms/arcade.jpg?v=20260901a" width="1100" height="733" alt="Inside the Floe Arcade: a penguin in a horned helmet standing on the pale ice floor between two lit cabinets, the left one captioned PLAY FLOE ARCADE and the right one ARCTIC HOCKEY, a stone archway between them, and four round porthole windows showing the aurora across the blue ice wall above" loading="lazy">
+          <img src="rooms/arcade.jpg?v=20260919a" width="1100" height="733" alt="Inside the Floe Arcade: a penguin in a horned helmet and a puffer vest standing on the pale ice floor between two lit cabinets, the left one captioned PLAY FLOE ARCADE and the right one ARCTIC HOCKEY, an arched doorway between them, and four round porthole windows showing the aurora across the blue ice wall above" loading="lazy">
         </div>
       </div>
 
@@ -706,7 +706,7 @@
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="6"/><circle cx="9.6" cy="12" r="1"/><circle cx="14.4" cy="12" r="1"/><path d="M8 7l1.5-3M16 7l-1.5-3"/></svg></div>
           <h3>Seven pets to adopt</h3>
-          <p>Adopt a fluffy one, feed it, play with it. It's a gentle loop — nothing bad ever happens to your pet. (An eighth is drawn and waiting, but it's priced in Goldfish, so nobody can adopt it yet.)</p>
+          <p>Adopt a fluffy one, feed it, play with it. It's a gentle loop — nothing bad ever happens to your pet.</p>
         </div>
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v6a8 8 0 0 1-16 0z"/><path d="M4 6H2v2a3 3 0 0 0 3 3M20 6h2v2a3 3 0 0 1-3 3"/><path d="M9 20h6M12 18v2"/></svg></div>
@@ -721,8 +721,8 @@
     <div class="container">
       <div class="center">
         <div class="section-eyebrow">Your penguin</div>
-        <h2>Twenty-six colours is <em>only the start.</em></h2>
-        <p class="lede">A hundred and fifty-four things across the catalogue: body colours, hats, glasses, scarves, capes, vests, feet, eye styles — and the furniture, wallpaper, and flooring for your igloo.</p>
+        <h2>Twenty-six colors is <em>only the start.</em></h2>
+        <p class="lede">A hundred and fifty-four things across the catalog: body colors, hats, glasses, scarves, capes, vests, feet, eye styles — and the furniture, wallpaper, and flooring for your igloo.</p>
       </div>
       
       <ul class="split-points" role="list" style="max-width: 720px; margin: 26px auto 0;">
@@ -773,7 +773,7 @@
         </div>
         <div class="honest-card">
           <h3>Your penguin lives in this browser.</h3>
-          <p>That's the trade for not making you sign up: your progress is saved to the device and browser you're playing on. Your phone and your laptop are two different penguins, and clearing your browser data starts you over.</p>
+          <p>That's the trade for not making you sign up: your progress is saved to the device and browser you're playing on. Unless you sign in, your phone and your laptop are two different penguins, and clearing your browser data starts you over.</p>
         </div>
       </div>
     </div>
@@ -805,7 +805,7 @@
         </details>
         <details class="faq">
           <summary>Is the chat safe?</summary>
-          <p>Anything typed goes through one filter that the browser and the server both run, so a patched client doesn't get around it: profanity is masked, anything shaped like a phone number, an email, a link or an address is blocked outright, and leetspeak is normalised first so the obvious dodges collapse to the same word. Players under 13 don't type at all — they use a list of ready-made phrases, and they never see anyone else's typed text. Everyone can mute or block any player, and report anyone who's being a problem. To be straight with you: reports are recorded but there is no full-time moderation team reading them, so please use mute and block — they work immediately.</p>
+          <p>Anything typed goes through one filter that the browser and the server both run, so it can't be bypassed: profanity is masked, anything shaped like a phone number, an email, a link or an address is blocked outright, and leetspeak is normalized first so the obvious dodges collapse to the same word. Players under 13 don't type at all — they use a list of ready-made phrases, and they never see anyone else's typed text. Everyone can mute or block any player, and report anyone who's being a problem. To be straight with you: reports are recorded but there is no full-time moderation team reading them, so please use mute and block — they work immediately.</p>
         </details>
         <details class="faq">
           <summary>Are the leaderboards legit?</summary>
@@ -825,7 +825,7 @@
 
   <section class="cta-strip">
     <h2>The island's already busy.</h2>
-    <p>No download, no sign-up, no cost. Pick a colour and go and stand on the ice.</p>
+    <p>No download, no sign-up, no cost. Pick a color and go stand on the ice.</p>
     <a href="https://waddleton.pages.dev/" class="btn-play" target="_blank" rel="noopener">
       <span>Play Waddleton free</span>
       <span aria-hidden="true">→</span>
@@ -860,23 +860,5 @@
     <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Waddleton — mind the thin ice.</div>
   </footer>
 
-  <script>
-    // Tour playback is opt-in by circumstance: motion welcome + the figure on
-    // screen. Anyone else keeps the poster, which is a real frame of the take.
-    (function () {
-      var v = document.querySelector('.tour-stage video');
-      if (!v || window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-          !('IntersectionObserver' in window)) return;
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) {
-            // Low Power Mode and autoplay policy reject play() silently —
-            // surface the native controls so a tap can still run the take.
-            v.play().catch(function () { v.controls = true; });
-          } else { v.pause(); }
-        });
-      }, { threshold: 0.25 }).observe(v);
-    })();
-  </script>
 </body>
 </html>
