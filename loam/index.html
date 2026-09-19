@@ -484,6 +484,12 @@
     /* Captions swap per frame; hold two lines so the page below never shifts. */
     .tend-stage figcaption { min-height: 2.6em; }
     @media (max-width: 900px) { .screens-row { grid-template-columns: 1fr 1fr; } }
+    /* Two across is ~143px a phone at 390 — unreadable. One large frame at a time, swiped. */
+    @media (max-width: 520px) {
+      .screens-row { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 72%;
+                     overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 4px 12px; }
+      .screens-row .screen-fig { scroll-snap-align: center; }
+    }
 
     /* ===== BOUNDARY ===== */
     .boundary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 32px; }
@@ -725,7 +731,7 @@
     <div class="container">
       <div class="hero-layout">
         <div class="hero-text">
-          <span class="eyebrow">Coming to iOS</span>
+          <span class="eyebrow">Coming to <span style="text-transform:none">iOS</span></span>
           <h1>The notes companion that <span class="soft swash">asks before it acts.</span></h1>
           <p class="lede">Write, ramble, record. Loam fixes your slips in place, shapes rambly jots into clean lines, files and flags what matters — and tells you what it changed. Nothing is silent, and the Ledger can undo it.</p>
           <div class="hero-buttons">
@@ -779,7 +785,7 @@
             </li>
             <li>
               <h3>Undo and redo, in both directions</h3>
-              <p>Everything Loam does lands in the Ledger with its own undo, and an undone row offers Redo. Undoing an old tidy never clobbers a newer filing — both directions are surgical, and history is never trimmed.</p>
+              <p>Everything Loam does lands in the Ledger with its own Undo — and Redo, if you change your mind. Undoing an old tidy never disturbs anything newer, and the history is never trimmed.</p>
             </li>
           </ol>
         </div>
@@ -839,7 +845,7 @@
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V7H7"/><path d="M12 8v4l3 2"/></svg></div>
           <h3>The Ledger</h3>
-          <p>Everything Loam does is written down here — with the pins, ticks and filings you make yourself, each named: what changed, and when. Undo appears on the confirmation, right where the action happened; undo and redo arrows sit in a note's top bar while you type; and here each row has its own Undo or Redo, plus an Undo all for today. Your history is never trimmed.</p>
+          <p>Every change — Loam's and your own — is written down here: what changed, and when. Each row has its own Undo or Redo, and there's an Undo all for today. Your history is never trimmed.</p>
         </div>
 
         <div class="feature-card">
@@ -891,19 +897,19 @@
       </div>
       <div class="screens-row">
         <figure class="screen-fig">
-          <img src="shots/L-home.png?v=20260831a" alt="The Notes pile: pinned notes lead, sections label the day, a digest reports what Loam tended" loading="lazy" width="780" height="1688">
+          <img src="shots/L-home.webp?v=20260919a" alt="The Notes pile: pinned notes lead, sections label the day, and a digest reports what Loam tended" loading="lazy" width="780" height="1695">
           <figcaption>The pile, tended and labeled</figcaption>
         </figure>
         <figure class="screen-fig">
-          <img src="shots/L-editor.png?v=20260831a" alt="A note tidied by Loam with the banner offering View original and Undo, and a commitment mark in the margin" loading="lazy" width="780" height="1688">
+          <img src="shots/L-editor.webp?v=20260919a" alt="A note tidied by Loam with a banner offering View original and Undo tidy, and commitment marks offering Remind me or Dismiss" loading="lazy" width="780" height="1695">
           <figcaption>Tidied — with the original one tap away</figcaption>
         </figure>
         <figure class="screen-fig">
-          <img src="shots/L-chat-draft.png?v=20260831a" alt="The companion chat drafting a checklist note with Keep and Discard buttons" loading="lazy" width="780" height="1688">
-          <figcaption>A drafted note — keeping it is your call</figcaption>
+          <img src="shots/L-chat.webp?v=20260919a" alt="The companion answering &quot;What did I promise Tom?&quot; from your notes — the demo date, the cabinets and the budget ceiling — citing the Kitchen reno note, with Copy and Ask again" loading="lazy" width="780" height="1695">
+          <figcaption>Ask your notes — every answer cites its page</figcaption>
         </figure>
         <figure class="screen-fig">
-          <img src="shots/D-home.png?v=20260831a" alt="The Notes pile in the dark scheme" loading="lazy" width="780" height="1688">
+          <img src="shots/D-home.webp?v=20260919a" alt="The Notes pile in the dark scheme" loading="lazy" width="780" height="1695">
           <figcaption>And a dark scheme that keeps the warmth</figcaption>
         </figure>
       </div>

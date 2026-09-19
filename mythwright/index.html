@@ -88,6 +88,7 @@
     }
 
     h1, h2, h3, .display { font-family: 'Cinzel', Georgia, serif; letter-spacing: 0.01em; }
+    h1, h2 { text-wrap: balance; }
 
     a { color: var(--gold-bright); text-decoration: none; transition: color .2s; }
     a:hover { color: var(--gold); }
@@ -180,6 +181,8 @@
       margin-top: 58px; padding-top: 30px; border-top: 1px solid var(--border);
       max-width: 640px; margin-left: auto; margin-right: auto;
     }
+    /* Four stats wrapped 3 + 1 on a phone, leaving "3 Lanes" alone; two by two instead. */
+    @media (max-width: 460px) { .hero .stat-strip { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; gap: 22px 56px; } }
     .stat-strip .stat .num { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700; color: var(--gold-bright); }
     .stat-strip .stat .lbl { font-size: .82rem; color: var(--tertiary-fg); letter-spacing: 0.06em; text-transform: uppercase; }
 
@@ -501,7 +504,7 @@
 
   <header class="hero">
     <div class="container">
-      <span class="kicker">Collectible Card Game · iOS</span>
+      <span class="kicker">Collectible Card Game · <span style="text-transform:none">iOS</span></span>
       <img src="app-icon.png" alt="Mythwright" class="crest" width="640" height="640" fetchpriority="high">
       <h1>Collect. Build. Battle.</h1>
       <p class="sub">The heroes and monsters of classic literature, at war across three lanes. Dracula trades blows with Athena, Alice sits beside Beowulf in your deck — and every match is six turns of nerve and timing.</p>
@@ -521,9 +524,9 @@
   <section class="showcase" aria-label="Mythwright on iPhone">
     <div class="container">
       <div class="carousel" id="heroCarousel" aria-label="Mythwright screenshots, auto-rotating">
-        <div class="slide active"><img src="screenshot.jpg?v=20260811b" alt="The Mythwright home screen on iPhone — Ranked PvP, Practice, Campaign, and Conquest game modes with today's featured card." width="828" height="1799" loading="lazy" data-allow-duplicate="true"></div>
-        <div class="slide"><img src="shots/collection.jpg" alt="The Mythwright collection screen — illustrated cards of Dracula, Van Helsing, and other literary legends." width="828" height="1799" loading="lazy" data-allow-duplicate="true"></div>
-        <div class="slide"><img src="shots/lanes.jpg" alt="A Mythwright match in progress with character cards fought across three lanes." width="828" height="1799" loading="lazy" data-allow-duplicate="true"></div>
+        <div class="slide active"><img src="screenshot.jpg?v=20260919a" alt="The Mythwright home screen on iPhone — Ranked PvP, Practice, Campaign, and Conquest game modes with today's featured card." width="828" height="1799" loading="lazy" data-allow-duplicate="true"></div>
+        <div class="slide"><img src="shots/collection.jpg?v=20260919a" alt="The Mythwright collection screen — illustrated cards of Dracula, Van Helsing, and other literary legends." width="828" height="1799" loading="lazy" data-allow-duplicate="true"></div>
+        <div class="slide"><img src="shots/lanes.jpg?v=20260919a" alt="A Mythwright match in progress with character cards fought across three lanes." width="828" height="1799" loading="lazy" data-allow-duplicate="true"></div>
         <div class="slide"><img src="shots/forge.jpg" alt="The Mythwright AI Forge — describe a character and it paints the art, balances the stats, and writes the ability." width="828" height="1799" loading="lazy" data-allow-duplicate="true"></div>
       </div>
       <div class="carousel-dots" id="heroDots" role="tablist" aria-label="Choose screenshot">
@@ -543,12 +546,12 @@
         <p>Collect the cards, forge your own, and duel across three lanes.</p>
       </div>
       <div class="gallery-grid">
-        <figure class="shot"><div class="frame"><img src="shots/collection.jpg" alt="The Mythwright collection screen — 256 cards, each an illustrated character from classic literature." loading="lazy" data-allow-duplicate="true"></div><figcaption class="cap">Collect all 256 legends</figcaption></figure>
-        <figure class="shot"><div class="frame"><img src="shots/lanes.jpg" alt="A Mythwright match mid-game — character cards committed across three contested lanes." loading="lazy" data-allow-duplicate="true"></div><figcaption class="cap">Duel across three lanes</figcaption></figure>
-        <figure class="shot"><div class="frame"><img src="shots/deck.jpg" alt="The Mythwright deck builder — assembling a twelve-card deck from the collection." loading="lazy"></div><figcaption class="cap">Build your deck</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="shots/collection.jpg?v=20260919a" alt="The Mythwright collection screen — 256 cards, each an illustrated character from classic literature." loading="lazy" data-allow-duplicate="true"></div><figcaption class="cap">Collect all 256 legends</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="shots/lanes.jpg?v=20260919a" alt="A Mythwright match mid-game — character cards committed across three contested lanes." loading="lazy" data-allow-duplicate="true"></div><figcaption class="cap">Duel across three lanes</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="shots/deck.jpg?v=20260919a" alt="The Mythwright deck builder — assembling a twelve-card deck from the collection." loading="lazy"></div><figcaption class="cap">Build your deck</figcaption></figure>
         <figure class="shot"><div class="frame"><img src="shots/forge.jpg" alt="The Mythwright AI Forge in use — a described character ready to be forged into a card." loading="lazy" data-allow-duplicate="true"></div><figcaption class="cap">Forge your own with AI</figcaption></figure>
-        <figure class="shot"><div class="frame"><img src="shots/card.jpg" alt="A Mythwright card detail — a Legendary card with its On Reveal ability and flavor quote." loading="lazy"></div><figcaption class="cap">Every card has its own ability</figcaption></figure>
-        <figure class="shot"><div class="frame"><img src="screenshot.jpg?v=20260811b" alt="The Mythwright home screen — Ranked, Practice, Campaign, and Conquest game modes." loading="lazy" data-allow-duplicate="true"></div><figcaption class="cap">Four ways to play</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="shots/card.jpg?v=20260919a" alt="A Mythwright card detail — a Legendary card with its On Reveal ability and flavor quote." loading="lazy"></div><figcaption class="cap">Every card has its own ability</figcaption></figure>
+        <figure class="shot"><div class="frame"><img src="screenshot.jpg?v=20260919a" alt="The Mythwright home screen — Ranked, Practice, Campaign, and Conquest game modes." loading="lazy" data-allow-duplicate="true"></div><figcaption class="cap">Four ways to play</figcaption></figure>
       </div>
     </div>
   </section>
@@ -792,7 +795,7 @@
         <h2>Forge your legend</h2>
         <p>Mythwright is coming to iPhone and iPad. Collect all 256 legends, build the deck, and take your seat at the table.</p>
         <div class="cta-row" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-          <span class="btn" aria-disabled="true">Coming to the App Store</span>
+          <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Mythwright%20launches" class="btn">Email me at launch</a>
           <a href="privacy.html" class="btn ghost">Privacy</a>
         </div>
       </div>

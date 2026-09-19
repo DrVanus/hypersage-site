@@ -761,6 +761,10 @@
     .comp-hear { min-width: 130px; min-height: 44px; }
     .price-region { color: var(--muted-fg); font-size: .875rem; margin: -12px 0 16px; }
     @media(max-width:880px) { .hero-companions.presence { width: 190px; height: 190px; left: -10px; } }
+    /* On a phone the device is centred and a 190px fawn sat on its conversation rows and tab bar;
+       smaller and tucked into the corner, it peeks at the phone the way it does on desktop. */
+    @media(max-width:560px) { .hero-companions.presence { width: 112px; height: 112px; left: -6px; bottom: -18px; } }
+    @media(max-width:360px) { .hero-companions.presence { width: 88px; height: 88px; left: -14px; bottom: -22px; } }
     @media(prefers-reduced-motion:reduce) { .presence-ready > img { opacity: 1; } .presence-ready > .presence-canvas { opacity: 0; } }
     @media(max-width:420px) { .hero-buttons { gap: 10px; } .hero-buttons a { padding: 14px 16px; font-size: .875rem; } }
     .voice-transcript { margin-top: 12px; font-size: .875rem; color: var(--muted-fg); }
@@ -836,7 +840,7 @@
       "name": "What's free, and what's Plus?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Free includes: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (5 messages a day; a message with a photo uses three of your daily messages). Quietoak Plus ($9.99/month or $59.99/year) raises that to 100 messages a day, with an upgraded AI model — and adds a premium companion voice (the on-device voice stays free for everyone) a PDF of your diary cards and chain analyses, and 30 companion reflections on chains a day instead of 3. Crisis support is never limited and never behind Plus."
+        "text": "Free includes: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (5 messages a day; a message with a photo uses three of your daily messages). Quietoak Plus ($9.99/month or $59.99/year) raises that to 100 messages a day, with an upgraded AI model — and adds a premium companion voice (the on-device voice stays free for everyone), a PDF of your diary cards and chain analyses, and 30 companion reflections on chains a day instead of 3. Crisis support is never limited and never behind Plus."
       }
     },
     {
@@ -852,7 +856,7 @@
       "name": "iPad? Mac? Android?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "iPhone first. The iPhone app runs on iPad in iPhone-compatibility mode for now; a native iPad layout, Android, and Mac aren't committed yet."
+        "text": "iPhone first. The iPhone app runs on iPad in iPhone-compatibility mode for now; a native iPad layout, Android, and Mac aren't available yet."
       }
     }
   ]
@@ -897,7 +901,7 @@
     <div class="container">
       <div class="hero-layout">
         <div class="hero-text">
-          <span class="eyebrow">Coming to iOS</span>
+          <span class="eyebrow">Coming to <span style="text-transform:none">iOS</span></span>
           <h1>Talk it through.<br><span class="soft">Find a next step.</span></h1>
           <p class="lede">Talk through hard moments with an AI companion, by text or voice. Practice DBT skills and keep a simple diary to see your progress.</p>
           <div class="hero-buttons">
@@ -910,7 +914,7 @@
           <p class="hero-note">Free skills &amp; diary · Ages 18+</p>
         </div>
         <div class="hero-image">
-          <div class="hero-app screen-frame"><a href="screenshots/02-companion.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak companion screen with Willow, conversation starters, and saved talks"><img src="screenshots/02-companion.webp?v=20260909a" width="1080" height="2347" fetchpriority="high" alt="Quietoak companion screen with Willow, conversation starters, and saved talks"></a></div>
+          <div class="hero-app screen-frame"><a href="screenshots/02-companion.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak companion screen with Willow, conversation starters, and saved talks"><img data-allow-duplicate="true" src="screenshots/02-companion.webp?v=20260909a" width="1080" height="2347" fetchpriority="high" alt="Quietoak companion screen with Willow, conversation starters, and saved talks"></a></div>
           
           <div class="hero-companions presence" data-presence="willow" data-always="true"><img src="motion/art/willow-dimensional.webp?v=20260909a" width="640" height="640" alt="Willow, Quietoak’s fawn companion"></div>
         </div>
@@ -941,7 +945,7 @@
           </ol>
         </div>
         <div>
-          <div class="how-app screen-frame"><a href="screenshots/01-today.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak Today screen with Willow, a mood check-in, and daily practice"><img src="screenshots/01-today.webp?v=20260909a" width="1080" height="2347" alt="Quietoak Today screen with Willow, a mood check-in, and daily practice" loading="lazy"></a></div>
+          <div class="how-app screen-frame"><a href="screenshots/01-today.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak Today screen with Willow, a mood check-in, and daily practice"><img data-allow-duplicate="true" src="screenshots/01-today.webp?v=20260909a" width="1080" height="2347" alt="Quietoak Today screen with Willow, a mood check-in, and daily practice" loading="lazy"></a></div>
         </div>
       </div>
     </div>
@@ -970,14 +974,14 @@
           <button type="button" class="comp-hear" data-companion="sage" data-name="Sage" data-audio="audio/sample-sage.m4a?v=20260901a" aria-label="Hear Sage’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear Sage</span></button><details class="voice-transcript"><summary>Read Sage’s introduction</summary><p>I&#x27;m Sage. When things feel like too much, we&#x27;ll find one small, doable next step — and take it together.</p></details>
         </div>
         <div class="companion-card river">
-          <button class="portrait-choice presence" data-presence="river" type="button" aria-label="Animate River" aria-pressed="false"><img src="motion/art/river-dimensional.webp?v=20260909a" width="416" height="416" loading="lazy" alt="River, an otter"></button>
+          <button class="portrait-choice presence" data-presence="river" type="button" aria-label="Animate River" aria-pressed="false"><img src="motion/art/river-dimensional.webp?v=20260909a" width="400" height="416" loading="lazy" alt="River, an otter"></button>
           <div class="name">River</div>
           <div class="role">Flowing</div>
           <p>Curious and easy to talk to. Asks before assuming — more of a conversation than a lesson.</p>
           <button type="button" class="comp-hear" data-companion="river" data-name="River" data-audio="audio/sample-river.m4a?v=20260901a" aria-label="Hear River’s voice sample — an AI companion, not human"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Hear River</span></button><details class="voice-transcript"><summary>Read River’s introduction</summary><p>Hey, I&#x27;m River. There&#x27;s no wrong way to start — just tell me how today&#x27;s going, and we&#x27;ll take it from there.</p></details>
         </div>
         <div class="companion-card sol">
-          <button class="portrait-choice presence" data-presence="sol" type="button" aria-label="Animate Sol" aria-pressed="false"><img src="motion/art/sol-dimensional.webp?v=20260909a" width="416" height="416" loading="lazy" alt="Sol, a fox"></button>
+          <button class="portrait-choice presence" data-presence="sol" type="button" aria-label="Animate Sol" aria-pressed="false"><img src="motion/art/sol-dimensional.webp?v=20260909a" width="397" height="416" loading="lazy" alt="Sol, a fox"></button>
           <div class="name">Sol</div>
           <div class="role">Hopeful</div>
           <p>Warm and low-light, never peppy. Finds the one true thing you already did, without talking you out of the hard part.</p>
@@ -1063,7 +1067,7 @@
           <div class="section-eyebrow">Knows you better</div>
           <h2>It learns what you're <em>navigating.</em></h2>
           
-          <p class="lede">Tell your companion as much or as little as you like about what you're navigating. It carries that as context — the words it chooses, what it already knows not to ask you twice — so your replies can fit the context you choose to share.</p>
+          <p class="lede">Tell your companion as much or as little as you like about what you're navigating. It carries that as context — the words it chooses, what it already knows not to ask you twice — so its replies fit the context you choose to share.</p>
           <ul class="spotlight-points">
             <li><strong>Never a label.</strong> Quietoak doesn't diagnose, treat, or assess you. Your companion holds what you share as context for how it talks with you, and always points clinical questions back to your clinician.</li>
             <li><strong>However sure you are.</strong> Mark anything you add as just <em>wondering</em>, <em>pretty sure</em>, or <em>diagnosed</em> — all welcome, none required, and nothing is verified or needed to use the app.</li>
@@ -1104,8 +1108,8 @@
           <p class="lede">STOP, TIPP, paced breathing and a body scan — each one recorded in your companion's own voice, so you can put the phone down, close your eyes and just follow along.</p>
           <ul class="spotlight-points">
             <li><strong>Their voice, not a robot.</strong> Every exercise is recorded in all six companions' voices. Bond with Stone and it's Stone who walks you through it; choose Fern and it's Fern.</li>
-            <li><strong>Free — not a trial, not a teaser.</strong> Guided audio isn't part of Plus. A paying subscriber and someone who has never spent a penny hear exactly the same recordings.</li>
-            <li><strong>Works with no signal.</strong> The audio lives inside the app, so a hard moment on the tube or in a hospital corridor plays the same as one at home.</li>
+            <li><strong>Free — not a trial, not a teaser.</strong> Guided audio isn't part of Plus. A paying subscriber and someone who has never spent a cent hear exactly the same recordings.</li>
+            <li><strong>Works with no signal.</strong> The audio lives inside the app, so a hard moment on the train or in a hospital corridor plays the same as one at home.</li>
           </ul>
           
           <figure class="guided-player">
@@ -1223,7 +1227,7 @@
       </div>
       <div class="screens-grid">
         <div class="screen-card">
-          <div class="screen-frame"><a href="screenshots/01-today.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak Today tab — a companion greeting, today’s diary card, and a skill to try"><img class="shot-img" src="screenshots/01-today.webp?v=20260909a" data-light="screenshots/01-today.webp?v=20260909a" data-dark="screenshots/01-today-dark.webp?v=20260909a" width="1080" height="2347" alt="Quietoak Today tab — a companion greeting, today’s diary card, and a skill to try" loading="lazy"></a></div>
+          <div class="screen-frame"><a href="screenshots/01-today.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak Today tab — a companion greeting, today’s diary card, and a skill to try"><img data-allow-duplicate="true" class="shot-img" src="screenshots/01-today.webp?v=20260909a" data-light="screenshots/01-today.webp?v=20260909a" data-dark="screenshots/01-today-dark.webp?v=20260909a" width="1080" height="2347" alt="Quietoak Today tab — a companion greeting, today’s diary card, and a skill to try" loading="lazy"></a></div>
           <div class="screen-label"><strong>Today</strong>Your companion, every day</div>
         </div>
         <div class="screen-card">
@@ -1276,7 +1280,7 @@
         <div class="spotlight-phone">
           <div class="spotlight-duo">
             
-            <div class="screen-frame"><a href="screenshots/02-companion.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak companion chat — Willow, conversation starters, saved talks, and a small daily practice"><img src="screenshots/02-companion.webp?v=20260909a" width="1080" height="2347" alt="Quietoak companion chat — Willow, conversation starters, saved talks, and a small daily practice" loading="lazy"></a></div>
+            <div class="screen-frame"><a href="screenshots/02-companion.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak companion chat — Willow, conversation starters, saved talks, and a small daily practice"><img data-allow-duplicate="true" src="screenshots/02-companion.webp?v=20260909a" width="1080" height="2347" alt="Quietoak companion chat — Willow, conversation starters, saved talks, and a small daily practice" loading="lazy"></a></div>
             <div class="screen-frame"><a href="screenshots/08-switcher.webp?v=20260909a" target="_blank" rel="noopener" aria-label="Enlarge screenshot: Quietoak companion switcher — choosing which companion you need right now, each with a voice sample"><img src="screenshots/08-switcher.webp?v=20260909a" width="1080" height="2347" alt="Quietoak companion switcher — choosing which companion you need right now, each with a voice sample" loading="lazy"></a></div>
           </div>
         </div>
@@ -1447,7 +1451,7 @@
         </details>
         <details class="faq">
           <summary>What's free, and what's Plus?</summary>
-          <p>Free includes: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (5 messages a day; a message with a photo uses three of your daily messages). Quietoak Plus ($9.99/month or $59.99/year) raises that to 100 messages a day, with an upgraded AI model — and adds a premium companion voice (the on-device voice stays free for everyone) a PDF of your diary cards and chain analyses, and 30 companion reflections on chains a day instead of 3. Crisis support is never limited and never behind Plus.</p>
+          <p>Free includes: the DBT skills library, the diary card and trends, all six companions, your saved conversations, the crisis kit, and daily companion chat (5 messages a day; a message with a photo uses three of your daily messages). Quietoak Plus ($9.99/month or $59.99/year) raises that to 100 messages a day, with an upgraded AI model — and adds a premium companion voice (the on-device voice stays free for everyone), a PDF of your diary cards and chain analyses, and 30 companion reflections on chains a day instead of 3. Crisis support is never limited and never behind Plus.</p>
         </details>
         <details class="faq">
           <summary>Who is Quietoak for?</summary>
@@ -1455,7 +1459,7 @@
         </details>
         <details class="faq">
           <summary>iPad? Mac? Android?</summary>
-          <p>iPhone first. The iPhone app runs on iPad in iPhone-compatibility mode for now; a native iPad layout, Android, and Mac aren't committed yet.</p>
+          <p>iPhone first. The iPhone app runs on iPad in iPhone-compatibility mode for now; a native iPad layout, Android, and Mac aren't available yet.</p>
         </details>
       </div>
     </div>
