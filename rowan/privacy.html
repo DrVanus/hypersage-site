@@ -103,7 +103,7 @@
     </ul>
 
     <h2>Crash reporting</h2>
-    <p>Rowan's backend can send crash and error reports to <strong>Sentry</strong>. Three things are enforced in code, on every event: personally identifying data is not attached, the request body is dropped — that is the field your message would be in — and the authorization, cookie, device-id and receipt headers are removed.</p>
+    <p>Rowan's backend can send crash and error reports to <strong>Sentry</strong>, but it is not switched on: no Sentry key is deployed to the server, so no error report leaves it at all today. If it is ever switched on, three things are enforced in code, on every event: personally identifying data is not attached, the request body is dropped — that is the field your message would be in — and the authorization, cookie, device-id and receipt headers are removed.</p>
     <p>Being precise about the limit of that: the scrubber rewrites the <em>request</em> attached to an event. It does not filter Sentry's breadcrumb trail, which is assembled from the backend's own log lines. Those log lines are written not to contain message text, symptoms or conditions, and we review them for that — but it is a discipline we hold ourselves to, not a filter that would catch us if we slipped, so we are not going to tell you breadcrumbs are health-content-free by construction. There is no product analytics of any kind — no PostHog, no Firebase, no ad networks.</p>
 
     <h2>How your health information is treated</h2>
@@ -121,7 +121,7 @@
       <li><strong>Anthropic</strong> — primary AI provider for Rowan's replies. <a href="https://www.anthropic.com/legal/privacy" rel="noopener">anthropic.com/legal/privacy</a></li>
       <li><strong>OpenAI</strong> — AI failover provider and transcription provider. It can receive your content by <strong>three</strong> separate routes: as the reply failover described above, enabled by default; as the failover for the independent safety check, which sends the recent transcript to a model of its own; and — only when you tap the microphone — as the <strong>transcription</strong> service that turns your recording into text. That third route is the only one that carries <strong>audio</strong> rather than text, and the recording is not stored by us before or after it (see "4. Voice"). Its text-to-speech route exists in our backend but is switched off, so nothing is sent to it for Rowan to <em>speak</em> today. <a href="https://openai.com/policies/privacy-policy" rel="noopener">openai.com/policies/privacy-policy</a></li>
       <li><strong>Fly.io</strong> — hosts our backend and database. <a href="https://fly.io/legal/privacy-policy" rel="noopener">fly.io/legal/privacy-policy</a></li>
-      <li><strong>Sentry</strong> — backend error reporting, with PII disabled. <a href="https://sentry.io/privacy/" rel="noopener">sentry.io/privacy</a></li>
+      <li><strong>Sentry</strong> — backend error reporting, with PII disabled. Not switched on today: no key is deployed, so nothing is sent to it. <a href="https://sentry.io/privacy/" rel="noopener">sentry.io/privacy</a></li>
       <li><strong>Apple App Store</strong> — app distribution. <a href="https://www.apple.com/legal/privacy/en-ww/" rel="noopener">apple.com/legal/privacy</a></li>
     </ul>
 
