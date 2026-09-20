@@ -379,9 +379,14 @@
     }
     .hero-phone-frame .hero-phone-img:first-child { position: relative; }
     .hero-phone-frame .hero-phone-img.is-active { opacity: 1; }
+    /* The row must never be wider than the phone above it. Two 44px arrows +
+       six 44px dots + gaps is 362px, which on a 320-wide screen ran past both
+       edges and `.hero { overflow: hidden }` sliced each arrow in half. Below
+       480 the dots keep their 44px height but narrow their hit box; flex-wrap
+       and max-width are the backstop if a seventh screen is ever added. */
     .hero-rotator-controls {
       display: none; align-items: center; justify-content: center; gap: 5px;
-      margin-top: 14px;
+      margin-top: 14px; flex-wrap: wrap; max-width: 100%;
     }
     .walkthrough-ready .hero-rotator-controls { display: flex; }
     .hero-rotator-controls button {
@@ -395,7 +400,13 @@
       color: var(--fg); border-color: var(--border); background: rgba(255,255,255,.035);
     }
     .hero-rotator-controls button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-    .hero-rotator-dots { display: flex; align-items: center; justify-content: center; }
+    .hero-rotator-dots {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; min-width: 0; max-width: 100%;
+    }
+    @media (max-width: 480px) {
+      .hero-rotator-controls .hero-rotator-dot { min-width: 30px; }
+    }
     .hero-rotator-dot::before {
       content: ''; width: 6px; height: 6px; border-radius: 50%;
       background: rgba(224,130,48,.3); transition: width .2s ease, background .2s ease;
@@ -687,8 +698,11 @@
       display: flex; align-items: flex-start; gap: 8px;
     }
     .price-features li::before { content: '\2713'; color: var(--primary); font-weight: 700; flex-shrink: 0; }
-    .price-features li.off { color: rgba(154,142,128,0.4); text-decoration: line-through; }
-    .price-features li.off::before { content: '\2715'; color: rgba(154,142,128,0.3); }
+    /* The two lines Free does NOT include are the ones a buyer reads hardest.
+       The strike-through and the ✕ carry "not included"; the ink stays at a
+       readable 4.5:1 instead of fading the limit out of the card. */
+    .price-features li.off { color: rgba(154,142,128,0.85); text-decoration: line-through; }
+    .price-features li.off::before { content: '\2715'; color: rgba(154,142,128,0.75); }
     .price-card .btn-warm, .price-card .btn-outline { width: 100%; justify-content: center; margin-top: 24px; }
 
     /* FAQ */
@@ -738,7 +752,7 @@
     footer { border-top: 1px solid var(--border); padding: 48px 0; }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
     .footer-brand p { font-size: 0.82rem; color: var(--muted-fg); margin-top: 12px; max-width: 280px; line-height: 1.55; }
-    .footer-col h2 { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(154,142,128,0.7); margin-bottom: 14px; }
+    .footer-col h2 { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(154,142,128,0.85); margin-bottom: 14px; }
     .footer-col ul { list-style: none; }
     .footer-col li { margin-bottom: 8px; }
     .footer-col a { font-size: 0.82rem; color: var(--muted-fg); transition: color 0.2s; }
@@ -746,8 +760,12 @@
     .footer-bottom {
       margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border);
       display: flex; justify-content: space-between; align-items: center;
-      font-size: 0.72rem; color: rgba(154,142,128,0.5);
+      gap: 16px; flex-wrap: wrap;
+      font-size: 0.8rem; color: rgba(154,142,128,0.85);
     }
+    /* Fine print, but the food-safety line is the one sentence in the footer
+       that has to be readable. Full --muted-fg (6.1:1 on the page ground). */
+    .footer-bottom .safety-note { color: var(--muted-fg); }
 
     /* Feature-detail sections — one section per major feature, CryptoSage
        style: copy on one side, real device screenshots on the other,
@@ -1869,7 +1887,7 @@
     </div>
     <div class="footer-bottom">
       <p>&copy; 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. All rights reserved.</p>
-      <p>Saffra is an AI. Always verify allergens and cooking temperatures yourself.</p>
+      <p class="safety-note">Saffra is an AI. Always verify allergens and cooking temperatures yourself.</p>
     </div>
   </div>
 </footer>
@@ -1979,11 +1997,7 @@
   }
 
   // Pricing toggle. Yearly is the default — best-value framing for the
-  // featured Pro card. VERIFIED against App Store Connect 2026-08-19:
-  // com.vanus.saffra.pro.monthly USA $4.99, com.vanus.saffra.pro.annual USA
-  // $29.99. There is NO lifetime product — /v1/apps/6792760857/inAppPurchasesV2
-  // returns an empty list — so the third card was removed. If a tier is ever
-  // added here, confirm it exists in StoreKit first.
+  // featured Pro card.
   var monthlyPrices = ['$0', '$4.99'];
   var yearlyPrices = ['$0', '$29.99'];
   var monthlyPeriods = ['forever', '/month'];
