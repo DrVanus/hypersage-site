@@ -12,7 +12,7 @@ CryptoSage AI provides market information, not investment advice. Rowan, Quietoa
 
 ## Products
 
-- [Holohound](https://hypersage.ai/holohound/): trading-card binder for Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam, with free unlimited scanning for Pokémon and Magic; the prices it shows name their source, and an AI called Hound knows your binder (iOS, in development)
+- [Holohound](https://hypersage.ai/holohound/): trading-card scanner and binder for Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam; the prices it shows name their source, and an AI called Hound knows your binder (iOS, in development)
 - [Wingmate](https://hypersage.ai/wingmate/): four AI dating coaches that remember the people you're talking to and turn a screenshot of your chat into suggested replies (iOS, live — [App Store](https://apps.apple.com/app/id6792772729))
 - [Quietoak](https://hypersage.ai/quietoak/): self-help DBT skills app with an AI companion that remembers you, mood logging, a daily diary card, and an always-free crisis kit (iOS, coming soon)
 - [Loam](https://hypersage.ai/loam/): AI notes companion that asks before it acts, tidies slips in place, and records every change it makes in a Ledger with undo and redo (iOS, coming soon)
