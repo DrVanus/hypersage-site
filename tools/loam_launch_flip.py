@@ -69,8 +69,8 @@ PAGE_EDITS = [
               <span aria-hidden="true">↗</span>
             </a>'''),
     # eyebrow
-    ('<span class="eyebrow">Coming to iOS</span>',
-     '<span class="eyebrow">On the App Store · iOS</span>'),
+    ('<span class="eyebrow">Coming to <span style="text-transform:none">iOS</span></span>',
+     '<span class="eyebrow">Available now</span>'),
     # FAQ answer
     ('<p>Loam is coming to the App Store for iPhone. <a href="' + MAILTO + '">Email us</a> and we\'ll tell you the moment it\'s live.</p>',
      '<p>Now — <a href="{URL}" target="_blank" rel="noopener">Loam is on the App Store</a> for iPhone.</p>'),
@@ -92,10 +92,15 @@ PAGE_EDITS = [
 
 ROOT_EDITS = [
     ('<span class="status">iOS · Coming soon</span>',
-     '<span class="status live">iOS · Live</span>'),
-    ('<a class="link" aria-label="Visit the Loam site" href="loam/">Visit Loam <span aria-hidden="true">→</span></a>',
-     '<a class="btn-store" target="_blank" rel="noopener" aria-label="Download Loam on the App Store" href="{URL}">Download on the App Store <span aria-hidden="true">↗</span></a>\n            <a class="link" aria-label="Visit the Loam site" href="loam/">Visit Loam <span aria-hidden="true">→</span></a>'),
-    (' <span class="soon">Coming soon</span>', ''),
+     '<span class="status live">iOS · Available</span>'),
+    ('<a class="link" aria-label="Website: Loam" href="loam/">Website <span aria-hidden="true">→</span></a>',
+     '<a class="app-store" aria-label="Download on the App Store: Loam" href="{URL}" target="_blank" rel="noopener">'
+     '<img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>\n'
+     '            <a class="link" aria-label="Website: Loam" href="loam/">Website <span aria-hidden="true">→</span></a>'),
+    # The rail's separate `<span class="soon">Coming soon</span>` chip is GONE — the
+    # card redesign folded status into the one `.status` chip edited above. An edit
+    # for an element that no longer exists is anchor rot that fails every --check,
+    # so it is removed rather than carried as a permanent red.
 ]
 
 OG_KICKER = ('"kicker": "Notes, tended \\u00b7 Coming to iOS"', '"kicker": "Notes, tended \\u00b7 iOS"')
