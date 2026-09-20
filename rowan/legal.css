@@ -134,3 +134,12 @@ footer.legal-footer {
 }
 footer.legal-footer a { color: var(--muted-fg); margin: 0 12px; font-weight: 600; }
 footer.legal-footer a:hover { color: var(--primary); }
+
+/* Tap targets (44px) for the nav and footer links, mirroring the studio's own
+   legal.css. These links were 23-26px tall on a phone — under the 44px iOS
+   minimum and under WCAG 2.5.5 — and they are the ONLY navigation on pages a
+   reader arrives at straight from the App Store listing, so a mistap there is
+   a dead end rather than an inconvenience. The nav grows ~14px taller; it is
+   sticky and that is the trade. */
+.legal-nav .links a, footer.legal-footer a { display: inline-flex; align-items: center; min-height: 44px; }
+.legal-nav .brand { min-height: 44px; }
