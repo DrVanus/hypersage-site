@@ -140,7 +140,7 @@
       
       <li><strong>Apple (speech recognition)</strong> — the audio you speak in voice mode. The app does not request on-device recognition, so Apple's Speech framework runs server-backed and the audio reaches Apple; it does not reach us.</li>
       <li><strong>OpenAI (Whisper)</strong> — the audio you speak in Cooking Mode, sent for a second, more accurate transcription. It runs for <em>every</em> spoken question, not only when Apple's transcript is poor, and also whenever Apple returns nothing or something Saffra can't parse; a cleanly recognized &ldquo;next&rdquo; or &ldquo;back&rdquo; is not sent, and composer dictation is never sent. The audio is not retained.</li>
-      <li><strong>OpenAI (vision)</strong> — the photo you take of a fridge or pantry shelf when you ask Saffra to identify what's on it. It is read to produce the list of items you then confirm, and it is not retained. Receipt and cookbook photos do not go this way.</li>
+      <li><strong>OpenAI (vision)</strong> — the photo you take of a fridge or pantry shelf when you ask Saffra to identify what's on it, and any photo you attach to a message in the chat tab. Both are read to answer you, and neither is retained. Receipt and cookbook photos do not go this way.</li>
       <li><strong>Apple and Google</strong> — sign-in.</li>
       <li><strong>USDA FoodData Central</strong> (ingredient names, for nutrition) and <strong>Open Food Facts</strong> (just the barcode number). No personal data either way.</li>
       <li><strong>Fly.io, Cloudflare R2, Upstash Redis</strong> — hosting infrastructure.</li>
