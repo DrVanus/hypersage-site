@@ -1,21 +1,15 @@
-# hypersage.ai is live (2026-08-06) and this repo is attached to it, so this file
-# is now at the ORIGIN ROOT and is actually in force. It was inert before: a crawler
-# only ever reads robots.txt from an origin root, and the site was served from a
-# project path, so the file that governed this host was drvanus.github.io/robots.txt.
+# hypersage.ai crawl rules.
 #
-# THIS IS THE ONLY robots.txt THAT CONTROLS CRAWLING. Eight subfolders retain a
-# robots.txt from the standalone sites that were folded into this origin. Crawlers
-# ignore those nested files, but their Sitemap lines point at the canonical
-# hypersage.ai subfolder URLs so a direct request does not advertise retired hosts.
-# The eleven product sites are subfolders of this one origin, so the rules below
-# cover all of them.
+# This is the only robots.txt in force for this host: a crawler reads robots.txt
+# from an origin root, and every product site is a subfolder of this one origin,
+# so the rules below cover all of them. Subfolder copies are inert; their Sitemap
+# lines point at canonical hypersage.ai URLs so a direct request does not
+# advertise a retired host.
 User-agent: *
 Allow: /
-# /fleet/ is the internal Harbormaster status board. Its contents are
-# encrypted at rest — a crawler fetching it gets a base64 blob — but it is
-# disallowed as well, because a URL in an index invites the traffic that
-# makes the passphrase the only thing standing there. It is linked from no
-# page and is in no sitemap; keep it that way.
+
 Disallow: /fleet/
+Disallow: /tools/
+Disallow: /.claude/
 
 Sitemap: https://hypersage.ai/sitemap.xml
