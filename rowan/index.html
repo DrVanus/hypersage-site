@@ -42,8 +42,12 @@
       --muted-fg: #6E5E7C;     /* textDim */
       /* Was #8B7C98, which measured 3.21:1 against the warm hero wash and
          3.86:1 on a white card — under AA for body-size text everywhere it is
-         used (.hero-note carries the medical disclaimer, and .soon carries the
-         small status badges). #726180 clears 4.5:1 on every background this
+         used (.hero-note sits under the hero CTAs, and .soon carries the small
+         status badges). The medical boundary statement .hero-note used to carry
+         is no longer here: disclaimers do not belong in selling copy, so it
+         lives in the #boundary section, the FAQ and the closing .disclaimer,
+         and the nav links straight to #boundary so it is one tap from the top.
+         #726180 clears 4.5:1 on every background this
          page paints behind it: 5.16 on --bg, 4.66 on the hero wash, 4.78 on the
          hero/lilac overlap, 5.62 on white, 4.73 on --card-soft. */
       --tertiary-fg: #726180;
@@ -67,6 +71,10 @@
     }
 
     html { scroll-behavior: smooth; color-scheme: only light; background: var(--bg); }
+    /* The nav is sticky and 73px tall, so an anchored jump used to park the
+       section's eyebrow underneath it — the reader landed on a headline with no
+       kicker. Matters most for #boundary, which the nav links to directly. */
+    section[id] { scroll-margin-top: 88px; }
 
     body {
       /* Matches the app's type stack: serif display over a system body face. */
@@ -550,7 +558,7 @@
   "name": "Rowan",
   "applicationCategory": "HealthApplication",
   "operatingSystem": "iOS",
-  "description": "An AI companion for living with a chronic condition. Talk about your day in plain words. Rowan keeps the record and turns it into a brief for your doctor.",
+  "description": "An AI companion for living with a chronic condition. Talk about your day in plain words. Rowan keeps the record and turns it into a brief for your doctor. It is not a medical device and does not diagnose or treat.",
   "url": "https://hypersage.ai/rowan/",
   "installUrl": "https://apps.apple.com/app/id6797693737",
   "offers": {
@@ -575,7 +583,7 @@
       "name": "Can Rowan tell me what's wrong with me?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No, and it's built not to. Rowan doesn't diagnose, doesn't offer a differential, and won't guess at what your symptoms mean. It's for people who already have a diagnosis and are living with it — organizing what happens day to day so your care team has better information to work with."
+        "text": "No, and it's built not to. Rowan doesn't diagnose, doesn't offer a differential, and won't guess at what your symptoms mean. It's for people who already have a diagnosis and are living with it — organizing what happens day to day so your care team has better information to work with. That goes for the trends too: what Rowan shows you there is a pattern, not a diagnosis, and what a pattern means is your doctor's call."
       }
     },
     {
@@ -668,6 +676,7 @@
         <a href="#how">How it works</a>
         <a href="#features">Features</a>
         <a href="#screens">Screens</a>
+        <a href="#boundary">What it isn't</a>
         <a href="#privacy-spotlight">Privacy</a>
         <a href="#faq">FAQ</a>
         <a href="support.html">Support</a>
@@ -679,6 +688,7 @@
           <a href="#how">How it works</a>
           <a href="#features">Features</a>
           <a href="#screens">Screens</a>
+          <a href="#boundary">What it isn't</a>
           <a href="#privacy-spotlight">Privacy</a>
           <a href="#faq">FAQ</a>
           <a href="support.html">Support</a>
@@ -955,7 +965,7 @@
     <div class="container">
       <div class="section-eyebrow" style="text-align:center;">What to expect</div>
       <h2 style="text-align:center;">What Rowan does, and <em>what it doesn't.</em></h2>
-      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Rowan keeps the record. Diagnosis and treatment stay with your care team.</p>
+      <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Rowan is an AI companion — not a doctor, nurse, or licensed clinician, and not a medical device. It keeps the record. Diagnosis and treatment stay with your care team.</p>
       <div class="boundary">
         <div class="boundary-col is">
           <h3>Rowan does</h3>
@@ -963,7 +973,7 @@
             <li>Help you organize, track, and understand your health information</li>
             <li>Turn everyday sentences into a symptom log</li>
             <li><strong>Talk it through with you</strong> — ask what changed this month, what you logged, or what's worth raising</li>
-            <li>Show you patterns over time, and help you describe them</li>
+            <li>Show you patterns over time — <strong>a pattern, not a diagnosis</strong> — and help you describe them</li>
             <li>Prepare better questions for your doctor</li>
             <li>Remind you about medications you entered, on the schedule you set</li>
             <li>Point you toward care — and toward emergency help when it matters</li>
@@ -998,13 +1008,15 @@
             
             <li><strong>Your messages go to an AI provider</strong> so Rowan can reply. That's Anthropic, or OpenAI when Anthropic is unavailable. Either one can receive your message and health context. The independent safety check has its own fallback to OpenAI, which receives the recent transcript. Your log is stored on our server so it carries over between sessions.</li>
             
+            <li><strong>The notes stay on your phone.</strong> What Rowan remembers about you is never filed on our server — though your phone sends those notes with each message, so they reach the AI provider like the rest of your context.</li>
+
             <li><strong>Delete means delete.</strong> One tap erases what Rowan keeps on your phone and purges your conversations, symptom logs, safety events, and usage counters from our server. You get a receipt of what was removed.</li>
           </ul>
           <p style="margin-top: 22px;"><a href="privacy.html" style="font-weight:700;">Read the full privacy policy →</a></p>
         </div>
         <div class="spotlight-phone">
 
-          <div class="screen-frame"><img src="shots/memory.webp?v=20260826a" alt="Rowan’s “What Rowan knows” card — the plain list of notes Rowan keeps about you, an “Edit these notes” button, “Clear these notes” underneath, and an “Always in context” note listing everything Rowan sees — the notes, your conditions, medications and allergies, recent entries, the name you gave Rowan, your device language and today’s date — and saying the notes are stored on the device, not kept on the server, but sent with each message and so reaching the AI provider" width="716" height="1772" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/memory.webp?v=20260826a" alt="Rowan’s “What Rowan knows” card — the plain list of notes Rowan keeps about you, an “Edit these notes” button, and “Clear these notes” underneath, over an “Always in context” note that begins listing everything Rowan sees alongside them: your conditions, medications and allergies, your recent entries, the name you gave Rowan, your device’s language and the date" width="716" height="1772" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -1017,7 +1029,7 @@
       <div class="faq-list">
         <details class="faq">
           <summary>Can Rowan tell me what's wrong with me?</summary>
-          <p>No, and it's built not to. Rowan doesn't diagnose, doesn't offer a differential, and won't guess at what your symptoms mean. It's for people who already have a diagnosis and are living with it — organizing what happens day to day so your care team has better information to work with.</p>
+          <p>No, and it's built not to. Rowan doesn't diagnose, doesn't offer a differential, and won't guess at what your symptoms mean. It's for people who already have a diagnosis and are living with it — organizing what happens day to day so your care team has better information to work with. That goes for the trends too: what Rowan shows you there is <strong>a pattern, not a diagnosis</strong>, and what a pattern means is your doctor's call.</p>
         </details>
         <details class="faq">
           <summary>Is Rowan a medical device?</summary>
@@ -1088,16 +1100,21 @@
     <div class="more-apps">
       <h3>More from HyperSage AI Labs</h3>
       <ul class="more-apps-list">
+        <li><a href="https://cryptosageai.io/">CryptoSage AI — Crypto Portfolio Tracker</a></li>
         <li><a href="https://hypersage.ai/wingmate/">Wingmate — AI Dating Coach</a></li>
-        <li><a href="https://hypersage.ai/quietoak/">Quietoak — DBT Skills Companion</a></li>
-        <li><a href="https://hypersage.ai/saffra/">Saffra — AI Personal Chef</a></li>
+        <li><a href="https://hypersage.ai/quietoak/">Quietoak — DBT Companion &amp; Diary</a></li>
+        <li><a href="https://hypersage.ai/alder/">Alder — Sobriety &amp; Recovery</a></li>
+        <li><a href="https://hypersage.ai/saffra/">Saffra — AI Cooking Assistant</a></li>
         <li><a href="https://hypersage.ai/storyvault/">StoryVault AI — Interactive Fiction</a></li>
         <li><a href="https://hypersage.ai/nightshelf/">Nightshelf — Sleep Stories</a></li>
+        <li><a href="https://hypersage.ai/holohound/">Holohound — Trading Card Scanner</a></li>
+        <li><a href="https://hypersage.ai/loam/">Loam — AI Notes Companion</a></li>
+        <li><a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a></li>
         <li><a href="https://hypersage.ai/hexhunter/">Hexhunter — Gothic Horde-Survivor</a></li>
         <li><a href="https://hypersage.ai/mythwright/">Mythwright — Strategy Card Game</a></li>
-        <li><a href="https://hypersage.ai/alder/">Alder — Sobriety &amp; Recovery</a></li>
-        <li><a href="https://hypersage.ai/waddleton/">Waddleton — Social World / Arcade</a></li>
-        <li><a href="https://hypersage.ai/mythkin/">Mythkin — AI Characters &amp; Legends</a></li>
+        <li><a href="https://hypersage.ai/waddleton/">Waddleton — Social World · Arcade</a></li>
+        <li><a href="https://hypersage.ai/hoardling/">Hoardling — Hoard Defense</a></li>
+        <li><a href="https://hypersage.ai/gemburrow/">Gemburrow — Cozy Gem-Digging Puzzle</a></li>
       </ul>
     </div>
     <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Rowan — your story, kept straight.</div>
