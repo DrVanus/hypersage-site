@@ -581,11 +581,40 @@
       .showcase-copy { text-align: center; }
       .showcase-copy p.lede { margin-left: auto; margin-right: auto; }
       .showcase-points { max-width: 460px; margin: 0 auto; text-align: left; }
-      .phone-row { max-width: 520px; margin: 0 auto; }
+      /* 520px across three frames left each phone ~161px wide — narrower than the
+         224px the frames are designed for. Give the stacked layout the room it
+         already had at desktop width instead of squeezing it. */
+      .phone-row { max-width: 720px; margin: 0 auto; }
+    }
+    /* Below ~600px three phones abreast shrank each capture to ~93px, at which
+       scale every line of in-app text inside them is grey texture rather than
+       words — the frames stop being evidence of anything. One frame per view in
+       a snap-scroller keeps them near their designed 224px+; the next frame
+       peeks in at the edge so the swipe is visible rather than hidden. */
+    @media (max-width: 600px) {
+      .phone-row {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 4px;
+      }
+      .phone-row::-webkit-scrollbar { display: none; }
+      .phone-row .screen-card {
+        flex: 0 0 min(78%, 300px);
+        max-width: none;
+        scroll-snap-align: start;
+      }
+      /* One-frame showcases have nothing to scroll: keep them centred. */
+      .phone-row.single { justify-content: center; overflow-x: visible; }
+      .phone-row.single .screen-card { flex: 0 0 min(80%, 300px); }
+      .phone-row.stagger .screen-card:nth-child(even) { transform: none; }
     }
     @media (max-width: 460px) {
       .phone-row { gap: 11px; }
-      .phone-row.stagger .screen-card:nth-child(even) { transform: none; }
       .phone-row .screen-name { font-size: 0.82rem; }
       .phone-row .screen-frame { padding: 6px; border-radius: 20px; }
       .phone-row .screen-frame img { border-radius: 15px; }
@@ -853,7 +882,7 @@
       </div>
       <div class="phone-row" style="margin-top: 48px;">
         <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-daily.jpg?v=20260919a" width="720" height="1564" alt="The Daily Challenge: today's shared loadout — Kael in The Ossuary on Normal with auto-aim and all 12 relics at level 1 — and a Play Daily Challenge button."></div><figcaption><div class="screen-kind">Daily</div><div class="screen-name">One hunt, equal power</div></figcaption></figure>
-        <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-mastery.jpg?v=20260919a" width="720" height="1564" alt="Hunter Mastery: 0 of 27 victories claimed, the next hunt to try, and the crests to earn — First Light, Wayfarer, Ninefold Oath and Grandmaster."></div><figcaption><div class="screen-kind">Mastery</div><div class="screen-name">Every hunter, every arena</div></figcaption></figure>
+        <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-mastery.jpg?v=20260919a" width="720" height="1564" alt="Hunter Mastery at the start of a save: 0 of 27 victories claimed, the next hunt to try, and the first four of the five crests to earn — First Light, Wayfarer, Ninefold Oath and Grandmaster, with Iron Resolve below them."></div><figcaption><div class="screen-kind">Mastery</div><div class="screen-name">Every hunter, every arena</div></figcaption></figure>
         <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-ritual.jpg?v=20260919a" width="720" height="1564" alt="A Warding Ritual at 2 of 3: two seals marked SEALED while the hunter charges the last one."></div><figcaption><div class="screen-kind">Ritual</div><div class="screen-name">Hold the seals</div></figcaption></figure>
       </div>
     </div>
