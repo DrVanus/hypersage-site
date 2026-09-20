@@ -57,6 +57,19 @@ a:hover { color: var(--accent-light); }
 .legal-nav .links a:hover { color: var(--accent); }
 .legal-nav .links a.active { color: var(--accent); }
 
+/* Narrow phones. These are the privacy/terms/support URLs filed with App Store
+   Connect, so they have to hold together at 320px: tighten the header first,
+   then at <=340px drop the brand wordmark so Privacy/Terms/Support still fit
+   the column instead of pushing the page into a sideways scroll. The mark stays
+   as the home link and its alt text keeps the link named.
+   Mirrors the studio-wide /legal.css blocks. */
+@media (max-width: 560px) {
+  .legal-nav .container { gap: 12px; }
+  .legal-nav .brand { font-size: 0.92rem; gap: 8px; }
+  .legal-nav .links { gap: 14px; font-size: 0.85rem; }
+}
+@media (max-width: 340px) { .legal-nav .brand > span { display: none; } }
+
 main.legal {
   max-width: 760px; margin: 0 auto;
   padding: 56px 24px 96px;
