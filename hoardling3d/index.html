@@ -46,6 +46,38 @@
       box-shadow:0 0 12px rgba(255,190,80,.65);transition:width .22s ease-out}
     #boot-note{font-family:system-ui,sans-serif;font-size:12px;letter-spacing:.10em;
       text-transform:uppercase;color:rgba(255,233,196,.46)}
+    /* THE PAGE HAD NO <a> AT ALL. sitemap.xml declares /hoardling3d/ and its
+       privacy, terms and support pages; all four answer 200, and the one a
+       visitor actually lands on linked to none of them and offered no way back
+       to the studio.
+
+       NOT IN #boot, WHICH IS THE OBVIOUS PLACE AND THE WRONG ONE. The 2D build
+       puts its row there because its title screen carries the same pair again
+       (TITLE_LEGAL in game.js); this build has no such thing. And #boot here is
+       not merely faded — game.js REMOVES it once ART.load resolves, which on a
+       warm cache is under a second: I measured the overlay already gone 900ms
+       after DOMContentLoaded. A row that lives in it is a blink.
+
+       So it is its own element, and it leaves on the player's FIRST touch
+       instead of on the loader's. Before that touch the game can only be
+       showing its title screen, whose bottom strip is empty at every width I
+       shot; after it the row is removed from the DOM entirely, so it cannot sit
+       over the machine tray that fills the bottom edge during a siege. The
+       wrapper never takes a pointer — only the four links do. */
+    #shell-legal{position:fixed;left:0;right:0;z-index:10;text-align:center;
+      bottom:max(10px,env(safe-area-inset-bottom));pointer-events:none;
+      font-family:system-ui,sans-serif;font-size:12px;letter-spacing:.04em;
+      transition:opacity .3s ease}
+    #shell-legal.gone{opacity:0}
+    #shell-legal a{pointer-events:auto;color:rgba(255,233,196,.52);
+      text-decoration:none;padding:6px 8px}
+    #shell-legal a:hover{color:#ffd75e;text-decoration:underline}
+    #shell-legal span{color:rgba(255,233,196,.28)}
+    /* A short window — landscape on a phone — is the one shape where the title
+       screen's own buttons can reach the bottom edge. Rather than guess the
+       clearance, stand the row down: a link that covers a game control is a
+       worse defect than the one being fixed. */
+    @media (max-height:560px){#shell-legal{display:none}}
     /* An ember drifting up behind the wordmark: proof of life while the bytes
        land, and it costs one compositor-only animation. */
     #boot-ember{position:absolute;width:5px;height:5px;border-radius:50%;
@@ -73,6 +105,28 @@
     <div id="boot-track"><div id="boot-fill"></div></div>
     <div id="boot-note">stoking the forge</div>
   </div>
+  <nav id="shell-legal" aria-label="Hoardling 3D legal and studio links">
+    <a href="privacy.html">Privacy</a><span>·</span><a href="terms.html">Terms</a><span>·</span><a href="support.html">Support</a><span>·</span><a href="https://hypersage.ai/">HyperSage</a>
+  </nav>
+  <script>
+  /* Stand the row down on the first input the player gives the game, and take
+     it out of the DOM after the fade so nothing of it is left over the siege.
+     A click on one of its own links must NOT count as that input — it is the
+     row doing its job — so the listener ignores anything inside it. */
+  (function () { try {
+    var n = document.getElementById('shell-legal');
+    if (!n) return;
+    var go = function (e) {
+      if (e && e.target && n.contains(e.target)) return;
+      document.removeEventListener('pointerdown', go, true);
+      document.removeEventListener('keydown', go, true);
+      n.classList.add('gone');
+      setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 350);
+    };
+    document.addEventListener('pointerdown', go, true);
+    document.addEventListener('keydown', go, true);
+  } catch (e) {} })();
+  </script>
 
   <script>window.__ART_EXT__="webp";</script>
   <script src="lb-config.js?v=20260913-boardoff"></script>

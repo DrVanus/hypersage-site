@@ -1171,7 +1171,7 @@
   // ===== R3D — the low-poly 3D renderer (?r3d=1) ==========================
   // The sim never knew it was 2D: update() emits state, a renderer draws it.
   // This module is a SECOND renderer — three.js, low-poly primitives in the
-  // Kingshot-ad style VANUS chose — under the existing 2D canvas, which goes
+  // chunky flat-shaded style VANUS chose — under the existing 2D canvas, which goes
   // transparent and keeps drawing ONLY the HUD/menus/screens on top.
   // Contract: R3D reads sim state, never writes it, never touches the seeded
   // stream. Taps are raycast to the ground so the SAME input logic runs.

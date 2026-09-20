@@ -24,9 +24,9 @@
 <body>
 <header class="site"><span class="mark"></span><a class="brand" href="./">Hoardling</a><a class="play" id="back-to-game" href="play/" hidden><span aria-hidden="true">←</span> Back to the game</a></header>
 <script>
-/* Offered only on a trip that started in the game, and never as a second copy of it. The iPhone app opens this
-   page in a Safari sheet with no referrer; a home-screen copy opens it in a window of its own (or hands it to
-   Safari). So: in a normal tab it goes back; in a window the game opened it closes that window; a later page of
+/* Offered only on a trip that started in the game, and never as a second copy of it. An in-app browser opens
+   this page with no referrer; a home-screen copy opens it in a window of its own (or hands it to the browser).
+   So: in a normal tab it goes back; in a window the game opened it closes that window; a later page of
    the same trip links to play/; with no way back to the running game it is not offered at all. */
 (function () { try {
   var a = document.getElementById('back-to-game'), key = 'hoardling.back', mode = null;
@@ -51,23 +51,21 @@
 <a href="mailto:support@hypersage.ai">support@hypersage.ai</a></p>
 
 <div class="card">
-<p style="margin:0">When you write in, it helps to say whether you're playing in a browser
-(and which device and browser) or the iPhone app, and what you were doing when it happened — which
+<p style="margin:0">When you write in, it helps to say which device and browser you're playing
+in, and what you were doing when it happened — which
 level, which trial, or which wave of Daily Siege. A screenshot is worth several paragraphs.</p>
 </div>
 
 <h2>Common questions</h2>
 
 <h3>I lost my progress.</h3>
-<p>Campaign stars, Forge, trials, and your Daily best are all stored on that one device — in
-your browser's local storage if you play in a browser, or in the iPhone app's own storage. A browser
-and the app keep separate saves. Clearing your browser data, using a different browser, switching
-devices, or deleting the iPhone app starts a fresh save. There is no account to sign back into and no
-cloud backup, so we can't restore a lost save.</p>
+<p>Campaign stars, Forge, trials, and your Daily best are all stored on that one device, in
+your browser's local storage. Each browser keeps its own save. Clearing your browser data, using a
+different browser, or switching devices starts a fresh save. There is no account to sign back into
+and no cloud backup, so we can't restore a lost save.</p>
 
 <h3>Is Hoardling free? Is there anything to buy?</h3>
-<p>Yes, in the browser, and there is nothing to buy — no purchases, no subscriptions, no ads.
-The iPhone app has no purchases, subscriptions or ads either.</p>
+<p>Yes, and there is nothing to buy — no purchases, no subscriptions, no ads.</p>
 
 <h3>Why don't I have a leaderboard name?</h3>
 <p>You only get one if you choose to post. The first time you start a Daily Siege, the game asks
@@ -100,15 +98,14 @@ version of the game, so it has three campaign keeps instead of four and no Duels
 It has no leaderboard. Your campaign progress in each is kept separate.</p>
 
 <h3>How do I delete my data?</h3>
-<p>In a browser, clear this site's data; in the iPhone app, delete the app. Your save lives only on the device.
+<p>Clear this site's data in your browser. Your save lives only on that device.
 A Daily Siege score already on the public board carries only its generated <code>WICK-XXXX</code>
 name and wave, and the <a href="privacy.html">Privacy</a> page explains what can and can't be
 removed.</p>
 
 <h3>The game feels slow, laggy, or won't load.</h3>
-<p>In the iPhone app, close Hoardling fully and reopen it. In a browser, closing other heavy tabs
-usually helps, and a fresh page load can clear a stuck asset download. If it keeps happening, tell
-us your device (and browser, if you play in one) and we'll dig in.</p>
+<p>Closing other heavy tabs usually helps, and a fresh page load can clear a stuck asset
+download. If it keeps happening, tell us your device and browser and we'll dig in.</p>
 
 <h2>Report a bug</h2>
 <p>Tell us what happened, what you expected instead, and (if you can) which map, wave, or menu you
