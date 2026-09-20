@@ -1,0 +1,131 @@
+# Publish hypersage.ai as a FILTERED artifact instead of the whole branch.
+#
+# WHY THIS EXISTS. GitHub Pages is currently set to "Deploy from a branch", and
+# that mode serves every file in main — including this repo's build tooling. On
+# 2026-09-19 all thirteen tracked internal files answered 200 on the live site:
+#
+#     https://hypersage.ai/tools/build_og.py          -> 200
+#     https://hypersage.ai/tools/loam_launch_flip.py  -> 200   (the launch recipe)
+#     https://hypersage.ai/.claude/launch.json        -> 200
+#
+# None of them carry a credential (they were grepped), so this is untidiness and
+# candid internal commentary in public, not a breach. But there is no way to
+# exclude a path from a branch deploy: .nojekyll is set, so Jekyll's `exclude:`
+# never runs, and a dot-directory is served like any other (.claude/ proves it).
+# The only lever is to publish an ARTIFACT that never contains them.
+#
+# IT IS NOT A PAYLOAD FIX. The artifact is the same ~84MB the branch build
+# already ships (tools/ and .claude/ together are 224KB), so the 10:00 deploy
+# timeout this repo has hit before is NOT addressed here. Do not cite this
+# workflow as the cure for that; cutting real weight is separate work.
+#
+# ==> THIS FILE DOES NOTHING UNTIL SOMEBODY FLIPS THE SETTING. <==
+# It is deliberately workflow_dispatch-only: while Pages is in branch mode a
+# push-triggered deploy would fail on every push and paint the repo red for a
+# setting nobody changed yet. To adopt it:
+#
+#   1. Run it once by hand (Actions -> Deploy site (filtered) -> Run workflow).
+#      It fails at "deploy" with "Pages site not configured for Actions" — that
+#      is expected and proves only that step is blocked.
+#   2. Settings -> Pages -> Build and deployment -> Source: GitHub Actions.
+#      Leave the custom domain and Enforce HTTPS exactly as they are.
+#   3. Run it by hand again. It should deploy and the verify step should pass.
+#   4. Only then add the push trigger:  on: { push: { branches: [main] } }
+#
+# DO NOT flip while an app is in App Store review. Every live listing points its
+# Support and Privacy URLs at this origin, and a dead Privacy URL is an
+# automatic rejection — which is exactly how unpublishing an origin bit
+# Hexhunter once already.
+name: Deploy site (filtered)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; a half-published origin is worse than a late one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage the published subset
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='tools/' \
+            --exclude='.claude/' \
+            ./ _site/
+
+      - name: Refuse to publish an artifact that is missing or leaking
+        run: |
+          set -euo pipefail
+          # Presence is asserted, not assumed: an artifact silently missing CNAME
+          # drops the custom domain, and missing .nojekyll hands the tree to
+          # Jekyll, which mangles anything with braces in it.
+          missing=0
+          for f in CNAME .nojekyll index.html 404.html robots.txt llms.txt \
+                   sitemap.xml sitemap-main.xml v.js og-image.png \
+                   privacy.html terms.html support.html press.html \
+                   .well-known/apple-app-site-association \
+                   .well-known/assetlinks.json .well-known/security.txt \
+                   google4a4ff7a5c7f01dcb.html \
+                   c654ee765c8a48fb87d6d2595ebeef87.txt; do
+            if [ ! -e "_site/$f" ]; then echo "MISSING from artifact: $f"; missing=1; fi
+          done
+          # The two Search Console verifications and the IndexNow key are load
+          # bearing: dropping either un-verifies the property.
+          for d in tools .claude .github; do
+            if [ -e "_site/$d" ]; then echo "LEAK: $d is inside the artifact"; missing=1; fi
+          done
+          # Every product page must still be there — a bad rsync that published
+          # only the root would otherwise sail through the checks above.
+          for p in rowan alder quietoak saffra storyvault nightshelf wingmate \
+                   mythkin mythwright hexhunter waddleton holohound loam \
+                   hoardling gemburrow; do
+            if [ ! -e "_site/$p/index.html" ]; then echo "MISSING product page: $p"; missing=1; fi
+          done
+          exit $missing
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Verify the live origin, including that the leak is closed
+        run: |
+          set -euo pipefail
+          fail=0
+          code() { curl -s -o /dev/null -w '%{http_code}' "https://hypersage.ai/$1?cb=$GITHUB_RUN_ID"; }
+          for p in "" rowan/ quietoak/ privacy.html terms.html support.html press.html \
+                   llms.txt og-image.png v.js robots.txt sitemap.xml \
+                   .well-known/apple-app-site-association; do
+            c=$(code "$p"); echo "$c  /$p"
+            [ "$c" = "200" ] || { echo "  ^ expected 200"; fail=1; }
+          done
+          # The whole point: these must now be gone.
+          for p in tools/build_og.py tools/loam_launch_flip.py .claude/launch.json; do
+            c=$(code "$p"); echo "$c  /$p"
+            [ "$c" = "404" ] || { echo "  ^ expected 404 — the artifact still carries it"; fail=1; }
+          done
+          exit $fail
