@@ -45,7 +45,7 @@
   <div class="wrap">
     <div class="top"><img src="app-icon.png" alt="Mythwright"><a href="index.html">Mythwright</a></div>
     <h1>Privacy Policy</h1>
-    <div class="updated">Last updated: September 13, 2026</div>
+    <div class="updated">Last updated: September 19, 2026</div>
 
     <p>Mythwright ("the app", "we", "us") is a collectible card game. We believe games should be fun without harvesting your life. This policy explains what the Mythwright iOS app does and does not collect.</p>
 
@@ -54,8 +54,8 @@
     <ul>
       <li><strong>Account</strong> — you sign in with Apple or Google to play. We receive the opaque user identifier from the provider and, where the provider passes it to us, your <strong>email address</strong>; your account is identified by that email and a user ID.</li>
       <li><strong>Gameplay data</strong> — your collection, decks, progress, and match results are stored to run the game. Matches are played against our servers, and your collection and progress are stored there under your account so they follow you to another device.</li>
-      <li><strong>AI Card Forge prompts</strong> — text you enter to generate a card is sent to our AI provider to produce the card, and is not used to identify you.</li>
-      <li><strong>Diagnostics</strong> — anonymized crash and performance data to help us fix bugs. This contains no card content or personal identifiers.</li>
+      <li><strong>AI Card Forge prompts</strong> — text you enter to generate a card is sent to <strong>OpenAI</strong>, which moderates it and then writes and paints the card. It is not used to identify you. See "Third-party services" below.</li>
+      <li><strong>Diagnostics</strong> — when a request to our servers fails, our error-reporting service can record the stack trace and a request ID so we can fix it. This contains no card content or personal identifiers.</li>
     </ul>
     <p>We do <strong>not</strong> collect your name, contacts, precise location, or browsing history.</p>
 
@@ -67,7 +67,14 @@
     </ul>
 
     <h2>Third-party services</h2>
-    <p>We use Apple services for the App Store and Sign in with Apple, and Google for Sign in with Google if you choose it. AI card generation is processed by a third-party model provider. These providers process data only to deliver their function and under their own terms.</p>
+    <ul>
+      <li><strong>Apple</strong>: the App Store and Sign in with Apple. <a href="https://www.apple.com/legal/privacy/" rel="noopener">apple.com/legal/privacy</a></li>
+      <li><strong>Google</strong>: Sign in with Google, only if you choose it. <a href="https://policies.google.com/privacy" rel="noopener">policies.google.com/privacy</a></li>
+      <li><strong>OpenAI</strong>: receives the text you type into the AI Card Forge — first to check it against OpenAI's content-moderation endpoint, then to write the card's stats and ability, then to paint its art. <a href="https://openai.com/policies/privacy-policy" rel="noopener">openai.com/policies/privacy-policy</a></li>
+      <li><strong>Fly.io</strong>: hosts our backend and the database holding your account, collection and progress. <a href="https://fly.io/legal/privacy-policy" rel="noopener">fly.io/legal/privacy-policy</a></li>
+      <li><strong>Sentry</strong>: server-side error reporting, when enabled. A report carries the stack trace and the request's ID. <a href="https://sentry.io/privacy/" rel="noopener">sentry.io/privacy</a></li>
+    </ul>
+    <p>These providers process data only to deliver their function and under their own terms.</p>
 
     <h2>Data sharing</h2>
     <p>We do not sell your data. We do not share personal information with advertisers.</p>
