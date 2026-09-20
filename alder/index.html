@@ -512,7 +512,7 @@
       "name": "Is Alder therapy?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. Alder is a self-help companion. It keeps your sober time, sits with you through hard moments, and points you toward real support. It doesn't provide therapy, counseling, or clinical care, and using it doesn't create a professional relationship with anyone. If you work with a professional, Alder works alongside that, never in place of it."
+        "text": "No. Alder is an AI companion — not a therapist or a doctor, and not a stand-in for the people who support your recovery. It keeps your sober time, sits with you through hard moments, and points you toward real support. It doesn't provide therapy, counseling, or clinical care, and using it doesn't create a professional relationship with anyone. It won't replace meetings, medication, or professional care; it works alongside them."
       }
     },
     {
@@ -809,7 +809,7 @@
 
       <div class="screens-grid" id="screens-grid">
         <div class="screen-card">
-          <div class="screen-frame"><img data-shot="home" src="shots/home-dark.webp?v=20260919a" alt="Alder's Today screen at late night: a painted tree under a dark sky, 90 days plus 3 hours 12 minutes, 90 days sober across all attempts, per-target counts of 90 for alcohol and 12 for vaping, Talk to Alder and Check in buttons, and the next chip two weeks away" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img data-shot="home" src="shots/home-dark.webp?v=20260919a" alt="Alder's Today screen at late night: a painted tree under a dark sky, 90 days plus 3 hours 12 minutes, 90 days sober across all attempts, per-target counts of 90 for alcohol and 12 for vaping, Talk to Alder and Check in buttons, and the next chip, two weeks for Vaping, two days away" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Today</strong>Your clock, and what's next</div>
         </div>
         <div class="screen-card">
@@ -901,7 +901,7 @@
           </ul>
         </div>
         <div class="spotlight-phone">
-          <div class="screen-frame"><img src="shots/ceremony-dark.webp?v=20260919a" alt="Alder's milestone screen: a bronze 30-day chip as the centerpiece, the heading &quot;Still here, 30 days on&quot;, a short letter signed by Alder, and buttons to share the chip or keep going" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/ceremony-dark.webp?v=20260919a" alt="Alder's milestone screen: a bronze 60-day chip as the centerpiece, the heading &quot;Still here, 30 days on&quot;, a short letter signed by Alder, and buttons to share the chip or keep going" width="780" height="1688" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -928,6 +928,7 @@
         <div class="boundary-col isnt">
           <h3>Alder does not</h3>
           <ul role="list">
+            <li>Work as a therapist or a doctor — it's an AI companion</li>
             <li>Provide therapy, counseling, or clinical care of any kind</li>
             <li>Diagnose anything, or tell you how severe your situation is</li>
             <li>Give detox, tapering, or dosing guidance for any substance</li>
@@ -973,7 +974,7 @@
       <div class="faq-list">
         <details class="faq">
           <summary>Is Alder therapy?</summary>
-          <p>No. Alder is a self-help companion. It keeps your sober time, sits with you through hard moments, and points you toward real support. It doesn't provide therapy, counseling, or clinical care, and using it doesn't create a professional relationship with anyone. If you work with a professional, Alder works alongside that, never in place of it.</p>
+          <p>No. Alder is an AI companion — not a therapist or a doctor, and not a stand-in for the people who support your recovery. It keeps your sober time, sits with you through hard moments, and points you toward real support. It doesn't provide therapy, counseling, or clinical care, and using it doesn't create a professional relationship with anyone. It won't replace meetings, medication, or professional care; it works alongside them.</p>
         </details>
         <details class="faq">
           <summary>Am I talking to a real person?</summary>
@@ -1073,10 +1074,6 @@
           });
           grid.querySelectorAll('img[data-shot]').forEach(function (img) {
             var stem = img.dataset.shot + (scheme === 'dark' ? '-dark' : '');
-            /* setAttribute, not a direct .src assignment — site_audit.py scans
-               the RAW HTML for src attributes, so an assignment would have its
-               string literal read as a broken local link. Same reason this
-               comment does not spell the pattern out. */
             img.setAttribute('src', 'shots/' + stem + '.webp' + VERSION);
           });
         });
