@@ -7,13 +7,13 @@
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#F5EFE3">
   <title>Loam — the notes companion that asks before it acts</title>
-  <meta name="description" content="Write anything. Loam fixes typos in place, turns rambly jots into clean lines, and files and flags what matters. Every change it makes lands in the Ledger, with its own Undo.">
+  <meta name="description" content="Write anything. Loam fixes typos in place, turns rambly jots into clean lines, and files and flags what matters. Changes land in the Ledger, with undo and redo where supported.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/loam/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Loam — notes, tended.">
-  <meta property="og:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and writes every action into a Ledger you can undo and redo.">
+  <meta property="og:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and records changes in a Ledger with undo and redo where supported.">
   <meta property="og:url" content="https://hypersage.ai/loam/">
   <meta property="og:site_name" content="Loam">
   <meta property="og:image" content="https://hypersage.ai/loam/og-image.png?v=20260919a">
@@ -22,7 +22,7 @@
   <meta property="og:image:alt" content="Loam — notes, tended">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Loam — notes, tended.">
-  <meta name="twitter:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and writes every action into a Ledger you can undo and redo.">
+  <meta name="twitter:description" content="The notes companion that asks before it acts. Tidies your slips in place, never rephrases you, and records changes in a Ledger with undo and redo where supported.">
   <meta name="twitter:image" content="https://hypersage.ai/loam/og-image.png?v=20260919a">
   <meta name="twitter:image:alt" content="Loam — notes, tended">
 
@@ -36,7 +36,7 @@
   "name": "Loam",
   "applicationCategory": "ProductivityApplication",
   "operatingSystem": "iOS",
-  "description": "The notes companion that asks before it acts. Loam fixes your slips in place, turns loose jots into clean lines, and files and flags what matters — and writes every action into a Ledger you can undo and redo.",
+  "description": "The notes companion that asks before it acts. Loam fixes your slips in place, turns loose jots into clean lines, and files and flags what matters — and records changes in a Ledger with undo and redo where supported.",
   "url": "https://hypersage.ai/loam/",
   "author": {
     "@type": "Organization",
@@ -86,7 +86,7 @@
       "name": "What does the daily allowance cover?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Only the companion's actions, and you get five a day. Notes, capture, search, history, undo, and redo have no limit."
+        "text": "Five companion actions a day. Notes, capture, search, history and supported undo and redo are not metered. Chat answers do not consume this action allowance."
       }
     },
     {
@@ -805,7 +805,7 @@
         <div class="hero-text">
           <span class="eyebrow">Coming to <span style="text-transform:none">iOS</span></span>
           <h1>The notes companion that <span class="soft swash">asks before it acts.</span></h1>
-          <p class="lede">Write, ramble, record. Loam fixes your slips in place, turns loose jots into clean lines, and files and flags what matters. It tells you what changed, and the Ledger can undo it.</p>
+          <p class="lede">Write, ramble, record. Loam fixes your slips in place, turns loose jots into clean lines, and files and flags what matters. It tells you what changed, with undo and redo in the Ledger where supported.</p>
           <div class="hero-buttons">
             <a href="mailto:support@hypersage.ai?subject=Notify%20me%20when%20Loam%20launches" class="btn-warm">
               <span>Be first to hear</span>
@@ -820,7 +820,7 @@
         </div>
       </div>
       
-      <ol class="hero-flow" role="list" aria-label="How a jot becomes a tended note, with the companion's changes one tap from undone">
+      <ol class="hero-flow" role="list" aria-label="How a jot becomes a tended note, with a record of its changes">
         <li>
           <div class="flow-head"><div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19.5 7.5a2.1 2.1 0 0 0-3-3L5 16z"/><path d="M14 6l3 3"/></svg></div><strong class="flow-name">You write</strong></div>
           <p>Type it, say it, or sketch it, as much as you like.</p>
@@ -831,7 +831,7 @@
         </li>
         <li>
           <div class="flow-head"><div class="flow-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V7H7"/><path d="M12 8v4l3 2"/></svg></div><strong class="flow-name">The Ledger keeps it</strong></div>
-          <p>Every change Loam makes, one tap from undone.</p>
+          <p>Changes recorded and attributed, with reversal controls where supported.</p>
         </li>
       </ol>
     </div>
@@ -856,8 +856,8 @@
               <p>Loam suggests tidies, filings, links between related notes, and flags on the commitments it spots. Each one waits for you on the review desk, unless you've set that power to Auto.</p>
             </li>
             <li>
-              <h3>Take it back, or bring it back</h3>
-              <p>Everything Loam does gets its own Undo, and a Redo if you change your mind again. Undoing an old tidy never disturbs anything newer.</p>
+              <h3>Review and reverse supported changes</h3>
+              <p>Supported Ledger rows offer Undo or Redo. Undoing an old tidy preserves a newer filing. Later edits can retire an action; captures and reminders cannot be redone after undo, and deleted notes stay deleted.</p>
             </li>
           </ol>
         </div>
@@ -917,7 +917,7 @@
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V7H7"/><path d="M12 8v4l3 2"/></svg></div>
           <h3>The Ledger</h3>
-          <p>Loam's changes and your own pins, ticks, and filings, all time-stamped. Each row has its own Undo or Redo, and there's an Undo all for today. Your history is never trimmed.</p>
+          <p>Loam's changes and your own pins, ticks, and filings, all time-stamped. Supported rows offer Undo or Redo, including eligible daily batches. Later edits can retire an action. Your history is never trimmed.</p>
         </div>
 
         <div class="feature-card">
@@ -935,7 +935,7 @@
         <div class="feature-card">
           <div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></div>
           <h3>No limit on capture</h3>
-          <p>Type, dictate, sketch, and save chat drafts without touching the daily allowance. It only counts what the companion does.</p>
+          <p>Type, dictate, sketch, and save chat drafts without touching the daily allowance. It counts companion actions; chat answers do not consume this allowance.</p>
         </div>
 
         <div class="feature-card">
@@ -1000,7 +1000,7 @@
         </div>
         <div class="boundary-card">
           <h3>Not a silent organizer</h3>
-          <p>Every filing, link, and flag goes on the record, where you can read it and reverse it. Even on Auto, Loam asks before it starts a new collection.</p>
+          <p>Every filing, link, and flag goes on the record, with reversal controls where supported. Even on Auto, Loam asks before it starts a new collection.</p>
         </div>
         <div class="boundary-card">
           <h3>Not a data business</h3>
@@ -1033,7 +1033,7 @@
         </details>
         <details>
           <summary>What does the daily allowance cover?</summary>
-          <p>Only the companion's actions, and you get five a day. Notes, capture, search, history, undo, and redo have no limit.</p>
+          <p>Five companion actions a day. Notes, capture, search, history and supported undo and redo are not metered. Chat answers do not consume this action allowance.</p>
         </details>
         <details>
           <summary>Can I get my notes out?</summary>

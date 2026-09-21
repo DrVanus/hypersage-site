@@ -1403,7 +1403,7 @@
     if (id !== 'clay' && !(Meta.data.owned && Meta.data.owned[id])) return 'clay';
     return id;
   }
-  // HOARDLING SKINS — the payoff for the hoard ranks.
+  // FLINT SKINS — the payoff for the hoard ranks.
   //
   // The rank ladder repeats forever but only ever changed a LABEL: climbing to
   // Vault Dragon rewrote a line of text and nothing you could look at. These
@@ -2299,10 +2299,10 @@
   }
 
   var MILESTONES = [
-    { n: 3, label: 'Hoardling wakes up!' },
+    { n: 3, label: 'Flint wakes up!' },
     { n: 7, label: 'The hoard sparkles!' },
     { n: 12, label: 'Bigger bag on free digs!' },
-    { n: 20, label: 'Golden Hoardling!' },
+    { n: 20, label: 'Golden Flint!' },
   ];
 
   // Named ranks BEYOND the authored milestones. The hoard is the game's only
@@ -2336,7 +2336,7 @@
   // named rank ladder, which tops out at 110 for Star Hoard. So a player who
   // clears the whole board sits roughly one ladder ahead of where digging
   // alone would put them, and no further: it cannot run away and cheapen the
-  // eight Hoardling skins gated on rank. If the list grows, re-check that sum.
+  // eight Flint skins gated on rank. If the list grows, re-check that sum.
   //
   // NO CLOCK. No expiry, no season, no window — those are appointment
   // mechanics wearing a rosette.
@@ -3639,7 +3639,7 @@
         Meta.save();
         // never stomp a milestone announcement — that one is rarer and louder
         if (this.toast === priorToast) {
-          this.toast = { text: 'PRISM: no card wants it, so Hoardling keeps it. The hoard is your collection.',
+          this.toast = { text: 'PRISM: no card wants it, so Flint keeps it. The hoard is your collection.',
                          until: this.worldT + 3.6 };
         }
       }
@@ -3897,7 +3897,7 @@
     if (!hit) {
       var rk = hoardRank(Meta.data.hoardTotal);
       if (rk && rk.at === Meta.data.hoardTotal) {
-        // NAME THE SKIN. A rank unlocks a Hoardling colour, and the wardrobe
+        // NAME THE SKIN. A rank unlocks a Flint colour, and the wardrobe
         // said so only if the player happened to open the shop's second tab —
         // so the reward for the game's deepest currency arrived in silence.
         // A full 40-level career yields ~27 hoard, which is ONE rank, so most
@@ -3958,7 +3958,7 @@
         this.dragonPulse = 1;
         Hap.heavy();
         Snd.hoard();
-        this.toast = { text: 'Hoardling is OVERJOYED! +' + HEART_GIFT + ' hoard',
+        this.toast = { text: 'Flint is OVERJOYED! +' + HEART_GIFT + ' hoard',
                        until: this.worldT + 3 };
       } else {
         this.coins += HEART_SELL;
@@ -5989,7 +5989,7 @@
                 'wood', heart && !coinsCount);
     choicePlate(ctx, R.hoard,
                 heart ? 'GIFT' : 'HOARD',
-                heart ? '+' + HEART_GIFT + ' hoard' : 'Hoardling keeps it',
+                heart ? '+' + HEART_GIFT + ' hoard' : 'Flint keeps it',
                 'hoard', false);
     // the gem last, in the gutter, ON TOP of nothing it could be confused with
     var spr = (c.key === 'heartstone' && SPR.gem_heartstone) || SPR.gem_prism;
@@ -7055,7 +7055,7 @@
 
     this._drawStanding('board', y + 10);
   };
-  // The Hoardling wardrobe. Unlocked by RANK, not bought — so the rows show a
+  // The Flint wardrobe. Unlocked by RANK, not bought — so the rows show a
   // threshold, never a price, and there is no wallet interaction at all.
   // The pick rack. Star-gated, so rows show a THRESHOLD, never a price.
   Game.prototype._drawPickTab = function () {
@@ -7163,7 +7163,7 @@
     ctx.fillStyle = 'rgba(232,220,200,0.75)'; ctx.font = fT(13);
     // Tab-aware: the wardrobe is unlocked by HOARD, so telling the player
     // their gems pay for it is simply false on that tab.
-    ctx.fillText(this.shopTab === 'dragon' ? 'what you hoard, the Hoardling wears'
+    ctx.fillText(this.shopTab === 'dragon' ? 'what you hoard, Flint wears'
                : this.shopTab === 'pick'   ? 'what you master, the pick remembers'
                : 'dig walls · every gem you sell pays for these', VIEW_MIN_W / 2, 134);
     this._drawGearAt(SHOP_GEAR);
@@ -7182,7 +7182,7 @@
     // --- tabs ---------------------------------------------------------------
     var TB = shopTabs(), st = this.shopTab || 'walls';
     [[TB.walls, 'DIG WALLS', st === 'walls'],
-     [TB.dragon, 'HOARDLING', st === 'dragon'],
+     [TB.dragon, 'FLINT', st === 'dragon'],
      [TB.pick, 'PICKAXE', st === 'pick']]
       .forEach(function (t) {
         var box = t[0], on = t[2];
