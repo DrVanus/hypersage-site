@@ -27,13 +27,14 @@ try:
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
             for book, title, edition in [
-                ('peter_pan', 'Peter Pan', 'Free on Nightshelf'),
                 ('pride_prejudice', 'Pride and Prejudice', 'Included with Nightshelf Pro'),
                 ('wind_in_willows', 'The Wind in the Willows', 'Free on Nightshelf'),
                 ('bedtime_real_princess', 'The Real Princess', 'Free on Nightshelf'),
                 ('original_lantern_ferry', 'The Lantern Ferry', 'Free on Nightshelf'),
                 ('original_evening_they_kept', 'The Evening They Kept', 'Free on Nightshelf'),
                 ('original_borrowed_light', 'The Sea of Borrowed Light', 'Included with Nightshelf Pro'),
+                ('original_tide_glass_observatory', 'The Tide-Glass Observatory', 'Free on Nightshelf'),
+                ('original_garden_between_stations', 'The Garden Between Stations', 'Included with Nightshelf Pro'),
             ]:
                 page.goto(base + '?book=' + book, wait_until='networkidle')
                 assert page.locator('#shared-book').is_visible(), book
@@ -45,10 +46,11 @@ try:
                 if book.startswith('original_'):
                     assert page.locator('#shared-book-author').inner_text() == 'A Nightshelf Original'
                     assert 'Created with AI for Nightshelf.' in page.locator('#shared-book-description').inner_text()
-                if captures and book in ['peter_pan', 'original_evening_they_kept', 'original_borrowed_light']:
+                if captures and book in ['wind_in_willows', 'original_tide_glass_observatory', 'original_garden_between_stations']:
                     page.screenshot(path=str(captures / f'share-{book}-{width}.png'))
-            page.goto(base + '?book=custom_private', wait_until='networkidle')
-            assert page.locator('#shared-book').is_hidden()
+            for held in ['peter_pan', 'irish_fairy_tales', 'pinocchio', 'custom_private']:
+                page.goto(base + '?book=' + held, wait_until='networkidle')
+                assert page.locator('#shared-book').is_hidden()
             assert page.locator('h1').inner_text() == 'Stories to drift off to'
             page.goto(base, wait_until='networkidle')
             assert page.locator('#shared-book').is_hidden()

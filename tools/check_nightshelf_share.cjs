@@ -45,7 +45,7 @@ for (const [id, book] of Object.entries(catalog)) {
     ? book.title + ' — a Nightshelf Original'
     : book.title + ' by ' + book.author + ' — Nightshelf');
 }
-const rejected = ['', '?book=', '?book=missing', '?book=custom_private',
+const rejected = ['?book=peter_pan', '?book=irish_fairy_tales', '?book=pinocchio', '', '?book=', '?book=missing', '?book=custom_private',
   '?book=__proto__', '?book=constructor', '?book=toString',
   '?book=%3Cscript%3Ealert(1)%3C/script%3E', '?book=javascript%3Aalert(1)',
   '?book=peter_pan&book=wind_in_willows', '?book=Peter_Pan', '?book=peter_pan%2Fevil'];
@@ -62,14 +62,16 @@ for (const id of Object.keys(run('').elements)) assert.ok(html.includes('id="' +
 const books = Object.values(catalog).filter(book => !book.kind);
 const originals = Object.values(catalog).filter(book => book.kind === 'original');
 const selections = Object.values(catalog).filter(book => book.kind === 'selection');
-assert.equal(books.length, 80, 'all 80 full-volume routes remain available');
-assert.equal(selections.length, 10, 'all ten traditional selection routes remain available');
-assert.equal(originals.length, 8, 'all eight prepared Originals have a shared route');
-assert.equal(originals.filter(book => book.freeTier).length, 3, 'three Originals are free');
-assert.equal(originals.filter(book => !book.freeTier).length, 5, 'five Originals require Pro');
+assert.equal(books.length, 77, 'all 77 full-volume routes remain available');
+assert.equal(selections.length, 12, 'all twelve traditional selection routes remain available');
+assert.equal(originals.length, 10, 'all ten prepared Originals have a shared route');
+assert.equal(originals.filter(book => book.freeTier).length, 4, 'four Originals are free');
+assert.equal(originals.filter(book => !book.freeTier).length, 6, 'six Originals require Pro');
 for (const [id, title, freeTier] of [
   ['original_evening_they_kept', 'The Evening They Kept', true],
   ['original_borrowed_light', 'The Sea of Borrowed Light', false],
+  ['original_tide_glass_observatory', 'The Tide-Glass Observatory', true],
+  ['original_garden_between_stations', 'The Garden Between Stations', false],
 ]) {
   assert.equal(catalog[id]?.title, title, id + ' must name the intended story');
   assert.equal(catalog[id]?.freeTier, freeTier, id + ' must preserve its intended access');
@@ -84,10 +86,10 @@ assert.equal(freeSpines, freeCount);
 assert.equal(proSpines, books.length - freeCount);
 for (const name of ['index.html', 'support.html', 'terms.html', 'privacy.html']) {
   const page = fs.readFileSync(path.join(root, name), 'utf8');
-  assert.doesNotMatch(page, /\b(?:82(?: complete)? (?:books|classics|works)|eighty-two|thirteen(?: of| free)|sixty-nine)\b/i,
+  assert.doesNotMatch(page, /\b(?:82(?: complete)? (?:books|classics|works)|eighty-two|eighty|fourteen(?: of| free)|sixty-six|sixty-nine)\b/i,
     name + ' must not advertise the retired catalog counts');
   for (const image of page.matchAll(/nightshelf\/og-image\.png\?v=([^"\s]+)/g)) {
-    assert.equal(image[1], '20260914', name + ' must show the current catalog OG card');
+    assert.equal(image[1], '20260922', name + ' must show the current catalog OG card');
   }
 }
 console.log(`PASS: ${books.length} shared books + ${selections.length} tales + ${originals.length} Originals, ${rejected.length} rejected queries, catalog counts and shelf artwork`);

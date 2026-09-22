@@ -32,7 +32,7 @@ window.nightshelfSharedBooks = {
   },
   "arabian_nights" : {
     "author" : "Anonymous",
-    "blurb" : "A thousand and one slow desert nights of stories.",
+    "blurb" : "Selected tales of genies, voyages, enchantment, and peril, edited by Andrew Lang.",
     "freeTier" : false,
     "title" : "The Arabian Nights"
   },
@@ -74,6 +74,14 @@ window.nightshelfSharedBooks = {
     "kind" : "selection",
     "title" : "The Gift of the Magi"
   },
+  "bedtime_golden_touch" : {
+    "author" : "Nathaniel Hawthorne",
+    "blurb" : "A short tale from A Wonder Book.",
+    "collection" : "A Wonder Book",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "The Golden Touch"
+  },
   "bedtime_hare_tortoise" : {
     "author" : "Aesop",
     "blurb" : "A short tale from Aesop's Fables.",
@@ -113,6 +121,14 @@ window.nightshelfSharedBooks = {
     "freeTier" : true,
     "kind" : "selection",
     "title" : "The Real Princess"
+  },
+  "bedtime_service_of_love" : {
+    "author" : "O. Henry",
+    "blurb" : "A short tale from The Four Million.",
+    "collection" : "The Four Million",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "A Service of Love"
   },
   "bedtime_strange_dolls" : {
     "author" : "Johnny Gruelle",
@@ -154,7 +170,7 @@ window.nightshelfSharedBooks = {
   },
   "chinese_wonder_book" : {
     "author" : "Norman Hinsdale Pitman",
-    "blurb" : "Dragon kings, paper lanterns, and quiet wonders from old China.",
+    "blurb" : "Chinese folk tales of dragon kings, supernatural trials, and costly sacrifices.",
     "freeTier" : false,
     "title" : "A Chinese Wonder Book"
   },
@@ -196,7 +212,7 @@ window.nightshelfSharedBooks = {
   },
   "five_children_it" : {
     "author" : "E. Nesbit",
-    "blurb" : "A sand-fairy, English countryside, and one careless wish a day.",
+    "blurb" : "A sand-fairy's wishes bring comic mishaps, peril, and dated racial caricatures.",
     "freeTier" : false,
     "title" : "Five Children and It"
   },
@@ -242,12 +258,6 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Indian Fairy Tales"
   },
-  "irish_fairy_tales" : {
-    "author" : "James Stephens",
-    "blurb" : "Fionn, the Shee, and slow green magic told the Irish way.",
-    "freeTier" : false,
-    "title" : "Irish Fairy Tales"
-  },
   "jane_eyre" : {
     "author" : "Charlotte Brontë",
     "blurb" : "A governess, a moor, and a house with too many shadows.",
@@ -256,7 +266,7 @@ window.nightshelfSharedBooks = {
   },
   "japanese_fairy_tales" : {
     "author" : "Yei Theodora Ozaki",
-    "blurb" : "Momotaro, the moon-maiden, and other quiet tales from old Japan.",
+    "blurb" : "Momotaro, the moon-maiden, and Japanese folk tales of wonder, violence, and revenge.",
     "freeTier" : false,
     "title" : "Japanese Fairy Tales"
   },
@@ -268,13 +278,13 @@ window.nightshelfSharedBooks = {
   },
   "jungle_book" : {
     "author" : "Rudyard Kipling",
-    "blurb" : "Mowgli, Bagheera, and the slow hum of the Indian forest.",
+    "blurb" : "Mowgli and other animals face the laws and dangers of the Indian forest.",
     "freeTier" : true,
     "title" : "The Jungle Book"
   },
   "just_so_stories" : {
     "author" : "Rudyard Kipling",
-    "blurb" : "How the whale got his throat. How the leopard got his spots.",
+    "blurb" : "Kipling's animal-origin tales, including historical racial slurs and stereotypes.",
     "freeTier" : false,
     "title" : "Just So Stories"
   },
@@ -370,6 +380,14 @@ window.nightshelfSharedBooks = {
     "kind" : "original",
     "title" : "The Evening They Kept"
   },
+  "original_garden_between_stations" : {
+    "author" : "Nightshelf",
+    "blurb" : "An overnight passenger lingers in a ferry’s garden, finding familiar leaves transformed by the changing light of a journey through space.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : false,
+    "kind" : "original",
+    "title" : "The Garden Between Stations"
+  },
   "original_hill_teahouse" : {
     "author" : "Nightshelf",
     "blurb" : "As autumn brings her neighbours indoors, a teahouse keeper finds a more welcoming arrangement for their monthly gathering.",
@@ -402,6 +420,14 @@ window.nightshelfSharedBooks = {
     "kind" : "original",
     "title" : "The Rain Map"
   },
+  "original_tide_glass_observatory" : {
+    "author" : "Nightshelf",
+    "blurb" : "On a quiet coastal visit, three panes of glass offer yesterday’s meadow, harbour and open sea, and a traveller chooses a view for the morning.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : true,
+    "kind" : "original",
+    "title" : "The Tide-Glass Observatory"
+  },
   "perrault_tales" : {
     "author" : "Charles Perrault",
     "blurb" : "Cinderella, Sleeping Beauty, Puss in Boots — the originals.",
@@ -414,23 +440,11 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Persuasion"
   },
-  "peter_pan" : {
-    "author" : "J. M. Barrie",
-    "blurb" : "Second to the right, and straight on till morning.",
-    "freeTier" : true,
-    "title" : "Peter Pan"
-  },
   "pink_fairy_book" : {
     "author" : "Andrew Lang",
-    "blurb" : "Japanese, Danish, and Sicilian tales in Lang's gentlest gathering.",
+    "blurb" : "Japanese, Danish, and Sicilian folk tales, from enchantment to violent revenge.",
     "freeTier" : false,
     "title" : "The Pink Fairy Book"
-  },
-  "pinocchio" : {
-    "author" : "Carlo Collodi",
-    "blurb" : "An Italian fairy tale carved slowly out of pine.",
-    "freeTier" : false,
-    "title" : "Pinocchio"
   },
   "poe_tales" : {
     "author" : "Edgar Allan Poe",
@@ -530,7 +544,7 @@ window.nightshelfSharedBooks = {
   },
   "tanglewood_tales" : {
     "author" : "Nathaniel Hawthorne",
-    "blurb" : "More Greek myths retold softly for young listeners.",
+    "blurb" : "Theseus, the Minotaur, and the Golden Fleece in Hawthorne's adventurous Greek retellings.",
     "freeTier" : true,
     "title" : "Tanglewood Tales"
   },
@@ -608,7 +622,7 @@ window.nightshelfSharedBooks = {
   },
   "wonder_book" : {
     "author" : "Nathaniel Hawthorne",
-    "blurb" : "Greek myths retold gently for children, by a New England fireside.",
+    "blurb" : "Hawthorne's Greek myths of quests, monster battles, and startling transformations.",
     "freeTier" : false,
     "title" : "A Wonder Book"
   },

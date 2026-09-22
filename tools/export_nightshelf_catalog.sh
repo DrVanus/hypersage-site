@@ -14,6 +14,7 @@ trap 'rm -rf "$BUILD"' EXIT
 swiftc -O -parse-as-library \
   "$SOURCE/BookText.swift" "$SOURCE/SleepCatalog.swift" \
   "$SOURCE/BedtimeSelections.swift" "$SOURCE/OriginalStories.swift" \
+  "$SOURCE/ListenDuration.swift" \
   "$APP_REPO/scripts/booktext_probe/Stubs.swift" \
   "$SITE/tools/export_nightshelf_catalog.swift" \
   -o "$BUILD/export-catalog"
