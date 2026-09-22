@@ -40,7 +40,7 @@
 <main>
   <div class="container">
     <h1>Privacy Policy</h1>
-    <p class="last-updated">Last updated: September 19, 2026</p>
+    <p class="last-updated">Last updated: September 22, 2026</p>
 
     <div class="draft-note">
       This policy covers the Saffra iOS app, and the email addresses collected by the early-access list this website ran until 26 August 2026. The website's own pages are covered by the <a href="https://hypersage.ai/privacy.html">HyperSage AI Labs website policy</a>. We will flag material changes here and in-app before they take effect.
@@ -52,10 +52,16 @@
     <ul>
       <li>We collect only what the app needs to work: your identity (via Sign in with Apple or Google), your cooking profile (equipment, allergies, preferences), your pantry, your conversation history with the chef, and recipes you import or write yourself.</li>
       <li>We use this data <strong>solely to operate the app</strong> — personalize the chef, remember your pantry, adapt recipes for you. We do not sell it, we do not use it to train models, we do not share it with advertisers.</li>
-      <li>Voice commands are transcribed by <strong>Apple's speech recognition service</strong>, which processes audio on Apple's servers.</li>
-      <li>Your conversations with the chef do leave your device: each message, along with a summary of your profile and pantry, goes to our server and on to <strong>OpenAI</strong> to generate the reply. Three more things can leave to be read by an AI model — a photo of a shelf when you ask Saffra to identify what's on it, any photo you attach to a chat message with the <strong>+</strong> button in the Saffra (chat) tab, and the audio clip of any question you ask in Cooking Mode, which is re-transcribed by OpenAI's Whisper; all three are read, then discarded. All of it is detailed below.</li>
+      <li>Voice commands are transcribed by <strong>Apple's speech recognition service</strong>, which may process audio on Apple's servers.</li>
+      <li>Your conversations with the chef do leave your device: each message, along with a summary of your profile and pantry, goes to our server and on to <strong>OpenAI</strong> to generate the reply. AI features also process selected photos, imported recipe or receipt text, search words, planning context, and recorded cooking questions as described below. These transfers require your explicit AI data-sharing permission.</li>
       <li>You can delete your account and all associated data at any time.</li>
     </ul>
+
+    <h2>Your permission for AI features</h2>
+    <p><strong>Version 1.3.2 and later:</strong> the separate AI permission controls below are part of this update. Earlier versions can send information when you use their AI features without this separate choice. Until you install the update, avoid AI chat, imports, photo analysis and voice features if you do not want that processing.</p>
+    <p>Before AI sharing is enabled, Saffra shows a separate disclosure naming <strong>HyperSage, OpenAI and Apple</strong>, the information each receives, and two choices: <strong>Allow AI data sharing</strong> or <strong>Continue without AI</strong>. A safety acknowledgement, a subscription, or an iOS microphone permission does not grant this permission. Existing installations must make this new choice too; older acknowledgements are not carried forward as AI consent.</p>
+    <p>Without AI sharing, you can browse the recipe catalogue, receive Saffra's deterministic daily picks, manage pantry and shopping lists, save recipes manually and use timers. These account features may still synchronize with HyperSage's servers; they are not all offline storage. AI chat, adaptation, smart imports, AI receipt/photo parsing, semantic recipe search, meal-plan generation, cloud speech and premium voice are blocked until you allow sharing. Demo preview responses are bundled examples and do not send your draft to an AI provider.</p>
+    <p>You can review or withdraw permission under <strong>Settings → Privacy &amp; Data → AI data sharing</strong>. Withdrawal blocks new AI requests and cancels active connections, including speech recognition. It does not recall information already received by a service provider or undo processing already started on our server. Signing out resets the device permission; deleting a local permission record is not account or provider-data deletion.</p>
 
     <h2>What we collect</h2>
 
@@ -78,20 +84,20 @@
     <h3>Pantry</h3>
     <ul>
       <li><strong>Items you add manually, via barcode scan, via receipt scan, or by photographing a shelf</strong> — including names, quantities, expirations, brand, and allergens.</li>
-      <li><strong>Receipt and cookbook photos</strong>: OCR runs on your iPhone via Apple's Vision framework. The <strong>image never leaves your device</strong>. Only the extracted text is sent to us for parsing.</li>
+      <li><strong>Receipt scans</strong>: OCR runs on your iPhone via Apple's Vision framework. The receipt image stays on your device in this flow; the extracted text, including any names, prices or store details visible on the receipt, is sent through our server to OpenAI for ingredient parsing after AI permission. When you attach a picture to chat or use an image-based recipe import, that chosen image follows the photo-processing route instead.</li>
       
-      <li><strong>Ingredient photos (fridge, counter, or shelf)</strong>: this one is different. When you photograph a shelf so Saffra can identify what's on it, <strong>the image is uploaded to our server and passed to OpenAI's vision model</strong>, which returns a list of the foods it thinks it can see. We show you that list to confirm before anything is added to your pantry. We do not store the image — it is held in memory for the request, and neither we nor OpenAI use it to train models. Receipt and cookbook pages are not sent this way. A photo you attach to a chat message is — see <em>Conversations</em> below.</li>
+      <li><strong>Ingredient photos (fridge, counter, or shelf)</strong>: this one is different. When you photograph a shelf so Saffra can identify what's on it, <strong>the image is uploaded to our server and passed to OpenAI's vision model</strong>, which returns a list of the foods it thinks it can see. We show you that list to confirm before anything is added to your pantry. We do not persist ingredient-scan images in our application database; they are held for the request. Provider retention and protection terms are separate from this application storage behavior. Chat attachments and image-based recipe imports also send the photos you select to OpenAI. Private cook-journal photos are local unless you explicitly choose to share or export them.</li>
     </ul>
 
     <h3>Conversations</h3>
     <ul>
       <li><strong>Messages you send to the chef</strong> and <strong>the chef's replies</strong>, so the chef has memory across sessions. Older conversations are periodically summarized and the raw messages are deleted.</li>
-      <li><strong>Photos you attach to a chat message</strong> — the <strong>+</strong> button in the Saffra (chat) tab lets you attach up to four photos, from your photo library or the camera, to a message to the chef. Those images are uploaded to our server and passed to <strong>OpenAI's vision model</strong> along with that message so the chef can answer about them. We do not store them: they are held in memory for the length of that request and then discarded, they are not sent again on later turns, and the saved conversation records only a marker such as <em>[shared 2 photos]</em> in place of the pictures. Neither we nor OpenAI use them to train models.</li>
+      <li><strong>Photos you attach to a chat message</strong> — the <strong>+</strong> button in the Saffra (chat) tab lets you attach up to four photos, from your photo library or the camera, to a message to the chef. Those images are uploaded to our server and passed to <strong>OpenAI's vision model</strong> along with that message so the chef can answer about them. We do not store them: they are held in memory for the length of that request and then discarded, they are not sent again on later turns, and the saved conversation records only a marker such as <em>[shared 2 photos]</em> in place of the pictures. We do not train our own models on the pictures. OpenAI processing and retention follow its applicable API terms, described below.</li>
     </ul>
 
     <h3>Recipes</h3>
     <ul>
-      <li>Recipes you import via URL or cookbook photo, and adapted versions created for you.</li>
+      <li>Recipes you enter manually, import via URL or image, and adapted versions created for you. AI URL import may send the URL and extracted page text to OpenAI; adaptations send the source recipe, your instructions and relevant cooking profile. Generated images may use the recipe description as an OpenAI image-generation prompt. Manually saving a private recipe and its optional photo does not itself call an AI model; selecting that recipe for a later AI feature can include its details in the AI request.</li>
       <li><strong>Recipes you write yourself</strong> — the title, ingredients, steps, an optional family or author credit, and an optional photo. They are private to your account: no other user can see or search them, and they are never used in anyone else's recommendations. Saving one does not send it to OpenAI or any other AI model. Its photo is stored on our server with location and camera details removed, and is shown only to you. If you ask Saffra to adapt one of your recipes, its text is sent to OpenAI like any other recipe she adapts.</li>
     </ul>
 
@@ -109,8 +115,8 @@
     <h3>Voice</h3>
     
     <ul>
-      <li>When you use voice mode, audio is transcribed by <strong>Apple's Speech framework</strong>. The app does not request on-device recognition, so Apple's server-backed service is what runs and the audio reaches Apple; it does not reach us.</li>
-      <li>In Cooking Mode the recorded clip is <em>also</em> sent to our server and forwarded to <strong>OpenAI's Whisper</strong> for a second transcription. This is not a rare backstop: it runs for every spoken question, because Whisper reads question-length kitchen speech more accurately than Apple's transcript, and it also runs whenever Apple returns nothing or returns something the app cannot parse. A navigation command Apple recognizes cleanly (&ldquo;next&rdquo;, &ldquo;back&rdquo;) is not sent, and dictation in the chat composer is never sent. We do not retain the audio; it is processed and discarded.</li>
+      <li>When you use voice mode, audio is transcribed by <strong>Apple's Speech framework</strong>. The app does not require on-device recognition, so audio may be sent to Apple's servers. This recognition stream is not sent to HyperSage.</li>
+      <li>In Cooking Mode the recorded clip is <em>also</em> sent to our server and forwarded to <strong>OpenAI's Whisper</strong> for a second transcription. This is not a rare backstop: it runs for every spoken question, because Whisper reads question-length kitchen speech more accurately than Apple's transcript, and it also runs whenever Apple returns nothing or returns something the app cannot parse. A navigation command Apple recognizes cleanly (&ldquo;next&rdquo;, &ldquo;back&rdquo;) is not sent, and dictation in the chat composer is never sent. Our transcription route does not persist the raw audio after the request. This is not a promise about Apple or OpenAI retention under their applicable terms.</li>
       <li>Text-to-speech uses OpenAI's text-to-speech. Audio is generated on our server and streamed to your device. Audio for publicly available curated recipes is cached (content-addressed) so we don't re-generate the same clip for every user.</li>
     </ul>
 
@@ -122,7 +128,7 @@
 
     <h3>We do NOT collect</h3>
     <ul>
-      <li>Location, contacts, calendar, browsing history, financial data, health data outside your self-declared dietary/allergy profile.</li>
+      <li>We do not request location, contacts, calendar or browsing-history access. You may optionally enter dietary/allergy information and nutrition preferences, including goal-estimate inputs such as age, sex, height, weight and activity level. Free text or selected media may contain other information you choose to provide.</li>
       <li>Any analytics that track you across apps or websites.</li>
     </ul>
 
@@ -138,32 +144,33 @@
     <p>We share data with these service providers only to the extent needed to run the app:</p>
     <ul>
       
-      <li><strong>Apple</strong> — Sign in with Apple, and <strong>speech recognition</strong>: the audio you speak in voice mode is transcribed by Apple's Speech framework. The app does not request on-device recognition, so the service runs server-backed and the audio reaches Apple. It does not reach us.</li>
+      <li><strong>Apple</strong> — Sign in with Apple, and <strong>speech recognition</strong>: the audio you speak in voice mode is transcribed by Apple's Speech framework. The app does not require on-device recognition, so audio may be sent to Apple's servers. This recognition stream is not sent to HyperSage.</li>
       <li><strong>Google</strong> — Sign in with Google, only if you use it. Governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
       
-      <li><strong>OpenAI</strong> — seven paths. (1) <strong>Chef chat</strong>: your messages, along with a summary of your profile and pantry, are sent to OpenAI to generate and adapt the chef's replies. (2) <strong>Vision</strong>: when you photograph a shelf to add ingredients, that image is sent to OpenAI's vision model to identify the foods in it. (3) <strong>Whisper</strong>: the audio of every question you ask in Cooking Mode, re-transcribed for accuracy — see <em>Voice</em> above for exactly when a clip is sent. (4) <strong>Text-to-speech</strong>: text you want spoken aloud. (5) <strong>Search</strong>: your recipe searches and imported recipe text are converted to embeddings to power search over Saffra's own recipe catalog — there is no external web-search provider. (6) <strong>Community photo review</strong>: if community sharing becomes available and you share a cook photo to it, that photo would be sent to OpenAI's vision model for the "is this food / is this safe" check before it goes live. This path does not run today — community sharing is not available in the current version. (7) <strong>Chat photos</strong>: any photo you attach to a message in the Saffra (chat) tab — up to four per message — sent with that message so the chef can answer about it. Governed by <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's privacy policy</a>. Neither the shelf image, the chat photos, nor the audio is retained by us, and none of your content is used to train models.</li>
+      <li><strong>OpenAI</strong> — with your AI permission, depending on the feature: (1) chef messages, selected chat photos, recent conversation history or summaries, cooking profile, pantry, equipment, current recipe/step and tool results; (2) recipe adaptation/import instructions, URL/page text or selected recipe images, recipe descriptions for generated images, and recipe search words for embeddings; (3) receipt text and selected ingredient photos; (4) meal-planning choices and relevant pantry/profile/recipe information; (5) recorded cooking questions for transcription and text requested for premium voice; and (6) selected community photos/captions for automated safety review if community sharing becomes available. Context can include allergies, dietary and nutrition preferences or other personal details you entered. Conversation titling and summarization can process earlier conversation text. OpenAI is the configured AI, embedding, image, transcription and premium-voice provider for the production service reviewed for this release. See <a href="https://openai.com/policies/business-terms/" target="_blank" rel="noopener">OpenAI's business terms</a> and <a href="https://platform.openai.com/docs/guides/your-data" target="_blank" rel="noopener">API data controls</a>.</li>
       <li><strong>USDA FoodData Central</strong> — ingredient names are sent to look up nutrition information. No personal data.</li>
       <li><strong>Open Food Facts</strong> — barcode lookups send just the barcode number. No personal data.</li>
       <li><strong>Google Firebase</strong> — holds the email addresses from the closed early-access waitlist until the launch notification is sent.</li>
       <li><strong>Fly.io, Cloudflare R2, Upstash Redis</strong> — hosting infrastructure.</li>
     </ul>
-    <p>None of these providers are authorized to use your data for their own purposes.</p>
+    <p>Our service providers process information under the terms applicable to their services and our accounts. Application-side deletion or non-storage does not mean a provider retains nothing. We do not sell your information or use your content to train our own models. OpenAI's standard API terms exclude API content from training by default unless customers opt in to sharing. Retention can include safety monitoring, legal requirements and endpoint-specific storage, as explained in the API data controls linked above.</p>
 
     <h2>How long we keep it</h2>
     <ul>
       <li><strong>Account + profile + pantry</strong> — until you delete your account.</li>
       <li><strong>Conversations</strong> — individual messages may be auto-summarized and deleted after ~20 turns; summaries persist until you delete the conversation.</li>
-      <li><strong>TTS audio cache</strong> — until you delete your account.</li>
-      <li><strong>Recipes you write yourself, and their photos</strong> — until you delete your account, which deletes them.</li>
-      <li><strong>Voice audio sent to Whisper</strong> — not stored; discarded after transcription.</li>
-      <li><strong>Ingredient/shelf photos</strong> — not stored; held only for the length of the request that identifies the foods in them, then discarded.</li>
-      <li><strong>Chat photo attachments</strong> — not stored; held only for the length of the request they are sent with, then discarded. The saved conversation keeps a marker such as <em>[shared 2 photos]</em>, not the pictures.</li>
+      <li><strong>TTS audio cache</strong> — generated speech may be cached to avoid generating the same audio repeatedly. Private cache records are associated with the account; publicly curated recipe narration may be shared across users.</li>
+      <li><strong>Voice audio sent for transcription</strong> — our request handler does not persist the raw recording; third-party retention follows the applicable provider terms.</li>
+      <li><strong>Ingredient/shelf photos</strong> — not persisted by the ingredient-scan request handler. This does not describe chat attachments, saved recipe photos, community uploads, operating-system temporary files or the provider's separate retention.</li>
       <li><strong>Community posts, photos, comments, likes, follows, blocks, notifications</strong> (only if community sharing becomes available; none exist today) — until you delete them individually or delete your account. When you delete your account we hard-delete the photos from object storage and remove the associated rows. Reports you've filed are retained in an anonymized form so we can keep acting on repeat abuse.</li>
       <li><strong>Waitlist email</strong> — until launch notification is sent or you ask for removal, whichever is sooner.</li>
+      <li><strong>Recipes you write yourself, and their photos</strong> — until you delete your account, which deletes them.</li>
+      <li><strong>Chat photo attachments</strong> — not stored; held only for the length of the request they are sent with, then discarded. The saved conversation keeps a marker such as <em>[shared 2 photos]</em>, not the pictures. This describes our application storage; OpenAI retention follows its applicable API terms.</li>
     </ul>
 
     <h2>Your choices</h2>
     <ul>
+      <li><strong>Withdraw AI permission</strong> in Settings → Privacy &amp; Data → AI data sharing. Existing saved pantry and recipe data remain available; previous provider transfers cannot be recalled by the switch.</li>
       <li><strong>Edit or delete any profile field</strong> in Profile / Me.</li>
       <li><strong>Delete pantry items or conversations</strong> any time. Recipes you write yourself and their photos are removed when you delete your account.</li>
       <li><strong>Sign out</strong> via Profile / Me.</li>

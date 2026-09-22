@@ -69,7 +69,7 @@ we want to hear about it.</p>
 <thead><tr><th>Data</th><th>Why it exists</th><th>Where it lives</th></tr></thead>
 <tbody>
 <tr><td><strong>A device identifier</strong> — a random ID your device generates. Not your email, phone, or advertising ID.</td><td>It is how your characters, conversations and memories are yours without an account.</td><td>Our server, and your device.</td></tr>
-<tr><td><strong>About you</strong>, if you fill it in — Settings → About you holds the name you want characters to call you, your pronouns, and anything you choose to write about yourself. All three are optional and all three are free text you typed; we never read them off your phone.</td><td>So a character addresses you the way you asked to be addressed. This is the only place Mythkin holds a name for you, and it is the name <em>you</em> chose to give it.</td><td>Our server, one row per device. <strong>Sent to Anthropic as part of the prompt on every reply</strong>, which is what makes it work. Editable and clearable in Settings at any time.</td></tr>
+<tr><td><strong>About you</strong>, if you fill it in — Settings → About you holds the name you want characters to call you, your pronouns, and anything you choose to write about yourself. All three are optional and all three are free text you typed; we never read them off your phone.</td><td>So a character addresses you the way you asked to be addressed. This is the dedicated profile-name field, and it is the name <em>you</em> chose to give it; names may also appear in content you send.</td><td>Our server, one row per device. <strong>Sent to Anthropic as part of the prompt on every reply</strong>, which is what makes it work. Editable and clearable in Settings at any time.</td></tr>
 <tr><td><strong>Characters you create</strong> — name, description, personality, greeting, backstory, artwork.</td><td>The product. If you publish one, its text and artwork become visible to other users.</td><td>Our server.</td></tr>
 <tr><td><strong>Conversations</strong> — the messages you send and the replies you receive.</td><td>So a conversation can continue where it left off.</td><td>Our server, and cached on your device.</td></tr>
 <tr><td><strong>Memories</strong> — short facts about you that a character has learned, each linked to the message it came from.</td><td>So characters remember you. This is the feature the app exists for.</td><td>Our server. Visible and editable by you in the app.</td></tr>
@@ -85,11 +85,7 @@ we want to hear about it.</p>
 </table>
 </div>
 
-<p>We do <strong>not</strong> collect: your email address, phone number, contacts,
-your photo library, precise location, health data, or an advertising identifier.
-We never ask your phone for your name — the only name Mythkin ever holds is one you
-typed into Settings → About you yourself, and you can clear it there.
-There is no third-party analytics SDK and no advertising SDK in the app.</p>
+<p>We do not request access to your contacts or photo library, your precise location, an advertising identifier, or a health profile. Photos are limited to ones you choose as described below. Content you type or attach can contain names, contact details or health information, and follows the processing described above. The optional name in Settings → About you is the dedicated profile-name field; names can also occur in conversations and saved memories. There is no third-party analytics SDK or advertising SDK in the app.</p>
 
 <div class="card">
   <h3>Photos you choose to send</h3>
@@ -98,10 +94,7 @@ There is no third-party analytics SDK and no advertising SDK in the app.</p>
   <ul>
     <li><strong>Making a kin from a photo.</strong> You choose up to three
     photographs — with the camera or from your library, you pick either way — and
-    we paint a portrait from them. <strong>The photos are deleted the moment the
-    painting is finished</strong> — or the moment the painting fails. They are
-    never stored beyond that, never shown to anyone, and never used to train
-    anything. Location and camera details are stripped before anything is sent.
+    we paint a portrait from them. Our service removes the input photos after the painting succeeds or reaches a terminal failure; a pending retry can retain them until that request resolves. This does not mean OpenAI deletes its copy immediately: provider retention and safety review follow the API policies below. We do not make the input photos public or use them to train our own models. Location and camera details are stripped before anything is sent.
     A kin made this way stays in your library: it cannot be shared or borrowed.</li>
     <li><strong>Sending a photo in a chat.</strong> The photo is forwarded to
     the AI so the character can respond to it, and is not stored on our
@@ -120,11 +113,11 @@ There is no third-party analytics SDK and no advertising SDK in the app.</p>
   <p>To generate a character's reply, we send the character's description, the
   relevant part of your conversation, the memories that character is using, and —
   if you filled it in — what you wrote in Settings → About you, including the name
-  you asked to be called. Anthropic does not use API content to train their models
-  and deletes it on a contractual schedule.</p>
+  you asked to be called. Anthropic’s commercial API terms restrict processing purposes and require confidentiality and security. API inputs and outputs are not used for model training by default, subject to explicit opt-in and feedback exceptions. Its standard retention is up to 30 days, with safety, legal, model/feature and separate-agreement exceptions. See its <a href="https://www.anthropic.com/legal/commercial-terms">commercial terms</a>, <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data">retention policy</a> and <a href="https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training">training policy</a>.</p>
 </div>
 <div class="card">
   <h3>OpenAI — character artwork and optional illustrations</h3>
+  <p>OpenAI processes API content under its <a href="https://openai.com/policies/services-agreement/">services agreement</a> and <a href="https://platform.openai.com/docs/guides/your-data">API data controls</a>. API content is excluded from training by default unless sharing is enabled. Retention and safety review depend on the endpoint and applicable settings; deleting content from Mythkin does not erase copies the provider already received.</p>
   <p>When artwork is generated for a character you create, the character's
   appearance description is sent to OpenAI's image API. Photo-based creation
   also sends the reference photo as described above. A painted chat moment uses
@@ -236,7 +229,7 @@ we will say so in the app before the change takes effect, not only on this page.
   <a href="safety.html">Safety</a>
   <a href="terms.html">Terms</a>
   <a href="support.html">Support</a>
-  <span class="meta">Last updated 2026-09-14</span>
+  <span class="meta">Last updated 2026-09-22</span>
 </div></footer>
 <script>
 (function(){

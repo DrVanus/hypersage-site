@@ -34,31 +34,32 @@
     <nav class="crumb"><a href="./">← Loam</a></nav>
 
     <h1>Privacy Policy</h1>
-    <p class="updated">Loam, by HyperSage AI Labs LLC · Last updated September 14, 2026</p>
+    <p class="updated">Loam, by HyperSage AI Labs LLC · Last updated September 22, 2026</p>
 
     <div class="callout">
-      <p><strong>The short version.</strong> Your notes live on your device. There is no account, no advertising, and no analytics. Content leaves your device only when the AI companion is working for you — and only after you've said yes to waking it. Deleting a note really deletes it.</p>
+      <p><strong>The short version.</strong> Your notes live on your device. There is no account, no advertising, and no analytics. Companion requests to Anthropic require your permission. Optional dictation separately uses Apple Speech, and an export or share goes where you choose, as described below. Deleting a note really deletes it.</p>
     </div>
 
     <h2>What Loam stores, and where</h2>
-    <p>Everything you make in Loam — notes, checklists, sketches, voice-note transcripts, chat history, the Ledger of companion actions, reminders, and your settings — is stored locally in the app's storage on your device. Loam has no accounts and no sign-in; we cannot read your notes, and we keep no copy of them.</p>
+    <p>Everything you make in Loam — notes, checklists, sketches, voice-note transcripts, chat history, the Ledger of companion actions, reminders, and your settings — is stored locally in the app's storage on your device. Loam has no accounts or sign-in and does not maintain a cloud notebook. Our server processes the content you send for companion features, as described below, without storing a note library.</p>
 
     <h2>What leaves your device, and when</h2>
-    <p>Loam sends content off your device only after you consent to waking the companion — it asks before its first send, names its AI provider, and works fully as a private notes app if you decline. After consent, content is sent only while the companion is doing something you asked for or dialed in:</p>
+    <p>Loam's companion sends content to Anthropic only after you consent to waking it — it asks before its first send and names its AI provider. Manual notes remain available if you decline. Optional dictation separately uses Apple Speech as described below. After companion consent, content is sent to Anthropic only while the companion is doing something you asked for or dialed in:</p>
     <ul>
       <li><strong>Asking your pile a question (chat).</strong> Your message, your note titles with each note's collection name, the handful of notes most relevant to your question, and the recent messages of that conversation (so Loam doesn't ask you to repeat yourself) are sent to Loam's server, which forwards them to Anthropic's Claude API and returns the answer. If you attach a photo in chat, it is sent for reading; a small thumbnail stays in your chat on the device, and we don't store the image.</li>
-      <li><strong>A deeper tending.</strong> When you ask Loam to look deeper at notes, those notes (trimmed) travel with light context: your collection names, recent Ledger entry labels, reminder labels, and your power-dial settings — so proposals fit how you've set Loam up.</li>
+      <li><strong>A deeper tending.</strong> When you ask Loam to look deeper, the chosen notes (or up to three recent notes) are trimmed and sent with up to 12 collection names from your whole pile, including collections unrelated to those notes. Recent Ledger and reminder labels are limited to the notes being sent. Your power-dial settings also travel so proposals fit the permissions you chose.</li>
       <li><strong>Basic tidying stays on the device.</strong> The Tidy pass that fixes typos and shapes rambly jots is deterministic code running locally — no AI service ever touches your words for it.</li>
     </ul>
     <p>Requests carry a pseudonymous device identifier (a random ID minted on your device) used only to meter daily usage and prevent abuse. It is not tied to your name, email, or any account, because none exist.</p>
     <h2>Changing your mind</h2>
-    <p>You can withdraw consent at any time. In Loam, open <strong>Powers</strong> and tap <strong>Withdraw</strong> on the Companion consent row: the companion goes back to sleep and nothing more is sent. <strong>Pause Loam</strong>, on the row below, suspends the companion without withdrawing consent. Either way, your notes, capture, history, undo and redo keep working exactly as before.</p>
+    <p><strong>Updated AI permission:</strong> the next Loam update renews the permission choice with the data scope described here and prevents interrupted requests from restarting after withdrawal. Earlier releases may show a shorter disclosure and lack that interruption protection. Until you install the update, keep the companion disabled if you do not want AI processing.</p>
+    <p>You can withdraw consent at any time. In Loam, open <strong>Powers</strong> and tap <strong>Withdraw</strong> on the Companion consent row, then choose <strong>Not now — just notes</strong> on the permission screen. New AI requests stop and pending app requests are cancelled. Re-enabling sharing does not restart an old request. Requests a provider already received remain subject to its retention terms. <strong>Pause Loam</strong>, on the row below, suspends the companion without withdrawing consent. Either way, your notes, capture, history, undo and redo keep working exactly as before.</p>
 
     <h2>Our server keeps no content</h2>
     <p>Loam's server is a thin relay. It forwards your request to Anthropic and returns the reply. It has no database of notes, messages, or photos, and it does not log their contents. The one thing it does keep is a count of requests per device identifier, per day — a number, not your content — stored on its own disk and deleted after a few days, so that the daily allowance holds across server restarts.</p>
 
     <h2>Anthropic (the AI provider)</h2>
-    <p>The companion runs on Claude, by Anthropic. Content sent to the Claude API is retained by Anthropic for up to 30 days for trust-and-safety purposes and is <strong>not used to train models</strong>. Neither we nor Anthropic use your notes for training — no exceptions.</p>
+    <p>The companion runs on Claude, by Anthropic. Anthropic's published API policy describes a standard retention period of up to 30 days, with exceptions for safety enforcement, legal requirements, model-specific terms and separate agreements. Its commercial API training policy excludes inputs and outputs by default, with opt-in and feedback exceptions. Loam does not train models on your notes. Read <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data">Anthropic's retention policy</a> and <a href="https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training">training policy</a>; we do not promise an unconditional provider deletion deadline.</p>
 
     <h2>Dictation</h2>
     <p>Voice capture uses Apple's speech recognition. Your audio is processed by Apple on your device or Apple's servers according to your iOS settings; it is never sent to Loam's server. Only the transcribed text lands in your note, on your device.</p>
@@ -68,15 +69,15 @@
 
     <h2>What we never do</h2>
     <ul>
-      <li>No accounts, and no collection of your name, email, or contacts.</li>
+      <li>No account profile or access to your contacts. Notes and questions you choose to send can contain identifying information.</li>
       <li>No advertising, and no advertising SDKs.</li>
       <li>No analytics or tracking SDKs. The only record of use we keep is the per-device request count described above, and only to enforce the daily allowance.</li>
-      <li>No selling or sharing of your data with anyone.</li>
-      <li>No training AI models on your notes.</li>
+      <li>No sale of your data or sharing for advertising. Requested AI processing shares the content described above with Anthropic.</li>
+      <li>Loam does not train its own AI models on your notes. Anthropic and Apple handle the information sent to them under their respective terms described above.</li>
     </ul>
 
     <h2>Deletion — and why there's no trash can</h2>
-    <p>Deleted means deleted. When you delete a note, it is removed from your device, its Ledger entries are redacted, and its traces are scrubbed from chat history — there is no trash folder and no thirty-day holding period, which is why Loam asks you to confirm. Our server holds none of your content, so there is nothing of yours to delete there; its per-device request counts expire on their own within a few days. If you have the iPhone app and want everything gone, delete your notes in it (or delete the app itself — all Loam data lives inside it).</p>
+    <p>Deleted means deleted. When you delete a note, it is removed from your device, its Ledger entries are redacted, and its traces are scrubbed from chat history — there is no trash folder and no thirty-day holding period, which is why Loam asks you to confirm. Our server holds none of your content, so there is nothing of yours to delete there; its per-device request counts expire on their own within a few days. Deleting local data does not recall requests Anthropic has already received; those are subject to its retention policy. If you want the on-device record gone, delete your notes in the app or delete the app itself. Backups, clipboard content, files you exported or shared, and copies saved in another app remain under your control; deleting the note does not remove those separate copies.</p>
 
     <h2>Export</h2>
     <p>Your pile is yours, anytime: in Powers, <strong>Back up all notes</strong> saves one file with your notes, sketches and collections (chats and reminders stay on your device), and <strong>Copy all notes as Markdown</strong> puts your whole pile on the clipboard to paste wherever you like.</p>
