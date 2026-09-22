@@ -7,7 +7,7 @@
   <title>Privacy Policy — Wingmate</title>
   <meta name="description" content="Privacy Policy for the Wingmate dating-coach app.">
   <link rel="canonical" href="https://hypersage.ai/wingmate/privacy.html">
-  
+
   <meta property="og:type" content="website">
   <meta property="og:title" content="Privacy Policy — Wingmate">
   <meta property="og:description" content="Privacy Policy for the Wingmate dating-coach app.">
@@ -86,17 +86,17 @@
       <p>Wingmate ("we", "our", "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use the Wingmate mobile application.</p>
 
       <h2>Information We Collect</h2>
-      <p><strong>Chat messages.</strong> When you chat with a coach, your message is sent to our server, which relays it to our AI provider (see Third-Party Processing) to generate a reply. Coach chat messages are not stored on our servers — each chat request is processed only to produce the response. Your conversation history is kept on your device. Replies prepared for Wingmate Keyboard work differently; see Prepared replies and Wingmate Keyboard below.</p>
+      <p><strong>Chat messages.</strong> When you chat with a coach, your message is sent to our server, which relays it to our AI provider (see Third-Party Processing) to generate a reply. Your full conversation history stays on your device. Ordinary coaching requests are processed to produce a response. The optional quick-reply flow temporarily retains generated output for safe retries, as described below.</p>
       <p><strong>Screenshots.</strong> If you share conversation screenshots with your coach, they are sent to our server and relayed to our AI provider (see Third-Party Processing) to generate a response. They are not stored on our servers.</p>
-      <p><strong>Other people in your screenshots.</strong> A conversation screenshot may include messages, names, or photos of the person you're talking to. When you choose to share one, that content is processed by our AI provider solely to generate your coaching response and is not stored on our servers or used to train models. Please only share screenshots you're comfortable processing this way, and avoid sharing content about anyone who would object.</p>
-      <p><strong>Device identifier.</strong> We generate and store a random, anonymous device identifier to track your free-tier usage and subscription status. It is tied to your device and subscription, not to your name, email address, or phone number.</p>
-      <p><strong>Connection data.</strong> Information you enter about people you're talking to (such as names, notes, and platforms) is stored locally on your device. When you ask a coach for advice about a specific person, the details you've entered about them are included in that request to our AI provider so the advice is relevant. We do not store this connection data on our servers. If you turn on saved context for Wingmate Keyboard, a short summary of the connection you select is included in that request and is held alongside the prepared replies for up to 30 minutes; see Prepared replies and Wingmate Keyboard below.</p>
+      <p><strong>Other people in your screenshots.</strong> A conversation screenshot may include messages, names, or photos of the person you're talking to. When you choose to share one, that content is processed by our AI provider solely to generate your coaching response and is processed under the providers’ applicable data-handling terms. Raw screenshot files are not persisted in our quick-reply journal. Please only share screenshots you're comfortable processing this way, and avoid sharing content about anyone who would object.</p>
+      <p><strong>Device identifier.</strong> We generate and store a random device identifier to track your free-tier usage and subscription status. It is not an account or advertising identifier, but it links allowance and retry records to the same device. A verified Apple subscription transaction can similarly identify your subscription allowance. We treat this as data linked to you for App Store privacy disclosures.</p>
+      <p><strong>Connection data.</strong> Information you enter about people you're talking to (such as names, notes, and platforms) is stored locally on your device. When you ask a coach for advice about a specific person, the details you've entered about them are included in that request to our AI provider so the advice is relevant. Raw submitted connection notes are not written to the quick-reply journal. A generated reply or summary may reflect that context and is subject to the temporary retention below.</p>
 
       <h2>Information We Do Not Collect</h2>
       <ul>
-        <li>We do not collect your real name, email address, or phone number</li>
+        <li>We do not require your real name, email address, or phone number; information you voluntarily include in messages or screenshots is processed with that content</li>
         <li>We do not access your contacts, photos, or files beyond screenshots you explicitly share</li>
-        <li>The app does not use tracking pixels, advertising identifiers, or third-party analytics</li>
+        <li>We do not use tracking pixels, advertising identifiers, or third-party analytics</li>
         <li>We do not sell or rent your data, and we do not share it with advertisers or data brokers</li>
       </ul>
 
@@ -114,19 +114,19 @@
         <li><strong>Anthropic</strong> (Claude) generates the coaches' written responses and analyzes shared screenshots.</li>
         <li><strong>OpenAI</strong> generates spoken audio when you use the read-aloud (text-to-speech) feature.</li>
       </ul>
-      <p>These providers process your content only to return a response and do not use it to train their models under our configuration. We do not share your data with any other third parties for their own purposes.</p>
+      <p>We do not use your messages or screenshots to train models. Our API providers do not use this content to train their models under our configuration; their processing is subject to the applicable API data-handling terms and our account settings. Provider retention is separate from Wingmate’s temporary reply cache. We do not sell your data or share it with advertisers or data brokers.</p>
 
+      <h2>Optional Keyboard and Share Extension</h2>
+      <p>The Wingmate keyboard works offline and does not need Full Access. From Wingmate’s shared storage it reads prepared replies, coach guidance, a short context summary and its label. Like other keyboards, it can inspect text near the cursor, selected text and the current document identifier to support typing and prevent accidental replacement. That information stays on your device. It does not access your incoming chat bubbles, live dating profiles, screenshots, saved connection notes, or credentials. Choosing a draft inserts text into the active field; you decide whether to send it.</p>
+      <p>When you share text or screenshots to Wingmate, you review that content and choose whether to send it to Anthropic for reply suggestions. Saved connection details are offered only if you enable them in Wingmate settings, and notes are included only when selected in the Share sheet. The Share extension uses the same device identity and subscription allowance as the main app. Your explicit permission to send shared content to Anthropic is remembered; you can turn it off in the Share sheet or in Wingmate Settings. This stops future preparation requests and does not undo a request you already sent.</p>
       <h2>Data Storage and Security</h2>
       <p>Your connection profiles, saved openers, and app preferences are stored locally on your device using encrypted file protection. Chat messages sent to our servers are processed over encrypted HTTPS connections.</p>
 
       <h2>Data Retention</h2>
-      <p>Your conversation transcripts, connections, and saved openers are stored only on your device, and you can delete all conversations at any time from Settings. Coach chat messages are not retained on our servers; each chat request is processed only to generate a reply and is not saved. Replies prepared for Wingmate Keyboard are the one exception, and are described below.</p>
-
-      <h2>Prepared replies and Wingmate Keyboard</h2>
-      <p><strong>The keyboard cannot read your screen.</strong> Wingmate Keyboard does not request Full Access, so iOS gives it no network access and no way to send anything anywhere. It cannot see your conversations, the app you are typing in, or what you type on any other keyboard. It can only display replies you have already prepared, and insert one when you tap it.</p>
-      <p><strong>You choose what is shared.</strong> Replies are prepared from the screenshots or text you explicitly share to Wingmate, plus — only if you turn on saved context — notes you have entered about the connection you select.</p>
-      <p><strong>Prepared replies are held for up to 30 minutes.</strong> So that you can retry a request without being charged for it twice, our server keeps the generated replies and a short summary of the context you shared for up to 30 minutes, and then deletes them. They are also stored on your device, in a space shared between Wingmate and its keyboard, until they expire or you clear them.</p>
-      <p>You can clear prepared replies at any time from Settings, and deleting a connection removes any prepared replies for that person.</p>
+      <p>Your conversation transcripts, connections, and saved openers stay on your device. You can delete conversations and clear prepared keyboard replies in Settings. Prepared replies stop being available in the keyboard after 30 minutes; local file contents are replaced when cleared or superseded.
+      </p><p>For the quick-reply flow, our backend temporarily stores generated drafts, a generated context summary and explanation for up to 30 minutes of availability, so a retry can return the same result without using another coaching message. Request identifiers, hashes and allowance/result state remain for 24 hours to prevent duplicate processing. We do not persist raw submitted screenshots or request text in that journal. Records are linked to a device or subscription identifier.
+      </p><p>Expired output is removed on startup, access, writes and a timer while the server is running. If the server is stopped, physical removal waits until it resumes. Hosting snapshots or backups may retain prior copies according to the configured hosting retention. Provider processing and retention are governed separately by the applicable provider terms. To request help with deletion of retained data, contact support@hypersage.ai. You can stop using Share and revoke its AI permission at any time; existing temporary output continues to expire on the schedule above.
+      </p><p>Wingmate’s keyboard does not transmit keystrokes or the text around your cursor. Apple’s speech-recognition service may process audio when you use voice input in the main app.</p>
 
       <h2>Children's Privacy</h2>
       <p>Wingmate is not intended for users under the age of 17. We do not knowingly collect information from children.</p>
