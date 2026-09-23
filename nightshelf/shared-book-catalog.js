@@ -150,6 +150,12 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "The Blue Fairy Book"
   },
+  "brick_moon" : {
+    "author" : "Edward Everett Hale",
+    "blurb" : "A brick satellite carries a small community into orbit; an ingenious voyage with a frightening launch and dated social attitudes.",
+    "freeTier" : true,
+    "title" : "The Brick Moon"
+  },
   "bulfinch_mythology" : {
     "author" : "Thomas Bulfinch",
     "blurb" : "Greek myth, the Round Table, and Charlemagne, told in one long volume.",
@@ -161,6 +167,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "Buck, the Yukon snows, and the song of the younger world.",
     "freeTier" : false,
     "title" : "The Call of the Wild"
+  },
+  "canterville_ghost" : {
+    "author" : "Oscar Wilde",
+    "blurb" : "An American family unsettles an English ghost in a comic tale with a dark history of murder and captivity.",
+    "freeTier" : true,
+    "title" : "The Canterville Ghost"
   },
   "celtic_fairy_tales" : {
     "author" : "Joseph Jacobs",
@@ -179,6 +191,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "A ghostly Christmas journey through regret, kindness, and second chances.",
     "freeTier" : true,
     "title" : "A Christmas Carol"
+  },
+  "cousin_phillis" : {
+    "author" : "Elizabeth Gaskell",
+    "blurb" : "A country household meets the railway age in a reflective novella of first love, disappointment, and recovery.",
+    "freeTier" : false,
+    "title" : "Cousin Phillis"
   },
   "cranford" : {
     "author" : "Elizabeth Gaskell",
@@ -227,6 +245,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "A green light across the bay. Long summer parties.",
     "freeTier" : false,
     "title" : "The Great Gatsby"
+  },
+  "great_stone_sardis" : {
+    "author" : "Frank R. Stockton",
+    "blurb" : "A polar submarine and a ray into the Earth lead to discovery, sabotage, peril, and an accidental death.",
+    "freeTier" : false,
+    "title" : "The Great Stone of Sardis"
   },
   "green_fairy_book" : {
     "author" : "Andrew Lang",
@@ -419,6 +443,14 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "kind" : "original",
     "title" : "The Rain Map"
+  },
+  "original_space_between_replies" : {
+    "author" : "Nightshelf",
+    "blurb" : "With eleven minutes between Mars and Earth, two sisters find a new way to share an ordinary evening.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : true,
+    "kind" : "original",
+    "title" : "The Space Between Replies"
   },
   "original_tide_glass_observatory" : {
     "author" : "Nightshelf",

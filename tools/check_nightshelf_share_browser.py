@@ -35,6 +35,11 @@ try:
                 ('original_borrowed_light', 'The Sea of Borrowed Light', 'Included with Nightshelf Pro'),
                 ('original_tide_glass_observatory', 'The Tide-Glass Observatory', 'Free on Nightshelf'),
                 ('original_garden_between_stations', 'The Garden Between Stations', 'Included with Nightshelf Pro'),
+                ('original_space_between_replies', 'The Space Between Replies', 'Free on Nightshelf'),
+                ('brick_moon', 'The Brick Moon', 'Free on Nightshelf'),
+                ('canterville_ghost', 'The Canterville Ghost', 'Free on Nightshelf'),
+                ('cousin_phillis', 'Cousin Phillis', 'Included with Nightshelf Pro'),
+                ('great_stone_sardis', 'The Great Stone of Sardis', 'Included with Nightshelf Pro'),
             ]:
                 page.goto(base + '?book=' + book, wait_until='networkidle')
                 assert page.locator('#shared-book').is_visible(), book
@@ -46,7 +51,7 @@ try:
                 if book.startswith('original_'):
                     assert page.locator('#shared-book-author').inner_text() == 'A Nightshelf Original'
                     assert 'Created with AI for Nightshelf.' in page.locator('#shared-book-description').inner_text()
-                if captures and book in ['wind_in_willows', 'original_tide_glass_observatory', 'original_garden_between_stations']:
+                if captures and book in ['brick_moon', 'great_stone_sardis', 'original_space_between_replies']:
                     page.screenshot(path=str(captures / f'share-{book}-{width}.png'))
             for held in ['peter_pan', 'irish_fairy_tales', 'pinocchio', 'custom_private']:
                 page.goto(base + '?book=' + held, wait_until='networkidle')
