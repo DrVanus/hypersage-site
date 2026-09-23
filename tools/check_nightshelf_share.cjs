@@ -62,8 +62,8 @@ for (const id of Object.keys(run('').elements)) assert.ok(html.includes('id="' +
 const books = Object.values(catalog).filter(book => !book.kind);
 const originals = Object.values(catalog).filter(book => book.kind === 'original');
 const selections = Object.values(catalog).filter(book => book.kind === 'selection');
-assert.equal(books.length, 81, 'all 81 full-volume routes remain available');
-assert.equal(selections.length, 12, 'all twelve traditional selection routes remain available');
+assert.equal(books.length, 93, 'all 93 full-volume routes remain available');
+assert.equal(selections.length, 24, 'all twenty-four traditional selection routes remain available');
 assert.equal(originals.length, 11, 'all eleven prepared Originals have a shared route');
 assert.equal(originals.filter(book => book.freeTier).length, 5, 'five Originals are free');
 assert.equal(originals.filter(book => !book.freeTier).length, 6, 'six Originals require Pro');
@@ -78,26 +78,53 @@ for (const [id, title, freeTier] of [
   assert.equal(catalog[id]?.freeTier, freeTier, id + ' must preserve its intended access');
   assert.equal(catalog[id]?.kind, 'original', id + ' must use the AI-disclosing Original card');
 }
-assert.equal(Object.keys(catalog).length, 104);
-assert.equal(Object.values(catalog).filter(book => book.freeTier).length, 26);
-assert.equal(Object.values(catalog).filter(book => !book.freeTier).length, 78);
+assert.equal(Object.keys(catalog).length, 128);
+assert.equal(Object.values(catalog).filter(book => book.freeTier).length, 35);
+assert.equal(Object.values(catalog).filter(book => !book.freeTier).length, 93);
 for (const id of ['canterville_ghost', 'cousin_phillis', 'brick_moon', 'great_stone_sardis']) {
   assert.ok(catalog[id], id + ' must have its new classic route');
   assert.ok(!catalog[id].kind, id + ' must remain a classic book');
 }
+
+for (const [id, free] of [
+  ['frankenstein', true], ['journey_earth', true], ['tales_shakespeare', true], ['meditations', true],
+  ['huckleberry_finn', false], ['prince_pauper', false], ['little_men', false], ['marvelous_land_oz', false],
+  ['white_fang', false], ['enchiridion', false], ['apology', false], ['odyssey', false],
+]) {
+  assert.equal(catalog[id]?.freeTier, free, id + ' access follows the app');
+  assert.ok(!catalog[id].kind, id + ' is a full book');
+}
+for (const [id, free, collection] of [
+  ['cinderella', false, 'Tales of Mother Goose'], ['snow_white', true, "Grimm's Fairy Tales"],
+  ['sleeping_beauty', true, "Grimm's Fairy Tales"], ['beauty_beast', false, 'The Blue Fairy Book'],
+  ['red_riding_hood', true, "Grimm's Fairy Tales"], ['rapunzel', true, "Grimm's Fairy Tales"],
+  ['hansel_gretel', true, "Grimm's Fairy Tales"], ['jack_beanstalk', false, 'English Fairy Tales'],
+  ['three_pigs', false, 'English Fairy Tales'], ['rip_van_winkle', false, 'The Sketch-Book'],
+  ['sleepy_hollow', false, 'The Sketch-Book'], ['tell_tale_heart', false, 'Tales of Mystery & Imagination'],
+]) {
+  const book = catalog['bedtime_' + id];
+  assert.equal(book?.freeTier, free, id + ' inherits source access');
+  assert.equal(book.kind, 'selection');
+  assert.equal(book.collection, collection);
+  assert.ok(book.blurb.includes('complete tale'), id + ' is not called an extra book');
+}
+
 const freeCount = books.filter(book => book.freeTier).length;
 assert.match(html, new RegExp('>' + books.length + '<'));
-assert.match(html, new RegExp('>' + freeCount + '<'));
+assert.equal(freeCount, 19);
+assert.match(html, /19 free/);
+assert.match(html, />35<[^]*Free choices/);
+assert.match(html, /selected tales also appear in their source collections/);
 const freeSpines = html.match(/class="spines free" d="([^"]+)"/)[1].match(/M/g).length;
 const proSpines = html.match(/class="spines pro" d="([^"]+)"/)[1].match(/M/g).length;
 assert.equal(freeSpines, freeCount);
 assert.equal(proSpines, books.length - freeCount);
 for (const name of ['index.html', 'support.html', 'terms.html', 'privacy.html']) {
   const page = fs.readFileSync(path.join(root, name), 'utf8');
-  assert.doesNotMatch(page, /\b(?:82(?: complete)? (?:books|classics|works)|eighty-two|eighty(?!-one)|seventy-seven|thirteen(?: of| free)|fourteen(?: of| free)|sixty-four|sixty-nine)\b/i,
+  assert.doesNotMatch(page, /\b(?:82(?: complete)? (?:books|classics|works)|eighty-two|eighty(?:-one)?|seventy-seven|(?:thirteen|fifteen)(?: of| free)|fourteen(?: of| free)|sixty-four|sixty-six|sixty-nine)\b/i,
     name + ' must not advertise the retired catalog counts');
   for (const image of page.matchAll(/nightshelf\/og-image\.png\?v=([^"\s]+)/g)) {
-    assert.equal(image[1], '20260923', name + ' must show the current catalog OG card');
+    assert.equal(image[1], '20260923-library19', name + ' must show the current catalog OG card');
   }
 }
 console.log(`PASS: ${books.length} shared books + ${selections.length} tales + ${originals.length} Originals, ${rejected.length} rejected queries, catalog counts and shelf artwork`);
