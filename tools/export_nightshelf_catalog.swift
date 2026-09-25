@@ -20,7 +20,7 @@ import Foundation
             precondition(catalog[tale.id] == nil, "Duplicate selection id")
             catalog[tale.id] = [
                 "title": tale.title, "author": source.author,
-                "blurb": "A short tale from " + source.title + ".",
+                "blurb": "A complete tale from " + source.title + ". " + tale.contentNote,
                 "freeTier": source.freeTier, "kind": "selection", "collection": source.title,
             ]
         }

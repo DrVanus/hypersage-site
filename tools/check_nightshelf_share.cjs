@@ -62,21 +62,51 @@ for (const id of Object.keys(run('').elements)) assert.ok(html.includes('id="' +
 const books = Object.values(catalog).filter(book => !book.kind);
 const originals = Object.values(catalog).filter(book => book.kind === 'original');
 const selections = Object.values(catalog).filter(book => book.kind === 'selection');
-assert.equal(books.length, 77, 'all 77 full-volume routes remain available');
-assert.equal(selections.length, 12, 'all twelve traditional selection routes remain available');
-assert.equal(originals.length, 10, 'all ten prepared Originals have a shared route');
-assert.equal(originals.filter(book => book.freeTier).length, 4, 'four Originals are free');
+assert.equal(books.length, 93, 'all 93 full-volume routes remain available');
+assert.equal(selections.length, 24, 'all twenty-four traditional selection routes remain available');
+assert.equal(originals.length, 11, 'all eleven prepared Originals have a shared route');
+assert.equal(originals.filter(book => book.freeTier).length, 5, 'five Originals are free');
 assert.equal(originals.filter(book => !book.freeTier).length, 6, 'six Originals require Pro');
+// Nightshelf content/classics/release-holds.json: 128 playable, 35 free, 93 Pro.
+assert.equal(Object.keys(catalog).length, 128, 'every playable listen has a shared route');
+assert.equal(Object.values(catalog).filter(book => book.freeTier).length, 35);
 for (const [id, title, freeTier] of [
   ['original_evening_they_kept', 'The Evening They Kept', true],
   ['original_borrowed_light', 'The Sea of Borrowed Light', false],
   ['original_tide_glass_observatory', 'The Tide-Glass Observatory', true],
   ['original_garden_between_stations', 'The Garden Between Stations', false],
+  ['original_space_between_replies', 'The Space Between Replies', true],
 ]) {
   assert.equal(catalog[id]?.title, title, id + ' must name the intended story');
   assert.equal(catalog[id]?.freeTier, freeTier, id + ' must preserve its intended access');
   assert.equal(catalog[id]?.kind, 'original', id + ' must use the AI-disclosing Original card');
 }
+// Classics added in 1.8 and 1.9.
+for (const [id, free] of [
+  ['canterville_ghost', true], ['brick_moon', true], ['cousin_phillis', false], ['great_stone_sardis', false],
+  ['frankenstein', true], ['journey_earth', true], ['tales_shakespeare', true], ['meditations', true],
+  ['huckleberry_finn', false], ['prince_pauper', false], ['little_men', false], ['marvelous_land_oz', false],
+  ['white_fang', false], ['enchiridion', false], ['apology', false], ['odyssey', false],
+]) {
+  assert.equal(catalog[id]?.freeTier, free, id + ' access follows the app');
+  assert.ok(!catalog[id].kind, id + ' is a full book');
+}
+// The 1.9 Familiar Tales inherit access from, and credit, their source collection.
+for (const [id, free, collection] of [
+  ['cinderella', false, 'Tales of Mother Goose'], ['snow_white', true, "Grimm's Fairy Tales"],
+  ['sleeping_beauty', true, "Grimm's Fairy Tales"], ['beauty_beast', false, 'The Blue Fairy Book'],
+  ['red_riding_hood', true, "Grimm's Fairy Tales"], ['rapunzel', true, "Grimm's Fairy Tales"],
+  ['hansel_gretel', true, "Grimm's Fairy Tales"], ['jack_beanstalk', false, 'English Fairy Tales'],
+  ['three_pigs', false, 'English Fairy Tales'], ['rip_van_winkle', false, 'The Sketch-Book'],
+  ['sleepy_hollow', false, 'The Sketch-Book'], ['tell_tale_heart', false, 'Tales of Mystery & Imagination'],
+]) {
+  const book = catalog['bedtime_' + id];
+  assert.equal(book?.freeTier, free, id + ' inherits source access');
+  assert.equal(book.kind, 'selection');
+  assert.equal(book.collection, collection);
+}
+// "Complete tale", as the app's share text says: Sleepy Hollow runs past an hour.
+for (const book of selections) assert.ok(book.blurb.startsWith('A complete tale from ' + book.collection + '. '), book.title);
 const freeCount = books.filter(book => book.freeTier).length;
 assert.match(html, new RegExp('>' + books.length + '<'));
 assert.match(html, new RegExp('>' + freeCount + '<'));
