@@ -30,6 +30,12 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Anne of Avonlea"
   },
+  "apology" : {
+    "author" : "Plato",
+    "blurb" : "Socrates defends his life and questioning before an Athenian court. Benjamin Jowett's translation of Plato's philosophical account of the trial.",
+    "freeTier" : false,
+    "title" : "Apology"
+  },
   "arabian_nights" : {
     "author" : "Anonymous",
     "blurb" : "Selected tales of genies, voyages, enchantment, and peril, edited by Andrew Lang.",
@@ -42,9 +48,25 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Around the World in Eighty Days"
   },
+  "bedtime_beauty_beast" : {
+    "author" : "Andrew Lang",
+    "blurb" : "A complete tale from The Blue Fairy Book. An enchanted palace and a promise to return. Includes threats of death, separation, and a frightening illness before a happy marriage.",
+    "collection" : "The Blue Fairy Book",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "Beauty and the Beast"
+  },
+  "bedtime_cinderella" : {
+    "author" : "Charles Perrault",
+    "blurb" : "A complete tale from Tales of Mother Goose. A fairy godmother, a midnight deadline, and a glass slipper. Cruel treatment gives way to forgiveness and a happy marriage.",
+    "collection" : "Tales of Mother Goose",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "Cinderella"
+  },
   "bedtime_elves_shoemaker" : {
     "author" : "The Brothers Grimm",
-    "blurb" : "A short tale from Grimm's Fairy Tales.",
+    "blurb" : "A complete tale from Grimm's Fairy Tales. A poor shoemaker receives secret help and gives a thoughtful gift in return.",
     "collection" : "Grimm's Fairy Tales",
     "freeTier" : true,
     "kind" : "selection",
@@ -52,7 +74,7 @@ window.nightshelfSharedBooks = {
   },
   "bedtime_emperors_new_clothes" : {
     "author" : "Hans Christian Andersen",
-    "blurb" : "A short tale from Andersen's Fairy Tales.",
+    "blurb" : "A complete tale from Andersen's Fairy Tales. Invisible finery and a child who tells the truth. A comic tale of deception, vanity, and an embarrassing parade.",
     "collection" : "Andersen's Fairy Tales",
     "freeTier" : true,
     "kind" : "selection",
@@ -60,7 +82,7 @@ window.nightshelfSharedBooks = {
   },
   "bedtime_fairies_gift" : {
     "author" : "Johnny Gruelle",
-    "blurb" : "A short tale from Raggedy Ann Stories.",
+    "blurb" : "A complete tale from Raggedy Ann Stories. A quiet nursery, a fairy visit, and a joyful welcome for a new baby.",
     "collection" : "Raggedy Ann Stories",
     "freeTier" : false,
     "kind" : "selection",
@@ -68,7 +90,7 @@ window.nightshelfSharedBooks = {
   },
   "bedtime_gift_of_magi" : {
     "author" : "O. Henry",
-    "blurb" : "A short tale from The Four Million.",
+    "blurb" : "A complete tale from The Four Million. Christmas gifts, money worries, and tears lead to a tender, ironic ending.",
     "collection" : "The Four Million",
     "freeTier" : false,
     "kind" : "selection",
@@ -76,23 +98,39 @@ window.nightshelfSharedBooks = {
   },
   "bedtime_golden_touch" : {
     "author" : "Nathaniel Hawthorne",
-    "blurb" : "A short tale from A Wonder Book.",
+    "blurb" : "A complete tale from A Wonder Book. King Midas learns what gold cannot buy. Includes hunger, a burn, and his daughter’s frightening transformation, followed by her safe return.",
     "collection" : "A Wonder Book",
     "freeTier" : false,
     "kind" : "selection",
     "title" : "The Golden Touch"
   },
+  "bedtime_hansel_gretel" : {
+    "author" : "The Brothers Grimm",
+    "blurb" : "A complete tale from Grimm's Fairy Tales. Two children outwit a witch and find their way home. Includes abandonment, threatened cannibalism, and the witch’s death in an oven.",
+    "collection" : "Grimm's Fairy Tales",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "Hansel and Gretel"
+  },
   "bedtime_hare_tortoise" : {
     "author" : "Aesop",
-    "blurb" : "A short tale from Aesop's Fables.",
+    "blurb" : "A complete tale from Aesop's Fables. A tiny fable about patience and a race, with some boasting and teasing.",
     "collection" : "Aesop's Fables",
     "freeTier" : true,
     "kind" : "selection",
     "title" : "The Hare and the Tortoise"
   },
+  "bedtime_jack_beanstalk" : {
+    "author" : "Joseph Jacobs",
+    "blurb" : "A complete tale from English Fairy Tales. Magic beans lead Jack to an ogre’s treasures. Includes threats of being eaten, theft, pursuit, and the ogre’s fatal fall.",
+    "collection" : "English Fairy Tales",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "Jack and the Beanstalk"
+  },
   "bedtime_mercury_woodman" : {
     "author" : "Aesop",
-    "blurb" : "A short tale from Aesop's Fables.",
+    "blurb" : "A complete tale from Aesop's Fables. A lost axe and a visit from Mercury. Honesty brings a reward; a greedy imitation ends in disappointment.",
     "collection" : "Aesop's Fables",
     "freeTier" : true,
     "kind" : "selection",
@@ -100,7 +138,7 @@ window.nightshelfSharedBooks = {
   },
   "bedtime_new_sisters" : {
     "author" : "Johnny Gruelle",
-    "blurb" : "A short tale from Raggedy Ann Stories.",
+    "blurb" : "A complete tale from Raggedy Ann Stories. Raggedy Ann inspires new dolls. Includes a lost toy, a week apart, and toy repairs.",
     "collection" : "Raggedy Ann Stories",
     "freeTier" : false,
     "kind" : "selection",
@@ -108,35 +146,99 @@ window.nightshelfSharedBooks = {
   },
   "bedtime_north_wind_sun" : {
     "author" : "Aesop",
-    "blurb" : "A short tale from Aesop's Fables.",
+    "blurb" : "A complete tale from Aesop's Fables. A tiny fable about persuasion and warmth, with a blustery contest.",
     "collection" : "Aesop's Fables",
     "freeTier" : true,
     "kind" : "selection",
     "title" : "The North Wind and the Sun"
   },
+  "bedtime_rapunzel" : {
+    "author" : "The Brothers Grimm",
+    "blurb" : "A complete tale from Grimm's Fairy Tales. A tower, a secret courtship, and a long-awaited reunion. Includes confinement, separation, and a fall that causes blindness.",
+    "collection" : "Grimm's Fairy Tales",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "Rapunzel"
+  },
   "bedtime_real_princess" : {
     "author" : "Hans Christian Andersen",
-    "blurb" : "A short tale from Andersen's Fairy Tales.",
+    "blurb" : "A complete tale from Andersen's Fairy Tales. A princess, a tower of mattresses, and three tiny peas. Includes a thunderstorm and an uncomfortable, bruised night.",
     "collection" : "Andersen's Fairy Tales",
     "freeTier" : true,
     "kind" : "selection",
     "title" : "The Real Princess"
   },
+  "bedtime_red_riding_hood" : {
+    "author" : "The Brothers Grimm",
+    "blurb" : "A complete tale from Grimm's Fairy Tales. Little Red-Cap meets two wolves in this complete Grimm tale. Includes being swallowed, a rescue, and the deaths of both wolves.",
+    "collection" : "Grimm's Fairy Tales",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "Little Red Riding Hood"
+  },
+  "bedtime_rip_van_winkle" : {
+    "author" : "Washington Irving",
+    "blurb" : "A complete tale from The Sketch-Book. A mountain drink and twenty lost years. Includes Irving’s framing and Catskill postscript, with alcohol, death, and dated stereotypes.",
+    "collection" : "The Sketch-Book",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "Rip Van Winkle"
+  },
   "bedtime_service_of_love" : {
     "author" : "O. Henry",
-    "blurb" : "A short tale from The Four Million.",
+    "blurb" : "A complete tale from The Four Million. Two young artists quietly support each other’s dreams. Financial strain and a workplace burn lead to an affectionate revelation.",
     "collection" : "The Four Million",
     "freeTier" : false,
     "kind" : "selection",
     "title" : "A Service of Love"
   },
+  "bedtime_sleeping_beauty" : {
+    "author" : "The Brothers Grimm",
+    "blurb" : "A complete tale from Grimm's Fairy Tales. Briar Rose and a hundred-year sleep. Includes a death curse and princes dying in the thorns before the castle awakens.",
+    "collection" : "Grimm's Fairy Tales",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "Sleeping Beauty"
+  },
+  "bedtime_sleepy_hollow" : {
+    "author" : "Washington Irving",
+    "blurb" : "A complete tale from The Sketch-Book. Ichabod Crane and the Headless Horseman, with the original postscript. Includes ghostly pursuit, corporal punishment, and racial stereotypes.",
+    "collection" : "The Sketch-Book",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "The Legend of Sleepy Hollow"
+  },
+  "bedtime_snow_white" : {
+    "author" : "The Brothers Grimm",
+    "blurb" : "A complete tale from Grimm's Fairy Tales. The seven-dwarfs tale, called Snowdrop in this edition. Includes attempted murder, poisoning, and the queen’s death before a happy ending.",
+    "collection" : "Grimm's Fairy Tales",
+    "freeTier" : true,
+    "kind" : "selection",
+    "title" : "Snow White"
+  },
   "bedtime_strange_dolls" : {
     "author" : "Johnny Gruelle",
-    "blurb" : "A short tale from Raggedy Ann Stories.",
+    "blurb" : "A complete tale from Raggedy Ann Stories. New dolls tease Raggedy Ann, then learn kindness and make amends.",
     "collection" : "Raggedy Ann Stories",
     "freeTier" : false,
     "kind" : "selection",
     "title" : "Raggedy Ann and the Strange Dolls"
+  },
+  "bedtime_tell_tale_heart" : {
+    "author" : "Edgar Allan Poe",
+    "blurb" : "A complete tale from Tales of Mystery & Imagination. An unreliable narrator hears an accusing heartbeat. A dark tale of murder, dismemberment, and escalating terror.",
+    "collection" : "Tales of Mystery & Imagination",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "The Tell-Tale Heart"
+  },
+  "bedtime_three_pigs" : {
+    "author" : "Joseph Jacobs",
+    "blurb" : "A complete tale from English Fairy Tales. A clever pig outwits a hungry wolf. In this older version, two pigs are eaten, and the wolf is boiled and eaten at the end.",
+    "collection" : "English Fairy Tales",
+    "freeTier" : false,
+    "kind" : "selection",
+    "title" : "The Three Little Pigs"
   },
   "black_beauty" : {
     "author" : "Anna Sewell",
@@ -150,6 +252,12 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "The Blue Fairy Book"
   },
+  "brick_moon" : {
+    "author" : "Edward Everett Hale",
+    "blurb" : "A brick satellite carries a small community into orbit; an ingenious voyage with a frightening launch and dated social attitudes.",
+    "freeTier" : true,
+    "title" : "The Brick Moon"
+  },
   "bulfinch_mythology" : {
     "author" : "Thomas Bulfinch",
     "blurb" : "Greek myth, the Round Table, and Charlemagne, told in one long volume.",
@@ -161,6 +269,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "Buck, the Yukon snows, and the song of the younger world.",
     "freeTier" : false,
     "title" : "The Call of the Wild"
+  },
+  "canterville_ghost" : {
+    "author" : "Oscar Wilde",
+    "blurb" : "An American family unsettles an English ghost in a comic tale with a dark history of murder and captivity.",
+    "freeTier" : true,
+    "title" : "The Canterville Ghost"
   },
   "celtic_fairy_tales" : {
     "author" : "Joseph Jacobs",
@@ -179,6 +293,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "A ghostly Christmas journey through regret, kindness, and second chances.",
     "freeTier" : true,
     "title" : "A Christmas Carol"
+  },
+  "cousin_phillis" : {
+    "author" : "Elizabeth Gaskell",
+    "blurb" : "A country household meets the railway age in a reflective novella of first love, disappointment, and recovery.",
+    "freeTier" : false,
+    "title" : "Cousin Phillis"
   },
   "cranford" : {
     "author" : "Elizabeth Gaskell",
@@ -204,6 +324,12 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Emma"
   },
+  "enchiridion" : {
+    "author" : "Epictetus",
+    "blurb" : "A compact manual of Stoic thought on choices, loss, and self-command, translated by George Long. Reflective advice from an ancient world.",
+    "freeTier" : false,
+    "title" : "Enchiridion"
+  },
   "english_fairy_tales" : {
     "author" : "Joseph Jacobs",
     "blurb" : "Jack and the Beanstalk, Tom Tit Tot, and the rest of England's oldest stories.",
@@ -216,6 +342,12 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Five Children and It"
   },
+  "frankenstein" : {
+    "author" : "Mary Shelley",
+    "blurb" : "A scientist creates life and faces the consequences in the complete 1818 novel. Gothic science fiction with grief, pursuit, and violence.",
+    "freeTier" : true,
+    "title" : "Frankenstein"
+  },
   "great_expectations" : {
     "author" : "Charles Dickens",
     "blurb" : "Marshes, mists, and a boy named Pip.",
@@ -227,6 +359,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "A green light across the bay. Long summer parties.",
     "freeTier" : false,
     "title" : "The Great Gatsby"
+  },
+  "great_stone_sardis" : {
+    "author" : "Frank R. Stockton",
+    "blurb" : "A polar submarine and a ray into the Earth lead to discovery, sabotage, peril, and an accidental death.",
+    "freeTier" : false,
+    "title" : "The Great Stone of Sardis"
   },
   "green_fairy_book" : {
     "author" : "Andrew Lang",
@@ -252,6 +390,12 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "The Heroes of Asgard"
   },
+  "huckleberry_finn" : {
+    "author" : "Mark Twain",
+    "blurb" : "Huck and Jim travel the Mississippi in a searching, often satirical adventure. Includes slavery, racial slurs, abuse, and danger.",
+    "freeTier" : false,
+    "title" : "Adventures of Huckleberry Finn"
+  },
   "indian_fairy_tales" : {
     "author" : "Joseph Jacobs",
     "blurb" : "Jackals, rajahs, and wise birds from the oldest storyland of all.",
@@ -276,6 +420,12 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Dr. Jekyll and Mr. Hyde"
   },
+  "journey_earth" : {
+    "author" : "Jules Verne",
+    "blurb" : "Three explorers descend into a volcanic passage and cross a hidden world of immense caverns, strange discoveries, and peril. F. A. Malleson's translation.",
+    "freeTier" : true,
+    "title" : "Journey to the Centre of the Earth"
+  },
   "jungle_book" : {
     "author" : "Rudyard Kipling",
     "blurb" : "Mowgli and other animals face the laws and dangers of the Indian forest.",
@@ -293,6 +443,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "Camelot, the round table, and Excalibur drawn from a still lake.",
     "freeTier" : false,
     "title" : "The Story of King Arthur and His Knights"
+  },
+  "little_men" : {
+    "author" : "Louisa May Alcott",
+    "blurb" : "At Plumfield, Jo and her family make a home and school for children learning kindness and responsibility. Includes loss, hardship, and second chances.",
+    "freeTier" : false,
+    "title" : "Little Men"
   },
   "little_princess" : {
     "author" : "Frances Hodgson Burnett",
@@ -324,6 +480,18 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "Mansfield Park"
   },
+  "marvelous_land_oz" : {
+    "author" : "L. Frank Baum",
+    "blurb" : "Tip, Jack Pumpkinhead, and a wooden Sawhorse set out across Oz in a playful adventure of magic, pursuit, and transformation.",
+    "freeTier" : false,
+    "title" : "The Marvelous Land of Oz"
+  },
+  "meditations" : {
+    "author" : "Marcus Aurelius",
+    "blurb" : "The Roman emperor's private reflections on character, change, and mortality, in George Long's translation. Twelve books of ancient philosophy.",
+    "freeTier" : true,
+    "title" : "Meditations"
+  },
   "north_wind" : {
     "author" : "George MacDonald",
     "blurb" : "A boy named Diamond rides the night wind over sleeping London.",
@@ -335,6 +503,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "Bath in the season. Gothic novels read by candlelight.",
     "freeTier" : false,
     "title" : "Northanger Abbey"
+  },
+  "odyssey" : {
+    "author" : "Homer",
+    "blurb" : "Odysseus journeys home through storms, strange islands, and the aftermath of war. Samuel Butler's prose translation, with peril, captivity, and violence.",
+    "freeTier" : false,
+    "title" : "The Odyssey"
   },
   "ohenry_four_million" : {
     "author" : "O. Henry",
@@ -420,6 +594,14 @@ window.nightshelfSharedBooks = {
     "kind" : "original",
     "title" : "The Rain Map"
   },
+  "original_space_between_replies" : {
+    "author" : "Nightshelf",
+    "blurb" : "With eleven minutes between Mars and Earth, two sisters find a new way to share an ordinary evening.",
+    "disclosure" : "Created with AI for Nightshelf. A complete, prepared story you can return to, with no generation needed.",
+    "freeTier" : true,
+    "kind" : "original",
+    "title" : "The Space Between Replies"
+  },
   "original_tide_glass_observatory" : {
     "author" : "Nightshelf",
     "blurb" : "On a quiet coastal visit, three panes of glass offer yesterday’s meadow, harbour and open sea, and a traveller chooses a view for the morning.",
@@ -463,6 +645,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "Long Regency sentences. Drawing rooms. Letters at dawn.",
     "freeTier" : false,
     "title" : "Pride and Prejudice"
+  },
+  "prince_pauper" : {
+    "author" : "Mark Twain",
+    "blurb" : "Two boys exchange places in Tudor England and discover the distance between privilege and poverty. Includes cruelty, imprisonment, and threatened execution.",
+    "freeTier" : false,
+    "title" : "The Prince and the Pauper"
   },
   "princess_goblin" : {
     "author" : "George MacDonald",
@@ -542,6 +730,12 @@ window.nightshelfSharedBooks = {
     "freeTier" : false,
     "title" : "A Tale of Two Cities"
   },
+  "tales_shakespeare" : {
+    "author" : "Charles & Mary Lamb",
+    "blurb" : "Twenty prose retellings of Shakespeare's comedies and tragedies, with magic, mistaken identities, love, and loss. Retold stories, including darker tales.",
+    "freeTier" : true,
+    "title" : "Tales from Shakespeare"
+  },
   "tanglewood_tales" : {
     "author" : "Nathaniel Hawthorne",
     "blurb" : "Theseus, the Minotaur, and the Golden Fleece in Hawthorne's adventurous Greek retellings.",
@@ -595,6 +789,12 @@ window.nightshelfSharedBooks = {
     "blurb" : "A little chimney-sweep slips into a cool green river world.",
     "freeTier" : false,
     "title" : "The Water-Babies"
+  },
+  "white_fang" : {
+    "author" : "Jack London",
+    "blurb" : "A wolf-dog moves between the wild and human worlds in a powerful story of survival and trust. Includes animal cruelty, fighting, and death.",
+    "freeTier" : false,
+    "title" : "White Fang"
   },
   "wilde_happy_prince" : {
     "author" : "Oscar Wilde",

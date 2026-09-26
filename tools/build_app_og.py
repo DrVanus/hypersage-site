@@ -88,7 +88,7 @@ CARDS = {
         # "with Nightshelf Pro" is load-bearing and must never be trimmed away:
         # conjuring a story is Pro-only with NO free allowance (the backend hard-402s,
         # index.html:706-711). An unqualified "AI stories" line overclaims the free tier.
-        "sub": "77 complete classics, read aloud over rain or firelight. Nightshelf&nbsp;Pro adds calm new stories written by AI.",
+        "sub": "93 classic books, read aloud over rain or firelight. Nightshelf&nbsp;Pro adds calm new stories written by AI.",
     },
     "mythwright": {
         "art": "app-icon.png",

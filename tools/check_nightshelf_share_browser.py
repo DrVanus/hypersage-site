@@ -35,6 +35,17 @@ try:
                 ('original_borrowed_light', 'The Sea of Borrowed Light', 'Included with Nightshelf Pro'),
                 ('original_tide_glass_observatory', 'The Tide-Glass Observatory', 'Free on Nightshelf'),
                 ('original_garden_between_stations', 'The Garden Between Stations', 'Included with Nightshelf Pro'),
+                ('original_space_between_replies', 'The Space Between Replies', 'Free on Nightshelf'),
+                ('brick_moon', 'The Brick Moon', 'Free on Nightshelf'),
+                ('canterville_ghost', 'The Canterville Ghost', 'Free on Nightshelf'),
+                ('cousin_phillis', 'Cousin Phillis', 'Included with Nightshelf Pro'),
+                ('great_stone_sardis', 'The Great Stone of Sardis', 'Included with Nightshelf Pro'),
+                ('frankenstein', 'Frankenstein', 'Free on Nightshelf'),
+                ('meditations', 'Meditations', 'Free on Nightshelf'),
+                ('odyssey', 'The Odyssey', 'Included with Nightshelf Pro'),
+                ('bedtime_snow_white', 'Snow White', 'Free on Nightshelf'),
+                ('bedtime_cinderella', 'Cinderella', 'Included with Nightshelf Pro'),
+                ('bedtime_sleepy_hollow', 'The Legend of Sleepy Hollow', 'Included with Nightshelf Pro'),
             ]:
                 page.goto(base + '?book=' + book, wait_until='networkidle')
                 assert page.locator('#shared-book').is_visible(), book
@@ -46,7 +57,7 @@ try:
                 if book.startswith('original_'):
                     assert page.locator('#shared-book-author').inner_text() == 'A Nightshelf Original'
                     assert 'Created with AI for Nightshelf.' in page.locator('#shared-book-description').inner_text()
-                if captures and book in ['wind_in_willows', 'original_tide_glass_observatory', 'original_garden_between_stations']:
+                if captures and book in ['meditations', 'bedtime_snow_white', 'bedtime_cinderella']:
                     page.screenshot(path=str(captures / f'share-{book}-{width}.png'))
             for held in ['peter_pan', 'irish_fairy_tales', 'pinocchio', 'custom_private']:
                 page.goto(base + '?book=' + held, wait_until='networkidle')
@@ -54,9 +65,12 @@ try:
             assert page.locator('h1').inner_text() == 'Stories to drift off to'
             page.goto(base, wait_until='networkidle')
             assert page.locator('#shared-book').is_hidden()
+            if captures:
+                page.screenshot(path=str(captures / f'home-{width}.png'), full_page=True)
+            assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'), width
             assert not errors, errors
             page.close()
         browser.close()
-    print('PASS: classics, a traditional selection, prior and new free/Pro Originals, unknown and normal pages at 320px, 390px and 1440px; AI disclosure intact, no script errors or horizontal overflow')
+    print('PASS: classics, familiar free/Pro selections, philosophy, prior and new free/Pro Originals, unknown and normal pages at 320px, 390px and 1440px; AI disclosure intact, no script errors or horizontal overflow')
 finally:
     server.shutdown()
