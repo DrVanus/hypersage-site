@@ -344,6 +344,9 @@
     .screens-grid + .screens-subhead { margin-top: 56px; }
 
     /* ===== ALTERNATING FEATURE ROWS ===== */
+    #keyboard .fr-note { margin-top: 18px; font-size: 0.86rem; opacity: 0.7; }
+    #keyboard .fr-art { display: flex; flex-direction: column; align-items: center; }
+    #keyboard .fr-art-label { text-align: center; margin-top: 12px; font-size: 0.8rem; opacity: 0.6; }
     .feature-rows { display: flex; flex-direction: column; gap: 108px; margin-top: 12px; }
     .feature-row { display: flex; align-items: center; gap: 72px; }
     .feature-row:nth-child(even) { flex-direction: row-reverse; }
@@ -673,7 +676,15 @@
       "name": "What happens to my screenshots and messages?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "They go to our server and on to the AI that writes your coaching. Our server passes them along without storing them. Your connections, notes, openers, and chat history live on your phone, and you can clear your conversations in Settings. There's no account and no ads. The privacy policy has the full picture."
+        "text": "They go to our server and on to the AI that writes your coaching. Our server doesn’t store your screenshots, screen images or messages. For keyboard and Share replies it keeps the suggested replies and a short summary for 30 minutes, so a retry doesn’t use another coaching message. Your connections, notes, openers, and chat history live on your phone, and you can clear your conversations in Settings. There's no account and no ads. The privacy policy has the full picture."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the Wingmate keyboard read my chats?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Only what’s on your screen when you tap Reply. The keyboard never sends what you type, and it can’t open profiles or earlier messages. When you tap Reply or New reply, it sends one picture of your whole screen — which can include notification banners — to our server and on to Anthropic to write a suggestion. The privacy policy explains exactly what’s sent and kept."
       }
     },
     {
@@ -715,6 +726,7 @@
       </a>
       <div class="links">
         <a href="#features">Features</a>
+        <a href="#keyboard">Keyboard</a>
         <a href="#screens">Screens</a>
         <a href="#coaches">Coaches</a>
         <a href="#how">How it works</a>
@@ -725,6 +737,7 @@
         <summary aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></summary>
         <div class="mobile-links">
           <a href="#features">Features</a>
+          <a href="#keyboard">Keyboard</a>
           <a href="#screens">Screens</a>
           <a href="#coaches">Coaches</a>
           <a href="#how">How it works</a>
@@ -799,6 +812,33 @@
         </div>
         <figcaption class="analyze-caption" id="analyze-caption">The finished read, with a reply to copy</figcaption>
       </figure>
+    </div>
+  </section>
+
+  <section class="block" id="keyboard">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">New in 1.5</span>
+        <h2>Your coach, <span class="grad-text">in your keyboard.</span></h2>
+        <p>Stay in the conversation. Switch to the Wingmate keyboard, tap Reply, and your coach reads what's on your screen and suggests a reply for you to edit and send.</p>
+      </div>
+      <div class="feature-rows">
+        <div class="feature-row" style="--accent: var(--jade); --accent-glow: rgba(52,211,153,0.16);">
+          <div class="fr-text">
+            <span class="fr-eyebrow">Wingmate Keyboard</span>
+            <h3>Tap Reply. Get a line that fits.</h3>
+            <p>Start screen assist, open the chat, and switch to Wingmate with the globe key. Each time you tap Reply, the keyboard sends one picture of your screen to your coach, who writes a suggestion that fits the thread.</p>
+            <ul class="fr-points">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>One tap, one picture. Nothing streams, and nothing is sent while you type.</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>A suggestion drops into your text box. You edit it and decide whether to send it.</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Screen assist ends after 15 minutes and has its own permission you can turn off any time.</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Got a reply in the Wingmate app? Tap Use in keyboard and it waits in the keyboard's Saved tab.</li>
+            </ul>
+            <p class="fr-note">Live replies need Allow Full Access and an internet connection, and each one uses a daily coaching message. Some apps and secure text fields don't allow custom keyboards or screen recording.</p>
+          </div>
+          <div class="fr-art"><div class="device"><div class="screen"><img width="828" height="1799" src="assets/screens/screen-keyboard.jpg?v=20261002a" alt="An example chat with Emma, with the Wingmate keyboard open below it: Jade is the selected coach, Screen assist is on with 12 minutes left, and one Warm suggestion reads Coffee date it is, what day works for you? above a New reply button" loading="lazy"></div></div><p class="fr-art-label">Example conversation</p></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1202,7 +1242,11 @@
         </details>
         <details class="faq">
           <summary>What happens to my screenshots and messages?</summary>
-          <p>They go to our server and on to the AI that writes your coaching. Our server passes them along without storing them. Your connections, notes, openers, and chat history live on your phone, and you can clear your conversations in Settings. There's no account and no ads. The <a href="privacy.html">privacy policy</a> has the full picture.</p>
+          <p>They go to our server and on to the AI that writes your coaching. Our server doesn’t store your screenshots, screen images or messages. For keyboard and Share replies it keeps the suggested replies and a short summary for 30 minutes, so a retry doesn’t use another coaching message. Your connections, notes, openers, and chat history live on your phone, and you can clear your conversations in Settings. There's no account and no ads. The <a href="privacy.html">privacy policy</a> has the full picture.</p>
+        </details>
+        <details class="faq">
+          <summary>Does the Wingmate keyboard read my chats?</summary>
+          <p>Only what’s on your screen when you tap Reply. The keyboard never sends what you type, and it can’t open profiles or earlier messages. When you tap Reply or New reply, it sends one picture of your whole screen — which can include notification banners — to our server and on to Anthropic to write a suggestion. The <a href="privacy.html">privacy policy</a> explains exactly what’s sent and kept.</p>
         </details>
         <details class="faq">
           <summary>Do the coaches remember the people I'm talking to?</summary>
