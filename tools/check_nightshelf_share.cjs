@@ -110,21 +110,25 @@ for (const [id, free, collection] of [
 }
 
 const freeCount = books.filter(book => book.freeTier).length;
-assert.match(html, new RegExp('>' + books.length + '<'));
+assert.match(html, />Books<[^]*Classic stories/);
 assert.equal(freeCount, 19);
-assert.match(html, /19 free/);
-assert.match(html, />35<[^]*Free choices/);
+assert.match(html, />Tales<[^]*Short listens/);
+assert.match(html, />Free<[^]*Choices to try/);
 assert.match(html, /selected tales also appear in their source collections/);
 const freeSpines = html.match(/class="spines free" d="([^"]+)"/)[1].match(/M/g).length;
 const proSpines = html.match(/class="spines pro" d="([^"]+)"/)[1].match(/M/g).length;
-assert.equal(freeSpines, freeCount);
-assert.equal(proSpines, books.length - freeCount);
+assert.equal(freeSpines, 8);
+assert.equal(proSpines, 20);
+assert.match(html, /not a count or proportion of the current catalog/);
+assert.match(html, /standalone selections/);
+assert.match(html, /More options → About this book/);
 for (const name of ['index.html', 'support.html', 'terms.html', 'privacy.html']) {
   const page = fs.readFileSync(path.join(root, name), 'utf8');
   assert.doesNotMatch(page, /\b(?:82(?: complete)? (?:books|classics|works)|eighty-two|eighty(?:-one)?|seventy-seven|(?:thirteen|fifteen)(?: of| free)|fourteen(?: of| free)|sixty-four|sixty-six|sixty-nine)\b/i,
     name + ' must not advertise the retired catalog counts');
+  assert.doesNotMatch(page, /(?:93 classic|ninety-three|nineteen of|other seventy-four|complete text|complete selections|About this edition)/i, name + ' must not overstate catalog counts or editions');
   for (const image of page.matchAll(/nightshelf\/og-image\.png\?v=([^"\s]+)/g)) {
-    assert.equal(image[1], '20260923-library19', name + ' must show the current catalog OG card');
+    assert.equal(image[1], '20261005-neutral', name + ' must show the neutral OG card');
   }
 }
-console.log(`PASS: ${books.length} shared books + ${selections.length} tales + ${originals.length} Originals, ${rejected.length} rejected queries, catalog counts and shelf artwork`);
+console.log(`PASS: ${books.length} shared books + ${selections.length} tales + ${originals.length} Originals, ${rejected.length} rejected queries, live catalog routes and neutral landing copy`);

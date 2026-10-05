@@ -10,23 +10,23 @@
   <meta name="theme-color" content="#0B0E19">
   <title>Nightshelf — sleep stories &amp; bedtime reading for iOS</title>
   
-  <meta name="description" content="Bedtime stories for iPhone. 93 classic books read aloud over rain or firelight, plus calm new AI-written stories with Nightshelf Pro.">
+  <meta name="description" content="Bedtime stories for iPhone. Classic books read aloud over rain or firelight, plus calm new AI-written stories with Nightshelf Pro.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/nightshelf/">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Nightshelf — Bedtime stories, read aloud">
-  <meta property="og:description" content="93 classic books, read aloud over rain or firelight. Nightshelf Pro adds calm new stories written by AI.">
+  <meta property="og:description" content="Classic books, read aloud over rain or firelight. Nightshelf Pro adds calm new stories written by AI.">
   <meta property="og:url" content="https://hypersage.ai/nightshelf/">
   <meta property="og:site_name" content="Nightshelf">
-  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20260923-library19">
+  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261005-neutral">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Nightshelf — stories to drift off to: stacked books beneath a crescent moon">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Nightshelf — Bedtime stories, read aloud">
-  <meta name="twitter:description" content="Complete bedtime classics, read aloud in a soft, sleepy voice. Nightshelf Pro adds calm new stories written by AI.">
-  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20260923-library19">
+  <meta name="twitter:description" content="Bedtime classics, read aloud in a soft, sleepy voice. Nightshelf Pro adds calm new stories written by AI.">
+  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261005-neutral">
   <meta name="twitter:image:alt" content="Nightshelf — stories to drift off to: stacked books beneath a crescent moon">
 
   <link rel="icon" type="image/png" href="app-icon.png">
@@ -271,13 +271,13 @@
       margin: 64px auto 0; padding-top: 34px; max-width: 680px;
       border-top: 1px solid var(--border);
     }
-    .stat { flex: 1 1 0; padding: 0 12px; position: relative; }
+    .stat { flex: 1 1 0; min-width: 0; padding: 0 7px; position: relative; }
     .stat + .stat::before {
       content: ''; position: absolute; left: 0; top: 12%; bottom: 12%;
       width: 1px; background: var(--border);
     }
     .stat .num {
-      font-family: var(--font-serif); font-size: 2.1rem; font-weight: 600;
+      font-family: var(--font-serif); font-size: clamp(1.5rem, 6.5vw, 2.1rem); font-weight: 600;
       color: var(--accent-bright); line-height: 1.3;
     }
     .stat .lbl { font-size: .8rem; color: var(--tertiary-fg); letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.6; }
@@ -579,8 +579,8 @@
 
 
     /* ====================== FREE / PRO SHELF ========================
-       The shelf itself, as spines: 93 books = 19 free (gold) + 74 with
-       Pro (dim). Counts mirror the "A Shelf for the Night" card — 19 gold + 74 dim path segments, no more, no fewer.
+       An illustrative shelf of spines, with free and Pro choices.
+       This decoration is not a count or proportion of the current catalog.
        Static by default; the glow is progressive enhancement. */
     .shelfviz { max-width: 740px; margin: 56px auto 0; }
     .shelfviz svg { display: block; width: 100%; height: auto; }
@@ -618,7 +618,7 @@
   "name": "Nightshelf",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "iOS",
-  "description": "Bedtime stories for iPhone. 93 classic books read aloud with ambient sound and a sleep timer, plus calm new stories written by AI with Nightshelf Pro.",
+  "description": "Bedtime stories for iPhone. Classic books read aloud with ambient sound and a sleep timer, plus calm new stories written by AI with Nightshelf Pro.",
   "url": "https://hypersage.ai/nightshelf/",
   "author": {
     "@type": "Organization",
@@ -637,7 +637,7 @@
       "name": "Do I need an account?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. There's nothing to sign up for and no password to remember. Your place in every story and your settings sync through your own private iCloud, so they'll be waiting on a new phone. Nightshelf keeps no copy on any server."
+        "text": "No. There's nothing to sign up for and no password to remember. Your reading progress, saved shelf and supported reading settings can sync through your own private iCloud. Ambient sound choices and their volume stay on this device. Nightshelf keeps no server copy of your synced progress."
       }
     },
     {
@@ -645,7 +645,7 @@
       "name": "What's free, and what needs Nightshelf Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Nineteen of the ninety-three classic books are free and complete. With five Originals and eleven selected tales, that makes 35 free listening choices. You get the on-device voice, every sound and piece of sleep music, the sleep timer, and screen dimming, with no time limit and no ads. Nightshelf Pro opens the other seventy-four books, the six AI narrators, 90- and 120-minute sleep timers, and Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial if your Apple Account is eligible."
+        "text": "The free shelf includes classic books, Nightshelf Originals and selected tales. The app labels which choices are free and which are included with Pro. You get the on-device voice, every sound and piece of sleep music, the sleep timer, and screen dimming, with no time limit and no ads. Nightshelf Pro opens more of the library, the six AI narrators, 90- and 120-minute sleep timers, and Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial if your Apple Account is eligible."
       }
     },
     {
@@ -658,10 +658,10 @@
     },
     {
       "@type": "Question",
-      "name": "Are the books abridged?",
+      "name": "Which editions are included?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. Every classic on the shelf is the complete text, chapter for chapter, drawn from public-domain editions."
+        "text": "The library includes novels, collections, retellings and selected tales. Editions can omit illustrations, notes or other supporting material. In the player, open More options → About this book for a title’s format, source and credits."
       }
     },
     {
@@ -746,9 +746,9 @@
       <p class="fineprint">No account. No ads. Just goodnights.</p>
       <div class="stat-strip">
         
-        <div class="stat"><div class="num">93</div><div class="lbl">Classic books</div></div>
-        <div class="stat"><div class="num">24</div><div class="lbl">Selected tales</div></div>
-        <div class="stat"><div class="num">35</div><div class="lbl">Free choices</div></div>
+        <div class="stat"><div class="num">Books</div><div class="lbl">Classic stories</div></div>
+        <div class="stat"><div class="num">Tales</div><div class="lbl">Short listens</div></div>
+        <div class="stat"><div class="num">Free</div><div class="lbl">Choices to try</div></div>
       </div>
     </div>
   </header>
@@ -802,17 +802,17 @@
         <div class="feature reveal">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="4.4" rx="1.2"/><rect x="3.5" y="9.8" width="17" height="4.4" rx="1.2"/><rect x="3.5" y="15.6" width="17" height="4.4" rx="1.2"/><line x1="6.5" y1="6.2" x2="8.2" y2="6.2"/><line x1="6.5" y1="12" x2="8.2" y2="12"/><line x1="6.5" y1="17.8" x2="8.2" y2="17.8"/></svg></div>
           <h3>A Shelf for the Night</h3>
-          <p>Ninety-three classic books, from Grimm's fairy tales to Austen, Verne and ancient philosophy. Nineteen are free; Nightshelf Pro opens the other seventy-four.</p>
+          <p>Classic books, from Grimm's fairy tales to Austen, Verne and ancient philosophy. Start with the free shelf; Nightshelf Pro opens more of the library.</p>
         </div>
         <div class="feature reveal">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h12v17l-6-4-6 4z"/><path d="M9 7h6M9 10h6"/></svg></div>
           <h3>Find a Familiar Tale</h3>
-          <p>Open Snow White, Cinderella, Sleeping Beauty and nine other familiar tales directly, with their own saved place. These are complete selections from the classic collections, with running times and notes about each version's tone.</p>
+          <p>Open Snow White, Cinderella, Sleeping Beauty and other familiar tales directly, with their own saved place. These are standalone selections from the classic collections, with running times and notes about each version's tone.</p>
         </div>
         <div class="feature reveal">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5c3-1 6-1 9 1 3-2 6-2 9-1v15c-3-1-6-1-9 1-3-2-6-2-9-1z"/><path d="M12 6v15"/></svg></div>
           <h3>Explore a Wider Library</h3>
-          <p>Discover Frankenstein, Journey to the Centre of the Earth, Meditations and Tales from Shakespeare among twelve newly added books. Shakespeare's stories are Charles and Mary Lamb's prose retellings; the Odyssey is Samuel Butler's prose translation.</p>
+          <p>Discover Frankenstein, Journey to the Centre of the Earth, Meditations and Tales from Shakespeare in the classic library. Shakespeare's stories are Charles and Mary Lamb's prose retellings; the Odyssey is Samuel Butler's prose translation.</p>
         </div>
         <div class="feature reveal">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg></div>
@@ -834,7 +834,7 @@
         <div class="feature reveal">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.2" r="1.3"/></svg></div>
           <h3>Private by Design</h3>
-          <p>No account, no ads, and no trackers in the app. Your place and settings stay on your phone, synced only through your own iCloud. Tonight's Story asks before anything you choose or type leaves your phone, and the <a href="privacy.html">privacy policy</a> shows exactly what the AI narrators send and where it goes.</p>
+          <p>No account, no ads, and no trackers in the app. Your reading progress, saved shelf and supported reading settings can sync through your own iCloud. Ambient sound choices and their volume stay on this device. Tonight's Story asks before anything you choose or type leaves your phone, and the <a href="privacy.html">privacy policy</a> shows exactly what the AI narrators send and where it goes.</p>
         </div>
         <div class="feature reveal">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5a4.5 4.5 0 0 1 4.5-4.5 5.5 5.5 0 0 1 10.7 1.6A4 4 0 0 1 18.5 17H8.5A4.5 4.5 0 0 1 4 12.5z"/><path d="M12 11v5"/><path d="M9.8 13.8L12 16l2.2-2.2"/></svg></div>
@@ -845,19 +845,19 @@
       
       <figure class="shelfviz reveal">
         <svg viewBox="0 0 770 150" aria-hidden="true" focusable="false">
-          <text class="lab" x="14" y="20">93 classic books</text>
-          <path class="spines free" d="M14 108V48M21.8 108V36M29.6 108V52M37.4 108V44M45.2 108V56M53 108V39M60.8 108V50M68.6 108V48M76.4 108V36M84.2 108V52M92 108V44M99.8 108V56M107.6 108V39M115.4 108V50M123.2 108V48M131 108V36M138.8 108V52M146.6 108V44M154.4 108V56"/>
-          <path class="spines pro" d="M180 108V48M187.8 108V36M195.6 108V52M203.4 108V44M211.2 108V56M219 108V39M226.8 108V50M234.6 108V48M242.4 108V36M250.2 108V52M258 108V44M265.8 108V56M273.6 108V39M281.4 108V50M289.2 108V48M297 108V36M304.8 108V52M312.6 108V44M320.4 108V56M328.2 108V39M336 108V50M343.8 108V48M351.6 108V36M359.4 108V52M367.2 108V44M375 108V56M382.8 108V39M390.6 108V50M398.4 108V48M406.2 108V36M414 108V52M421.8 108V44M429.6 108V56M437.4 108V39M445.2 108V50M453 108V48M460.8 108V36M468.6 108V52M476.4 108V44M484.2 108V56M492 108V39M499.8 108V50M507.6 108V48M515.4 108V36M523.2 108V52M531 108V44M538.8 108V56M546.6 108V39M554.4 108V50M562.2 108V48M570 108V36M577.8 108V52M585.6 108V44M593.4 108V56M601.2 108V39M609 108V50M616.8 108V48M624.6 108V36M632.4 108V52M640.2 108V44M648 108V56M655.8 108V39M663.6 108V50M671.4 108V48M679.2 108V36M687 108V52M694.8 108V44M702.6 108V56M710.4 108V39M718.2 108V50M726 108V48M733.8 108V36M741.6 108V52M749.4 108V44"/>
+          <text class="lab" x="14" y="20">A shelf for the night</text>
+          <path class="spines free" d="M20 108V48M43 108V36M66 108V52M89 108V44M112 108V56M135 108V39M158 108V50M181 108V48"/>
+          <path class="spines pro" d="M235 108V48M260 108V36M285 108V52M310 108V44M335 108V56M360 108V39M385 108V50M410 108V48M435 108V48M460 108V36M485 108V52M510 108V44M535 108V56M560 108V39M585 108V50M610 108V48M635 108V48M660 108V36M685 108V52M710 108V44"/>
           <rect x="8" y="111" width="754" height="3" rx="1.5" fill="rgba(243,239,230,0.20)"/>
-          <path d="M14 124H160" stroke="rgba(232,177,92,0.45)" stroke-width="2" stroke-linecap="round" fill="none"/>
-          <path d="M180 124H755" stroke="rgba(243,239,230,0.14)" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M20 124H181" stroke="rgba(232,177,92,0.45)" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M235 124H710" stroke="rgba(243,239,230,0.14)" stroke-width="2" stroke-linecap="round" fill="none"/>
           <circle cx="196" cy="18" r="1.2" fill="rgba(243,239,230,0.45)"/>
           <circle cx="452" cy="26" r="1.1" fill="rgba(154,140,214,0.45)"/>
           <circle cx="700" cy="14" r="1.3" fill="rgba(246,200,119,0.4)"/>
         </svg>
         
-        <div class="shelf-axis" aria-hidden="true"><span class="a">19 free</span><span class="b">74 more with Nightshelf Pro</span></div>
-        <figcaption class="wd-cap">The library contains 93 classic books, 11 AI-written Nightshelf Originals and 24 complete tales selected from the classic books: 128 listening choices, with 35 free and 93 included with Pro. The selected tales also appear in their source collections; they are not additional books. Every prepared text downloads with the app.</figcaption>
+        <div class="shelf-axis" aria-hidden="true"><span class="a">Free</span><span class="b">With Pro</span></div>
+        <figcaption class="wd-cap">Choose from classic books, AI-written Nightshelf Originals and selected tales. The selected tales also appear in their source collections; they are not additional books. Prepared texts download with the app. Availability and free or Pro access are shown in your installed version; see <a href="#editions">edition details</a> for the formats and source credits.</figcaption>
       </figure>
 
       <figure class="listen-card reveal" id="listen">
@@ -992,19 +992,19 @@
       <div class="faq-list reveal">
         <details class="faq">
           <summary>Do I need an account?</summary>
-          <p>No. There's nothing to sign up for and no password to remember. Your place in every story and your settings sync through your own private iCloud, so they'll be waiting on a new phone. Nightshelf keeps no copy on any server.</p>
+          <p>No. There's nothing to sign up for and no password to remember. Your reading progress, saved shelf and supported reading settings can sync through your own private iCloud. Ambient sound choices and their volume stay on this device. Nightshelf keeps no server copy of your synced progress.</p>
         </details>
         <details class="faq">
           <summary>What's free, and what needs Nightshelf Pro?</summary>
-          <p>Nineteen of the ninety-three classic books are free and complete. With five Originals and eleven selected tales, that makes 35 free listening choices. You get the on-device voice, every sound and piece of sleep music, the sleep timer, and screen dimming, with no time limit and no ads. Nightshelf Pro opens the other seventy-four books, the six AI narrators, 90- and 120-minute sleep timers, and Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial if your Apple Account is eligible.</p>
+          <p>The free shelf includes classic books, Nightshelf Originals and selected tales. The app labels which choices are free and which are included with Pro. You get the on-device voice, every sound and piece of sleep music, the sleep timer, and screen dimming, with no time limit and no ads. Nightshelf Pro opens more of the library, the six AI narrators, 90- and 120-minute sleep timers, and Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial if your Apple Account is eligible.</p>
         </details>
         <details class="faq">
           <summary>Does it work offline?</summary>
           <p>Yes, the whole shelf does. Every book ships inside the app, and the on-device voice reads any of them with the network off, ambient sound and sleep timer included. Only the six cloud narrators and Tonight's Story need a connection.</p>
         </details>
-        <details class="faq">
-          <summary>Are the books abridged?</summary>
-          <p>No. Every classic on the shelf is the complete text, chapter for chapter, drawn from public-domain editions.</p>
+        <details class="faq" id="editions">
+          <summary>Which editions are included?</summary>
+          <p>The library includes novels, collections, retellings and selected tales. Editions can omit illustrations, notes or other supporting material. In the player, open More options → About this book for a title’s format, source and credits.</p>
         </details>
         <details class="faq">
           <summary>Where do my words go?</summary>
@@ -1024,7 +1024,7 @@
         <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <h2 class="grad-text">Drift off tonight</h2>
         
-        <p>A bedtime story, read aloud, every night. Start with nineteen free classic books.</p>
+        <p>A bedtime story, read aloud, every night. Start with the free shelf.</p>
         <div class="cta-row">
           <a href="https://apps.apple.com/app/id6792761643" class="btn" target="_blank" rel="noopener">Download on the App Store</a>
           <a href="privacy.html" class="btn ghost">Privacy</a>
