@@ -5,7 +5,12 @@
   if (ids.length !== 1) return;
   var id = ids[0];
   var catalog = window.nightshelfSharedBooks;
-  if (!catalog || !Object.prototype.hasOwnProperty.call(catalog, id)) return;
+  var versioned = false;
+  if (!catalog || !Object.prototype.hasOwnProperty.call(catalog, id)) {
+    catalog = window.nightshelfVersionedSharedBooks;
+    if (!catalog || !Object.prototype.hasOwnProperty.call(catalog, id)) return;
+    versioned = true;
+  }
   var book = catalog[id];
   var card = document.getElementById('shared-book');
   if (!card) return;
@@ -18,9 +23,15 @@
   document.getElementById('shared-book-description').textContent = original
     ? book.blurb + ' ' + book.disclosure
     : book.blurb;
-  document.getElementById('shared-book-edition').textContent = book.freeTier
-    ? 'Free on Nightshelf'
-    : 'Included with Nightshelf Pro';
+  var access = book.freeTier ? 'Free on Nightshelf' : 'Included with Nightshelf Pro';
+  document.getElementById('shared-book-edition').textContent = versioned
+    ? 'Requires Nightshelf ' + book.minimumVersion + ' or later. ' + access
+    : access;
+  if (versioned) {
+    document.getElementById('shared-book-help').textContent =
+      'Already have Nightshelf ' + book.minimumVersion + ' or later? Open this story on your iPhone. ' +
+      'Otherwise, keep this link and update when that version becomes available.';
+  }
   document.getElementById('shared-book-open').href = 'nightshelf://book/' + encodeURIComponent(id);
   document.title = original
     ? book.title + ' — a Nightshelf Original'

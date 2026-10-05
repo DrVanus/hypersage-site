@@ -5,13 +5,14 @@ const path = require('node:path');
 const vm = require('node:vm');
 const root = path.join(__dirname, '..', 'nightshelf');
 const catalogSource = fs.readFileSync(path.join(root, 'shared-book-catalog.js'), 'utf8');
+const versionedSource = fs.readFileSync(path.join(root, 'shared-book-versioned.js'), 'utf8');
 const handler = fs.readFileSync(path.join(root, 'shared-book.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
 function run(search) {
   const elements = Object.fromEntries([
     'shared-book', 'shared-book-title', 'shared-book-author',
-    'shared-book-description', 'shared-book-edition', 'shared-book-open',
+    'shared-book-description', 'shared-book-edition', 'shared-book-open', 'shared-book-help',
   ].map(id => [id, { hidden: true, textContent: '', href: '' }]));
   const context = {
     URLSearchParams,
@@ -20,6 +21,7 @@ function run(search) {
   };
   vm.createContext(context);
   vm.runInContext(catalogSource, context);
+  vm.runInContext(versionedSource, context);
   vm.runInContext(handler, context);
   assert.equal(context.window.location.search, search, 'Must not navigate automatically');
   return { elements, context };
@@ -45,7 +47,28 @@ for (const [id, book] of Object.entries(catalog)) {
     ? book.title + ' — a Nightshelf Original'
     : book.title + ' by ' + book.author + ' — Nightshelf');
 }
-const rejected = ['?book=peter_pan', '?book=irish_fairy_tales', '?book=pinocchio', '', '?book=', '?book=missing', '?book=custom_private',
+// Titles introduced in1.9.9 have explicit version-qualified cards. The released
+// catalog remains separate and unchanged; the query never creates a URL itself.
+const versioned = run('').context.window.nightshelfVersionedSharedBooks;
+const expectedVersionedIDs = ["age_innocence", "anne_house_dreams", "anne_island", "beasts_super_beasts", "bedtime_aladdin", "bedtime_bremen_musicians", "bedtime_frog_prince", "bedtime_happy_prince", "bedtime_nightingale_rose", "bedtime_puss_in_boots", "bedtime_rumpelstiltskin", "bedtime_selfish_giant", "bedtime_snow_queen", "bedtime_three_bears", "bedtime_twelve_dancing_princesses", "blue_castle", "consolation_philosophy", "daddy_long_legs", "david_copperfield", "dorian_gray", "emerson_essays_first", "enchanted_april", "father_brown", "gullivers_travels", "hound_baskervilles", "kidnapped", "les_miserables", "little_lord_fauntleroy", "lorna_doone", "lost_world", "madding_crowd", "middlemarch", "moby_dick", "monte_cristo", "moonstone", "mosses_old_manse", "north_south", "peter_rabbit", "rebecca_sunnybrook", "scarlet_letter", "silas_marner", "tao_te_ching", "the_prophet", "three_musketeers", "walden", "wisdom_of_life"];
+assert.deepEqual(Object.keys(versioned).sort(), expectedVersionedIDs);
+assert.equal(Object.values(versioned).filter(book => book.freeTier).length, 16);
+for (const [id, book] of Object.entries(versioned)) {
+  assert.ok(!Object.hasOwn(catalog, id), 'released route must retain priority');
+  assert.equal(book.minimumVersion, '1.9.9');
+  const {elements} = run('?book=' + encodeURIComponent(id));
+  assert.equal(elements['shared-book'].hidden, false);
+  assert.equal(elements['shared-book-title'].textContent, book.title);
+  assert.equal(elements['shared-book-author'].textContent, 'by ' + book.author);
+  assert.equal(elements['shared-book-description'].textContent, book.blurb);
+  assert.equal(elements['shared-book-open'].href, 'nightshelf://book/' + id);
+  assert.equal(elements['shared-book-edition'].textContent,
+    'Requires Nightshelf 1.9.9 or later. ' +
+    (book.freeTier ? 'Free on Nightshelf' : 'Included with Nightshelf Pro'));
+  assert.match(elements['shared-book-help'].textContent, /update when that version becomes available/);
+}
+
+const rejected = ['?book=middlemarch&book=wind_in_willows', '?book=Middlemarch', '?book=middlemarch%2Fevil', '?book=peter_pan', '?book=irish_fairy_tales', '?book=pinocchio', '', '?book=', '?book=missing', '?book=custom_private',
   '?book=__proto__', '?book=constructor', '?book=toString',
   '?book=%3Cscript%3Ealert(1)%3C/script%3E', '?book=javascript%3Aalert(1)',
   '?book=peter_pan&book=wind_in_willows', '?book=Peter_Pan', '?book=peter_pan%2Fevil'];
@@ -131,4 +154,4 @@ for (const name of ['index.html', 'support.html', 'terms.html', 'privacy.html'])
     assert.equal(image[1], '20261005-neutral', name + ' must show the neutral OG card');
   }
 }
-console.log(`PASS: ${books.length} shared books + ${selections.length} tales + ${originals.length} Originals, ${rejected.length} rejected queries, live catalog routes and neutral landing copy`);
+console.log(`PASS: ${books.length} shared books + ${selections.length} tales + ${originals.length} Originals, ${rejected.length} rejected queries, live catalog routes,46 version-qualified cards and neutral landing copy`);
