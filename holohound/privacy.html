@@ -27,27 +27,38 @@
 <header class="site"><img class="mark" src="app-icon.png" alt="" width="30" height="30"><a class="brand" href="./">Holohound</a></header>
 <main class="wrap">
 <h1>Privacy</h1>
-<p class="updated">Last updated 13 September 2026</p>
+<p class="updated">Last updated 5 October 2026</p>
 
 <div class="card">
 <h2 style="margin-top:0">The short version</h2>
 <p>Holohound has <strong>no accounts and no sign-in</strong>. In the iPhone app, your collection is stored
 on your device, not on our servers. We run <strong>no analytics, no advertising and no
-third-party tracking</strong>. We cannot see your binder. Three things do reach our own
-server, and each is described below: <strong>messages to Hound</strong>, the AI companion;
+third-party tracking</strong>. Your complete binder is not uploaded. If you allow Hound
+data sharing and send a message, relevant card details and a binder summary can leave your
+device, as described below. Our server also handles <strong>messages to Hound</strong>, the AI companion;
 <strong>sold-price lookups</strong> for a card; and, if you subscribe, <strong>proof of your
 Holohound Pro subscription</strong>. Hound's replies are written by Anthropic's AI.</p>
 </div>
 
 <h2>What stays on your device</h2>
-<p>Everything you create in the app: the cards in your binder, what you paid, your want
-list, your price watches, and the value history the app records over time. This lives in
-the app's own storage on your device. Deleting the app deletes it.</p>
+<p>Your binder, what you paid, your want list, your price watches, conversations, and the
+value history the app records over time live in the app's own storage on your device.
+Selected information can be sent when you use Hound, as described below. Deleting the app
+can remove this local data.</p>
 <p>When you scan a card, the app also keeps a rectified photo of it on your device, capped at
 your newest 40 captures so the library can't grow without bound. These photos are never
 uploaded anywhere; the card-matching step that reads them runs entirely on the device.</p>
-<p>Because it is only on your device, <strong>we cannot restore it for you</strong> if you
-lose the device or delete the app. Backup is not implemented in this version.</p>
+<p><strong>Profile &rarr; Collection backup</strong> lets you save a separate JSON backup
+and preview a backup before explicitly replacing your collection. A backup includes
+collection lots, costs, sales, tags, wish list, pending scans, preferences, conversations,
+value and centering history, your profile image, and card descriptions for offline recovery.
+Camera captures, native photos, device identity, Hound allowance and Pro purchases are
+excluded. Use Restore Purchases for Pro.</p>
+<p>The exported JSON file is <strong>not encrypted</strong>; store and share it only somewhere
+you trust. iCloud sync and automatic cloud backup are unavailable in this build. We cannot
+restore your collection from our servers. Keep a separate backup if you want to recover it
+after losing the device or deleting the app. Deleting the app does not delete backup files
+you saved elsewhere.</p>
 
 <h2>What leaves your device</h2>
 
@@ -62,9 +73,13 @@ website, whichever catalogue you are browsing receives your IP address and can s
 cards were requested. Yu-Gi-Oh! and Gundam card images are fetched through our own server,
 which requests that card's image on the app's behalf, so the image host sees our server
 rather than your device. We do not send any catalogue your collection, and these requests carry no identifier from us.</p>
-<p>Holohound also links out to graders and marketplaces — PSA, Beckett, CGC, SGC, TCGplayer
-and eBay — when you tap a certificate or a listing. Those open outside the app and are
-covered by their own privacy policies, not this one. Nothing is sent to them unless you tap.</p>
+<p>Holohound also links out to graders and marketplaces — PSA, Beckett, CGC, SGC, TCGplayer,
+eBay and Cardmarket — when you tap a certificate, product or search link. A marketplace
+search includes the card name, set and number and, when specified, its finish, language or
+grade. Search links open a search page; they do not mean Holohound has fetched or verified
+a seller's offer. Those sites receive the search terms and your normal browser request,
+including your IP address, and are covered by their own privacy policies. Constructing the
+link sends nothing to the marketplace; it is opened only when you tap.</p>
 
 <h3>Prices</h3>
 <p>Every price in the app names the feed it came from, on the card itself, because the feeds
@@ -95,15 +110,43 @@ for that card. The provider is sent the card, not your install id, your IP addre
 collection.</p>
 
 <h3>Hound, the AI companion</h3>
-<p>When you send Hound a message, this is exactly what is sent, and nothing more: the message
-you type, any photo you attach to it, the last few messages of that conversation, and the
-specific card rows relevant to your question — which can include what you paid for a card and
-its condition. They go to our server and are forwarded to
-<a href="https://www.anthropic.com/" rel="noopener">Anthropic</a>, whose AI model writes the
-reply. Your whole collection is not sent, no account is created, and we do not store the
-conversation on our servers. Anthropic retains API inputs and outputs for a limited period
-under its trust-and-safety policy before deleting them; that retention is theirs, not ours.
-None of it is used for tracking.</p>
+<p>Before the first message is sent, the app asks you to allow Hound data sharing and names
+<a href="https://www.anthropic.com/" rel="noopener">Anthropic</a>, the AI provider. If you
+allow it and send a message, our server receives and forwards the following to Anthropic
+to generate the reply:</p>
+<ul>
+  <li>The message you type; any photos you deliberately attach (up to three per message,
+      reduced to 1,024 pixels on the long edge); and the last eight messages of the conversation.</li>
+  <li>The card you opened Hound from, including its game, name, set, number, quantity,
+      condition, recorded finish and language, what you paid, recorded grading details,
+      and centering measurements when available.</li>
+  <li>Price references, including amount, currency, source, quote type, printing coverage,
+      the source-provided date and the app's separate price-check time when available.
+      Missing dates or prices remain unknown.</li>
+  <li>A binder summary: counts, value, cost and cost coverage, your eight most valuable
+      priced cards, and progress on up to six sets. A question about a set may also include
+      the cards you are missing from it. Your complete collection is not sent.</li>
+  <li>Offers you choose to ask Hound about: seller labels, currency, item and delivery costs,
+      taxes or fees, quantities, and whether you confirmed that the card details match.
+      Calculated comparison totals may be included so Hound can explain them.</li>
+</ul>
+<p><strong>Comparing entered offers on your device sends nothing to AI.</strong> Asking
+Hound about a comparison prepares a message; you still choose whether to send it. These
+are figures you entered, not fetched listings. Avoid entering personal or sensitive
+information in seller labels or messages.</p>
+<p>Our server also receives catalogue and holding identifiers to associate the context
+with the selected card, your random install id, and, if you have Pro, your App Store
+subscription record for allowance and subscription checks. Those identifiers and the
+subscription record are not included as metadata in the request to Anthropic. We do not
+store the conversation on our servers. Anthropic's
+<a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">commercial data-retention policy</a>
+describes its handling of API inputs and outputs, including its standard deletion period
+and exceptions for safety, legal requirements or other agreed retention. Its retention is
+separate from the conversation stored on your device.</p>
+<p>You can change your choice in <strong>Profile &rarr; About &amp; legal &rarr; Hound data
+sharing</strong>. Choosing Not now prevents new Hound messages from being sent; scanning,
+your binder and price references keep working. Changing the choice does not recall a
+request already sent or delete data already received by Anthropic.</p>
 
 <h3>The install id and daily counts</h3>
 <p>The app generates a random id for your install. It is not a login, and it is not your
@@ -123,10 +166,13 @@ the subscription is real and current before applying Pro's limits.</p>
 <p>To stop one subscription being shared across strangers' phones, our server keeps a
 <strong>one-way hash of the subscription's original transaction id</strong>, together with
 <strong>up to five install ids</strong> that have used it and when each last did. An install id
-that has not used the subscription for 30 days stops counting toward those five, but it can stay
-in the record until the subscription is next used, and the record itself has no automatic
-deletion date yet; to ask us to remove it, email us. This means that,
-for a subscriber, the install id and its daily Hound count are linked on our server to the
+that has not used the subscription for 30 days stops occupying one of those five seats.
+The service checks for expired seats across stored subscriptions during startup and
+request handling, at most once per hour during normal operation; removal therefore
+depends on service activity and a successful storage write. This seat cleanup does not
+imply deletion of usage, purchase-verification, refund or other records described in this
+policy. To ask about or request removal of server-held information, email us. For a
+subscriber, the install id and its daily Hound count are linked on our server to the
 subscription.</p>
 
 <h2>What we never collect</h2>
@@ -159,9 +205,11 @@ chat with other people. Hound is an AI, not a person and not another user; what 
 it sends is listed in full above.</p>
 
 <h2>Your choices</h2>
-<p>You can export your collection to a CSV file from the Profile screen at any time, without
-a subscription. Deleting the app erases your collection, your scan photos and the install id
-on your device. If you subscribed, cancel Holohound Pro in your Apple ID's subscription settings —
+<p>You can export your collection to a CSV file or save a Collection backup from the Profile
+screen without a subscription. A CSV is a collection export; use Collection backup when
+you want the additional preferences, conversations and history described above. Deleting
+the app can remove your local collection, scan photos and install id, but it does not
+remove exported files from wherever you saved or shared them. If you subscribed, cancel Holohound Pro in your Apple ID's subscription settings —
 deleting the app does not cancel it — and the install stops counting toward the subscription's five
 places 30 days after it was last used, as described above. For a question about anything our
 server holds, or to ask for it to be removed, email us.</p>
