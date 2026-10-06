@@ -645,7 +645,7 @@
       "name": "What's free, and what needs Nightshelf Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The free shelf includes classic books, Nightshelf Originals and selected tales. The app labels which choices are free and which are included with Pro. You get the on-device voice, every sound and piece of sleep music, the sleep timer, and screen dimming, with no time limit and no ads. Nightshelf Pro opens more of the library, the six AI narrators, 90- and 120-minute sleep timers, and Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial if your Apple Account is eligible."
+        "text": "The free shelf includes classic books, Nightshelf Originals and selected tales. The app labels which choices are free and which are included with Pro. You get the on-device voice, every sound and piece of sleep music, the sleep timer, and screen dimming, with no time limit and no ads. Nightshelf Pro opens more of the library, AI narrators (Mira and Rowan from 1.9.10), 90- and 120-minute sleep timers, and Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial if your Apple Account is eligible."
       }
     },
     {
@@ -653,7 +653,7 @@
       "name": "Does it work offline?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, the whole shelf does. Every book ships inside the app, and the on-device voice reads any of them with the network off, ambient sound and sleep timer included. Only the six cloud narrators and Tonight's Story need a connection."
+        "text": "Yes, the whole shelf does. Every book ships inside the app, and the on-device voice reads any of them with the network off, ambient sound and sleep timer included. Only the AI narrators and Tonight's Story need a connection."
       }
     },
     {
@@ -669,7 +669,7 @@
       "name": "Where do my words go?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Your own words go nowhere unless you say so. Reading, listening in your iPhone's voice, ambient sound, and the timer all happen on your phone. Tonight's Story, and an AI narrator reading a story you made, ask your permission before anything you chose or typed leaves; say no and they stay off while everything else keeps working. From Nightshelf 1.9.3, AI narrators can read the books that come with Nightshelf without asking, and they are on from the start: Nova reads your first few minutes once on each iPhone, or all night with Nightshelf Pro. The paragraph being read and the next one go to Nightshelf's server, which sees your IP address as any website does and keeps a scrambled daily character count to limit use (with Pro, the request also carries the ID and receipt the privacy policy describes), and on to OpenAI, which gets only that text, the narrator's name and a reading-style note, with no ID. Settings → AI features → AI narrators for Nightshelf's books turns that off; earlier versions ask before any cloud narration. Auditioning a narrator with ▶ doesn't ask first, because it sends a fixed sample sentence, never anything of yours. The privacy policy names every stop your words make."
+        "text": "Your own words go nowhere unless you say so. Reading, listening in your iPhone's voice, ambient sound, and the timer all happen on your phone. Tonight's Story, and an AI narrator reading a story you made, ask your permission before anything you chose or typed leaves; say no and they stay off while everything else keeps working. From Nightshelf 1.9.3, AI narrators can read the books that come with Nightshelf without asking, and they are on from the start. In 1.9.10, Mira reads your first few minutes once on each iPhone, or Mira or Rowan reads with Nightshelf Pro; earlier versions use Nova for the welcome and Automatic. The paragraph being read and a small amount ahead go to Nightshelf's server, which sees your IP address as any website does and keeps a scrambled daily character count to limit use (with Pro, the request also carries the ID and receipt the privacy policy describes), and on to OpenAI, which gets only that text, the narrator's name and a reading-style note, with no ID. Settings → AI features → AI narrators for Nightshelf's books turns that off; versions 1.9.2 and earlier ask before any cloud narration. Auditioning a narrator with ▶ doesn't ask first, because it sends a fixed sample sentence, never anything of yours. The privacy policy names every stop your words make."
       }
     },
     {
@@ -825,7 +825,7 @@
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7.5" y1="20" x2="7.5" y2="13.5"/><line x1="12" y1="20" x2="12" y2="8.5"/><line x1="16.5" y1="20" x2="16.5" y2="11"/></svg></div>
           <h3>Read Along, or Listen</h3>
           
-          <p>The on-device voice reads every book aloud, even in airplane mode. For something richer, Nightshelf Pro adds six warm AI narrators.</p>
+          <p>The on-device voice reads every book aloud, even in airplane mode. From Nightshelf 1.9.10, Nightshelf Pro adds Mira and Rowan, two warm AI narrators.</p>
         </div>
         <div class="feature reveal">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 3.5l.6 1.9 1.9.6-1.9.6-.6 1.9-.6-1.9-1.9-.6 1.9-.6z"/></svg></div>
@@ -869,13 +869,13 @@
           </button>
           <div class="listen-meta">
             <div class="listen-title">Hear a narrator</div>
-            <div class="listen-sub">Nova · the opening lines of <em>Alice's Adventures in Wonderland</em></div>
+            <div class="listen-sub">Mira · a quiet bedtime passage</div>
             <div class="listen-bar" aria-hidden="true"><i id="listen-fill"></i></div>
           </div>
-          <div class="listen-time" id="listen-time">0:20</div>
+          <div class="listen-time" id="listen-time">0:10</div>
         </div>
-        <audio id="listen-audio" preload="none" src="audio/nova-alice.mp3?v=20260901a"></audio>
-        <figcaption class="wd-cap">A real sample of Nova, one of the six AI narrators in Nightshelf Pro.</figcaption>
+        <audio id="listen-audio" preload="none" src="audio/mira-bedtime.mp3?v=20261006a"></audio>
+        <figcaption class="wd-cap">An AI-generated sample of Mira, one of the two narrators in Nightshelf Pro from version 1.9.10.</figcaption>
       </figure>
 
       <figure class="ambient-card reveal" id="ambient">
@@ -997,11 +997,11 @@
         </details>
         <details class="faq">
           <summary>What's free, and what needs Nightshelf Pro?</summary>
-          <p>The free shelf includes classic books, Nightshelf Originals and selected tales. The app labels which choices are free and which are included with Pro. You get the on-device voice, every sound and piece of sleep music, the sleep timer, and screen dimming, with no time limit and no ads. Nightshelf Pro opens more of the library, the six AI narrators, 90- and 120-minute sleep timers, and Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial if your Apple Account is eligible.</p>
+          <p>The free shelf includes classic books, Nightshelf Originals and selected tales. The app labels which choices are free and which are included with Pro. You get the on-device voice, every sound and piece of sleep music, the sleep timer, and screen dimming, with no time limit and no ads. Nightshelf Pro opens more of the library, AI narrators (Mira and Rowan from 1.9.10), 90- and 120-minute sleep timers, and Tonight's Story. Prices are shown in the app, and the annual plan includes a 7-day free trial if your Apple Account is eligible.</p>
         </details>
         <details class="faq">
           <summary>Does it work offline?</summary>
-          <p>Yes, the whole shelf does. Every book ships inside the app, and the on-device voice reads any of them with the network off, ambient sound and sleep timer included. Only the six cloud narrators and Tonight's Story need a connection.</p>
+          <p>Yes, the whole shelf does. Every book ships inside the app, and the on-device voice reads any of them with the network off, ambient sound and sleep timer included. Only the AI narrators and Tonight's Story need a connection.</p>
         </details>
         <details class="faq" id="editions">
           <summary>Which editions are included?</summary>
@@ -1009,7 +1009,7 @@
         </details>
         <details class="faq">
           <summary>Where do my words go?</summary>
-          <p>Your own words go nowhere unless you say so. Reading, listening in your iPhone's voice, ambient sound, and the timer all happen on your phone. Tonight's Story, and an AI narrator reading a story you made, ask your permission before anything you chose or typed leaves; say no and they stay off while everything else keeps working. From Nightshelf 1.9.3, AI narrators can read the books that come with Nightshelf without asking, and they are on from the start: Nova reads your first few minutes once on each iPhone, or all night with Nightshelf Pro. The paragraph being read and the next one go to Nightshelf's server, which sees your IP address as any website does and keeps a scrambled daily character count to limit use (with Pro, the request also carries the ID and receipt the privacy policy describes), and on to OpenAI, which gets only that text, the narrator's name and a reading-style note, with no ID. Settings → AI features → AI narrators for Nightshelf's books turns that off; earlier versions ask before any cloud narration. Auditioning a narrator with ▶ doesn't ask first, because it sends a fixed sample sentence, never anything of yours. The <a href="privacy.html">privacy policy</a> names every stop your words make.</p>
+          <p>Your own words go nowhere unless you say so. Reading, listening in your iPhone's voice, ambient sound, and the timer all happen on your phone. Tonight's Story, and an AI narrator reading a story you made, ask your permission before anything you chose or typed leaves; say no and they stay off while everything else keeps working. From Nightshelf 1.9.3, AI narrators can read the books that come with Nightshelf without asking, and they are on from the start. In 1.9.10, Mira reads your first few minutes once on each iPhone, or Mira or Rowan reads with Nightshelf Pro; earlier versions use Nova for the welcome and Automatic. The paragraph being read and a small amount ahead go to Nightshelf's server, which sees your IP address as any website does and keeps a scrambled daily character count to limit use (with Pro, the request also carries the ID and receipt the privacy policy describes), and on to OpenAI, which gets only that text, the narrator's name and a reading-style note, with no ID. Settings → AI features → AI narrators for Nightshelf's books turns that off; versions 1.9.2 and earlier ask before any cloud narration. Auditioning a narrator with ▶ doesn't ask first, because it sends a fixed sample sentence, never anything of yours. The <a href="privacy.html">privacy policy</a> names every stop your words make.</p>
         </details>
         <details class="faq">
           <summary>When can I get it?</summary>
@@ -1087,7 +1087,7 @@
         }
       });
       audio.addEventListener('ended', function () {
-        fill.style.width = '0%'; time.textContent = fmt(audio.duration || 20);
+        fill.style.width = '0%'; time.textContent = fmt(audio.duration || 10);
         btn.classList.remove('playing');
       });
       /* The room and the narrator never talk over each other. */
