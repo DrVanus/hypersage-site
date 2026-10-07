@@ -149,7 +149,7 @@ assert.match(html, /which choices are free and which are included with Pro/i);
 assert.match(html, /Some features require Nightshelf Pro/i);
 assert.match(html, /Availability follows your installed version/i);
 assert.match(html, /More options → About this book/);
-for (const shot of ['home', 'library', 'reader', 'voices', 'sounds', 'story']) {
+for (const shot of ['home', 'library', 'book-details-63', 'reader', 'voices-63', 'sounds', 'story']) {
   const imagePath = 'shots/20261007/' + shot + '.jpg';
   const imageURL = imagePath + (shot === 'sounds' ? '?v=20261007-soundart62' : '');
   assert.ok(html.includes('src="' + imageURL + '"'), shot + ' must use the current approved capture');
