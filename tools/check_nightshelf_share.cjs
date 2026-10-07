@@ -151,7 +151,8 @@ assert.match(html, /Availability follows your installed version/i);
 assert.match(html, /More options → About this book/);
 for (const shot of ['home', 'library', 'reader', 'voices', 'sounds', 'story']) {
   const imagePath = 'shots/20261007/' + shot + '.jpg';
-  assert.ok(html.includes('src="' + imagePath + '"'), shot + ' must use the current approved capture');
+  const imageURL = imagePath + (shot === 'sounds' ? '?v=20261007-soundart62' : '');
+  assert.ok(html.includes('src="' + imageURL + '"'), shot + ' must use the current approved capture');
   assert.ok(fs.existsSync(path.join(root, imagePath)), shot + ' capture must exist');
 }
 for (const name of ['index.html', 'support.html', 'terms.html', 'privacy.html']) {
