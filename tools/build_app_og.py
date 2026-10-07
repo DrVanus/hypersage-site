@@ -71,23 +71,24 @@ CARDS = {
         "art": "app-icon.png",
         "css": """
   .og { background:
-        radial-gradient(circle at 79% 46%, rgba(232,177,92,0.16), transparent 58%),
-        linear-gradient(160deg, #111527 0%, #0B0E19 62%); }
-  .kicker { color: #E8B15C; }
-  h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 640; font-size: 78px;
-       background-image: linear-gradient(178deg, #FBF6EA 4%, #F6C877 70%, #C68B36 108%); }
-  h1 em { font-style: italic; }
-  .sub { color: #B7B2C4; }
+        radial-gradient(circle at 79% 46%, rgba(230,191,120,0.12), transparent 58%),
+        linear-gradient(160deg, #141927 0%, #0c101b 62%); }
+  .kicker { color: #e6bf78; font-weight: 500; }
+  h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 78px;
+       letter-spacing: -0.035em; color: #f4efdf; background: none;
+       -webkit-background-clip: border-box; background-clip: border-box; }
+  h1 em { font-style: italic; color: #e6bf78; padding-right: 0.05em; }
+  .sub { color: #b3afc1; }
   .art { width: 424px; height: 424px; border-radius: 96px;
-         box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(232,177,92,0.20); }
+         box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(230,191,120,0.16); }
 """,
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
         # Released 2026-08-21; the page links the App Store and no longer says "coming".
         "kicker": "Bedtime stories · iOS",
         "h1": "Stories to <em>drift&nbsp;off</em>&nbsp;to",
         # "with Nightshelf Pro" is load-bearing and must never be trimmed away:
-        # conjuring a story is Pro-only with NO free allowance (the backend hard-402s,
-        # index.html:706-711). An unqualified "AI stories" line overclaims the free tier.
+        # conjuring a story is Pro-only with NO free allowance (the backend hard-402s).
+        # An unqualified "AI stories" line overclaims the free tier.
         "sub": "Classic books, read aloud over rain or firelight. Nightshelf&nbsp;Pro adds calm new stories written by AI.",
     },
     "mythwright": {

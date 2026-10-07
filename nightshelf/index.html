@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-itunes-app" content="app-id=6792761643">
-  
-  <script>document.documentElement.classList.add('js');</script>
+
+
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#0B0E19">
+  <meta name="theme-color" content="#0c101b">
   <title>Nightshelf — sleep stories &amp; bedtime reading for iOS</title>
-  
+
   <meta name="description" content="Bedtime stories for iPhone. Classic books read aloud over rain or firelight, plus calm new AI-written stories with Nightshelf Pro.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/nightshelf/">
@@ -19,597 +19,21 @@
   <meta property="og:description" content="Classic books, read aloud over rain or firelight. Nightshelf Pro adds calm new stories written by AI.">
   <meta property="og:url" content="https://hypersage.ai/nightshelf/">
   <meta property="og:site_name" content="Nightshelf">
-  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261005-neutral">
+  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261007-redesign">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Nightshelf — stories to drift off to: stacked books beneath a crescent moon">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Nightshelf — Bedtime stories, read aloud">
   <meta name="twitter:description" content="Bedtime classics, read aloud in a soft, sleepy voice. Nightshelf Pro adds calm new stories written by AI.">
-  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261005-neutral">
+  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261007-redesign">
   <meta name="twitter:image:alt" content="Nightshelf — stories to drift off to: stacked books beneath a crescent moon">
 
   <link rel="icon" type="image/png" href="app-icon.png">
   <link rel="apple-touch-icon" href="app-icon.png">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
-
-  <style>
-    /* ================================================================
-       Nightshelf design system
-       ---------------------------------------------------------------
-       Descender safety: every element that uses background-clip: text
-       carries .grad-text (padding-bottom reserves paint area below the
-       baseline, negative margin re-tightens layout). Headings keep
-       line-height ≥ 1.16 and never sit in an overflow-hidden box, so
-       g / y / p / j descenders are never cut.
-       ================================================================ */
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --bg:            #0B0E19;
-      --bg-raised:     #111527;
-      --surface:       #151A2E;
-      --card:          #171D33;
-      --fg:            #F3EFE6;
-      --muted-fg:      #B7B2C4;
-      --tertiary-fg:   #837E93;
-      --accent:        #E8B15C;
-      --accent-bright: #F6C877;
-      --accent-deep:   #C68B36;
-      --lilac:         #9A8CD6;
-      --rose:          #D98C97;
-      --ink:           #241703;
-
-      --border:        rgba(243,239,230,0.08);
-      --border-strong: rgba(243,239,230,0.16);
-      --gold-border:   rgba(232,177,92,0.38);
-      --accent-glow:   rgba(232,177,92,0.13);
-
-      --radius-sm: 10px;
-      --radius:    16px;
-      --radius-lg: 24px;
-
-      --shadow-lg: 0 24px 70px rgba(0,0,0,0.55);
-      --shadow-md: 0 12px 34px rgba(0,0,0,0.40);
-
-      --font-serif: 'Fraunces', Georgia, serif;
-      --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-
-      /* fluid type scale */
-      --text-hero: clamp(2.75rem, 6.4vw, 4.6rem);
-      --text-h2:   clamp(1.9rem, 3.8vw, 2.7rem);
-      --text-h3:   1.32rem;
-      --text-sub:  clamp(1.05rem, 2.2vw, 1.28rem);
-    }
-
-    html { scroll-behavior: smooth; background: var(--bg); color-scheme: dark; }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-
-    body {
-      font-family: var(--font-sans);
-      background: var(--bg);
-      color: var(--fg);
-      line-height: 1.68;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow-x: hidden;
-      text-rendering: optimizeLegibility;
-    }
-
-    ::selection { background: rgba(232,177,92,0.28); color: var(--fg); }
-
-    /* ---- Night sky: lamplight glows + two drifting star layers ---- */
-    .sky {
-      position: absolute; inset: 0 0 auto 0; height: 160vh;
-      pointer-events: none; z-index: 0; overflow: hidden;
-    }
-    .sky::before {
-      content: ''; position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse 62% 46% at 12% -6%, rgba(232,177,92,0.15), transparent 62%),
-        radial-gradient(ellipse 55% 42% at 92% 2%, rgba(154,140,214,0.13), transparent 64%),
-        radial-gradient(ellipse 90% 60% at 50% 118%, rgba(217,140,151,0.05), transparent 72%);
-    }
-    .sky .stars, .sky .stars2 { content: ''; position: absolute; inset: 0; }
-    .sky .stars {
-      background-image:
-        radial-gradient(1.1px 1.1px at 22px 34px, rgba(243,239,230,0.55), transparent 55%),
-        radial-gradient(0.9px 0.9px at 130px 90px, rgba(243,239,230,0.35), transparent 55%),
-        radial-gradient(1.3px 1.3px at 230px 150px, rgba(246,200,119,0.4), transparent 55%),
-        radial-gradient(0.8px 0.8px at 310px 60px, rgba(243,239,230,0.3), transparent 55%);
-      background-size: 360px 220px;
-      animation: twinkle 7s ease-in-out infinite alternate;
-    }
-    .sky .stars2 {
-      background-image:
-        radial-gradient(1px 1px at 70px 170px, rgba(243,239,230,0.4), transparent 55%),
-        radial-gradient(0.9px 0.9px at 180px 40px, rgba(154,140,214,0.45), transparent 55%),
-        radial-gradient(1.2px 1.2px at 300px 200px, rgba(243,239,230,0.28), transparent 55%);
-      background-size: 420px 260px;
-      animation: twinkle 9s ease-in-out 1.8s infinite alternate;
-    }
-    @keyframes twinkle { from { opacity: .45; } to { opacity: 1; } }
-    @media (prefers-reduced-motion: reduce) { .sky .stars, .sky .stars2 { animation: none; } }
-
-    h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.012em; }
-
-    /* Descender-safe gradient text */
-    .grad-text {
-      background-image: linear-gradient(178deg, #FBF6EA 4%, var(--accent-bright) 70%, var(--accent-deep) 108%);
-      -webkit-background-clip: text; background-clip: text;
-      -webkit-text-fill-color: transparent; color: transparent;
-      padding-bottom: 0.22em;      /* room for g / y / p descenders */
-      margin-bottom: -0.14em;      /* reclaim layout height          */
-    }
-
-    a { color: var(--accent-bright); text-decoration: none; transition: color .2s; }
-    a:hover { color: var(--accent); }
-    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-
-    /* A shared book gets a clear way into the app, above the usual welcome. */
-    .shared-book[hidden] { display: none; }
-    .shared-book { padding: 36px 0 0; position: relative; z-index: 1; }
-    .shared-book-card {
-      max-width: 800px; margin: 0 auto; padding: clamp(24px, 5vw, 44px);
-      border: 1px solid var(--gold-border); border-radius: var(--radius-lg);
-      background: linear-gradient(145deg, var(--surface), var(--bg-raised));
-      box-shadow: var(--shadow-md); text-align: center;
-    }
-    .shared-book-label { color: var(--accent-bright); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; }
-    .shared-book h2 { margin: 12px 0 6px; font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.2; overflow-wrap: anywhere; }
-    .shared-book-author { color: var(--muted-fg); font-family: var(--font-serif); font-size: 1.15rem; }
-    .shared-book-description { max-width: 540px; margin: 18px auto 0; color: var(--muted-fg); }
-    .shared-book-edition { margin-top: 16px; color: var(--accent-bright); font-size: .9rem; }
-    .shared-book-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 24px; }
-    .shared-book-help { margin: 18px auto 0; max-width: 530px; font-size: .85rem; color: var(--muted-fg); }
-    @media (max-width: 420px) { .shared-book-actions .btn { width: 100%; } }
-
-    .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
-
-    /* ============================== NAV ============================== */
-    nav.site {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(11,14,25,0.72);
-      backdrop-filter: saturate(150%) blur(18px);
-      -webkit-backdrop-filter: saturate(150%) blur(18px);
-      border-bottom: 1px solid var(--border);
-    }
-    nav.site::after {
-      content: ''; display: block; height: 1px;
-      background: linear-gradient(90deg, transparent 8%, rgba(232,177,92,0.22) 50%, transparent 92%);
-      margin-top: -1px;
-    }
-    nav.site .container { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; }
-    .brand { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-serif); font-weight: 600; color: var(--fg); font-size: 1.3rem; line-height: 1.3; }
-    .brand img { width: 36px; height: 36px; border-radius: 10px; box-shadow: 0 0 0 1px var(--border-strong), 0 4px 14px rgba(0,0,0,0.5); }
-    nav.site .links { display: flex; gap: 30px; align-items: center; }
-    nav.site .links a:not(.btn) {
-      color: var(--muted-fg); font-weight: 500; font-size: .95rem; line-height: 1.5;
-      position: relative; padding: 4px 0;
-    }
-    nav.site .links a:not(.btn)::after {
-      content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px;
-      background: var(--accent); transition: right .25s ease;
-    }
-    nav.site .links a:not(.btn):hover { color: var(--fg); }
-    nav.site .links a:not(.btn):hover::after { right: 0; }
-    .mobile-menu { display: none; position: relative; }
-    .mobile-menu > summary {
-      list-style: none; cursor: pointer; padding: 6px 10px;
-      min-width: 44px; min-height: 44px;
-      display: inline-flex; align-items: center; justify-content: center;
-      border: 1px solid var(--gold-border); border-radius: 10px;
-      color: var(--accent-bright); font-weight: 700; font-size: 1.1rem; line-height: 1.3;
-    }
-    .mobile-menu > summary::-webkit-details-marker { display: none; }
-    .mobile-menu[open] > summary { background: var(--accent-glow); }
-    .mobile-links {
-      position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
-      display: flex; flex-direction: column; gap: 2px; min-width: 200px;
-      background: var(--surface); border: 1px solid var(--border-strong);
-      border-radius: 14px; padding: 8px; box-shadow: var(--shadow-md);
-    }
-    .mobile-links a { color: var(--fg); font-weight: 600; padding: 10px 12px; border-radius: 8px; }
-    .mobile-links a:hover { background: var(--bg-raised); color: var(--accent-bright); }
-    @media (max-width: 700px) { nav.site .links { display: none; } .mobile-menu { display: block; } }
-
-    /* ============================ BUTTONS ============================ */
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-      background: linear-gradient(180deg, var(--accent-bright), var(--accent-deep));
-      color: var(--ink); font-weight: 600; font-size: .97rem; line-height: 1.45;
-      padding: 13px 26px; border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.14);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 8px 24px rgba(232,177,92,0.28);
-      transition: transform .16s ease, box-shadow .22s ease;
-    }
-    .btn:hover { color: var(--ink); transform: translateY(-2px); box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 12px 34px rgba(232,177,92,0.42); }
-    .btn:active { transform: translateY(0); }
-    .btn[aria-disabled="true"] { cursor: default; opacity: .82; box-shadow: none; }
-    .btn[aria-disabled="true"]:hover { transform: none; box-shadow: none; }
-    .btn.ghost {
-      background: rgba(232,177,92,0.05); color: var(--accent-bright);
-      border: 1px solid var(--gold-border); box-shadow: none;
-    }
-    .btn.ghost:hover { background: var(--accent-glow); color: var(--accent-bright); box-shadow: 0 6px 20px rgba(232,177,92,0.12); }
-    .btn.sm { padding: 9px 20px; font-size: .9rem; }
-
-    /* ============================= HERO ============================= */
-    header.hero { padding: 96px 0 56px; text-align: center; position: relative; }
-    .kicker {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-weight: 600; font-size: .76rem; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--accent);
-      padding: 7px 18px; line-height: 1.6;
-      border: 1px solid var(--gold-border); border-radius: 999px;
-      background: var(--accent-glow); margin-bottom: 34px;
-    }
-    .kicker svg { width: 13px; height: 13px; }
-    .hero img.crest {
-      width: 116px; height: 116px; border-radius: 26px; margin: 0 auto 34px; display: block;
-      box-shadow: 0 0 0 1px var(--border-strong), 0 18px 44px rgba(0,0,0,0.5), 0 0 60px rgba(232,177,92,0.14);
-    }
-    .hero h1 {
-      font-size: var(--text-hero); line-height: 1.16; font-weight: 600;
-      max-width: 14em; margin-left: auto; margin-right: auto;
-    }
-    .hero h1 em { font-style: italic; font-weight: 500; }
-    .hero p.sub {
-      font-size: var(--text-sub); color: var(--muted-fg); line-height: 1.7;
-      max-width: 610px; margin: 20px auto 40px;
-    }
-    .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .hero .fineprint { margin-top: 16px; font-size: .84rem; color: var(--tertiary-fg); line-height: 1.6; }
-
-    .stat-strip {
-      display: flex; justify-content: center; align-items: stretch;
-      margin: 64px auto 0; padding-top: 34px; max-width: 680px;
-      border-top: 1px solid var(--border);
-    }
-    .stat { flex: 1 1 0; min-width: 0; padding: 0 7px; position: relative; }
-    .stat + .stat::before {
-      content: ''; position: absolute; left: 0; top: 12%; bottom: 12%;
-      width: 1px; background: var(--border);
-    }
-    .stat .num {
-      font-family: var(--font-serif); font-size: clamp(1.5rem, 6.5vw, 2.1rem); font-weight: 600;
-      color: var(--accent-bright); line-height: 1.3;
-    }
-    .stat .lbl { font-size: .8rem; color: var(--tertiary-fg); letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.6; }
-
-    /* ======================= DEVICE SHOWCASE ======================= */
-    .showcase { padding: 26px 0 10px; }
-    .showcase .container { display: flex; justify-content: center; align-items: center; gap: 34px; }
-    .device-wrap { position: relative; }
-    .device-wrap::before {
-      content: ''; position: absolute; inset: -12% -30%;
-      background: radial-gradient(ellipse 55% 48% at 50% 42%, rgba(232,177,92,0.16), transparent 70%);
-      pointer-events: none;
-    }
-    .device {
-      position: relative; width: 310px; max-width: 82vw; padding: 12px;
-      background: linear-gradient(165deg, #262d4b 0%, #10142a 60%, #1a2140 100%);
-      border-radius: 50px; border: 1px solid var(--border-strong);
-      box-shadow: var(--shadow-lg), 0 0 80px var(--accent-glow), 0 1px 0 rgba(255,255,255,0.08) inset;
-    }
-    .device img { display: block; width: 100%; height: auto; border-radius: 38px; }
-    .float-chip {
-      display: inline-flex; align-items: center; gap: 10px;
-      background: rgba(21,26,46,0.86); border: 1px solid var(--border-strong);
-      border-radius: 14px; padding: 12px 18px;
-      font-size: .88rem; font-weight: 500; color: var(--muted-fg); line-height: 1.5;
-      box-shadow: var(--shadow-md);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    }
-    .float-chip .dot { width: 26px; height: 26px; border-radius: 8px; flex: none; display: grid; place-items: center; background: var(--accent-glow); border: 1px solid var(--gold-border); color: var(--accent-bright); }
-    .float-chip .dot svg { width: 14px; height: 14px; }
-    .float-chip strong { color: var(--fg); font-weight: 600; }
-    .chip-col { display: flex; flex-direction: column; gap: 18px; }
-    .chip-col.left { align-items: flex-end; }
-    .chip-col.right { align-items: flex-start; }
-    @media (max-width: 900px) { .chip-col { display: none; } }
-
-    /* =========================== SECTIONS =========================== */
-    section { padding: 84px 0; }
-    .section-head { text-align: center; max-width: 640px; margin: 0 auto 56px; }
-    .eyebrow {
-      display: block; font-family: var(--font-sans); font-weight: 600; font-size: .74rem;
-      letter-spacing: 0.22em; text-transform: uppercase; color: var(--tertiary-fg);
-      margin-bottom: 14px; line-height: 1.6;
-    }
-    .eyebrow::before, .eyebrow::after { content: '·'; color: var(--accent); margin: 0 10px; }
-    .section-head h2 { font-size: var(--text-h2); line-height: 1.22; }
-    .section-head p { color: var(--muted-fg); font-size: 1.08rem; margin-top: 12px; line-height: 1.7; }
-
-    .fleuron { text-align: center; color: var(--accent); opacity: .8; font-size: 1.05rem; letter-spacing: 1.1em; text-indent: 1.1em; line-height: 1; margin: 6px 0 0; user-select: none; }
-
-    /* ====================== SCREENSHOT GALLERY ====================== */
-    /* The edge fades below are deliberately pulled 26px OUTSIDE this shell so
-       the cards appear to slide under the page's own margin. That bleed widened
-       the document by exactly 2px at every viewport under ~1144px: the container
-       is viewport-bound there with 24px of padding, so a 26px bleed lands 2px
-       past the edge. The max-width:700px rule further down already fixed it for
-       phones and states the law — "decorative glows may bleed visually, but they
-       must not widen the page" — it just never covered tablets and small laptops.
-       Clipping the section enforces that law at EVERY width with no breakpoint
-       to keep in sync: `clip` (not `hidden`) does not create a scroll container,
-       so the rail inside still scrolls and nothing sticky is trapped. */
-    #screens { overflow-x: clip; }
-    .gallery-shell { position: relative; }
-    .gallery-shell::before, .gallery-shell::after {
-      content: ''; position: absolute; top: 0; bottom: 26px; width: 70px; z-index: 2; pointer-events: none;
-    }
-    .gallery-shell::before { left: -26px; background: linear-gradient(90deg, var(--bg), transparent); }
-    .gallery-shell::after  { right: -26px; background: linear-gradient(270deg, var(--bg), transparent); }
-    .gallery-row {
-      display: flex; gap: 26px; overflow-x: auto; padding: 14px 34px 30px;
-      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .gallery-row::-webkit-scrollbar { display: none; }
-    .shot { flex: 0 0 auto; width: 228px; scroll-snap-align: center; text-align: center; }
-    @media (max-width: 700px) {
-      /* Decorative glows may bleed visually, but they must not widen the page.
-         The gallery itself remains horizontally scrollable inside its row. */
-      .device-wrap::before { inset: -12% 0; }
-      .gallery-shell::before { left: 0; }
-      .gallery-shell::after { right: 0; }
-    }
-    .shot .frame {
-      padding: 9px; border-radius: 36px;
-      background: linear-gradient(165deg, #262d4b, #10142a 62%, #1a2140);
-      border: 1px solid var(--border-strong);
-      box-shadow: var(--shadow-md), 0 0 46px rgba(232,177,92,0.10), 0 1px 0 rgba(255,255,255,0.07) inset;
-      transition: transform .28s ease, box-shadow .28s ease;
-    }
-    .shot:hover .frame { transform: translateY(-6px); box-shadow: var(--shadow-lg), 0 0 60px rgba(232,177,92,0.16), 0 1px 0 rgba(255,255,255,0.07) inset; }
-    .shot .frame img { display: block; width: 100%; height: auto; border-radius: 27px; }
-    .shot .cap { margin-top: 16px; font-family: var(--font-serif); font-style: italic; font-size: 1.02rem; color: var(--muted-fg); line-height: 1.5; }
-    @media (max-width: 640px) { .shot { width: 196px; } }
-
-    /* =========================== FEATURES =========================== */
-    .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
-    @media (max-width: 780px) { .features { grid-template-columns: 1fr; } }
-    .feature {
-      position: relative;
-      background: linear-gradient(180deg, var(--card), var(--bg-raised));
-      border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 32px 30px 30px; overflow: hidden;
-      transition: transform .22s ease, border-color .22s ease, box-shadow .25s ease;
-    }
-    .feature::before {
-      content: ''; position: absolute; top: 0; left: 14%; right: 14%; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(232,177,92,0.35), transparent);
-      opacity: 0; transition: opacity .25s ease;
-    }
-    .feature:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: var(--shadow-md); }
-    .feature:hover::before { opacity: 1; }
-    .feature .ic {
-      width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
-      background: linear-gradient(150deg, rgba(246,200,119,0.20), rgba(198,139,54,0.06));
-      border: 1px solid var(--gold-border); margin-bottom: 20px; color: var(--accent-bright);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 8px 20px rgba(232,177,92,0.08);
-    }
-    .feature .ic svg { width: 25px; height: 25px; display: block; }
-    .feature h3 { font-size: var(--text-h3); line-height: 1.35; margin-bottom: 8px; }
-    .feature p { color: var(--muted-fg); font-size: .98rem; line-height: 1.7; }
-
-    /* ============================ RITUAL ============================ */
-    .ritual { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; position: relative; }
-    @media (max-width: 720px) { .ritual { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; } }
-    .step {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 30px 24px 26px; text-align: center; position: relative;
-      transition: border-color .22s ease, transform .22s ease;
-    }
-    .step:hover { border-color: var(--border-strong); transform: translateY(-3px); }
-    .step .n {
-      font-family: var(--font-serif); font-size: 1.35rem; font-weight: 600; color: var(--accent);
-      display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
-      border: 1px solid var(--gold-border); margin-bottom: 16px; line-height: 1;
-      background: var(--accent-glow);
-    }
-    .step h3 { font-size: 1.14rem; line-height: 1.4; margin-bottom: 6px; }
-    .step p { font-size: .95rem; color: var(--muted-fg); line-height: 1.65; }
-
-    /* ============================= FAQ ============================= */
-    .faq-list { max-width: 720px; margin: 0 auto; }
-    details.faq { padding: 18px 0; border-bottom: 1px solid var(--border); }
-    details.faq summary {
-      font-weight: 600; font-size: 1.05rem; cursor: pointer; list-style: none;
-      display: flex; justify-content: space-between; align-items: center; gap: 16px;
-      color: var(--fg);
-    }
-    details.faq summary::-webkit-details-marker { display: none; }
-    details.faq summary::after {
-      content: '+'; color: var(--accent); font-weight: 400; font-size: 1.35rem;
-      line-height: 1; flex: 0 0 auto; transition: transform .2s;
-    }
-    details.faq[open] summary::after { transform: rotate(45deg); }
-    details.faq p { margin-top: 12px; color: var(--muted-fg); font-size: .97rem; line-height: 1.7; }
-
-    /* =========================== CTA BAND =========================== */
-    .cta-band {
-      position: relative; text-align: center; overflow: hidden;
-      background:
-        radial-gradient(ellipse 64% 130% at 50% -8%, rgba(232,177,92,0.16), transparent 68%),
-        linear-gradient(180deg, var(--bg-raised), var(--bg));
-      border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
-      padding: 68px 32px 62px; margin: 10px 0;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset;
-    }
-    .cta-band .moon {
-      width: 44px; height: 44px; margin: 0 auto 22px; color: var(--accent-bright);
-      filter: drop-shadow(0 0 18px rgba(246,200,119,0.45));
-    }
-    .cta-band h2 { font-size: var(--text-h2); line-height: 1.22; }
-    .cta-band p { color: var(--muted-fg); max-width: 480px; margin: 12px auto 32px; font-size: 1.08rem; line-height: 1.7; }
-
-    /* ============================ FOOTER ============================ */
-    footer.site { border-top: 1px solid var(--border); padding: 48px 0 42px; margin-top: 48px; }
-    footer.site .container { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
-    footer.site .brand { font-size: 1.1rem; color: var(--muted-fg); }
-    footer.site .brand img { width: 30px; height: 30px; border-radius: 8px; }
-    footer.site .flinks { display: flex; gap: 26px; flex-wrap: wrap; justify-content: center; }
-    footer.site .flinks a { color: var(--tertiary-fg); font-size: .92rem; line-height: 1.6; }
-    footer.site .flinks a:hover { color: var(--accent-bright); }
-    footer.site .copy { color: var(--tertiary-fg); font-size: .85rem; line-height: 1.6; }
-    /* Fine print: the people whose recordings are in the app, and the licence
-       they shared them under. Credits belong here, not in the selling copy. */
-    footer.site .credits { color: var(--tertiary-fg); font-size: .8rem; line-height: 1.7; max-width: 640px; opacity: .92; }
-    footer.site .credits a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-    footer.site .credits a:hover { color: var(--accent-bright); }
-
-    /* ========================= WIND-DOWN ============================
-       Layered diagram: the story, the narration, the ambient sound —
-       dimming toward the moon as the sleep timer fades everything out.
-       Depicts only what the copy above already says. Static by default;
-       the drift/breathe animations are progressive enhancement. */
-    .winddown { max-width: 740px; margin: 64px auto 0; }
-    .winddown svg { display: block; width: 100%; height: auto; }
-    .winddown .lab {
-      font-family: var(--font-sans); font-size: 11px; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase; fill: var(--tertiary-fg);
-    }
-    .winddown .wave { fill: none; stroke-linecap: round; }
-    .winddown .w1 { stroke: var(--accent-bright); stroke-width: 2.4; opacity: .85; animation: wd-drift 26s linear infinite; }
-    .winddown .w2 { stroke: var(--lilac); stroke-width: 2; opacity: .75; animation: wd-drift2 38s linear infinite; }
-    .winddown .glow { animation: wd-breathe 9s ease-in-out infinite alternate; }
-    @keyframes wd-drift  { to { transform: translateX(-80px); } }
-    @keyframes wd-drift2 { to { transform: translateX(-60px); } }
-    @keyframes wd-breathe { from { opacity: .55; } to { opacity: 1; } }
-    @media (prefers-reduced-motion: reduce) {
-      .winddown .w1, .winddown .w2, .winddown .glow { animation: none; }
-    }
-    .wd-axis {
-      display: flex; justify-content: space-between; margin-top: 2px; padding: 0 4px;
-      font-size: .74rem; font-weight: 600; color: var(--tertiary-fg);
-      letter-spacing: .14em; text-transform: uppercase; line-height: 1.6;
-    }
-    .wd-cap {
-      margin-top: 20px; text-align: center; font-family: var(--font-serif);
-      font-style: italic; font-size: 1.02rem; color: var(--muted-fg); line-height: 1.6;
-    }
-
-    /* The listen card: one real render from the app's own narration service.
-       Tap to play — audio never starts itself. */
-    .listen-card {
-      max-width: 560px; margin: 46px auto 0; padding: 20px 22px;
-      background: var(--card); border: 1px solid var(--gold-border);
-      border-radius: var(--radius); box-shadow: var(--shadow-md);
-    }
-    .listen-row { display: flex; align-items: center; gap: 16px; }
-    .listen-play {
-      flex: 0 0 auto; width: 54px; height: 54px; border-radius: 50%;
-      border: 1px solid var(--gold-border); background: rgba(232,177,92,0.13);
-      color: var(--accent-bright); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .2s, transform .2s;
-    }
-    .listen-play:hover { background: rgba(232,177,92,0.22); transform: scale(1.04); }
-    .listen-play svg { width: 24px; height: 24px; }
-    .listen-play .i-pause { display: none; }
-    .listen-play.playing .i-play { display: none; }
-    .listen-play.playing .i-pause { display: block; }
-    .listen-meta { flex: 1; min-width: 0; }
-    .listen-title { font-family: var(--font-serif); font-weight: 600; font-size: 1.08rem; }
-    .listen-sub { color: var(--muted-fg); font-size: 0.88rem; margin-top: 2px; }
-    .listen-bar {
-      margin-top: 10px; height: 4px; border-radius: 2px;
-      background: rgba(243,239,230,0.12); overflow: hidden;
-    }
-    .listen-bar i {
-      display: block; width: 0%; height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-bright));
-      border-radius: 2px;
-    }
-    .listen-time { flex: 0 0 auto; color: var(--tertiary-fg); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
-    .listen-card .wd-cap { margin-top: 16px; font-size: 0.92rem; }
-
-    /* The ambient card: excerpts of the recordings the app bundles
-       (Nightshelf/AmbientLoops at the shipped commit), grouped Nature and
-       Music like the app's Music & sounds sheet. When re-cutting, decode the
-       stereo loops as interleaved pairs and check duration and spectral
-       centroid before encoding (an earlier mono read played an octave low). */
-    .ambient-card {
-      max-width: 560px; margin: 20px auto 0; padding: 20px 22px;
-      background: var(--card); border: 1px solid var(--border-strong);
-      border-radius: var(--radius); box-shadow: var(--shadow-md);
-    }
-    .ambient-head { margin-bottom: 14px; }
-    /* Two even columns, as in the app's own grid: eight nature sounds make
-       four full rows and the two pieces of music one, at every width. */
-    .ambient-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .amb-group {
-      margin: 14px 0 8px; color: var(--tertiary-fg);
-      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
-    }
-    .ambient-head + .amb-group { margin-top: 0; }
-    .amb-btn {
-      min-width: 0; min-height: 44px;
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 10px 14px; border-radius: 999px;
-      border: 1px solid var(--gold-border); background: rgba(232,177,92,0.10);
-      color: var(--accent-bright); font-family: var(--font-sans);
-      font-weight: 600; font-size: 0.92rem; cursor: pointer;
-      transition: background .2s, color .2s, transform .2s;
-    }
-    .amb-btn:hover { background: rgba(232,177,92,0.20); transform: translateY(-1px); }
-    .amb-btn svg { width: 18px; height: 18px; flex: 0 0 auto; }
-    .amb-btn.playing { background: var(--accent); color: var(--ink); border-color: var(--accent); }
-    /* Phones: keep every name on one line ("Evening Strings" wrapped at 375px). */
-    @media (max-width: 420px) {
-      .ambient-card { padding: 18px 14px; }
-      .amb-btn { padding: 10px 8px; gap: 6px; font-size: 0.86rem; white-space: nowrap; }
-      .amb-btn svg { width: 16px; height: 16px; }
-    }
-    @media (max-width: 350px) {
-      .ambient-card { padding: 16px 10px; }
-      .ambient-row { gap: 8px; }
-      .amb-btn { padding: 10px 6px; gap: 5px; font-size: 0.8rem; }
-      .amb-btn svg { width: 14px; height: 14px; }
-    }
-    .ambient-card .listen-bar { margin-top: 14px; }
-    .ambient-card .wd-cap { margin-top: 14px; font-size: 0.9rem; }
 
 
-    /* ====================== FREE / PRO SHELF ========================
-       An illustrative shelf of spines, with free and Pro choices.
-       This decoration is not a count or proportion of the current catalog.
-       Static by default; the glow is progressive enhancement. */
-    .shelfviz { max-width: 740px; margin: 56px auto 0; }
-    .shelfviz svg { display: block; width: 100%; height: auto; }
-    .shelfviz .lab {
-      font-family: var(--font-sans); font-size: 11px; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase; fill: var(--tertiary-fg);
-    }
-    .shelfviz .spines { fill: none; stroke-width: 6; stroke-linecap: round; }
-    .shelfviz .free { stroke: var(--accent-bright); animation: shelf-glow 8s ease-in-out infinite alternate; }
-    .shelfviz .pro { stroke: rgba(243,239,230,0.17); }
-    @keyframes shelf-glow { from { opacity: .74; } to { opacity: 1; } }
-    @media (prefers-reduced-motion: reduce) { .shelfviz .free { animation: none; } }
-    .shelf-axis {
-      display: flex; margin-top: 2px;
-      font-size: .74rem; font-weight: 600; color: var(--tertiary-fg);
-      letter-spacing: .14em; text-transform: uppercase; line-height: 1.6;
-    }
-    .shelf-axis .a { flex: 0 0 21%; text-align: center; color: var(--accent-bright); }
-    .shelf-axis .b { flex: 1 1 auto; text-align: center; }
-
-    /* ======================= SCROLL REVEAL ========================== */
-    .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
-    .reveal.in { opacity: 1; transform: none; }
-    @media (prefers-reduced-motion: reduce) { .js .reveal { opacity: 1; transform: none; transition: none; } }
-
-    /* ===================== SIBLING PRODUCT STRIP ==================== */
-    @media (max-width: 640px) {
-    }
-  </style>
 
 <script type="application/ld+json">
 {
@@ -684,33 +108,15 @@
 }
 </script>
   <script src="/v.js" defer></script>
+<link rel="stylesheet" href="nightshelf.css?v=20261007a">
 </head>
 <body>
-  <div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars2"></div></div>
-
-  <nav class="site">
-    <div class="container">
-      <a class="brand" href="#top"><img src="app-icon.png" alt="" aria-hidden="true" width="512" height="512"> Nightshelf</a>
-      <div class="links">
-        <a href="#screens">Screens</a>
-        <a href="#features">Features</a>
-        <a href="#ritual">How it works</a>
-        <a href="#faq">FAQ</a>
-        <a href="https://apps.apple.com/app/id6792761643" class="btn ghost sm" target="_blank" rel="noopener">App Store</a>
-      </div>
-      <details class="mobile-menu">
-        <summary aria-label="Open navigation">☰</summary>
-        <div class="mobile-links">
-          <a href="#screens">Screens</a>
-          <a href="#features">Features</a>
-          <a href="#ritual">How it works</a>
-          <a href="#faq">FAQ</a>
-          <a href="#get">Get the app</a>
-        </div>
-      </details>
-    </div>
-  </nav>
-
+<a class="skip-link" href="#main">Skip to content</a>
+<nav class="site-nav" aria-label="Main navigation"><div class="container nav-inner">
+<a class="brand" href="#top"><img src="app-icon.png?v=20261006" alt="" width="512" height="512"><span>Nightshelf</span></a>
+<div class="nav-links"><a href="#library">The library</a><a href="#screens">The experience</a><a href="#sound">Take a listen</a></div>
+<a class="nav-download" href="https://apps.apple.com/app/id6792761643">Get Nightshelf <span aria-hidden="true">↗</span></a>
+</div></nav>
   <section class="shared-book" id="shared-book" aria-labelledby="shared-book-title" hidden>
     <div class="container">
       <div class="shared-book-card">
@@ -731,137 +137,35 @@
   <script src="shared-book-versioned.js?v=20261005-199" defer></script>
   <script src="shared-book.js?v=20261005-versioned" defer></script>
 
-  <header class="hero" id="top">
-    <div class="container">
-      <span class="kicker">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-        Bedtime stories · <span style="text-transform:none">iOS</span>
-      </span>
-      <img src="app-icon.png" alt="The Nightshelf app icon — books stacked beneath a crescent moon" class="crest" width="512" height="512" fetchpriority="high">
-      <h1 class="grad-text">Stories to <em>drift off</em> to</h1>
-      <p class="sub">A shelf of classics, read aloud in a soft, sleepy voice with rain or firelight underneath. Nightshelf Pro adds calm new stories, written for you by AI.</p>
-      <div class="cta-row">
-        <a href="https://apps.apple.com/app/id6792761643" class="btn" target="_blank" rel="noopener">Download on the App Store</a>
-        <a href="#screens" class="btn ghost">Take a look</a>
-      </div>
-      <p class="fineprint">No account. No ads. Just goodnights.</p>
-      <div class="stat-strip">
-        
-        <div class="stat"><div class="num">Books</div><div class="lbl">Classic stories</div></div>
-        <div class="stat"><div class="num">Tales</div><div class="lbl">Short listens</div></div>
-        <div class="stat"><div class="num">Free</div><div class="lbl">Choices to try</div></div>
-      </div>
-    </div>
-  </header>
 
-  <section class="showcase" aria-label="Nightshelf on iPhone">
-    <div class="container">
-      <div class="chip-col left" aria-hidden="true">
-        <div class="float-chip"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span><span>Fades out in <strong>30 min</strong></span></div>
-        <div class="float-chip"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M7 8v8M17 8v8M3 11v2M21 11v2"/></svg></span><span>A story, <strong>read aloud</strong></span></div>
-      </div>
-      <div class="device-wrap reveal">
-        <div class="device">
-          <img src="shots/home.jpg?v=20261006-featured-b9470a8" alt="Nightshelf home — Saved for Later with The Adventures of Sherlock Holmes, Pride and Prejudice, and The Odyssey." width="840" height="1825" loading="lazy" data-allow-duplicate="true">
-        </div>
-      </div>
-      <div class="chip-col right" aria-hidden="true">
-        <div class="float-chip"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14a8 8 0 0 1 16 0M8 19c-.5-1.4-.8-3-.8-5M12 20c-.4-1.8-.6-3.8-.6-6M16 19c.5-1.4.8-3 .8-5"/></svg></span><span><strong>Rain</strong> underneath</span></div>
-        <div class="float-chip"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5V6a2 2 0 0 1 2-2h13v14H6.5a2.5 2.5 0 0 0 0 5H19"/></svg></span><span>Your place, <strong>kept</strong></span></div>
-      </div>
-    </div>
-  </section>
+<main id="main">
+<header class="hero" id="top"><div class="container hero-grid">
+<div class="hero-copy"><p class="eyebrow"><span class="little-star" aria-hidden="true">✦</span> A quieter kind of evening</p>
+<h1>Stories to<br><em>drift off</em> to</h1>
+<p class="hero-lede">Leave the day on the last page. Settle into a timeless book, a gentle voice, and the sound of rain outside.</p>
+<div class="hero-actions"><a class="button primary store-button" href="https://apps.apple.com/app/id6792761643">Get Nightshelf <span aria-hidden="true">↗</span></a><a class="text-link" href="#sound"><span aria-hidden="true">▷</span> A moment of calm</a></div>
+<p class="hero-note">Start with the free shelf. Made for iPhone.</p>
+</div>
+<div class="hero-stage" aria-label="A look inside Nightshelf"><div class="orbit orbit-one" aria-hidden="true"></div><div class="orbit orbit-two" aria-hidden="true"></div><span class="stage-star star-one" aria-hidden="true">✧</span><span class="stage-star star-two" aria-hidden="true">✦</span><p class="stage-note">Your next chapter can wait<br>until tomorrow.</p>
+<div class="device device-back"><picture class=""><source type="image/webp" srcset="shots/20261007/reader-small.webp 420w, shots/20261007/reader.webp 840w" sizes="(max-width: 600px) 70vw, 320px"><img src="shots/20261007/reader.jpg" alt="Nightshelf reader paused on The Wind in the Willows, with playback controls and a 30-minute sleep timer." width="840" height="1825" loading="eager" fetchpriority=high data-allow-duplicate="true"></picture></div>
+<div class="device device-front"><picture class=""><source type="image/webp" srcset="shots/20261007/home-small.webp 420w, shots/20261007/home.webp 840w" sizes="(max-width: 600px) 70vw, 320px"><img src="shots/20261007/home.jpg" alt="Nightshelf home with illustrated books saved for later and the bedtime story creator." width="840" height="1825" loading="eager" fetchpriority=high data-allow-duplicate="true"></picture></div>
+<div class="sleep-pill"><span aria-hidden="true">☾</span> One more chapter. A little less day.</div>
+</div></div>
+<div class="container hero-bottom"><span>CLASSICS TO COME HOME TO</span><span aria-hidden="true">✦</span><span>VOICES TO WIND DOWN WITH</span><span aria-hidden="true">✦</span><span>A PLACE KEPT FOR TOMORROW</span></div></header>
 
-  <section id="screens" aria-label="Nightshelf screenshots">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="eyebrow">The app</span>
-        <h2 class="grad-text">A closer look</h2>
-        <p>Read it, hear it, and drift off.</p>
-      </div>
-      
-      <div class="gallery-shell reveal">
-        <div class="gallery-row">
-          <figure class="shot"><div class="frame"><img src="shots/home.jpg?v=20261006-featured-b9470a8" alt="Nightshelf home — Saved for Later with The Adventures of Sherlock Holmes, Pride and Prejudice, and The Odyssey." loading="lazy" width="840" height="1825" data-allow-duplicate="true"></div><figcaption class="cap">A shelf for the night</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/reader.jpg?v=20261006-b61" alt="The Nightshelf reader paused on The Wind in the Willows, with 15-second skips, chapter progress, and a 30-minute sleep timer." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Read along, or listen</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/originals.jpg?v=20261002-b56" alt="Nightshelf Originals — 11 choices, with The Evening They Kept and The Lantern Ferry showing their listening times and AI-generated labels." loading="lazy" width="840" height="1826"></div><figcaption class="cap">Nightshelf Originals</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/ambient.jpg?v=20261006-b61" alt="Nightshelf Music & sounds — Forest Leaves selected, alongside nature sounds and Brown Noise, Pink Noise, White Noise and Fan." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Music &amp; sounds underneath</figcaption></figure>
-          <figure class="shot"><div class="frame"><img src="shots/chapters.jpg?v=20261006-b61" alt="The Wind in the Willows chapter list, showing The River Bank as Reading now and a listening time for each chapter." loading="lazy" width="840" height="1825"></div><figcaption class="cap">Skip to any chapter</figcaption></figure>
-        </div>
-      </div>
-    </div>
-  </section>
+<section class="library section" id="library"><div class="container editorial-grid">
+<div class="library-art"><div class="section-number" aria-hidden="true">01 / THE SHELF</div><div class="device library-device"><picture class=""><source type="image/webp" srcset="shots/20261007/library-small.webp 420w, shots/20261007/library.webp 840w" sizes="(max-width: 600px) 70vw, 320px"><img src="shots/20261007/library.jpg" alt="Nightshelf library showing Cinderella, Snow White, Sleeping Beauty, and classic fairy-tale collections." width="840" height="1825" loading="lazy"  data-allow-duplicate="true"></picture></div><span class="art-caption">Familiar worlds. Fresh goodnights.</span></div>
+<div class="editorial-copy"><p class="eyebrow">An old friend, or a new favorite</p><h2>A whole world.<br>A softer landing.</h2><p>Austen and adventure. Fairy tales and philosophy. Find a story for the kind of night you’re having, then pick up exactly where you left off.</p>
+<ul class="quiet-list"><li><span aria-hidden="true">01</span><div><h3>Find your kind of story</h3><p>Browse classic books, familiar tales, short listens, and AI-written Nightshelf Originals.</p></div></li><li><span aria-hidden="true">02</span><div><h3>Keep a little something for later</h3><p>Save a book to your shelf. Your reading place will be waiting when you return.</p></div></li><li><span aria-hidden="true">03</span><div><h3>Let the story come to you</h3><p>Read along or close your eyes. The on-device voice works offline; Pro adds AI narration.</p></div></li></ul>
+<a class="text-link" href="#screens">Step inside the app <span aria-hidden="true">↗</span></a>
+</div></div></section>
 
-  <section id="features" style="padding-top: 40px;">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="eyebrow">Features</span>
-        <h2 class="grad-text">Everything for a good night</h2>
-        <p>Simple and unhurried, the way bedtime should feel.</p>
-      </div>
-      <div class="features">
-        <div class="feature reveal">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="4.4" rx="1.2"/><rect x="3.5" y="9.8" width="17" height="4.4" rx="1.2"/><rect x="3.5" y="15.6" width="17" height="4.4" rx="1.2"/><line x1="6.5" y1="6.2" x2="8.2" y2="6.2"/><line x1="6.5" y1="12" x2="8.2" y2="12"/><line x1="6.5" y1="17.8" x2="8.2" y2="17.8"/></svg></div>
-          <h3>A Shelf for the Night</h3>
-          <p>Classic books, from Grimm's fairy tales to Austen, Verne and ancient philosophy. Start with the free shelf; Nightshelf Pro opens more of the library.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h12v17l-6-4-6 4z"/><path d="M9 7h6M9 10h6"/></svg></div>
-          <h3>Find a Familiar Tale</h3>
-          <p>Open Snow White, Cinderella, Sleeping Beauty and other familiar tales directly, with their own saved place. These are standalone selections from the classic collections, with running times and notes about each version's tone.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5c3-1 6-1 9 1 3-2 6-2 9-1v15c-3-1-6-1-9 1-3-2-6-2-9-1z"/><path d="M12 6v15"/></svg></div>
-          <h3>Explore a Wider Library</h3>
-          <p>Discover Frankenstein, Journey to the Centre of the Earth, Meditations and Tales from Shakespeare in the classic library. Shakespeare's stories are Charles and Mary Lamb's prose retellings; the Odyssey is Samuel Butler's prose translation.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg></div>
-          <h3>Conjure a Story</h3>
-          
-          <p>Pick a place, a mood, and a length, and AI writes you a calm new bedtime story, with a cover painted to match. It's called Tonight's Story, and it's part of Nightshelf Pro.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7.5" y1="20" x2="7.5" y2="13.5"/><line x1="12" y1="20" x2="12" y2="8.5"/><line x1="16.5" y1="20" x2="16.5" y2="11"/></svg></div>
-          <h3>Read Along, or Listen</h3>
-          
-          <p>The on-device voice reads every book aloud, even in airplane mode. From Nightshelf 1.9.10, Nightshelf Pro adds Mira and Rowan, two warm AI narrators.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 3.5l.6 1.9 1.9.6-1.9.6-.6 1.9-.6-1.9-1.9-.6 1.9-.6z"/></svg></div>
-          <h3>Music, Sounds &amp; Sleep Timer</h3>
-          <p>Rain, fireplace, night crickets, soft piano and more play quietly under the voice. The sleep timer fades it all out as you fall asleep, or lets the sound play on after the story ends.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.2" r="1.3"/></svg></div>
-          <h3>Private by Design</h3>
-          <p>No account, no ads, and no trackers in the app. Your reading progress, saved shelf and supported reading settings can sync through your own iCloud. Ambient sound choices and their volume stay on this device. Tonight's Story asks before anything you choose or type leaves your phone, and the <a href="privacy.html">privacy policy</a> shows exactly what the AI narrators send and where it goes.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5a4.5 4.5 0 0 1 4.5-4.5 5.5 5.5 0 0 1 10.7 1.6A4 4 0 0 1 18.5 17H8.5A4.5 4.5 0 0 1 4 12.5z"/><path d="M12 11v5"/><path d="M9.8 13.8L12 16l2.2-2.2"/></svg></div>
-          <h3>Right Where You Left Off</h3>
-          <p>Every story remembers your place, so tomorrow's chapter starts exactly where tonight's ended. With iCloud, it follows you to a new phone.</p>
-        </div>
-      </div>
-      
-      <figure class="shelfviz reveal">
-        <svg viewBox="0 0 770 150" aria-hidden="true" focusable="false">
-          <text class="lab" x="14" y="20">A shelf for the night</text>
-          <path class="spines free" d="M20 108V48M43 108V36M66 108V52M89 108V44M112 108V56M135 108V39M158 108V50M181 108V48"/>
-          <path class="spines pro" d="M235 108V48M260 108V36M285 108V52M310 108V44M335 108V56M360 108V39M385 108V50M410 108V48M435 108V48M460 108V36M485 108V52M510 108V44M535 108V56M560 108V39M585 108V50M610 108V48M635 108V48M660 108V36M685 108V52M710 108V44"/>
-          <rect x="8" y="111" width="754" height="3" rx="1.5" fill="rgba(243,239,230,0.20)"/>
-          <path d="M20 124H181" stroke="rgba(232,177,92,0.45)" stroke-width="2" stroke-linecap="round" fill="none"/>
-          <path d="M235 124H710" stroke="rgba(243,239,230,0.14)" stroke-width="2" stroke-linecap="round" fill="none"/>
-          <circle cx="196" cy="18" r="1.2" fill="rgba(243,239,230,0.45)"/>
-          <circle cx="452" cy="26" r="1.1" fill="rgba(154,140,214,0.45)"/>
-          <circle cx="700" cy="14" r="1.3" fill="rgba(246,200,119,0.4)"/>
-        </svg>
-        
-        <div class="shelf-axis" aria-hidden="true"><span class="a">Free</span><span class="b">With Pro</span></div>
-        <figcaption class="wd-cap">Choose from classic books, AI-written Nightshelf Originals and selected tales. The selected tales also appear in their source collections; they are not additional books. Prepared texts download with the app. Availability and free or Pro access are shown in your installed version; see <a href="#editions">edition details</a> for the formats and source credits.</figcaption>
-      </figure>
+<section class="experience section" id="screens"><div class="container"><div class="section-header"><div><p class="eyebrow">Made for the last minutes of the day</p><h2>Less to do.<br>More to drift into.</h2></div><p>Choose a story. Make the room your own.<br>Let Nightshelf take it from there.</p></div>
+<div class="gallery-controls"><p>Inside Nightshelf <span>· Screens from version 1.9.10</span></p><div><button type="button" class="gallery-prev circle-button" aria-label="Previous app screens">←</button><button type="button" class="gallery-next circle-button" aria-label="Next app screens">→</button></div></div>
+<div class="screen-gallery" tabindex="0" role="region" aria-label="Nightshelf app screenshots; scroll to explore">
+<figure class="screen-card"><div class="device"><a class="screen-open" href="shots/20261007/home.jpg" target="_blank" rel="noopener" aria-label="View full-size screenshot: Nightshelf home with illustrated books saved for later and the bedtime story creator."><picture class=""><source type="image/webp" srcset="shots/20261007/home-small.webp 420w, shots/20261007/home.webp 840w" sizes="(max-width: 600px) 70vw, 320px"><img src="shots/20261007/home.jpg" alt="Nightshelf home with illustrated books saved for later and the bedtime story creator." width="840" height="1825" loading="lazy"  data-allow-duplicate="true"></picture></a></div><figcaption><span class="caption-number">01</span><h3>A shelf that feels like yours</h3><p>Keep favorites close and find something for tonight.</p></figcaption></figure><figure class="screen-card"><div class="device"><a class="screen-open" href="shots/20261007/reader.jpg" target="_blank" rel="noopener" aria-label="View full-size screenshot: Nightshelf reader paused on The Wind in the Willows, with playback controls and a 30-minute sleep timer."><picture class=""><source type="image/webp" srcset="shots/20261007/reader-small.webp 420w, shots/20261007/reader.webp 840w" sizes="(max-width: 600px) 70vw, 320px"><img src="shots/20261007/reader.jpg" alt="Nightshelf reader paused on The Wind in the Willows, with playback controls and a 30-minute sleep timer." width="840" height="1825" loading="lazy"  data-allow-duplicate="true"></picture></a></div><figcaption><span class="caption-number">02</span><h3>Your story. Your pace.</h3><p>Read along, listen, and let the sleep timer fade out.</p></figcaption></figure><figure class="screen-card"><div class="device"><a class="screen-open" href="shots/20261007/voices.jpg" target="_blank" rel="noopener" aria-label="View full-size screenshot: Nightshelf voice picker with Mira and Rowan AI narrators and installed device voice options."><picture class=""><source type="image/webp" srcset="shots/20261007/voices-small.webp 420w, shots/20261007/voices.webp 840w" sizes="(max-width: 600px) 70vw, 320px"><img src="shots/20261007/voices.jpg" alt="Nightshelf voice picker with Mira and Rowan AI narrators and installed device voice options." width="840" height="1825" loading="lazy"  data-allow-duplicate="true"></picture></a></div><figcaption><span class="caption-number">03</span><h3>Find your evening voice</h3><p>Mira and Rowan bring a different warmth to the page.</p></figcaption></figure><figure class="screen-card"><div class="device"><a class="screen-open" href="shots/20261007/sounds.jpg" target="_blank" rel="noopener" aria-label="View full-size screenshot: Nightshelf Music and sounds showing nature recordings and noise options."><picture class=""><source type="image/webp" srcset="shots/20261007/sounds-small.webp 420w, shots/20261007/sounds.webp 840w" sizes="(max-width: 600px) 70vw, 320px"><img src="shots/20261007/sounds.jpg" alt="Nightshelf Music and sounds showing nature recordings and noise options." width="840" height="1825" loading="lazy"  data-allow-duplicate="true"></picture></a></div><figcaption><span class="caption-number">04</span><h3>A little atmosphere</h3><p>Rain, leaves, music, and more, beneath the story.</p></figcaption></figure><figure class="screen-card"><div class="device"><a class="screen-open" href="shots/20261007/story.jpg" target="_blank" rel="noopener" aria-label="View full-size screenshot: Nightshelf Bedtime Story form with language, story idea, mood and length controls."><picture class=""><source type="image/webp" srcset="shots/20261007/story-small.webp 420w, shots/20261007/story.webp 840w" sizes="(max-width: 600px) 70vw, 320px"><img src="shots/20261007/story.jpg" alt="Nightshelf Bedtime Story form with language, story idea, mood and length controls." width="840" height="1825" loading="lazy"  data-allow-duplicate="true"></picture></a></div><figcaption><span class="caption-number">05</span><h3>Something only for tonight</h3><p>Choose an idea and mood. Pro writes a new story with AI.</p></figcaption></figure></div><p class="gallery-footnote">Tap a screen to see it up close. Some features require Nightshelf Pro. Availability follows your installed version.</p></div></section>
 
-      <figure class="listen-card reveal" id="listen">
+<section class="sound-section section" id="sound"><div class="container"><div class="sound-heading"><p class="eyebrow">A small preview of a quieter night</p><h2>Don’t just picture it.<br><em>Listen.</em></h2><p>A warm narrator. Rain at the window. Find what feels like winding down to you.</p></div><div class="sound-players">      <figure class="listen-card reveal" id="listen">
         <div class="listen-row">
           <button type="button" class="listen-play" id="listen-play" aria-label="Play the narration sample">
             <svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
@@ -932,63 +236,22 @@
         <div class="listen-bar" aria-hidden="true"><i id="ambient-fill"></i></div>
         <audio id="ambient-audio" preload="none"></audio>
         <figcaption class="wd-cap">Each sample is an excerpt of a recording that ships inside the app: eight nature soundscapes from the field recordists credited below, and two pieces of sleep music made for Nightshelf. The app also generates brown, pink and white noise and a steady fan as you listen. All fourteen sounds are free and play offline.</figcaption>
-      </figure>
-    </div>
-  </section>
+      </figure></div><p id="audio-status" class="audio-status" role="status" aria-live="polite"></p></div></section>
 
-  <section id="ritual" style="padding-top: 20px;">
+<section class="ritual-section section" id="ritual"><div class="container"><p class="eyebrow">Your evening, unhurried</p><h2>Three little steps.<br>Nowhere else to be.</h2><div class="ritual">
+<article><span>01</span><h3>Find your story</h3><p>Return to a familiar world, or follow your curiosity somewhere new.</p></article>
+<article><span>02</span><h3>Settle into the sound</h3><p>Choose a voice, add a soundscape, and set a sleep timer.</p></article>
+<article><span>03</span><h3>Leave the rest for tomorrow</h3><p>Let the narration fade. Your place stays, even when you drift.</p></article>
+</div></div></section>
+<section class="features-section section" id="features"><div class="container"><div class="section-header"><div><p class="eyebrow">A little more room to wander</p><h2>Begin with the free shelf.</h2></div><p>Keep it simple, or open up more<br>with Nightshelf Pro.</p></div><div class="plan-grid">
+<article class="plan"><p class="eyebrow">Included, from the first night</p><h3>Your quiet essentials</h3><p>Start with free classic books, selected tales, and Nightshelf Originals.</p><ul><li>On-device narration</li><li>Every soundscape and piece of sleep music</li><li>Sleep timer and screen dimming</li><li>Saved places and a shelf for later</li></ul><a class="text-link" href="https://apps.apple.com/app/id6792761643">Find your first story <span aria-hidden="true">↗</span></a></article>
+<article class="plan pro"><p class="eyebrow">Nightshelf Pro</p><h3>A wider world of goodnights</h3><p>Explore more of the library and make the evening a little more your own.</p><ul><li>More classic books and selected tales</li><li>Mira and Rowan AI narrators, from 1.9.10</li><li>Personal AI-written bedtime stories</li><li>Longer 90- and 120-minute sleep timers</li></ul><p class="plan-note">Plans and current prices are shown in the app.</p></article>
+</div></div></section>
+  <section id="faq" >
     <div class="container">
-      <div class="section-head reveal">
-        <span class="eyebrow">The ritual</span>
-        <h2 class="grad-text">A little ritual, every night</h2>
-        <p>For the quiet minutes before sleep.</p>
-      </div>
-      <div class="ritual">
-        <div class="step reveal"><div class="n">1</div><h3>Open your shelf</h3><p>Last night's book is waiting on top.</p></div>
-        <div class="step reveal"><div class="n">2</div><h3>Press play</h3><p>A warm voice reads aloud while rain or firelight murmurs underneath.</p></div>
-        <div class="step reveal"><div class="n">3</div><h3>Drift off</h3><p>The sleep timer fades the story out and holds your place till tomorrow.</p></div>
-      </div>
-      <figure class="winddown reveal">
-        <svg viewBox="0 0 720 230" aria-hidden="true" focusable="false">
-          <defs>
-            <linearGradient id="wdDim" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#0B0E19" stop-opacity="0"/>
-              <stop offset=".55" stop-color="#0B0E19" stop-opacity=".55"/>
-              <stop offset="1" stop-color="#0B0E19" stop-opacity="1"/>
-            </linearGradient>
-            <radialGradient id="wdGlow">
-              <stop offset="0" stop-color="#F6C877" stop-opacity=".32"/>
-              <stop offset="1" stop-color="#F6C877" stop-opacity="0"/>
-            </radialGradient>
-          </defs>
-          <text class="lab" x="40" y="34">The story</text>
-          <rect x="40" y="48" width="430" height="4" rx="2" fill="rgba(243,239,230,0.30)"/>
-          <rect x="40" y="60" width="470" height="4" rx="2" fill="rgba(243,239,230,0.22)"/>
-          <rect x="40" y="72" width="390" height="4" rx="2" fill="rgba(243,239,230,0.27)"/>
-          <text class="lab" x="40" y="104">A warm voice</text>
-          <path class="wave w1" d="M-80 126q20 -14 40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0t40 0"/>
-          <text class="lab" x="40" y="170">Rain or firelight</text>
-          <path class="wave w2" d="M-60 190q15 -9 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0"/>
-          <rect x="360" y="0" width="360" height="230" fill="url(#wdDim)"/>
-          <circle class="glow" cx="644" cy="112" r="54" fill="url(#wdGlow)"/>
-          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" transform="translate(615 83) scale(2.4)" fill="#F6C877"/>
-          <circle cx="560" cy="38" r="1.3" fill="rgba(243,239,230,0.5)"/>
-          <circle cx="688" cy="58" r="1.1" fill="rgba(243,239,230,0.38)"/>
-          <circle cx="604" cy="170" r="1.2" fill="rgba(243,239,230,0.32)"/>
-        </svg>
-        <div class="wd-axis" aria-hidden="true"><span>Press play</span><span>Drift off</span></div>
-        <figcaption class="wd-cap">As the sleep timer ends, voice and room fade out together.</figcaption>
-      </figure>
-      <p class="fleuron" aria-hidden="true">✦ ✦ ✦</p>
-    </div>
-  </section>
-
-  
-  <section id="faq" style="padding-top: 20px;">
-    <div class="container">
-      <div class="section-head reveal">
+      <div class="section-head">
         <span class="eyebrow">Common questions</span>
-        <h2 class="grad-text">FAQ</h2>
+        <h2>A few things before you settle in.</h2>
       </div>
       <div class="faq-list reveal">
         <details class="faq">
@@ -1019,108 +282,9 @@
     </div>
   </section>
 
-  <section id="get" style="padding-top: 20px;">
-    <div class="container">
-      <div class="cta-band reveal">
-        <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-        <h2 class="grad-text">Drift off tonight</h2>
-        
-        <p>A bedtime story, read aloud, every night. Start with the free shelf.</p>
-        <div class="cta-row">
-          <a href="https://apps.apple.com/app/id6792761643" class="btn" target="_blank" rel="noopener">Download on the App Store</a>
-          <a href="privacy.html" class="btn ghost">Privacy</a>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <footer class="site">
-    <div class="container">
-      <a class="brand" href="#top"><img src="app-icon.png" alt="" aria-hidden="true" width="512" height="512" loading="lazy"> Nightshelf</a>
-      <div class="flinks">
-        <a href="privacy.html">Privacy</a>
-        <a href="terms.html">Terms</a>
-        <a href="support.html">Support</a>
-        <a href="#features">Features</a>
-        
-      </div>
-      
-      <div class="credits">Field recordings: rain by chromakei, fireplace by BonnyOrbit, thunder by TRP and bastipictures, wind by barkenov, ocean by jackmichaelking, stream by Tom_Kaszuba, night crickets by OwlStorm, forest leaves by bone666138 — shared on <a href="https://freesound.org/" target="_blank" rel="noopener">Freesound</a> under <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0</a> and edited into Nightshelf's soundscapes. Moonlit Piano and Evening Strings were created for Nightshelf with Lyria 3 Pro through Runway, then edited and mastered as quiet instrumental loops. The brown, pink and white noise and the fan are generated by the app itself.</div>
-      <div class="copy">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Nightshelf — made for quiet evenings and soft goodnights.</div>
-    </div>
-  </footer>
-
-  <script>
-    (function () {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
-        return;
-      }
-      if (!('IntersectionObserver' in window)) {
-        document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
-        return;
-      }
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-      }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
-      document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-    })();
-  </script>
-  <script>
-    /* The listen card. Play/pause on tap only — audio never starts itself. */
-    (function () {
-      var audio = document.getElementById('listen-audio');
-      var btn = document.getElementById('listen-play');
-      var fill = document.getElementById('listen-fill');
-      var time = document.getElementById('listen-time');
-      if (!audio || !btn) return;
-      function fmt(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
-      btn.addEventListener('click', function () {
-        if (audio.paused) { audio.play().catch(function () {}); } else { audio.pause(); }
-      });
-      audio.addEventListener('play', function () { btn.classList.add('playing'); btn.setAttribute('aria-label', 'Pause the narration sample'); });
-      audio.addEventListener('pause', function () { btn.classList.remove('playing'); btn.setAttribute('aria-label', 'Play the narration sample'); });
-      audio.addEventListener('timeupdate', function () {
-        if (audio.duration) {
-          fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
-          time.textContent = fmt(audio.duration - audio.currentTime);
-        }
-      });
-      audio.addEventListener('ended', function () {
-        fill.style.width = '0%'; time.textContent = fmt(audio.duration || 10);
-        btn.classList.remove('playing');
-      });
-      /* The room and the narrator never talk over each other. */
-      var amb = document.getElementById('ambient-audio');
-      audio.addEventListener('play', function () { if (amb && !amb.paused) amb.pause(); });
-    })();
-
-    /* The ambient card. Tap a soundscape to hear it; tap it again to stop. */
-    (function () {
-      var amb = document.getElementById('ambient-audio');
-      var fill = document.getElementById('ambient-fill');
-      var narr = document.getElementById('listen-audio');
-      if (!amb) return;
-      var btns = document.querySelectorAll('.amb-btn');
-      var active = null;
-      function clear() { btns.forEach(function (b) { b.classList.remove('playing'); }); }
-      btns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var src = btn.getAttribute('data-audio');
-          if (active === btn && !amb.paused) { amb.pause(); return; }
-          if (narr && !narr.paused) narr.pause();
-          if (amb.getAttribute('src') !== src) { amb.setAttribute('src', src); amb.load(); }
-          active = btn;
-          amb.play().catch(function () { clear(); });
-        });
-      });
-      amb.addEventListener('play', function () { clear(); if (active) active.classList.add('playing'); });
-      amb.addEventListener('pause', function () { clear(); });
-      amb.addEventListener('timeupdate', function () {
-        if (amb.duration) fill.style.width = (amb.currentTime / amb.duration * 100) + '%';
-      });
-      amb.addEventListener('ended', function () { clear(); fill.style.width = '0%'; });
-    })();
-  </script>
-</body>
-</html>
+<section class="closing section" id="get"><div class="container"><span class="closing-moon" aria-hidden="true">☾</span><p class="eyebrow">The day can end here</p><h2>A good story.<br>A softer goodnight.</h2><p>Your next favorite evening ritual is waiting.</p><a class="button primary" href="https://apps.apple.com/app/id6792761643">Get Nightshelf for iPhone <span aria-hidden="true">↗</span></a></div></section>
+</main>
+<footer class="site-footer"><div class="container"><div class="footer-top"><a class="brand" href="#top"><img src="app-icon.png?v=20261006" alt="" width="512" height="512">Nightshelf</a><p>Made for quiet evenings<br>and soft goodnights.</p><nav aria-label="Footer"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="support.html">Support</a><a href="#faq">Questions</a></nav></div><div class="credits">Field recordings: rain by chromakei, fireplace by BonnyOrbit, thunder by TRP and bastipictures, wind by barkenov, ocean by jackmichaelking, stream by Tom_Kaszuba, night crickets by OwlStorm, forest leaves by bone666138 — shared on <a href="https://freesound.org/" target="_blank" rel="noopener">Freesound</a> under <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0</a> and edited into Nightshelf's soundscapes. Moonlit Piano and Evening Strings were created for Nightshelf with Lyria 3 Pro through Runway, then edited and mastered as quiet instrumental loops. The brown, pink and white noise and the fan are generated by the app itself.</div><div class="copyright"><span>© 2026 <a href="https://hypersage.ai/">HyperSage AI Labs LLC</a></span><span>Good stories. Goodnight.</span></div></div></footer>
+<script src="nightshelf.js?v=20261007a" defer></script>
+</body></html>

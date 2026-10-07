@@ -133,25 +133,34 @@ for (const [id, free, collection] of [
 }
 
 const freeCount = books.filter(book => book.freeTier).length;
-assert.match(html, />Books<[^]*Classic stories/);
 assert.equal(freeCount, 19);
-assert.match(html, />Tales<[^]*Short listens/);
-assert.match(html, />Free<[^]*Choices to try/);
-assert.match(html, /selected tales also appear in their source collections/);
-const freeSpines = html.match(/class="spines free" d="([^"]+)"/)[1].match(/M/g).length;
-const proSpines = html.match(/class="spines pro" d="([^"]+)"/)[1].match(/M/g).length;
-assert.equal(freeSpines, 8);
-assert.equal(proSpines, 20);
-assert.match(html, /not a count or proportion of the current catalog/);
-assert.match(html, /standalone selections/);
+// The redesign presents capability tiers instead of a decorative spine-count chart.
+// Preserve the safety contract: no unqualified catalog totals or free AI-story claim.
+const visibleCopy = html.replace(/<script\b[^>]*>[^]*?<\/script>/gi, ' ').replace(/<[^>]+>/g, ' ');
+assert.doesNotMatch(visibleCopy, /\b\d+\s+(?:classic\s+)?(?:books|classics|tales|Originals)\b/i,
+  'marketing copy must not turn version-dependent routes into a catalog-size promise');
+const freePlan = html.match(/<article class="plan">([^]*?)<\/article>/)?.[1];
+const proPlan = html.match(/<article class="plan pro">([^]*?)<\/article>/)?.[1];
+assert.ok(freePlan && proPlan, 'free and Pro capabilities must remain distinct');
+assert.match(freePlan, /free[^]*classic books[^]*selected tales[^]*Originals/i);
+assert.match(freePlan, /On-device narration/i);
+assert.match(proPlan, /Nightshelf Pro[^]*AI narrators[^]*AI-written bedtime stories/i);
+assert.match(html, /which choices are free and which are included with Pro/i);
+assert.match(html, /Some features require Nightshelf Pro/i);
+assert.match(html, /Availability follows your installed version/i);
 assert.match(html, /More options → About this book/);
+for (const shot of ['home', 'library', 'reader', 'voices', 'sounds', 'story']) {
+  const imagePath = 'shots/20261007/' + shot + '.jpg';
+  assert.ok(html.includes('src="' + imagePath + '"'), shot + ' must use the current approved capture');
+  assert.ok(fs.existsSync(path.join(root, imagePath)), shot + ' capture must exist');
+}
 for (const name of ['index.html', 'support.html', 'terms.html', 'privacy.html']) {
   const page = fs.readFileSync(path.join(root, name), 'utf8');
   assert.doesNotMatch(page, /\b(?:82(?: complete)? (?:books|classics|works)|eighty-two|eighty(?:-one)?|seventy-seven|(?:thirteen|fifteen)(?: of| free)|fourteen(?: of| free)|sixty-four|sixty-six|sixty-nine)\b/i,
     name + ' must not advertise the retired catalog counts');
   assert.doesNotMatch(page, /(?:93 classic|ninety-three|nineteen of|other seventy-four|complete text|complete selections|About this edition)/i, name + ' must not overstate catalog counts or editions');
   for (const image of page.matchAll(/nightshelf\/og-image\.png\?v=([^"\s]+)/g)) {
-    assert.equal(image[1], '20261005-neutral', name + ' must show the neutral OG card');
+    assert.equal(image[1], '20261007-redesign', name + ' must show the current generated OG card');
   }
 }
-console.log(`PASS: ${books.length} shared books + ${selections.length} tales + ${originals.length} Originals, ${rejected.length} rejected queries, live catalog routes,46 version-qualified cards and neutral landing copy`);
+console.log(`PASS: ${books.length} shared books + ${selections.length} tales + ${originals.length} Originals, ${rejected.length} rejected queries, live catalog routes,46 version-qualified cards and version-qualified free/Pro landing copy`);

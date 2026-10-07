@@ -62,7 +62,7 @@ try:
             for held in ['peter_pan', 'irish_fairy_tales', 'pinocchio', 'custom_private']:
                 page.goto(base + '?book=' + held, wait_until='networkidle')
                 assert page.locator('#shared-book').is_hidden()
-            assert page.locator('h1').inner_text() == 'Stories to drift off to'
+            assert ' '.join(page.locator('h1').inner_text().split()) == 'Stories to drift off to'
             page.goto(base, wait_until='networkidle')
             assert page.locator('#shared-book').is_hidden()
             if captures:

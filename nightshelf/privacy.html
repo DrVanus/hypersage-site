@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#0C0F1A">
+  <meta name="theme-color" content="#0c101b">
   <title>Privacy Policy — Nightshelf</title>
   <meta name="description" content="Privacy Policy for the Nightshelf reading app.">
   <link rel="canonical" href="https://hypersage.ai/nightshelf/privacy.html">
@@ -14,93 +14,56 @@
   <meta property="og:description" content="Privacy Policy for the Nightshelf reading app.">
   <meta property="og:url" content="https://hypersage.ai/nightshelf/privacy.html">
   <meta property="og:site_name" content="Nightshelf">
-  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261005-neutral">
+  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261007-redesign">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261005-neutral">
+  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261007-redesign">
   <link rel="icon" type="image/png" href="app-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg:#0B0E19; --fg:#F3EFE6; --muted:#B7B2C4; --tertiary:#837E93;
-      --accent:#E8B15C; --accent-bright:#F6C877; --accent-deep:#C68B36;
-      --border:rgba(243,239,230,0.08); --border-strong:rgba(243,239,230,0.16);
-      --gold-border:rgba(232,177,92,0.38);
-    }
-    html { background: var(--bg); color-scheme: dark; scroll-behavior: smooth; }
-    body {
-      font-family:'Inter',-apple-system,system-ui,sans-serif; background:var(--bg); color:var(--fg);
-      line-height:1.75; -webkit-font-smoothing:antialiased; position:relative;
-    }
-    body::before {
-      content:''; position:absolute; inset:0 0 auto 0; height:60vh; pointer-events:none;
-      background:
-        radial-gradient(ellipse 62% 50% at 14% -8%, rgba(232,177,92,0.12), transparent 62%),
-        radial-gradient(ellipse 55% 45% at 90% -4%, rgba(154,140,214,0.10), transparent 64%);
-    }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 90px; position:relative; }
-    .top { display:flex; align-items:center; gap:12px; margin-bottom: 52px; }
-    .top img { width:36px; height:36px; border-radius:10px; box-shadow:0 0 0 1px var(--border-strong), 0 4px 14px rgba(0,0,0,0.5); }
-    .top a { font-family:'Fraunces',serif; font-weight:600; color:var(--fg); text-decoration:none; font-size:1.3rem; line-height:1.3; }
-    h1 {
-      font-family:'Fraunces',serif; font-weight:600; font-size:clamp(2.1rem,5vw,2.7rem); line-height:1.2;
-      background-image:linear-gradient(178deg,#FBF6EA 4%,var(--accent-bright) 70%,var(--accent-deep) 108%);
-      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
-      padding-bottom:0.22em; margin-bottom:-0.10em;  /* descender-safe gradient text */
-    }
-    .updated { color:var(--tertiary); font-size:.9rem; margin-bottom:38px; }
-    h2 {
-      font-family:'Fraunces',serif; font-weight:600; font-size:1.32rem; line-height:1.4;
-      margin:40px 0 12px; color:var(--fg); padding-top:18px; position:relative;
-    }
-    h2::before {
-      content:''; position:absolute; top:0; left:0; width:44px; height:1px;
-      background:linear-gradient(90deg, var(--accent), transparent);
-    }
-    p, li { color:var(--muted); margin-bottom:14px; font-size:.99rem; }
-    li { margin-bottom:12px; }
-    ul { padding-left: 22px; }
-    strong { color:var(--fg); font-weight:600; }
-    /* Server hostnames are read as literals, not prose — a reviewer should be
-       able to tell where the words actually go at a glance. */
-    code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em;
-      color: var(--fg); background: rgba(243,239,230,0.06);
-      border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px;
-    }
-    a { color: var(--accent-bright); text-decoration:none; }
-    a:hover { color: var(--accent); }
-    ::selection { background: rgba(232,177,92,0.28); color: var(--fg); }
-    .back {
-      display:inline-flex; align-items:center; gap:8px; margin-top:44px; padding:11px 22px;
-      color:var(--accent-bright); text-decoration:none; font-weight:600; font-size:.95rem; line-height:1.5;
-      border:1px solid var(--gold-border); border-radius:999px; background:rgba(232,177,92,0.05);
-      transition:background .2s ease;
-    }
-    .back:hover { background:rgba(232,177,92,0.13); color:var(--accent-bright); }
-  </style>
+  <link rel="stylesheet" href="legal-refresh.css?v=20261007">
   <script src="/v.js" defer></script>
 </head>
-<body>
-  <div class="wrap">
-    <div class="top"><img src="app-icon.png" alt="Nightshelf"><a href="index.html">Nightshelf</a></div>
+<body class="legal-page">
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="legal-header">
+    <a class="brand" href="./"><img src="app-icon.png?v=20261007" width="40" height="40" alt=""><span>Nightshelf</span></a>
+    <nav aria-label="Nightshelf information"><a href="support.html">Support</a><a href="privacy.html" aria-current="page">Privacy</a><a href="terms.html">Terms</a></nav>
+    <a class="back-home" href="./">Back to the app <span aria-hidden="true">↗</span></a>
+  </header>
+  <div class="reading-layout">
+    <aside class="contents" aria-label="On this page">
+      <details class="contents-disclosure" open>
+      <summary class="contents-label">On this page <span aria-hidden="true">⌄</span></summary>
+      <nav aria-label="Page contents">
+          <a href="#what-stays-on-your-device">What stays on your device</a>
+          <a href="#what-leaves-your-device-and-why">What leaves your device, and why</a>
+          <a href="#where-it-goes-three-stops-not-two">Where it goes: three stops, not two</a>
+          <a href="#what-our-server-keeps">What our server keeps</a>
+          <a href="#purchases">Purchases</a>
+          <a href="#premium-system-voices">Premium system voices</a>
+          <a href="#data-sharing">Data sharing</a>
+          <a href="#children-s-privacy">Children&#x27;s privacy</a>
+          <a href="#this-website">This website</a>
+          <a href="#contact">Contact</a>
+      </nav>
+      </details>
+      <a class="contents-contact" href="mailto:support@hypersage.ai">Email support <span aria-hidden="true">↗</span></a>
+    </aside>
+    <main id="content" tabindex="-1">
+      <p class="eyebrow">Your privacy</p>
     <h1>Privacy Policy</h1>
     <div class="updated">Last updated: October 6, 2026</div>
 
     <p>Nightshelf ("the app", "we", "us") is a bedtime-story app for iOS. It is built to know as little about you as possible. There is <strong>no account, no sign-in, no analytics SDK, no third-party tracker, and no advertising</strong>. This policy explains the little that's left.</p>
 
-    <h2>What stays on your device</h2>
+    <h2 id="what-stays-on-your-device">What stays on your device</h2>
     <ul>
       <li><strong>Your shelf and progress</strong> — which stories you've opened, your saved shelf, your place in each one, and supported bedtime settings (voice, speed and sleep timer). These live on your device and can sync between your own devices through Apple's private iCloud key-value storage. Ambient sound choices and their volume stay on this device. Nightshelf keeps no server copy of your synced progress.</li>
       <li><strong>On-device narration</strong> — the built-in iOS voice synthesizes every word on your phone, and it never needs a connection.</li>
       <li><strong>The welcome narration</strong> — from Nightshelf 1.9.3, a small record on this iPhone of how much of the welcome you've heard: how many characters have been sent to be read, when the welcome began and ended and why, and when it may try again if the narrator couldn't be reached. From 1.9.10 the welcome voice is Mira; earlier versions use Nova. The same record and allowance carry over when you update. It is kept in this iPhone's Keychain, so deleting and reinstalling Nightshelf does not play the welcome again. It is not copied to your other devices or to a new iPhone, and it is never sent to our server. Nightshelf Pro does not use it.</li>
     </ul>
 
-    <h2>What leaves your device, and why</h2>
+    <h2 id="what-leaves-your-device-and-why">What leaves your device, and why</h2>
     <p>From Nightshelf 1.9.3, the books that come with Nightshelf can be read by an AI narrator without asking first, and this is on from the start: Automatic is the starting voice and AI narrators start on (unless you said no to Nightshelf's cloud features in an earlier version), so the first time you play one of those books on an iPhone, the welcome narrator starts reading: Mira in 1.9.10, Nova in earlier versions. The paragraph being read and a small amount ahead go to Nightshelf's server, which asks OpenAI to voice them; the exact buffering is described below. OpenAI gets only that text, the narrator's name and a reading-style note — no ID, and nothing you typed. Nightshelf's server sees your internet address, as any website does, and keeps a scrambled daily character count to limit use. You can turn this off in Settings → AI features. Tonight's Story and the stories you made are different: Nightshelf asks before anything you choose or type leaves your phone. In Nightshelf 1.9.2 and earlier, every cloud narration asks first as well, including the books that come with Nightshelf; once allowed, it sends the same text. The details are below, along with two smaller things that go out without asking: tapping ▶ to audition a narrator, and a check at launch that carries no text.</p>
     <ul>
       <li><strong>AI narrators reading Nightshelf's books (from Nightshelf 1.9.3)</strong> — in Nightshelf 1.9.10, the two AI narrators are Mira and Rowan. Mira is the starting voice for Automatic and the welcome; earlier versions offer six narrators and use Nova for Automatic and the welcome. With Nightshelf Pro, the narrator you choose reads. Without Pro, the welcome reads your first few minutes of Nightshelf's books once on each iPhone, when your voice is set to Automatic; then, at the end of a paragraph, your iPhone's own voice carries on, offline. The current paragraph and the next one are sent to be turned into audio. With Pro in 1.9.10, up to two more short paragraphs can be sent early to reduce waits between paragraphs. The welcome still fetches only the next paragraph ahead, and changing its narrator does not restart the welcome allowance. Welcome requests carry no device ID and no receipt; a Pro request carries the ID and receipt described below. <strong>Settings → AI features → AI narrators for Nightshelf's books</strong> turns this off, and your iPhone's voice then reads every book that comes with Nightshelf, offline. The switch syncs with your other settings through your iCloud. If you said no when Nightshelf asked about its cloud features in an earlier version, on this iPhone or on an iPhone whose backup this one was restored from, the switch starts off, and because it syncs, it is then off on your other devices too. No text of Nightshelf's books is sent for narration when you have chosen a particular iPhone voice, when AI narrators are off, or, without Pro, once the welcome minutes are done. If your iPhone's voice is only standing in for an AI narrator that was interrupted, the paragraphs ahead can still be sent, so the narrator can pick the story back up.</li>
@@ -108,7 +71,7 @@
       <li><strong>Auditioning a narrator.</strong> Tapping ▶ beside a narrator's name sends a fixed sample sentence in the selected language, written into the app itself. It travels the same road as everything else. We don't put it behind the permission because it cannot carry anything of yours — not the page you were reading, not a word you typed, not even which book you were in. It happens only when you tap ▶. Before Nightshelf 1.9.3 it carried the random device or subscription ID described below for every listener; from 1.9.3 it does so only with Nightshelf Pro.</li>
     </ul>
 
-    <h2>Where it goes: three stops, not two</h2>
+    <h2 id="where-it-goes-three-stops-not-two">Where it goes: three stops, not two</h2>
     <p>Everything travels the same road.</p>
     <ul>
       <li><strong>Nightshelf's own server</strong> first — <code>storyvault-api.fly.dev</code>, which we run and which is hosted for us by <strong>Fly.io</strong> in the United States. Your words reach us and our host before they reach anyone else.</li>
@@ -117,7 +80,7 @@
     </ul>
     <p>OpenAI and Anthropic retain text according to their own terms and applicable account arrangements. Nightshelf does not promise that either provider discards it immediately. What we can tell you is what <em>we</em> do, below.</p>
 
-    <h2>What our server keeps</h2>
+    <h2 id="what-our-server-keeps">What our server keeps</h2>
     <ul>
       <li><strong>A device or subscription ID.</strong> Nightshelf has no account or sign-in and does not require your name or email. A story detail can contain identifying information. We send that text without removing identifying details, so please leave personal information out. Each cloud request also carries a random ID that stands in for your phone. From Nightshelf 1.9.3, requests from a listener without Nightshelf Pro — the welcome and ▶ auditions — no longer carry it. The ID isn't made from anything about you, and deleting and reinstalling Nightshelf keeps the same one. If you subscribed in the app, a phone that picks up that subscription switches to the ID saved with the purchase instead, so your devices share that one ID. These records can be linked to your device or subscription, even though they do not carry your name or email. It exists so daily limits can be counted per device or subscription rather than per network — otherwise everyone behind one router would share a single limit. Counting requires keeping it: our server stores a scrambled (SHA-256) copy of that ID alongside the date, which feature was used, and a running number. No book title, no story, and none of your words are in that row. Rows more than 35 days old are deleted when the clean-up runs — but nothing runs it on a timer. It piggybacks on other traffic reaching the same server, so a row can sit there longer than 35 days, and we would rather say that than imply a schedule we haven't built.</li>
       <li><strong>A record for a subscription from an offer code.</strong> These subscriptions lack the app account token used by an in-app purchase, so our server keeps a separate record. It holds Apple's transaction IDs, the first presenting device's random ID stored as it is, and verification timestamps. A separate recent-device history keeps scrambled (SHA-256) copies of device IDs with first- and last-seen times, linked to the subscription. The history is bounded to recent devices; it is not an access limit. A device removed from that history can return with a current, valid verified receipt. The subscription's devices share one service budget. These records contain no name, email, card details or story text and are not part of the 35-day usage clean-up. Older history entries can be replaced as devices return, while the transaction record and first device's ID can remain after the subscription ends. To request release of the retained subscription record, email the address below.</li>
@@ -127,26 +90,42 @@
       <li><strong>Your IP address.</strong> Reaching our server shows it your IP, the way visiting a website does. The guest allowance uses a scrambled (SHA-256) copy of that IP. From Nightshelf 1.9.3, the welcome is counted the same way: a daily character count kept against the scrambled IP, with no device ID. The scrambling uses no secret key, so someone with access to our database could work these rows back to the address. Like the device-ID rows above, they become eligible for deletion after 35 days, but only when the clean-up runs, and nothing runs it on a timer, so a row can stay longer. Web-server access logs can also contain the client IP address, request path and response status. The app also pings the server once at launch to check it is awake: in Nightshelf 1.9.2 and earlier when a cloud narrator would read (with Pro, after you had allowed cloud narration), and from 1.9.3, without asking, when AI narrators are on and one would read Nightshelf's books — with Nightshelf Pro, or while the welcome is still open. That ping carries no text.</li>
     </ul>
 
-    <h2>Purchases</h2>
+    <h2 id="purchases">Purchases</h2>
     <p>Nightshelf Pro is bought through Apple. Apple handles the transaction and gives the app a signed receipt, so it knows you're a subscriber. The app sends that receipt to our server with its cloud requests so the server can check it; the receipt carries no name, email or card details. What the server keeps from it for a subscription redeemed with an offer code is described above. You can manage the subscription anytime in Settings → your name → Subscriptions.</p>
 
-    <h2>Premium system voices</h2>
+    <h2 id="premium-system-voices">Premium system voices</h2>
     <p>If you download Apple's Premium or Enhanced voices from iOS Settings → Accessibility → Spoken Content (Read &amp; Speak on newer iOS) → Voices, that download and those voices are handled by iOS, not by Nightshelf. From Nightshelf 1.9.2, whenever your iPhone's own voice is reading, Automatic uses the best voice installed and switches by itself when you download a better one, and you can choose any installed voice; these voices read on the phone, offline. Automatic is not always your iPhone's voice, though. With Nightshelf Pro it means Mira in 1.9.10 and Nova in earlier versions (in 1.9.2, once you had allowed cloud narration; from 1.9.3, while AI narrators are on). From 1.9.3, without Pro, Automatic uses the welcome narrator for your first few minutes once on each iPhone, as described above.</p>
 
-    <h2>Data sharing</h2>
+    <h2 id="data-sharing">Data sharing</h2>
     <p>We do not sell data and we do not share anything with advertisers. Nothing described above is used to build a profile of you or to advertise to you.</p>
 
-    <h2>Children's privacy</h2>
+    <h2 id="children-s-privacy">Children's privacy</h2>
     <p>Nightshelf is made for adults who read themselves to sleep, and the App Store lists the applicable age rating in your country or region. It is not directed to children and is not part of Apple's Kids Category. The shelf is adult literary fiction — alongside the fairy tales there is a Mystery &amp; Gothic shelf holding <em>Dracula</em>, <em>Jekyll &amp; Hyde</em>, Poe and Lovecraft — so parents should treat it the way they would a bookshelf, not a children's app.</p>
     <p>No account or sign-in is required, and Nightshelf does not ask for your name or email address. Its cloud features process the text they read aloud or that you choose to send, and the identifiers described above. Please do not enter personal details about a child in a story prompt. We do not knowingly collect personal information from children under 13. If you believe a child has sent us personal information through Nightshelf, email support@hypersage.ai so we can investigate and delete any such information we retain.</p>
 
-    <h2>This website</h2>
+    <h2 id="this-website">This website</h2>
     <p>These pages at hypersage.ai/nightshelf/ are covered by the <a href="https://hypersage.ai/privacy.html#visit-counter">HyperSage AI Labs website privacy policy</a>: no cookies and no identifiers, only anonymous daily totals of page views and App Store button taps. Nothing the website counts is connected to the app.</p>
 
-    <h2>Contact</h2>
+    <h2 id="contact">Contact</h2>
     <p>Questions about this policy? Email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>.</p>
 
-    <a class="back" href="index.html">← Back to Nightshelf</a>
+
+      <a class="back" href="./">← Back to Nightshelf</a>
+    </main>
   </div>
+  <footer class="legal-footer">
+    <a class="footer-brand" href="./">Nightshelf <span>Stories to drift off to.</span></a>
+    <nav aria-label="Footer"><a href="support.html">Support</a><a href="privacy.html" aria-current="page">Privacy</a><a href="terms.html">Terms</a></nav>
+    <p>© 2026 HyperSage AI Labs LLC</p>
+  </footer>
+  <script>
+    (() => {
+      const contents = document.querySelector('.contents-disclosure');
+      const wide = window.matchMedia('(min-width: 701px)');
+      const setContents = () => { contents.open = wide.matches; };
+      setContents();
+      wide.addEventListener('change', setContents);
+    })();
+  </script>
 </body>
 </html>

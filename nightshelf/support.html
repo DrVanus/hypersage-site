@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#0C0F1A">
+  <meta name="theme-color" content="#0c101b">
   <title>Support — Nightshelf</title>
   
   <meta name="description" content="Help with Nightshelf — classic books read aloud until you fall asleep. Email support@hypersage.ai for anything not answered here.">
@@ -14,124 +14,100 @@
   <meta property="og:description" content="Help with Nightshelf — classic books read aloud until you fall asleep. Email support@hypersage.ai for anything not answered here.">
   <meta property="og:url" content="https://hypersage.ai/nightshelf/support.html">
   <meta property="og:site_name" content="Nightshelf">
-  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261005-neutral">
+  <meta property="og:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261007-redesign">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261005-neutral">
+  <meta name="twitter:image" content="https://hypersage.ai/nightshelf/og-image.png?v=20261007-redesign">
   <link rel="icon" type="image/png" href="app-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg:#0B0E19; --fg:#F3EFE6; --muted:#B7B2C4; --tertiary:#837E93;
-      --accent:#E8B15C; --accent-bright:#F6C877; --accent-deep:#C68B36;
-      --border:rgba(243,239,230,0.08); --border-strong:rgba(243,239,230,0.16);
-      --gold-border:rgba(232,177,92,0.38);
-    }
-    html { background: var(--bg); color-scheme: dark; scroll-behavior: smooth; }
-    body {
-      font-family:'Inter',-apple-system,system-ui,sans-serif; background:var(--bg); color:var(--fg);
-      line-height:1.75; -webkit-font-smoothing:antialiased; position:relative;
-    }
-    body::before {
-      content:''; position:absolute; inset:0 0 auto 0; height:60vh; pointer-events:none;
-      background:
-        radial-gradient(ellipse 62% 50% at 14% -8%, rgba(232,177,92,0.12), transparent 62%),
-        radial-gradient(ellipse 55% 45% at 90% -4%, rgba(154,140,214,0.10), transparent 64%);
-    }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 90px; position:relative; }
-    .top { display:flex; align-items:center; gap:12px; margin-bottom: 52px; }
-    .top img { width:36px; height:36px; border-radius:10px; box-shadow:0 0 0 1px var(--border-strong), 0 4px 14px rgba(0,0,0,0.5); }
-    .top a { font-family:'Fraunces',serif; font-weight:600; color:var(--fg); text-decoration:none; font-size:1.3rem; line-height:1.3; }
-    h1 {
-      font-family:'Fraunces',serif; font-weight:600; font-size:clamp(2.1rem,5vw,2.7rem); line-height:1.2;
-      background-image:linear-gradient(178deg,#FBF6EA 4%,var(--accent-bright) 70%,var(--accent-deep) 108%);
-      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
-      padding-bottom:0.22em; margin-bottom:-0.10em;  /* descender-safe gradient text */
-    }
-    .updated { color:var(--tertiary); font-size:.9rem; margin-bottom:38px; }
-    h2 {
-      font-family:'Fraunces',serif; font-weight:600; font-size:1.32rem; line-height:1.4;
-      margin:40px 0 12px; color:var(--fg); padding-top:18px; position:relative;
-    }
-    h2::before {
-      content:''; position:absolute; top:0; left:0; width:44px; height:1px;
-      background:linear-gradient(90deg, var(--accent), transparent);
-    }
-    p, li { color:var(--muted); margin-bottom:14px; font-size:.99rem; }
-    li { margin-bottom:12px; }
-    ul { padding-left: 22px; }
-    strong { color:var(--fg); font-weight:600; }
-    a { color: var(--accent-bright); text-decoration:none; }
-    a:hover { color: var(--accent); }
-    ::selection { background: rgba(232,177,92,0.28); color: var(--fg); }
-    .back {
-      display:inline-flex; align-items:center; gap:8px; margin-top:44px; padding:11px 22px;
-      color:var(--accent-bright); text-decoration:none; font-weight:600; font-size:.95rem; line-height:1.5;
-      border:1px solid var(--gold-border); border-radius:999px; background:rgba(232,177,92,0.05);
-      transition:background .2s ease;
-    }
-    .back:hover { background:rgba(232,177,92,0.13); color:var(--accent-bright); }
-  </style>
+  <link rel="stylesheet" href="legal-refresh.css?v=20261007">
   <script src="/v.js" defer></script>
 </head>
-<body>
-  <div class="wrap">
-    <div class="top"><img src="app-icon.png" alt="Nightshelf"><a href="index.html">Nightshelf</a></div>
+<body class="legal-page">
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="legal-header">
+    <a class="brand" href="./"><img src="app-icon.png?v=20261007" width="40" height="40" alt=""><span>Nightshelf</span></a>
+    <nav aria-label="Nightshelf information"><a href="support.html" aria-current="page">Support</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav>
+    <a class="back-home" href="./">Back to the app <span aria-hidden="true">↗</span></a>
+  </header>
+  <div class="reading-layout">
+    <aside class="contents" aria-label="On this page">
+      <details class="contents-disclosure" open>
+      <summary class="contents-label">On this page <span aria-hidden="true">⌄</span></summary>
+      <nav aria-label="Page contents">
+          <a href="#do-i-need-a-connection">Do I need a connection?</a>
+          <a href="#which-books-are-free">Which books are free?</a>
+          <a href="#where-are-the-familiar-fairy-tales">Where are the familiar fairy tales?</a>
+          <a href="#the-narrator-sounds-flat">The narrator sounds flat</a>
+          <a href="#mira-read-the-first-few-minutes-then-the-voice-changed">Mira read the first few minutes, then the voice changed</a>
+          <a href="#the-story-switched-to-the-device-voice">The story switched to the device voice</a>
+          <a href="#why-does-the-narrator-sometimes-pause">Why does the narrator sometimes pause?</a>
+          <a href="#it-kept-reading-after-i-fell-asleep">It kept reading after I fell asleep</a>
+          <a href="#my-progress-did-not-follow-to-my-other-device">My progress did not follow to my other device</a>
+          <a href="#which-edition-am-i-listening-to">Which edition am I listening to?</a>
+          <a href="#tonight-s-story-will-not-generate">Tonight&#x27;s Story will not generate</a>
+          <a href="#restoring-nightshelf-pro">Restoring Nightshelf Pro</a>
+          <a href="#refunds-and-billing">Refunds and billing</a>
+          <a href="#reporting-a-bug">Reporting a bug</a>
+          <a href="#where-your-data-goes">Where your data goes</a>
+          <a href="#reviewers-and-press">Reviewers and press</a>
+      </nav>
+      </details>
+      <a class="contents-contact" href="mailto:support@hypersage.ai">Email support <span aria-hidden="true">↗</span></a>
+    </aside>
+    <main id="content" tabindex="-1">
+      <p class="eyebrow">Here to help</p>
     <h1>Support</h1>
     <p class="updated">One developer reads every email. You'll get a real reply, usually within a day or two — <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>.</p>
 
-    <h2>Do I need a connection?</h2>
+    <h2 id="do-i-need-a-connection">Do I need a connection?</h2>
     <p>Not for the library. The included classic books ship inside the app, and the on-device narrator reads them with no network at all — a plane, a basement, or airplane mode are all fine. Only the AI narrators and writing a new Tonight's Story need a connection.</p>
 
-    <h2>Which books are free?</h2>
+    <h2 id="which-books-are-free">Which books are free?</h2>
     <p>The free shelf includes <em>The Wind in the Willows</em>, <em>Alice's Adventures in Wonderland</em>, <em>A Christmas Carol</em>, <em>Treasure Island</em>, <em>Black Beauty</em>, Grimm, Aesop, <em>Frankenstein</em>, <em>Journey to the Centre of the Earth</em>, <em>Meditations</em> and <em>Tales from Shakespeare</em>. They stay free for as long as you keep the app, with no account and no ads. Nightshelf Pro opens more of the library, plus the AI narrators, Tonight's Story, and sleep timers past an hour.</p>
     <p>The included books are <em>installed</em> either way — that is why the shelf works offline — but a locked book shows a padlock until you subscribe.</p>
 
-    <h2>Where are the familiar fairy tales?</h2>
+    <h2 id="where-are-the-familiar-fairy-tales">Where are the familiar fairy tales?</h2>
     <p>Open Familiar Tales on Home for familiar selected tales, including Snow White (the historical Snowdrop version), Cinderella and Sleeping Beauty. Their source books remain available too. Search also recognizes familiar alternate titles, including Snowdrop and The Princess and the Pea.</p>
     <p>The library offers classic books, AI-written Nightshelf Originals and selected tales. Your installed version shows the available titles and their free or Pro access. Selected tales come from the included classic books, so they are not counted as extra books. They have their own saved place and running time. Familiar Tales stops at the selected tale's ending; Short listens can continue to another eligible tale when continuation is enabled and the timer has time left.</p>
 
-    <h2>The narrator sounds flat</h2>
+    <h2 id="the-narrator-sounds-flat">The narrator sounds flat</h2>
     <p>Check the narrator name in the player. If it shows an iPhone voice, you can choose another installed voice for free. From Nightshelf 1.9.2, whenever your iPhone's voice is reading, Automatic uses the best English voice installed on your iPhone and switches by itself when you download a better one, and you can choose any installed voice in the voice menu, free. For a warmer sound, download one: in iOS Settings, open Accessibility → Spoken Content (Read &amp; Speak on newer iOS) → Voices → English, choose a voice marked Premium or Enhanced, and download it. Larger voices can be over 100 MB, so Wi-Fi helps. With Nightshelf Pro in version 1.9.10, you can choose Mira or Rowan. Earlier versions offer six AI narrators. Tap the play button beside a narrator to hear a sample before choosing.</p>
 
-    <h2>Mira read the first few minutes, then the voice changed</h2>
+    <h2 id="mira-read-the-first-few-minutes-then-the-voice-changed">Mira read the first few minutes, then the voice changed</h2>
     <p>If you don't have Nightshelf Pro and your voice is set to Automatic, the welcome narrator reads your first few minutes of Nightshelf's books once on each iPhone. From 1.9.10 that narrator is Mira; versions 1.9.3 through 1.9.9 use Nova. Then, at the end of a paragraph, your iPhone's own voice carries on, offline, for as long as you like. The minutes are counted in text, not time, so a faster reading speed makes them shorter. Every paragraph sent for the welcome narrator to read counts, including the next one, which is fetched early to reduce pauses. Reinstalling or updating Nightshelf doesn't start them again. If you chose a particular iPhone voice, the welcome doesn't read. You can switch to your iPhone's voice sooner from the welcome note in the player, and <strong>Settings → AI features → AI narrators for Nightshelf's books</strong> turns AI narrators off. Nightshelf Pro keeps your chosen AI narrator reading.</p>
     <p>The welcome narrator needs a connection. If it can't be reached, your iPhone's voice reads instead, and unspent welcome minutes are kept for later.</p>
 
-    <h2>The story switched to the device voice</h2>
+    <h2 id="the-story-switched-to-the-device-voice">The story switched to the device voice</h2>
     <p>Cloud narration with Nightshelf Pro has no nightly allowance to run through. Its one ceiling is a fair-use limit, there to stop automated misuse, and a banner says when narration resumes if you ever meet it. A dropped connection or a service outage can also switch reading to your iPhone's voice. From 1.9.10, the player explains this as soon as it happens and offers Retry; the notice stays until the AI narrator is heard again. The app also retries automatically while the book keeps reading.</p>
     <p>If the banner says Pro couldn't be confirmed with the narrator, tap it to retry. If that keeps happening, use Restore Purchases and see <em>Restoring Nightshelf Pro</em> below.</p>
 
-    <h2>Why does the narrator sometimes pause?</h2>
+    <h2 id="why-does-the-narrator-sometimes-pause">Why does the narrator sometimes pause?</h2>
     <p>AI narration is prepared over the internet. In 1.9.10, Nightshelf Pro can prepare up to three paragraphs ahead, with a small text limit on the two extra paragraphs, to reduce waits during short dialogue. The free welcome prepares one paragraph ahead. A slow connection or a delayed voice service can still cause a wait; choosing an installed iPhone voice works offline.</p>
 
-    <h2>It kept reading after I fell asleep</h2>
+    <h2 id="it-kept-reading-after-i-fell-asleep">It kept reading after I fell asleep</h2>
     <p>Set the sleep timer before you start. Narration fades out rather than stopping abruptly, so it does not jolt you awake. Your place in the book is saved either way, so you can pick up wherever you drifted off.</p>
 
-    <h2>My progress did not follow to my other device</h2>
+    <h2 id="my-progress-did-not-follow-to-my-other-device">My progress did not follow to my other device</h2>
     <p>Progress syncs through your own private iCloud storage, so both devices need to be signed into the same Apple Account with iCloud Drive on. There is no Nightshelf account and no server copy of your synced progress. With iCloud off, progress stays on one device. Ambient sound choices and their volume are local to each device.</p>
 
-    <h2>Which edition am I listening to?</h2>
+    <h2 id="which-edition-am-i-listening-to">Which edition am I listening to?</h2>
     <p>The library includes novels, collections, retellings and selected tales. In the player, open More options → About this book for a title’s format, source and credits. Some editions omit illustrations, editorial notes or other supporting material.</p>
 
-    <h2>Tonight's Story will not generate</h2>
+    <h2 id="tonight-s-story-will-not-generate">Tonight's Story will not generate</h2>
     <p>It needs a connection and takes a few seconds to write. If it keeps failing, check your connection and try a shorter prompt. If the app says tonight's stories are spent, that is the daily cap — a few fresh stories a day, then it resets. Every book already on your shelf still reads aloud in the meantime.</p>
 
-    <h2>Restoring Nightshelf Pro</h2>
+    <h2 id="restoring-nightshelf-pro">Restoring Nightshelf Pro</h2>
     <p>Open the Pro screen and tap <strong>Restore Purchases</strong>. If the Apple Account signed in to the App Store has an active subscription, Nightshelf Pro opens again — there is no account to log into. If the App Store cannot be reached, the app says so rather than telling you there is no subscription; try again once you are back online.</p>
     <p>A subscription <strong>redeemed with an offer code</strong> can use the cloud narrators, Tonight's Story and story covers across your devices once its current Apple receipt is verified. All those devices share the subscription's service limits. There is no fixed five-device refusal. If access still cannot be confirmed, check that the subscription is active under the Apple Account used for Media &amp; Purchases, use Restore Purchases, and tap the narrator banner to retry. If it persists, email us with the message shown; please do not send your receipt or any story details.</p>
 
-    <h2>Refunds and billing</h2>
+    <h2 id="refunds-and-billing">Refunds and billing</h2>
     <p>All purchases are handled by Apple. Request a refund at <a href="https://reportaproblem.apple.com/" rel="noopener">reportaproblem.apple.com</a>, and manage or cancel in iOS Settings → your name → Subscriptions.</p>
 
-    <h2>Reporting a bug</h2>
+    <h2 id="reporting-a-bug">Reporting a bug</h2>
     <p>Email <a href="mailto:support@hypersage.ai?subject=Nightshelf%20bug%20report">support@hypersage.ai</a> with what you saw and what you were doing. Your device model and iOS version help a lot.</p>
 
-    <h2>Where your data goes</h2>
+    <h2 id="where-your-data-goes">Where your data goes</h2>
     <p>The <a href="privacy.html">privacy policy</a> has the full details. In short, the app has no account, no sign-in, no analytics, no third-party tracker and no advertising. Reading progress, your saved shelf and supported reading settings can sync through your private iCloud. Ambient sound choices and their volume stay on this device.</p>
     <p>The on-device narrator speaks every word on the phone, so no book text is sent for narration while an iPhone voice you chose is reading. If it is only standing in for a cloud narrator that was interrupted, the paragraphs ahead can still be sent, so that narrator can pick the story back up. From Nightshelf 1.9.3, AI narrators can read the books that come with Nightshelf without asking first — Mira for your first few minutes on each iPhone in 1.9.10 (Nova in earlier versions), or your chosen narrator with Nightshelf Pro — and they are on from the start, with Automatic as the starting voice. The paragraph being read and the next one go to <strong>Nightshelf's own server</strong> (hosted for us by Fly.io in the United States), along with up to two more short paragraphs for Pro buffering in 1.9.10, and then to <strong>OpenAI</strong>, which gets only that text, the narrator's name and a reading-style note, with no ID. Our server sees your IP address, as any website does, and keeps a scrambled daily character count to limit use; with Pro, the request also carries the ID and receipt described in the <a href="privacy.html">privacy policy</a>. <strong>Settings → AI features → AI narrators for Nightshelf's books</strong> turns this off. If you said no when Nightshelf asked about its cloud features in an earlier version, on this iPhone or on an iPhone whose backup this one was restored from, the switch starts off, and because it syncs through iCloud, it is then off on your other devices too.</p>
     <p>Anything you choose or type is different: Tonight's Story, its cover, and an AI narrator reading a story you made need your permission first. From Nightshelf 1.9.3, the <strong>Tonight's Story &amp; your stories</strong> setting under Settings → AI features, not the AI narrators switch, turns them off. In Nightshelf 1.9.2 and earlier, every cloud narration asks first, including the books that come with Nightshelf.</p>
@@ -139,10 +115,26 @@
     <p>Two smaller things go out without asking, and the <a href="privacy.html">privacy policy</a> spells them out. Tapping ▶ to audition a narrator sends one fixed sample sentence — the same one for everyone, built into the app. It carries no page of a book and nothing you have typed, which is why it isn't gated, and it only happens when you tap ▶. Before Nightshelf 1.9.3 it carried the random device or subscription ID described there for every listener; from 1.9.3 it does so only with Nightshelf Pro. That ID is not anonymous: the records it keys can be linked to your device or subscription, even though they hold no name or email. The other is a check at launch that the server is awake, made when an AI narrator would read; it carries no text.</p>
     <p>Our server keeps a scrambled copy of a random ID so daily limits can be counted per device or subscription. From Nightshelf 1.9.3, a listener without Pro sends no such ID: the welcome and ▶ auditions are counted against a scrambled copy of the IP address instead, and the record of how much of the welcome you've heard stays on your iPhone and is never sent. Each phone has its own ID and keeps it through a reinstall; a phone that picks up a subscription bought in the app switches to the ID saved with that purchase. A subscription redeemed with an offer code has no such ID, so the server keeps a separate record for it — Apple's transaction IDs, the first device's random ID, and a bounded recent-device history of scrambled device IDs and first- and last-seen times — which the <a href="privacy.html">privacy policy</a> sets out in full. The server also keeps narration it has already made in a shared cache, filed under a fingerprint of the paragraph rather than under a device or subscription. No Nightshelf account or sign-in is required. Optional story details are sent as entered, so please leave personal information out.</p>
 
-    <h2>Reviewers and press</h2>
+    <h2 id="reviewers-and-press">Reviewers and press</h2>
     <p>Reach out at <a href="mailto:support@hypersage.ai?subject=Nightshelf%20review%20request">support@hypersage.ai</a>. Nightshelf reads classic books aloud at bedtime, from Grimm's fairy tales to Dracula, Sherlock Holmes and Poe, with ambient sound and a sleep timer. It also includes Nightshelf Originals, written with AI for the app. Our thanks to the volunteer transcribers who typed the classics back into readable form.</p>
 
-    <a class="back" href="index.html">← Back to Nightshelf</a>
+
+      <a class="back" href="./">← Back to Nightshelf</a>
+    </main>
   </div>
+  <footer class="legal-footer">
+    <a class="footer-brand" href="./">Nightshelf <span>Stories to drift off to.</span></a>
+    <nav aria-label="Footer"><a href="support.html" aria-current="page">Support</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav>
+    <p>© 2026 HyperSage AI Labs LLC</p>
+  </footer>
+  <script>
+    (() => {
+      const contents = document.querySelector('.contents-disclosure');
+      const wide = window.matchMedia('(min-width: 701px)');
+      const setContents = () => { contents.open = wide.matches; };
+      setContents();
+      wide.addEventListener('change', setContents);
+    })();
+  </script>
 </body>
 </html>
