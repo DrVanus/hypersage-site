@@ -27,6 +27,9 @@
   document.getElementById('shared-book-edition').textContent = versioned
     ? 'Requires Nightshelf ' + book.minimumVersion + ' or later. ' + access
     : access;
+  if (book.availabilityNote) {
+    document.getElementById('shared-book-edition').textContent += ' ' + book.availabilityNote;
+  }
   if (versioned) {
     document.getElementById('shared-book-help').textContent =
       'Already have Nightshelf ' + book.minimumVersion + ' or later? Open this story on your iPhone. ' +
