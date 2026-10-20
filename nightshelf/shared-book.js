@@ -28,7 +28,7 @@
     ? 'Requires Nightshelf ' + book.minimumVersion + ' or later. ' + access
     : access;
   if (book.availabilityNote) {
-    document.getElementById('shared-book-edition').textContent += ' ' + book.availabilityNote;
+    document.getElementById('shared-book-edition').textContent += '. ' + book.availabilityNote;
   }
   if (versioned) {
     document.getElementById('shared-book-help').textContent =
