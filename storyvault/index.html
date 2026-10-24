@@ -1467,7 +1467,7 @@
       "name": "Does the AI train on my stories?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Nothing is sent to an AI provider until you allow AI sharing in the app. After that, your input goes through our backend to Anthropic's Claude to write the next page (with OpenAI as a failover), and to OpenAI for scene art and voice narration. Their API terms exclude it from model training by default, and we never sell it. What we and those providers may keep, and for how long, is set out in the privacy policy."
+        "text": "Nothing is sent to an AI provider until you allow AI sharing in the app. Story generation goes through our backend to Anthropic or OpenAI; OpenAI also provides scene art and the original cloud narrators. Optional ElevenLabs narrators require StoryVault Pro and separate permission before the passage and selected voice are sent to ElevenLabs. Anthropic and OpenAI exclude ordinary API content from model training by default, subject to the exceptions described in our privacy policy. ElevenLabs' applicable terms may allow it to use submitted content to improve its models. We never sell your input. The privacy policy explains each provider's data use and retention."
       }
     },
     {
@@ -1806,7 +1806,7 @@
           <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.5v5.2c0 4.3-2.9 7.6-7 9-4.1-1.4-7-4.7-7-9V5.5z"/><rect x="9.3" y="10.8" width="5.4" height="4.5" rx="1"/><path d="M10.4 10.8V9.6a1.6 1.6 0 0 1 3.2 0v1.2"/></svg></div>
           <h3>Yours alone</h3>
           
-          <p>Your saved adventures and reading progress live on your device. No account needed to read or play, and AI providers&rsquo; API terms exclude your stories from model training by default.</p>
+          <p>Your saved adventures and reading progress live on your device. No account is needed to read or play. AI sharing is optional, and ElevenLabs narration needs a separate permission. See our <a href="privacy.html">privacy policy</a>.</p>
         </div>
       </div>
     </div>
@@ -1962,7 +1962,7 @@
             <li>Unlimited custom premises</li>
             <li>Unlimited saved adventures</li>
             
-            <li>AI voice narration, around 80 minutes a day</li>
+            <li>Original cloud narrators, around 80 minutes a day; optional ElevenLabs narrators have a separate, smaller allowance</li>
             <li>AI-painted scene art, up to 10 turns a day, 100 a month</li>
             
             <li>All four illustration styles: Painterly Classic, Ink &amp; Watercolor, Cinematic Noir, Modern Illustrated</li>
@@ -2000,7 +2000,7 @@
         <details class="faq">
           <summary>Does the AI train on my stories?</summary>
           
-          <p>Nothing is sent to an AI provider until you allow AI sharing in the app. After that, your input goes through our backend to Anthropic's Claude to write the next page (with OpenAI as a failover), and to OpenAI for scene art and voice narration. Their API terms exclude it from model training by default, and we never sell it. What we and those providers may keep, and for how long, is set out in the privacy policy.</p>
+          <p>Nothing is sent to an AI provider until you allow AI sharing in the app. Story generation goes through our backend to Anthropic or OpenAI; OpenAI also provides scene art and the original cloud narrators. Optional ElevenLabs narrators require StoryVault Pro and separate permission before the passage and selected voice are sent to ElevenLabs. Anthropic and OpenAI exclude ordinary API content from model training by default, subject to the exceptions described in our privacy policy. ElevenLabs' applicable terms may allow it to use submitted content to improve its models. We never sell your input. The privacy policy explains each provider's data use and retention.</p>
           
           <figure class="datapath" aria-hidden="true">
             <div class="dp-flow">
@@ -2012,7 +2012,7 @@
               </svg>
               <div class="dp-node dp-hub">
                 <b>Our backend</b>
-                <i>for the duration of the request, then forwards it</i>
+                <i>forwards requests; narration audio may be cached</i>
               </div>
               <svg class="dp-fan" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
                 <path class="dp-live" d="M0,50 C45,50 55,28 100,28"/>
@@ -2025,16 +2025,16 @@
                   <span class="dp-chip">OpenAI as a failover</span>
                 </div>
                 <div class="dp-node">
-                  <b>OpenAI</b>
-                  <i>scene art and voice narration</i>
-                  <span class="dp-chip">Both with Pro — scene art up to 10 turns a day, 100 a month</span>
+                  <b>OpenAI / optional ElevenLabs</b>
+                  <i>OpenAI: scene art and original narration. ElevenLabs: Pro narration with separate permission</i>
+                  <span class="dp-chip">ElevenLabs with Pro; scene art up to 10 turns a day, 100 a month</span>
                 </div>
               </div>
             </div>
             <div class="dp-seal">
               <span>Sent to AI only after you allow it</span>
               <span>We never sell your input</span>
-              <span>Excluded from AI training by default</span>
+              <span>Provider data use varies; see the privacy policy</span>
             </div>
           </figure>
         </details>
