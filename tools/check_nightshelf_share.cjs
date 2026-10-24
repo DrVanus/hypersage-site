@@ -142,7 +142,10 @@ assert.doesNotMatch(visibleCopy, /\b\d+\s+(?:classic\s+)?(?:books|classics|tales
 const freePlan = html.match(/<article class="plan">([^]*?)<\/article>/)?.[1];
 const proPlan = html.match(/<article class="plan pro">([^]*?)<\/article>/)?.[1];
 assert.ok(freePlan && proPlan, 'free and Pro capabilities must remain distinct');
-assert.match(freePlan, /free[^]*classic books[^]*selected tales[^]*Originals/i);
+assert.match(freePlan, /free[^]*classic books[^]*selected tales/i);
+// Retired Originals remain valid shared identities, but are not a browse/free-tier offer.
+assert.doesNotMatch(freePlan, /Originals/i);
+assert.doesNotMatch(html, /(?:free shelf includes|Browse|Start with)[^<.]*Originals/i);
 assert.match(freePlan, /On-device narration/i);
 assert.match(proPlan, /Nightshelf Pro[^]*AI narrators[^]*AI-written bedtime stories/i);
 assert.match(html, /which choices are free and which are included with Pro/i);
