@@ -218,7 +218,7 @@ CARDS = {
 """,
         "kicker": 'Quiet<span class="oak">oak</span>',
         "h1": 'Talk it through.<br><em>Find a next step.</em>',
-        "sub": "An AI companion that remembers you. Practice DBT skills and keep a one-minute diary card.",
+        "sub": "Conversation, guided practice, diary cards and written chain analysis, together.",
     },
     "rowan": {
         "art": "art/rowan_welcome.png",
