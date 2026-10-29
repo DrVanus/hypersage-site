@@ -3798,6 +3798,7 @@ function makeExcavationJar(site) {
     gem_heartstone: 'art/gem_heartstone.png',
     prop_pickaxe: 'art/prop_pickaxe.png',
     mole_keeper: 'art/mole_keeper.png',
+    home_keeper: 'art/home_workshop.png',
     backdrop_burrow: 'art/backdrop_burrow.jpg',
     bg_dig_wall: 'art/bg_dig_wall.jpg',
   };
@@ -7683,6 +7684,38 @@ function makeExcavationJar(site) {
     ctx.fillText(text,x,y+(up-down)/2);
   }
 
+  var _homeFloorPlane = null;
+  function menuFloorPlane(bg) {
+    if (_homeFloorPlane) return _homeFloorPlane;
+    var c = document.createElement('canvas'); c.width=1024;c.height=336;
+    var x=c.getContext('2d');
+    x.drawImage(bg,0,bg.height*1200/1536,bg.width,bg.height*336/1536,0,0,1024,336);
+    x.globalCompositeOperation='destination-in';
+    var fade=x.createLinearGradient(0,0,0,16);
+    fade.addColorStop(0,'rgba(0,0,0,0)');fade.addColorStop(1,'rgba(0,0,0,1)');
+    x.fillStyle=fade;x.fillRect(0,0,1024,336);
+    _homeFloorPlane=c;return c;
+  }
+  var _homeKeeperScene = null;
+  function menuKeeperScene(img) {
+    if (_homeKeeperScene) return _homeKeeperScene;
+    var c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+    var x=c.getContext('2d');x.drawImage(img,0,0);
+    x.globalCompositeOperation='source-atop';
+    var quiet=x.createLinearGradient(0,c.height*194/440,0,c.height*304/440);
+    quiet.addColorStop(0,'rgba(13,8,4,0)');
+    quiet.addColorStop(1,'rgba(13,8,4,0.78)');
+    x.fillStyle=quiet;x.fillRect(0,0,c.width,c.height);
+    x.globalCompositeOperation='destination-in';
+    var edge=x.createLinearGradient(0,0,c.width,0);
+    edge.addColorStop(0,'rgba(0,0,0,0)');edge.addColorStop(.065,'rgba(0,0,0,1)');
+    edge.addColorStop(.935,'rgba(0,0,0,1)');edge.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=edge;x.fillRect(0,0,c.width,c.height);
+    var foot=x.createLinearGradient(0,c.height*.93,0,c.height);
+    foot.addColorStop(0,'rgba(0,0,0,1)');foot.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=foot;x.fillRect(0,0,c.width,c.height);
+    _homeKeeperScene=c;return c;
+  }
   Game.prototype._drawMenu = function () {
     var ctx = this.ctx, v = this.view;
     var cx = VIEW_MIN_W / 2;
@@ -7690,7 +7723,9 @@ function makeExcavationJar(site) {
     if (bg) {
       var s = Math.max(v.w / bg.width, v.h / bg.height);
       ctx.drawImage(bg, (v.w - bg.width * s) / 2 - v.ox, (v.h - bg.height * s) / 2 - v.uiTop, bg.width * s, bg.height * s);
-      ctx.fillStyle = 'rgba(20,14,10,0.46)';
+      var floorTop=300+this._menuShift();
+      ctx.drawImage(menuFloorPlane(bg),-v.ox,floorTop,v.w,v.h+v.uiTop-floorTop);
+      ctx.fillStyle = 'rgba(20,14,10,0.60)';
       ctx.fillRect(-v.ox, -v.uiTop, v.w, v.h + v.uiTop);
     }
     var vig = ctx.createRadialGradient(cx, 300, VIEW_MIN_W * 0.30, cx, 320, VIEW_H * 0.78);
@@ -7745,24 +7780,8 @@ function makeExcavationJar(site) {
     ctx.stroke();
     if (SPR.gem_prism) ctx.drawImage(SPR.gem_prism, cx - 9, 147, 18, 18);
 
-    if (SPR.mole_keeper) {
-      var spot = ctx.createRadialGradient(cx - 4, 272, 10, cx - 4, 284, 172);
-      spot.addColorStop(0, 'rgba(255,214,140,0.22)');
-      spot.addColorStop(0.55, 'rgba(255,196,110,0.10)');
-      spot.addColorStop(1, 'rgba(255,196,110,0)');
-      ctx.fillStyle = spot;
-      ctx.fillRect(cx - 194, 128, 388, 310);
-      ctx.save();
-      ctx.translate(cx - 4, 360);
-      ctx.scale(1, 0.185);
-      var sh = ctx.createRadialGradient(0, 0, 0, 0, 0, 74);
-      sh.addColorStop(0, 'rgba(16,9,4,0.46)');
-      sh.addColorStop(0.55, 'rgba(16,9,4,0.22)');
-      sh.addColorStop(1, 'rgba(16,9,4,0)');
-      ctx.fillStyle = sh;
-      ctx.beginPath(); ctx.arc(0, 0, 74, 0, 6.283); ctx.fill();
-      ctx.restore();
-      ctx.drawImage(SPR.mole_keeper, cx - 100, 172, 200, 200);
+    if (SPR.home_keeper) {
+      ctx.drawImage(menuKeeperScene(SPR.home_keeper), cx - 165, 156, 330, 440);
     }
 
     var lvl = Meta.data.careerLevel || 1;
