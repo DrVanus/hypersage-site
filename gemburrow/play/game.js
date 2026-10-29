@@ -5262,8 +5262,9 @@ function makeExcavationJar(site) {
     var cw = Math.max(320, window.innerWidth || 0);
     var ch = Math.max(240, window.innerHeight || 0);
     var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-    this.canvas.width = Math.round(cw * dpr);
-    this.canvas.height = Math.round(ch * dpr);
+    var pixelWidth = Math.round(cw * dpr), pixelHeight = Math.round(ch * dpr);
+    if (this.canvas.width !== pixelWidth) this.canvas.width = pixelWidth;
+    if (this.canvas.height !== pixelHeight) this.canvas.height = pixelHeight;
     var scale = Math.min(ch / VIEW_H, cw / VIEW_MIN_W);
     var probe = document.getElementById('safe-probe');
     var inset = probe ? probe.getBoundingClientRect().top : 0;
