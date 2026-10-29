@@ -2,56 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- viewport-fit=cover is REQUIRED for env(safe-area-inset-*) to resolve on
-       notched phones and under Android's forced edge-to-edge (targetSdk 35+). -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="description" content="Gemburrow: dig gems out of a physics-packed jar, fill the orders on the line, and decide what your dragon keeps.">
   <title>Gemburrow</title>
-  <!-- The play build is linked from /gemburrow/, which IS in the sitemap, so a
-       crawler will find it. A canvas page has no indexable text, earns nothing
-       in search, and would dilute the marketing page's canonical. -->
   <meta name="robots" content="noindex">
-  <meta name="theme-color" content="#1c2751">
+  <meta name="theme-color" content="#1a120c">
 
-  <!-- INSTALLABLE PWA. `display:standalone` alone does NOT give iOS a
-       chrome-less launch — apple-mobile-web-app-capable is the one that does.
-       `orientation:portrait` is honoured on Android and ignored by iOS Safari;
-       portrait on iOS comes from the game's own letterbox math, not from here. -->
-  <link rel="manifest" href="manifest.json?v=5ffdb8a3fb">
-  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=5ffdb8a3fb">
-  <link rel="apple-touch-icon" href="art/icon-180.png?v=5ffdb8a3fb">
+  <link rel="manifest" href="manifest.json?v=41d7e6a7dd">
+  <link rel="icon" type="image/png" sizes="192x192" href="art/icon-192.png?v=41d7e6a7dd">
+  <link rel="apple-touch-icon" href="art/icon-180.png?v=41d7e6a7dd">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Gemburrow">
 
-  <!-- THE SPLASH IS INLINE AND ABOVE THE STYLESHEET LINK, deliberately, so it
-       paints on the very first frame with no extra round-trip. The game starts
-       its loop immediately but draws procedural fallback shapes until the art
-       has decoded — flat circles where the painted gems go — and players read
-       that as broken. This covers exactly that window; game.js's sprite loader
-       drives #boot-fill and removes #boot when the last sprite lands. -->
   <style>
-    html,body{margin:0;height:100%;background:#1c2751;overflow:hidden}
-    #boot{position:fixed;inset:0;z-index:9;display:flex;flex-direction:column;
-      align-items:center;justify-content:center;gap:18px;
-      background:radial-gradient(120% 80% at 50% 40%,#2b2016 0%,#1a120c 58%,#0d0906 100%);
-      font-family:Georgia,"Times New Roman",serif;text-align:center;
-      padding:0 24px;transition:opacity .38s ease}
-    #boot.gone{opacity:0;pointer-events:none}
-    #boot-mark{font-size:clamp(32px,10vw,52px);font-weight:700;letter-spacing:.02em;
-      color:#ffd75e;text-shadow:0 2px 0 #6b4718,0 0 34px rgba(255,180,60,.32)}
-    #boot-sub{font-style:italic;font-size:clamp(13px,4vw,17px);color:#e8a53c;opacity:.92}
-    #boot-track{width:min(220px,56vw);height:5px;border-radius:3px;
-      background:rgba(255,233,196,.13);overflow:hidden}
-    #boot-fill{height:100%;width:0;border-radius:3px;
-      background:linear-gradient(90deg,#e8a53c,#ffd75e);
-      box-shadow:0 0 12px rgba(255,190,80,.6);transition:width .22s ease-out}
-    #boot-note{font-family:system-ui,sans-serif;font-size:12px;letter-spacing:.10em;
-      text-transform:uppercase;color:rgba(255,233,196,.44)}
-    @media (prefers-reduced-motion:reduce){
-      #boot-fill{transition:none}#boot{transition:none}}
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #1a120c; }
+    #lamplight {
+      position: fixed; inset: 0; z-index: 9;
+      display: grid; place-content: center; justify-items: center; row-gap: 16px;
+      padding: 0 24px;
+      text-align: center;
+      font-family: Georgia, "Times New Roman", serif;
+      background: radial-gradient(120% 80% at 50% 40%, #2b2016, #1a120c 58%, #0d0906);
+      transition: opacity 380ms ease;
+    }
+    #lamplight.out { opacity: 0; pointer-events: none; }
+    #lamplight p { margin: 0; }
+    .lamp-name {
+      font-size: clamp(32px, 10vw, 52px); font-weight: 700; letter-spacing: .02em;
+      color: #ffd75e; text-shadow: 0 2px 0 #6b4718, 0 0 34px rgba(255, 180, 60, .32);
+    }
+    .lamp-tag { font-style: italic; font-size: clamp(13px, 4vw, 17px); color: #e8a53c; opacity: .92; }
+    .lamp-wick {
+      width: min(220px, 56vw); height: 6px; margin: 2px 0;
+      border-radius: 999px; background: rgba(255, 233, 196, .13); overflow: hidden;
+    }
+    .lamp-glow {
+      display: block; width: 0; height: 100%;
+      background: linear-gradient(90deg, #e8a53c, #ffd75e);
+      box-shadow: 0 0 12px rgba(255, 190, 80, .6);
+      transition: width 220ms ease-out;
+    }
+    .lamp-note {
+      font: 12px system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255, 233, 196, .44);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #lamplight, .lamp-glow { transition: none; }
+    }
   </style>
-  <link rel="stylesheet" href="style.css?v=5ffdb8a3fb">
+  <link rel="stylesheet" href="style.css?v=41d7e6a7dd">
 </head>
 <body>
   <div id="game-wrap">
@@ -63,11 +63,11 @@
     <div id="game-details" class="screen-reader-text" role="region" aria-label="Screen details"></div>
     <p id="game-status" class="screen-reader-text" role="status" aria-live="polite" aria-atomic="true"></p>
   </div>
-  <div id="boot" role="status" aria-live="polite">
-    <div id="boot-mark">Gemburrow</div>
-    <div id="boot-sub">dig gems &middot; fill orders &middot; feed the dragon</div>
-    <div id="boot-track"><div id="boot-fill"></div></div>
-    <div id="boot-note">lighting the lanterns</div>
+  <div id="lamplight" role="status" aria-live="polite">
+    <p class="lamp-name">Gemburrow</p>
+    <p class="lamp-tag">dig gems &middot; fill orders &middot; feed the dragon</p>
+    <div class="lamp-wick"><span class="lamp-glow"></span></div>
+    <p class="lamp-note">lighting the lanterns</p>
   </div>
   <dialog id="how-to-play" role="dialog" aria-modal="true" aria-labelledby="guide-title">
     <header class="guide-header">
@@ -89,7 +89,7 @@
       <section><span class="guide-step" aria-hidden="true">2</span><div>
         <h2>Plan around an order.</h2>
         <p>Gems go into your bag. A card pays automatically when you have its <strong>whole set</strong>. The numbers show what is in your bag out of what the card needs.</p>
-        <p class="guide-tip">Tap a card to find its missing gems: gold means reachable; violet means buried. Turn on Gem symbols in Settings for another way to match them.</p>
+        <p class="guide-tip">Tap a card to keep that order in focus while you dig. Its missing gems stay marked as the pile settles: solid gold rings are reachable; dashed violet rings are buried. Tap the card again to clear the focus, or another card to change your plan. The line below your bag shows how much of the set you have. The focus clears when that order leaves the line. Gem symbols in Settings add another way to match pieces.</p>
       </div></section>
       <section><span class="guide-step" aria-hidden="true">3</span><div>
         <h2>Leave room in your bag.</h2>
@@ -106,11 +106,18 @@
         <p>Fill the shift's order goal before your swings run out. Each spare swing then earns 5 coins. Watch the RUSH card's own countdown when one appears.</p>
         <p class="guide-tip">Career banks coins on your first clear. Free banks every shift. Today's Daily banks your first finished shift; replays can improve your best.</p>
       </div></section>
-      <section><span class="guide-step" aria-hidden="true">⌨</span><div><h2>Play with a keyboard.</h2><p>Use Tab or the arrow keys to move between controls and reachable gems. Safari may use Option+Tab. Press Enter or Space to choose. Press Escape to pause or go back. Your system’s Reduce Motion preference quiets decorative movement.</p></div></section>
-      <p class="guide-footer">Your shift stays paused while you read. Close this guide to return to Settings.</p>
+      <section><span class="guide-step" aria-hidden="true">◆</span><div>
+        <h2>Excavations: split it or save it?</h2>
+        <p>The five free sites have finite piles and one visible commission. Great gems give you a choice: <strong>split for one swing</strong> to put three loose gems into your satchel, or <strong>lift intact for two swings</strong> to preserve a specimen for Flint.</p>
+        <p>Splitting needs three empty slots. A full satchel refuses ordinary gems without spending a swing. Discarding is permanent for this attempt. Dense striped stones take two swings.</p>
+        <p>Once the commission is filled, finish for a shorter route or keep digging for specimens. Only completed digs record specimens. Your best route and discoveries are kept in the field journal; these digs do not award coins or hoard.</p>
+        <p class="guide-tip">Nothing refills. There is no choice timer. Replay any site to discover a different route.</p>
+      </div></section>
+      <section data-guide-keys hidden><span class="guide-step" aria-hidden="true">⌨</span><div><h2>Play with a keyboard.</h2><p>Use Tab or the arrow keys to move between controls and reachable gems.<span data-guide-browser> In Safari, Option+Tab may be needed.</span> Press Enter or Space to choose. Press Escape to pause or go back.</p></div></section>
+      <p class="guide-footer">Your shift stays paused while you read. Your system’s Reduce Motion setting quiets decorative movement. Close this guide to return to Settings.</p>
     </div>
   </dialog>
-  <script>window.__BUILD__="5ffdb8a3fb";window.__ART_EXT__="webp";</script>
-  <script src="game.js?v=df2ee5a8ac" defer></script>
+  <script>window.__BUILD__="41d7e6a7dd";window.__ART_EXT__="webp";</script>
+  <script src="game.js?v=41d7e6a7dd" defer></script>
 </body>
 </html>

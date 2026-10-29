@@ -6,25 +6,25 @@
   
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#17100A">
-  <title>Gemburrow: cozy gem-digging puzzle</title>
-  <meta name="description" content="A cozy gem-digging puzzle. Dig gems out of a physics-packed jar, fill the orders on the line, and decide what your dragon keeps. Play it in your browser.">
+  <title>Gemburrow: Dig gems. Fill orders. Grow a hoard.</title>
+  <meta name="description" content="Dig through a tumbling gem jar, fill customer orders with seven satchel slots, and grow Flint’s hoard. Optional excavations add split-or-preserve routes.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/gemburrow/">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Gemburrow: Dig the jar. Fill the orders. Feed the dragon.">
-  <meta property="og:description" content="A cozy gem-digging puzzle you can play in your browser. Every gem and rock is real physics: pull one out and the whole pile settles.">
+  <meta property="og:title" content="Gemburrow: Dig gems. Fill orders. Grow a hoard.">
+  <meta property="og:description" content="Dig through a tumbling gem jar, fill customer orders with seven satchel slots, and grow Flint’s hoard. Optional excavations add split-or-preserve routes.">
   <meta property="og:url" content="https://hypersage.ai/gemburrow/">
   <meta property="og:site_name" content="Gemburrow">
-  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260919a">
+  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20261029a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Gemburrow: a cozy gem-digging puzzle set in a mole's underground gem shop">
+  <meta property="og:image:alt" content="Gemburrow: gem digging, customer orders and optional specimen excavations">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Gemburrow: Dig the jar. Fill the orders. Feed the dragon.">
-  <meta name="twitter:description" content="A cozy gem-digging puzzle you can play in your browser. Pull one gem and the whole pile settles.">
-  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20260919a">
-  <meta name="twitter:image:alt" content="Gemburrow: a cozy gem-digging puzzle set in a mole's underground gem shop">
+  <meta name="twitter:title" content="Gemburrow: Dig gems. Fill orders. Grow a hoard.">
+  <meta name="twitter:description" content="Dig through a tumbling gem jar, fill customer orders with seven satchel slots, and grow Flint’s hoard. Optional excavations add split-or-preserve routes.">
+  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20261029a">
+  <meta name="twitter:image:alt" content="Gemburrow: gem digging, customer orders and optional specimen excavations">
 
   <link rel="icon" type="image/png" href="app-icon-512.png?v=20260821a">
   <link rel="apple-touch-icon" href="app-icon-512.png?v=20260821a">
@@ -193,7 +193,7 @@
     }
 
     /* ===== SECTIONS ===== */
-    .section-block { padding: 72px 0; position: relative; }
+    .section-block { padding: 72px 0; position: relative; scroll-margin-top: 68px; }
     .section-block.panel { background: linear-gradient(180deg, rgba(38, 28, 19, 0.55), rgba(23, 16, 10, 0)); border-top: 1px solid var(--border); }
     .section-eyebrow {
       font-size: 0.76rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
@@ -342,7 +342,7 @@
     .rung span { color: var(--muted-fg); font-size: 0.95rem; }
 
     /* ===== SCREENS ===== */
-    .screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 42px; }
+    .screens { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 42px; }
     .screen-card { display: flex; flex-direction: column; gap: 12px; }
     .screen-frame {
       border-radius: 26px; padding: 8px; background: linear-gradient(160deg, #392A1C, #191108 62%);
@@ -463,942 +463,78 @@
       .eyebrow .eb-long { display: none; }
     }
   </style>
-
-  <script>
-    // Runs in <head> so the class is set before paint: only opt IN to the
-    // reveal when motion is welcome and IntersectionObserver exists.
-    (function () {
-      try {
-        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
-          document.documentElement.classList.add('js-reveal');
-        }
-      } catch (e) {}
-    })();
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "VideoGame",
-    "name": "Gemburrow",
-    "applicationCategory": "Game",
-    "operatingSystem": "Web",
-    "description": "A cozy gem-digging puzzle you can play in your browser. Dig gems out of a physics-packed jar, assemble full sets in your satchel to fill the orders hanging on the line, and decide which rare gems your dragon keeps forever.",
-    "url": "https://hypersage.ai/gemburrow/",
-    "author": {
-      "@type": "Organization",
-      "name": "HyperSage AI Labs LLC"
-    }
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Where can I play Gemburrow?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "In your browser, at hypersage.ai/gemburrow/play/, which you can add to your home screen. Your progress is saved in that browser. Gemburrow is also coming to iPhone; the iPhone version will keep its own save on the phone, separate from the browser's."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What kind of puzzle is it?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "A physics puzzle. A jar is packed with gems and rocks; orders on the line ask for particular gems, and you dig them out. A piece comes out only when nothing rests on it, the pile collapses into every gap you make, and each dig spends one of your pickaxe swings."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does it cost anything, and are there ads?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Not in your browser. The browser version at hypersage.ai/gemburrow/play/ has no store and no ads, and all 40 career levels are open, along with the Daily Dig and its leaderboard, Free Dig, and the whole shop and wardrobe. ARCHIVE there shows your recent Daily results; replaying past jars is not part of the browser version. The coins you spend in the mole's shop are earned by digging and are not for sale. Gemburrow is also coming to iPhone, free to play with one optional purchase: The Full Burrow, a single one-time unlock that opens career levels 11–40 and the 14-day dig archive. On iPhone, Free Dig, today's Daily and its leaderboard, career levels 1–10, twenty-five of the 27 contracts, every dig wall and all eight Flint coats are included. Coats unlock with hoard earned by playing. The Worn Iron and Copper picks fit within the free levels; the four remaining picks and last two contracts require progress in career levels 11–40. There is no subscription, no coin pack, no ads and no energy meter."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What do coins actually do?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "They bank between shifts and buy dig walls in the mole's shop: six of them, from Burrow Clay up to Deep Basalt. Those walls are purely cosmetic. Coins also pay for a Deeper Pick, which adds eight swings to one retry of a career level you're stuck on. It never applies to Daily Dig: everyone gets the same jar, seven satchel slots and starting swing budget."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is the Daily Dig?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "One jar a day, identical for every player, with the same gems, rocks and buried prisms and a leaderboard of the day's best hauls. It resets at midnight UTC. Open SCORES, then DAILY for today's leaderboard or YOU for personal bests. LEAGUE, when available, adds up the last 14 days of Daily scores. Scores use a random ID made on your device, an auto-generated MOLE- name and the run's numbers. The same ID looks up your own standing; no account or sign-in is needed."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I play without a connection?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "In the iPhone app, Career, Free Dig and Daily Dig play offline. The browser version loads over the network and does not install itself for reliable offline play. Progress stays in the app or browser where you played. Leaderboards need a connection. A queued Daily score retries on launch, reconnection or resume while that Daily is current, and expires at the next midnight UTC. It may retry while another mode is open."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How long is a shift, and is there a timer?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "There is no overall shift timer. Your pickaxe limits the shift: Daily and Free digs start with 55 swings, while career levels set their own starting budget. Each pry costs a swing. Individual Rush orders do carry their own 45-second countdown, shown as a dial on the card."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is the art hand-painted?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "No. It's AI-generated. The gems, rocks, mole and dragon are made with an AI image model under one painterly art direction, then curated and repaired until the set holds together. The music is composed and rendered by our own script, and there is no stock art or licensed audio."
-        }
-      }
-    ]
-  }
-  </script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Gemburrow", "applicationCategory": "Game", "operatingSystem": "Web", "description": "Dig through a tumbling gem jar, fill customer orders with seven satchel slots, and grow Flint’s hoard. Optional excavations add split-or-preserve routes.", "url": "https://hypersage.ai/gemburrow/", "author": {"@type": "Organization", "name": "HyperSage AI Labs LLC"}}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Where can I play?", "acceptedAnswer": {"@type": "Answer", "text": "Play free in your browser at hypersage.ai/gemburrow/play/. Progress is saved in that browser. An iPhone version is in development; its save is separate from the browser save."}}, {"@type": "Question", "name": "What happens when I split or preserve a great gem?", "acceptedAnswer": {"@type": "Answer", "text": "Splitting costs one swing and puts three loose gems into the seven-slot satchel. Lifting intact costs two swings and keeps a specimen for Flint, without supplying loose gems. The specimen is recorded only if you complete the commission."}}, {"@type": "Question", "name": "What is free?", "acceptedAnswer": {"@type": "Answer", "text": "All five excavations are free. The browser also opens all 40 Career levels, Free Dig and today’s Daily Dig. The iPhone version includes Career levels 1–10, Free Dig and today’s Daily; the optional one-time Full Burrow purchase opens Career levels 11–40 and the 14-day Daily archive. It does not add excavation sites. There are no ads, subscriptions or coin packs."}}, {"@type": "Question", "name": "How do I open the Daily Dig?", "acceptedAnswer": {"@type": "Answer", "text": "Complete Career level 1 from the main menu. Today’s Daily uses the same jar and starting budget for everyone. A connection is needed for leaderboard results."}}, {"@type": "Question", "name": "Does the excavation have a timer?", "acceptedAnswer": {"@type": "Answer", "text": "No. Excavations use a fixed swing budget, and the great-gem choice has no countdown. Rush orders and rare-gem choices have their own visible timers."}}, {"@type": "Question", "name": "Where is my progress saved?", "acceptedAnswer": {"@type": "Answer", "text": "Excavation records and other progress stay in the browser or app where you played. Clearing site data or deleting the app removes that local save. Excavation results are not uploaded; Daily leaderboard activity is described in the Privacy Policy."}}, {"@type": "Question", "name": "How were the art and music made?", "acceptedAnswer": {"@type": "Answer", "text": "The gems, rocks, mole and dragon use AI-generated artwork curated for the game. The four soundtrack recordings were generated with AI and prepared for the game, with separate music and sound volume controls."}}]}</script>
 </head>
 <body>
-
-  <nav class="site" id="top">
-    <div class="container">
-      <a class="brand" href="#top" aria-label="Gemburrow: back to top">
-        <img src="app-icon-512.png?v=20260821a" alt="" width="512" height="512">
-        Gemburrow
-      </a>
-      <div class="links">
-        <a href="play/">Play</a>
-        <a href="#jar-band">Try it</a>
-        <a href="#play">How it plays</a>
-        <a href="#dragon">Flint</a>
-        <a href="#modes">Modes</a>
-        <a href="#screens">Screens</a>
-        <a href="#honest">The deal</a>
-        <a href="#faq">FAQ</a>
-      </div>
-      <details class="mobile-menu">
-        <summary aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></summary>
-        <div class="mobile-links">
-          <a href="play/">Play</a>
-          <a href="#jar-band">Try it</a>
-          <a href="#play">How it plays</a>
-          <a href="#dragon">Flint</a>
-          <a href="#modes">Modes</a>
-          <a href="#screens">Screens</a>
-          <a href="#honest">The deal</a>
-          <a href="#faq">FAQ</a>
-        </div>
-      </details>
+  <div id="top"></div>
+  <nav class="site"><div class="container">
+    <a class="brand" href="#top" aria-label="Gemburrow: back to top"><img src="app-icon-512.png?v=20260821a" alt="" width="512" height="512"><span>Gemburrow</span></a>
+    <div class="links"><a href="play/">Play</a><a href="#play">How it plays</a><a href="#dragon">Flint</a><a href="#modes">Ways to play</a><a href="#screens">Screens</a><a href="#faq">FAQ</a></div>
+    <details class="mobile-menu"><summary aria-label="Open navigation">Menu</summary><div class="mobile-links"><a href="play/">Play</a><a href="#play">How it plays</a><a href="#dragon">Flint</a><a href="#modes">Ways to play</a><a href="#screens">Screens</a><a href="#faq">FAQ</a></div></details>
+  </div></nav>
+  <header class="hero"><div class="container">
+    <div><span class="eyebrow">Gem digging · play free in your browser</span>
+      <h1>Read the orders.<br>Work the jar.<br><span class="hl">Grow Flint’s hoard.</span></h1>
+      <p class="lede">Pick exposed gems from a tumbling glass jar, make room in your seven-slot satchel, and deliver customer orders before your swings run out. Start in Career, return for a Daily Dig, or explore at your own pace in Free Dig.</p>
+      <div class="hero-cta"><a class="btn-primary" href="play/">Play Gemburrow free</a><a class="btn-ghost" href="#honest">What's included</a></div>
+      <p class="hero-note">No ads · no energy meter · coming to iPhone</p>
     </div>
-  </nav>
-
-  <header class="hero">
-    <div class="container">
-      <div>
-        <span class="eyebrow"><span class="eb-long">Cozy gem-digging puzzle &middot; </span>play in your browser</span>
-        <h1>Dig the jar.<br>Fill the orders.<br><span class="hl">Feed the dragon.</span></h1>
-        <p class="lede">
-          A cozy gem-digging puzzle where every gem and rock is real physics. Dig one
-          out to fill an order, and the whole pile settles into the gap.
-        </p>
-        <div class="hero-cta">
-          <a class="btn-primary" href="play/">
-            <span>Play Gemburrow free</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </a>
-          <a class="btn-ghost" href="#honest">What's free, and why</a>
-        </div>
-        <p class="hero-note">No ads · no energy meter · no sign-in · all 40 levels free in your browser</p>
-      </div>
-      <div class="phone">
-        <img data-allow-duplicate="true" src="shots/candidate-120-s1-dig.png" width="1290" height="2796" loading="eager" alt="A career shift in the real game: order cards above a settling jar, with a limited satchel and swing budget">
-      </div>
+    <div class="phone"><img src="shots/career-run.png" width="780" height="1688" loading="eager" alt="Gemburrow Career with hanging customer orders, a seven-slot satchel and a dense glass jar of gems and rocks"></div>
+  </div></header>
+  <section class="section-block panel" id="play"><div class="container">
+    <div class="section-eyebrow">How it plays</div><h2>Read the orders. Make room.</h2>
+    <p class="section-lede">Five customer orders hang above the jar. Choose an order to keep its plan visible, then work through the pieces above the gems you need.</p>
+    <div class="grid-3">
+      <article class="card"><h3>Plan a delivery</h3><p>Select a customer card to see the remaining gems. The plan stays selected while you dig, and matching gems are marked in the pile.</p></article>
+      <article class="card"><h3>Work the pile</h3><p>Clear exposed rocks and extract reachable gems. Pieces settle as the jar opens, so the next useful gem may need another route.</p></article>
+      <article class="card"><h3>Mind seven slots</h3><p>The satchel holds seven gems. Completed orders deliver automatically; tap a held gem to discard it when you need space.</p></article>
     </div>
-  </header>
-
-  <section class="jarband" id="jar-band">
-    <div class="container">
-      <div class="jar-intro">
-        <div class="section-eyebrow">Try it</div>
-        <h2>Dig a jar right here.</h2>
-        <p class="section-lede">
-          One order, a satchel and a pickaxe with a fixed number of swings. The
-          rule that makes it a puzzle comes straight from the full game. <strong>A gem with anything resting on top of it
-          will not come out.</strong> Try one and it just shifts in place. Clear what's
-          above it and the whole pile falls into the hole.
-        </p>
-      </div>
-
-      <div class="jarwrap">
-        <div class="jar-stage">
-          <canvas id="jar" width="360" height="440"
-                  aria-label="A jar of gems and rocks. Click a gem that has nothing on top of it to pull it out and the pile collapses into the gap. The Dig the top gem button does the same without a pointer."></canvas>
-        </div>
-
-        <div class="jar-side">
-          <div class="hud-row">
-            <div class="hud-card" id="orderCard">
-              <div class="hud-label">Order <span id="orderPay">90c</span></div>
-              <ul class="need" id="orderNeed"></ul>
-            </div>
-            <div class="hud-stack">
-              <div class="hud-label">Satchel <span id="bagCount">0/7</span></div>
-              <ol class="bag" id="bagStrip" aria-label="Satchel slots. Click a gem to toss it."></ol>
-              <div class="hud-label swings-label">Pickaxe <span id="swingsLeft">22</span></div>
-              <div class="meter"><i id="swingsBar" style="width:100%"></i></div>
-              <div class="hud-label">Earned <span id="coins">0c</span></div>
-            </div>
-          </div>
-
-          <p class="jar-status" id="jarStatus" role="status" aria-live="polite">
-            Click a gem on the surface of the pile.
-          </p>
-
-          <div class="jar-actions">
-            <button type="button" id="jarDig">Dig the top gem</button>
-            <button type="button" id="jarRefill">New jar</button>
-          </div>
-
-          <ul class="rules">
-            <li><b>Only the surface comes out.</b> If anything rests on a piece, it stays buried.</li>
-            <li><b>Orders pay on full sets.</b> A gem sitting in your satchel has earned nothing yet.</li>
-            <li><b>Every pull costs a swing, rocks included.</b> They pay a coin and get in the way.</li>
-            <li><b>A full satchel jams.</b> Dig anything into a full bag and it is scrapped, even a gem the card wanted. Click a slot to toss one first.</li>
-          </ul>
-
-          <p class="jar-foot">
-            The full game is deeper than this: five orders on the line at once, 55 swings
-            in a standard dig, rare prisms a dragon wants, and a Heartstone that takes three
-            pries to free.
-          </p>
-        </div>
-      </div>
+  </div></section>
+  <section class="section-block" id="dragon"><div class="container dragon-row">
+    <div class="dragon-art"><img src="play/art/dragon.webp" width="200" height="200" loading="lazy" alt="Flint, the small purple dragon who keeps your preserved specimens"></div>
+    <div><div class="section-eyebrow">Optional excavations</div><h2>Some gems are worth keeping whole.</h2>
+      <p class="section-lede">Choose EXCAVATIONS from the main menu for five free, finite sites. Split a great gem into three loose gems for a commission, or spend two swings to lift it intact for Flint. Complete the commission to record your route and specimens in the field journal.</p>
+      <p class="jar-foot">These optional digs have no timer. They do not award coins or change the Daily challenge; Career, Daily and Free Dig keep their own hoard, wardrobe and coin progress.</p>
     </div>
-  </section>
-
-  <section class="section-block panel" id="play">
-    <div class="container">
-      <div class="section-eyebrow">How it plays</div>
-      <h2>Grabbing is easy. Digging is the game.</h2>
-      <p class="section-lede">
-        Five orders hang on a line above the jar. Every one wants a specific set of
-        gems, and you only get paid when a set is <em>complete</em>, so the jar
-        stops being a pile of treasure and starts being a plan.
-      </p>
-      <div class="grid-3">
-        <article class="card reveal">
-          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9a7 7 0 0 1 14 0v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M9 9V7a3 3 0 0 1 6 0v2"/><path d="M5 13h14"/></svg></div>
-          <h3>The satchel</h3>
-          <p>
-            Seven slots. Gems you dig stay in the bag until they finish an order.
-            Fill it with things nobody asked for and the next gem you pull is scrap.
-          </p>
-        </article>
-        <article class="card reveal">
-          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20l9-9"/><path d="M14 3c-2.6.5-5 1.9-6.8 3.8C9.1 5 11.5 3.6 14 3z"/><path d="M4.5 8.5c3-3.2 7.3-5 11.7-5-.2 4.4-2 8.7-5.2 11.7z"/><path d="M13 9l4 4"/></svg></div>
-          <h3>Make every swing count</h3>
-          <p>
-            Daily and Free digs start with 55 swings, and career levels set their own
-            budget. Every pry spends one, so read the cards before you swing.
-          </p>
-        </article>
-        <article class="card reveal">
-          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><circle cx="16" cy="16" r="3"/><circle cx="12" cy="7.5" r="3.5"/></svg></div>
-          <h3>The pile answers back</h3>
-          <p>
-            Digging moves the pile, uncovering gems that were out of reach a
-            second ago. Rocks pay a coin
-            and cost a swing; sometimes clearing one is the whole move.
-          </p>
-        </article>
-        <article class="card reveal">
-          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6h12v14l-2.5-1.6L13 20l-2.5-1.6L8 20l-2-1.4z"/><path d="M9 10h6"/><path d="M9 13.5h4"/><path d="M12 6V3"/></svg></div>
-          <h3>Orders that refill</h3>
-          <p>
-            Deliver a set and a fresh card drops onto the line in its place. A Rush
-            order arrives with a 45-second dial and pays for the hurry.
-          </p>
-        </article>
-        <article class="card reveal">
-          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18"/><path d="M9.5 9L12 20"/><path d="M14.5 9L12 20"/><path d="M9.5 9L10.5 4"/><path d="M14.5 9L13.5 4"/></svg></div>
-          <h3>Heartstones and geodes</h3>
-          <p>
-            Some rocks crack open into gems. Deep in the biggest jars lies a
-            Heartstone, a colossal gem that takes three pries to free. On a Free or Daily
-            dig, sell it for 600 coins or give it to the dragon.
-          </p>
-        </article>
-        <article class="card reveal">
-          <div class="ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/></svg></div>
-          <h3>It rings in tune</h3>
-          <p>
-            Combos climb the notes of whatever chord the soundtrack is playing,
-            and the fanfare grows with what you earned. A shift
-            that lost money never gets a celebration.
-          </p>
-        </article>
-      </div>
+  </div></section>
+  <section class="section-block panel" id="modes"><div class="container">
+    <div class="section-eyebrow">Ways to play</div><h2>Your next dig starts here.</h2>
+    <p class="section-lede">Career, Daily Dig and Free Dig are on the main menu, alongside the shop, dragon collection and scores. Excavations are an optional way to explore the same gems and rocks with a different goal.</p>
+    <div class="modes">
+      <article class="mode" style="--accent:var(--amber)"><div class="kind">Career</div><h3>40 levels</h3><p>Fill the orders before the pick is spent. The browser opens all 40 levels; the iPhone version includes levels 1–10, with 11–40 in the optional Full Burrow unlock.</p></article>
+      <article class="mode" style="--accent:var(--sapphire)"><div class="kind">Daily Dig</div><h3>A shared daily jar</h3><p>Complete Career level 1 to open today's Daily. Everyone starts with the same jar and budget. Connected results can appear on the Daily leaderboard.</p></article>
+      <article class="mode" style="--accent:var(--emerald)"><div class="kind">Free Dig</div><h3>A fresh jar</h3><p>Start a random jar, earn coins for the shop and build Flint's hoard. Free Dig results are not uploaded.</p></article>
     </div>
-  </section>
-
-  <section class="section-block" id="dragon">
-    <div class="container dragon-row">
-      <div class="dragon-art reveal">
-        <img src="demo/dragon.png?v=20260821a" width="200" height="200" loading="lazy"
-             alt="Flint, a small purple dragon asleep on a heap of gems and coins">
-      </div>
-      <div>
-        <div class="section-eyebrow">The collection</div>
-        <h2>Use it… or feed the dragon.</h2>
-        <p class="section-lede">
-          Flint sleeps on a ledge in the shop, and rare prisms go to his hoard.
-          When an order wants one too, the game stops and gives you six seconds to
-          choose. USE IT toward the card, or HOARD it and Flint keeps it forever.
-          If time runs out, it goes to the satchel while a card wants it and there is room; otherwise, Flint keeps it.
-        </p>
-        <div class="ladder">
-          <div class="rung"><span class="n">3</span><span>Flint wakes up</span></div>
-          <div class="rung"><span class="n">7</span><span>The hoard starts to sparkle</span></div>
-          <div class="rung"><span class="n">12</span><span>A bigger bag on free digs</span></div>
-          <div class="rung"><span class="n">20</span><span>Golden Flint</span></div>
-        </div>
-        <p class="jar-foot">
-          The hoard carries across every shift you ever dig. The bigger bag works
-          on free digs only, so the Daily stays seven slots for everyone.
-        </p>
-      </div>
+  </div></section>
+  <section class="section-block" id="screens"><div class="container">
+    <div class="section-eyebrow center">From the browser game</div><h2 class="center">Plan, choose, bring it home.</h2>
+    <div class="screens">
+      <figure class="screen-card"><div class="screen-frame"><img src="shots/main-menu.png" width="780" height="1688" loading="lazy" alt="The main menu keeps Career, Daily Dig and Free Dig prominent, with an optional Excavations entry"></div><figcaption><div class="screen-kind">The burrow</div><div class="screen-name">Choose your next dig</div></figcaption></figure>
+      <figure class="screen-card"><div class="screen-frame"><img src="shots/career-run.png" width="780" height="1688" loading="lazy" alt="Career customer orders above the dense gem jar and seven-slot satchel"></div><figcaption><div class="screen-kind">Career</div><div class="screen-name">Fill the orders</div></figcaption></figure>
+      <figure class="screen-card"><div class="screen-frame"><img src="shots/excavation-choice.png" width="640" height="1334" loading="lazy" alt="A great amber offers Lift intact for two swings, Split for one swing, or Leave it for now"></div><figcaption><div class="screen-kind">Optional excavation</div><div class="screen-name">Split or preserve</div></figcaption></figure>
+      <figure class="screen-card"><div class="screen-frame"><img src="shots/excavation-results-preserved.png" width="640" height="1334" loading="lazy" alt="An Amber Pocket commission completed in eleven swings with one intact amber specimen"></div><figcaption><div class="screen-kind">The field journal</div><div class="screen-name">A specimen for Flint</div></figcaption></figure>
     </div>
-  </section>
-
-  <section class="section-block panel" id="modes">
-    <div class="container">
-      <div class="section-eyebrow">Three ways to dig</div>
-      <h2>A ladder, a race, and somewhere to just play.</h2>
-      <div class="modes">
-        <article class="mode reveal" style="--accent: var(--amber);">
-          <div class="kind">Career</div>
-          <h3>40 levels</h3>
-          <p>The mole's job ladder. Clear every order before the pickaxe dies; earn one to three stars on the swings you had left at the bell.</p>
-          <ul>
-            <li>Each level is identical for every player</li>
-            <li>Rush orders from level 3, prisms from level 5</li>
-            <li>Stuck? A Deeper Pick buys eight more swings for one retry</li>
-          </ul>
-        </article>
-        <article class="mode reveal" style="--accent: var(--sapphire);">
-          <div class="kind">Daily Dig</div>
-          <h3>One shared jar</h3>
-          <p>The same gems, the same rocks and the same buried prisms for everybody in the world, with a leaderboard of the day's best hauls. A new jar opens at midnight UTC.</p>
-          <ul>
-            <li>No account or sign-in. A name is generated for you</li>
-            <li>Your best run of the day is the one that stands</li>
-          </ul>
-        </article>
-        <article class="mode reveal" style="--accent: var(--emerald);">
-          <div class="kind">Free Dig</div>
-          <h3>A fresh jar, no stakes</h3>
-          <p>A brand-new random jar whenever you want one. Practice a route, chase a personal best, or just take the lid off and make a mess.</p>
-          <ul>
-            <li>Every run banks its coins</li>
-            <li>An eighth satchel slot once your hoard reaches 12</li>
-            <li>Runs are never uploaded</li>
-          </ul>
-        </article>
-      </div>
+  </div></section>
+  <section class="section-block panel" id="honest"><div class="container">
+    <div class="section-eyebrow">What's included</div><h2>Three everyday modes. Five optional excavations.</h2>
+    <p class="section-lede">Start with Career, unlock today's Daily by clearing level 1, or try Free Dig. The five optional excavations are also free. There are no ads, subscriptions, energy meters or coin packs.</p>
+    <div class="honest">
+      <div><span class="tick" aria-hidden="true">✓</span><div><b>Browser</b><p>The five excavations, all 40 Career levels, Free Dig and today's Daily are playable without a purchase. The browser has no purchase checkout; its archive shows recent results, without replaying past jars.</p></div></div>
+      <div><span class="tick" aria-hidden="true">✓</span><div><b>iPhone, in development</b><p>The optional one-time Full Burrow purchase opens Career levels 11–40 and the 14-day Daily archive. The five excavations, Career 1–10, Free Dig and today's Daily stay free. The unlock does not add excavation sites or change the Daily jar.</p></div></div>
+      <div><span class="tick" aria-hidden="true">✓</span><div><b>Your progress</b><p>The journal and other progress stay in the app or browser where you played. Excavation, Career, Free Dig and archive results are not uploaded. <a href="privacy.html">Read about Daily leaderboard data.</a></p></div></div>
     </div>
-  </section>
-
-  <section class="section-block" id="screens">
-    <div class="container">
-      <div class="section-eyebrow center">Screens</div>
-      <h2 class="center">Lantern light, all the way down.</h2>
-      <div class="screens">
-        <figure class="screen-card reveal">
-          <div class="screen-frame"><img data-allow-duplicate="true" src="shots/candidate-120-s1-dig.png" width="1290" height="2796" loading="lazy" alt="A career shift with order cards, reachable gems, a satchel and a remaining swing budget"></div>
-          <figcaption><div class="screen-kind">The shift</div><div class="screen-name">Read the line, then dig</div></figcaption>
-        </figure>
-        <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/candidate-120-s2-choice.png" width="1290" height="2796" loading="lazy" alt="A rare prism choice: use it toward an order or let Flint keep it, with a visible countdown"></div>
-          <figcaption><div class="screen-kind">The dilemma</div><div class="screen-name">Use it, or hoard it</div></figcaption>
-        </figure>
-        <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/candidate-120-s3-dragon.png" width="1290" height="2796" loading="lazy" alt="Flint wardrobe showing dragon coats unlocked through permanent hoard progress"></div>
-          <figcaption><div class="screen-kind">The hoard</div><div class="screen-name">Coats earned through your hoard</div></figcaption>
-        </figure>
-        <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/candidate-120-s4-results.png" width="1290" height="2796" loading="lazy" alt="A level 13 result showing career stars and earned rewards; iPhone levels 11–40 require The Full Burrow purchase"></div>
-          <figcaption><div class="screen-kind">The bell</div><div class="screen-name">Three stars, coins banked</div><p>On iPhone, levels 11–40 require The Full Burrow purchase.</p></figcaption>
-        </figure>
-        <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/candidate-120-s6-shop.png" width="1290" height="2796" loading="lazy" alt="The mole's Dig Walls shop, with Flint and Pickaxe wardrobe tabs and wall prices in earned coins"></div>
-          <figcaption><div class="screen-kind">The shop</div><div class="screen-name">Six walls, all cosmetic</div></figcaption>
-        </figure>
-        <figure class="screen-card reveal">
-          <div class="screen-frame"><img src="shots/candidate-120-s8-heartstone.png" width="1290" height="2796" loading="lazy" alt="A Heartstone buried in the gem jar, which takes three pries to loosen"></div>
-          <figcaption><div class="screen-kind">The Heartstone</div><div class="screen-name">Three pries to loosen it</div></figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  
-  <section class="section-block panel" id="honest">
-    <div class="container">
-      <div class="section-eyebrow">The deal</div>
-      <h2>An honest game about greed.</h2>
-      <p class="section-lede">
-        A hoarding game built on a slot machine would be a poor joke. In your browser
-        there is no store at all, and the iPhone version on its way has one optional
-        purchase that only adds places to dig.
-      </p>
-      <div class="honest">
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>Free in your browser</b><p>All 40 career levels are open, and there is no store. The iPhone version will have one optional purchase, The Full Burrow, which opens career levels 11–40 and replays of the 14-day dig archive. Free digs, the Daily Dig and levels 1–10 stay free there, with no subscription and no coin packs.</p></div></div>
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>No ads</b><p>No ads to watch, skip, or accidentally tap.</p></div></div>
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>No energy meter</b><p>Play as long as you like. Nothing recharges on a clock, and nothing asks you to come back in four hours.</p></div></div>
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>No account</b><p>No sign-in, no email, no profile. The leaderboard names you MOLE-something and gets on with it.</p></div></div>
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>Money never changes a dig</b><p>Coins are earned by digging and are not for sale. They buy cosmetic walls or a Deeper Pick for one career retry, and the Daily stays the same jar for everyone. On iPhone, The Full Burrow opens levels and the archive. It never touches swings, satchel slots or what's in a jar.</p></div></div>
-        <div><span class="tick" aria-hidden="true">✓</span><div><b>Only Daily results are shared</b><p>A Daily Dig score carries a random ID made on your device, a generated MOLE- name and the run's numbers. Career, Free Dig and archive results are not uploaded. <a href="privacy.html">The details</a>.</p></div></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section-block" id="faq">
-    <div class="container">
-      <div class="section-eyebrow center">Common questions</div>
-      <h2 class="center">FAQ</h2>
-      <div class="faq-list">
-        <details class="faq">
-          <summary>Where can I play Gemburrow?</summary>
-          <p>In your browser, at <a href="play/">hypersage.ai/gemburrow/play/</a>, which you can add to your home screen. Your progress is saved in that browser. Gemburrow is also coming to iPhone; the iPhone version will keep its own save on the phone, separate from the browser's.</p>
-        </details>
-        <details class="faq">
-          <summary>What kind of puzzle is it?</summary>
-          <p>A physics puzzle. A jar is packed with gems and rocks; orders on the line ask for particular gems, and you dig them out. A piece comes out only when nothing rests on it, the pile collapses into every gap you make, and each dig spends one of your pickaxe swings.</p>
-        </details>
-        <details class="faq">
-          <summary>Does it cost anything, and are there ads?</summary>
-          <p>Not in your browser. The browser version at <a href="play/">hypersage.ai/gemburrow/play/</a> has no store and no ads, and all 40 career levels are open, along with the Daily Dig and its leaderboard, Free Dig, and the whole shop and wardrobe. ARCHIVE there shows your recent Daily results; replaying past jars is not part of the browser version. The coins you spend in the mole's shop are earned by digging and are not for sale. Gemburrow is also coming to iPhone, free to play with one optional purchase: The Full Burrow, a single one-time unlock that opens career levels 11–40 and the 14-day dig archive. On iPhone, Free Dig, today's Daily and its leaderboard, career levels 1–10, twenty-five of the 27 contracts, every dig wall and all eight Flint coats are included. Coats unlock with hoard earned by playing. The Worn Iron and Copper picks fit within the free levels; the four remaining picks and last two contracts require progress in career levels 11–40. There is no subscription, no coin pack, no ads and no energy meter.</p>
-        </details>
-        <details class="faq">
-          <summary>What do coins actually do?</summary>
-          <p>They bank between shifts and buy dig walls in the mole's shop: six of them, from Burrow Clay up to Deep Basalt. Those walls are purely cosmetic. Coins also pay for a Deeper Pick, which adds eight swings to one retry of a career level you're stuck on. It never applies to Daily Dig: everyone gets the same jar, seven satchel slots and starting swing budget.</p>
-        </details>
-        <details class="faq">
-          <summary>What is the Daily Dig?</summary>
-          <p>One jar a day, identical for every player, with the same gems, rocks and buried prisms and a leaderboard of the day's best hauls. It resets at midnight UTC. Open SCORES, then DAILY for today's leaderboard or YOU for personal bests. LEAGUE, when available, adds up the last 14 days of Daily scores. Scores use a random ID made on your device, an auto-generated MOLE- name and the run's numbers. The same ID looks up your own standing; no account or sign-in is needed.</p>
-        </details>
-        <details class="faq">
-          <summary>Can I play without a connection?</summary>
-          <p>In the iPhone app, Career, Free Dig and Daily Dig play offline. The browser version loads over the network and does not install itself for reliable offline play. Progress stays in the app or browser where you played. Leaderboards need a connection. A queued Daily score retries on launch, reconnection or resume while that Daily is current, and expires at the next midnight UTC. It may retry while another mode is open.</p>
-        </details>
-        <details class="faq">
-          <summary>How long is a shift, and is there a timer?</summary>
-          <p>There is no overall shift timer. Your pickaxe limits the shift: Daily and Free digs start with 55 swings, while career levels set their own starting budget. Each pry costs a swing. Individual Rush orders do carry their own 45-second countdown, shown as a dial on the card.</p>
-        </details>
-        <details class="faq">
-          <summary>Is the art hand-painted?</summary>
-          <p>No. It's AI-generated. The gems, rocks, mole and dragon are made with an AI image model under one painterly art direction, then curated and repaired until the set holds together. The music is composed and rendered by our own script, and there is no stock art or licensed audio.</p>
-        </details>
-      </div>
-    </div>
-  </section>
-
-  <section class="section-block" id="about">
-    <div class="container">
-      <div class="about-card">
-        <img src="app-icon-512.png?v=20260821a" width="512" height="512" loading="lazy" alt="Gemburrow app icon">
-        <div>
-          <div class="section-eyebrow">The studio</div>
-          <h3>From HyperSage</h3>
-          <p>Gemburrow is made by <a href="https://hypersage.ai/">HyperSage</a>, an independent app and game studio. We wrote the jar's physics ourselves so it stays smooth on a phone. <a href="https://hypersage.ai/">See the studio <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta-strip" id="notify">
-    <h2>The jar is full. Grandpa left you the shop.</h2>
-    <p>Dig in your browser right now. Questions, or a complaint about the dragon's attitude? Write to <a href="mailto:support@hypersage.ai?subject=Gemburrow">support@hypersage.ai</a>.</p>
-    <a href="play/" class="btn-primary">
-      <span>Play Gemburrow free</span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </a>
-  </section>
-
-  <footer class="site">
-    <div class="foot-brand">Gemburrow</div>
-    <div class="links">
-      <a href="privacy.html">Privacy</a>
-      <a href="terms.html">Terms</a>
-      <a href="support.html">Support</a>
-      <a href="mailto:support@hypersage.ai">Contact</a>
-    </div>
-    
-    <div class="copyright">© 2026 <a href="https://hypersage.ai/" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">HyperSage AI Labs LLC</a>. Dig responsibly; the dragon is watching.</div>
-  </footer>
-
-  <script>  /* ============================================================
-     THE JAR — a faithful miniature of the app's dig, not an impression of it.
-
-     The first version of this let you pull a gem out of the middle of the pile,
-     which is precisely the move the real game refuses, so it taught the wrong
-     game. Four rules are now ported rather than approximated, and each one is
-     marked with the game.js behaviour it mirrors:
-
-       1. EXPOSED()  — game.js Jar.prototype.exposed, same constants (0.72/1.05).
-                       A refused pull wiggles the body instead, exactly as
-                       game.js does with `b.wiggle = 1; Snd.thunk()`.
-       2. FULL SETS  — an order pays only when every row is satisfied, and the
-                       gems leave the satchel at that moment (burst delivery).
-       3. SWINGS     — every extraction costs one, rocks included; rocks pay 1c.
-       4. THE JAM    — a gem dug into a full satchel that no row wants is
-                       scrapped and earns nothing.
-
-     The solver itself is the same family as the game's — fixed substeps,
-     position-based separation, motion derived from displacement rather than
-     impulses — cut down to what a landing page needs. It sleeps when nothing is
-     moving, so an idle tab costs nothing.
-     ============================================================ */
-  (function () {
-    var canvas = document.getElementById('jar');
-    if (!canvas || !canvas.getContext) return;
-    var ctx = canvas.getContext('2d');
-
-    var GEMS = [
-      { key: 'ruby', label: 'ruby', color: '#E0475B', r: 17 },
-      { key: 'sapphire', label: 'sapphire', color: '#5B8CE8', r: 18 },
-      { key: 'emerald', label: 'emerald', color: '#46B073', r: 18 },
-      { key: 'amber', label: 'amber', color: '#E3A24A', r: 16 }
-    ];
-    var PRISM = { key: 'prism', label: 'prism', color: '#CFE8F5', r: 19 };
-    var ROCKS = [{ key: 'rock_s', r: 15 }, { key: 'rock_m', r: 19 }, { key: 'rock_l', r: 24 }];
-    // Tuned, not guessed: at 18 swings with a 55% gem pour, a button-only
-    // playthrough filled ZERO orders in 3 of 8 runs — and a visitor who fills
-    // nothing learns nothing. 22 swings, a slightly gemmier pour and a
-    // three-gem cap on the order put a first payout inside almost every run.
-    var SWINGS = 22, BAG_CAP = 7;
-
-    var imgs = {};
-    GEMS.concat([PRISM]).concat(ROCKS).forEach(function (t) {
-      var im = new Image();
-      im.onload = wake;
-      im.src = 'demo/' + t.key + '.png?v=20260821a';
-      imgs[t.key] = im;
-    });
-    function src(key) { return 'demo/' + key + '.png?v=20260821a'; }
-
-    var W = 0, H = 0, dpr = 1;
-    var jar = { l: 0, r: 0, top: 0, bot: 0 };
-    var bodies = [], pops = [];
-    var GRAV = 1500, STEP = 1 / 120, ITER = 5, SLOP = 0.4;
-    var acc = 0, last = 0, awake = 0, running = false;
-
-    var bag = [], swings = SWINGS, coins = 0, order = null, over = false;
-
-    var el = {
-      pay: document.getElementById('orderPay'),
-      need: document.getElementById('orderNeed'),
-      bagCount: document.getElementById('bagCount'),
-      bagStrip: document.getElementById('bagStrip'),
-      swings: document.getElementById('swingsLeft'),
-      bar: document.getElementById('swingsBar'),
-      coins: document.getElementById('coins'),
-      status: document.getElementById('jarStatus'),
-      dig: document.getElementById('jarDig'),
-      refill: document.getElementById('jarRefill')
-    };
-
-    function say(msg, kind) {
-      el.status.textContent = msg;
-      el.status.className = 'jar-status' + (kind ? ' ' + kind : '');
-    }
-
-    function layout() {
-      var box = canvas.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = box.width; H = box.height;
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      jar = { l: 18, r: W - 18, top: 38, bot: H - 18 };
-    }
-
-    function rand(a, b) { return a + Math.random() * (b - a); }
-
-    /* RULE 1 — game.js Jar.prototype.exposed, constants included. A body is
-       diggable only when nothing rests within 0.72 of the combined radii
-       horizontally and 1.05 vertically. This is the whole puzzle. */
-    function EXPOSED(b) {
-      for (var i = 0; i < bodies.length; i++) {
-        var o = bodies[i];
-        if (o === b || o.y >= b.y) continue;
-        var dx = Math.abs(o.x - b.x), dy = b.y - o.y, rs = o.r + b.r;
-        if (dx < rs * 0.72 && dy < rs * 1.05) return false;
-      }
-      return true;
-    }
-
-    function newOrder() {
-      // two rows, one to three of each — the same shape as a real order card,
-      // and never a prism: those are the app's sell-or-hoard dilemma, not a
-      // thing a starter order should demand.
-      var pool = GEMS.slice();
-      for (var i = pool.length - 1; i > 0; i--) {
-        var j = (Math.random() * (i + 1)) | 0, t = pool[i]; pool[i] = pool[j]; pool[j] = t;
-      }
-      var first = 1 + ((Math.random() * 2) | 0);            // 1 or 2
-      var rows = [
-        { key: pool[0].key, label: pool[0].label, want: first },
-        { key: pool[1].key, label: pool[1].label, want: 3 - first }   // total is always 3
-      ];
-      var total = rows[0].want + rows[1].want;
-      order = { rows: rows, pay: total * 30 };
-      renderOrder();
-    }
-
-    function have(key) {
-      var n = 0;
-      for (var i = 0; i < bag.length; i++) if (bag[i] === key) n++;
-      return n;
-    }
-
-    function renderOrder() {
-      el.pay.textContent = order.pay + 'c';
-      el.need.innerHTML = '';
-      order.rows.forEach(function (row) {
-        var got = Math.min(have(row.key), row.want);
-        var li = document.createElement('li');
-        if (got >= row.want) li.className = 'done';
-        var im = document.createElement('img');
-        im.src = src(row.key); im.alt = row.label; im.width = 21; im.height = 21;
-        var n = document.createElement('span');
-        n.className = 'n';
-        n.textContent = got + '/' + row.want;
-        li.appendChild(im); li.appendChild(n);
-        el.need.appendChild(li);
-      });
-    }
-
-    function renderBag(jamIndex) {
-      el.bagCount.textContent = bag.length + '/' + BAG_CAP;
-      el.bagStrip.innerHTML = '';
-      for (var i = 0; i < BAG_CAP; i++) {
-        var li = document.createElement('li');
-        if (i < bag.length) {
-          li.className = 'filled';
-          var im = document.createElement('img');
-          im.src = src(bag[i]); im.alt = bag[i]; im.width = 22; im.height = 22;
-          li.appendChild(im);
-          li.title = 'Toss this ' + bag[i];
-          (function (idx) {
-            li.addEventListener('click', function () { toss(idx); });
-          })(i);
-        }
-        if (jamIndex === i) li.classList.add('jam');
-        el.bagStrip.appendChild(li);
-      }
-    }
-
-    function renderSwings() {
-      el.swings.textContent = swings;
-      var pct = Math.max(0, swings / SWINGS) * 100;
-      el.bar.style.width = pct + '%';
-      el.bar.parentNode.className = 'meter' + (swings <= 5 ? ' low' : '');
-      el.coins.textContent = coins + 'c';
-    }
-
-    function toss(i) {
-      if (over) return;
-      // Mirrors the app: tossing costs no swing and earns nothing — an
-      // undelivered gem is simply gone.
-      var key = bag.splice(i, 1)[0];
-      renderBag(); renderOrder();
-      say('Tossed the ' + key + '. No swing spent, and no coins for it: a gem only pays once it completes an order.');
-    }
-
-    /* RULE 2 — the order pays only when EVERY row is satisfied, and the gems
-       leave the satchel at that moment. Partial progress is worth nothing. */
-    function tryDeliver() {
-      for (var i = 0; i < order.rows.length; i++) {
-        if (have(order.rows[i].key) < order.rows[i].want) return false;
-      }
-      order.rows.forEach(function (row) {
-        for (var n = 0; n < row.want; n++) bag.splice(bag.indexOf(row.key), 1);
-      });
-      coins += order.pay;
-      say('Order filled: ' + order.pay + 'c. The whole card cashes out at once, and a new one takes its place.', 'good');
-      newOrder();
-      renderBag(); renderSwings();
-      return true;
-    }
-
-    function wanted(key) {
-      for (var i = 0; i < order.rows.length; i++) {
-        if (order.rows[i].key === key && have(key) < order.rows[i].want) return true;
-      }
-      return false;
-    }
-
-    /* RULES 3 and 4 — a swing per pull, and a full satchel scraps a gem that no
-       row wants. */
-    function dig(b, i) {
-      bodies.splice(i, 1);
-      pops.push({ x: b.x, y: b.y, r: b.r, t: 0 });
-      swings--;
-      var isRock = b.key.indexOf('rock') === 0;
-
-      if (isRock) {
-        coins += 1;
-        say('Rock cleared. It paid a coin and cost a swing. Look what it was holding up.');
-      } else if (bag.length >= BAG_CAP) {
-        // Unconditional, exactly as the app has it: "bag jammed: the gem is LOST
-        // and the ladder resets — a gem not delivered earns nothing". An earlier
-        // version here only scrapped gems the order did not want, which quietly
-        // made the demo kinder than the game and blunted the whole point of the
-        // satchel — that committing a slot to the wrong gem costs you.
-        renderBag(bag.length - 1);
-        say('Satchel jammed, and that ' + b.key + ' is gone. A full bag scraps whatever you dig next, even something the card wanted. Toss a slot first.', 'bad');
-      } else {
-        bag.push(b.key);
-        if (!tryDeliver()) {
-          say('Bagged the ' + b.key + '. It has earned nothing yet; orders pay on the full set.');
-        }
-      }
-
-      renderBag(); renderOrder(); renderSwings();
-      wake();
-      if (swings <= 0) endShift();
-    }
-
-    function endShift() {
-      over = true;
-      say('Out of swings. You earned ' + coins + 'c. In the full game a standard dig starts with 55 swings and five orders hang on the line at once. Start a new jar and try reading the card before you dig.', 'good');
-      el.dig.disabled = true;
-    }
-
-    function refuse(b) {
-      b.wiggle = 1;                    // game.js does exactly this on a refused pull
-      wake();
-      say('That one is buried; something is resting on it. Clear what is on top of it first.', 'bad');
-    }
-
-    function fill() {
-      bodies = []; pops = [];
-      var jarW = jar.r - jar.l, jarH = jar.bot - jar.top;
-      var area = jarW * jarH, filled = 0, guard = 0;
-      // area-budgeted pour, like the app's: circles pack to about 90%, so stop
-      // well short or the pile can never settle
-      while (filled < area * 0.62 && guard++ < 400) {
-        var isGem = Math.random() < 0.62;
-        var t;
-        if (isGem) t = Math.random() < 0.06 ? PRISM : GEMS[(Math.random() * GEMS.length) | 0];
-        else t = ROCKS[(Math.random() * ROCKS.length) | 0];
-        var b = {
-          key: t.key, gem: isGem, color: t.color || '#8A7B69', r: t.r,
-          x: rand(jar.l + t.r + 2, jar.r - t.r - 2),
-          y: rand(jar.top - jarH * 0.9, jar.top - t.r),
-          px: 0, py: 0, wiggle: 0
-        };
-        b.px = b.x; b.py = b.y;
-        bodies.push(b);
-        filled += Math.PI * t.r * t.r;
-      }
-      awake = 4.5;
-      run();
-    }
-
-    function reset() {
-      bag = []; coins = 0; swings = SWINGS; over = false;
-      el.dig.disabled = false;
-      newOrder(); fill();
-      renderBag(); renderSwings();
-      say('New jar. Read the card, then click a gem that has nothing on top of it.');
-    }
-
-    function step(dt) {
-      var i, j, a, b;
-      for (i = 0; i < bodies.length; i++) {
-        a = bodies[i];
-        var vx = (a.x - a.px) * 0.995, vy = (a.y - a.py) * 0.995;
-        a.px = a.x; a.py = a.y;
-        a.x += vx; a.y += vy + GRAV * dt * dt;
-        if (a.wiggle > 0) a.wiggle = Math.max(0, a.wiggle - dt * 3.2);
-      }
-      for (var k = 0; k < ITER; k++) {
-        for (i = 0; i < bodies.length; i++) {
-          a = bodies[i];
-          for (j = i + 1; j < bodies.length; j++) {
-            b = bodies[j];
-            var dx = b.x - a.x, dy = b.y - a.y, min = a.r + b.r;
-            if (dx > min || dx < -min || dy > min || dy < -min) continue;
-            var d2 = dx * dx + dy * dy;
-            if (d2 >= min * min || d2 === 0) continue;
-            var d = Math.sqrt(d2), push = min - d - SLOP;
-            if (push <= 0) continue;
-            var nx = dx / d * push * 0.5, ny = dy / d * push * 0.5;
-            a.x -= nx; a.y -= ny; b.x += nx; b.y += ny;
-          }
-          if (a.x < jar.l + a.r) a.x = jar.l + a.r;
-          if (a.x > jar.r - a.r) a.x = jar.r - a.r;
-          if (a.y > jar.bot - a.r) a.y = jar.bot - a.r;
-        }
-      }
-    }
-
-    function roundRect(x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.arcTo(x + w, y, x + w, y + h, r);
-      ctx.arcTo(x + w, y + h, x, y + h, r);
-      ctx.arcTo(x, y + h, x, y, r);
-      ctx.arcTo(x, y, x + w, y, r);
-      ctx.closePath();
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-
-      ctx.save();
-      var g = ctx.createLinearGradient(0, jar.top, 0, jar.bot);
-      g.addColorStop(0, 'rgba(255,236,200,0.07)');
-      g.addColorStop(1, 'rgba(120,80,40,0.10)');
-      ctx.fillStyle = g;
-      roundRect(jar.l - 8, jar.top - 10, (jar.r - jar.l) + 16, (jar.bot - jar.top) + 18, 16);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255,215,94,0.22)';
-      ctx.lineWidth = 1.5;
-      roundRect(jar.l - 8, jar.top - 10, (jar.r - jar.l) + 16, (jar.bot - jar.top) + 18, 16);
-      ctx.stroke();
-      ctx.restore();
-
-      for (var i = 0; i < bodies.length; i++) {
-        var b = bodies[i], im = imgs[b.key];
-        // the wiggle a refused pull produces — the app's own "it will not move" tell
-        var wob = b.wiggle > 0 ? Math.sin(b.wiggle * 34) * b.wiggle * 4 : 0;
-        var bx = b.x + wob;
-        if (im && im.complete && im.naturalWidth) {
-          var s = b.r * 2.06;
-          ctx.drawImage(im, bx - s / 2, b.y - s / 2, s, s);
-        } else {
-          ctx.beginPath();
-          ctx.arc(bx, b.y, b.r, 0, 6.283);
-          ctx.fillStyle = b.color; ctx.fill();
-        }
-      }
-
-      for (var p = 0; p < pops.length; p++) {
-        var q = pops[p], a = 1 - q.t / 0.45;
-        if (a <= 0) continue;
-        ctx.beginPath();
-        ctx.arc(q.x, q.y, q.r + (1 - a) * 26, 0, 6.283);
-        ctx.strokeStyle = 'rgba(255,215,94,' + (a * 0.7).toFixed(3) + ')';
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-      }
-
-      ctx.fillStyle = 'rgba(255,255,255,0.05)';
-      ctx.fillRect(jar.l + 4, jar.top + 6, 7, (jar.bot - jar.top) * 0.42);
-    }
-
-    function frame(ts) {
-      if (!running) return;
-      if (!last) last = ts;
-      var dt = Math.min(0.05, (ts - last) / 1000);
-      last = ts;
-      acc += dt;
-      var n = 0;
-      while (acc >= STEP && n < 10) { step(STEP); acc -= STEP; n++; }
-      for (var p = pops.length - 1; p >= 0; p--) {
-        pops[p].t += dt;
-        if (pops[p].t > 0.45) pops.splice(p, 1);
-      }
-      draw();
-      awake -= dt;
-      if (awake <= 0 && !pops.length) { running = false; last = 0; return; }
-      requestAnimationFrame(frame);
-    }
-    function run() { if (!running) { running = true; last = 0; requestAnimationFrame(frame); } }
-    function wake() { awake = Math.max(awake, 1.6); run(); }
-
-    function pick(cx, cy) {
-      if (over) { say('That jar is finished. Hit New jar to pour another.'); return; }
-      var best = null, bestY = Infinity;
-      for (var i = 0; i < bodies.length; i++) {
-        var b = bodies[i], dx = cx - b.x, dy = cy - b.y;
-        if (dx * dx + dy * dy <= b.r * b.r && b.y < bestY) { best = i; bestY = b.y; }
-      }
-      if (best === null) return;
-      // RULE 1 — the gate. Everything above depends on this refusing.
-      if (!EXPOSED(bodies[best])) { refuse(bodies[best]); return; }
-      dig(bodies[best], best);
-    }
-
-    canvas.addEventListener('pointerdown', function (e) {
-      var box = canvas.getBoundingClientRect();
-      pick(e.clientX - box.left, e.clientY - box.top);
-    });
-
-    el.dig.addEventListener('click', function () {
-      if (over) return;
-      // Keyboard/no-pointer parity, and it must be as CAPABLE as a click, not
-      // just as constrained. It obeys the same exposure rule, and it makes the
-      // same two decisions a sighted player makes: prefer a gem the card
-      // actually wants, and when the surface is all rock, clear a rock — which
-      // is a real move, not a dead end. An earlier version only ever took the
-      // shallowest gem and stranded keyboard users the moment none was exposed.
-      var pickIdx = function (test) {
-        var best = -1, bestY = Infinity;
-        for (var i = 0; i < bodies.length; i++) {
-          if (bodies[i].y < bestY && test(bodies[i]) && EXPOSED(bodies[i])) { best = i; bestY = bodies[i].y; }
-        }
-        return best;
-      };
-      // Order matters, and it was measured: taking "any gem" before "a rock"
-      // hoards junk the card never wanted and strands the run — 3 of 12
-      // button-only playthroughs filled nothing. Clearing a rock instead opens
-      // the pile and is what a player actually does when the surface is wrong.
-      var i = pickIdx(function (b) { return b.gem && wanted(b.key); });
-      if (i < 0) i = pickIdx(function (b) { return b.key.indexOf('rock') === 0; });
-      if (i < 0) i = pickIdx(function (b) { return b.gem && bag.length < BAG_CAP; });
-      if (i < 0) i = pickIdx(function () { return true; });
-      if (i < 0) { say('Nothing is diggable; the jar is empty. Hit New jar.', 'bad'); return; }
-      dig(bodies[i], i);
-    });
-
-    el.refill.addEventListener('click', reset);
-
-    var ro = window.ResizeObserver ? new ResizeObserver(function () { layout(); draw(); }) : null;
-    if (ro) ro.observe(canvas); else window.addEventListener('resize', function () { layout(); draw(); });
-    document.addEventListener('visibilitychange', function () { if (!document.hidden) wake(); });
-
-    layout();
-    reset();
-  })();
-
-  /* Scroll reveal — only ever runs when the head script opted in.
-     A dead-man switch backs it: if the observer has not fired within 1.2s
-     (throttled background tab, a scraper, a future browser quirk) every
-     element is revealed anyway. Content must never be able to stay hidden
-     because an enhancement did not run. */
-  (function () {
-    if (!document.documentElement.classList.contains('js-reveal')) return;
-    var els = [].slice.call(document.querySelectorAll('.reveal'));
-    var revealAll = function () { els.forEach(function (el) { el.classList.add('in'); }); };
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
-    els.forEach(function (el) { io.observe(el); });
-    setTimeout(revealAll, 1200);
-  })();
-  </script>
+  </div></section>
+  <section class="section-block" id="faq"><div class="container"><div class="section-eyebrow center">Good to know</div><h2 class="center">FAQ</h2><div class="faq-list">
+<details class="faq"><summary>Where can I play?</summary><p>Play free in your browser at hypersage.ai/gemburrow/play/. Progress is saved in that browser. An iPhone version is in development; its save is separate from the browser save.</p></details>
+<details class="faq"><summary>What happens when I split or preserve a great gem?</summary><p>Splitting costs one swing and puts three loose gems into the seven-slot satchel. Lifting intact costs two swings and keeps a specimen for Flint, without supplying loose gems. The specimen is recorded only if you complete the commission.</p></details>
+<details class="faq"><summary>What is free?</summary><p>All five excavations are free. The browser also opens all 40 Career levels, Free Dig and today’s Daily Dig. The iPhone version includes Career levels 1–10, Free Dig and today’s Daily; the optional one-time Full Burrow purchase opens Career levels 11–40 and the 14-day Daily archive. It does not add excavation sites. There are no ads, subscriptions or coin packs.</p></details>
+<details class="faq"><summary>How do I open the Daily Dig?</summary><p>Complete Career level 1 from the main menu. Today’s Daily uses the same jar and starting budget for everyone. A connection is needed for leaderboard results.</p></details>
+<details class="faq"><summary>Does the excavation have a timer?</summary><p>No. Excavations use a fixed swing budget, and the great-gem choice has no countdown. Rush orders and rare-gem choices have their own visible timers.</p></details>
+<details class="faq"><summary>Where is my progress saved?</summary><p>Excavation records and other progress stay in the browser or app where you played. Clearing site data or deleting the app removes that local save. Excavation results are not uploaded; Daily leaderboard activity is described in the Privacy Policy.</p></details>
+<details class="faq"><summary>How were the art and music made?</summary><p>The gems, rocks, mole and dragon use AI-generated artwork curated for the game. The four soundtrack recordings were generated with AI and prepared for the game, with separate music and sound volume controls.</p></details>
+</div></div></section>
+  <section class="cta-strip"><h2>What will you bring back for Flint?</h2><p>Start a Career dig, or choose an excavation. Questions? <a href="mailto:support@hypersage.ai?subject=Gemburrow">support@hypersage.ai</a>.</p><a href="play/" class="btn-primary">Play Gemburrow free</a></section>
+  <footer class="site"><div class="foot-brand">Gemburrow</div><div class="links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="support.html">Support</a><a href="mailto:support@hypersage.ai">Contact</a></div><div class="copyright">© 2026 <a href="https://hypersage.ai/">HyperSage AI Labs LLC</a></div></footer>
 </body>
 </html>

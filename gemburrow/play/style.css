@@ -1,16 +1,13 @@
-/* Gemburrow — DOM overlay stylesheet. The world is on <canvas>; everything
-   here is chrome. Consume the safe-area insets on every edge-anchored element. */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
   width: 100%; height: 100%;
   overflow: hidden;
-  background: #1c2751;
+  background: #1a120c;
   font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
   -webkit-user-select: none; user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
-  /* stops the browser from stealing hops as scroll/zoom gestures */
   touch-action: none;
 }
 
@@ -20,28 +17,9 @@ html, body {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   display: block;
-  /* iOS Safari ignores user-scalable=no on double-tap; this is the real fix. */
   touch-action: none;
 }
 
-/* Example HUD anchor — Android targetSdk 35+ FORCES edge-to-edge, so content at
-   y=0 hides under the status bar/notch. The WEB layer must pay the inset back.
-   Copy this max(px, env(...)) idiom for every edge-anchored overlay element. */
-.hud-top-left {
-  position: absolute;
-  top: max(10px, env(safe-area-inset-top));
-  left: max(12px, env(safe-area-inset-left));
-}
-.hud-bottom {
-  position: absolute;
-  bottom: max(14px, env(safe-area-inset-bottom));
-  left: max(14px, env(safe-area-inset-left));
-  right: max(14px, env(safe-area-inset-right));
-}
-
-/* invisible probes: JS reads their offsets to learn the insets in CSS px.
-   TWO of them — the bottom one anchors the shop counter to the physical floor
-   instead of to the authoring constant VIEW_H. */
 #safe-probe {
   position: fixed;
   top: env(safe-area-inset-top, 0px);
@@ -55,8 +33,6 @@ html, body {
   visibility: hidden;
 }
 
-/* A native dialog supplies focus containment, Escape and screen-reader text.
-   Its scroll area is independent of the fixed canvas and its gesture rules. */
 #how-to-play {
   position: fixed; inset: var(--guide-top, 12px) 0 var(--guide-bottom, 12px); z-index: 20;
   margin: auto; padding: 0;
@@ -85,6 +61,7 @@ html.guide-fallback::after { content: ''; position: fixed; inset: 0; z-index: 19
 .guide-gems img { display: block; width: 46px; height: 46px; object-fit: contain; margin: 0 auto 6px; }
 .guide-gems figcaption { color: #d9c299; font-size: 12px; }
 .guide-body section { display: flex; gap: 12px; margin-top: 24px; }
+.guide-body section[hidden], .guide-body [hidden] { display: none; }
 .guide-step { flex: none; width: 28px; height: 28px; border: 1px solid #a0804d; border-radius: 50%; text-align: center; color: #ffdf97; font: bold 16px/26px Georgia, serif; }
 .guide-body h2 { color: #ffe3a0; font: bold 20px/1.3 Georgia, serif; margin-bottom: 8px; }
 .guide-body p + p { margin-top: 10px; }
@@ -92,8 +69,6 @@ html.guide-fallback::after { content: ''; position: fixed; inset: 0; z-index: 19
 .guide-body strong { color: #ffe3a0; }
 .guide-footer { margin-top: 28px; padding-top: 16px; border-top: 1px solid #a0804d44; color: #c9b493; font-size: 13px; }
 
-/* Transparent buttons provide native keyboard and assistive activation while
-   touch continues to use the canvas. Never hide these with opacity:0. */
 #game-controls { position: absolute; inset: 0; pointer-events: none; }
 .game-control { position: absolute; padding: 0; border: 0; border-radius: 9px; background: transparent; color: transparent; font-size: 0; pointer-events: none; }
 .game-control:focus { outline: 3px solid #ffd75e; outline-offset: 2px; box-shadow: 0 0 0 6px #1b120c; }

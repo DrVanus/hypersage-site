@@ -398,7 +398,7 @@ CARDS = {
         "sub": "Cleopatra. Sherlock Holmes. Marcus Aurelius. Ada Lovelace. 470 figures from history, myth and literature, each written at length. They remember what you tell them.",
     },
     "gemburrow": {
-        "art": "shots/daily.jpg",
+        "art": "shots/career-run.png",
         "css": """
   /* The page's own lantern wash (body::before) over --bg-2 -> --bg, with one
      extra warm pass at the top so the card carries the same light the shop room
@@ -421,8 +421,8 @@ CARDS = {
        background-image: linear-gradient(178deg, #F6ECDC 62%, #CBB79C 165%); }
   h1 .grad { background-image: linear-gradient(100deg, #FFE9A8, #E3A24A 55%, #E0475B); }
   .sub { color: #CBB79C; max-width: 540px; }
-  /* The Daily Dig frame, bled full height and feathered into the lantern glow —
-     828x1795 at h=630 is w=291, so nothing is cropped off the jar. */
+  /* The Career frame, bled full height and feathered into the lantern glow —
+     780x1688 at h=630 is w=291, so nothing is cropped off the jar. */
   .art { width: 291px; height: 630px; object-position: 50% 42%;
          -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%);
          mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%); }
@@ -432,8 +432,8 @@ CARDS = {
         # game, playable at /gemburrow/play/ (200) since before 2026-08-21. 41 chars,
         # the length measured against the nowrap above.
         "kicker": "Gem-digging puzzle \u00b7 play in your browser",
-        "h1": 'Dig the jar.<br>Feed the <span class="grad">dragon.</span>',
-        "sub": "Every gem and rock is real physics: pull one out and the whole pile settles. Fill the orders on the line \u2014 and decide what the dragon keeps.",
+        "h1": 'Read the orders.<br>Work the jar.<br><span class="grad">Grow a hoard.</span>',
+        "sub": "Career, Daily and Free Dig. Fill customer orders, or choose an optional excavation to preserve specimens for Flint.",
     },
     # Replaces the hand-made 2026-08 plate whose baked subhead said "recover
     # every stolen coin", refuted by game.js:4486-4490 (a laden raider that

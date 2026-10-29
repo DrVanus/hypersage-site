@@ -27,7 +27,7 @@ CryptoSage AI provides market information, not investment advice. Rowan, Quietoa
 - [Waddleton](https://waddleton.pages.dev/): free-to-play snowy social world in the browser where you make a penguin, meet other players, and play 17 arcade games (live, [about](https://hypersage.ai/waddleton/))
 - [Mythkin](https://hypersage.ai/mythkin/): AI character app for adults; talk to 470 figures from history, myth, literature and scripture, or write your own (iOS, coming soon)
 - [Hoardling](https://hypersage.ai/hoardling/): hoard-defense game played from the dragon's side of the cave, where you hold the chokepoints and kill a carrier to send its coins home; free in the browser (live on the web, not on the App Store, [play](https://hypersage.ai/hoardling/play/))
-- [Gemburrow](https://hypersage.ai/gemburrow/): cozy gem-digging puzzle where every gem and rock is real physics; free in the browser (live on the web, not on the App Store, [play](https://hypersage.ai/gemburrow/play/))
+- [Gemburrow](https://hypersage.ai/gemburrow/): gem digging with customer orders, a seven-slot satchel and Flint's hoard; Career, Daily and Free Dig plus five optional specimen excavations (live on the web, not on the App Store, [play](https://hypersage.ai/gemburrow/play/))
 
 ## Studio
 
