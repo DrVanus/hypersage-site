@@ -7843,12 +7843,6 @@ function makeExcavationJar(site) {
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
   };
 
-  var SHOP_ROW_Y = 250, SHOP_ROW_H = 56, SHOP_ROW_GAP = 8;
-  var SHOP_TAB_W = 132, SHOP_TAB_H = 34, SHOP_TAB_Y = 210;
-  var DRAGON_ROW_Y = 254, DRAGON_ROW_H = 50, DRAGON_ROW_GAP = 1;
-  function dragonRowY(i) { return DRAGON_ROW_Y + i * (DRAGON_ROW_H + DRAGON_ROW_GAP); }
-  var WARDROBE_TALLY_Y = 176;
-  var DRAGON_HIT_H = DRAGON_ROW_H + DRAGON_ROW_GAP;
   function padHitUp(r, h) {
     h = h || 50;
     return { x: r.x, y: r.y - (h - r.h), w: r.w, h: h };
@@ -7876,16 +7870,76 @@ function makeExcavationJar(site) {
       return c;
     } catch (e) { return base; }
   }
-  function shopTabs() {
-    var cx = VIEW_MIN_W / 2, W = 128, G = 4;
-    var x0 = cx - (W * 1.5 + G);
-    return {
-      walls:  { x: x0,               y: SHOP_TAB_Y, w: W, h: SHOP_TAB_H },
-      dragon: { x: x0 + W + G,       y: SHOP_TAB_Y, w: W, h: SHOP_TAB_H },
-      pick:   { x: x0 + (W + G) * 2, y: SHOP_TAB_Y, w: W, h: SHOP_TAB_H },
-    };
+  function shopCatalog(tab) {
+    return tab === 'dragon' ? DRAGON_SKINS : tab === 'pick' ? PICK_SKINS : WALL_SKINS;
   }
-  function shopRowY(i) { return SHOP_ROW_Y + i * (SHOP_ROW_H + SHOP_ROW_GAP); }
+  function shopItemState(tab, item) {
+    tab = tab === 'dragon' || tab === 'pick' ? tab : 'walls';
+    var list = shopCatalog(tab);
+    item = list.filter(function (sk) { return item && sk.id === item.id; })[0] || list[0];
+    var have = tab === 'walls' ? (Meta.data.coins || 0) : tab === 'dragon' ? (Meta.data.hoardTotal || 0) : starTotal();
+    var need = tab === 'walls' ? item.price : tab === 'dragon' ? (item.rank < 0 ? 0 : 20 + item.rank * HOARD_STEP) : item.stars;
+    var owned = tab === 'walls' ? item.price === 0 || !!(Meta.data.owned && Meta.data.owned[item.id])
+      : tab === 'dragon' ? dragonUnlocked(item) : pickUnlocked(item);
+    var eq = tab === 'walls' ? equippedWallId() : tab === 'dragon' ? equippedDragonId() : equippedPickId();
+    var equipped = item.id === eq, afford = have >= need;
+    var label = equipped ? 'Equipped' : owned ? 'Equip'
+      : tab === 'walls' ? (afford ? 'Buy for ' + need.toLocaleString() + ' coins' : 'Need ' + (need - have).toLocaleString() + ' more coins')
+      : 'Unlock at ' + need + (tab === 'dragon' ? ' hoard' : ' stars');
+    return { item: item, id: item.id, name: item.name, owned: owned, equipped: equipped,
+      unlocked: owned, afford: afford, have: have, need: need, actionLabel: label,
+      canAct: !equipped && (owned || tab === 'walls' && afford) };
+  }
+  Game.prototype.shopSelection = function () {
+    var tab = this.shopTab === 'dragon' || this.shopTab === 'pick' ? this.shopTab : 'walls';
+    var list = shopCatalog(tab), selected = this._shopSelections && this._shopSelections[tab];
+    return list.filter(function (sk) { return sk.id === selected; })[0]
+      || list.filter(function (sk) { return shopItemState(tab, sk).equipped; })[0] || list[0];
+  };
+  Game.prototype.selectShopItem = function (id) {
+    var tab = this.shopTab === 'dragon' || this.shopTab === 'pick' ? this.shopTab : 'walls';
+    var item = shopCatalog(tab).filter(function (sk) { return sk.id === id; })[0];
+    if (!item) return false;
+    this._shopSelections = this._shopSelections || {};
+    this._shopSelections[tab] = item.id;
+    return true;
+  };
+  Game.prototype.activateShopItem = function () {
+    if (this._shopActionBusy) return false;
+    var tab = this.shopTab === 'dragon' || this.shopTab === 'pick' ? this.shopTab : 'walls';
+    var st = shopItemState(tab, this.shopSelection());
+    if (!st.canAct) return false;
+    this._shopActionBusy = true;
+    try {
+      if (tab === 'walls' && !st.owned) {
+        Meta.data.coins -= st.need;
+        Meta.data.owned = Meta.data.owned || {};
+        Meta.data.owned[st.id] = 1;
+        Snd.fanfare(150);
+      } else uiTick();
+      Meta.data.equipped = Meta.data.equipped || {};
+      Meta.data.equipped[tab === 'walls' ? 'wall' : tab] = st.id;
+      Meta.save();
+      if (tab === 'dragon') this.dragonPulse = 1;
+      this._uiLockUntil = nowMs() + UI_LOCK_MS;
+      return true;
+    } finally { this._shopActionBusy = false; }
+  };
+  Game.prototype.shopLayout = function () {
+    var tab = this.shopTab === 'dragon' || this.shopTab === 'pick' ? this.shopTab : 'walls';
+    var columns = tab === 'dragon' ? 4 : 3, width = tab === 'dragon' ? 85 : 116;
+    var tabs = {};
+    ['walls', 'dragon', 'pick'].forEach(function (id, i) { tabs[id] = { x: 28 + 124 * i, y: 196, w: 116, h: 58 }; });
+    return {
+      tabs: tabs, preview: { x: 28, y: 266, w: 364, h: 176 },
+      action: { x: 188, y: 368, w: 184, h: 58 },
+      cards: shopCatalog(tab).map(function (item, i) {
+        return { id: 'shop-item:' + tab + ':' + item.id, item: item,
+          rect: { x: 28 + (width + 8) * (i % columns), y: 454 + 86 * Math.floor(i / columns), w: width, h: 78 } };
+      }),
+      back: { x: 100, y: this._shopBackY(650), w: 220, h: 56 }
+    };
+  };
 
   var RECORDS_BACK_Y = 640;
   var REC_TAB_Y = 78, REC_TAB_H = 34, REC_TAB_W = 76, REC_TAB_GAP = 4, REC_TAB_W4 = 96;
@@ -8328,215 +8382,145 @@ function makeExcavationJar(site) {
 
     this._drawStanding('board', y + 10);
   };
-  Game.prototype._drawPickTab = function () {
-    var ctx = this.ctx, cx = VIEW_MIN_W / 2;
-    var eq = equippedPickId(), have = starTotal();
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillStyle = 'rgba(255,215,94,0.85)'; ctx.font = fT(12);
-    ctx.fillText('\u2605 ' + have + ' of ' + (CAREER_MAX * 3) + ' career stars', cx, WARDROBE_TALLY_Y, 300);
-
-    var base = SPR.prop_pickaxe;
-    for (var i = 0; i < PICK_SKINS.length; i++) {
-      var sk = PICK_SKINS[i], y = dragonRowY(i);
-      var open = pickUnlocked(sk), isEq = eq === sk.id;
-      var x0 = cx - 150;
-      ctx.fillStyle = isEq ? 'rgba(90,70,42,0.92)' : 'rgba(30,22,16,0.82)';
-      rr(ctx, x0, y, 300, DRAGON_ROW_H, 10); ctx.fill();
-      ctx.strokeStyle = isEq ? '#ffd75e' : open ? 'rgba(201,168,106,0.7)' : 'rgba(140,120,100,0.28)';
-      ctx.lineWidth = isEq ? 2.5 : 1.5;
-      rr(ctx, x0, y, 300, DRAGON_ROW_H, 10); ctx.stroke();
-      if (base) {
-        ctx.save();
-        ctx.globalAlpha = open ? 1 : 0.28;
-        ctx.drawImage(tintCutout(base, sk, _pickPrev, sk.id) || base,
-                      x0 + 8, y + 3, DRAGON_ROW_H - 6, DRAGON_ROW_H - 6);
-        ctx.restore();
-      }
-      ctx.textAlign = 'left';
-      ctx.fillStyle = open ? '#f0e2c8' : 'rgba(200,186,166,0.45)';
-      ctx.font = fT(14, 'bold');
-      ctx.fillText(sk.name, x0 + 58, y + 15, 150);
-      ctx.textAlign = 'right';
-      ctx.font = fT(12, 'bold');
-      if (isEq) { ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN', x0 + 290, y + 18, 90); }
-      else if (open) { ctx.fillStyle = 'rgba(201,168,106,0.9)'; ctx.fillText('wear', x0 + 290, y + 18, 90); }
-      else { ctx.fillStyle = 'rgba(200,186,166,0.5)';
-             ctx.fillText('\u2605 ' + sk.stars, x0 + 290, y + 18, 90); }
-      ctx.textAlign = 'center';
+  function shopArt(ctx, tab, item, b) {
+    var img=tab==='walls'?gradedWall(item.id)
+           :tab==='dragon'?skinPreview(item)
+           :tintCutout(SPR.prop_pickaxe,item,_pickPrev,item.id);
+    if(!img)return;
+    ctx.save();
+    if(tab==='walls'){
+      rr(ctx,b.x,b.y,b.w,b.h,8);ctx.clip();
+      var scale=Math.max(b.w/img.width,b.h/img.height);
+      ctx.drawImage(img,b.x+(b.w-img.width*scale)/2,b.y+(b.h-img.height*scale)/2,img.width*scale,img.height*scale);
+    }else{
+      var crop=tab==='dragon'?[47/320,24/320,238/320,271/320]:[37/256,17/256,184/256,222/256];
+      var sx=crop[0]*img.width,sy=crop[1]*img.height,sw=crop[2]*img.width,sh=crop[3]*img.height;
+      var fit=Math.min(b.w/sw,b.h/sh),dw=sw*fit,dh=sh*fit;
+      ctx.drawImage(img,sx,sy,sw,sh,b.x+(b.w-dw)/2,b.y+(b.h-dh)/2,dw,dh);
     }
-    this._menuBtn('BACK', this._shopBackY(dragonRowY(PICK_SKINS.length) + 6));
-  };
-
-  Game.prototype._drawDragonTab = function () {
-    var ctx = this.ctx, cx = VIEW_MIN_W / 2;
-    var eq = equippedDragonId();
-    var rk = hoardRank(Meta.data.hoardTotal);
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillStyle = 'rgba(232,201,255,0.85)'; ctx.font = fT(12);
-    ctx.fillText(rk ? rk.name + ' · hoard ' + Meta.data.hoardTotal
-                    : 'hoard ' + Meta.data.hoardTotal + ' · first skin at 20',
-                 cx, WARDROBE_TALLY_Y, 300);
-
-    var base = SPR.dragon;
-    for (var i = 0; i < DRAGON_SKINS.length; i++) {
-      var sk = DRAGON_SKINS[i], y = dragonRowY(i);
-      var open = dragonUnlocked(sk), isEq = eq === sk.id;
-      var x0 = cx - 150;
-      ctx.fillStyle = isEq ? 'rgba(90,70,42,0.92)' : 'rgba(30,22,16,0.82)';
-      rr(ctx, x0, y, 300, DRAGON_ROW_H, 10); ctx.fill();
-      ctx.strokeStyle = isEq ? '#ffd75e'
-                        : open ? 'rgba(201,168,106,0.7)' : 'rgba(140,120,100,0.28)';
-      ctx.lineWidth = isEq ? 2.5 : 1.5;
-      rr(ctx, x0, y, 300, DRAGON_ROW_H, 10); ctx.stroke();
-
-      if (base) {
-        ctx.save();
-        ctx.globalAlpha = open ? 1 : 0.28;
-        var img = skinPreview(sk) || base;
-        ctx.drawImage(img, x0 + 8, y + 3, DRAGON_ROW_H - 6, DRAGON_ROW_H - 6);
-        ctx.restore();
-      }
-      ctx.textAlign = 'left';
-      ctx.fillStyle = open ? '#f0e2c8' : 'rgba(200,186,166,0.45)';
-      ctx.font = fT(14, 'bold');
-      ctx.fillText(sk.name, x0 + 58, y + 15, 150);
-      ctx.textAlign = 'right';
-      ctx.font = fT(12, 'bold');
-      if (isEq) {
-        ctx.fillStyle = '#ffd75e'; ctx.fillText('WORN', x0 + 290, y + 18, 90);
-      } else if (open) {
-        ctx.fillStyle = 'rgba(201,168,106,0.9)'; ctx.fillText('wear', x0 + 290, y + 18, 90);
-      } else {
-        ctx.fillStyle = 'rgba(200,186,166,0.5)';
-        ctx.fillText('hoard ' + (20 + sk.rank * HOARD_STEP), x0 + 290, y + 18, 110);
-      }
-      ctx.textAlign = 'center';
-    }
-    this._menuBtn('BACK', this._shopBackY(dragonRowY(DRAGON_SKINS.length) + 6));
-  };
-
+    ctx.restore();
+  }
+  function shopLabel(ctx,text,x,y,font,color){
+    ctx.save();ctx.fillStyle=color||'#ffe9a8';menuCenteredLabel(ctx,text,x,y,font);ctx.restore();
+  }
+  function shopLock(ctx,x,y){
+    ctx.save();ctx.strokeStyle='#c7b28f';ctx.lineWidth=1.3;ctx.lineCap='round';
+    rr(ctx,x-4,y-1,8,7,1.4);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x-2.5,y-1);ctx.lineTo(x-2.5,y-3);
+    ctx.bezierCurveTo(x-2.5,y-7,x+2.5,y-7,x+2.5,y-3);ctx.lineTo(x+2.5,y-1);ctx.stroke();
+    ctx.restore();
+  }
+  function shopCheck(ctx,x,y){
+    ctx.save();ctx.strokeStyle='#ffd75e';ctx.lineWidth=1.7;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x-1,y+3);ctx.lineTo(x+5,y-4);ctx.stroke();ctx.restore();
+  }
+  function shopPlate(ctx,b,selected){
+    ctx.save();
+    var fill=ctx.createLinearGradient(0,b.y,0,b.y+b.h);
+    fill.addColorStop(0,selected?'#58422b':'#35271b');
+    fill.addColorStop(1,selected?'#332417':'#21180f');
+    ctx.fillStyle=fill;rr(ctx,b.x,b.y,b.w,b.h,12);ctx.fill();
+    ctx.strokeStyle=selected?'#eac675':'rgba(197,158,98,0.46)';ctx.lineWidth=selected?2:1.2;
+    rr(ctx,b.x+.5,b.y+.5,b.w-1,b.h-1,11.5);ctx.stroke();
+    ctx.restore();
+  }
   Game.prototype._drawShop = function () {
-    var ctx = this.ctx, v = this.view;
-    ctx.fillStyle = '#241a12';
-    ctx.fillRect(-v.ox, -v.uiTop, v.w, v.h);
-    var bg = SPR.backdrop_burrow;
-    if (bg) {
-      ctx.globalAlpha = 0.30;
-      var sc = Math.max(v.w / bg.width, v.h / bg.height);
-      ctx.drawImage(bg, -v.ox + (v.w - bg.width * sc) / 2, -v.uiTop, bg.width * sc, bg.height * sc);
-      ctx.globalAlpha = 1;
+    var ctx=this.ctx,v=this.view,cx=VIEW_MIN_W/2;
+    var tab=this.shopTab||'walls',layout=this.shopLayout(),item=this.shopSelection();
+    var info=shopItemState(tab,item),catalog=shopCatalog(tab);
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillStyle='#21170f';ctx.fillRect(-v.ox,-v.uiTop,v.w,v.h+v.uiTop);
+    var bg=SPR.backdrop_burrow;
+    if(bg){
+      var cover=Math.max(v.w/bg.width,v.h/bg.height);
+      ctx.globalAlpha=.17;
+      ctx.drawImage(bg,-v.ox+(v.w-bg.width*cover)/2,-v.uiTop,bg.width*cover,bg.height*cover);
+      ctx.globalAlpha=1;
     }
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillStyle = '#ffe9a8'; ctx.font = fD(28);
-    ctx.fillText("THE MOLE'S SHOP", VIEW_MIN_W / 2, 96);
-    ctx.fillStyle = 'rgba(232,220,200,0.75)'; ctx.font = fT(13);
-    ctx.fillText(this.shopTab === 'dragon' ? 'what you hoard, Flint wears'
-               : this.shopTab === 'pick'   ? 'what you master, the pick remembers'
-               : 'dig walls · every gem you sell pays for these', VIEW_MIN_W / 2, 134);
-    this._drawGearAt(SHOP_GEAR);
+    ctx.fillStyle='#ffe9a8';ctx.font=fD(28);
+    ctx.fillText("THE MOLE'S SHOP",cx,83,VIEW_MIN_W-48);
+    ctx.fillStyle='#c8b89b';ctx.font=fT(12);
+    ctx.fillText('Choose a look. Your dig stays the same.',cx,122,VIEW_MIN_W-48);
+    this._drawGearAt(SHOP_GEAR,true);
 
-    if (this.shopTab !== 'dragon' && this.shopTab !== 'pick') {
-      ctx.fillStyle = 'rgba(20,12,6,0.55)';
-      rr(ctx, VIEW_MIN_W / 2 - 78, 168, 156, 40, 12); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,215,94,0.5)'; ctx.lineWidth = 1.5;
-      rr(ctx, VIEW_MIN_W / 2 - 78, 168, 156, 40, 12); ctx.stroke();
-      ctx.fillStyle = '#ffd75e'; ctx.font = fN(22);
-      ctx.fillText((Meta.data.coins || 0).toLocaleString() + 'c', VIEW_MIN_W / 2, 178);
+    var balance={x:cx-106,y:146,w:212,h:38};
+    ctx.fillStyle='rgba(14,9,5,0.64)';rr(ctx,balance.x,balance.y,balance.w,balance.h,10);ctx.fill();
+    ctx.strokeStyle='rgba(206,166,96,.44)';ctx.lineWidth=1;ctx.stroke();
+    var balanceLabel=tab==='walls'?'SAVED COINS':tab==='dragon'?'DRAGON HOARD':'CAREER STARS';
+    var balanceValue=tab==='walls'?(Meta.data.coins||0).toLocaleString()
+                 :tab==='dragon'?(Meta.data.hoardTotal||0).toLocaleString()+' gems'
+                 :starTotal()+' / '+(CAREER_MAX*3);
+    ctx.font=fT(9,'bold');var balanceLabelW=ctx.measureText(balanceLabel).width;
+    ctx.font=fN(17);var balanceTextW=Math.min(148,Math.max(balanceLabelW,ctx.measureText(balanceValue).width));
+    var balanceLeft=cx-(32+balanceTextW)/2;
+    var balanceIconX=balanceLeft+12,balanceTextX=balanceLeft+32+balanceTextW/2;
+    if(tab==='walls')drawCoin(ctx,balanceIconX,165,11);
+    else if(tab==='dragon')shopArt(ctx,'dragon',DRAGON_SKINS[0],{x:balanceIconX-13,y:152,w:26,h:26});
+    else drawStar(ctx,balanceIconX,165,11,'#e5c36f');
+    ctx.textAlign='center';ctx.fillStyle='#c8b89b';ctx.font=fT(9,'bold');
+    ctx.fillText(balanceLabel,balanceTextX,151);
+    ctx.fillStyle=tab==='dragon'?'#e2c7ec':'#f4d57e';
+    fitText(ctx,balanceValue,balanceTextX,163,148,fN,17);
+    ['walls','dragon','pick'].forEach(function(kind){
+      var b=layout.tabs[kind];shopPlate(ctx,b,kind===tab);
+      var first=shopCatalog(kind)[0];
+      shopArt(ctx,kind,first,{x:b.x+b.w/2-15,y:b.y+6,w:30,h:27});
+      shopLabel(ctx,kind==='walls'?'WALLS':kind==='dragon'?'DRAGON':'PICKAXES',
+                b.x+b.w/2,b.y+45,fT(11.5,'bold'),kind===tab?'#ffe9a8':'#d5c4a6');
+    });
+
+    var p=layout.preview;
+    shopPlate(ctx,p,true);
+    var halo=ctx.createRadialGradient(105,349,8,105,349,82);
+    halo.addColorStop(0,tab==='dragon'?'rgba(182,130,213,.22)':'rgba(235,185,86,.19)');
+    halo.addColorStop(1,'rgba(235,185,86,0)');
+    ctx.fillStyle=halo;ctx.fillRect(p.x+4,p.y+4,150,p.h-8);
+    shopArt(ctx,tab,item,{x:43,y:282,w:124,h:140});
+    if(tab==='walls'){
+      ctx.strokeStyle='rgba(239,204,139,.58)';ctx.lineWidth=1.3;rr(ctx,43,282,124,140,8);ctx.stroke();
     }
-
-    var TB = shopTabs(), st = this.shopTab || 'walls';
-    [[TB.walls, 'DIG WALLS', st === 'walls'],
-     [TB.dragon, 'FLINT', st === 'dragon'],
-     [TB.pick, 'PICKAXE', st === 'pick']]
-      .forEach(function (t) {
-        var box = t[0], on = t[2];
-        ctx.fillStyle = on ? 'rgba(90,70,50,0.95)' : 'rgba(20,12,6,0.45)';
-        rr(ctx, box.x, box.y, box.w, box.h, 9); ctx.fill();
-        ctx.strokeStyle = on ? 'rgba(255,215,94,0.9)' : 'rgba(201,168,106,0.35)';
-        ctx.lineWidth = on ? 2 : 1;
-        rr(ctx, box.x, box.y, box.w, box.h, 9); ctx.stroke();
-        ctx.fillStyle = on ? '#ffd75e' : 'rgba(232,220,200,0.6)';
-        ctx.font = fT(12, 'bold');
-        ctx.fillText(t[1], box.x + box.w / 2, box.y + 11, box.w - 12);
-      });
-    if (st === 'dragon') { this._drawDragonTab(); return; }
-    if (st === 'pick') { this._drawPickTab(); return; }
-
-    var eq = equippedWallId();
-    for (var i = 0; i < WALL_SKINS.length; i++) {
-      var sk = WALL_SKINS[i], y = shopRowY(i);
-      var owned = sk.price === 0 || !!(Meta.data.owned && Meta.data.owned[sk.id]);
-      var isEq = eq === sk.id;
-      var afford = (Meta.data.coins || 0) >= sk.price;
-      var x0 = VIEW_MIN_W / 2 - 150;
-
-      ctx.fillStyle = isEq ? 'rgba(90,70,42,0.92)' : 'rgba(30,22,16,0.82)';
-      rr(ctx, x0, y, 300, SHOP_ROW_H, 12); ctx.fill();
-      ctx.strokeStyle = isEq ? '#ffd75e' : (owned ? 'rgba(201,168,106,0.7)'
-                                                  : (afford ? 'rgba(201,168,106,0.45)'
-                                                            : 'rgba(140,120,100,0.28)'));
-      ctx.lineWidth = isEq ? 2.5 : 1.5;
-      rr(ctx, x0, y, 300, SHOP_ROW_H, 12); ctx.stroke();
-
-      var tw = 44, th = SHOP_ROW_H - 16, tX = x0 + 10, tY = y + 8;
-      ctx.save();
-      ctx.beginPath(); rr(ctx, tX, tY, tw, th, 8); ctx.clip();
-      var wimg = gradedWall(sk.id);
-      if (wimg) {
-        var sw = Math.min(wimg.width, Math.round(wimg.width * 0.42));
-        var sh = Math.round(sw * th / tw);
-        ctx.drawImage(wimg, (wimg.width - sw) / 2, (wimg.height - sh) / 2, sw, sh, tX, tY, tw, th);
-      } else {
-        ctx.fillStyle = '#6b5a45'; ctx.fillRect(tX, tY, tw, th);
-      }
-      if (!owned && !afford) { ctx.fillStyle = 'rgba(12,8,5,0.42)'; ctx.fillRect(tX, tY, tw, th); }
-      ctx.restore();
-      ctx.strokeStyle = isEq ? 'rgba(255,215,94,0.85)' : 'rgba(255,240,200,0.22)';
-      ctx.lineWidth = isEq ? 2 : 1;
-      rr(ctx, tX, tY, tw, th, 8); ctx.stroke();
-
-      var tx0 = x0 + 66, rightX = x0 + 288, textRoom = 150;
-      ctx.textAlign = 'left';
-      ctx.fillStyle = owned ? '#ffe9a8' : (afford ? '#f0e3cc' : 'rgba(200,186,166,0.55)');
-      fitD(ctx, sk.name, tx0, y + 11, textRoom, 17);
-      ctx.fillStyle = 'rgba(232,220,200,0.5)';
-      fitT(ctx, sk.note || '', tx0, y + 33, 144, 11.5);
-
-      if (!owned && afford) {
-        ctx.fillStyle = 'rgba(255,215,94,0.85)';
-        rr(ctx, x0 + 2, y + 12, 3, SHOP_ROW_H - 24, 1.5); ctx.fill();
-      }
-
-      ctx.textAlign = 'right';
-      if (isEq) {
-        ctx.fillStyle = '#ffd75e';
-        ctx.font = fT(12, 'bold');
-        ctx.fillText('\u2713 WORN', rightX, y + 22);
-      } else if (owned) {
-        ctx.fillStyle = 'rgba(255,233,168,0.8)';
-        ctx.font = fT(12, 'bold');
-        ctx.fillText('WEAR', rightX, y + 22);
-      } else {
-        ctx.fillStyle = afford ? '#ffd75e' : 'rgba(200,186,166,0.5)';
-        ctx.font = fN(afford ? 18 : 17);
-        var ptxt = sk.price.toLocaleString();
-        var py = afford ? y + 20 : y + 13;
-        ctx.fillText(ptxt, rightX, py);
-        ctx.globalAlpha = afford ? 1 : 0.5;
-        drawCoin(ctx, rightX - ctx.measureText(ptxt).width - 11, py + 9, 8);
-        ctx.globalAlpha = 1;
-        if (!afford) {
-          var have = Meta.data.coins || 0;
-          var bw2 = 74, bx = rightX - bw2, byy = y + 38;
-          ctx.fillStyle = 'rgba(0,0,0,0.38)'; rr(ctx, bx, byy, bw2, 4, 2); ctx.fill();
-          ctx.fillStyle = 'rgba(255,215,94,0.5)';
-          rr(ctx, bx, byy, Math.max(2, bw2 * Math.min(1, have / sk.price)), 4, 2); ctx.fill();
-        }
-      }
-      ctx.textAlign = 'center';
+    ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillStyle='#fff0cc';fitD(ctx,item.name,188,279,184,21);
+    ctx.fillStyle='#d3c2a3';
+    fitT(ctx,tab==='walls'?(item.note||'A new backdrop for your jar')
+           :tab==='dragon'?'A new color for Flint'
+           :'A new finish for your pick',188,310,184,11.5);
+    var requirement=info.equipped?'Currently equipped':info.owned?'Unlocked · ready to equip'
+      :tab==='walls'?item.price.toLocaleString()+' saved coins'
+      :tab==='dragon'?'Keep '+info.need+' gems to unlock'
+      :'Earn '+info.need+' career stars';
+    ctx.fillStyle=info.equipped?'#f2d27d':'#d3c2a3';
+    fitT(ctx,requirement,188,332,184,11.5,'bold');
+    if(!info.owned&&info.need>0){
+      var ratio=Math.max(0,Math.min(1,info.have/info.need));
+      ctx.fillStyle='#1a110a';rr(ctx,188,354,184,4,2);ctx.fill();
+      if(ratio>0){ctx.fillStyle=tab==='dragon'?'#c7a4d9':'#deb96b';rr(ctx,188,354,184*ratio,4,2);ctx.fill();}
     }
-    this._menuBtn('BACK', this._shopBackY(shopRowY(WALL_SKINS.length) + 6));
-    ctx.textBaseline = 'alphabetic';
+    var action=layout.action;
+    shopPlate(ctx,action,info.canAct);
+    if(info.canAct){
+      ctx.fillStyle='rgba(242,202,112,.10)';rr(ctx,action.x+3,action.y+3,action.w-6,action.h-6,9);ctx.fill();
+    }
+    var actionText=info.equipped?'EQUIPPED':info.owned?'EQUIP'
+      :tab==='walls'&&info.afford?'BUY · '+info.need.toLocaleString()+' COINS'
+      :tab==='walls'?'NEED '+Math.max(0,info.need-info.have).toLocaleString()+' MORE'
+      :'NOT YET UNLOCKED';
+    shopLabel(ctx,actionText,action.x+action.w/2,action.y+action.h/2,fT(12,'bold'),
+              info.canAct?'#ffe9a8':info.equipped?'#e4c681':'#bda888');
+
+    layout.cards.forEach(function(entry){
+      var b=entry.rect,st=shopItemState(tab,entry.item),selected=entry.item.id===item.id;
+      shopPlate(ctx,b,selected);
+      shopArt(ctx,tab,entry.item,{x:b.x+b.w/2-23,y:b.y+7,w:46,h:37});
+      if(st.equipped)shopCheck(ctx,b.x+b.w-12,b.y+13);
+      else if(!st.owned&&!st.afford)shopLock(ctx,b.x+b.w-12,b.y+12);
+      shopLabel(ctx,entry.item.name,b.x+b.w/2,b.y+58,fT(tab==='dragon'?11:11.5,'bold'),
+                selected?'#ffedc2':'#e0cfae');
+    });
+    ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle='#bda98a';ctx.font=fT(10.5);
+    ctx.fillText('Tap a style to preview it.',cx,632);
+    this._menuBtn('BACK',layout.back.y,{w:layout.back.w,h:layout.back.h});
+    ctx.restore();
   };
 
   Game.prototype._drawLevels = function () {
@@ -9088,17 +9072,19 @@ function makeExcavationJar(site) {
       add('restore', 'Restore purchases', pr.restore, Store.busy || !Store.available());
       add('back', 'Back', pr.back);
     } else if (g.state === 'shop') {
-      var tabs = shopTabs(), tab = g.shopTab || 'walls';
-      ['walls', 'dragon', 'pick'].forEach(function (t) { add('tab:' + t, { walls: 'Jar walls', dragon: 'Dragon colors', pick: 'Pickaxes' }[t], tabs[t], false, t === tab); });
-      var list = tab === 'pick' ? PICK_SKINS : tab === 'dragon' ? DRAGON_SKINS : WALL_SKINS;
-      list.forEach(function (sk, i) {
-        var owned = tab === 'pick' ? pickUnlocked(sk) : tab === 'dragon' ? dragonUnlocked(sk) : sk.price === 0 || !!(Meta.data.owned && Meta.data.owned[sk.id]);
-        var equipped = sk.id === (tab === 'pick' ? equippedPickId() : tab === 'dragon' ? equippedDragonId() : equippedWallId());
-        var detail = owned ? equipped ? '. Equipped' : '. Equip' : tab === 'walls' ? '. Buy for ' + sk.price + ' coins' : tab === 'pick' ? '. Requires ' + sk.stars + ' career stars' : '. Requires ' + (20 + sk.rank * HOARD_STEP) + ' hoard';
-        add('skin:' + sk.id, sk.name + detail, { x: 60, y: tab === 'walls' ? shopRowY(i) : dragonRowY(i), w: 300, h: tab === 'walls' ? SHOP_ROW_H : DRAGON_HIT_H },
-          !owned && (tab !== 'walls' || (Meta.data.coins || 0) < sk.price), equipped);
+      var layout = g.shopLayout(), tab = g.shopTab || 'walls', selected = g.shopSelection();
+      ['walls', 'dragon', 'pick'].forEach(function (t) {
+        add('tab:' + t, { walls: 'Jar walls', dragon: 'Dragon colors', pick: 'Pickaxes' }[t], layout.tabs[t], false, t === tab);
       });
-      btn('back', 'Back', g._shopBackY((tab === 'walls' ? shopRowY(list.length) : dragonRowY(list.length)) + 6));
+      layout.cards.forEach(function (card) {
+        var st = shopItemState(tab, card.item);
+        var detail = st.equipped ? '. Equipped' : st.owned ? '. Owned' : tab === 'walls' ? '. Costs ' + st.need + ' coins'
+          : '. Unlocks at ' + st.need + (tab === 'dragon' ? ' hoard' : ' career stars');
+        add(card.id, st.name + detail + '. Preview', card.rect, false, card.item.id === selected.id);
+      });
+      var action = shopItemState(tab, selected);
+      add('shop-action', action.name + '. ' + action.actionLabel, layout.action, !action.canAct);
+      add('back', 'Back', layout.back);
     } else if (g.state === 'records') {
       var r = g.recordsRects(), tabNames = { stats: 'Stats', board: 'Daily leaderboard', league: 'League', past: 'Past daily digs', jobs: 'Contracts' };
       var activeTab = g.recTab || 'stats';
@@ -9206,7 +9192,7 @@ function makeExcavationJar(site) {
       }
     } else if (g.state === 'paywall') lines.push('Full Burrow is a one-time purchase. Unlock the full 40-level career and past Daily jars. Today’s Daily and Free Dig remain available without purchase.');
     else if (g.state === 'levels') lines.push('Choose a reached level to replay it. Stars can improve; coins bank on the first clear only.');
-    else if (g.state === 'shop') lines.push('Walls cost saved coins. Dragon colors unlock with your hoard. Pickaxes unlock with career stars. These appearances do not change your dig.');
+    else if (g.state === 'shop') lines.push('Select an item to preview it. Only the Buy or Equip button changes your appearance. Walls cost saved coins. Dragon colors unlock with your hoard. Pickaxes unlock with career stars. Hoard and stars are not spent. These appearances do not change your dig.');
     else if (g.state === 'menu' && !m.tutorialDone) lines.push('Daily Dig unlocks when you finish the introductory Career lesson.');
     return lines;
   };
@@ -9263,8 +9249,16 @@ function makeExcavationJar(site) {
       if (el.style.cssText !== css) el.style.cssText = css;
     });
     Object.keys(nodes).forEach(function (id) { if (!seen[id]) { nodes[id].remove(); delete nodes[id]; } });
+    if (g.state === 'shop' && !g.showSettings) {
+      var next = host.firstChild;
+      controls.forEach(function (d) {
+        var el = nodes[d.id];
+        if (el !== next) host.insertBefore(el, next);
+        else next = next.nextSibling;
+      });
+    }
     if (g._accessKeyboard && ((prior && !seen[prior]) || (g._accessScene && g._accessScene !== scene))) {
-      var target = controls.filter(function (d) { return !d.disabled && d.id !== 'deeper-pick' && d.id !== 'buy' && (g.showSettings || g.choice || g.state !== 'playing' || d.id.indexOf('gem:') === 0); });
+      var target = controls.filter(function (d) { return !d.disabled && d.id !== 'deeper-pick' && d.id !== 'buy' && d.id !== 'shop-action' && (g.showSettings || g.choice || g.state !== 'playing' || d.id.indexOf('gem:') === 0); });
       if (!g.showSettings && g.state === 'playing' && excavationChoice) {
         target = controls.filter(function (d) { return d.id === (excavationChoice === 'cut' ? 'cut:cancel' : 'excavation:continue'); });
       }
@@ -9467,72 +9461,15 @@ function makeExcavationJar(site) {
     }
     if (game.state === 'shop') {
       if (inRect(w, SHOP_GEAR)) { uiTick(); game.openSettings(); return; }
-      var TBs = shopTabs();
-      if (inRect(w, padHitUp(TBs.walls)))  { uiTick(); game.shopTab = 'walls'; return; }
-      if (inRect(w, padHitUp(TBs.dragon))) { uiTick(); game.shopTab = 'dragon'; return; }
-      if (inRect(w, padHitUp(TBs.pick)))   { uiTick(); game.shopTab = 'pick'; return; }
-
-      if (game.shopTab === 'pick') {
-        for (var pi = 0; pi < PICK_SKINS.length; pi++) {
-          var py = dragonRowY(pi);
-          if (w.y >= py && w.y < py + DRAGON_HIT_H &&
-              w.x > VIEW_MIN_W / 2 - 150 && w.x < VIEW_MIN_W / 2 + 150) {
-            var psk = PICK_SKINS[pi];
-            if (!pickUnlocked(psk)) { Snd.thunk(); return; }
-            uiTick();
-            Meta.data.equipped = Meta.data.equipped || {};
-            Meta.data.equipped.pick = psk.id;
-            Meta.save();
-            return;
-          }
-        }
-        if (hitBtn(w, game._shopBackY(dragonRowY(PICK_SKINS.length) + 6))) {
-          uiTick(); game.state = 'menu'; Snd.scene('shop'); return;
-        }
-        return;
+      var shop = game.shopLayout(), categories = ['walls', 'dragon', 'pick'];
+      for (var ti = 0; ti < categories.length; ti++) {
+        if (inRect(w, shop.tabs[categories[ti]])) { uiTick(); game.shopTab = categories[ti]; return; }
       }
-      if (game.shopTab === 'dragon') {
-        for (var di = 0; di < DRAGON_SKINS.length; di++) {
-          var dy = dragonRowY(di);
-          if (w.y >= dy && w.y < dy + DRAGON_HIT_H &&
-              w.x > VIEW_MIN_W / 2 - 150 && w.x < VIEW_MIN_W / 2 + 150) {
-            var dsk = DRAGON_SKINS[di];
-            if (!dragonUnlocked(dsk)) { Snd.thunk(); return; }
-            uiTick();
-            Meta.data.equipped = Meta.data.equipped || {};
-            Meta.data.equipped.dragon = dsk.id;
-            Meta.save();
-            game.dragonPulse = 1;
-            return;
-          }
-        }
-        if (hitBtn(w, game._shopBackY(dragonRowY(DRAGON_SKINS.length) + 6))) {
-          uiTick(); game.state = 'menu'; Snd.scene('shop'); return;
-        }
-        return;
+      for (var ci = 0; ci < shop.cards.length; ci++) {
+        if (inRect(w, shop.cards[ci].rect)) { if (game.selectShopItem(shop.cards[ci].item.id)) uiTick(); return; }
       }
-      var backY = game._shopBackY(shopRowY(WALL_SKINS.length) + 6);
-      if (hitBtn(w, backY)) { uiTick(); game.state = 'menu'; Snd.scene('shop'); return; }
-      for (var si = 0; si < WALL_SKINS.length; si++) {
-        var ry = shopRowY(si);
-        if (w.y < ry || w.y > ry + SHOP_ROW_H) continue;
-        if (w.x < VIEW_MIN_W / 2 - 150 || w.x > VIEW_MIN_W / 2 + 150) continue;
-        var sk = WALL_SKINS[si];
-        var owned = sk.price === 0 || !!(Meta.data.owned && Meta.data.owned[sk.id]);
-        if (!owned) {
-          if ((Meta.data.coins || 0) < sk.price) { Snd.thunk(); return; }
-          Meta.data.coins -= sk.price;
-          Meta.data.owned = Meta.data.owned || {};
-          Meta.data.owned[sk.id] = 1;
-          Snd.fanfare(150);
-        } else {
-          Snd.pop();
-        }
-        Meta.data.equipped = Meta.data.equipped || {};
-        Meta.data.equipped.wall = sk.id;
-        Meta.save();
-        return;
-      }
+      if (inRect(w, shop.action)) { game.activateShopItem(); return; }
+      if (inRect(w, shop.back)) { uiTick(); game.state = 'menu'; Snd.scene('shop'); return; }
       return;
     }
     if (game.state === 'levels') {
