@@ -4073,7 +4073,7 @@ function makeExcavationJar(site) {
                  contracts: {},
                  taught: {},
                  hints: 1,
-                 musicVolume: 0.7, sfxVolume: 1,
+                 musicVolume: 0.7, sfxVolume: 1, haptics: 1,
                  marks: 0,
                  full: 0, iapSeen: {}, iapAccess: {} };
     function mergeAccess(a, b) {
@@ -4098,6 +4098,7 @@ function makeExcavationJar(site) {
       return keys.some(function (key) { return !states[key].revoked; }) ? 1 : 0;
     }
     var hadLocal = false;
+    var hapticsChoice = null;
     var provisional = false;
     try { provisional = localStorage.getItem(K + '.prov') === '1'; } catch (e) {}
     try {
@@ -4194,6 +4195,7 @@ function makeExcavationJar(site) {
               if (nat.iapSeen[receipt] === 'fulfilled') receipts[receipt] = 'fulfilled';
             }
             if (!provisional || progress(nat) >= progress(data)) Object.assign(data, nat);
+            if (hapticsChoice !== null) data.haptics = hapticsChoice;
             data.excavations = excavationRecords;
             data.bestFree = bestFree;
             data.bestDaily = bestDaily;
@@ -4220,6 +4222,7 @@ function makeExcavationJar(site) {
       settle();
     }
     return { data: data, save: save, flush: flush, mergeAccess: mergeAccess, accessFull: accessFull,
+             setHaptics: function (enabled) { hapticsChoice = enabled ? 1 : 0; data.haptics = hapticsChoice; save(); },
              ready: function (cb) { if (settled) cb(); else waiting.push(cb); },
              onAudioRestore: function (cb) { audioRestoreListeners.push(cb); if (settled) cb(); } };
   })();
@@ -4505,16 +4508,51 @@ function makeExcavationJar(site) {
   })();
 
   var Hap = (function () {
-    var last = 0;
+    var last = -Infinity, webActive = false;
+    function nativeShell() {
+      var C = window.Capacitor;
+      if (!C) return false;
+      try {
+        if (typeof C.isNativePlatform === 'function') return C.isNativePlatform();
+        return typeof C.getPlatform === 'function' && /^(ios|android)$/.test(C.getPlatform());
+      } catch (e) { return false; }
+    }
+    function nativePlugin() {
+      var C = window.Capacitor;
+      return C && C.Plugins && C.Plugins.Haptics;
+    }
+    function webAvailable() {
+      return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+    }
+    function available() {
+      var P = nativePlugin();
+      return nativeShell() ? !!(P && typeof P.impact === 'function') : webAvailable();
+    }
+    function enabled() { return Meta.data.haptics !== 0 && Meta.data.haptics !== false; }
+    function stop() {
+      if (!webActive) return;
+      webActive = false;
+      try { if (webAvailable()) navigator.vibrate(0); } catch (e) {}
+    }
     function fire(style) {
-      var P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
-      if (!P) return;
+      if (!enabled() || document.hidden) return;
+      var native = nativeShell(), P = nativePlugin();
+      if (native ? !(P && typeof P.impact === 'function') : !webAvailable()) return;
+      if (!native && navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
       var now = performance.now();
       if (now - last < 30) return;
       last = now;
-      try { P.impact({ style: style }).catch(function () {}); } catch (e) {}
+      if (native) {
+        try { Promise.resolve(P.impact({ style: style })).catch(function () {}); } catch (e) {}
+        return;
+      }
+      try {
+        webActive = navigator.vibrate(style === 'LIGHT' ? 12 : style === 'MEDIUM' ? 20 : 30) !== false;
+      } catch (e) { webActive = false; }
     }
+    document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); });
     return {
+      available: available, enabled: enabled, stop: stop,
       light: function () { fire('LIGHT'); },
       medium: function () { fire('MEDIUM'); },
       heavy: function () { fire('HEAVY'); },
@@ -7256,15 +7294,18 @@ function makeExcavationJar(site) {
     this._drawGearAt(this.gearRect());
   };
 
-  Game.prototype._drawGearAt = function (b) {
+  Game.prototype._drawGearAt = function (b, menuChrome) {
     var ctx = this.ctx;
     var ta = ctx.textAlign, tb = ctx.textBaseline;
+    if (menuChrome) menuChromePlate(ctx, b);
+    else {
     ctx.fillStyle = 'rgba(20,12,6,0.45)';
     rr(ctx, b.x, b.y, b.w, b.h, 10); ctx.fill();
     ctx.strokeStyle = 'rgba(201,168,106,0.35)'; ctx.lineWidth = 1;
     rr(ctx, b.x, b.y, b.w, b.h, 10); ctx.stroke();
-    var cx = b.x + b.w / 2, cy = b.y + b.h / 2, R = Math.min(b.w, b.h) * 0.28;
-    ctx.fillStyle = 'rgba(232,220,200,0.82)';
+    }
+    var cx = b.x + b.w / 2, cy = b.y + b.h / 2, R = Math.min(b.w, b.h) * (menuChrome ? 0.21 : 0.28);
+    ctx.fillStyle = menuChrome ? '#e4c78d' : 'rgba(232,220,200,0.82)';
     ctx.beginPath();
     for (var i = 0; i < 8; i++) {
       var a0 = i * 0.7854 - 0.15, a1 = i * 0.7854 + 0.15;
@@ -7289,7 +7330,9 @@ function makeExcavationJar(site) {
                       : ['music', 'sound', 'hints', 'marks', 'help']
                           .concat(canRestore ? ['restore'] : [])
                           .concat(['privacy', 'done']);
-    var ph = SET_HEAD + SET_PAD + ids.length * SET_ROW_H + 96 + (ids.length - 1) * SET_GAP + SET_FOOT;
+    if (Hap.available()) ids.splice(2, 0, 'haptics');
+    var gap = ids.length > 8 ? 4 : SET_GAP;
+    var ph = SET_HEAD + SET_PAD + ids.length * SET_ROW_H + 96 + (ids.length - 1) * gap + SET_FOOT;
     var px = VIEW_MIN_W / 2 - SET_W / 2;
     var py = Math.round(VIEW_H / 2 - ph / 2);
     var out = {
@@ -7304,7 +7347,7 @@ function makeExcavationJar(site) {
         id: ids[i], x: px + 20, y: rowY,
         w: SET_W - 40, h: audio ? 100 : SET_ROW_H,
       });
-      rowY += (audio ? 100 : SET_ROW_H) + SET_GAP;
+      rowY += (audio ? 100 : SET_ROW_H) + gap;
     }
     return out;
   };
@@ -7354,9 +7397,10 @@ function makeExcavationJar(site) {
 
     for (var i = 0; i < R.rows.length; i++) {
       var r = R.rows[i];
-      if (r.id === 'music' || r.id === 'sound' || r.id === 'hints' || r.id === 'marks') {
+      if (r.id === 'music' || r.id === 'sound' || r.id === 'haptics' || r.id === 'hints' || r.id === 'marks') {
         var on = r.id === 'music' ? !Snd.musicMuted
                : r.id === 'sound' ? !Snd.sfxMuted
+               : r.id === 'haptics' ? Hap.enabled()
                : r.id === 'hints' ? Meta.data.hints !== 0
                : Meta.data.marks === 1;
         ctx.fillStyle = 'rgba(20,12,6,0.5)';
@@ -7367,6 +7411,7 @@ function makeExcavationJar(site) {
         ctx.fillStyle = '#e8dcc8'; ctx.font = fD(17);
         ctx.fillText(r.id === 'music' ? 'Music'
                    : r.id === 'sound' ? 'Sound effects'
+                   : r.id === 'haptics' ? 'Haptics'
                    : r.id === 'hints' ? 'Hints in the jar'
                    : 'Gem symbols', r.x + 16, r.y + 17);
         var sw = { x: r.x + r.w - 76, y: r.y + 11, w: 60, h: 30 };
@@ -7437,6 +7482,11 @@ function makeExcavationJar(site) {
           if (isMusic) Snd.setMusicMuted(!Snd.musicMuted); else Snd.setSfxMuted(!Snd.sfxMuted);
         }
         Snd.pop();
+      }
+      else if (r.id === 'haptics') {
+        Meta.setHaptics(!Hap.enabled());
+        Snd.pop();
+        if (Hap.enabled()) Hap.light(); else Hap.stop();
       }
       else if (r.id === 'hints') {
         Meta.data.hints = Meta.data.hints === 0 ? 1 : 0;
@@ -7545,10 +7595,10 @@ function makeExcavationJar(site) {
   var MENU = {
     gear:   { x: VIEW_MIN_W - 64, y: 18, w: 50, h: 50 },
     shop:   { x: VIEW_MIN_W - 164, y: 18, w: 92, h: 50 },
-    strip:  { x: VIEW_MIN_W / 2 - 118, y: 382, w: 236, h: 50 },
-    career: { x: VIEW_MIN_W / 2 - 122, y: 502, w: 244, h: 60 },
-    daily:  { x: VIEW_MIN_W / 2 - 122, y: 572, w: 244, h: 60 },
-    free:   { x: VIEW_MIN_W / 2 - 122, y: 642, w: 244, h: 60 },
+    strip:  { x: VIEW_MIN_W / 2 - 132, y: 382, w: 264, h: 50 },
+    career: { x: VIEW_MIN_W / 2 - 132, y: 502, w: 264, h: 60 },
+    daily:  { x: VIEW_MIN_W / 2 - 132, y: 572, w: 264, h: 60 },
+    free:   { x: VIEW_MIN_W / 2 - 132, y: 642, w: 264, h: 60 },
   };
   var MENU_BOTTOM = 702;
   var MENU_CHROME = { gear: 1, shop: 1 };
@@ -7592,6 +7642,47 @@ function makeExcavationJar(site) {
     return { x: b.x, y: b.y + d, w: b.w, h: b.h };
   };
 
+
+  function menuChromePlate(ctx, b) {
+    ctx.save();
+    var grad = ctx.createLinearGradient(0, b.y, 0, b.y + b.h);
+    grad.addColorStop(0, '#4d3523'); grad.addColorStop(1, '#261910');
+    ctx.shadowColor = 'rgba(0,0,0,0.28)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
+    ctx.fillStyle = grad; rr(ctx,b.x,b.y,b.w,b.h,12); ctx.fill();
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.strokeStyle = 'rgba(221,181,111,0.64)'; ctx.lineWidth = 1.25;
+    rr(ctx,b.x+.5,b.y+.5,b.w-1,b.h-1,11.5); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,233,168,0.10)';
+    rr(ctx,b.x+3,b.y+3,b.w-6,b.h-6,9); ctx.stroke();
+    ctx.restore();
+  }
+  function menuShopIcon(ctx, x, y, size) {
+    ctx.save();ctx.translate(x,y);ctx.scale(size/24,size/24);
+    ctx.strokeStyle='#ffe9a8';ctx.lineWidth=1.8;ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.fillStyle='rgba(255,215,94,0.09)';
+    ctx.beginPath();ctx.moveTo(-8,-4);ctx.lineTo(8,-4);ctx.lineTo(9,9);
+    ctx.quadraticCurveTo(0,11,-9,9);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-4,-3);ctx.lineTo(-4,-7);
+    ctx.bezierCurveTo(-4,-13,4,-13,4,-7);ctx.lineTo(4,-3);ctx.stroke();
+    ctx.restore();
+  }
+  function menuJournalIcon(ctx, x, y, size) {
+    ctx.save();ctx.translate(x,y);ctx.scale(size/24,size/24);
+    ctx.strokeStyle='#ffe9a8';ctx.lineWidth=1.7;ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.fillStyle='rgba(255,215,94,0.09)';
+    rr(ctx,-8,-10,16,20,2);ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-4,-10);ctx.lineTo(-4,10);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(2,-4);ctx.lineTo(5,0);ctx.lineTo(2,4);ctx.lineTo(-1,0);ctx.closePath();ctx.stroke();
+    ctx.restore();
+  }
+  function menuCenteredLabel(ctx, text, x, y, font) {
+    ctx.font=font;ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    var m=ctx.measureText(text);
+    var up=Number.isFinite(m.actualBoundingBoxAscent)?m.actualBoundingBoxAscent:10;
+    var down=Number.isFinite(m.actualBoundingBoxDescent)?m.actualBoundingBoxDescent:0;
+    ctx.fillText(text,x,y+(up-down)/2);
+  }
+
   Game.prototype._drawMenu = function () {
     var ctx = this.ctx, v = this.view;
     var cx = VIEW_MIN_W / 2;
@@ -7610,27 +7701,23 @@ function makeExcavationJar(site) {
 
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
 
-    var coins = Meta.data.coins || 0;
-    ctx.fillStyle = 'rgba(20,12,6,0.62)';
-    rr(ctx, 16, 20, 112, 46, 12); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,215,94,0.45)'; ctx.lineWidth = 1.5;
-    rr(ctx, 16, 20, 112, 46, 12); ctx.stroke();
-    ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fT(10);
-    ctx.fillText('COINS', 78, 26);
-    drawCoin(ctx, 34, 46, 11);
-    ctx.fillStyle = '#ffd75e'; ctx.font = fN(20);
-    fitText(ctx, coins.toLocaleString() + 'c', 80, 38, 82, fN, 20);
-    var sb = MENU.shop;
-    ctx.fillStyle = 'rgba(20,12,6,0.62)';
-    rr(ctx, sb.x, sb.y, sb.w, sb.h, 12); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,215,94,0.45)'; ctx.lineWidth = 1.5;
-    rr(ctx, sb.x, sb.y, sb.w, sb.h, 12); ctx.stroke();
-    ctx.fillStyle = '#ffe9a8'; ctx.font = fT(15, 'bold');
-    ctx.fillText('SHOP', sb.x + sb.w / 2, sb.y + 15);
-    this._drawGearAt(MENU.gear);
     ctx.save();
-    choicePlate(ctx, FIELD_HOME, 'EXCAVATIONS', 'Field journal', 'wood', false);
+    var wallet={x:16,y:18,w:112,h:50}, coins=Meta.data.coins||0;
+    menuChromePlate(ctx,wallet);menuChromePlate(ctx,FIELD_HOME);
+    menuChromePlate(ctx,MENU.shop);
+    drawCoin(ctx,35,44,11);
+    ctx.fillStyle='rgba(232,220,200,0.72)';
+    menuCenteredLabel(ctx,'COINS',82,31,fT(9,'bold'));
+    ctx.fillStyle='#ffd75e';ctx.textBaseline='alphabetic';ctx.font=fN(20);
+    fitText(ctx,coins.toLocaleString()+'c',82,55,76,fN,20);
+    menuJournalIcon(ctx,192,34,18);
+    ctx.fillStyle='#ffe9a8';
+    menuCenteredLabel(ctx,'EXCAVATIONS',192,55,fT(10.5,'bold'));
+    menuShopIcon(ctx,302,34,19);
+    menuCenteredLabel(ctx,'SHOP',302,55,fT(11.5,'bold'));
+    this._drawGearAt(MENU.gear, true);
     ctx.restore();
+    ctx.textAlign='center';ctx.textBaseline='top';
 
     var dy = this._menuShift();
     ctx.save();
@@ -7686,26 +7773,26 @@ function makeExcavationJar(site) {
     rr(ctx, sbx.x, sbx.y, sbx.w, sbx.h, 14); ctx.fill();
     ctx.strokeStyle = 'rgba(201,168,106,0.3)'; ctx.lineWidth = 1;
     rr(ctx, sbx.x, sbx.y, sbx.w, sbx.h, 14); ctx.stroke();
-    ctx.strokeStyle = 'rgba(201,168,106,0.4)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(cx - 104, 400); ctx.lineTo(cx + 104, 400); ctx.stroke();
-    for (var bi2 = 0; bi2 < 5; bi2++) {
-      var ln = band0 + bi2;
-      var nx = cx - 88 + bi2 * 44;
-      var isCur = ln === lvl, done2 = ln < lvl;
-      ctx.fillStyle = done2 ? '#c9a86a' : isCur ? '#ffd75e' : 'rgba(90,70,50,0.9)';
-      ctx.beginPath(); ctx.arc(nx, 400, isCur ? 13 : 10, 0, 6.283); ctx.fill();
-      if (ln % 5 === 0 && SPR.gem_prism) ctx.drawImage(SPR.gem_prism, nx - 8, 392, 16, 16);
-      ctx.fillStyle = done2 || isCur ? '#3a2a18' : 'rgba(232,220,200,0.55)';
-      ctx.font = fT(11, 'bold'); ctx.textBaseline = 'middle';
-      if (ln % 5 !== 0) ctx.fillText(String(ln), nx, 401);
-      ctx.textBaseline = 'top';
-      var st2 = (Meta.data.careerStars || {})[ln] || 0;
-      for (var si2 = 0; si2 < st2; si2++) drawStar(ctx, nx - 8 + si2 * 8, 420, 3.5, '#ffd75e');
+    var railLeft=sbx.x+30, railRight=sbx.x+sbx.w-50;
+    var railY=sbx.y+sbx.h/2;
+    ctx.strokeStyle='rgba(201,168,106,0.4)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(railLeft,railY);ctx.lineTo(railRight,railY);ctx.stroke();
+    for (var bi2=0;bi2<5;bi2++) {
+      var ln=band0+bi2, nx=railLeft+bi2*(railRight-railLeft)/4;
+      var isCur=ln===lvl, done2=ln<lvl;
+      ctx.fillStyle=done2?'#c9a86a':isCur?'#ffd75e':'#4f3c2b';
+      ctx.beginPath();ctx.arc(nx,railY,isCur?13:11,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=done2||isCur?'#3a2a18':'#d3c0a2';
+      menuCenteredLabel(ctx,String(ln),nx,railY,fT(11,'bold'));
+      var st2=Math.max(0,Math.min(3,(Meta.data.careerStars||{})[ln]||0));
+      for(var si2=0;si2<st2;si2++)
+        drawStar(ctx,nx+(si2-(st2-1)/2)*7,railY+18,2.5,'#ffd75e');
     }
-    ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fD(16);
-    ctx.textBaseline = 'middle';
-    ctx.fillText('›', sbx.x + sbx.w - 13, sbx.y + sbx.h / 2);
-    ctx.textBaseline = 'top';
+    var arrowX=sbx.x+sbx.w-18;
+    ctx.strokeStyle='#d3b780';ctx.lineWidth=1.7;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();ctx.moveTo(arrowX-2.5,railY-4);
+    ctx.lineTo(arrowX+2.5,railY);ctx.lineTo(arrowX-2.5,railY+4);ctx.stroke();
+    ctx.textAlign='center';ctx.textBaseline='top';
 
     var day = dayNumber();
     var best = Meta.data.bestDaily[day] || 0;
@@ -7744,7 +7831,7 @@ function makeExcavationJar(site) {
     this._menuBtn('DAILY DIG', MENU.daily.y, {
       w: MENU.daily.w, h: MENU.daily.h, tone: 'daily', icon: 'gem_sapphire',
       disabled: firstRun,
-      sub: firstRun ? 'one shared jar · after your first shift'
+      sub: firstRun ? 'finish the Career lesson to unlock'
                     : todayChar.name + ' · one jar, everyone',
     });
     this._menuBtn('FREE DIG', MENU.free.y, {
@@ -8921,10 +9008,10 @@ function makeExcavationJar(site) {
     }
     function btn(id, label, y, disabled) { add(id, label, { x: 100, y: y, w: 220, h: 56 }, disabled); }
     if (g.showSettings) {
-      var labels = { music: 'Music', sound: 'Sound effects', hints: 'Hints in the jar', marks: 'Gem symbols',
+      var labels = { music: 'Music', sound: 'Sound effects', haptics: 'Haptics', hints: 'Hints in the jar', marks: 'Gem symbols',
         help: 'How to Play', resume: 'Resume', done: 'Done', quit: g._quitArmed > nowMs() ? 'Confirm quit shift' : 'Quit shift',
         restore: 'Restore purchases', privacy: 'Privacy policy' };
-      var values = { music: !Snd.musicMuted, sound: !Snd.sfxMuted, hints: Meta.data.hints !== 0, marks: Meta.data.marks === 1 };
+      var values = { music: !Snd.musicMuted, sound: !Snd.sfxMuted, haptics: Hap.enabled(), hints: Meta.data.hints !== 0, marks: Meta.data.marks === 1 };
       g.settingsRects().rows.forEach(function (r) {
         if (r.id === 'music' || r.id === 'sound') {
           var ar = audioSettingRects(r), level = r.id === 'music' ? Snd.musicVolume : Snd.sfxVolume;
@@ -9120,7 +9207,7 @@ function makeExcavationJar(site) {
     } else if (g.state === 'paywall') lines.push('Full Burrow is a one-time purchase. Unlock the full 40-level career and past Daily jars. Today’s Daily and Free Dig remain available without purchase.');
     else if (g.state === 'levels') lines.push('Choose a reached level to replay it. Stars can improve; coins bank on the first clear only.');
     else if (g.state === 'shop') lines.push('Walls cost saved coins. Dragon colors unlock with your hoard. Pickaxes unlock with career stars. These appearances do not change your dig.');
-    else if (g.state === 'menu' && !m.tutorialDone) lines.push('Daily Dig unlocks after your first finished shift.');
+    else if (g.state === 'menu' && !m.tutorialDone) lines.push('Daily Dig unlocks when you finish the introductory Career lesson.');
     return lines;
   };
 
