@@ -6520,7 +6520,7 @@ function makeExcavationJar(site) {
     } else if (ledge.h >= 92) {
       c.textAlign='center';c.textBaseline='top';c.fillStyle='#f3dfb8';fitT(c,note,210,ledge.y+12,380,11);
     }
-    if(e.cut||e.prompt||this.state==='results'||this.state==='paused') {
+    if((e.cut||e.prompt||this.state==='results'||this.state==='paused') && !(this.state==='paused'&&this.showSettings)) {
       c.fillStyle='rgba(12,9,6,0.55)';c.fillRect(-v.ox,-v.uiTop,v.w,v.h+v.uiTop);
       paper(30,230,360,398,'');
       if(this.state==='paused') {
@@ -7348,7 +7348,7 @@ function makeExcavationJar(site) {
   };
   Game.prototype.settingsRects = function () {
     var inShift = this.state === 'paused' || this.state === 'playing';
-    var canRestore = Store.available() && !Ent.owned();
+    var canRestore = Store.available();
     var rows = [], sections = [], px = 17, width = 386, x = px + 16, rw = width - 32;
     var y = 76, aw = (rw - 10) / 2;
     rows.push({id:'music',x:x,y:y,w:aw,h:116});
@@ -7363,9 +7363,14 @@ function makeExcavationJar(site) {
     rows.push({id:'help',x:x,y:y,w:inShift?rw:(rw-10)/2,h:58});
     if (!inShift) rows.push({id:'privacy',x:x+(rw+10)/2,y:y,w:(rw-10)/2,h:58});
     y += 64;
-    if (canRestore && !inShift) {rows.push({id:'restore',x:x,y:y,w:rw,h:58}); y+=64;}
-    if (inShift) {rows.push({id:'quit',x:x,y:y,w:rw,h:58}); y+=64;}
-    rows.push({id:inShift?'resume':'done',x:x,y:y,w:rw,h:58}); y+=74;
+    if (!inShift) {
+      rows.push({id:'access',x:x,y:y,w:canRestore?(rw-10)/2:rw,h:58});
+      if(canRestore)rows.push({id:'restore',x:x+(rw+10)/2,y:y,w:(rw-10)/2,h:58});
+      y+=64;
+    }
+    rows.push({id:inShift?(PAUSE_HUB?'pause-back':'resume'):'done',x:x,y:y,w:rw,h:58}); y+=64;
+    if(inShift&&!PAUSE_HUB){rows.push({id:'quit',x:x,y:y,w:rw,h:58});y+=64;}
+    y+=10;
     var ph=y, available=this.view.floorY || VIEW_H, py=Math.max(8,Math.round((available-ph)/2));
     rows.forEach(function(row){row.y+=py;});sections.forEach(function(a){a.y+=py;});comfort.y+=py;
     return {panel:{x:px,y:py,w:width,h:ph},close:{x:px+width-64,y:py+8,w:58,h:58},
@@ -7416,6 +7421,15 @@ function makeExcavationJar(site) {
       ctx.quadraticCurveTo(18,19,12,22);ctx.quadraticCurveTo(6,19,4,14);
       ctx.lineTo(3,6);ctx.closePath();ctx.stroke();
       ctx.beginPath();ctx.moveTo(8,12);ctx.lineTo(11,15);ctx.lineTo(16,9);ctx.stroke();
+    }else if(id==='resume'){
+      ctx.moveTo(7,3);ctx.lineTo(21,12);ctx.lineTo(7,21);ctx.closePath();ctx.stroke();
+    }else if(id==='settings'){
+      [5,12,19].forEach(function(yy,j){ctx.moveTo(2,yy);ctx.lineTo(22,yy);});ctx.stroke();
+      [7,16,10].forEach(function(xx,j){ctx.fillStyle=SETTINGS_THEME.panel;ctx.beginPath();ctx.arc(xx,5+j*7,3,0,Math.PI*2);ctx.fill();ctx.stroke();});
+    }else if(id==='access'){
+      ctx.moveTo(3,21);ctx.lineTo(3,10);ctx.quadraticCurveTo(12,-4,21,10);
+      ctx.lineTo(21,21);ctx.closePath();ctx.moveTo(8,21);ctx.lineTo(8,12);
+      ctx.quadraticCurveTo(12,6,16,12);ctx.lineTo(16,21);ctx.stroke();
     }else if(id==='restore'){
       ctx.arc(12,12,8,-.8,4.2);ctx.stroke();
       ctx.beginPath();ctx.moveTo(3,3);ctx.lineTo(3,9);ctx.lineTo(9,9);ctx.stroke();
@@ -7435,19 +7449,99 @@ function makeExcavationJar(site) {
       ctx.fillText(on?'ON':'OFF',on?x+16:x+w-16,y+10);}
   }
 
+  var PAUSE_HUB = true;
   Game.prototype.openSettings = function () {
     this.showSettings = true;
     this._settingsRestoreRequested = Store.busy;
-    this._quitArmed = 0;
-    if (this.state === 'playing') this.setPaused(true);
+    var active=this.state==='playing'||this.state==='paused';
+    this._settingsPage=active&&PAUSE_HUB?'pause':'controls';
+    if(this.state==='playing')this.setPaused(true);
   };
   Game.prototype.closeSettings = function () {
-    this.showSettings = false;
-    if (this.state === 'paused') this.setPaused(false);
+    this.showSettings=false;this._settingsPage=null;
+    if(this.state==='paused')this.setPaused(false);
+  };
+  Game.prototype.settingsBack = function () {
+    if(this._settingsPage==='leave')this._settingsPage=this._settingsReturn||'pause';
+    else if(PAUSE_HUB&&this._settingsPage==='controls'&&this.state==='paused')this._settingsPage='pause';
+    else this.closeSettings();
+  };
+  Game.prototype.leaveDigCopy = function () {
+    if(this.mode==='excavation')return ['This attempt and its specimens','will not be recorded in your journal.','Your earlier discoveries stay saved.'];
+    if(this.archiveDay)return ['This attempt will not record a score.','Your earlier records stay saved.'];
+    return ['This dig’s coins will not be banked.',
+      this.career?'This level will not count as finished.':this.isDaily?'Today’s score will not be recorded.':'This attempt will not record a score.',
+      'Saved progress and hoard stay.'];
+  };
+  Game.prototype.pauseRects = function () {
+    var leaving=this._settingsPage==='leave',h=leaving?350:410;
+    var y=Math.max(8,Math.round(((this.view.floorY||VIEW_H)-h)/2));
+    var rows=leaving?[
+      {id:'cancel',label:'Cancel',x:33,y:y+202,w:354,h:58,primary:true},
+      {id:'leave',label:'End dig and return',x:33,y:y+270,w:354,h:58,danger:true}
+    ]:[
+      {id:'resume',label:'Resume digging',x:33,y:y+120,w:354,h:64,primary:true},
+      {id:'settings',label:'Settings',x:33,y:y+196,w:172,h:66},
+      {id:'help',label:'How to play',x:215,y:y+196,w:172,h:66},
+      {id:'quit',label:this.mode==='excavation'?'Return to field journal':'Return to burrow',x:33,y:y+286,w:354,h:58}
+    ];
+    return {panel:{x:17,y:y,w:386,h:h},close:{x:339,y:y+8,w:58,h:58},rows:rows,leaving:leaving};
+  };
+  Game.prototype._drawPause = function () {
+    var ctx=this.ctx,v=this.view,R=this.pauseRects(),p=R.panel,t=SETTINGS_THEME;
+    ctx.save();ctx.fillStyle='rgba(12,8,5,.77)';ctx.fillRect(-v.ox,-v.uiTop,v.w,v.h+v.uiTop);
+    ctx.fillStyle='rgba(0,0,0,.35)';rr(ctx,p.x,p.y+6,p.w,p.h,22);ctx.fill();
+    ctx.fillStyle=t.panel;rr(ctx,p.x,p.y,p.w,p.h,22);ctx.fill();
+    ctx.strokeStyle=t.border;ctx.lineWidth=1.5;rr(ctx,p.x,p.y,p.w,p.h,22);ctx.stroke();
+    ctx.textBaseline='top';ctx.textAlign='left';
+    ctx.fillStyle=t.accent;ctx.font=fT(11,'bold');ctx.fillText('TAKE A BREATHER',p.x+22,p.y+20);
+    ctx.fillStyle=t.ink;ctx.font=fD(29);ctx.fillText(R.leaving?'End this dig?':'Dig paused',p.x+22,p.y+42);
+    var c=R.close;ctx.fillStyle=t.card;rr(ctx,c.x+8,c.y+8,42,42,14);ctx.fill();
+    ctx.strokeStyle=t.muted;ctx.lineWidth=2;ctx.beginPath();
+    ctx.moveTo(c.x+23,c.y+23);ctx.lineTo(c.x+35,c.y+35);
+    ctx.moveTo(c.x+35,c.y+23);ctx.lineTo(c.x+23,c.y+35);ctx.stroke();
+    if(R.leaving){
+      ctx.fillStyle=t.muted;ctx.font=fT(16);
+      this.leaveDigCopy().forEach(function(line,i){ctx.fillText(line,p.x+22,p.y+94+i*25);});
+      ctx.strokeStyle=t.divider;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(39,p.y+184);ctx.lineTo(381,p.y+184);ctx.stroke();
+    }else{
+      var mode=this.mode==='excavation'?this.excavation.site.title:this.career?'Career · Level '+this.career.level:this.archiveDay?'Daily archive':this.isDaily?'Daily Dig':'Free Dig';
+      ctx.fillStyle=t.muted;ctx.font=fT(15);ctx.fillText(mode+' · '+this.swings+' swings left',p.x+22,p.y+84,p.w-44);
+      ctx.textAlign='center';ctx.font=fT(13);ctx.fillText('Your dig stays paused until you resume.',210,p.y+368);
+    }
+    R.rows.forEach(function(r){
+      ctx.fillStyle=r.primary?t.primary:r.danger?'#52312a':t.card;rr(ctx,r.x,r.y,r.w,r.h,14);ctx.fill();
+      if(!r.primary){ctx.strokeStyle=r.danger?'#ab7463':t.divider;ctx.lineWidth=1;rr(ctx,r.x,r.y,r.w,r.h,14);ctx.stroke();}
+      var ink=r.primary?t.primaryInk:r.danger?t.danger:t.ink;
+      ctx.fillStyle=ink;ctx.textAlign='center';ctx.font=fT(r.primary?20:r.w<200?16:17,'bold');
+      if(r.id==='settings'||r.id==='help'){
+        settingsIcon(ctx,r.id,r.x+14,r.y+22,22,t.icon);ctx.fillStyle=ink;ctx.fillText(r.label,r.x+99,r.y+25);
+      }else{ctx.fillText(r.label,r.x+r.w/2,r.y+(r.h-20)/2);}
+      if(r.id==='quit'){settingsIcon(ctx,'quit',r.x+17,r.y+18,22,t.icon);}
+    });
+    ctx.restore();
+  };
+  Game.prototype._pauseTap = function(w) {
+    var R=this.pauseRects();
+    if(inRect(w,R.close)||!inRect(w,R.panel)){this.settingsBack();return;}
+    for(var i=0;i<R.rows.length;i++){
+      var r=R.rows[i];if(!inRect(w,r))continue;
+      if(r.id==='resume'){Snd.pop();this.closeSettings();}
+      else if(r.id==='settings'){Snd.pop();this._settingsPage='controls';}
+      else if(r.id==='help'){Snd.pop();openHelpGuide();}
+      else if(r.id==='quit'){this._settingsReturn=this._settingsPage;this._settingsPage='leave';Snd.thunk();}
+      else if(r.id==='cancel'){Snd.pop();this.settingsBack();}
+      else if(r.id==='leave'){
+        this.showSettings=false;this._settingsPage=null;
+        this.state=this.mode==='excavation'?'fieldnotes':'menu';Snd.scene('shop');
+      }
+      return;
+    }
   };
 
   Game.prototype._drawSettings = function () {
     if (!this.showSettings) return;
+    if(this._settingsPage==='pause'||this._settingsPage==='leave'){this._drawPause();return;}
     var ctx=this.ctx,v=this.view,R=this.settingsRects(),p=R.panel,t=SETTINGS_THEME;
     ctx.save();
     ctx.fillStyle='rgba(12,8,5,0.76)';
@@ -7504,16 +7598,22 @@ function makeExcavationJar(site) {
         ctx.fillText(r.id==='haptics'?'Feel each dig and discovery':r.id==='hints'?'Highlight gems your orders need':'Tell gem colors apart by shape',r.x+52,r.y+36);
         settingsSwitch(ctx,r.x+r.w-70,r.y+15,on,false);
       }else{
-        var primary=r.id==='done'||r.id==='resume',armed=r.id==='quit'&&this._quitArmed>nowMs();
+        var primary=r.id==='done'||r.id==='resume'||r.id==='pause-back',armed=false;
         ctx.fillStyle=primary?t.primary:armed?'#62342b':t.card;
         rr(ctx,r.x,r.y,r.w,r.h,14);ctx.fill();
         if(!primary){ctx.strokeStyle=armed?t.danger:t.divider;ctx.lineWidth=1;rr(ctx,r.x,r.y,r.w,r.h,14);ctx.stroke();}
         var ink=primary?t.primaryInk:r.id==='quit'?t.danger:t.ink;
         ctx.fillStyle=ink;ctx.font=fT(primary?20:16,'bold');
-        var label=r.id==='resume'?'Resume digging':r.id==='quit'?(armed?'Tap again to leave':'Leave this dig'):
+        var label=r.id==='pause-back'?'Back to pause':r.id==='resume'?'Resume digging':r.id==='quit'?(this.mode==='excavation'?'Return to field journal':'Return to burrow'):
           r.id==='restore'?(Store.busy?'Restoring…':'Restore purchases'):
           r.id==='privacy'?'Privacy':r.id==='help'?'How to play':'Done';
-        if(primary){ctx.textAlign='center';ctx.fillText(label,r.x+r.w/2,r.y+19);}
+        if(r.id==='access'||r.id==='restore'){
+          settingsIcon(ctx,r.id,r.x+13,r.y+18,22,t.icon);
+          ctx.fillStyle=t.ink;ctx.font=fT(16,'bold');ctx.textAlign='left';
+          ctx.fillText(r.id==='access'?'Full Burrow':Store.busy?'Restoring…':'Restore',r.x+43,r.y+11);
+          ctx.fillStyle=t.muted;ctx.font=fT(11.5);
+          ctx.fillText(r.id==='restore'?'Purchases':Store.available()?(Ent.owned()?'Unlocked':'One-time unlock'):'All 40 Career levels included on web',r.x+43,r.y+35);
+        }else if(primary){ctx.textAlign='center';ctx.fillText(label,r.x+r.w/2,r.y+19);}
         else {
           settingsIcon(ctx,r.id,r.x+16,r.y+18,22,r.id==='quit'?t.danger:t.icon);
           ctx.fillStyle=ink;ctx.textAlign='left';ctx.fillText(label,r.x+49,r.y+21);
@@ -7525,8 +7625,9 @@ function makeExcavationJar(site) {
   };
 
   Game.prototype._settingsTap = function (w) {
+    if(this._settingsPage==='pause'||this._settingsPage==='leave'){this._pauseTap(w);return;}
     var R = this.settingsRects();
-    if (inRect(w, R.close)) { Snd.pop(); this.closeSettings(); return; }
+    if (inRect(w, R.close)) { Snd.pop(); this.settingsBack(); return; }
     for (var i = 0; i < R.rows.length; i++) {
       var r = R.rows[i];
       if (!inRect(w, r)) continue;
@@ -7537,6 +7638,8 @@ function makeExcavationJar(site) {
         Store.restore(function (got) { if (got) { Snd.fanfare(150); Hap.medium(); } });
         return;
       }
+      if(r.id==='access'){Snd.pop();this.openPaywall({state:this.state,settings:true});return;}
+      if(r.id==='pause-back'){Snd.pop();this.settingsBack();return;}
       if (r.id === 'privacy') { Snd.pop(); openOutward(PRIVACY_URL); return; }
       if (r.id === 'help') {
         Snd.pop();
@@ -7570,19 +7673,11 @@ function makeExcavationJar(site) {
       }
       else if (r.id === 'resume' || r.id === 'done') { Snd.pop(); this.closeSettings(); }
       else if (r.id === 'quit') {
-        if (this._quitArmed > nowMs()) {
-          this._quitArmed = 0;
-          this.showSettings = false;
-          this.state = this.mode === 'excavation' ? 'fieldnotes' : 'menu';
-          Snd.scene('shop');
-        } else {
-          this._quitArmed = nowMs() + 2600;
-          Snd.thunk();
-        }
+        this._settingsReturn='controls';this._settingsPage='leave';Snd.thunk();
       }
       return;
     }
-    if (!inRect(w, R.panel)) { this.closeSettings(); }
+    if (!inRect(w, R.panel)) { this.settingsBack(); }
   };
 
   Game.prototype.gearRect = function () {
@@ -8021,6 +8116,7 @@ function makeExcavationJar(site) {
     var tabs = {};
     ['walls', 'dragon', 'pick'].forEach(function (id, i) { tabs[id] = { x: 28 + 124 * i, y: 196, w: 116, h: 58 }; });
     return {
+      access: { x: 28, y: 12, w: 314, h: 58 },
       tabs: tabs, preview: { x: 28, y: 266, w: 364, h: 176 },
       action: { x: 188, y: 368, w: 184, h: 58 },
       cards: shopCatalog(tab).map(function (item, i) {
@@ -8514,6 +8610,25 @@ function makeExcavationJar(site) {
     rr(ctx,b.x+.5,b.y+.5,b.w-1,b.h-1,11.5);ctx.stroke();
     ctx.restore();
   }
+  function fullBurrowOffer() {
+    var nativeStore = Store.available(), owned = Ent.owned();
+    var sub = !nativeStore ? 'All 40 Career levels included here'
+      : owned ? 'Unlocked · purchase details and restore'
+      : 'One-time unlock · 30 more Career levels';
+    return { nativeStore: nativeStore, owned: owned, title: 'THE FULL BURROW',
+      subtitle: sub, label: 'The Full Burrow. ' + sub + '. ' +
+        (!nativeStore ? 'See web and iPhone access.' : owned ? 'View your purchase.' : 'View purchase details.') };
+  }
+  Game.prototype._drawFullBurrowEntry = function (b) {
+    var ctx = this.ctx, offer = fullBurrowOffer();
+    ctx.save(); shopPlate(ctx, b, false);
+    if (SPR.gem_prism) ctx.drawImage(SPR.gem_prism, b.x + 12, b.y + 12, 34, 34);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillStyle = '#f2d68e'; fitT(ctx, offer.title, b.x + 56, b.y + 11, b.w - 70, 14, 'bold');
+    ctx.fillStyle = '#d5c4a6'; fitT(ctx, offer.subtitle, b.x + 56, b.y + 33, b.w - 70, 11);
+    ctx.restore();
+  };
+
   Game.prototype._drawShop = function () {
     var ctx=this.ctx,v=this.view,cx=VIEW_MIN_W/2;
     var tab=this.shopTab||'walls',layout=this.shopLayout(),item=this.shopSelection();
@@ -8532,6 +8647,7 @@ function makeExcavationJar(site) {
     ctx.fillStyle='#c8b89b';ctx.font=fT(12);
     ctx.fillText('Choose a look. Your dig stays the same.',cx,122,VIEW_MIN_W-48);
     this._drawGearAt(SHOP_GEAR,true);
+    this._drawFullBurrowEntry(layout.access);
 
     var balance={x:cx-106,y:146,w:212,h:38};
     ctx.fillStyle='rgba(14,9,5,0.64)';rr(ctx,balance.x,balance.y,balance.w,balance.h,10);ctx.fill();
@@ -8752,15 +8868,61 @@ function makeExcavationJar(site) {
 
   var PAY_RECTS = {
     buy:     { x: VIEW_MIN_W / 2 - 122, y: 500, w: 244, h: 60 },
-    restore: { x: VIEW_MIN_W / 2 - 122, y: 572, w: 244, h: 44 },
-    back:    { x: VIEW_MIN_W / 2 - 122, y: 630, w: 244, h: 52 },
+    restore: { x: VIEW_MIN_W / 2 - 122, y: 572, w: 244, h: 58 },
+    back:    { x: VIEW_MIN_W / 2 - 122, y: 642, w: 244, h: 58 },
   };
   Game.prototype.paywallRects = function () { return PAY_RECTS; };
 
-  Game.prototype.openPaywall = function () {
+  Game.prototype.openPaywall = function (origin) {
+    if (this.state !== 'paywall') {
+      var from = origin && typeof origin === 'object' ? origin
+        : { state: this.state, settings: !!this.showSettings };
+      var safe = ['menu', 'shop', 'records', 'levels', 'fieldnotes', 'results'];
+      this._paywallReturn = { state: safe.indexOf(from.state) >= 0 ? from.state : 'menu',
+                              settings: !!from.settings };
+    }
+    this.showSettings = false;
     this.state = 'paywall';
-    Store.note = null;
+    if (!Store.busy) Store.note = null;
     Store.load();
+  };
+  Game.prototype.paywallBackLabel = function () {
+    var from = this._paywallReturn || { state: 'levels', settings: false };
+    if (from.settings) return 'Back to Settings';
+    return { shop: 'Back to Shop', menu: 'Back to menu', records: 'Back to records',
+      levels: 'Back to levels', fieldnotes: 'Back to field journal', results: 'Back to results' }[from.state] || 'Back';
+  };
+  Game.prototype.closePaywall = function () {
+    var from = this._paywallReturn || { state: 'levels', settings: false };
+    this.state = from.state;
+    this.showSettings = !!from.settings;
+    if (from.settings) this._settingsRestoreRequested = Store.busy || !!Store.note;
+    this._paywallReturn = null;
+  };
+  Game.prototype._drawWebAccess = function () {
+    var ctx = this.ctx, cx = VIEW_MIN_W / 2;
+    ctx.fillStyle = '#ffe9a8'; ctx.font = fD(28);
+    ctx.fillText('PLAYING ON THE WEB', cx, 96, VIEW_MIN_W - 40);
+    ctx.fillStyle = '#d5c4a6'; ctx.font = fT(14);
+    ctx.fillText('No purchase needed in this version.', cx, 137, VIEW_MIN_W - 40);
+    var card = { x: 28, y: 184, w: 364, h: 180 };
+    shopPlate(ctx, card, true);
+    if (SPR.gem_prism) ctx.drawImage(SPR.gem_prism, cx - 23, 199, 46, 46);
+    ctx.fillStyle = '#fff0cc'; ctx.font = fT(17, 'bold');
+    ctx.fillText('All 40 Career levels are included', cx, 260, 332);
+    ctx.fillStyle = '#d5c4a6'; ctx.font = fT(14);
+    ctx.fillText('Today’s Daily and unlimited Free Dig', cx, 293, 332);
+    ctx.fillText('All five optional Excavations', cx, 321, 332);
+    ctx.fillStyle = '#f2d68e'; ctx.font = fT(17, 'bold');
+    ctx.fillText('THE FULL BURROW ON iPHONE', cx, 406, 344);
+    ctx.fillStyle = '#d5c4a6'; ctx.font = fT(14);
+    ['A one-time purchase adds Career levels 11–40',
+     'and replay of the last 14 Daily jars on iPhone.',
+     'Here on the web, Archive shows score history.'].forEach(function (line, i) {
+      ctx.fillText(line, cx, 440 + i * 26, 344);
+    });
+    this._menuBtn(this.paywallBackLabel(), PAY_RECTS.back.y,
+      { w: PAY_RECTS.back.w, h: PAY_RECTS.back.h, quiet: true });
   };
 
   Game.prototype._drawPaywall = function () {
@@ -8777,9 +8939,11 @@ function makeExcavationJar(site) {
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
 
     ctx.fillStyle = '#ffe9a8'; ctx.font = fD(28);
+    if (!Store.available()) { this._drawWebAccess(); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; return; }
     ctx.fillText('THE FULL BURROW', cx, 96, VIEW_MIN_W - 40);
     ctx.fillStyle = 'rgba(232,220,200,0.8)'; ctx.font = fT(13);
-    ctx.fillText('One purchase. No subscription, nothing else to buy.', cx, 134, VIEW_MIN_W - 40);
+    ctx.fillText(Ent.owned() ? 'Unlocked · one purchase, no subscription'
+                 : 'One purchase. No subscription, nothing else to buy.', cx, 134, VIEW_MIN_W - 40);
 
     var yy = 178;
     var give = ['Career levels ' + (FREE_CAREER_LEVELS + 1) + '-' + CAREER_MAX + ': the rest of the ladder',
@@ -8832,15 +8996,21 @@ function makeExcavationJar(site) {
                                       disabled: have || Store.busy || !Store.price });
     this._menuBtn('RESTORE PURCHASE', PAY_RECTS.restore.y,
                   { w: PAY_RECTS.restore.w, h: PAY_RECTS.restore.h, quiet: true, disabled: Store.busy });
-    this._menuBtn('NOT NOW', PAY_RECTS.back.y, { w: PAY_RECTS.back.w, h: PAY_RECTS.back.h, quiet: true });
+    this._menuBtn(this.paywallBackLabel(), PAY_RECTS.back.y,
+                  { w: PAY_RECTS.back.w, h: PAY_RECTS.back.h, quiet: true });
 
-    if (Store.note) {
+    var status = Store.note || (!Store.price && !Store.busy && !have
+      ? 'Price unavailable. Please try again later.' : null);
+    if (status) {
       ctx.fillStyle = 'rgba(232,220,200,0.8)'; ctx.font = fT(12);
-      ctx.fillText(Store.note, cx, PAY_RECTS.back.y + PAY_RECTS.back.h + 10, VIEW_MIN_W - 40);
-    } else if (!Store.available()) {
-      ctx.fillStyle = 'rgba(232,220,200,0.55)'; ctx.font = fT(11);
-      ctx.fillText('This build has no store. The full ladder ships with the app.',
-                   cx, PAY_RECTS.back.y + PAY_RECTS.back.h + 10, VIEW_MIN_W - 40);
+      var words = status.split(' '), line = '', lines = [];
+      words.forEach(function (word) {
+        var next = line ? line + ' ' + word : word;
+        if (line && ctx.measureText(next).width > 334) { lines.push(line); line = word; }
+        else line = next;
+      });
+      if (line) lines.push(line);
+      lines.slice(0, 2).forEach(function (text, i) { ctx.fillText(text, cx, 448 + i * 17, 334); });
     }
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
   };
@@ -9082,8 +9252,12 @@ function makeExcavationJar(site) {
     }
     function btn(id, label, y, disabled) { add(id, label, { x: 100, y: y, w: 220, h: 56 }, disabled); }
     if (g.showSettings) {
+      if(g._settingsPage==='pause'||g._settingsPage==='leave'){
+        var pr=g.pauseRects();pr.rows.forEach(function(r){add('pause:'+r.id,r.label,r);});
+        add('settings-close',pr.leaving?'Cancel leaving dig':'Resume digging',pr.close);return out;
+      }
       var labels = { music: 'Music', sound: 'Sound effects', haptics: 'Haptics', hints: 'Hints in the jar', marks: 'Gem symbols',
-        help: 'How to Play', resume: 'Resume', done: 'Done', quit: g._quitArmed > nowMs() ? 'Confirm quit shift' : 'Quit shift',
+        help: 'How to Play', resume: 'Resume', done: 'Done', quit: g.mode==='excavation'?'Return to field journal':'Return to burrow', 'pause-back':'Back to pause', access:'Full Burrow',
         restore: 'Restore purchases', privacy: 'Privacy policy' };
       var values = { music: !Snd.musicMuted, sound: !Snd.sfxMuted, haptics: Hap.enabled(), hints: Meta.data.hints !== 0, marks: Meta.data.marks === 1 };
       g.settingsRects().rows.forEach(function (r) {
@@ -9095,7 +9269,7 @@ function makeExcavationJar(site) {
           add('setting:' + r.id + ':more', 'Increase' + suffix, ar.more, level >= 1);
         } else add('setting:' + r.id, labels[r.id], r, r.id === 'restore' && Store.busy, values[r.id], r.id in values ? 'switch' : null);
       });
-      add('settings-close', 'Close Settings', g.settingsRects().close);
+      add('settings-close', PAUSE_HUB&&g.state==='paused'?'Back to pause':'Close Settings', g.settingsRects().close);
       return out;
     }
     if (g.state === 'fieldnotes' || (g.mode === 'excavation' && g.state !== 'menu' && g.state !== 'shop' && g.state !== 'levels' && g.state !== 'records' && g.state !== 'paywall' && g.state !== 'paused')) return g._excavationControls();
@@ -9158,9 +9332,12 @@ function makeExcavationJar(site) {
       btn('back', 'Menu', rr.menu);
     } else if (g.state === 'paywall') {
       var pr = g.paywallRects();
-      add('buy', 'Unlock full burrow' + (Store.price ? ', ' + Store.price : ''), pr.buy, Ent.owned() || Store.busy || !Store.price || !Store.available());
-      add('restore', 'Restore purchases', pr.restore, Store.busy || !Store.available());
-      add('back', 'Back', pr.back);
+      if (Store.available()) {
+        add('buy', Ent.owned() ? 'The Full Burrow is unlocked' : 'Unlock full burrow' + (Store.price ? ', ' + Store.price : ''), pr.buy, Ent.owned() || Store.busy || !Store.price);
+        add('restore', 'Restore purchases', pr.restore, Store.busy);
+      }
+      add('back', g.paywallBackLabel(), pr.back);
+      return out;
     } else if (g.state === 'shop') {
       var layout = g.shopLayout(), tab = g.shopTab || 'walls', selected = g.shopSelection();
       ['walls', 'dragon', 'pick'].forEach(function (t) {
@@ -9173,6 +9350,7 @@ function makeExcavationJar(site) {
         add(card.id, st.name + detail + '. Preview', card.rect, false, card.item.id === selected.id);
       });
       var action = shopItemState(tab, selected);
+      add('shop-access', fullBurrowOffer().label, layout.access);
       add('shop-action', action.name + '. ' + action.actionLabel, layout.action, !action.canAct);
       add('back', 'Back', layout.back);
     } else if (g.state === 'records') {
@@ -9200,7 +9378,7 @@ function makeExcavationJar(site) {
 
   Game.prototype.accessSummary = function () {
     var g = this, text = '';
-    if (g.showSettings) text = 'Settings. ' + (g.state === 'paused' ? 'Your shift is paused.' : '');
+    if (g.showSettings) text = (g._settingsPage==='leave'?'End this dig? '+g.leaveDigCopy().join(' '):g._settingsPage==='pause'?'Dig paused.':'Settings.') + (g.state==='paused'?' Your dig is paused.':'');
     else if (g.state === 'fieldnotes') text = 'GemBurrow. Five free authored excavations. Fill a commission and preserve intact specimens for Flint.';
     else if (g.mode === 'excavation' && (g.state === 'playing' || g.state === 'paused' || g.state === 'results')) {
       var e = g.excavation;
@@ -9228,6 +9406,8 @@ function makeExcavationJar(site) {
   Game.prototype.accessDetails = function () {
     var g = this, lines = [], m = Meta.data;
     if (g.showSettings) {
+      if(g._settingsPage==='leave')return g.leaveDigCopy();
+      if(g._settingsPage==='pause')return ['Resume digging to continue. Settings and How to play keep your dig paused. Returning ends this unfinished attempt.'];
       lines.push('Jar hints highlight gems needed for orders. Gem symbols distinguish gem colors by shape.');
       return lines;
     }
@@ -9284,7 +9464,10 @@ function makeExcavationJar(site) {
         }
         lines.push(g._standingText(tab === 'league' ? 'league' : 'board') + '. Your display name: ' + safeName(m.playerName) + '.');
       }
-    } else if (g.state === 'paywall') lines.push('Full Burrow is a one-time purchase. Unlock the full 40-level career and past Daily jars. Today’s Daily and Free Dig remain available without purchase.');
+    } else if (g.state === 'paywall') lines.push(!Store.available()
+      ? 'Web access: all 40 Career levels, today’s Daily, Free Dig and all five Excavations are included. Archive shows score history only. On iPhone, The Full Burrow is a one-time purchase for Career levels 11–40 and replay of the last 14 Daily jars.'
+      : Ent.owned() ? 'The Full Burrow is unlocked. Career levels 11–40 and the 14-day Daily archive are included. Restore purchases is available.'
+      : 'The Full Burrow is a one-time purchase for Career levels 11–40 and replay of the last 14 Daily jars. Today’s Daily, Free Dig and all five Excavations remain available without purchase.');
     else if (g.state === 'levels') lines.push('Choose a reached level to replay it. Stars can improve; coins bank on the first clear only.');
     else if (g.state === 'shop') lines.push('Select an item to preview it. Only the Buy or Equip button changes your appearance. Walls cost saved coins. Dragon colors unlock with your hoard. Pickaxes unlock with career stars. Hoard and stars are not spent. These appearances do not change your dig.');
     else if (g.state === 'menu' && !m.tutorialDone) lines.push('Daily Dig unlocks when you finish the introductory Career lesson.');
@@ -9310,7 +9493,7 @@ function makeExcavationJar(site) {
     var priorRect = prior && nodes[prior] && nodes[prior]._worldRect;
     var excavationChoice = g.mode === 'excavation' && g.excavation
       ? (g.excavation.cut ? 'cut' : g.excavation.prompt ? 'finish' : '') : '';
-    var scene = g.state + ':' + !!g.showSettings + ':' + !!g.choice + ':' + excavationChoice;
+    var scene = g.state + ':' + !!g.showSettings + ':' + g._settingsPage + ':' + !!g.choice + ':' + excavationChoice;
     controls.forEach(function (d) {
       seen[d.id] = true;
       var el = nodes[d.id];
@@ -9343,7 +9526,7 @@ function makeExcavationJar(site) {
       if (el.style.cssText !== css) el.style.cssText = css;
     });
     Object.keys(nodes).forEach(function (id) { if (!seen[id]) { nodes[id].remove(); delete nodes[id]; } });
-    if (g.state === 'shop' && !g.showSettings) {
+    if ((g.state === 'shop' && !g.showSettings) || g.showSettings) {
       var next = host.firstChild;
       controls.forEach(function (d) {
         var el = nodes[d.id];
@@ -9460,9 +9643,9 @@ function makeExcavationJar(site) {
     if (helpIsOpen()) return;
     Snd.unlock();
     if (game._uiLockUntil && nowMs() < game._uiLockUntil) return;
-    var state = game.state, settings = game.showSettings;
+    var state = game.state, settings = game.showSettings, settingsPage=game._settingsPage;
     _routeTap(w);
-    if (game.state !== state || game.showSettings !== settings) game._uiLockUntil = nowMs() + UI_LOCK_MS;
+    if (game.state !== state || game.showSettings !== settings || game._settingsPage!==settingsPage) game._uiLockUntil = nowMs() + UI_LOCK_MS;
   }
   window.addEventListener('pointerdown', function (e) {
     if (helpIsOpen() || (e.target.closest && e.target.closest('.game-control'))) return;
@@ -9473,10 +9656,10 @@ function makeExcavationJar(site) {
   });
   function navigateBack() {
     if (helpIsOpen()) { closeHelpGuide(); return true; }
-    if (game.showSettings) game.closeSettings();
+    if (game.showSettings) game.settingsBack();
     else if (game.state === 'playing') game.openSettings();
     else if (game.state === 'paused') game.setPaused(false);
-    else if (game.state === 'paywall') game.state = 'levels';
+    else if (game.state === 'paywall') game.closePaywall();
     else if (game.state === 'fieldnotes') { game.state = 'menu'; Snd.scene('shop'); }
     else if (game.mode === 'excavation' && game.state === 'results') { game.state = 'fieldnotes'; Snd.scene('shop'); }
     else if (game.state !== 'menu') { game.state = 'menu'; Snd.scene('shop'); }
@@ -9556,6 +9739,7 @@ function makeExcavationJar(site) {
     if (game.state === 'shop') {
       if (inRect(w, SHOP_GEAR)) { uiTick(); game.openSettings(); return; }
       var shop = game.shopLayout(), categories = ['walls', 'dragon', 'pick'];
+      if (inRect(w, shop.access)) { uiTick(); game.openPaywall(); return; }
       for (var ti = 0; ti < categories.length; ti++) {
         if (inRect(w, shop.tabs[categories[ti]])) { uiTick(); game.shopTab = categories[ti]; return; }
       }
@@ -9582,19 +9766,18 @@ function makeExcavationJar(site) {
       return;
     }
     if (game.state === 'paywall') {
-      if (inRect(w, SHOP_GEAR)) { uiTick(); game.openSettings(); return; }
       var PR = game.paywallRects();
-      if (hitBtn(w, PR.buy.y) && !Ent.owned() && !Store.busy && Store.price) {
+      if (inRect(w, PR.buy) && Store.available() && !Ent.owned() && !Store.busy && Store.price) {
         uiTick();
         Store.buy(function (got) { if (got) { Snd.fanfare(300); Hap.heavy(); } });
         return;
       }
-      if (hitBtn(w, PR.restore.y) && !Store.busy) {
+      if (inRect(w, PR.restore) && Store.available() && !Store.busy) {
         uiTick();
         Store.restore(function (got) { if (got) { Snd.fanfare(150); Hap.medium(); } });
         return;
       }
-      if (hitBtn(w, PR.back.y)) { uiTick(); game.state = 'levels'; return; }
+      if (inRect(w, PR.back)) { uiTick(); game.closePaywall(); return; }
       return;
     }
     if (game.state === 'menu') {
