@@ -17,14 +17,14 @@
   <meta property="og:description" content="A gothic illustrated horde-survivor for iOS. Pick a hero, draft upgrades, evolve weapons, and survive the horde.">
   <meta property="og:url" content="https://hypersage.ai/hexhunter/">
   <meta property="og:site_name" content="Hexhunter">
-  <meta property="og:image" content="https://hypersage.ai/hexhunter/og-image.png?v=20260919a">
+  <meta property="og:image" content="https://hypersage.ai/hexhunter/og-image.png?v=20261030a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Hexhunter — a gothic illustrated horde-survivor">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Hexhunter — Survive the Horde. Draft Your Doom.">
   <meta name="twitter:description" content="A gothic illustrated horde-survivor for iOS. Draft upgrades, evolve weapons, survive the horde.">
-  <meta name="twitter:image" content="https://hypersage.ai/hexhunter/og-image.png?v=20260919a">
+  <meta name="twitter:image" content="https://hypersage.ai/hexhunter/og-image.png?v=20261030a">
   <meta name="twitter:image:alt" content="Hexhunter — a gothic illustrated horde-survivor">
 
   <link rel="icon" type="image/png" href="app-icon-512.png?v=20260711a">
@@ -46,10 +46,10 @@
       --card: #17121F;
       --card-soft: #1E1830;
       --fg: #ECE7F5;          /* bone-white ink */
-      --muted-fg: #A99EC2;    /* muted lilac ink */
+      --muted-fg: #B9ADCA;    /* muted lilac ink */
       /* Raised from #7A7092 so 0.74–0.92rem labels clear AA over the fixed
          violet atmosphere instead of only against the flat page colour. */
-      --tertiary-fg: #8D82A8;
+      --tertiary-fg: #A296B8;
       --primary: #8B5CF6;     /* arcane violet */
       --primary-bright: #A78BFA;
       --primary-dark: #6D28D9;
@@ -121,7 +121,7 @@
       letter-spacing: 0.06em; text-transform: uppercase;
     }
     nav.site .brand img { width: 38px; height: 38px; border-radius: 10px; box-shadow: 0 0 20px var(--violet-glow); }
-    nav.site .links { display: flex; gap: 24px; font-size: 0.92rem; flex-wrap: nowrap; white-space: nowrap; }
+    nav.site .links { display: flex; gap: 22px; font-size: 0.88rem; flex-wrap: nowrap; white-space: nowrap; }
     nav.site .links a { color: var(--muted-fg); font-weight: 600; letter-spacing: 0.02em; }
     nav.site .links a:hover { color: var(--primary-bright); }
 
@@ -148,22 +148,22 @@
     }
 
     /* ===== HERO ===== */
-    section.hero { position: relative; padding: 96px 0 92px; overflow: hidden; }
+    section.hero { position: relative; padding: 48px 0 44px; overflow: hidden; isolation: isolate; }
     .hero-bg {
       position: absolute; inset: 0; z-index: 0;
       background-image: url('assets/art/cover.jpg?v=20260711a');
-      background-size: cover; background-position: center 30%;
-      opacity: 0.30;
+      background-size: cover; background-position: center 40%;
+      opacity: 0.68;
     }
     .hero-bg::after {
       content: ''; position: absolute; inset: 0;
-      background: linear-gradient(180deg, rgba(12,10,20,0.55) 0%, rgba(12,10,20,0.80) 55%, var(--bg) 100%),
-                  radial-gradient(ellipse 60% 70% at 50% 40%, transparent, rgba(12,10,20,0.5) 90%);
+      background: linear-gradient(90deg, rgba(12,10,20,.94), rgba(12,10,20,.65) 46%, rgba(12,10,20,.12) 80%),
+                  linear-gradient(180deg, rgba(12,10,20,.08) 55%, var(--bg) 100%);
     }
     .hero .container { position: relative; z-index: 1; }
     .hero-layout {
-      display: grid; grid-template-columns: 1.08fr 0.92fr;
-      gap: 52px; align-items: center;
+      display: grid; grid-template-columns: 1.18fr 0.82fr;
+      gap: 64px; align-items: center;
     }
     @media (max-width: 900px) {
       .hero-layout { grid-template-columns: 1fr; gap: 40px; text-align: center; }
@@ -179,7 +179,7 @@
     }
     .hero-text h1 {
       font-weight: 800;
-      font-size: clamp(2.4rem, 5.6vw, 4.1rem);
+      font-size: clamp(2.35rem, 4.6vw, 3.7rem);
       line-height: 1.18; letter-spacing: 0.01em; padding-bottom: 0.1em;
       margin-bottom: 20px;
       text-shadow: 0 2px 30px rgba(0,0,0,0.6);
@@ -223,7 +223,7 @@
     /* The column must carry the width: its only content (the carousel) is
        absolutely-positioned images with no intrinsic size, so a shrink-to-fit
        flex item would collapse to nothing without an explicit width. */
-    .hero-art .carousel-column { width: 100%; max-width: 372px; }
+    .hero-art .carousel-column { width: 100%; max-width: 252px; }
     .hero-art .device {
       width: 100%; padding: 12px; display: block;
       background: linear-gradient(160deg, #241b3a, #100b1b);
@@ -240,7 +240,7 @@
     /* Hero carousel — crossfades gameplay screenshots inside the phone frame. */
     .hero-art .carousel {
       position: relative; overflow: hidden;
-      border-radius: 32px; aspect-ratio: 620 / 1347;
+      border-radius: 32px; aspect-ratio: 900 / 1955;
       background: #0C0A14;
     }
     .hero-art .carousel img {
@@ -540,7 +540,7 @@
        full intrinsic height — 1560px and 1799px tall in a 126-250px column,
        spilling down the page. Fixed 2026-08-24; it had been live since these
        captures were wired in. */
-    .screen-frame img { width: 100%; height: auto; display: block; border-radius: 19px; aspect-ratio: 620 / 1347; object-fit: cover; }
+    .screen-frame img { width: 100%; height: auto; display: block; border-radius: 19px; aspect-ratio: 900 / 1955; object-fit: cover; }
     .screen-kind { font-family: 'Cinzel', serif; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin: 18px 0 3px; }
     .screen-name { font-size: 1.02rem; font-weight: 700; color: var(--fg); }
 
@@ -571,7 +571,7 @@
     /* Single-phone showcases (e.g. Biomes) center one comfortably-sized frame. */
     .phone-row.single { justify-content: center; }
     .phone-row.single .screen-card { max-width: 268px; }
-    .phone-row .screen-frame img { aspect-ratio: 620 / 1347; }
+    .phone-row .screen-frame img { aspect-ratio: 900 / 1955; }
     .phone-row .screen-kind { margin-top: 14px; }
     .phone-row .screen-name { font-size: 0.94rem; }
 
@@ -707,6 +707,117 @@
       .foot-more-grid { gap: 8px; }
       .foot-more-grid a { padding: 6px 12px; font-size: 0.8rem; }
     }
+
+    /* Arcane field: the game's woodcut art, ritual geometry, and restrained light. */
+    html { scroll-padding-top: 92px; }
+    .skip-link { position: fixed; left: 16px; top: -80px; z-index: 100; padding: 12px 20px; background: var(--gold-bright); color: var(--bg); border-radius: 8px; font-weight: 700; }
+    .skip-link:focus { top: 12px; color: var(--bg); }
+    nav.site .links a { padding: 10px 0; }
+    nav.site .links a:last-child { color: var(--gold-bright); }
+    .mobile-menu > summary { min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+    .hero-text { padding: 12px 0; }
+    .hero-text .eyebrow { margin-bottom: 20px; background: rgba(212,175,55,.08); }
+    .hero-text .lede { max-width: 510px; line-height: 1.75; font-size: 1.04rem; margin-bottom: 26px; }
+    .hero-buttons { gap: 12px; }
+    .hero-buttons .btn-primary { padding: 15px 22px; font-size: .93rem; }
+    .hero-buttons .btn-ghost { padding: 15px 19px; font-size: .93rem; }
+    .hero-proof { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 24px; color: var(--muted-fg); font-size: .78rem; letter-spacing: .04em; }
+    .hero-proof span::before { content: '✦'; color: var(--gold); margin-right: 7px; font-size: .7rem; }
+    .hero-art { isolation: isolate; }
+    .arcane-seal { position: absolute; width: 490px; height: 490px; left: 50%; top: 43%; transform: translate(-50%,-50%); stroke: var(--gold); stroke-width: .8; opacity: .26; pointer-events: none; z-index: -1; }
+    .hero-art::before { content: ''; position: absolute; width: 400px; height: 400px; border-radius: 50%; top: 43%; left: 50%; transform: translate(-50%,-50%); z-index: -1; background: radial-gradient(circle, rgba(139,92,246,.23), transparent 69%); pointer-events: none; }
+    .hero-art .device { padding: 7px; border-radius: 30px; box-shadow: 0 28px 70px rgba(0,0,0,.68), 0 0 45px rgba(139,92,246,.18); }
+    .hero-art .carousel, .hero-art .carousel img { border-radius: 23px; }
+    .hero-art .carousel img { object-fit: contain; }
+    .preview-caption { margin-top: 14px; font-size: .75rem; letter-spacing: .05em; color: var(--muted-fg); }
+    .carousel-dots { margin-top: 4px; gap: 0; }
+    .carousel-dots button { width: 44px; height: 36px; }
+    .carousel-pause { min-height: 36px; font-size: .74rem; margin-top: 0; padding: 7px 12px; }
+    .section-block { padding: 72px 0; }
+    .section-eyebrow { display: flex; align-items: center; gap: 12px; }
+    .section-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--gold); opacity: .7; }
+    .panel { background: radial-gradient(ellipse at 95% 15%, rgba(139,92,246,.07), transparent 55%), linear-gradient(180deg, #14101f, #0c0a14); }
+    #preview { border-top-color: rgba(212,175,55,.24); }
+    .feature-card { background: linear-gradient(145deg, #20172d, #14111c); }
+    .feature-card::before { height: 1px; opacity: .8; }
+    .draft-strip { padding-top: 40px; }
+    .heroes-grid { grid-template-columns: repeat(3, 1fr); }
+    .hero-card { background: radial-gradient(ellipse at 50% 10%, rgba(139,92,246,.10), transparent 65%), var(--card); }
+    .hero-card .portrait { width: 148px; height: 148px; }
+    .screen-frame img { object-fit: contain; }
+    .screen-frame a { display: block; border-radius: 19px; cursor: zoom-in; }
+    .screen-frame a:focus-visible { outline: 3px solid var(--gold-bright); outline-offset: 5px; }
+    .screen-kind, .art-card .art-kind { font-size: .72rem; }
+    .screen-name { font-size: .94rem; }
+    .boss-art { position: relative; isolation: isolate; text-align: center; padding: 26px; }
+    .boss-art::before { content: ''; position: absolute; inset: 2% 5% 14%; z-index: -1; border: 1px solid rgba(212,175,55,.2); border-radius: 50%; background: radial-gradient(circle, rgba(139,92,246,.2), transparent 70%); box-shadow: 0 0 0 15px rgba(212,175,55,.025); }
+    .boss-art img { display: block; width: min(100%, 360px); height: auto; margin: auto; filter: drop-shadow(0 20px 36px rgba(0,0,0,.65)); }
+    .gallery-hint { text-align: center; font-size: .8rem; color: var(--muted-fg); margin-top: 20px; }
+    .shot-dialog { position: fixed; inset: 0; width: min(96vw, 720px); max-width: 96vw; max-height: 96dvh; margin: auto; padding: 20px; background: #100d19; color: var(--fg); border: 1px solid var(--border-strong); border-radius: 20px; box-shadow: 0 30px 100px #000; }
+    .shot-dialog::backdrop { background: rgba(6,4,12,.9); }
+    .shot-dialog .dialog-top { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 12px; }
+    .shot-dialog h2 { font-size: 1rem; }
+    .dialog-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .dialog-actions a { font-size: .8rem; padding: 12px 0; }
+    .shot-dialog button { min-width: 44px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--card); color: var(--fg); font: inherit; cursor: pointer; }
+    .shot-dialog img { display: block; width: auto; max-width: 100%; height: auto; max-height: calc(96dvh - 120px); margin: auto; border-radius: 12px; }
+    .shot-dialog button:focus-visible, .carousel-pause:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .cta-strip { position: relative; overflow: hidden; isolation: isolate; background: radial-gradient(ellipse at center, rgba(139,92,246,.2), transparent 65%), #100c1b; }
+    .cta-strip::before { content: ''; position: absolute; width: 500px; height: 500px; border: 1px solid rgba(212,175,55,.16); border-radius: 50%; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: -1; box-shadow: 0 0 0 24px rgba(212,175,55,.025), 0 0 0 25px rgba(212,175,55,.10); }
+    @media (min-width: 901px) and (max-height: 760px) {
+      section.hero { padding-top: 28px; padding-bottom: 28px; }
+      .hero-art .carousel-column { max-width: 218px; }
+      .hero-text h1 { font-size: 3.25rem; }
+      .arcane-seal { width: 430px; height: 430px; }
+    }
+    @media (max-width: 1000px) { nav.site .links { gap: 14px; } }
+    @media (max-width: 900px) {
+      section.hero { padding: 44px 0 40px; }
+      .hero-layout { grid-template-columns: 1fr; gap: 36px; }
+      .hero-text h1 { max-width: 640px; margin-left: auto; margin-right: auto; }
+      .hero-text .lede { max-width: 560px; }
+      .hero-proof { justify-content: center; }
+      .hero-art .carousel-column { max-width: 268px; }
+      .hero-bg { background-position: 65% 10%; background-size: auto 850px; background-repeat: no-repeat; opacity: .5; }
+      .hero-bg::after { background: linear-gradient(180deg, rgba(12,10,20,.65), rgba(12,10,20,.45) 45%, var(--bg) 90%); }
+      .section-eyebrow { justify-content: center; }
+      .section-eyebrow::after { content: ''; width: 28px; height: 1px; background: var(--gold); opacity: .7; }
+      .section-block > .container > h2, .section-block > .container > .lede { text-align: center; margin-left: auto; margin-right: auto; }
+    }
+    @media (max-width: 600px) {
+      .container { padding-left: 22px; padding-right: 22px; }
+      section.hero { padding-top: 24px; }
+      .hero-layout { gap: 32px; }
+      .hero-text h1 { font-size: clamp(2.1rem, 8.5vw, 3rem); line-height: 1.18; }
+      .hero-text .lede { font-size: .98rem; margin-bottom: 22px; }
+      .hero-text .eyebrow { font-size: .65rem; margin-bottom: 18px; }
+      .hero-buttons { flex-direction: column; align-items: center; }
+      .hero-buttons a { justify-content: center; width: min(100%, 310px); }
+      .hero-proof { margin-top: 18px; gap: 8px 12px; font-size: .71rem; }
+      .arcane-seal { width: 420px; height: 420px; }
+      .section-block, .section-block.tight { padding: 52px 0; }
+      .section-block h2, .showcase-copy h2 { font-size: 1.85rem; }
+      .section-block .lede { margin-bottom: 30px; }
+      .showcase { gap: 30px; }
+      .showcase-detail { margin-top: 36px; }
+      .heroes-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+      .hero-card { padding: 18px 10px; }
+      .hero-card .portrait { width: 110px; height: 110px; max-width: 100%; }
+      .hero-card .name { font-size: 1rem; }
+      .hero-card .epithet { font-size: .69rem; }
+      .hero-card p { font-size: .82rem; line-height: 1.55; }
+      .hero-card .stat-line, .hero-card .weapon { font-size: .72rem; }
+      .gallery-grid { grid-template-columns: repeat(2, minmax(0,1fr)); max-width: none; gap: 12px; }
+      .art-card .art-cap { padding: 10px; }
+      .art-card .art-name { font-size: .8rem; }
+      .art-card .art-kind { font-size: .65rem; }
+      .shot-dialog { padding: 12px; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      @keyframes seal-light { 0%, 100% { opacity: .19; } 50% { opacity: .32; } }
+      .arcane-seal { animation: seal-light 9s ease-in-out infinite; }
+    }
+
   </style>
 
 <script type="application/ld+json">
@@ -716,7 +827,6 @@
   "name": "Hexhunter",
   "applicationCategory": "GameApplication",
   "operatingSystem": "iOS",
-  "softwareVersion": "1.2.1",
   "description": "A gothic illustrated horde-survivor for iOS. Pick a hero, draft upgrades every level, evolve your weapons into ascended forms, and survive three dark biomes.",
   "url": "https://hypersage.ai/hexhunter/",
   "author": {
@@ -749,7 +859,7 @@
     },
     {
       "@type": "Question",
-      "name": "Can I unlock everything just by playing?",
+      "name": "Can I earn every hunter, arena and relic by playing?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Yes. Start free with Vess and Kael, then earn the other seven hunters through their challenges: defeat a boss, survive long enough, evolve a weapon, kill 1,000 in one run, or win on The Ashlands. Earned essence buys relics, and deeper biomes open as you survive longer. If you'd rather skip ahead, Unlock All is a single one-time purchase that opens all 9 heroes, all 3 arenas and all 12 relics at maximum level, plus three supporter crests. Every hero, arena and relic in it can also be earned by playing. No subscriptions, no ads, no currency packs to keep buying. Purchase and restore details are on the support page."
@@ -768,7 +878,7 @@
       "name": "What does Hexhunter collect about me?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Nothing. The app has no ads, no analytics, no tracking, no account to create, and no server of its own. Your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, Apple handles those optional services under its own terms."
+        "text": "The app has no ads, no analytics, no tracking, no account to create, and no server of its own. Your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, Apple handles those optional services under its own terms."
       }
     },
     {
@@ -776,7 +886,7 @@
       "name": "Is the art hand-drawn?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. Every hero, enemy, and boss plate is AI-generated under one art direction, then curated and cleaned up until the whole bestiary holds a single gothic woodcut line. The music is synthesized from scratch in-house."
+        "text": "No. Every hero, enemy, and boss plate is AI-generated under one art direction, then curated and cleaned up until the whole bestiary holds a single gothic woodcut line."
       }
     }
   ]
@@ -785,6 +895,7 @@
   <script src="/v.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
   <nav class="site" id="top">
     <div class="container">
@@ -803,7 +914,7 @@
         <a href="#download">Download</a>
       </div>
       <details class="mobile-menu">
-        <summary aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></summary>
+        <summary aria-label="Navigation menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></summary>
         <div class="mobile-links">
           <a href="#features">Features</a>
           <a href="#combat">Combat</a>
@@ -819,6 +930,7 @@
     </div>
   </nav>
 
+  <main id="main">
   <section class="hero">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="container">
@@ -832,24 +944,32 @@
               <span>Download on the App Store</span>
             </a>
             <a href="#preview" class="btn-ghost">
-              <span>What's new in 1.2</span>
+              <span>Explore the hunt</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </a>
           </div>
+          <div class="hero-proof" aria-label="Game highlights"><span>Play free</span><span>Offline hunts</span><span>No ads</span></div>
+          <p class="preview-caption">Screenshots preview v1.3. See the App Store for the available version.</p>
         </div>
         <div class="hero-art">
+          <svg class="arcane-seal" viewBox="0 0 600 600" fill="none" aria-hidden="true">
+            <circle cx="300" cy="300" r="276"/><circle cx="300" cy="300" r="258"/>
+            <circle cx="300" cy="300" r="223" stroke-dasharray="2 18"/>
+            <path d="M300 24 539 438 61 438Z M300 576 61 162 539 162Z"/>
+            <path d="M300 8v32M300 560v32M8 300h32M560 300h32"/>
+            <path d="m300 70 8 14-8 14-8-14Zm230 216 8 14-8 14-8-14ZM300 502l8 14-8 14-8-14ZM70 286l8 14-8 14-8-14Z"/>
+          </svg>
           <div class="carousel-column">
             <div class="device">
               
               <div class="carousel" id="heroCarousel" aria-roledescription="carousel" aria-label="Hexhunter screenshots">
-                <img class="active" fetchpriority="high" src="assets/screens/hunt-horde.jpg?v=20260919a" width="720" height="1564" alt="Vess moving between foes, glowing pickups and projectiles in the Ossuary.">
-                <img src="assets/screens/hunt-evolution.jpg?v=20260919a" width="720" height="1564" alt="Nyx firing an evolved Storm Conduit lightning strike at an enemy, with a visible stun ring.">
-                <img src="assets/screens/hunt-boss.jpg?v=20260919a" width="720" height="1564" alt="The Plague Abbot fight: a hunter holds the ground against the horde beneath the boss health bar.">
-                <img src="assets/screens/hunt-ritual.jpg?v=20260919a" width="720" height="1564" alt="A Warding Ritual at 2 of 3: two seals marked SEALED while the hunter charges the last one.">
-                <img src="assets/screens/hunt-draft.jpg?v=20260919a" width="720" height="1564" alt="The level-up draft: Ironhide, Gold Tongue, a new Chain Lightning weapon with its Lv 6 evolution hint, and Thornmail, with Reroll and Banish.">
+                <img class="active" fetchpriority="high" decoding="async" src="assets/screens/20261030-horde.jpg" width="900" height="1955" alt="A level 13 hunt in the Ossuary: Vess surrounded by enemies, hexes and glowing pickups as a MASSACRE streak lands.">
+                <img decoding="async" src="assets/screens/20261030-draft.jpg" width="900" height="1955" alt="The level-up draft offers Quickened, Garlic Ring, Plague Rats and Runic Might, with Reroll and Banish controls.">
+                <img decoding="async" src="assets/screens/20261030-frostvault.jpg" width="900" height="1955" alt="A hunt in the Frostvault, with icy landmarks, chill fields, glowing pickups and a Warding Ritual.">
+                <img decoding="async" src="assets/screens/20261030-ritual.jpg" width="900" height="1955" alt="Silas charging a glowing warding seal while two other rune seals are marked SEALED.">
               </div>
             </div>
-            <p class="preview-caption">In-game screenshots</p>
+            <p class="preview-caption">Update preview · v1.3</p>
             <div class="carousel-dots" id="heroDots" role="group" aria-label="Choose a screenshot"></div>
             <button class="carousel-pause" id="heroPause" type="button" hidden>Pause rotation</button>
           </div>
@@ -860,18 +980,18 @@
 
   <section class="section-block tight panel" id="preview" aria-labelledby="preview-title">
     <div class="container">
-      <div class="section-eyebrow">New in 1.2</div>
+      <div class="section-eyebrow">Beyond the first hunt</div>
       <h2 id="preview-title">A new reason to <em>hunt every day.</em></h2>
       <p class="lede">A shared Daily Challenge, victory seals and crests to earn, and arenas that fight back, on top of Hex Step and the Warding Rituals.</p>
       <div class="features-grid">
         <div class="feature-card">
           <h3>Daily Challenge</h3>
-          <p>A fresh hunt every day, with the same hero, arena and starting relics for everyone. Nothing you've bought or upgraded changes your starting power. Chase your best survival time and kill count.</p>
+          <p>A fresh hunt each UTC day, with the same hero, arena and starting relics for everyone. Purchases and saved upgrades do not change your starting power. Chase your best survival time, with kills breaking ties. Daily bests stay on your device.</p>
           <span class="stat">One hunt · equal footing</span>
         </div>
         <div class="feature-card">
           <h3>Hunter Mastery</h3>
-          <p>Win with every hunter in every arena to claim all 27 victory seals, with stronger seals on Normal and Hard. Earn five mastery crests along the way and wear one on your score cards.</p>
+          <p>Win regular hunts with every hunter in every arena to claim all 27 victory seals, with stronger seals on Normal and Hard. Earn five mastery crests along the way and wear one on your score cards.</p>
           <span class="stat">27 seals · 5 crests</span>
         </div>
         <div class="feature-card">
@@ -881,10 +1001,10 @@
         </div>
       </div>
       <div class="phone-row" style="margin-top: 48px;">
-        <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-daily.jpg?v=20260919a" width="720" height="1564" alt="The Daily Challenge: today's shared loadout — Kael in The Ossuary on Normal with auto-aim and all 12 relics at level 1 — and a Play Daily Challenge button."></div><figcaption><div class="screen-kind">Daily</div><div class="screen-name">One hunt, equal power</div></figcaption></figure>
-        <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-mastery.jpg?v=20260919a" width="720" height="1564" alt="Hunter Mastery at the start of a save: 0 of 27 victories claimed, the next hunt to try, and the first four of the five crests to earn — First Light, Wayfarer, Ninefold Oath and Grandmaster, with Iron Resolve below them."></div><figcaption><div class="screen-kind">Mastery</div><div class="screen-name">Every hunter, every arena</div></figcaption></figure>
-        <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-ritual.jpg?v=20260919a" width="720" height="1564" alt="A Warding Ritual at 2 of 3: two seals marked SEALED while the hunter charges the last one."></div><figcaption><div class="screen-kind">Ritual</div><div class="screen-name">Hold the seals</div></figcaption></figure>
+        <figure class="screen-card"><div class="screen-frame"><a class="shot-link" href="assets/screens/20261030-daily.jpg" aria-label="Enlarge screenshot: The October 30 Daily Challenge: Silas in the Ossuary, Normal difficulty, auto-aim and all twelve relics at level one."><img loading="lazy" src="assets/screens/20261030-daily.jpg" width="900" height="1955" alt="The October 30 Daily Challenge: Silas in the Ossuary, Normal difficulty, auto-aim and all twelve relics at level one."></a></div><figcaption><div class="screen-kind">Daily</div><div class="screen-name">One hunt, equal power</div></figcaption></figure>
+        <figure class="screen-card"><div class="screen-frame"><a class="shot-link" href="assets/screens/20261030-ritual.jpg" aria-label="Enlarge screenshot: Silas charging a glowing warding seal while two other rune seals are marked SEALED."><img loading="lazy" src="assets/screens/20261030-ritual.jpg" width="900" height="1955" alt="Silas charging a glowing warding seal while two other rune seals are marked SEALED."></a></div><figcaption><div class="screen-kind">Ritual</div><div class="screen-name">Hold the seals</div></figcaption></figure>
       </div>
+      <p class="gallery-hint">Select a screenshot for a closer look.</p>
     </div>
   </section>
 
@@ -904,7 +1024,7 @@
           <div class="card-label">Item</div>
         </div>
       </div>
-      <p class="draft-note">Every level, the hunt deals <b>three cards</b> (four for Lyra), each a new weapon, an upgrade, or an item. Choose well.</p>
+      <p class="draft-note">Every level, <b>choose your next power</b>: a weapon, an upgrade, or an item. Lyra and the Arcane Lens relic add draft choices.</p>
       <p class="draft-tally">9 hunters · 18 weapons · 3 biomes</p>
     </div>
   </section>
@@ -913,7 +1033,7 @@
     <div class="container">
       <div class="section-eyebrow">Inside the hunt</div>
       <h2>Every run is a <em>new nightmare.</em></h2>
-      <p class="lede">An endless horde and a build you assemble on the fly. Survive long enough and your weapons <span style="color:var(--gold)">ascend</span>.</p>
+      <p class="lede">A relentless horde and a build you assemble on the fly. Survive long enough and your weapons <span style="color:var(--gold)">ascend</span>.</p>
       <div class="features-grid">
         <div class="feature-card">
           <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.2 4.5 6 7.4 6 10.5a6 6 0 0 1-12 0C6 10.4 8.8 7.5 12 3z"/></svg></div>
@@ -957,10 +1077,8 @@
           </ul>
         </div>
         <div class="showcase-media">
-          <div class="phone-row stagger">
-            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-horde.jpg?v=20260919a" width="720" height="1564" alt="Vess moving between foes, glowing pickups and projectiles in the Ossuary."></div><figcaption><div class="screen-kind">The hunt</div><div class="screen-name">Keep moving</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-evolution.jpg?v=20260919a" width="720" height="1564" alt="Nyx firing an evolved Storm Conduit lightning strike at an enemy, with a visible stun ring."></div><figcaption><div class="screen-kind">Evolution</div><div class="screen-name">Unleash Storm Conduit</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-controls.jpg?v=20260919a" width="720" height="1564" alt="The Control Layout editor shows a custom Hex Step position, Left and Right presets, Cancel and Save Layout."></div><figcaption><div class="screen-kind">Controls</div><div class="screen-name">Place your Hex Step</div></figcaption></figure>
+          <div class="phone-row single">
+            <figure class="screen-card"><div class="screen-frame"><a class="shot-link" href="assets/screens/20261030-horde.jpg" aria-label="Enlarge screenshot: A level 13 hunt in the Ossuary: Vess surrounded by enemies, hexes and glowing pickups as a MASSACRE streak lands."><img loading="lazy" src="assets/screens/20261030-horde.jpg" width="900" height="1955" alt="A level 13 hunt in the Ossuary: Vess surrounded by enemies, hexes and glowing pickups as a MASSACRE streak lands."></a></div><figcaption><div class="screen-kind">The hunt</div><div class="screen-name">Keep moving</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -984,7 +1102,7 @@
         <div class="showcase-media">
           
           <div class="phone-row single">
-            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-heroes.jpg?v=20260919a" width="720" height="1564" alt="The hunter picker with Silas, the Pilgrim selected — a Boomerang start, +30% damage, less health and speed — and The Ossuary as the stage."></div><figcaption><div class="screen-kind">Hunters</div><div class="screen-name">Pick your hunter</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><a class="shot-link" href="assets/screens/20261030-heroes.jpg" aria-label="Enlarge screenshot: Silas the Pilgrim selected in the hunter loadout, with the Ossuary arena, the Reliquary and Begin the Hunt."><img loading="lazy" src="assets/screens/20261030-heroes.jpg" width="900" height="1955" alt="Silas the Pilgrim selected in the hunter loadout, with the Ossuary arena, the Reliquary and Begin the Hunt."></a></div><figcaption><div class="screen-kind">Hunters</div><div class="screen-name">Pick your hunter</div></figcaption></figure>
 
           </div>
         </div>
@@ -1083,7 +1201,7 @@
         </div>
         <div class="showcase-media">
           <div class="phone-row single">
-            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-heroes.jpg?v=20260919a" width="720" height="1564" alt="The hunter picker with Silas, the Pilgrim selected — a Boomerang start, +30% damage, less health and speed — and The Ossuary as the stage."></div><figcaption><div class="screen-kind">Loadout</div><div class="screen-name">Choose your descent</div></figcaption></figure>
+            <figure class="screen-card"><div class="screen-frame"><a class="shot-link" href="assets/screens/20261030-frostvault.jpg" aria-label="Enlarge screenshot: A hunt in the Frostvault, with icy landmarks, chill fields, glowing pickups and a Warding Ritual."><img loading="lazy" src="assets/screens/20261030-frostvault.jpg" width="900" height="1955" alt="A hunt in the Frostvault, with icy landmarks, chill fields, glowing pickups and a Warding Ritual."></a></div><figcaption><div class="screen-kind">The Frostvault</div><div class="screen-name">Into the cold</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -1136,10 +1254,8 @@
           </ul>
         </div>
         <div class="showcase-media">
-          <div class="phone-row stagger">
-            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-draft.jpg?v=20260919a" width="720" height="1564" alt="The level-up draft: Ironhide, Gold Tongue, a new Chain Lightning weapon with its Lv 6 evolution hint, and Thornmail, with Reroll and Banish."></div><figcaption><div class="screen-kind">Draft</div><div class="screen-name">Choose your power</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-evolution.jpg?v=20260919a" width="720" height="1564" alt="Nyx firing an evolved Storm Conduit lightning strike at an enemy, with a visible stun ring."></div><figcaption><div class="screen-kind">Evolution</div><div class="screen-name">Watch it fire</div></figcaption></figure>
-            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-codex.jpg?v=20260919a" width="720" height="1564" alt="The Evolution Codex shows discovered and undiscovered recipes and explains the level 6 requirement, or level 5 as Nyx."></div><figcaption><div class="screen-kind">Codex</div><div class="screen-name">Learn the recipes</div></figcaption></figure>
+          <div class="phone-row single">
+            <figure class="screen-card"><div class="screen-frame"><a class="shot-link" href="assets/screens/20261030-draft.jpg" aria-label="Enlarge screenshot: The level-up draft offers Quickened, Garlic Ring, Plague Rats and Runic Might, with Reroll and Banish controls."><img loading="lazy" src="assets/screens/20261030-draft.jpg" width="900" height="1955" alt="The level-up draft offers Quickened, Garlic Ring, Plague Rats and Runic Might, with Reroll and Banish controls."></a></div><figcaption><div class="screen-kind">Draft</div><div class="screen-name">Choose your power</div></figcaption></figure>
           </div>
         </div>
       </div>
@@ -1227,9 +1343,10 @@
         </div>
         <div class="showcase-media">
           
-          <div class="phone-row single">
-            <figure class="screen-card"><div class="screen-frame"><img loading="lazy" src="assets/screens/hunt-boss.jpg?v=20260919a" width="720" height="1564" alt="The Plague Abbot fight: a hunter holds the ground against the horde beneath the boss health bar."></div><figcaption><div class="screen-kind">Boss</div><div class="screen-name">The Plague Abbot</div></figcaption></figure>
-          </div>
+          <figure class="boss-art">
+            <img src="assets/art/boss_plague_abbot.png?v=20260711a" width="320" height="320" loading="lazy" alt="The Plague Abbot: the Ossuary boss, in the game's gothic woodcut artwork.">
+            <figcaption><div class="screen-kind">Boss artwork</div><div class="screen-name">The Plague Abbot</div></figcaption>
+          </figure>
         </div>
       </div>
     </div>
@@ -1281,7 +1398,7 @@
           <p>No. Hexhunter plays fully offline, with no account and no server. You only need a connection for the optional extras: Game Center leaderboards and achievements, and buying or restoring an unlock on the App Store. Your progress lives on your phone either way.</p>
         </details>
         <details class="faq">
-          <summary>Can I unlock everything just by playing?</summary>
+          <summary>Can I earn every hunter, arena and relic by playing?</summary>
           <p>Yes. Start free with Vess and Kael, then earn the other seven hunters through their challenges: defeat a boss, survive long enough, evolve a weapon, kill 1,000 in one run, or win on The Ashlands. Earned essence buys relics, and deeper biomes open as you survive longer. If you'd rather skip ahead, Unlock All is a single one-time purchase that opens all 9 heroes, all 3 arenas and all 12 relics at maximum level, plus three supporter crests. Every hero, arena and relic in it can also be earned by playing. No subscriptions, no ads, no currency packs to keep buying. Purchase and restore details are on the <a href="support.html">support page</a>.</p>
         </details>
         <details class="faq">
@@ -1290,11 +1407,11 @@
         </details>
         <details class="faq">
           <summary>What does Hexhunter collect about me?</summary>
-          <p>Nothing. The app has no ads, no analytics, no tracking, no account to create, and no server of its own. Your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, Apple handles those optional services under its own terms.</p>
+          <p>The app has no ads, no analytics, no tracking, no account to create, and no server of its own. Your progress, unlocks, and best times are stored on your phone. If you use Game Center or buy an unlock, Apple handles those optional services under its own terms.</p>
         </details>
         <details class="faq">
           <summary>Is the art hand-drawn?</summary>
-          <p>No. Every hero, enemy, and boss plate is AI-generated under one art direction, then curated and cleaned up until the whole bestiary holds a single gothic woodcut line. The music is synthesized from scratch in-house.</p>
+          <p>No. Every hero, enemy, and boss plate is AI-generated under one art direction, then curated and cleaned up until the whole bestiary holds a single gothic woodcut line.</p>
         </details>
       </div>
     </div>
@@ -1322,6 +1439,13 @@
     </a>
   </section>
 
+  </main>
+
+  <dialog class="shot-dialog" aria-labelledby="shot-title">
+    <div class="dialog-top"><h2 id="shot-title">Inside the hunt</h2><div class="dialog-actions"><a href="assets/screens/20261030-horde.jpg" target="_blank" rel="noopener">Full size ↗</a><button type="button" autofocus>Close</button></div></div>
+    <div class="dialog-image"></div>
+  </dialog>
+
   <footer class="site">
     <div class="foot-brand">Hexhunter</div>
     <div class="links">
@@ -1335,6 +1459,43 @@
   </footer>
 
   <script>
+    (function () {
+      var dialog = document.querySelector('.shot-dialog');
+      if (!dialog || typeof dialog.showModal !== 'function') return;
+      var previousOverflow = '', opener = null;
+      document.querySelectorAll('.shot-link').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          event.preventDefault();
+          opener = link;
+          var source = link.querySelector('img');
+          var enlarged = dialog.querySelector('img');
+          if (!enlarged) { enlarged = document.createElement('img'); dialog.querySelector('.dialog-image').appendChild(enlarged); }
+          enlarged.src = source.src;
+          dialog.querySelector('.dialog-actions a').href = source.src;
+          enlarged.alt = source.alt;
+          previousOverflow = document.body.style.overflow;
+          document.body.style.overflow = 'hidden';
+          dialog.showModal();
+        });
+      });
+      dialog.querySelector('button').addEventListener('click', function () { dialog.close(); });
+      dialog.addEventListener('click', function (event) {
+        if (event.target !== dialog) return;
+        var box = dialog.getBoundingClientRect();
+        if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close();
+      });
+      dialog.addEventListener('close', function () {
+        document.body.style.overflow = previousOverflow;
+        if (opener) opener.focus({ preventScroll: true });
+      });
+    })();
+    document.querySelectorAll('.mobile-links a').forEach(function (link) {
+      link.addEventListener('click', function () { link.closest('details').open = false; });
+    });
+    document.querySelector('.mobile-menu').addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') { this.open = false; this.querySelector('summary').focus(); }
+    });
     (function () {
       var carousel = document.getElementById('heroCarousel');
       var carouselColumn = carousel && carousel.closest('.carousel-column');

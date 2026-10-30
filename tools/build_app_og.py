@@ -492,9 +492,9 @@ CARDS = {
   /* Cinzel has no true lowercase, so this reads as caps exactly like the page's
      hero h1; the 18-character first line sets the ceiling at 52px (56px wraps to 4). */
   h1 { font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: 52px;
-       background-image: linear-gradient(178deg, #ECE7F5 60%, #A99EC2 165%); }
+       background-image: linear-gradient(178deg, #ECE7F5 60%, #B9ADCA 165%); }
   h1 .grad { background-image: linear-gradient(180deg, #F0D875 0%, #D4AF37 78%); }
-  .sub { color: #A99EC2; }
+  .sub { color: #B9ADCA; }
   /* The hero's own cover plate (the page's .hero-bg), bled full-height like the
      card it replaces and feathered into the violet so the huntress faces the horde. */
   .art { width: 540px; height: 630px; object-position: 60% 45%; opacity: 0.82;
@@ -503,7 +503,7 @@ CARDS = {
 """,
         # "Coming to iOS" outlived the 2026-08-26 release by six days of link
         # previews; the page's own hero eyebrow is the source of this string.
-        "kicker": "Gothic horde-survivor · iOS",
+        "kicker": "Hexhunter · iOS",
         "h1": 'Survive the Horde.<br>Draft Your <span class="grad">Doom.</span>',
         "sub": "Pick a hero, draft upgrades every level, evolve your weapons into ascended forms, and fight to survive the endless dark.",
     },
