@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0D0620">
   <title>Support — StoryVault</title>
   <meta name="description" content="Need help with StoryVault? Email support@hypersage.ai or check the FAQ.">
   <link rel="canonical" href="https://hypersage.ai/storyvault/support.html">
@@ -57,29 +59,30 @@
       flex: 0 0 32px;
       text-align: center;
     }
-    .help-row .body { flex: 1; }
+    .help-row .body { flex: 1; min-width: 0; }
     .help-row .body strong { display: block; margin-bottom: 4px; color: var(--fg); }
     .help-row .body p { color: var(--muted-fg); font-size: 0.95rem; margin-bottom: 0; }
   </style>
   <script src="/v.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
-  <nav class="legal-nav">
+  <nav class="legal-nav" aria-label="StoryVault information">
     <div class="container">
-      <a href="index.html" class="brand">
-        <img src="storyvault-mark.png" alt="StoryVault">
+      <a href="index.html" class="brand" aria-label="StoryVault home">
+        <img src="storyvault-mark.png" alt="" width="28" height="28">
         <span>StoryVault</span>
       </a>
       <div class="links">
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
-        <a href="support.html" class="active">Support</a>
+        <a href="support.html" class="active" aria-current="page">Support</a>
       </div>
     </div>
   </nav>
 
-  <main class="legal">
+  <main class="legal" id="main-content" tabindex="-1">
     <h1>Support</h1>
     <p class="updated">A real person reads every email. You'll usually hear back within a day or two.</p>
 

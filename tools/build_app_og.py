@@ -113,40 +113,33 @@ CARDS = {
         "sub": "The heroes and monsters of classic literature, at war across three lanes. 256 cards, six factions, a full campaign.",
     },
     "storyvault": {
-        "art": "storyvault-mark.png",
+        # The same painted vault used in the page hero. Keeping it in "art"
+        # makes signals()/digest() hash the actual backdrop bytes automatically.
+        "art": "art/vault-hero-20261030.webp",
         "css": """
-  /* Every hex below is copied verbatim from storyvault/index.html :root —
-     --card #171030, --bg #0D0620, --bg-deeper #060312, --accent #D9B57F,
-     --fg #F5F1E8, --muted-fg #B8AEC6, and --gold-grad for the italic line.
-     The site has ONE scheme (no prefers-color-scheme block), so this is it. */
-  .og { background: linear-gradient(160deg, #171030 0%, #0D0620 52%, #060312 100%); }
-  .kicker { color: #D9B57F; }
-  /* Mirrors .hero-text h1: Playfair Display 700, letter-spacing -0.02em. */
-  h1 { font-family: 'Playfair Display', 'Iowan Old Style', Georgia, serif; font-weight: 700;
-       font-size: 63px; letter-spacing: -0.02em;
-       background-image: linear-gradient(178deg, #F5F1E8 30%, #B8AEC6 108%); }
-  /* The page's own accent span is .italic-anything.grad — italic 600 painted
-     with --gold-grad. "written with you." must stay ONE line; a wrapped orphan
-     "you." killed the 460px read, hence 63px + nowrap (measured: 449px in a
-     548px column, so it clears). */
+  .og { position: relative; isolation: isolate; background: #0D0620; }
+  .og-left { position: relative; z-index: 2; width: 700px; padding-left: 76px; }
+  .og-right { position: absolute; z-index: 0; inset: 0; }
+  .og-right::after { content: ''; position: absolute; inset: 0;
+       background: linear-gradient(90deg, rgba(13,6,32,.44), rgba(13,6,32,.15) 53%, transparent 76%),
+                   linear-gradient(0deg, rgba(13,6,32,.38), transparent 50%); }
+  .art { width: 1200px; height: 630px; object-fit: cover; object-position: center 43%; }
+  /* Brand and hero headline retain the site's Playfair/cream/antique-gold voice. */
+  .kicker { font-family: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
+       text-transform: none; color: #D9B57F; font-size: 36px; font-weight: 600;
+       letter-spacing: -.02em; margin-bottom: 38px; gap: 12px; }
+  .kicker svg { width: 25px; height: 25px; }
+  h1 { font-family: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
+       font-weight: 700; font-size: 67px; letter-spacing: -0.02em;
+       color: #F5F1E8; background: none; margin-bottom: 24px; }
   h1 .grad { font-style: italic; font-weight: 600; white-space: nowrap;
        background-image: linear-gradient(115deg, #F3E3BD 0%, #E4C48F 38%, #D9B57F 62%, #C09A62 100%); }
-  .sub { color: #B8AEC6; }
-  /* The mark's own nebula feathers into the card bg instead of sitting in a box. */
-  .art { width: 560px; height: 560px; border-radius: 0;
-         -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 98%);
-         mask-image: radial-gradient(closest-side, #000 55%, transparent 98%); }
+  .sub { color: #B8AEC6; font-size: 24px; line-height: 1.5; max-width: 535px; }
 """,
-        # The page's own eyebrow ornament: .hero-eyebrow::before { content: '✦' }.
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.6l2.3 7.8 7.8 2.3-7.8 2.3-2.3 7.8-2.3-7.8L1.9 11.7l7.8-2.3z"/></svg>',
-        # Was "· Coming to iOS", justified by "the page's eyebrow says Coming to
-        # iOS and links no App Store". BOTH halves of that premise expired: the app
-        # went live 2026-08-17, the page eyebrow now reads "Available now", and it
-        # carries 3 App Store links (fetched 2026-08-21). The card is the image every
-        # share renders, so it was telling people a shipped app was not out yet.
-        "kicker": "AI Adventures · iOS",
+        "kicker": "StoryVault",
         "h1": 'Branching tales,<br><span class="grad">written with you.</span>',
-        "sub": "Step into Beowulf, Dracula, or a world only the AI has dreamed. Every choice rewrites the next page.",
+        "sub": "Step into Beowulf, Dracula, or a world only you and the AI know. Every choice rewrites the next page.",
     },
     "saffra": {
         "art": "saffra-hat.png",

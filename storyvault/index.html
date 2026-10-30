@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#100a21">
+  <meta name="color-scheme" content="dark">
   <meta name="apple-itunes-app" content="app-id=6792759454">
   <title>StoryVault — Branching AI adventures and 84 classics</title>
   
@@ -15,15 +17,15 @@
   <meta property="og:description" content="Write a world from a single line and the AI builds it out. Or step inside one of eighty-four complete classics and change where it goes.">
   <meta property="og:url" content="https://hypersage.ai/storyvault/">
   <meta property="og:site_name" content="StoryVault">
-  <meta property="og:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260919a">
+  <meta property="og:image" content="https://hypersage.ai/storyvault/og-image.png?v=20261030">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="StoryVault — branching tales, written with you: a glowing gilded storybook">
+  <meta property="og:image:alt" content="StoryVault — branching tales, written with you, beside a glowing doorway in an enchanted library.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="StoryVault — AI Adventures">
   <meta name="twitter:description" content="Write your own world and the AI builds it out. Or step inside one of eighty-four complete classics.">
-  <meta name="twitter:image" content="https://hypersage.ai/storyvault/og-image.png?v=20260919a">
-  <meta name="twitter:image:alt" content="StoryVault — branching tales, written with you: a glowing gilded storybook">
+  <meta name="twitter:image" content="https://hypersage.ai/storyvault/og-image.png?v=20261030">
+  <meta name="twitter:image:alt" content="StoryVault — branching tales, written with you, beside a glowing doorway in an enchanted library.">
 
   <link rel="icon" type="image/png" href="storyvault-mark.png">
   <link rel="apple-touch-icon" href="storyvault-mark.png">
@@ -496,40 +498,22 @@
       pointer-events: none;
     }
 
-    /* Hero screenshot carousel — 6 captures (light + dark), 4s each,
-       24s loop. Visible window per slide is 1/6 of the cycle with a
-       ~0.6s crossfade at each edge. */
+    /* A stable first frame, with reader-controlled browsing. */
     .hero-carousel { position: relative; width: 100%; }
-    .hero-carousel img {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      animation: sv-carousel 24s infinite;
+    .hero-carousel img { width: 100%; display: none; animation: none; }
+    .hero-carousel img:first-child { display: block; }
+    .hero-carousel.has-controls img { display: none; }
+    .hero-carousel.has-controls img.is-current { display: block; }
+    .gallery-controls { display: none; }
+    .js .gallery-controls { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 22px; }
+    .gallery-controls button {
+      width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%;
+      border: 1px solid var(--border-strong); background: var(--card);
+      color: var(--accent-light); font: inherit; cursor: pointer;
     }
-    /* Every delay is shifted back by the 2.5% fade-in (0.6s of 24s) so the
-       first frame starts already held at full opacity. With a plain 0s delay
-       the animation begins at the 0% stop — opacity 0 — and the phone frame is
-       visibly EMPTY for the first 0.6s of every page load. Measured by
-       tools/check_hero_carousel.py: coverage 0.04 at t=0. Keep the offsets and
-       the keyframe stops in step if the image count ever changes. */
-    .hero-carousel img:nth-child(1) { position: relative; animation-delay: -0.6s; }
-    .hero-carousel img:nth-child(2) { animation-delay: 3.4s; }
-    .hero-carousel img:nth-child(3) { animation-delay: 7.4s; }
-    .hero-carousel img:nth-child(4) { animation-delay: 11.4s; }
-    .hero-carousel img:nth-child(5) { animation-delay: 15.4s; }
-    .hero-carousel img:nth-child(6) { animation-delay: 19.4s; }
-    @keyframes sv-carousel {
-      0%     { opacity: 0; }
-      2.5%   { opacity: 1; }
-      16.67% { opacity: 1; }
-      19.2%  { opacity: 0; }
-      100%   { opacity: 0; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .hero-carousel img { animation: none; opacity: 1; }
-      .hero-carousel img:nth-child(n+2) { display: none; }
-    }
-
+    .gallery-controls button:hover { background: var(--card-2); border-color: var(--accent); }
+    .gallery-controls p { text-align: center; font-size: .8rem; line-height: 1.5; min-width: 125px; color: var(--accent-light); }
+    .gallery-controls small { display: block; color: var(--muted-fg); font-size: .68rem; letter-spacing: .12em; }
     /* ===== STATS STRIP ===== */
     .stats-strip {
       display: flex; flex-wrap: wrap; justify-content: center;
@@ -1422,6 +1406,115 @@
       footer.site .hs-more { text-align: center; }
       footer.site .hs-more-list { justify-content: center; }
     }
+
+
+    /* StoryVault, October 2026: a painted entrance into the library. */
+    :root {
+      --bg: #100a21;
+      --bg-deeper: #090613;
+      --tertiary-fg: #b2a5bd;
+      --warm-grad: linear-gradient(115deg, #efdab1, #d5ad76);
+      --hero-art: url("art/vault-hero-20261030.webp");
+    }
+    body::before {
+      background:
+        radial-gradient(ellipse 75% 60% at 100% 25%, rgba(102,64,143,.12), transparent 70%),
+        radial-gradient(ellipse 60% 60% at 0% 85%, rgba(168,112,61,.09), transparent 70%);
+    }
+    body::after {
+      content: ''; pointer-events: none; position: fixed; inset: 0; z-index: 0; opacity: .16;
+      background-image: url("art/paper-grain.svg");
+    }
+    .skip-link { position: fixed; left: 16px; top: -100px; z-index: 100; padding: 12px 18px; background: var(--accent-light); color: var(--bg-deeper); border-radius: 8px; }
+    .skip-link:focus { top: 12px; color: var(--bg-deeper); }
+    section[id], #main { scroll-margin-top: calc(var(--nav-height, 5rem) + 24px); }
+    nav.site { background: rgba(16,10,33,.92); }
+    nav.site .links { gap: 20px; font-size: .84rem; }
+    .mobile-menu > summary { min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+    .btn-nav { min-height: 44px; }
+    .btn-warm { color: var(--bg-deeper); box-shadow: 0 8px 34px rgba(185,132,65,.16), inset 0 1px 0 rgba(255,255,255,.35); }
+    .btn-warm:hover { color: var(--bg-deeper); box-shadow: 0 12px 34px rgba(185,132,65,.25); }
+    section.hero { isolation: isolate; padding: 56px 0 76px; }
+    section.hero::before {
+      content: ''; position: absolute; inset: 0; z-index: -2;
+      background-image: var(--hero-art);
+      background-size: cover; background-position: center;
+    }
+    section.hero::after {
+      content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+      background: linear-gradient(90deg, rgba(16,10,33,.84), rgba(16,10,33,.46) 43%, rgba(16,10,33,.05) 73%, rgba(16,10,33,.18)),
+                  linear-gradient(0deg, var(--bg) 0%, transparent 27%, rgba(16,10,33,.12) 100%);
+    }
+    .hero-layout { gap: 48px; }
+    .hero-text { padding: 16px 0 30px; }
+    .hero-text h1 { font-size: clamp(2.75rem, 5.3vw, 4.25rem); line-height: 1.12; }
+    .hero-text .lede { color: #d3c9df; font-size: 1.08rem; }
+    .hero-eyebrow { background: rgba(22,13,36,.72); border-color: rgba(217,181,127,.32); }
+    .hero-trust { color: #c8bad2; gap: 10px 18px; font-size: .78rem; }
+    .hero-image .device-stage { width: min(100%, 310px); }
+    .device.device-hero { max-width: 310px; }
+    .hero-image::after { background: radial-gradient(ellipse at center, rgba(218,168,83,.15), transparent 65%); }
+    .hero-spark { animation: none; opacity: .55; }
+    .stats-strip { margin-top: 0; background: linear-gradient(110deg, rgba(51,33,62,.55), rgba(22,16,36,.8)); }
+    .stat-value { font-size: 2rem; }
+    .world-card { border-color: rgba(217,181,127,.26); }
+    .screen-card .screen-label strong { color: var(--accent-light); }
+    .cta-strip { background: radial-gradient(ellipse at center top, rgba(169,117,58,.14), transparent 70%), var(--bg-deeper); }
+    .bm-live, .bm-spark, .dp-fan path.dp-live { animation: none !important; }
+    @media (max-width: 1090px) {
+      nav.site .links { display: none; }
+      .mobile-menu { display: block; }
+      nav.site .container { justify-content: flex-start; }
+      nav.site .brand { margin-right: auto; }
+    }
+    @media (max-width: 880px) {
+      section.hero { padding: 42px 0 56px; }
+      section.hero::before { background-position: 68% center; }
+      section.hero::after { background: linear-gradient(180deg, rgba(16,10,33,.87), rgba(16,10,33,.6) 40%, rgba(16,10,33,.18) 72%, var(--bg)); }
+      .hero-layout { gap: 28px; }
+      .hero-text { padding: 0; }
+      .hero-text h1 { font-size: clamp(2.6rem, 8vw, 4rem); }
+      .hero-text .lede { max-width: 530px; margin-bottom: 24px; }
+      .hero-eyebrow { margin-bottom: 18px; }
+      .hero-buttons { margin-bottom: 20px; }
+      .hero-image .device-stage { width: 274px; }
+    }
+    @media (max-width: 560px) {
+      :root { --hero-art: url("art/vault-hero-20261030-mobile.webp"); }
+      .container { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+      .hero-text h1 { font-size: min(2.6rem, calc(1rem + 8vw)); }
+      .hero-text .lede { font-size: 1rem; line-height: 1.7; }
+      .hero-buttons { gap: 10px; }
+      .btn-warm, .btn-outline { padding: 14px 18px; font-size: .9rem; }
+      .hero-trust { gap: 8px 14px; font-size: .73rem; }
+      .hero-eyebrow { font-size: .65rem; }
+      .gallery-controls { margin-bottom: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+    @media (prefers-reduced-transparency: reduce) {
+      body::after { display: none; }
+      nav.site { background: var(--bg); backdrop-filter: none; }
+    }
+
+
+    /* Keep native text enlargement within the page, including navigation. */
+    main { overflow-wrap: anywhere; }
+    nav.site .container { flex-wrap: wrap; }
+    .hero-layout > *, .how-grid > *, .adv-hero-grid > *, .features-grid > *, .plans > * { min-width: 0; }
+    .hero-image .device-stage { max-width: 100%; }
+    .mobile-links { max-width: calc(100vw - 24px); max-height: calc(100dvh - var(--nav-height, 5rem) - 20px); overflow-y: auto; }
+    .library-chip { max-width: 100%; white-space: normal; }
+    .world-card { display: grid; }
+    .world-card img { grid-area: 1 / 1; height: 100%; }
+    .world-card .world-overlay { position: relative; grid-area: 1 / 1; min-width: 0; }
+    @media (max-width: 560px) {
+      .screens-grid { margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; scroll-padding-inline: 20px; }
+    }
+
+    .adventure-title { font: 600 clamp(1.8rem, 3vw, 2.7rem)/1.2 "Playfair Display", Georgia, serif; margin-bottom: 24px; }
+    .adventure-title em { color: var(--accent-light); }
   </style>
 
 <script type="application/ld+json">
@@ -1516,8 +1609,9 @@
   <script src="/v.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <nav class="site">
+  <nav class="site" aria-label="Main navigation">
     <div class="container">
       <a class="brand" href="#top" aria-label="StoryVault home">
         <img src="storyvault-mark.png" alt="" width="640" height="640">
@@ -1534,7 +1628,7 @@
       </div>
       <a href="https://apps.apple.com/app/id6792759454" class="btn-nav" target="_blank" rel="noopener" aria-label="Download StoryVault: AI Adventures on the App Store">Download</a>
       <details class="mobile-menu">
-        <summary aria-label="Open menu">☰</summary>
+        <summary aria-label="Navigation menu">☰</summary>
         <div class="mobile-links">
           <a href="#how">How it works</a>
           <a href="#adventure">AI Adventure</a>
@@ -1548,6 +1642,7 @@
     </div>
   </nav>
 
+  <main id="main" tabindex="-1">
   <section class="hero" id="top">
     <div class="container">
       <div class="hero-layout">
@@ -1560,7 +1655,7 @@
               <span>Download on the App Store</span>
               <span aria-hidden="true">↗</span>
             </a>
-            <a href="#plans" class="btn-outline">See plans</a>
+            <a href="#adventure" class="btn-outline">Step inside <span aria-hidden="true">↓</span></a>
           </div>
           <div class="hero-trust">
             <span>84 classics built in</span>
@@ -1577,12 +1672,17 @@
             <div class="device device-hero">
               <div class="hero-carousel">
                 <img src="screenshots/home.jpg?v=20261027a" width="720" height="1564" fetchpriority="high" alt="StoryVault home in light mode — Continue Reading Alice's Adventures in Wonderland, Write a Story and AI Adventure buttons, and Most Popular classics">
-                <img data-allow-duplicate="true" src="screenshots/adventure-turn.jpg?v=20260919a" width="720" height="1564" alt="A live AI Adventure turn — The Prismshard Heist, Chapter 1 of 7, with a scene the app paints for the turn with Pro above the story text, and a 'Type a custom move, or ask a what-if' box" loading="lazy">
+                <img data-allow-duplicate="true" src="screenshots/release135-adventure.webp" width="900" height="1955" alt="An illustrated Dracula adventure in StoryVault, with the castle scene, story passage, Listen control, three choices and a field for your own response." loading="lazy">
                 <img data-allow-duplicate="true" src="screenshots/library.jpg?v=20261027a" width="720" height="1564" alt="Your Vault library in light mode — the Prismshard Heist adventure beside Alice, Dracula, and Frankenstein" loading="lazy">
                 <img src="screenshots/reader-dark.jpg?v=20261027a" width="720" height="1564" alt="The reader in dark mode — Alice in Wonderland in a clean night-reading view" loading="lazy">
                 <img data-allow-duplicate="true" src="screenshots/write-story.jpg?v=20261027a" width="720" height="1564" alt="Write Your Own Story composer in light mode — quick-start flavors and Help build my brief" loading="lazy">
                 <img data-allow-duplicate="true" src="screenshots/home-dark.jpg?v=20261027a" width="720" height="1564" alt="StoryVault home in dark mode — the same literary home by night" loading="lazy">
               </div>
+            </div>
+            <div class="gallery-controls" role="group" aria-label="App screenshot gallery">
+              <button type="button" id="gallery-prev" aria-label="Previous app screenshot">←</button>
+              <p id="gallery-caption" aria-live="polite"><span>Your literary home</span><small>01 / 06</small></p>
+              <button type="button" id="gallery-next" aria-label="Next app screenshot">→</button>
             </div>
           </div>
         </div>
@@ -1680,34 +1780,28 @@
     <div class="container">
       <div class="section-eyebrow center">The headline act</div>
       <h2 style="text-align:center;" class="reveal">AI Adventure. <em class="grad">Your move.</em></h2>
-      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Each turn, the AI writes the next page and hands you the pen. It remembers what you chose, so a single run can go on for hours. Here's one turn.</p>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Step into a familiar world and take it somewhere unexpected. The AI writes the scene; you decide what happens next.</p>
 
       <div class="adv-hero-grid">
         <div class="reveal">
           <div class="device-stage">
             <div class="device">
-              <div class="turn-player" id="turn-player" role="img" aria-label="Five real frames of one streamed AI Adventure turn in Dracula: three choices offered with 10 free turns left, the storyteller writing, the chosen move — Write to Mina before you lose your nerve — held on screen, the next page streaming in, and the finished page with three fresh choices and 9 free turns left">
-                <img data-allow-duplicate="true" src="screenshots/adventure-live-1.jpg?v=20260901a" width="720" height="1564" alt="" decoding="async">
-                <img data-allow-duplicate="true" src="screenshots/adventure-live-2.jpg?v=20260901a" width="720" height="1564" alt="" loading="lazy" decoding="async">
-                <img data-allow-duplicate="true" src="screenshots/adventure-live-3.jpg?v=20260901a" width="720" height="1564" alt="" loading="lazy" decoding="async">
-                <img data-allow-duplicate="true" src="screenshots/adventure-live-4.jpg?v=20260901a" width="720" height="1564" alt="" loading="lazy" decoding="async">
-                <img data-allow-duplicate="true" src="screenshots/adventure-live-5.jpg?v=20260901a" width="720" height="1564" alt="" class="rest" decoding="async">
-              </div>
+              <img data-allow-duplicate="true" src="screenshots/release135-adventure.webp" width="900" height="1955" alt="An illustrated Dracula adventure in StoryVault, with the castle scene, story passage, Listen control, three choices and a field for your own response." loading="lazy">
             </div>
-            <div class="turn-player-caption" id="turn-caption">One live turn, five real frames — your move, then the next page</div>
+            <p class="turn-player-caption">A real adventure, captured in StoryVault.</p>
           </div>
         </div>
         <div class="turn-panel reveal">
-          <div class="turn-kicker">Dracula · a live turn · your move</div>
-          <p class="prose">You press your forehead briefly against the cold window glass. Below, the square is empty. A wisp of cloud moves across the bone-pale moon. And then — at the far edge of the market square, quite still among the shadow — something. <em>A shape that may be a driver. A shape that may be a coach.</em></p>
-          <div class="turn-choices">
-            <div class="turn-choice"><span class="n">1</span> Take the landlady's crucifix and board the midnight coach</div>
-            <div class="turn-choice"><span class="n">2</span> Refuse to board until daylight; demand another night at the inn</div>
-            <div class="turn-choice"><span class="n">3</span> Slip out and speak directly to the driver before departing</div>
+          <div class="turn-kicker">Dracula · at the castle threshold</div>
+          <h3 class="adventure-title">The door opens.<br><em>What do you do?</em></h3>
+          <p class="prose">A pale figure waits with a silver lamp. Read the scene, choose a response, or write a move of your own. The next page begins with your decision.</p>
+          <div class="turn-choices" aria-label="Example choices shown in the app">
+            <div class="turn-choice"><span class="n">1</span> Search the courtyard for a way out.</div>
+            <div class="turn-choice"><span class="n">2</span> Step inside and take the Count’s hand.</div>
+            <div class="turn-choice"><span class="n">3</span> Raise your crucifix and refuse to enter.</div>
           </div>
-          <div class="turn-custom">Or type your own — "Type a custom move, or ask a what-if…"</div>
-          
-          <p class="turn-note">This is the phone's final frame, set in readable type. It comes from a real run of the Dracula scenario, streamed live on the free tier.</p>
+          <div class="turn-custom">Or write your own response in the app.</div>
+          <p class="turn-note">One scene from a real Dracula adventure. Your choices take the story somewhere new.</p>
         </div>
       </div>
 
@@ -1816,8 +1910,8 @@
     <div class="container">
       <div class="section-eyebrow center">A look inside</div>
       <h2 style="text-align:center;" class="reveal">Crafted, top to <em class="grad">bottom.</em></h2>
-      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Built by hand, one screen at a time.</p>
-      <div class="screens-grid reveal-stagger">
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Real screens from StoryVault. A library to return to, and worlds to get lost in.</p>
+      <div class="screens-grid reveal-stagger" tabindex="0" role="region" aria-label="App screenshots">
         <div class="screen-card">
           <div class="device-stage">
             <div class="device">
@@ -1833,7 +1927,7 @@
         <div class="screen-card">
           <div class="device-stage">
             <div class="device">
-              <img src="screenshots/adventure-dark.jpg?v=20261027a" width="720" height="1564" alt="AI Adventure picker in dark mode — Tonight's Tale: The Prismshard Heist under a full moon, Write Your Own Tale, and Jump to shelves" loading="lazy">
+              <img src="screenshots/release135-worlds.webp" width="900" height="1955" alt="StoryVault Original Worlds catalog with painted covers for Beowulf at Heorot, The Scribes of the Veiled Mere, The Same Day at Vialdi and Veilkeep Manor." loading="lazy">
             </div>
           </div>
           <div class="screen-label">
@@ -1870,9 +1964,9 @@
   <section class="section-block tight" id="daynight" style="background: linear-gradient(180deg, rgba(23,16,48,0.0), rgba(23,16,48,0.5) 18%, rgba(23,16,48,0.5) 82%, rgba(23,16,48,0.0));">
     <div class="container">
       <div class="section-eyebrow center">Day &amp; night</div>
-      <h2 style="text-align:center;" class="reveal">Read it. Write it. <em class="grad">Share it.</em></h2>
-      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Every screen comes in warm parchment by day and deep violet after dark, from the first page of a book to the stories you share on Tales.</p>
-      <div class="screens-grid reveal-stagger">
+      <h2 style="text-align:center;" class="reveal">Read it. Write it. <em class="grad">Live it.</em></h2>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Warm parchment by day, deep violet after dark. Shape a new story, choose a character, and find a voice for the journey.</p>
+      <div class="screens-grid reveal-stagger" tabindex="0" role="region" aria-label="More app screenshots">
         <div class="screen-card">
           <div class="device-stage">
             <div class="device">
@@ -1898,23 +1992,23 @@
         <div class="screen-card">
           <div class="device-stage">
             <div class="device">
-              <img src="screenshots/profile-dark.jpg?v=20261027a" width="720" height="1564" alt="Profile in dark mode — books, adventures, and unlocks at a glance, recent achievements, and appearance themes" loading="lazy">
+              <img src="screenshots/release135-narrators.webp" width="900" height="1955" alt="StoryVault narrator picker with Storyteller selected, Adventurer and Mystery Pro voices, and the original narrator Ember below." loading="lazy">
             </div>
           </div>
           <div class="screen-label">
-            <strong>Your profile</strong>
-            Achievements, stats, and themes
+            <strong>Find your voice</strong>
+            Preview a narrator for the next chapter
           </div>
         </div>
         <div class="screen-card">
           <div class="device-stage">
             <div class="device">
-              <img src="screenshots/tales-dark.jpg?v=20260919a" width="720" height="1564" alt="Tales in dark mode — the Discover feed sorted by Recent, led by the StoryVault Original The Iron River by Theo Marsden, with The Anchored Charts, The Sixth Door and Letters We Never Sent beneath it, each badged STORYVAULT ORIGINAL" loading="lazy">
+              <img src="screenshots/release135-characters.webp" width="900" height="1955" alt="Choose your character in Jane Eyre, with Jane selected and Edward Rochester, Mrs. Fairfax, Bertha Mason and St. John Rivers available below." loading="lazy">
             </div>
           </div>
           <div class="screen-label">
-            <strong>Tales</strong>
-            StoryVault Originals, after dark
+            <strong>Become the character</strong>
+            Enter the story from a new point of view
           </div>
         </div>
       </div>
@@ -1950,7 +2044,7 @@
       <div class="section-eyebrow center">StoryVault Pro</div>
       <h2 style="text-align:center;" class="reveal">Free to read. <em class="grad">Pro to keep playing.</em></h2>
       
-      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">All 84 classics are free, and so is your first AI adventure: 10 turns, enough to finish one story. Pro carries on from there.</p>
+      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">All 84 classics are free, with 10 AI Adventure turns to start. Pro carries on from there.</p>
 
       <div class="plans reveal-stagger">
         <div class="plan">
@@ -2074,6 +2168,7 @@
     </a>
   </section>
 
+  </main>
   <footer class="site">
     <div class="footer-inner">
       <div class="brand">
@@ -2111,36 +2206,59 @@
     });
   </script>
   <script>
-    /* The turn player paces five real frames of one streamed Dracula turn.
-       Runs only when motion is welcome and on screen; everyone else keeps the
-       settled page. Captions quote the pixels. */
-    (function () {
-      var player = document.getElementById('turn-player');
-      if (!player || !('IntersectionObserver' in window) ||
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      var frames = player.querySelectorAll('img');
-      var cap = document.getElementById('turn-caption');
-      var steps = [
-        { hold: 2600, say: 'Your move: three branches, or type anything. 10 free turns left.' },
-        { hold: 2000, say: '"The storyteller is writing…"' },
-        { hold: 2000, say: 'Your choice holds on screen: "Write to Mina before you lose your nerve."' },
-        { hold: 2600, say: 'The next page streams in, live.' },
-        { hold: 3400, say: 'And it ends on fresh choices — the horses are already there.' }
-      ];
-      var step = -1, timer = null;
-      function advance() {
-        step = (step + 1) % steps.length;
-        for (var i = 0; i < frames.length; i++) frames[i].classList.toggle('on', i === step);
-        if (cap) cap.textContent = steps[step].say;
-        timer = window.setTimeout(advance, steps[step].hold);
-      }
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (en.isIntersecting) {
-            if (timer === null) { player.classList.add('playing'); advance(); }
-          } else if (timer !== null) { window.clearTimeout(timer); timer = null; }
+    (() => {
+      const nav = document.querySelector('nav.site');
+      const sizeNav = () => document.documentElement.style.setProperty('--nav-height', `${nav.getBoundingClientRect().height}px`);
+      sizeNav();
+      if ('ResizeObserver' in window) new ResizeObserver(sizeNav).observe(nav);
+      const gallery = document.querySelector('.hero-carousel');
+      const images = Array.from(gallery.querySelectorAll('img'));
+      const labels = ['Your literary home', 'Inside an adventure', 'Your personal vault', 'A quieter reading view', 'Write your own story', 'The vault after dark'];
+      const caption = document.getElementById('gallery-caption');
+      let current = 0, requested = 0, request = 0;
+      function render(index) {
+        current = index;
+        images.forEach((img, i) => {
+          img.classList.toggle('is-current', i === current);
+          img.setAttribute('aria-hidden', String(i !== current));
         });
-      }, { threshold: 0.3 }).observe(player);
+        caption.querySelector('span').textContent = labels[current];
+        caption.querySelector('small').textContent = String(current + 1).padStart(2, '0') + ' / ' + String(images.length).padStart(2, '0');
+      }
+      async function show(index) {
+        const next = (index + images.length) % images.length;
+        const ticket = ++request;
+        requested = next;
+        gallery.setAttribute('aria-busy', 'true');
+        caption.querySelector('small').textContent = 'Loading…';
+        try {
+          // Keep the current page visible until the requested screenshot can paint.
+          images[next].loading = 'eager';
+          await images[next].decode();
+        } catch {
+          if (ticket !== request) return;
+          requested = current;
+          gallery.removeAttribute('aria-busy');
+          caption.querySelector('small').textContent = 'Could not load — try again';
+          return;
+        }
+        if (ticket !== request) return;
+        render(next);
+        gallery.removeAttribute('aria-busy');
+      }
+      render(0);
+      gallery.classList.add('has-controls');
+      document.getElementById('gallery-prev').addEventListener('click', () => show(requested - 1));
+      document.getElementById('gallery-next').addEventListener('click', () => show(requested + 1));
+      document.querySelectorAll('.mobile-links a').forEach(link => {
+        link.addEventListener('click', () => { document.querySelector('.mobile-menu').open = false; });
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          const menu = document.querySelector('.mobile-menu');
+          if (menu.open) { menu.open = false; menu.querySelector('summary').focus(); }
+        }
+      });
     })();
   </script>
 

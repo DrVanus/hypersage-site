@@ -1,0 +1,83 @@
+{
+  "schema": "storyvault-website-screenshot-provenance-v1",
+  "prepared_date": "2026-10-30",
+  "source_collection": "StoryVaultAstra-20261010",
+  "qualification": "All four raw hashes match frames-approved-134.json. The 2026-10-19 screenshot gate passed native capture, provenance, OCR and visual checks. These native views underlie the eight approved App Store screenshots reused for 1.3.5(23), confirmed by the 2026-10-26 submitted-assets review.",
+  "freshness_scope": "These are newly prepared website assets from the qualified October 19 captures, not newly captured October 30 app screens. The homepage, library, reader and other October 27 shipping-build screenshots are already newer and remain available.",
+  "existing_shots_observation": "The October 27 site refresh intentionally retained September 19 adventure-turn and tales-dark because its forced-offline capture fixture showed missing art/network errors. The five-frame live demo dates to September 1 and depicts older adventure UI.",
+  "images": [
+    {
+      "path": "screenshots/release135-adventure.webp",
+      "width": 900,
+      "height": 1955,
+      "bytes": 179190,
+      "sha256": "80a4b997cfb130e66a173b607bdba2705b0fa17aa271648935889e6631802e85",
+      "alt": "An illustrated Dracula adventure in StoryVault, with the castle scene, story passage, Listen control, three choices and a field for your own response.",
+      "suggested_title": "Step into the story",
+      "suggested_caption": "Read the scene, choose a response, or write your own.",
+      "source_sha256": "78d7f05d792d46418b1c6d3d854d0be75f176c9f782335ad6ca1ac583d6dd917",
+      "source_geometry": [
+        1320,
+        2868
+      ],
+      "capture_date": "2026-10-19",
+      "capture_source_head": "fd26cebd1e0db432f98d1f78e7a395d33c6dbfe8",
+      "content_operation": "Full native viewport, uniformly resized to 900\u00d71955 and encoded as WebP quality 91; no crop, retouching, UI reconstruction or compositing."
+    },
+    {
+      "path": "screenshots/release135-worlds.webp",
+      "width": 900,
+      "height": 1955,
+      "bytes": 307758,
+      "sha256": "c8c10917459d314a5f2f0332e4553bf3009cc446301ec79506c465ccd406cd97",
+      "alt": "StoryVault Original Worlds catalog with painted covers for Beowulf at Heorot, The Scribes of the Veiled Mere, The Same Day at Vialdi and Veilkeep Manor.",
+      "suggested_title": "Find another world",
+      "suggested_caption": "Explore original settings, then choose where your story begins.",
+      "source_sha256": "edd27bd860056cee004a5e533532851aa680f01c4c2ee2fa8306aca161fe8a74",
+      "source_geometry": [
+        1320,
+        2868
+      ],
+      "capture_date": "2026-10-19",
+      "capture_source_head": "fd26cebd1e0db432f98d1f78e7a395d33c6dbfe8",
+      "content_operation": "Full native viewport, uniformly resized to 900\u00d71955 and encoded as WebP quality 91; no crop, retouching, UI reconstruction or compositing."
+    },
+    {
+      "path": "screenshots/release135-characters.webp",
+      "width": 900,
+      "height": 1955,
+      "bytes": 163528,
+      "sha256": "2cb1bf9d2ddcc77b9071218d1b4b51fd25d50373dff22c9a0ec0df8af37f2afd",
+      "alt": "Choose your character in Jane Eyre, with Jane selected and Edward Rochester, Mrs. Fairfax, Bertha Mason and St. John Rivers available below.",
+      "suggested_title": "See another side",
+      "suggested_caption": "Choose a character and enter the story from their point of view.",
+      "source_sha256": "a0dfb17dbe14570a15755d898b6742e24937da5e5985a8f4109aebdeee3594ba",
+      "source_geometry": [
+        1320,
+        2868
+      ],
+      "capture_date": "2026-10-19",
+      "capture_source_head": "fd26cebd1e0db432f98d1f78e7a395d33c6dbfe8",
+      "content_operation": "Full native viewport, uniformly resized to 900\u00d71955 and encoded as WebP quality 91; no crop, retouching, UI reconstruction or compositing."
+    },
+    {
+      "path": "screenshots/release135-narrators.webp",
+      "width": 900,
+      "height": 1955,
+      "bytes": 136892,
+      "sha256": "73d317e0cb345582f9920b1e0eddce9b68e9b857467dc65131c58451587ec90b",
+      "alt": "StoryVault narrator picker with Storyteller selected, Adventurer and Mystery Pro voices, and the original narrator Ember below.",
+      "suggested_title": "Give the story a voice",
+      "suggested_caption": "Preview narrators and choose the voice for your adventures and books.",
+      "source_sha256": "b633dfae055c8158380da786a83be998f640bc97eef4d61fd2dfb49e5ede4358",
+      "source_geometry": [
+        1320,
+        2868
+      ],
+      "capture_date": "2026-10-19",
+      "capture_source_head": "fd26cebd1e0db432f98d1f78e7a395d33c6dbfe8",
+      "content_operation": "Full native viewport, uniformly resized to 900\u00d71955 and encoded as WebP quality 91; no crop, retouching, UI reconstruction or compositing."
+    }
+  ],
+  "visual_review": "PASS: all four optimized web images inspected together at approximately 236px width, with native headers and complete primary controls preserved. Dracula full native raw also inspected at full view. Existing native catalog scrolling below the visible first rows is preserved."
+}
