@@ -13,19 +13,19 @@
   <link rel="canonical" href="https://hypersage.ai/rowan/">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Rowan — the health companion that knows your story.">
-  <meta property="og:description" content="Talk about your day in plain words. Rowan keeps the record and turns it into a brief for your doctor.">
+  <meta property="og:title" content="Rowan — your health story, held with care.">
+  <meta property="og:description" content="An AI companion for life with a chronic condition. Turn the details of your day into a record for your next appointment.">
   <meta property="og:url" content="https://hypersage.ai/rowan/">
   <meta property="og:site_name" content="Rowan">
-  <meta property="og:image" content="https://hypersage.ai/rowan/og-image.png?v=20260919b">
+  <meta property="og:image" content="https://hypersage.ai/rowan/og-image.png?v=20261030a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Rowan — the health companion that knows your story">
+  <meta property="og:image:alt" content="Rowan — your health story, held with care">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Rowan — the health companion that knows your story.">
-  <meta name="twitter:description" content="Talk about your day in plain words. Rowan keeps the record and turns it into a brief for your doctor.">
-  <meta name="twitter:image" content="https://hypersage.ai/rowan/og-image.png?v=20260919b">
-  <meta name="twitter:image:alt" content="Rowan — the health companion that knows your story">
+  <meta name="twitter:title" content="Rowan — your health story, held with care.">
+  <meta name="twitter:description" content="An AI companion for life with a chronic condition. Turn the details of your day into a record for your next appointment.">
+  <meta name="twitter:image" content="https://hypersage.ai/rowan/og-image.png?v=20261030a">
+  <meta name="twitter:image:alt" content="Rowan — your health story, held with care">
 
   <link rel="icon" type="image/png" href="rowan-icon.png?v=20260731a">
   <link rel="apple-touch-icon" href="rowan-icon.png?v=20260731a">
@@ -387,26 +387,6 @@
       border-radius: var(--radius-lg); padding: 30px 32px; max-width: 900px; margin: 0 auto;
     }
     @media (max-width: 780px) { .translate { grid-template-columns: 1fr; gap: 16px; text-align: center; } }
-    /* The flow player: six real frames of one session, crossfaded. The logged
-       frame (.rest) stands for no-JS and reduced-motion; .playing is added by
-       JS only when motion is welcome. Chrome mirrors .screen-frame. */
-    .flow-player-fig { max-width: 300px; margin: 0 auto; }
-    .flow-player {
-      position: relative; aspect-ratio: 780 / 1688;
-      border-radius: 22px; overflow: hidden; border: 1px solid var(--border);
-      box-shadow: 0 16px 40px rgba(59,45,79,0.11); background: #fff;
-    }
-    .flow-player img {
-      position: absolute; inset: 0; width: 100%; height: auto; display: block;
-      opacity: 0; transition: opacity 0.45s ease;
-    }
-    .flow-player img.rest { opacity: 1; }
-    .flow-player.playing img.rest:not(.on) { opacity: 0; }
-    .flow-player.playing img.on { opacity: 1; }
-    .flow-player-fig figcaption {
-      margin-top: 12px; text-align: center; color: var(--muted, #6b5f7a);
-      font-size: 0.92rem; min-height: 2.8em;
-    }
     .translate .said { font-family: ui-serif, Georgia, serif; font-size: 1.15rem; line-height: 1.5; color: var(--fg); }
     .translate .arrow { color: var(--primary); font-size: 1.6rem; font-weight: 700; }
     @media (max-width: 780px) { .translate .arrow { transform: rotate(90deg); } }
@@ -549,6 +529,138 @@
       border: 1px solid var(--border); border-radius: 999px;
     }
     .more-apps-list a:hover { color: var(--primary-dark); background: var(--card-soft); border-color: var(--border-strong); }
+
+    /* Dawn garden: local vector atmosphere, original character art, real app UI. */
+    :root { --dawn-peach: #f5dccb; --dawn-lilac: #e9e0f3; --ink-soft: #695570; }
+    body::before { background: radial-gradient(ellipse 78% 40% at 80% 4%, #eee4f5aa, transparent 70%), radial-gradient(ellipse 65% 40% at 8% 65%, #f7dfd380, transparent 70%); }
+    .container { max-width: 1180px; }
+    nav.site .links { gap: 24px; }
+    nav.site .links a { padding: 10px 0; }
+    section[id], main[id] { scroll-margin-top: 96px; }
+    section.hero { padding: 72px 0 46px; isolation: isolate; }
+    .dawn-landscape { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url('art/dawn-garden.svg?v=20261030a') center top / cover no-repeat; }
+    .hero-layout { grid-template-columns: 1.08fr 1fr; gap: 42px; min-height: 570px; }
+    .eyebrow { background: transparent; border: 0; padding: 0; font-size: .69rem; letter-spacing: .16em; }
+    .eyebrow > span { margin-right: 8px; color: var(--accent-ink); font-size: 1rem; vertical-align: -.05em; }
+    .hero-text h1 { font-size: clamp(2.9rem, 5.05vw, 4.55rem); font-weight: 500; line-height: 1.06; letter-spacing: -.045em; margin-bottom: 25px; }
+    .hero-text h1 .soft { color: var(--primary-dark); font-style: italic; }
+    .hero-text .lede { max-width: 480px; font-size: 1.1rem; line-height: 1.8; margin-bottom: 30px; }
+    .hero-buttons { gap: 12px; }
+    .btn-warm { background: var(--primary-dark); box-shadow: 0 6px 22px #5b49a826; border-radius: 999px; padding: 15px 23px; font-size: .92rem; }
+    .btn-warm:hover { background: #4c3a91; box-shadow: 0 10px 26px #5b49a82e; }
+    .btn-outline { background: #fff9; border-radius: 999px; padding: 15px 22px; font-size: .92rem; }
+    .hero-note { font-size: .8rem; margin-top: 22px; color: var(--muted-fg); }
+    .hero-image { height: 570px; isolation: isolate; }
+    .hero-image::after { inset: 18% 5% 5%; background: radial-gradient(ellipse, #e1c5cf6b, transparent 65%); }
+    .dawn-arch { position: absolute; inset: 12px 0 28px 12px; border-radius: 49% 49% 42% 42%; background: radial-gradient(ellipse at 38% 55%, #fff5df 0, #f7dfc9 28%, #e8dcf0 68%, #ebe2f2 100%); box-shadow: inset 0 0 70px #ffffff90, 0 25px 65px #8c72ac12; border: 1px solid #fff9; z-index: -1; }
+    .dawn-arch::before, .dawn-arch::after { content: ''; position: absolute; inset: -18px 16px; border: 1px solid #b6a3cb45; border-radius: 50%; transform: rotate(-22deg); }
+    .dawn-arch::after { inset: 22px -14px; transform: rotate(25deg); }
+    .dawn-arch span { position: absolute; width: 120px; height: 120px; top: 60px; left: 62px; border-radius: 50%; background: #fff8e6bb; box-shadow: 0 0 55px #fff8dc; }
+    .hero-image .rowan-portrait { position: absolute; width: 300px; max-width: 61%; left: -10px; top: 109px; z-index: 2; filter: drop-shadow(0 16px 18px #9d688b18); }
+    .hero-phone { position: absolute; right: 13px; top: 64px; width: 215px; padding: 7px; border-radius: 29px; background: #fcfaf7; border: 1px solid #d7c6d5; box-shadow: 9px 20px 40px #5f47652e, inset 0 0 0 2px #fff; transform: rotate(5deg); }
+    .hero-phone img { max-width: 100%; width: 100%; border-radius: 22px; display: block; }
+    .hero-phone:hover { transform: rotate(3deg) translateY(-3px); }
+    .scene-note { position: absolute; bottom: 11px; left: 20px; font-family: ui-serif, Georgia, serif; font-size: 1.03rem; line-height: 1.5; color: var(--ink-soft); transform: rotate(-4deg); }
+    .scene-note > span { display: inline-block; margin-right: 8px; color: var(--accent-ink); }
+    .scene-note strong { display: inline-block; padding-left: 23px; font-weight: 400; font-style: italic; }
+    .scene-star { position: absolute; z-index: 3; color: #a16f3c; font-size: 24px; line-height: 1; }
+    .star-one { left: 21px; top: 67px; }
+    .star-two { right: 12px; top: 21px; font-size: 36px; color: #8871ac; }
+    .star-three { left: 47%; bottom: 68px; font-size: 15px; }
+    .hero-flow { gap: 36px; margin-top: 50px; border-top: 1px solid #8871ac30; padding-top: 34px; }
+    .hero-flow li { background: #fff9; border-color: #ffffffb3; box-shadow: 0 10px 25px #79648005; padding: 22px; border-radius: 20px; }
+    .hero-flow li + li::before { left: -28px; animation: none; }
+    .flow-glyph { border: 0; border-radius: 50%; width: 40px; height: 40px; }
+    .section-block { padding: 88px 0; }
+    .section-block h2 { font-weight: 500; font-size: clamp(2rem, 4vw, 3rem); }
+    .section-block h2 em { font-style: italic; color: var(--primary-dark); }
+    .feature-card { box-shadow: 0 12px 40px #69557006; border-color: #ad99b52b; }
+    #screens { background: linear-gradient(180deg, #eee7f5, #f8f3ee); }
+    .screens-help { color: var(--muted-fg); font-size: .85rem; margin: -14px auto 28px; }
+    .screens-grid { max-width: 960px; gap: 38px 40px; }
+    .screen-frame { border: 5px solid #fff; outline: 1px solid #cfbed2; border-radius: 27px; box-shadow: 0 16px 40px #5f47651f; }
+    .screen-frame img { border-radius: 22px; }
+    .screen-label { margin-top: 18px; font-size: .87rem; }
+    .screen-label strong { font-family: ui-serif, Georgia, serif; font-size: 1.2rem; font-weight: 600; color: var(--fg); margin-bottom: 5px; }
+    .screen-zoom { display: block; padding: 0; width: 100%; border: 0; background: transparent; cursor: zoom-in; border-radius: 22px; }
+    .screen-zoom:focus-visible { outline: 3px solid var(--primary-dark); outline-offset: 7px; }
+    [hidden] { display: none !important; }
+    .theme-toggle { margin-bottom: 36px; }
+    #screens.theme-dark .screens-help { color: #c6b7d5; }
+    #screens.theme-dark .screen-frame { outline-color: #68527b; }
+    .gallery-viewer { margin: auto; padding: 18px; max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); width: min(490px, calc(100vw - 24px)); border: 1px solid #c9b9d5; border-radius: 24px; background: #fbf4ef; color: var(--fg); box-shadow: 0 30px 100px #19132770; overflow: auto; }
+    .gallery-viewer::backdrop { background: #251c35cc; backdrop-filter: blur(5px); }
+    .viewer-bar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 12px; }
+    .viewer-bar h2 { font-size: 1.4rem; font-weight: 500; }
+    .viewer-close { font: inherit; color: var(--primary-dark); border: 1px solid var(--border-strong); background: #fff; min-width: 72px; min-height: 44px; border-radius: 999px; cursor: pointer; }
+    .viewer-close:focus-visible { outline: 3px solid var(--primary-dark); outline-offset: 2px; }
+    .gallery-viewer img { display: block; width: auto; height: auto; max-width: 100%; max-height: calc(100dvh - 160px); margin: auto; border-radius: 16px; }
+    .gallery-viewer figcaption { font-size: .78rem; color: var(--muted-fg); text-align: center; margin-top: 10px; }
+    .cta-strip { background: url('art/dawn-garden.svg?v=20261030a') center 65% / cover no-repeat, #eee4f2; padding: 88px 24px; }
+    .cta-strip h2 { max-width: 660px; margin: 0 auto 18px; font-weight: 500; }
+    footer.site .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+    footer.site .links a { display: inline-flex; align-items: center; min-height: 44px; margin: 0 8px; }
+    @media (max-width: 1100px) and (min-width: 901px) {
+      .hero-image { height: 530px; }
+      .hero-phone { width: 190px; }
+      .hero-image .rowan-portrait { width: 260px; left: -20px; }
+      nav.site .links { gap: 15px; font-size: .88rem; }
+    }
+    @media (max-width: 900px) {
+      section.hero { padding-top: 52px; }
+      .hero-layout { grid-template-columns: 1fr; gap: 20px; }
+      .hero-text h1 { font-size: clamp(2.9rem, 8.5vw, 4.3rem); }
+      .hero-text .lede { max-width: 510px; font-size: 1.03rem; }
+      .hero-image { width: min(100%, 490px); height: 570px; margin: 16px auto 0; text-align: left; }
+      .hero-flow { grid-template-columns: repeat(3, 1fr); max-width: none; gap: 16px; margin-top: 32px; }
+      .hero-flow li { padding: 20px 12px; }
+      .hero-flow li + li::before { display: none; }
+      .hero-flow p { font-size: .84rem; }
+      .section-block { padding: 64px 0; }
+    }
+    @media (max-width: 600px) {
+      .btn-nav { display: none; }
+      nav.site .container { flex-wrap: wrap; }
+      .how-figure::after { inset: 0; }
+      .container { padding-left: 22px; padding-right: 22px; }
+      section.hero { padding-top: 40px; }
+      .hero-text h1 { font-size: clamp(2.6rem, 9.8vw, 3.5rem); }
+      .hero-text .lede { font-size: 1rem; line-height: 1.7; }
+      .hero-buttons { flex-direction: column; align-items: center; gap: 10px; }
+      .hero-buttons a { justify-content: center; width: min(100%, 310px); min-height: 50px; }
+      .hero-image { height: 470px; max-width: 380px; margin-top: 20px; }
+      .hero-phone { width: 178px; right: 5px; top: 45px; padding: 5px; border-radius: 24px; }
+      .hero-phone img { border-radius: 19px; }
+      .hero-image .rowan-portrait { left: -8px; top: 99px; max-width: 62%; }
+      .dawn-arch { inset: 15px 0 30px 3px; }
+      .dawn-arch span { top: 70px; left: 25px; width: 80px; height: 80px; }
+      .scene-note { left: 7px; bottom: 0; font-size: .95rem; }
+      .star-one { top: 43px; left: 12px; }
+      .star-two { top: 5px; }
+      .star-three { bottom: 60px; left: 39%; }
+      .hero-flow { grid-template-columns: 1fr; gap: 12px; padding-top: 25px; }
+      .hero-flow li { display: grid; grid-template-columns: 44px 1fr; column-gap: 14px; text-align: left; padding: 16px 20px; }
+      .flow-glyph { grid-row: 1 / 3; margin: 2px 0 0; }
+      .flow-name { font-size: 1rem; }
+      .hero-flow p { font-size: .86rem; }
+      .screens-grid { display: flex; overflow-x: auto; padding: 8px 6px 30px; gap: 24px; scroll-snap-type: x mandatory; scrollbar-color: #aa97bc transparent; scrollbar-width: thin; }
+      .screen-card { flex: 0 0 78%; scroll-snap-align: center; min-width: 0; }
+      .screens-help { max-width: 280px; line-height: 1.6; }
+      .screen-label { min-height: 55px; }
+      .dawn-landscape { background-position: 63% top; background-size: auto 1050px; }
+      .scene-note strong { padding-left: 20px; }
+    }
+    @media (max-width: 350px) {
+      .container { padding-left: 18px; padding-right: 18px; }
+      .eyebrow { font-size: .6rem; }
+      .hero-image { height: 420px; }
+      .hero-phone { width: 148px; right: 0; }
+      .hero-image .rowan-portrait { top: 105px; }
+      .scene-note { font-size: .85rem; bottom: 6px; }
+      .hero-text h1 { font-size: 2.6rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { .hero-phone:hover { transform: rotate(5deg); } }
+
   </style>
 
 <script type="application/ld+json">
@@ -607,7 +719,7 @@
       "name": "Am I talking to a real person?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. Rowan is an AI companion, and it says so — there's a persistent indicator in the chat reading \"AI companion · not a clinician,\" Rowan says what it is at the start of a conversation, and it answers plainly every time you ask. It has no credentials and doesn't play a doctor."
+        "text": "No. Rowan is an AI companion, and it says so — there's a persistent indicator in the chat reading \"AI chat · not a clinician,\" Rowan says what it is at the start of a conversation, and it answers plainly every time you ask. It has no credentials and doesn't play a doctor."
       }
     },
     {
@@ -615,7 +727,7 @@
       "name": "Where does my data actually go?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Your messages, and a profile summary of your conditions, medications, allergies, and recent symptoms, are sent to our backend and on to an AI provider so Rowan can reply. We use Anthropic (Claude) as the primary provider, with OpenAI as failover. Failover is on by default and automatic: if Anthropic is unavailable, the same message and the same profile payload go to OpenAI instead, so OpenAI can receive your health context on any turn. OpenAI can be reached by a second route as well — the independent safety check runs on its own separate model, and it has its own failover, which sends the recent transcript to OpenAI. Under both providers' commercial API terms as they stand today, your content is not used to train their models. Those are their terms rather than ours, and we will update this page if they change. Your conversations and logs are also stored on our own server, keyed only to a random device ID — never your name. The notes Rowan keeps about you are stored only on your phone — but your phone sends them along with each message, so they reach the AI provider too. Full details, including how long each thing is kept, are in the privacy policy."
+        "text": "Your messages, and a profile summary of your conditions, medications, allergies, and recent symptoms, are sent to our backend and on to an AI provider so Rowan can reply. We use Anthropic (Claude) as the primary provider, with OpenAI as failover. Failover is on by default and automatic: if Anthropic is unavailable, the same message and the same profile payload go to OpenAI instead, so OpenAI can receive your health context on any turn. OpenAI can be reached by a second route as well — the independent safety check runs on its own separate model, and it has its own failover, which sends the recent transcript to OpenAI. Provider processing, retention, and model-training terms are explained in our privacy policy, including the applicable exceptions. Your conversations and logs are also stored on our own server, keyed to a random device ID. Any name or identifying detail you share can still appear in that content. The editable list of notes Rowan keeps about you is stored on your phone. Your phone also sends those notes with each message; they reach our server and the AI provider and may remain in retained message history. Full details, including how long each thing is kept, are in the privacy policy."
       }
     },
     {
@@ -676,7 +788,6 @@
         <a href="#how">How it works</a>
         <a href="#features">Features</a>
         <a href="#screens">Screens</a>
-        <a href="#boundary">What it isn't</a>
         <a href="#privacy-spotlight">Privacy</a>
         <a href="#faq">FAQ</a>
         <a href="support.html">Support</a>
@@ -701,23 +812,32 @@
   <main id="main">
 
   <section class="hero">
+    <div class="dawn-landscape" aria-hidden="true"></div>
     <div class="container">
       <div class="hero-layout">
         <div class="hero-text">
-          <span class="eyebrow">On the App Store · <span style="text-transform:none">iOS</span></span>
-          <h1>The health companion that <span class="soft">knows your story.</span></h1>
-          <p class="lede">Living with a chronic condition means retelling your history at every appointment. Rowan listens to how your day went and keeps the record for you. When it's time to see your doctor, it hands you a brief.</p>
+          <span class="eyebrow"><span aria-hidden="true">✦</span> A little support for the everyday</span>
+          <h1>Your health story,<br><span class="soft">held with care.</span></h1>
+          <p class="lede">An AI companion for life with a chronic condition. Tell Rowan about your day; turn the details into a record you can bring to your next appointment.</p>
           <div class="hero-buttons">
             <a href="https://apps.apple.com/app/id6797693737" class="btn-warm" target="_blank" rel="noopener" aria-label="Download Rowan on the App Store">
               <span>Download on the App Store</span>
               <span aria-hidden="true">↗</span>
             </a>
-            <a href="#how" class="btn-outline">See how it works</a>
+            <a href="#screens" class="btn-outline">Take a look inside <span aria-hidden="true">↓</span></a>
           </div>
-          <p class="hero-note">Free to download. No account, no ads.</p>
+          <p class="hero-note">For iPhone · Free to download · No account, no ads.</p>
         </div>
         <div class="hero-image">
-          <img src="art/rowan_welcome.png?v=20260731a" alt="Rowan, a warm dawn-sprite companion with a soft violet-and-apricot flame" width="712" height="800" fetchpriority="high">
+          <div class="dawn-arch" aria-hidden="true"><span></span></div>
+          <span class="scene-star star-one" aria-hidden="true">✦</span>
+          <span class="scene-star star-two" aria-hidden="true">✧</span>
+          <span class="scene-star star-three" aria-hidden="true">✦</span>
+          <img class="rowan-portrait" src="art/rowan_welcome.png?v=20260731a" alt="Rowan, a warm dawn-sprite companion with a soft violet-and-apricot flame" width="712" height="800" fetchpriority="high">
+          <a class="hero-phone" href="#screens" aria-label="Explore screenshots of the Rowan app">
+            <img data-allow-duplicate="true" src="shots/home.webp?v=20261030a" alt="Rowan’s Today screen, shown with sample data" width="780" height="1688" fetchpriority="high">
+          </a>
+          <div class="scene-note"><span aria-hidden="true">✦</span> A place for the details.<br><strong>A little space for you.</strong></div>
         </div>
       </div>
       
@@ -780,7 +900,7 @@
         <div class="logged">
           <span class="chip">Knee pain · 7/10</span>
           <span class="chip">Factor: long drive</span>
-          <span class="chip">Jul 31</span>
+          <span class="chip">Example</span>
           <div style="margin-top:8px;">Saved as an entry, ready for your trends and your visit brief.</div>
         </div>
       </div>
@@ -790,17 +910,7 @@
   
   <section class="section-block tight">
     <div class="container">
-      <figure class="flow-player-fig">
-        <div class="flow-player" id="flow-player" role="img" aria-label="Six real frames of Rowan in use: the chat invitation, the sentence Really dizzy this morning after a bad night about a 6 typed and sent, Rowan's Reading what you wrote wait line, the reply streaming in, the log card reading Dizziness 6 out of 10 with the bad night noted as a possible factor, and the entry sitting in the Log">
-          <img src="shots/flow-1.webp?v=20260901a" alt="" width="780" height="1688" decoding="async">
-          <img src="shots/flow-2.webp?v=20260901a" alt="" width="780" height="1688" loading="lazy" decoding="async">
-          <img src="shots/flow-3.webp?v=20260901a" alt="" width="780" height="1688" loading="lazy" decoding="async">
-          <img src="shots/flow-4.webp?v=20260901a" alt="" width="780" height="1688" loading="lazy" decoding="async">
-          <img src="shots/flow-5.webp?v=20260901a" alt="" width="780" height="1688" class="rest" decoding="async">
-          <img src="shots/flow-6.webp?v=20260901a" alt="" width="780" height="1688" loading="lazy" decoding="async">
-        </div>
-        <figcaption id="flow-caption">One real session. A rough sentence in, a log entry out.</figcaption>
-      </figure>
+
     </div>
   </section>
 
@@ -859,7 +969,7 @@
       <h2>Warm, and quiet about it.</h2>
       <p class="lede" style="margin-left:auto; margin-right:auto;">Soft colors and plain words. Rowan is designed to be opened on a bad day.</p>
 
-      <div class="theme-toggle" role="group" aria-label="Preview appearance">
+      <div class="theme-toggle" hidden role="group" aria-label="Preview appearance">
         <span class="thumb" aria-hidden="true"></span>
         <button type="button" data-theme="light" aria-pressed="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
@@ -871,30 +981,31 @@
         </button>
       </div>
 
-      <div class="screens-grid">
+      <p class="screens-help">Example screens with sample data.</p>
+      <div class="screens-grid" tabindex="0" role="region" aria-label="Rowan app screenshots, scroll horizontally on small screens">
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/home.webp?v=20260826a" data-light="shots/home.webp?v=20260826a" data-dark="shots/home-dark.webp?v=20260826a" alt="Rowan's Today screen — a greeting, the next appointment, and today's medications" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" data-allow-duplicate="true" src="shots/home.webp?v=20261030a" data-light="shots/home.webp?v=20261030a" data-dark="shots/home-dark.webp?v=20261030a" alt="Rowan's Today screen — a greeting, the next appointment, and today's medications" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Today</strong>What's next, and what's due</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/chat.webp?v=20260826a" data-light="shots/chat.webp?v=20260826a" data-dark="shots/chat-dark.webp?v=20260826a" alt="Rowan's chat screen with an AI companion indicator" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/chat.webp?v=20261030a" data-light="shots/chat.webp?v=20261030a" data-dark="shots/chat-dark.webp?v=20261030a" alt="Rowan's chat screen with an AI companion indicator" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Chat</strong>Where a day becomes a log entry</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/log.webp?v=20260826a" data-light="shots/log.webp?v=20260826a" data-dark="shots/log-dark.webp?v=20260826a" alt="Rowan's quick log — pick a symptom, choose a severity band, and add what might matter" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/log.webp?v=20261030a" data-light="shots/log.webp?v=20261030a" data-dark="shots/log-dark.webp?v=20261030a" alt="Rowan's quick log — pick a symptom, choose a severity band, and add what might matter" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Quick log</strong>Thirty seconds, if you'd rather tap</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/trends.webp?v=20260826a" data-light="shots/trends.webp?v=20260826a" data-dark="shots/trends-dark.webp?v=20260826a" alt="Rowan's trends screen — a per-day bar chart of headache severity with a 7-day average line over it, and a noticed pattern underneath" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/trends.webp?v=20261030a" data-light="shots/trends.webp?v=20261030a" data-dark="shots/trends-dark.webp?v=20261030a" alt="Rowan's trends screen — a per-day headache severity chart, a rolling average, and a pattern from the sample record" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Trends</strong>Your weeks, charted</div>
         </div>
         <div class="screen-card">
-          <div class="screen-frame"><img class="shot-img" src="shots/conditions.webp?v=20260826a" data-light="shots/conditions.webp?v=20260826a" data-dark="shots/conditions-dark.webp?v=20260826a" alt="Rowan's conditions screen with diagnosed and suspected chips" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/conditions.webp?v=20261030a" data-light="shots/conditions.webp?v=20261030a" data-dark="shots/conditions-dark.webp?v=20261030a" alt="Rowan's conditions screen with diagnosed and suspected chips" width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Conditions</strong>Diagnosed, or just suspected</div>
         </div>
         <div class="screen-card">
           
-          <div class="screen-frame"><img class="shot-img" src="shots/recap.webp?v=20260826a" data-light="shots/recap.webp?v=20260826a" data-dark="shots/recap-dark.webp?v=20260826a" alt="Rowan's monthly recap — the month's most-logged symptom with its day count, the number of entries and days noted, and the factor that ran alongside the rougher days. Every figure is computed from the entries in the record." width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img class="shot-img" src="shots/recap.webp?v=20261030a" data-light="shots/recap.webp?v=20261030a" data-dark="shots/recap-dark.webp?v=20261030a" alt="Rowan's monthly recap — the month's most-logged symptom with its day count, the number of entries and days noted, and the factor that ran alongside the rougher days. Every figure is computed from the entries in the record." width="780" height="1688" loading="lazy"></div>
           <div class="screen-label"><strong>Monthly recap</strong>One page of your month</div>
         </div>
       </div>
@@ -906,7 +1017,7 @@
       <div class="spotlight-grid">
         <div class="spotlight-phone">
           
-          <div class="screen-frame"><img src="shots/brief.webp?v=20260826a" alt="A Rowan visit brief for a neurology appointment — it opens with the biggest change stated in words, &quot;Headache is down 0.9 points over the last 15 days&quot;, over a per-day severity chart that draws each half of the window at its own average, 4.7 then 3.8, with the days nobody logged marked on the baseline, then the other symptoms as compact rows with their own change" width="780" height="1688" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/brief.webp?v=20261030a" alt="Rowan’s visit brief with patient priorities, health background, and details for the appointment — sample data" width="780" height="1688" loading="lazy"></div>
         </div>
         <div>
           <div class="section-eyebrow">The visit brief</div>
@@ -1003,12 +1114,12 @@
           <h2>No account. No ads. <em>No trackers.</em></h2>
           <p style="color: var(--muted-fg); font-size: 1.05rem;">Here's where your health data goes, including the parts that leave your phone.</p>
           <ul class="spotlight-points" role="list">
-            <li><strong>No sign-up.</strong> No name, email, or password. Your install is identified by a random device ID.</li>
-            <li><strong>No ad or analytics software</strong> touches your health content, and we never sell or share it.</li>
+            <li><strong>No sign-up.</strong> No email or password is required. Your install is identified by a random device ID. A name you choose to share can be included in conversation context.</li>
+            <li><strong>No ad or analytics software</strong> touches your health content. We never sell it or share it for advertising.</li>
             
             <li><strong>Your messages go to an AI provider</strong> so Rowan can reply. That's Anthropic, or OpenAI when Anthropic is unavailable. Either one can receive your message and health context. The independent safety check has its own fallback to OpenAI, which receives the recent transcript. Your log is stored on our server so it carries over between sessions.</li>
             
-            <li><strong>The notes stay on your phone.</strong> What Rowan remembers about you is never filed on our server — though your phone sends those notes with each message, so they reach the AI provider like the rest of your context.</li>
+            <li><strong>Your notes, in your control.</strong> Rowan keeps the editable list on your phone. Those notes are sent as conversation context to our server and AI providers, and may remain in retained message history. The privacy policy explains the retention windows.</li>
 
             <li><strong>Delete means delete.</strong> One tap erases what Rowan keeps on your phone and purges your conversations, symptom logs, safety events, and usage counters from our server. You get a receipt of what was removed.</li>
           </ul>
@@ -1016,7 +1127,7 @@
         </div>
         <div class="spotlight-phone">
 
-          <div class="screen-frame"><img src="shots/memory.webp?v=20260826a" alt="Rowan’s “What Rowan knows” card — the plain list of notes Rowan keeps about you, an “Edit these notes” button, and “Clear these notes” underneath, over an “Always in context” note that begins listing everything Rowan sees alongside them: your conditions, medications and allergies, your recent entries, the name you gave Rowan, your device’s language and the date" width="716" height="1772" loading="lazy"></div>
+          <div class="screen-frame"><img src="shots/memory.webp?v=20261030a" alt="Rowan’s editable memory notes and an explanation of the context shared with a conversation — sample data" width="716" height="1772" loading="lazy"></div>
         </div>
       </div>
     </div>
@@ -1042,11 +1153,11 @@
         <details class="faq">
           <summary>Am I talking to a real person?</summary>
           
-          <p>No. Rowan is an AI companion, and it says so — there's a persistent indicator in the chat reading "AI companion · not a clinician," Rowan says what it is at the start of a conversation, and it answers plainly every time you ask. It has no credentials and doesn't play a doctor.</p>
+          <p>No. Rowan is an AI companion, and it says so — there's a persistent indicator in the chat reading "AI chat · not a clinician," Rowan says what it is at the start of a conversation, and it answers plainly every time you ask. It has no credentials and doesn't play a doctor.</p>
         </details>
         <details class="faq">
           <summary>Where does my data actually go?</summary>
-          <p>Your messages, and a profile summary of your conditions, medications, allergies, and recent symptoms, are sent to our backend and on to an AI provider so Rowan can reply. We use Anthropic (Claude) as the primary provider, with OpenAI as failover. Failover is on by default and automatic: if Anthropic is unavailable, the same message and the same profile payload go to OpenAI instead, so OpenAI can receive your health context on any turn. OpenAI can be reached by a second route as well — the independent safety check runs on its own separate model, and it has its own failover, which sends the recent transcript to OpenAI. Under both providers' commercial API terms as they stand today, your content is not used to train their models. Those are their terms rather than ours, and we will update this page if they change. Your conversations and logs are also stored on our own server, keyed only to a random device ID — never your name. The notes Rowan keeps about you are stored only on your phone — but your phone sends them along with each message, so they reach the AI provider too. Full details, including how long each thing is kept, are in the <a href="privacy.html">privacy policy</a>.</p>
+          <p>Your messages, and a profile summary of your conditions, medications, allergies, and recent symptoms, are sent to our backend and on to an AI provider so Rowan can reply. We use Anthropic (Claude) as the primary provider, with OpenAI as failover. Failover is on by default and automatic: if Anthropic is unavailable, the same message and the same profile payload go to OpenAI instead, so OpenAI can receive your health context on any turn. OpenAI can be reached by a second route as well — the independent safety check runs on its own separate model, and it has its own failover, which sends the recent transcript to OpenAI. Provider processing, retention, and model-training terms are explained in our privacy policy, including the applicable exceptions. Your conversations and logs are also stored on our own server, keyed to a random device ID. Any name or identifying detail you share can still appear in that content. The editable list of notes Rowan keeps about you is stored on your phone. Your phone also sends those notes with each message; they reach our server and the AI provider and may remain in retained message history. Full details, including how long each thing is kept, are in the <a href="privacy.html">privacy policy</a>.</p>
         </details>
         <details class="faq">
           <summary>Is Rowan HIPAA-compliant?</summary>
@@ -1101,48 +1212,13 @@
   </footer>
 
   <script>
-    /* The flow player paces six real frames of one session. Runs only when
-       motion is welcome and the figure is on screen; everyone else keeps the
-       logged frame. Captions quote what each frame shows. */
-    (function () {
-      var player = document.getElementById('flow-player');
-      if (!player || !('IntersectionObserver' in window) ||
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      var frames = player.querySelectorAll('img');
-      var cap = document.getElementById('flow-caption');
-      var steps = [
-        { hold: 1600, say: '“Tell me in your own words — a rough sentence is plenty.”' },
-        { hold: 1900, say: 'Said like you’d say it out loud: “Really dizzy this morning after a bad night, about a 6.”' },
-        { hold: 1700, say: 'Sent. Rowan reads what you wrote.' },
-        { hold: 1900, say: 'Rowan replies in plain language.' },
-        { hold: 3600, say: 'The entry is already written: Dizziness · 6/10, with the bad night noted. Tap Edit if it’s not right.' },
-        { hold: 2600, say: 'And there it is in your Log.' }
-      ];
-      var step = -1, timer = null;
-      function advance() {
-        step = (step + 1) % steps.length;
-        for (var i = 0; i < frames.length; i++) frames[i].classList.toggle('on', i === step);
-        if (cap) cap.textContent = steps[step].say;
-        timer = window.setTimeout(advance, steps[step].hold);
-      }
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (en.isIntersecting) {
-            if (timer === null) { player.classList.add('playing'); advance(); }
-          } else if (timer !== null) { window.clearTimeout(timer); timer = null; }
-        });
-      }, { threshold: 0.3 }).observe(player);
-    })();
     (function () {
       var section = document.getElementById('screens');
       if (!section) return;
       var toggle = section.querySelector('.theme-toggle');
       var imgs = section.querySelectorAll('.shot-img');
       if (!toggle) return;
-      imgs.forEach(function (img) {
-        var d = img.getAttribute('data-dark');
-        if (d) { var pre = new Image(); pre.src = d; }
-      });
+      toggle.hidden = false;
       function setTheme(mode) {
         var dark = mode === 'dark';
         section.classList.toggle('theme-dark', dark);
@@ -1159,6 +1235,51 @@
         var btn = e.target.closest('button');
         if (btn) setTheme(btn.getAttribute('data-theme'));
       });
+    })();
+  </script>
+
+  <dialog class="gallery-viewer" aria-labelledby="viewer-title">
+    <div class="viewer-bar"><h2 id="viewer-title">Inside Rowan</h2><button class="viewer-close" type="button" autofocus>Close <span aria-hidden="true">×</span></button></div>
+    <figure><figcaption>Example screen with sample data</figcaption></figure>
+  </dialog>
+  <script>
+    (function () {
+      var viewer = document.querySelector('.gallery-viewer');
+      if (!viewer || typeof viewer.showModal !== 'function') return;
+      var lastTrigger, savedOverflow;
+      var enlarged = document.createElement('img');
+      enlarged.width = 780; enlarged.height = 1688; enlarged.alt = '';
+      viewer.querySelector('figure').prepend(enlarged);
+      document.querySelector('.screens-help').textContent += ' Tap any screen to take a closer look.';
+      document.querySelectorAll('.screen-card').forEach(function (card) {
+        var img = card.querySelector('.shot-img');
+        var title = card.querySelector('.screen-label strong').textContent;
+        var button = document.createElement('button');
+        button.className = 'screen-zoom'; button.type = 'button';
+        button.setAttribute('aria-label', 'Enlarge ' + title + ' screenshot');
+        img.parentNode.insertBefore(button, img); button.appendChild(img);
+        button.addEventListener('click', function () {
+          lastTrigger = button;
+          viewer.querySelector('img').src = img.src;
+          viewer.querySelector('img').alt = img.alt;
+          document.getElementById('viewer-title').textContent = title;
+          savedOverflow = document.body.style.overflow;
+          document.body.style.overflow = 'hidden';
+          viewer.showModal();
+        });
+      });
+      viewer.querySelector('button').addEventListener('click', function () { viewer.close(); });
+      viewer.addEventListener('click', function (e) { if (e.target === viewer) {
+        var rect = viewer.getBoundingClientRect();
+        if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) viewer.close();
+      } });
+      viewer.addEventListener('close', function () {
+        document.body.style.overflow = savedOverflow || '';
+        if (lastTrigger) lastTrigger.focus({ preventScroll: true });
+      });
+      var menu = document.querySelector('.mobile-menu');
+      menu.querySelectorAll('a').forEach(function (link) { link.addEventListener('click', function () { menu.open = false; }); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); } });
     })();
   </script>
 

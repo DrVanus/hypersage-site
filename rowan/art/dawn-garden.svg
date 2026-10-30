@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100" fill="none">
+<defs>
+ <radialGradient id="dawn"><stop stop-color="#fff3d9"/><stop offset=".52" stop-color="#f9e4d8"/><stop offset="1" stop-color="#fbf4ef" stop-opacity="0"/></radialGradient>
+ <linearGradient id="hill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d8cde8"/><stop offset="1" stop-color="#eee6ec"/></linearGradient>
+ <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b3a3c5"/><stop offset="1" stop-color="#dfcbd2"/></linearGradient>
+ <g id="sprig" stroke="#9784ae" stroke-width="1.4"><path d="M0 250C14 171 3 87 29 0"/>
+ <g fill="url(#leaf)" stroke="none"><path d="M22 36C-17 14-21 42 17 66C20 53 22 43 22 36Z"/><path d="M17 66C57 36 66 67 14 94Z"/><path d="M13 99C-30 70-36 110 11 126Z"/><path d="M11 130C56 98 65 137 10 157Z"/><path d="M10 163C-35 142-37 181 8 190Z"/><path d="M7 194C49 172 58 207 4 221Z"/></g></g>
+</defs>
+<ellipse cx="880" cy="240" rx="820" ry="610" fill="url(#dawn)"/>
+<path d="M-100 750C210 551 397 882 719 720C1041 558 1316 605 1710 792V1100H-100Z" fill="url(#hill)" opacity=".19"/>
+<path d="M-100 866C180 681 435 975 834 797C1173 645 1434 783 1710 900V1100H-100Z" fill="#e8d4d0" opacity=".22"/>
+<path d="M-100 907C241 758 506 1010 875 864C1251 717 1462 881 1710 925" stroke="#bba3bf" stroke-opacity=".22"/>
+<path d="M-50 944C260 817 578 1065 1014 883C1295 766 1470 911 1660 967" stroke="#fff" stroke-opacity=".9"/>
+<g opacity=".29"><use href="#sprig" transform="translate(1440 300) rotate(24) scale(1.5)"/><use href="#sprig" transform="translate(1548 509) rotate(48) scale(1.25)"/><use href="#sprig" transform="translate(48 522) rotate(-32) scale(.9)"/></g>
+<g fill="#b69cba" opacity=".4"><circle cx="1294" cy="124" r="2"/><circle cx="1400" cy="217" r="2.5"/><circle cx="1200" cy="660" r="2"/><path d="M1307 331l3-10 3 10 10 3-10 3-3 10-3-10-10-3Z"/><path d="M177 130l2-7 2 7 7 2-7 2-2 7-2-7-7-2Z"/></g></svg>

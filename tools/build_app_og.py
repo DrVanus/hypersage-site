@@ -223,36 +223,32 @@ CARDS = {
     "rowan": {
         "art": "art/rowan_welcome.png",
         "css": """
-  /* Rowan's page is warm cream, not violet: --bg #FBF4EF under the three
-     body::before radial washes, copied verbatim. The third stop is the page's
-     own --primary-glow (the .hero-image::after halo) moved under the art. */
-  .og { background:
-        radial-gradient(ellipse 85% 55% at 15% 0%, rgba(251,227,214,0.85), transparent 62%),
-        radial-gradient(ellipse 70% 50% at 88% 10%, rgba(241,234,247,0.90), transparent 68%),
-        radial-gradient(ellipse 34% 62% at 78% 50%, rgba(111,91,197,0.14), transparent 65%),
-        radial-gradient(ellipse 70% 45% at 50% 100%, rgba(111,91,197,0.05), transparent 70%),
-        #FBF4EF; }
-  /* No webfonts on this site — the page's own system stacks, or the card
-     renders in a face Rowan never uses. .eyebrow is --primary-dark. */
+  /* The page's dawn-garden artwork, system type, cream ground and violet ink.
+     This social crop uses the same portrait and oval atmosphere as the hero. */
+  .og { background: url('art/dawn-garden.svg') center 54% / cover no-repeat, #FBF4EF; }
+  .og-left { position: relative; z-index: 2; }
   .kicker { font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, system-ui, sans-serif;
-            color: #5B49A8; }
-  /* Flat --fg ink, not a gradient: kill the shell's background-clip:text or the
-     headline renders as transparent glyphs on a light card. */
+            color: #5B49A8; font-size: 23px; letter-spacing: .10em; }
   h1 { font-family: ui-serif, 'New York', Charter, Georgia, 'Times New Roman', serif;
-       font-weight: 700; font-size: 60px; letter-spacing: -0.025em;
+       font-weight: 700; font-size: 66px; letter-spacing: -0.025em;
        background-image: none; color: #3B2D4F; }
-  /* .hero-text h1 .soft — --primary, and upright: the page never italicises it. */
-  h1 em { font-style: normal; color: #6F5BC5; }
+  h1 em { font-style: italic; color: #5B49A8; }
   .sub { font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, system-ui, sans-serif;
-         color: #6E5E7C; }
-  /* The 712x800 hero sprite at its own ratio — contain, not the shell's cover,
-     and no drop-shadow: on cream it greys the halo the art already paints. */
+         color: #6E5E7C; font-size: 25px; max-width: 525px; }
+  .og-right { position: relative; isolation: isolate; height: 100%; }
+  .og-right::before { content: ''; position: absolute; z-index: -1;
+         width: 430px; height: 500px; border-radius: 49% 49% 42% 42%;
+         background: radial-gradient(ellipse at 38% 55%, #fff5df 0, #f7dfc9 28%, #e8dcf0 68%, #ebe2f2 100%);
+         border: 1px solid #fff9; box-shadow: inset 0 0 70px #ffffff90; }
+  .og-right::after { content: ''; position: absolute; z-index: -1;
+         width: 412px; height: 530px; border: 1px solid #b6a3cb45;
+         border-radius: 50%; transform: rotate(-22deg); }
   .art { width: 432px; height: 486px; object-fit: contain; }
 """,
-        "kicker_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-        "kicker": "Health companion · iOS",
-        "h1": "The health<br>companion that<br><em>knows your story.</em>",
-        "sub": "Talk about your day in plain words. Rowan keeps the record and turns it into a brief for your doctor.",
+        "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.6l2.3 7.8 7.8 2.3-7.8 2.3-2.3 7.8-2.3-7.8L1.9 11.7l7.8-2.3z"/></svg>',
+        "kicker": "Rowan · iOS",
+        "h1": "Your health story,<br><em>held with care.</em>",
+        "sub": "An AI companion for life with a chronic condition. Turn the details of your day into a record for your next appointment.",
     },
     "alder": {
         "art": "art/alder_steady.png",
