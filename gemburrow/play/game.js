@@ -4099,7 +4099,13 @@ function makeExcavationJar(site) {
       return keys.some(function (key) { return !states[key].revoked; }) ? 1 : 0;
     }
     var hadLocal = false;
-    var hapticsChoice = null;
+    var preferenceChoices = {};
+    function setPreference(key, value) {
+      if (['musicMuted', 'sfxMuted', 'musicVolume', 'sfxVolume', 'hints', 'marks', 'haptics'].indexOf(key) < 0) return;
+      preferenceChoices[key] = value;
+      data[key] = value;
+      save();
+    }
     var provisional = false;
     try { provisional = localStorage.getItem(K + '.prov') === '1'; } catch (e) {}
     try {
@@ -4196,7 +4202,7 @@ function makeExcavationJar(site) {
               if (nat.iapSeen[receipt] === 'fulfilled') receipts[receipt] = 'fulfilled';
             }
             if (!provisional || progress(nat) >= progress(data)) Object.assign(data, nat);
-            if (hapticsChoice !== null) data.haptics = hapticsChoice;
+            Object.keys(preferenceChoices).forEach(function (key) { data[key] = preferenceChoices[key]; });
             data.excavations = excavationRecords;
             data.bestFree = bestFree;
             data.bestDaily = bestDaily;
@@ -4223,7 +4229,8 @@ function makeExcavationJar(site) {
       settle();
     }
     return { data: data, save: save, flush: flush, mergeAccess: mergeAccess, accessFull: accessFull,
-             setHaptics: function (enabled) { hapticsChoice = enabled ? 1 : 0; data.haptics = hapticsChoice; save(); },
+             setPreference: setPreference,
+             setHaptics: function (enabled) { setPreference('haptics', enabled ? 1 : 0); },
              ready: function (cb) { if (settled) cb(); else waiting.push(cb); },
              onAudioRestore: function (cb) { audioRestoreListeners.push(cb); if (settled) cb(); } };
   })();
@@ -4985,21 +4992,21 @@ function makeExcavationJar(site) {
       else if (ensure()) { reconcileMusic(); musicLoad(); }
     }
     api.setMusicMuted = function (m) {
-      api.musicMuted = !!m; Meta.data.musicMuted = !!m; Meta.save(); updateMusicGain();
+      api.musicMuted = !!m; Meta.setPreference('musicMuted', api.musicMuted); updateMusicGain();
     };
     api.setMusicVolume = function (v) {
       api.musicVolume = volume(v, api.musicVolume);
-      Meta.data.musicVolume = api.musicVolume; Meta.save(); updateMusicGain();
+      Meta.setPreference('musicVolume', api.musicVolume); updateMusicGain();
     };
     api.setSfxMuted = function (m) {
-      api.sfxMuted = !!m; Meta.data.sfxMuted = !!m; Meta.save();
+      api.sfxMuted = !!m; Meta.setPreference('sfxMuted', api.sfxMuted);
       if (!m) ensure();
       if (sfxBus) sfxBus.gain.value = m ? 0 : api.sfxVolume;
       if (m) live.slice().forEach(function (r) { try { r.src.stop(); } catch (e) {} });
     };
     api.setSfxVolume = function (v) {
       api.sfxVolume = volume(v, api.sfxVolume);
-      Meta.data.sfxVolume = api.sfxVolume; Meta.save();
+      Meta.setPreference('sfxVolume', api.sfxVolume);
       if (sfxBus) sfxBus.gain.value = api.sfxMuted ? 0 : api.sfxVolume;
     };
     function glassPulse(step, at, strength) {
@@ -7324,46 +7331,105 @@ function makeExcavationJar(site) {
     ctx.textAlign = ta; ctx.textBaseline = tb;
   };
 
-  var SET_ROW_H = 52, SET_GAP = 8, SET_HEAD = 56, SET_PAD = 18, SET_FOOT = 40, SET_W = 300;
+  var SETTINGS_THEME = {
+    panel: '#2c211a', card: '#392b21', inset: '#241b15',
+    border: '#776046', divider: '#66513c', ink: '#fff1d4',
+    muted: '#d3bfa0', accent: '#ebc47a', icon: '#ebc47a',
+    on: '#a8c380', onInk: '#243317', off: '#655748', offInk: '#fff1d4',
+    primary: '#edca86', primaryInk: '#342516', danger: '#f2b1a0'
+  };
   Game.prototype.settingsRects = function () {
     var inShift = this.state === 'paused' || this.state === 'playing';
     var canRestore = Store.available() && !Ent.owned();
-    var ids = inShift ? ['music', 'sound', 'hints', 'marks', 'help', 'resume', 'quit']
-                      : ['music', 'sound', 'hints', 'marks', 'help']
-                          .concat(canRestore ? ['restore'] : [])
-                          .concat(['privacy', 'done']);
-    if (Hap.available()) ids.splice(2, 0, 'haptics');
-    var gap = ids.length > 8 ? 4 : SET_GAP;
-    var ph = SET_HEAD + SET_PAD + ids.length * SET_ROW_H + 96 + (ids.length - 1) * gap + SET_FOOT;
-    var px = VIEW_MIN_W / 2 - SET_W / 2;
-    var py = Math.round(VIEW_H / 2 - ph / 2);
-    var out = {
-      panel: { x: px, y: py, w: SET_W, h: ph },
-      close: { x: px + SET_W - 56, y: py + 6, w: 50, h: 50 },
-      rows: [],
-    };
-    var rowY = py + SET_HEAD + SET_PAD;
-    for (var i = 0; i < ids.length; i++) {
-      var audio = ids[i] === 'music' || ids[i] === 'sound';
-      out.rows.push({
-        id: ids[i], x: px + 20, y: rowY,
-        w: SET_W - 40, h: audio ? 100 : SET_ROW_H,
-      });
-      rowY += (audio ? 100 : SET_ROW_H) + gap;
-    }
-    return out;
+    var rows = [], sections = [], px = 17, width = 386, x = px + 16, rw = width - 32;
+    var y = 76, aw = (rw - 10) / 2;
+    rows.push({id:'music',x:x,y:y,w:aw,h:116});
+    rows.push({id:'sound',x:x+aw+10,y:y,w:aw,h:116});
+    y += 132;
+    sections.push({label:'PLAY YOUR WAY',y:y}); y += 24;
+    var ids = Hap.available() ? ['haptics','hints','marks'] : ['hints','marks'];
+    var groupY = y;
+    ids.forEach(function(id){rows.push({id:id,x:x,y:y,w:rw,h:58});y+=58;});
+    var comfort = {x:x,y:groupY,w:rw,h:ids.length*58};
+    y += 12;
+    rows.push({id:'help',x:x,y:y,w:inShift?rw:(rw-10)/2,h:58});
+    if (!inShift) rows.push({id:'privacy',x:x+(rw+10)/2,y:y,w:(rw-10)/2,h:58});
+    y += 64;
+    if (canRestore && !inShift) {rows.push({id:'restore',x:x,y:y,w:rw,h:58}); y+=64;}
+    if (inShift) {rows.push({id:'quit',x:x,y:y,w:rw,h:58}); y+=64;}
+    rows.push({id:inShift?'resume':'done',x:x,y:y,w:rw,h:58}); y+=74;
+    var ph=y, available=this.view.floorY || VIEW_H, py=Math.max(8,Math.round((available-ph)/2));
+    rows.forEach(function(row){row.y+=py;});sections.forEach(function(a){a.y+=py;});comfort.y+=py;
+    return {panel:{x:px,y:py,w:width,h:ph},close:{x:px+width-64,y:py+8,w:58,h:58},
+      rows:rows,sections:sections,comfort:comfort,inShift:inShift};
   };
 
   function audioSettingRects(r) {
     return {
-      toggle: { x: r.x, y: r.y, w: r.w, h: 50 },
-      less: { x: r.x, y: r.y + 50, w: 50, h: 50 },
-      more: { x: r.x + r.w - 50, y: r.y + 50, w: 50, h: 50 },
+      toggle:{x:r.x,y:r.y,w:r.w,h:58},
+      less:{x:r.x,y:r.y+58,w:58,h:58},
+      more:{x:r.x+r.w-58,y:r.y+58,w:58,h:58}
     };
+  }
+
+  function settingsIcon(ctx,id,x,y,size,color) {
+    ctx.save();ctx.translate(x,y);ctx.scale(size/24,size/24);
+    ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=1.8;
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();
+    if(id==='music'){
+      ctx.moveTo(9,17);ctx.lineTo(9,5);ctx.lineTo(19,3);ctx.lineTo(19,15);
+      ctx.moveTo(9,9);ctx.lineTo(19,7);ctx.stroke();
+      ctx.beginPath();ctx.ellipse(6,18,3,2.3,-.2,0,Math.PI*2);
+      ctx.ellipse(16,16,3,2.3,-.2,0,Math.PI*2);ctx.fill();
+    }else if(id==='sound'){
+      ctx.moveTo(4,9);ctx.lineTo(8,9);ctx.lineTo(13,5);ctx.lineTo(13,19);
+      ctx.lineTo(8,15);ctx.lineTo(4,15);ctx.closePath();ctx.stroke();
+      ctx.beginPath();ctx.arc(12,12,6,-.65,.65);ctx.stroke();
+      ctx.beginPath();ctx.arc(12,12,10,-.65,.65);ctx.stroke();
+    }else if(id==='haptics'){
+      rr(ctx,7,3,10,18,2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(10,18);ctx.lineTo(14,18);
+      ctx.moveTo(3,8);ctx.lineTo(1,12);ctx.lineTo(3,16);
+      ctx.moveTo(21,8);ctx.lineTo(23,12);ctx.lineTo(21,16);ctx.stroke();
+    }else if(id==='hints'){
+      ctx.arc(12,9,6,0,Math.PI*2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(9,15);ctx.lineTo(9,19);ctx.lineTo(15,19);ctx.lineTo(15,15);
+      ctx.moveTo(10,22);ctx.lineTo(14,22);ctx.stroke();
+    }else if(id==='marks'){
+      ctx.moveTo(6,4);ctx.lineTo(18,4);ctx.lineTo(22,10);ctx.lineTo(12,22);
+      ctx.lineTo(2,10);ctx.closePath();ctx.moveTo(2,10);ctx.lineTo(22,10);
+      ctx.moveTo(8,10);ctx.lineTo(12,4);ctx.lineTo(16,10);ctx.lineTo(12,22);ctx.closePath();ctx.stroke();
+    }else if(id==='help'){
+      ctx.moveTo(12,6);ctx.quadraticCurveTo(7,2,2,4);ctx.lineTo(2,20);
+      ctx.quadraticCurveTo(7,18,12,22);ctx.quadraticCurveTo(17,18,22,20);
+      ctx.lineTo(22,4);ctx.quadraticCurveTo(17,2,12,6);ctx.lineTo(12,22);ctx.stroke();
+    }else if(id==='privacy'){
+      ctx.moveTo(12,2);ctx.lineTo(21,6);ctx.lineTo(20,14);
+      ctx.quadraticCurveTo(18,19,12,22);ctx.quadraticCurveTo(6,19,4,14);
+      ctx.lineTo(3,6);ctx.closePath();ctx.stroke();
+      ctx.beginPath();ctx.moveTo(8,12);ctx.lineTo(11,15);ctx.lineTo(16,9);ctx.stroke();
+    }else if(id==='restore'){
+      ctx.arc(12,12,8,-.8,4.2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(3,3);ctx.lineTo(3,9);ctx.lineTo(9,9);ctx.stroke();
+    }else if(id==='quit'){
+      rr(ctx,4,3,9,18,1);ctx.stroke();ctx.beginPath();
+      ctx.moveTo(10,12);ctx.lineTo(22,12);ctx.moveTo(18,8);ctx.lineTo(22,12);ctx.lineTo(18,16);ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function settingsSwitch(ctx,x,y,on,compact) {
+    var t=SETTINGS_THEME,w=compact?40:58,h=28;
+    ctx.fillStyle=on?t.on:t.off;rr(ctx,x,y,w,h,14);ctx.fill();
+    ctx.fillStyle=on?t.onInk:t.offInk;ctx.beginPath();
+    var cx=on?x+w-14:x+14;
+    ctx.arc(cx,y+14,9,0,Math.PI*2);ctx.fill();
+    if(!compact){ctx.font=fT(9,'bold');ctx.textAlign='center';
+      ctx.fillText(on?'ON':'OFF',on?x+16:x+w-16,y+10);}
   }
 
   Game.prototype.openSettings = function () {
     this.showSettings = true;
+    this._settingsRestoreRequested = Store.busy;
     this._quitArmed = 0;
     if (this.state === 'playing') this.setPaused(true);
   };
@@ -7374,86 +7440,80 @@ function makeExcavationJar(site) {
 
   Game.prototype._drawSettings = function () {
     if (!this.showSettings) return;
-    var ctx = this.ctx, v = this.view;
-    var R = this.settingsRects(), p = R.panel;
-    ctx.fillStyle = 'rgba(12,8,5,0.68)';
-    ctx.fillRect(-v.ox, -v.uiTop, v.w, v.h + v.uiTop);
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    var ctx=this.ctx,v=this.view,R=this.settingsRects(),p=R.panel,t=SETTINGS_THEME;
+    ctx.save();
+    ctx.fillStyle='rgba(12,8,5,0.76)';
+    ctx.fillRect(-v.ox,-v.uiTop,v.w,v.h+v.uiTop);
+    ctx.fillStyle='rgba(0,0,0,0.35)';rr(ctx,p.x,p.y+6,p.w,p.h,22);ctx.fill();
+    ctx.fillStyle=t.panel;rr(ctx,p.x,p.y,p.w,p.h,22);ctx.fill();
+    ctx.strokeStyle=t.border;ctx.lineWidth=1.5;rr(ctx,p.x,p.y,p.w,p.h,22);ctx.stroke();
+    ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillStyle=t.ink;ctx.font=fD(28);ctx.fillText('Settings',p.x+22,p.y+12);
+    ctx.fillStyle=t.muted;ctx.font=fT(13);
+    var subtitle=this._settingsRestoreRequested&&Store.note?Store.note:
+      R.inShift?'Your dig is paused. Take your time.':'A little comfort for every dig.';
+    var words=subtitle.split(' '),line='',lineY=p.y+45;
+    words.forEach(function(word){
+      var next=line?line+' '+word:word;
+      if(line&&ctx.measureText(next).width>p.w-100){ctx.fillText(line,p.x+22,lineY);line=word;lineY+=14;}
+      else line=next;
+    });
+    if(line)ctx.fillText(line,p.x+22,lineY);
+    var close=R.close;
+    ctx.fillStyle=t.card;rr(ctx,close.x+8,close.y+8,42,42,14);ctx.fill();
+    ctx.strokeStyle=t.muted;ctx.lineWidth=2;ctx.beginPath();
+    ctx.moveTo(close.x+23,close.y+23);ctx.lineTo(close.x+35,close.y+35);
+    ctx.moveTo(close.x+35,close.y+23);ctx.lineTo(close.x+23,close.y+35);ctx.stroke();
+    ctx.fillStyle=t.card;rr(ctx,R.comfort.x,R.comfort.y,R.comfort.w,R.comfort.h,16);ctx.fill();
+    ctx.strokeStyle=t.divider;ctx.lineWidth=1;rr(ctx,R.comfort.x,R.comfort.y,R.comfort.w,R.comfort.h,16);ctx.stroke();
+    R.sections.forEach(function(a){ctx.fillStyle=t.muted;ctx.font=fT(12,'bold');ctx.fillText(a.label,p.x+20,a.y);});
+    for(var i=0;i<R.rows.length;i++){
+      var r=R.rows[i],audio=r.id==='music'||r.id==='sound';
+      var on=r.id==='music'?!Snd.musicMuted:r.id==='sound'?!Snd.sfxMuted:
+        r.id==='haptics'?Hap.enabled():r.id==='hints'?Meta.data.hints!==0:Meta.data.marks===1;
+      ctx.textAlign='left';
+      if(audio){
+        ctx.fillStyle=t.card;rr(ctx,r.x,r.y,r.w,r.h,16);ctx.fill();
+        ctx.strokeStyle=t.divider;rr(ctx,r.x,r.y,r.w,r.h,16);ctx.stroke();
+        settingsIcon(ctx,r.id,r.x+12,r.y+18,22,t.icon);
+        ctx.fillStyle=t.ink;ctx.font=fT(17,'bold');ctx.fillText(r.id==='music'?'Music':'Effects',r.x+42,r.y+21);
+        settingsSwitch(ctx,r.x+r.w-50,r.y+15,on,true);
+        ctx.strokeStyle=t.divider;ctx.beginPath();ctx.moveTo(r.x+12,r.y+58);ctx.lineTo(r.x+r.w-12,r.y+58);ctx.stroke();
+        var ar=audioSettingRects(r),level=r.id==='music'?Snd.musicVolume:Snd.sfxVolume;
+        ctx.textAlign='center';ctx.font=fT(24,'bold');
+        ctx.fillStyle=level>0?t.accent:t.muted;ctx.globalAlpha=level>0?1:.42;
+        ctx.fillText('−',ar.less.x+29,ar.less.y+15);
+        ctx.globalAlpha=level<1?1:.42;ctx.fillText('+',ar.more.x+29,ar.more.y+15);ctx.globalAlpha=1;
+        ctx.fillStyle=t.ink;ctx.font=fT(16,'bold');ctx.fillText(on?Math.round(level*100)+'%':'Muted',r.x+r.w/2,r.y+72);
+        ctx.fillStyle=t.inset;rr(ctx,r.x+r.w/2-25,r.y+99,50,3,1.5);ctx.fill();
+        if(level>0){ctx.fillStyle=on?t.accent:t.muted;rr(ctx,r.x+r.w/2-25,r.y+99,50*level,3,1.5);ctx.fill();}
+      }else if(r.id==='haptics'||r.id==='hints'||r.id==='marks'){
+        if(r.y>R.comfort.y){ctx.strokeStyle=t.divider;ctx.beginPath();ctx.moveTo(r.x+52,r.y);ctx.lineTo(r.x+r.w-14,r.y);ctx.stroke();}
+        settingsIcon(ctx,r.id,r.x+16,r.y+17,24,t.icon);
+        ctx.fillStyle=t.ink;ctx.font=fT(19,'bold');
+        ctx.fillText(r.id==='haptics'?'Haptics':r.id==='hints'?'Jar hints':'Gem symbols',r.x+52,r.y+10);
+        ctx.fillStyle=t.muted;ctx.font=fT(12);
+        ctx.fillText(r.id==='haptics'?'Feel each dig and discovery':r.id==='hints'?'Highlight gems your orders need':'Tell gem colors apart by shape',r.x+52,r.y+36);
+        settingsSwitch(ctx,r.x+r.w-70,r.y+15,on,false);
+      }else{
+        var primary=r.id==='done'||r.id==='resume',armed=r.id==='quit'&&this._quitArmed>nowMs();
+        ctx.fillStyle=primary?t.primary:armed?'#62342b':t.card;
+        rr(ctx,r.x,r.y,r.w,r.h,14);ctx.fill();
+        if(!primary){ctx.strokeStyle=armed?t.danger:t.divider;ctx.lineWidth=1;rr(ctx,r.x,r.y,r.w,r.h,14);ctx.stroke();}
+        var ink=primary?t.primaryInk:r.id==='quit'?t.danger:t.ink;
+        ctx.fillStyle=ink;ctx.font=fT(primary?20:16,'bold');
+        var label=r.id==='resume'?'Resume digging':r.id==='quit'?(armed?'Tap again to leave':'Leave this dig'):
+          r.id==='restore'?(Store.busy?'Restoring…':'Restore purchases'):
+          r.id==='privacy'?'Privacy':r.id==='help'?'How to play':'Done';
+        if(primary){ctx.textAlign='center';ctx.fillText(label,r.x+r.w/2,r.y+19);}
+        else {
+          settingsIcon(ctx,r.id,r.x+16,r.y+18,22,r.id==='quit'?t.danger:t.icon);
+          ctx.fillStyle=ink;ctx.textAlign='left';ctx.fillText(label,r.x+49,r.y+21);
 
-    ctx.fillStyle = 'rgba(0,0,0,0.45)';
-    rr(ctx, p.x + 3, p.y + 6, p.w, p.h, 18); ctx.fill();
-    ctx.fillStyle = '#2b2018';
-    rr(ctx, p.x, p.y, p.w, p.h, 18); ctx.fill();
-    ctx.strokeStyle = 'rgba(201,168,106,0.8)'; ctx.lineWidth = 2;
-    rr(ctx, p.x, p.y, p.w, p.h, 18); ctx.stroke();
-
-    ctx.fillStyle = '#ffe9a8'; ctx.font = fD(24);
-    ctx.fillText('SETTINGS', p.x + p.w / 2, p.y + 16);
-    ctx.strokeStyle = 'rgba(201,168,106,0.3)'; ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(p.x + 22, p.y + SET_HEAD - 4); ctx.lineTo(p.x + p.w - 22, p.y + SET_HEAD - 4);
-    ctx.stroke();
-
-    ctx.fillStyle = 'rgba(232,220,200,0.65)'; ctx.font = fD(20);
-    ctx.fillText('✕', R.close.x + R.close.w / 2, R.close.y + 14);
-
-    for (var i = 0; i < R.rows.length; i++) {
-      var r = R.rows[i];
-      if (r.id === 'music' || r.id === 'sound' || r.id === 'haptics' || r.id === 'hints' || r.id === 'marks') {
-        var on = r.id === 'music' ? !Snd.musicMuted
-               : r.id === 'sound' ? !Snd.sfxMuted
-               : r.id === 'haptics' ? Hap.enabled()
-               : r.id === 'hints' ? Meta.data.hints !== 0
-               : Meta.data.marks === 1;
-        ctx.fillStyle = 'rgba(20,12,6,0.5)';
-        rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.fill();
-        ctx.strokeStyle = 'rgba(201,168,106,0.35)'; ctx.lineWidth = 1.5;
-        rr(ctx, r.x, r.y, r.w, r.h, 12); ctx.stroke();
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#e8dcc8'; ctx.font = fD(17);
-        ctx.fillText(r.id === 'music' ? 'Music'
-                   : r.id === 'sound' ? 'Sound effects'
-                   : r.id === 'haptics' ? 'Haptics'
-                   : r.id === 'hints' ? 'Hints in the jar'
-                   : 'Gem symbols', r.x + 16, r.y + 17);
-        var sw = { x: r.x + r.w - 76, y: r.y + 11, w: 60, h: 30 };
-        ctx.fillStyle = on ? '#6a8f4a' : 'rgba(70,56,44,0.9)';
-        rr(ctx, sw.x, sw.y, sw.w, sw.h, 15); ctx.fill();
-        ctx.fillStyle = on ? '#eaf6d8' : 'rgba(200,186,166,0.7)';
-        ctx.beginPath();
-        ctx.arc(on ? sw.x + sw.w - 15 : sw.x + 15, sw.y + 15, 11, 0, 6.283); ctx.fill();
-        ctx.textAlign = 'center';
-        ctx.fillStyle = on ? '#dfeecb' : 'rgba(200,186,166,0.65)';
-        ctx.font = fT(10, 'bold');
-        ctx.fillText(on ? 'ON' : 'OFF', on ? sw.x + 19 : sw.x + 42, sw.y + 10);
-        if (r.id === 'music' || r.id === 'sound') {
-          var ar = audioSettingRects(r), level = r.id === 'music' ? Snd.musicVolume : Snd.sfxVolume;
-          ctx.strokeStyle = 'rgba(201,168,106,0.20)';
-          ctx.beginPath(); ctx.moveTo(r.x + 12, r.y + 50); ctx.lineTo(r.x + r.w - 12, r.y + 50); ctx.stroke();
-          ctx.font = fD(25); ctx.fillStyle = level > 0 ? '#ffe9a8' : 'rgba(232,220,200,0.35)';
-          ctx.fillText('−', ar.less.x + 25, ar.less.y + 12);
-          ctx.fillStyle = level < 1 ? '#ffe9a8' : 'rgba(232,220,200,0.35)';
-          ctx.fillText('+', ar.more.x + 25, ar.more.y + 12);
-          ctx.fillStyle = '#e8dcc8'; ctx.font = fT(13, 'bold');
-          ctx.fillText((r.id === 'music' ? 'Music' : 'Sound') + ' volume ' + Math.round(level * 100) + '%', r.x + r.w / 2, r.y + 68);
         }
-      } else {
-        var armed = r.id === 'quit' && this._quitArmed > nowMs();
-        var label = r.id === 'resume' ? 'RESUME'
-                  : r.id === 'quit' ? (armed ? 'TAP AGAIN TO QUIT' : 'QUIT SHIFT')
-                  : r.id === 'restore' ? (Store.busy ? 'RESTORING\u2026' : 'RESTORE PURCHASE')
-                  : r.id === 'privacy' ? 'PRIVACY POLICY'
-                  : r.id === 'help' ? 'HOW TO PLAY'
-                  : 'DONE';
-        this._menuBtn(label, r.y, { w: r.w, h: r.h,
-                                    quiet: (r.id === 'quit' && !armed) || r.id === 'restore' || r.id === 'privacy',
-                                    disabled: r.id === 'restore' && Store.busy });
       }
     }
-
-    ctx.fillStyle = 'rgba(232,220,200,0.42)'; ctx.font = fT(11);
-    ctx.fillText('tap outside to close', p.x + p.w / 2, p.y + p.h - 22, p.w - 40);
-    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.restore();
   };
 
   Game.prototype._settingsTap = function (w) {
@@ -7463,6 +7523,8 @@ function makeExcavationJar(site) {
       var r = R.rows[i];
       if (!inRect(w, r)) continue;
       if (r.id === 'restore') {
+        if (Store.busy) return;
+        this._settingsRestoreRequested = true;
         Snd.pop();
         Store.restore(function (got) { if (got) { Snd.fanfare(150); Hap.medium(); } });
         return;
@@ -7491,12 +7553,12 @@ function makeExcavationJar(site) {
         if (Hap.enabled()) Hap.light(); else Hap.stop();
       }
       else if (r.id === 'hints') {
-        Meta.data.hints = Meta.data.hints === 0 ? 1 : 0;
-        Meta.save(); Snd.pop();
+        Meta.setPreference('hints', Meta.data.hints === 0 ? 1 : 0);
+        Snd.pop();
       }
       else if (r.id === 'marks') {
-        Meta.data.marks = Meta.data.marks === 1 ? 0 : 1;
-        Meta.save(); Snd.pop();
+        Meta.setPreference('marks', Meta.data.marks === 1 ? 0 : 1);
+        Snd.pop();
       }
       else if (r.id === 'resume' || r.id === 'done') { Snd.pop(); this.closeSettings(); }
       else if (r.id === 'quit') {
@@ -9157,7 +9219,11 @@ function makeExcavationJar(site) {
 
   Game.prototype.accessDetails = function () {
     var g = this, lines = [], m = Meta.data;
-    if (g.showSettings || g.state === 'paused') return lines;
+    if (g.showSettings) {
+      lines.push('Jar hints highlight gems needed for orders. Gem symbols distinguish gem colors by shape.');
+      return lines;
+    }
+    if (g.state === 'paused') return lines;
     if (g.state === 'fieldnotes') return ['All five sites are free. Finite piles never refill. Complete the commission to record preserved specimens. Replay for a shorter route or a missing specimen.'];
     if (g.mode === 'excavation' && (g.state === 'playing' || g.state === 'results')) return [g.excavation.site.brief, 'Remove the pieces above a gem before lifting it. Great gems can be split for three loose gems, or lifted intact for two swings. Dense striped rocks take two swings. The satchel holds seven gems. Discarding a gem is permanent for this attempt. A completed commission lets you finish immediately or keep digging. Journal records do not award coins or change Daily challenges.'];
     if (g.state === 'results') {
