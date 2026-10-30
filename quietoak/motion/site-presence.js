@@ -2,13 +2,16 @@
    Artwork stays in original canvas coordinates; only actual audio drives mouths. */
 (() => {
 'use strict';
-const N=384, feather=.0015, cache=new Map(), surfaces=[], media=matchMedia('(prefers-reduced-motion: reduce)');
+const N=384, feather=.0015, cache=new Map(), surfaces=[];
+const media=typeof matchMedia==='function'?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
 const base='motion/', version='?v=20260909a';
-let selected='willow', paused=false, raf=null, audioContext=null, analyser=null, waveform=null, audioID=null, audioButton=null, audioGeneration=0;
-const audio=new Audio(); audio.preload='none';
+let selected='willow', paused=false, raf=null, audioContext=null, analyser=null, waveform=null, audioID=null, audioButton=null, audioGeneration=0, meterPending=null;
+// Media remains usable when the optional portrait or Web Audio helpers fail.
+let audio=null;try{audio=new Audio();audio.preload='none';}catch(_){}
 const status=document.getElementById('audio-status'), motionButton=document.getElementById('motion-toggle');
-const metadata=fetch(base+'face-rigs.json'+version).then(r=>{if(!r.ok)throw Error();return r.json();});
-const gestures=fetch(base+'presence-rigs.json'+version).then(r=>{if(!r.ok)throw Error();return r.json();}).then(r=>r.rigs);
+const getJSON=url=>Promise.resolve().then(()=>fetch(url)).then(r=>{if(!r.ok)throw Error('Portrait metadata unavailable');return r.json();});
+const metadata=getJSON(base+'face-rigs.json'+version);
+const gestures=getJSON(base+'presence-rigs.json'+version).then(r=>r.rigs);
 // Handled below by each asset load; keep failed metadata from rejecting unobserved.
 metadata.catch(()=>{}); gestures.catch(()=>{});
 const torsos={
@@ -85,7 +88,7 @@ class Portrait {
    if(!this.renderer.available)throw Error('Renderer unavailable');
    if(!this.renderer.setArt(this.art.rest,this.art.config))throw Error('Rig unavailable');
    this.draw(0,0,{head:0,tail:0,lift:0});this.host.classList.add('presence-ready');
-  }catch(error){if(location.hostname==='127.0.0.1')this.host.dataset.error=String(error);this.failed=true;this.host.classList.remove('presence-ready');if(this.renderer)this.renderer.destroy();}
+  }catch(error){if(location.hostname==='127.0.0.1')this.host.dataset.error=String(error);this.failed=true;this.host.classList.remove('presence-ready');try{if(this.renderer)this.renderer.destroy();}catch(_){}}
   this.loading=false;sync();
  }
  draw(eyes=0,mouth=0,pose={head:0,tail:0,lift:0},breath=0){
@@ -112,77 +115,158 @@ class Portrait {
  }
  suspend(rest){this.clock.pause();if(rest){this.clock.reduce();this.blink.cancel();if(!this.atRest)this.draw();}}
 }
+// Renderer failures retire only that decorative surface; the original image stays.
+let portraitSetupFailed=false;
+function failPortrait(s){
+ s.failed=true;s.host.classList.remove('presence-ready');
+ try{s.clock.pause();}catch(_){}
+ try{if(s.renderer)s.renderer.destroy();}catch(_){}
+}
 function sync(){
  let running=false;
  for(const s of surfaces){
-  if(s.active){s.ensure();if(s.art&&!s.failed)running=true;}
-  else s.suspend(paused||media.matches||s.id!==selected&&s.host.dataset.always!=='true');
+  try{
+   if(s.active){s.ensure();if(s.art&&!s.failed)running=true;}
+   else s.suspend(paused||media.matches||s.id!==selected&&s.host.dataset.always!=='true');
+  }catch(_){failPortrait(s);}
  }
  if(running&&raf===null)raf=requestAnimationFrame(tick);
  if(!running&&raf!==null){cancelAnimationFrame(raf);raf=null;}
- const unavailable=surfaces.some(s=>s.failed&&s.id===selected&&s.visible);
+ const unavailable=portraitSetupFailed||surfaces.some(s=>s.failed&&s.id===selected&&s.visible);
  for(const s of surfaces)if(s.failed&&s.host.tagName==='BUTTON'){s.host.disabled=true;s.host.setAttribute('aria-label',s.id+' animation unavailable');}
  if(motionButton){motionButton.textContent=unavailable?'Animation unavailable':media.matches?'Motion reduced':paused?'Play companion animation':'Pause companion animation';motionButton.disabled=media.matches||unavailable;motionButton.setAttribute('aria-pressed',String(paused||media.matches));}
 }
 function audioLevel(){
- if(!analyser||audio.paused||audio.ended||audio.readyState<2||!audioID)return 0;
- analyser.getFloatTimeDomainData(waveform);let sum=0;for(const v of waveform)sum+=v*v;
- const rms=Math.sqrt(sum/waveform.length),db=rms?20*Math.log10(rms):-Infinity;
- return db<=-50?0:Math.min(1,Math.max(0,(db+50)/32));
+ if(!audio||!analyser||audio.paused||audio.ended||audio.readyState<2||!audioID)return 0;
+ try{
+  analyser.getFloatTimeDomainData(waveform);let sum=0;for(const v of waveform)sum+=v*v;
+  const rms=Math.sqrt(sum/waveform.length),db=rms?20*Math.log10(rms):-Infinity;
+  return Number.isFinite(db)&&db>-50?Math.min(1,Math.max(0,(db+50)/32)):0;
+ }catch(_){return 0;}
 }
 function tick(time){
  raf=null;const level=audioLevel();
- for(const s of surfaces)if(s.active&&s.art){try{s.tick(time,level);}catch(_){s.failed=true;s.host.classList.remove('presence-ready');s.suspend(false);}}
+ for(const s of surfaces)if(s.active&&s.art){try{s.tick(time,level);}catch(_){failPortrait(s);}}
  if(surfaces.some(s=>s.active&&s.art))raf=requestAnimationFrame(tick);
  else sync();
 }
 function choose(id){if(audioID&&audioID!==id)stopSample();selected=id;document.querySelectorAll('.portrait-choice').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.presence===id)));sync();}
-for(const host of document.querySelectorAll('[data-presence]'))surfaces.push(new Portrait(host));
-const observer=new IntersectionObserver(entries=>{for(const e of entries){const s=surfaces.find(p=>p.host===e.target);s.visible=e.isIntersecting;}sync();},{threshold:.05});
-surfaces.forEach(s=>observer.observe(s.host));
+for(const host of document.querySelectorAll('[data-presence]')){
+ try{surfaces.push(new Portrait(host));}
+ catch(_){portraitSetupFailed=true;host.classList.remove('presence-ready');if(host.tagName==='BUTTON'){host.disabled=true;host.setAttribute('aria-label',host.dataset.presence+' animation unavailable');}}
+}
+try{
+ if(typeof IntersectionObserver!=='function'||typeof requestAnimationFrame!=='function')throw Error('Animation observation unavailable');
+ const observer=new IntersectionObserver(entries=>{for(const e of entries){const s=surfaces.find(p=>p.host===e.target);if(s)s.visible=e.isIntersecting;}sync();},{threshold:.05});
+ surfaces.forEach(s=>observer.observe(s.host));
+}catch(_){portraitSetupFailed=true;surfaces.forEach(failPortrait);}
 document.querySelectorAll('.portrait-choice').forEach(b=>{b.addEventListener('click',()=>choose(b.dataset.presence));});
 if(motionButton)motionButton.addEventListener('click',()=>{paused=!paused;sync();});
-media.addEventListener('change',sync);
+if(media.addEventListener)media.addEventListener('change',sync);else if(media.addListener)media.addListener(sync);
+function setStatus(text){if(status)status.textContent=text;}
 function setAudioLabel(btn,playing){
  if(!btn)return;const name=btn.dataset.name;btn.classList.toggle('playing',playing);btn.setAttribute('aria-pressed',String(playing));
- btn.querySelector('span').textContent=playing?'Stop '+name:'Hear '+name;
+ const label=btn.querySelector('span');if(label)label.textContent=playing?'Stop '+name:'Hear '+name;
  btn.setAttribute('aria-label',(playing?'Stop ':'Hear ')+name+'’s voice sample — an AI companion, not human');
 }
+function closeMouths(){
+ for(const s of surfaces)if(s.art&&!s.failed){try{s.draw(s.blink.progress,0,s.clock.pose,s.clock.level);}catch(_){failPortrait(s);}}
+}
 function stopSample(){
- audioGeneration++;audio.pause();try{audio.currentTime=0;}catch(_){}setAudioLabel(audioButton,false);audioID=null;audioButton=null;if(status)status.textContent='';
- for(const s of surfaces)if(s.art)s.draw(s.blink.progress,0,s.clock.pose,s.clock.level);
+ audioGeneration++;const button=audioButton;audioID=null;audioButton=null;
+ if(audio){audio.pause();try{audio.currentTime=0;}catch(_){}}
+ setAudioLabel(button,false);setStatus('');closeMouths();
 }
 function ensureMeter(){
- if(audioContext)return;
- const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
- audioContext=new AC();analyser=audioContext.createAnalyser();analyser.fftSize=1024;analyser.smoothingTimeConstant=0;waveform=new Float32Array(analyser.fftSize);
- const source=audioContext.createMediaElementSource(audio);source.connect(analyser);analyser.connect(audioContext.destination);
+ if(!meterPending)meterPending=configureMeter().finally(()=>{meterPending=null;});
+ return meterPending;
 }
-document.querySelectorAll('.comp-hear').forEach(btn=>{
- btn.setAttribute('aria-pressed','false');
- btn.addEventListener('click',async()=>{
-  if(audioButton===btn){stopSample();status.textContent='';return;}
-  stopSample();const g=document.getElementById('guided-audio');if(g)g.pause();
-  const id=btn.dataset.companion;choose(id);audioID=id;audioButton=btn;const generation=audioGeneration;
-  status.textContent='Loading '+btn.dataset.name+'’s voice…';audio.src=btn.dataset.audio;
-  try{ensureMeter();if(audioContext)await audioContext.resume();if(generation!==audioGeneration)return;await audio.play();if(generation!==audioGeneration)return;}
-  catch(_){if(generation!==audioGeneration)return;stopSample();status.textContent='The voice sample could not play. Please try again.';}
- });
-});
-audio.addEventListener('playing',()=>{if(!audioID||audio.paused)return;setAudioLabel(audioButton,true);status.textContent=audioButton?'Playing '+audioButton.dataset.name+'’s recorded voice.':'';sync();});
-audio.addEventListener('ended',()=>{stopSample();status.textContent='';});
-audio.addEventListener('error',()=>{if(audioButton){stopSample();status.textContent='The voice sample could not load. Please try again.';}});
+async function configureMeter(){
+ if(audioContext){try{await audioContext.resume();}catch(_){}return;}
+ const AC=window.AudioContext||window.webkitAudioContext;if(!AC||!audio)return;
+ let context,source;
+ try{
+  context=new AC();await context.resume();
+  // Do not route native media into a context that could not start.
+  if(context.state&&context.state!=='running'){try{await context.close();}catch(_){}return;}
+  const meter=context.createAnalyser();meter.fftSize=1024;meter.smoothingTimeConstant=0;
+  source=context.createMediaElementSource(audio);source.connect(meter);meter.connect(context.destination);
+  audioContext=context;analyser=meter;waveform=new Float32Array(meter.fftSize);
+ }catch(_){
+  // If routing partly succeeded, retain a direct output without portrait metering.
+  if(source){try{source.disconnect();source.connect(context.destination);audioContext=context;}catch(_){} }
+  else if(context){try{await context.close();}catch(_){} }
+ }
+}
 const guided=document.getElementById('guided-audio'),gb=document.getElementById('guided-play'),gf=document.getElementById('guided-fill'),gt=document.getElementById('guided-time');
-if(guided&&gb){
- const fmt=s=>Math.floor(Math.max(0,s)/60)+':'+String(Math.ceil(Math.max(0,s))%60).padStart(2,'0');
- const state=()=>{const playing=!guided.paused&&!guided.ended;gb.classList.toggle('playing',playing);gb.setAttribute('aria-pressed',String(playing));gb.setAttribute('aria-label',(playing?'Pause':'Play')+' the body scan opening, read by Willow, an AI companion, not human');};
- gb.addEventListener('click',()=>{if(guided.paused){stopSample();guided.play().catch(()=>{status.textContent='The guided sample could not play. Please try again.';});}else guided.pause();});
- guided.addEventListener('play',state);guided.addEventListener('pause',state);guided.addEventListener('ended',()=>{state();gf.style.width='0%';gt.textContent=fmt(guided.duration||17);});
- guided.addEventListener('timeupdate',()=>{if(guided.duration){gf.style.width=(guided.currentTime/guided.duration*100)+'%';gt.textContent=fmt(guided.duration-guided.currentTime);}});
- state();
+const gs=document.getElementById('guided-status'),gl=document.getElementById('guided-play-label');
+const grow=gb?gb.closest('.gp-row'):null;
+let guidedGeneration=0,guidedState='ready';
+function pauseGuided(){guidedGeneration++;if(guided)guided.pause();}
+if(audio){
+ document.querySelectorAll('.comp-hear').forEach(btn=>{
+  btn.setAttribute('role','button');btn.setAttribute('aria-pressed','false');
+  btn.addEventListener('keydown',event=>{if((event.key===' '||event.key==='Spacebar')&&!event.altKey&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();if(!event.repeat)btn.click();}});
+  btn.addEventListener('click',async event=>{
+   // Keep normal link behavior for open-in-new-tab and other modified clicks.
+   if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||event.button>0)return;
+   event.preventDefault();
+   if(audioButton===btn){stopSample();return;}
+   stopSample();pauseGuided();
+   const id=btn.dataset.companion;choose(id);audioID=id;audioButton=btn;const generation=audioGeneration;
+   setStatus('Loading '+btn.dataset.name+'’s voice…');audio.src=btn.dataset.audio||btn.href;
+   try{await ensureMeter();if(generation!==audioGeneration)return;await audio.play();if(generation!==audioGeneration)return;}
+   catch(_){if(generation!==audioGeneration)return;stopSample();setStatus('The voice sample could not play. Please try again.');}
+  });
+ });
+ audio.addEventListener('playing',()=>{if(!audioID||audio.paused)return;setAudioLabel(audioButton,true);setStatus(audioButton?'Playing '+audioButton.dataset.name+'’s recorded voice.':'');sync();});
+ audio.addEventListener('pause',()=>{if(audio.paused&&audioButton){stopSample();setStatus('Voice sample paused.');}});
+ audio.addEventListener('waiting',()=>{if(audioButton&&!audio.paused){setAudioLabel(audioButton,false);setStatus('Loading '+audioButton.dataset.name+'’s voice…');closeMouths();}});
+ audio.addEventListener('ended',()=>{stopSample();});
+ audio.addEventListener('error',()=>{if(audioButton){stopSample();setStatus('The voice sample could not load. Please try again.');}});
 }
-document.addEventListener('visibilitychange',()=>{if(document.hidden){stopSample();if(guided)guided.pause();}sync();});
-window.addEventListener('pagehide',()=>{stopSample();if(guided)guided.pause();if(raf!==null)cancelAnimationFrame(raf);raf=null;for(const s of surfaces)s.clock.pause();});
+if(guided){
+ // Applies to native controls too if custom-control enhancement is unavailable.
+ guided.addEventListener('play',()=>{stopSample();});
+}
+if(guided&&gb&&grow){
+ const fmt=value=>{const total=Math.ceil(Number.isFinite(value)?Math.max(0,value):0);return Math.floor(total/60)+':'+String(total%60).padStart(2,'0');};
+ const time=()=>{
+  const duration=guided.duration,current=guided.currentTime;
+  if(!Number.isFinite(duration)||duration<=0)return;
+  if(gf)gf.style.width=(guided.ended?0:Math.min(100,Math.max(0,current/duration*100)))+'%';
+  if(gt)gt.textContent=fmt(guided.ended?duration:duration-current);
+ };
+ const state=(next,message)=>{
+  guidedState=next;const playing=next==='playing';
+  gb.classList.toggle('playing',playing);gb.setAttribute('aria-pressed',String(playing));
+  const label=next==='loading'?'Cancel loading':playing?'Pause sample':next==='ended'?'Replay sample':next==='paused'?'Resume sample':next==='error'?'Try again':'Play sample';
+  if(gl)gl.textContent=label;
+  gb.setAttribute('aria-label',label+' — the body scan opening, read by Willow, an AI companion, not human');
+  if(gs)gs.textContent=message||'';
+ };
+ gb.addEventListener('click',async()=>{
+  if(guidedState==='loading'||!guided.paused&&!guided.ended){pauseGuided();state('paused','Paused. You can resume the sample.');return;}
+  stopSample();const generation=++guidedGeneration;
+  if(guided.ended){try{guided.currentTime=0;}catch(_){}}
+  state('loading','Loading Willow’s body scan opening…');
+  try{if(guided.error)guided.load();await guided.play();}
+  catch(_){if(generation!==guidedGeneration)return;pauseGuided();state('error','The guided sample could not play. Please try again.');}
+ });
+ guided.addEventListener('play',()=>{state('loading','Loading Willow’s body scan opening…');});
+ guided.addEventListener('playing',()=>{if(!guided.paused&&!guided.ended)state('playing','Playing Willow’s recorded body scan opening.');});
+ guided.addEventListener('waiting',()=>{if(!guided.paused)state('loading','Loading Willow’s body scan opening…');});
+ guided.addEventListener('pause',()=>{if(!guided.paused)return;guidedGeneration++;if(!guided.ended&&guidedState!=='error'){state('paused','Paused. You can resume the sample.');time();}});
+ guided.addEventListener('ended',()=>{guidedGeneration++;state('ended','Sample complete. You can play it again.');time();});
+ guided.addEventListener('error',()=>{pauseGuided();state('error','The guided sample could not load. Please try again.');});
+ guided.addEventListener('loadedmetadata',time);guided.addEventListener('durationchange',time);guided.addEventListener('timeupdate',time);
+ state('ready','');time();
+ // Reveal custom controls only after every listener is bound. With no script,
+ // or missing markup, the original native audio controls remain available.
+ grow.hidden=false;guided.controls=false;guided.hidden=true;
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){stopSample();pauseGuided();}sync();});
+window.addEventListener('pagehide',()=>{stopSample();pauseGuided();if(raf!==null)cancelAnimationFrame(raf);raf=null;for(const s of surfaces){try{s.clock.pause();}catch(_){}}});
 window.addEventListener('pageshow',sync);
 sync();
 })();

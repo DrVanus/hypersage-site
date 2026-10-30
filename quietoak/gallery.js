@@ -23,7 +23,7 @@
   const image = document.getElementById('screen-dialog-image');
   const caption = document.getElementById('screen-dialog-caption');
   const counter = document.getElementById('screen-counter');
-  const links = [...document.querySelectorAll('a[href*="screenshots/"]')];
+  const links = [...document.querySelectorAll('main a[href*="screenshots/"]')];
   const unique = [...document.querySelectorAll('.gallery-card > a')];
   let current = 0, opener = null;
   const zoom = document.getElementById('screen-zoom');
@@ -37,6 +37,7 @@
     current = (index + unique.length) % unique.length;
     const link = unique[current];
     image.src = link.href;
+    document.getElementById("screen-original").href = link.href;
     image.alt = link.querySelector('img').alt;
     caption.textContent = link.dataset.caption || image.alt;
     counter.textContent = `${current + 1} / ${unique.length}`;

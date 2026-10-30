@@ -20,42 +20,49 @@
   <meta name="twitter:image" content="https://hypersage.ai/quietoak/og-image.png?v=20261030a">
   <link rel="icon" type="image/png" href="quietoak-icon.png?v=20260908a">
   <link rel="apple-touch-icon" href="quietoak-icon.png?v=20260908a">
-  <link rel="stylesheet" href="legal.css?v=20261030a">
+  <link rel="stylesheet" href="legal.css?v=20261030b">
   <style>
     .contact-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 14px; padding: 28px; margin-bottom: 32px; text-align: center;
+      border-radius: 18px; padding: 24px 20px; margin-bottom: 32px; text-align: center;
     }
-    .contact-card .email-link { display: inline-block; font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-top: 8px; }
-    .help-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 32px; }
-    .help-row {
-      display: flex; gap: 14px; align-items: flex-start;
-      padding: 16px 18px; border: 1px solid var(--border);
-      border-radius: 12px; background: var(--surface);
+    .contact-card .email-link { display: inline-flex; align-items: center; min-height: 44px; max-width: 100%; font-size: clamp(1rem, 4.8vw, 1.2rem); font-weight: 700; color: var(--primary); margin-top: 4px; overflow-wrap: anywhere; }
+    .help-grid { display: grid; gap: 12px; margin-bottom: 32px; }
+    .help-item { border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .help-item > summary { display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 16px 20px; list-style: none; cursor: pointer; color: var(--fg); font-weight: 600; line-height: 1.5; }
+    .help-item > summary::-webkit-details-marker { display: none; }
+    .help-item > summary::after { content: '+'; flex: none; margin-left: auto; font-size: 1.25rem; font-weight: 400; color: var(--primary-dark); }
+    .help-item[open] > summary::after { content: '−'; }
+    .help-item .glyph { flex: 0 0 26px; text-align: center; font-size: 1.2rem; }
+    .help-item .help-title { min-width: 0; }
+    .help-answer { padding: 0 20px 20px 60px; }
+    .help-answer p { color: var(--muted-fg); font-size: .95rem; margin-bottom: 0; }
+    .help-answer strong { display: inline; }
+    @media (max-width: 420px) {
+      .help-item > summary { padding-inline: 16px; gap: 10px; }
+      .help-answer { padding: 0 16px 18px; }
     }
-    .help-row .glyph { font-size: 1.4rem; flex: 0 0 32px; text-align: center; }
-    .help-row .body { flex: 1; }
-    .help-row .body strong { display: block; margin-bottom: 4px; color: var(--fg); }
-    .help-row .body p { color: var(--muted-fg); font-size: 0.95rem; margin-bottom: 0; }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <nav class="legal-nav">
+  <nav class="legal-nav" aria-label="Quietoak information">
     <div class="container">
       <a href="index.html" class="brand">
-        <img src="quietoak-icon.png?v=20260908a" alt="Quietoak">
+        <img src="quietoak-icon.png?v=20260908a" width="30" height="30" alt="">
         Quietoak
       </a>
       <div class="links">
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
-        <a href="support.html" class="active">Support</a>
+        <a href="support.html" class="active" aria-current="page">Support</a>
+        <a href="safety.html">Safety</a>
       </div>
     </div>
   </nav>
 
-  <main class="legal">
+  <main class="legal" id="main" tabindex="-1">
     <h1>Support</h1>
     <p class="updated">Every email is read by a person, not a bot. You'll get a real reply, usually within a day or two.</p>
 
@@ -71,61 +78,54 @@
     <h2>Quick help</h2>
 
     <div class="help-grid">
-      <div class="help-row">
-        <div class="glyph">💬</div>
-        <div class="body">
-          <strong>Companion not replying?</strong>
+      <details class="help-item">
+        <summary><span class="glyph" aria-hidden="true">💬</span><span class="help-title">Companion not replying?</span></summary>
+        <div class="help-answer">
           <p>Replies are generated live. If a reply fails, check your connection and use the retry control. Do not delete the app as a troubleshooting step: that can remove local data. The written diary, skills, chains, plans and bundled crisis resources remain available without AI.</p>
         </div>
-      </div>
-      <div class="help-row">
-        <div class="glyph">⭐</div>
-        <div class="body">
-          <strong>Restore Quietoak Plus?</strong>
+      </details>
+      <details class="help-item">
+        <summary><span class="glyph" aria-hidden="true">⭐</span><span class="help-title">Restore Quietoak Plus?</span></summary>
+        <div class="help-answer">
           <p>In the iPhone app, open the Plus screen and tap <strong>Restore Purchases</strong>. If your Apple ID has an active subscription, it re-links in seconds.</p>
         </div>
-      </div>
-      <div class="help-row">
-        <div class="glyph">🪶</div>
-        <div class="body">
-          <strong>Hit the free chat limit?</strong>
+      </details>
+      <details class="help-item">
+        <summary><span class="glyph" aria-hidden="true">🪶</span><span class="help-title">Hit the free chat limit?</span></summary>
+        <div class="help-answer">
           <p>Companion chat includes 5 messages a day on the free tier, resetting each day; Quietoak Plus raises that to 100. A message with a photo attached counts as three, because the image goes through a separate safety check first. The Crisis Survival Kit has no message allowance and stays free, as do the skills library and written diary. Chat is not an emergency service.</p>
         </div>
-      </div>
-      <div class="help-row">
-        <div class="glyph">🎙️</div>
-        <div class="body">
-          <strong>Voice dictation isn't working?</strong>
+      </details>
+      <details class="help-item">
+        <summary><span class="glyph" aria-hidden="true">🎙️</span><span class="help-title">Voice dictation isn't working?</span></summary>
+        <div class="help-answer">
           <p>Diary dictation needs microphone permission: iOS Settings → Quietoak → Microphone. The audio is sent to our backend and on to OpenAI only to produce the text, then discarded — it isn't stored.</p>
         </div>
-      </div>
-      <div class="help-row">
-        <div class="glyph">🔒</div>
-        <div class="body">
-          <strong>AI paused after deleting data?</strong>
+      </details>
+      <details class="help-item">
+        <summary><span class="glyph" aria-hidden="true">🔒</span><span class="help-title">AI paused after deleting data?</span></summary>
+        <div class="help-answer">
           <p>Open Me to review the deletion status. Remote AI features stay paused until local removal and server deletion are both confirmed. Retry server deletion when you are connected. If local removal failed, the app explains what remains; a newly confirmed full deletion also includes data created since your earlier request. Local DBT tools remain available.</p>
         </div>
-      </div>
-      <div class="help-row">
-        <div class="glyph">🐛</div>
-        <div class="body">
-          <strong>Found a bug?</strong>
+      </details>
+      <details class="help-item">
+        <summary><span class="glyph" aria-hidden="true">🐛</span><span class="help-title">Found a bug?</span></summary>
+        <div class="help-answer">
           <p>Email <a href="mailto:support@hypersage.ai?subject=Bug%20report">support@hypersage.ai</a> with what you saw and what you were doing. Screenshots help — please avoid including anything private from your diary or chat.</p>
         </div>
-      </div>
-      <div class="help-row">
-        <div class="glyph">💸</div>
-        <div class="body">
-          <strong>Refund or billing?</strong>
+      </details>
+      <details class="help-item">
+        <summary><span class="glyph" aria-hidden="true">💸</span><span class="help-title">Refund or billing?</span></summary>
+        <div class="help-answer">
           <p>Purchases in the iPhone app are handled by Apple. If you subscribe, request refunds via <a href="https://reportaproblem.apple.com/" rel="noopener">reportaproblem.apple.com</a>, and manage or cancel Plus in iOS Settings → Apple ID → Subscriptions.</p>
         </div>
-      </div>
+      </details>
     </div>
 
     <h2>For clinicians, reviewers &amp; press</h2>
     
     <p>If you're a DBT-informed clinician, a reviewer, or a journalist evaluating Quietoak, reach out at <a href="mailto:support@hypersage.ai?subject=Review%20request">support@hypersage.ai</a>. Quietoak is a self-help adjunct based on the DBT (Dialectical Behavior Therapy) model, not therapy. It includes an always-free crisis kit and an independent crisis-safety layer.</p>
-    <p>Read the published <a href="safety.html">self-harm safety protocol</a> for details on the AI-companion safeguards and crisis-referral process.</p>
+    <p>Download the app screenshots and brand images from our <a href="press-kit.html">press kit</a>. Read the published <a href="safety.html">self-harm safety protocol</a> for details on the AI-companion safeguards and crisis-referral process.</p>
 
     <h2>Where your data goes</h2>
     
@@ -138,6 +138,7 @@
     <a href="terms.html">Terms</a>
     <a href="support.html">Support</a>
     <a href="safety.html">Safety</a>
+      <a href="press-kit.html">Press kit</a>
     <div style="margin-top: 12px;">© 2026 HyperSage AI Labs LLC</div>
   </footer>
 

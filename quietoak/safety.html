@@ -18,27 +18,45 @@
   <meta name="twitter:image" content="https://hypersage.ai/quietoak/og-image.png?v=20261030a">
   <link rel="icon" type="image/png" href="quietoak-icon.png?v=20260908a">
   <link rel="apple-touch-icon" href="quietoak-icon.png?v=20260908a">
-  <link rel="stylesheet" href="legal.css?v=20261030a">
+  <link rel="stylesheet" href="legal.css?v=20261030b">
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <nav class="legal-nav">
+  <nav class="legal-nav" aria-label="Quietoak information">
     <div class="container">
       <a href="index.html" class="brand">
-        <img src="quietoak-icon.png?v=20260908a" alt="Quietoak">
+        <img src="quietoak-icon.png?v=20260908a" width="30" height="30" alt="">
         Quietoak
       </a>
       <div class="links">
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
         <a href="support.html">Support</a>
+        <a href="safety.html" class="active" aria-current="page">Safety</a>
       </div>
     </div>
   </nav>
 
-  <main class="legal">
+  <main class="legal" id="main" tabindex="-1">
     <h1>Self-Harm Safety Protocol</h1>
     <p class="updated">Published: 2026-08-12</p>
+
+    <details class="page-toc">
+      <summary>On this page</summary>
+      <nav aria-label="Page sections">
+        <ul>
+          <li><a href="#section-1-check-before-and-after-generation">1. Check before and after generation</a></li>
+          <li><a href="#section-2-do-not-provide-harmful-assistance">2. Do not provide harmful assistance</a></li>
+          <li><a href="#section-3-refer-to-real-people-and-services">3. Refer to real people and services</a></li>
+          <li><a href="#section-4-escalate-proportionately">4. Escalate proportionately</a></li>
+          <li><a href="#section-5-keep-crisis-access-independent">5. Keep crisis access independent</a></li>
+          <li><a href="#section-6-minimize-safety-audit-data">6. Minimize safety audit data</a></li>
+          <li><a href="#limits-and-review">Limits and review</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </details>
 
     <div class="crisis-note">
       <strong>Need help now?</strong> Quietoak is not an emergency service. In the United States, call or text <strong>988</strong> or text <strong>HOME to 741741</strong>. Elsewhere, contact your local crisis line or emergency number. If there is immediate danger, contact emergency services now.
@@ -46,28 +64,28 @@
 
     <p>This page describes the protocol Quietoak maintains to prevent its AI companion from producing content that encourages suicide, suicidal ideation, or self-harm, and to refer a person to real crisis services. It applies independently of subscription status or message limits.</p>
 
-    <h2>1. Check before and after generation</h2>
+    <h2 id="section-1-check-before-and-after-generation">1. Check before and after generation</h2>
     <p>Quietoak runs a safety classifier before an AI-companion response is generated. A separate output guard checks generated text as it streams back. These safeguards operate independently of the companion's personality instructions.</p>
 
-    <h2>2. Do not provide harmful assistance</h2>
+    <h2 id="section-2-do-not-provide-harmful-assistance">2. Do not provide harmful assistance</h2>
     <p>The companion is instructed not to encourage self-harm, provide methods or optimization details, romanticize death, agree that a person should die, or impersonate an emergency or clinical professional. When the output guard detects unsafe content, Quietoak stops or replaces the response with a safe alternative.</p>
 
-    <h2>3. Refer to real people and services</h2>
+    <h2 id="section-3-refer-to-real-people-and-services">3. Refer to real people and services</h2>
     <p>When a message indicates suicidal ideation or self-harm, Quietoak presents crisis-service options. In the United States these include calling or texting 988 and texting HOME to 741741. Other regions receive locally appropriate resources where available, along with general emergency guidance.</p>
 
-    <h2>4. Escalate proportionately</h2>
+    <h2 id="section-4-escalate-proportionately">4. Escalate proportionately</h2>
     <p>Signals of an active method, plan, or intent open the Crisis Survival Kit instead of leaving the person in an ordinary companion exchange. Passive or ambiguous signals keep crisis resources visible alongside the conversation. <em>Get help now</em> is available on every main tab and throughout onboarding.</p>
 
-    <h2>5. Keep crisis access independent</h2>
+    <h2 id="section-5-keep-crisis-access-independent">5. Keep crisis access independent</h2>
     <p>Crisis resources do not require an account, permission to share data with an AI provider, a subscription, or a remaining message allowance. The resource directory is bundled with the app so it remains available without a data connection, although placing a call or sending a text still requires service.</p>
 
-    <h2>6. Minimize safety audit data</h2>
+    <h2 id="section-6-minimize-safety-audit-data">6. Minimize safety audit data</h2>
     <p>When Quietoak surfaces a safety intervention, its backend records a minimal event containing a pseudonymous device identifier, risk level, and timestamp. It does not store the message text in that safety event, and the event is automatically removed on a short retention schedule. The separate handling of companion conversations is explained in the <a href="privacy.html">Privacy Policy</a>.</p>
 
-    <h2>Limits and review</h2>
+    <h2 id="limits-and-review">Limits and review</h2>
     <p>No automated classifier can identify every crisis or guarantee that every generated response is safe. Quietoak is a self-help tool, not therapy, clinical monitoring, a crisis line, or emergency care. We review the protocol as the product and applicable requirements change; implementation thresholds and anti-evasion details are not published because doing so could weaken the safeguards.</p>
 
-    <h2>Contact</h2>
+    <h2 id="contact">Contact</h2>
     <p>Report a safety concern or ask about this protocol at <a href="mailto:support@hypersage.ai?subject=Quietoak%20safety">support@hypersage.ai</a>.</p>
   </main>
 
@@ -77,6 +95,7 @@
     <a href="terms.html">Terms</a>
     <a href="support.html">Support</a>
     <a href="safety.html">Safety</a>
+      <a href="press-kit.html">Press kit</a>
     <div style="margin-top: 12px;">© 2026 HyperSage AI Labs LLC</div>
   </footer>
 
