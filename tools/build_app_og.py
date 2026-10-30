@@ -418,26 +418,21 @@ CARDS = {
     "holohound": {
         "art": "app-icon.png",
         "css": """
-  /* Midnight Holo, re-keyed from holohound/style.css :root (dark block) --
-     every hex below is one of that file's own --bg/--surface/--tint/--holo
-     tokens, nothing invented for this card. */
+  /* Holographic collector palette and headline from holohound/style.css/index.html. */
   .og { background:
-        radial-gradient(circle at 80% 40%, rgba(157,139,255,0.16), transparent 58%),
-        linear-gradient(160deg, #131829 0%, #0A0D18 62%); }
-  .kicker { color: #9D8BFF; }
-  h1 { font-weight: 800; font-size: 66px; letter-spacing: -0.01em;
-       background-image: linear-gradient(120deg, #4EE1FF, #8B7BFF 38%, #FF7BD5 68%, #F5C84C); }
-  .sub { color: #96A0B8; max-width: 540px; }
-  /* The icon on a holo card, same treatment as the app's own tab-bar mark:
-     a rounded square lifted off the dark ground with the holo gradient as glow. */
-  .art { width: 340px; height: 340px; border-radius: 76px;
-         box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(157,139,255,0.22); }
+        radial-gradient(ellipse at 80% 30%, rgba(177,163,255,.18), transparent 60%),
+        linear-gradient(150deg, #131829, #0A0D18 65%); }
+  .kicker { color: #B1A3FF; font-family: -apple-system, sans-serif; letter-spacing: .12em; }
+  h1 { font-family: -apple-system, sans-serif; font-weight: 720; font-size: 74px;
+       letter-spacing: -.055em; color: #EEF1FA; }
+  h1 .grad { background-image: linear-gradient(110deg,#9CE7ED,#B2A6FF 44%,#F0B7E4 78%,#F5DBA4); }
+  .sub { color: #A8B0C8; font-family: -apple-system, sans-serif; max-width: 510px; font-size: 25px; }
+  .art { width: 340px; height: 340px; border-radius: 76px; transform: rotate(8deg);
+         box-shadow: 0 24px 70px rgba(0,0,0,.55), 0 0 90px rgba(177,163,255,.18); }
 """,
-        # Mirrors the page's own hero eyebrow verbatim \u2014 it moved to multi-TCG
-        # "In development" positioning on 2026-09-01 and the card lagged it.
-        "kicker": "TCG scanner \u00b7 Coming to iOS",
-        "h1": "Hound knows your binder \u2014<br>and the market.",
-        "sub": "Ask what you\u2019re missing or what a card is worth. Prices name their source, and scanning is free and unlimited.",
+        "kicker": "Holohound · For collectors",
+        "h1": 'Your cards.<br><span class="grad">A whole new light.</span>',
+        "sub": "Free, unlimited card scanning. Five games in one binder. And Hound, your AI card companion.",
     },
     "hexhunter": {
         "art": "assets/art/cover.jpg",

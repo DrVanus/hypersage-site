@@ -10,17 +10,17 @@
 <meta property="og:description" content="How to get help with Holohound.">
 <meta property="og:url" content="https://hypersage.ai/holohound/support.html">
 <meta property="og:type" content="article">
-<meta property="og:image" content="https://hypersage.ai/holohound/og-image.png?v=20260919a">
+<meta property="og:image" content="https://hypersage.ai/holohound/og-image.png?v=20261030a">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hypersage.ai/holohound/og-image.png?v=20260919a">
+<meta name="twitter:image" content="https://hypersage.ai/holohound/og-image.png?v=20261030a">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F5F6FB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0A0D18" media="(prefers-color-scheme: dark)">
 <link rel="icon" type="image/png" href="app-icon.png">
 <link rel="apple-touch-icon" href="app-icon.png">
-<link rel="stylesheet" href="style.css?v=20260824a">
+<link rel="stylesheet" href="style.css?v=20261030a">
 </head>
 <body>
 <header class="site"><img class="mark" src="app-icon.png" alt="" width="30" height="30"><a class="brand" href="./">Holohound</a></header>
@@ -28,7 +28,7 @@
 <h1>Support</h1>
 <p class="lede">A real person reads this mailbox.
 <a href="mailto:support@hypersage.ai">support@hypersage.ai</a></p>
-<p class="updated">Last updated 13 September 2026</p>
+<p class="updated">Last updated 30 October 2026</p>
 
 <div class="card">
 <p style="margin:0">When you write, it helps to include your iOS version, the
@@ -54,22 +54,33 @@ for a card, it says so
 rather than showing you a market price labelled as a sale.</p>
 
 <h3>How do I get my collection out?</h3>
-<p>In the iPhone app, <strong>Profile → Export collection (CSV)</strong>. It is free, it needs no
-subscription, and the file is yours.</p>
+<p>In the iPhone app, <strong>Profile → Export collection (CSV)</strong> saves your collection
+for a spreadsheet. To save a backup with your preferences, conversations and history, use
+<strong>Profile → Collection backup → Save backup</strong>. Both are free and need no
+subscription. The <a href="privacy.html">privacy policy</a> lists what each backup includes.</p>
 
 <h3>How do I delete my data?</h3>
-<p>Delete the app. Your collection is stored on your device, so removing the app removes all
-of it, and there is no account to close and no server copy of your collection to request.
-Our own server holds daily counts of Hound messages and sold-price lookups, keyed to a random
-per-install id and to IP address, and — if you subscribe to Pro — a hashed record of which
-installs use your subscription; an install stops counting toward it after 30 days without use.
-None of these has an automatic deletion date yet, so email us to ask for removal. The
-<a href="privacy.html">privacy policy</a> lists all of it. If you subscribed, deleting the app does not cancel
-Holohound Pro; cancel that in your Apple ID settings (see below).</p>
+<p>Deleting the app can remove your local collection, scan photos and install id. It does
+not remove exported files or backups you saved elsewhere; your device data can also be
+included in iPhone backups, depending on your settings. There is no Holohound account to close.</p>
+<p>Our server keeps usage counts and subscription records described in the
+<a href="privacy.html">privacy policy</a>. Removing records for an individual install requires
+its exact install id. This version does not show you that id or include it in a backup or
+diagnostics report, so we cannot currently identify and remove your install’s server records.
+Email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> with questions about
+server-held information. Deleting the app does not cancel Holohound Pro; cancel it in your
+Apple ID settings (see below).</p>
 
 <h3>Does my collection move to a new phone?</h3>
-<p>Not yet. This version has no backup, so your collection lives only on the phone that
-recorded it. Until backup arrives, export a CSV now and then to keep a copy.</p>
+<p>You can move it with a Collection backup. On the old phone, open
+<strong>Profile → Collection backup → Save backup</strong> and save the JSON file somewhere
+you can access on the new phone. On the new phone, open <strong>Profile → Collection backup →
+Choose backup to restore</strong>. Review the preview, confirm that it will replace the current
+collection, then tap <strong>Replace my collection</strong>. Restoring replaces the collection;
+it does not merge two collections.</p>
+<p>The backup file is not encrypted, so keep it somewhere you trust. Holohound has no automatic
+iCloud sync or cloud backup service of its own. Scan photos and Pro purchases are not included
+in a Collection backup; use <strong>Restore Purchases</strong> for Pro.</p>
 
 <h3>Restoring Holohound Pro</h3>
 <p>If you subscribe, Holohound Pro is tied to your Apple ID, not to a Holohound account — there isn't one. On a
