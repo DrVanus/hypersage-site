@@ -2240,10 +2240,17 @@
       var connection = navigator.connection;
       var paused = motion.matches || !!(connection && connection.saveData);
       var visible = false, hovered = false, focused = false;
+      var explicitPlay = false, pointerOnPlay = false;
       var current = 0, requested = 0, version = 0, timer = null, pendingManual = false;
       var INTERVAL = 10000;
       function restricted() { return motion.matches || !!(connection && connection.saveData); }
-      function canRotate() { return !paused && !restricted() && visible && !hovered && !focused && !document.hidden; }
+      function canRotate() {
+        // Explicit Play works while its button still has focus or hover.
+        // Entering another control or inspecting a screen still suspends it.
+        var focusHeld = focused && !(explicitPlay && document.activeElement === play);
+        var hoverHeld = hovered && !(explicitPlay && pointerOnPlay);
+        return !paused && !restricted() && visible && !hoverHeld && !focusHeld && !document.hidden;
+      }
       function stopAutomatic() {
         clearTimeout(timer);
         timer = null;
@@ -2318,19 +2325,38 @@
         });
       }
       function step(direction) {
-        paused = true;
+        paused = true; explicitPlay = false;
         stopAutomatic();
         updatePlay();
         show((requested + direction + scenes.length) % scenes.length, true);
       }
       figure.querySelector('#showcase-prev').addEventListener('click', function () { step(-1); });
       figure.querySelector('#showcase-next').addEventListener('click', function () { step(1); });
-      menu.addEventListener('change', function () { paused = true; stopAutomatic(); updatePlay(); show(Number(menu.value), true); });
-      play.addEventListener('click', function () { paused = !paused; stopAutomatic(); updatePlay(); schedule(); });
-      figure.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') { hovered = true; stopAutomatic(); } });
-      figure.addEventListener('pointerleave', function () { hovered = false; schedule(); });
+      menu.addEventListener('change', function () { paused = true; explicitPlay = false; stopAutomatic(); updatePlay(); show(Number(menu.value), true); });
+      play.addEventListener('click', function () {
+        paused = !paused;
+        explicitPlay = !paused;
+        pointerOnPlay = play.matches(':hover');
+        stopAutomatic(); updatePlay(); schedule();
+      });
+      figure.addEventListener('pointerenter', function (event) {
+        if (event.pointerType !== 'touch') {
+          hovered = true;
+          pointerOnPlay = play.matches(':hover');
+          stopAutomatic(); schedule();
+        }
+      });
+      figure.addEventListener('pointermove', function (event) {
+        if (event.pointerType === 'touch') return;
+        var overPlay = play.contains(event.target);
+        if (overPlay !== pointerOnPlay) {
+          pointerOnPlay = overPlay;
+          if (explicitPlay) { stopAutomatic(); schedule(); }
+        }
+      });
+      figure.addEventListener('pointerleave', function () { hovered = false; pointerOnPlay = false; schedule(); });
       figure.addEventListener('focusin', function (event) {
-        focused = true; stopAutomatic();
+        focused = true; explicitPlay = false; stopAutomatic();
         if (event.target.closest('.showcase-phone, .showcase-explore')) { version++; pendingManual = false; requested = current; note.textContent = restingNote; menu.value = String(current); }
       });
       figure.addEventListener('focusout', function () {
@@ -2343,7 +2369,7 @@
       }, {threshold:[0,.35]}).observe(figure.querySelector('.showcase-stage'));
       function preferencesChanged() {
         if (restricted()) {
-          paused = true;
+          paused = true; explicitPlay = false;
           sides.forEach(function (side) { if (side.getAnimations) side.getAnimations({subtree:true}).forEach(function (animation) { animation.cancel(); }); });
         }
         stopAutomatic(); updatePlay(); schedule();
