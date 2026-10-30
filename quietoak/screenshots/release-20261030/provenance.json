@@ -1,0 +1,226 @@
+{
+  "schema": "quietoak-website-screenshots/v1",
+  "preparedDate": "2026-10-30",
+  "nativeCaptureDate": "2026-10-28",
+  "description": "Optimized website copies of the verified October 28 native capture set. No app pixels were redrawn, removed, replaced or retouched. These are existing captures, not a new simulator session.",
+  "sourceRepository": "anchor-ios",
+  "sourceBranch": "codex/quietoak-practice-loop-20261028",
+  "sourceSet": "store/release-20261028",
+  "sourceCaptureReceiptSHA256": "cab5fbf20f1de32b96adff833fb0465634a43ea92d10926b0cd0ccbef3a991b6",
+  "appVersion": "1.0.0",
+  "appBuild": "27",
+  "productionTree": "f5fbcf67f75c12efbcda2d47947554b5c9855f8c",
+  "binarySHA256": "c3f97abf010fb9d42047597ac7fcda78d7ac506db8751305d0ec8332fb92c27f",
+  "captureDevice": "iPhone 17 Pro Max Simulator, iOS 26.2",
+  "mockReplies": false,
+  "fictionalUserContentOnly": true,
+  "conversion": {
+    "operation": "Full-image Lanczos downsampling and WebP encoding only",
+    "colorMode": "RGB",
+    "quality": 90,
+    "method": 6,
+    "pillowVersion": "12.1.1",
+    "widths": [
+      720,
+      1080
+    ]
+  },
+  "frames": [
+    {
+      "id": "01-companion-chat",
+      "alt": "A real QuietOak conversation with Willow, identified as an AI companion, and a STOP skill card.",
+      "sourceCommit": "92a90b9ba3445cb208c8e66ddf52c66eff577b74",
+      "sourceRawPath": "raw/01-companion-chat.png",
+      "sourceRawSHA256": "f16b7a9a2d76c12f72bb6175e3eaa79bc7e0fb87a6f338c20304e4fd59813dd5",
+      "sourceDimensions": [
+        1320,
+        2868
+      ],
+      "sourceReceipt": "capture-provenance/release-chat-reframe20-retry4-receipt.json",
+      "variants": [
+        {
+          "file": "01-companion-chat-720.webp",
+          "width": 720,
+          "height": 1564,
+          "bytes": 106790,
+          "sha256": "a1a2a7df0aefe65e355e06ec949bfcf5ba3e96d328a9d21ccce6a22ce00bd2e9"
+        },
+        {
+          "file": "01-companion-chat.webp",
+          "width": 1080,
+          "height": 2347,
+          "bytes": 172174,
+          "sha256": "464543f2570f9c07bcad86473555af5b4668d127c8de7df0c5616e082a37b461"
+        }
+      ]
+    },
+    {
+      "id": "02-companions",
+      "alt": "QuietOak companion picker showing Willow, Sage, River and Sol with their personalities and voice previews.",
+      "sourceCommit": "4714b1ba8808b141cb887e216fd1f086f5810517",
+      "sourceRawPath": "raw/02-companions.png",
+      "sourceRawSHA256": "4aa35c14a59c63c31af438572da46f30e3658920e47d79ddb59b3831845b6f17",
+      "sourceDimensions": [
+        1320,
+        2868
+      ],
+      "sourceReceipt": "capture-provenance/release-live19-receipt.json",
+      "variants": [
+        {
+          "file": "02-companions-720.webp",
+          "width": 720,
+          "height": 1564,
+          "bytes": 80650,
+          "sha256": "0d9c3a2726060289ab37b081a71c7435a522e8cd8abb2e2dce9190103b2024b9"
+        },
+        {
+          "file": "02-companions.webp",
+          "width": 1080,
+          "height": 2347,
+          "bytes": 130370,
+          "sha256": "63a8d33147d47acb2fc251a332cb64d3c3c5b70cf3dd5c0c794902579919ca4b"
+        }
+      ]
+    },
+    {
+      "id": "03-practice-plan",
+      "alt": "A saved QuietOak practice plan with a turning point, a cue to notice and a response to try.",
+      "sourceCommit": "4714b1ba8808b141cb887e216fd1f086f5810517",
+      "sourceRawPath": "raw/03-practice-plan.png",
+      "sourceRawSHA256": "6baa6f2824f44ce7ad99475eb78005d2ebc8c1783fe3df45d1103da1d60e9f77",
+      "sourceDimensions": [
+        1320,
+        2868
+      ],
+      "sourceReceipt": "capture-provenance/release-live19-receipt.json",
+      "variants": [
+        {
+          "file": "03-practice-plan-720.webp",
+          "width": 720,
+          "height": 1564,
+          "bytes": 73356,
+          "sha256": "73ab824b927cbb256f5f8b6bba17326cc60891e65cb12f2090e52b061ed6c104"
+        },
+        {
+          "file": "03-practice-plan.webp",
+          "width": 1080,
+          "height": 2347,
+          "bytes": 120712,
+          "sha256": "d179af5235753f61a735519ddf90a7ac92b3b33792f29b7fde20dbe1f0fae4dc"
+        }
+      ]
+    },
+    {
+      "id": "04-rehearsal",
+      "alt": "An editable QuietOak rehearsal message based on a saved plan, ready to add to chat before sending.",
+      "sourceCommit": "4714b1ba8808b141cb887e216fd1f086f5810517",
+      "sourceRawPath": "raw/04-rehearsal.png",
+      "sourceRawSHA256": "64acb15d9f4d949d4ecc884563b8b671ab09b75586b31e9a9750da79aa0dab18",
+      "sourceDimensions": [
+        1320,
+        2868
+      ],
+      "sourceReceipt": "capture-provenance/release-live19-receipt.json",
+      "variants": [
+        {
+          "file": "04-rehearsal-720.webp",
+          "width": 720,
+          "height": 1564,
+          "bytes": 93868,
+          "sha256": "dcd8297c2af2f9089b6fc5c442f9b76cbe6b20a5eadf5bb5ff57e15f01b180d7"
+        },
+        {
+          "file": "04-rehearsal.webp",
+          "width": 1080,
+          "height": 2347,
+          "bytes": 154672,
+          "sha256": "fd6c8251097a7acd601434502663dc3a26da66d86073c3b3aa08259b731fa5ee"
+        }
+      ]
+    },
+    {
+      "id": "05-guided-practice",
+      "alt": "QuietOak guided STOP practice with Willow, a breathing cue and Back and Next controls.",
+      "sourceCommit": "4714b1ba8808b141cb887e216fd1f086f5810517",
+      "sourceRawPath": "raw/05-guided-practice.png",
+      "sourceRawSHA256": "f1a2764bec617ed646777fbc2f4856acc4a931eaa1b406d4f498c9810c3219e6",
+      "sourceDimensions": [
+        1320,
+        2868
+      ],
+      "sourceReceipt": "capture-provenance/release-live19-receipt.json",
+      "variants": [
+        {
+          "file": "05-guided-practice-720.webp",
+          "width": 720,
+          "height": 1564,
+          "bytes": 59264,
+          "sha256": "3b982449c49a07e675cfbe9ac308b447d7609fe24d41edda62afa4c15dcfce1c"
+        },
+        {
+          "file": "05-guided-practice.webp",
+          "width": 1080,
+          "height": 2347,
+          "bytes": 96516,
+          "sha256": "982aec9c05aac2ba1cb0598937c41cdf9e7944a40898f290bae7febd83dc922c"
+        }
+      ]
+    },
+    {
+      "id": "06-diary",
+      "alt": "A QuietOak daily diary card with a mood check-in, emotion ratings and urges to notice.",
+      "sourceCommit": "4714b1ba8808b141cb887e216fd1f086f5810517",
+      "sourceRawPath": "raw/06-diary.png",
+      "sourceRawSHA256": "4453cd3cf699e3be8186349963c9c508e9259e5073e63cc65a0f0361c069a4c5",
+      "sourceDimensions": [
+        1320,
+        2868
+      ],
+      "sourceReceipt": "capture-provenance/release-live19-receipt.json",
+      "variants": [
+        {
+          "file": "06-diary-720.webp",
+          "width": 720,
+          "height": 1564,
+          "bytes": 43076,
+          "sha256": "d209a6f836bc79108e7467ab03e03d9803291441acb7e09b95c28a8045053e14"
+        },
+        {
+          "file": "06-diary.webp",
+          "width": 1080,
+          "height": 2347,
+          "bytes": 68494,
+          "sha256": "6e89cec53742dd941e4d0511c413c43175342e24fc7e79b9cb168cef772c30c1"
+        }
+      ]
+    },
+    {
+      "id": "07-record-attempt",
+      "alt": "A QuietOak practice plan with an explicitly recorded attempt and a note about what happened.",
+      "sourceCommit": "4714b1ba8808b141cb887e216fd1f086f5810517",
+      "sourceRawPath": "raw/07-record-attempt.png",
+      "sourceRawSHA256": "23183089f03c77b78b49ab5dcaa716a7dee4dbbc87ee6d4a0dbb0d8d93935c01",
+      "sourceDimensions": [
+        1320,
+        2868
+      ],
+      "sourceReceipt": "capture-provenance/release-live19-receipt.json",
+      "variants": [
+        {
+          "file": "07-record-attempt-720.webp",
+          "width": 720,
+          "height": 1564,
+          "bytes": 71688,
+          "sha256": "ad984f4112cd53c19487cb0eb916cb46b42df0d43a10dd198e1d7edf77e5902d"
+        },
+        {
+          "file": "07-record-attempt.webp",
+          "width": 1080,
+          "height": 2347,
+          "bytes": 118822,
+          "sha256": "cb4c72012dc4cc51fe5770b840799b194479a9da51b4c8bcf49505312049fdb6"
+        }
+      ]
+    }
+  ]
+}

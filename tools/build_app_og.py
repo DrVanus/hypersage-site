@@ -31,7 +31,7 @@ FONTS = {
     'mythwright': 'family=Cinzel:wght@500..800&family=Inter:wght@400..800',
     'storyvault': 'family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700',
     'saffra': 'family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600',
-    'quietoak': 'family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600',
+    'quietoak': '',
     'rowan': '',
     'alder': '',
     'wingmate': '',
@@ -173,45 +173,38 @@ CARDS = {
         "sub": "Premium recipes you can trust, adapted to your kitchen. Then cook hands-free while she talks you through it.",
     },
     "quietoak": {
-        "art": "companions/group-painting.png",
+        # The same woodland clearing used by the page hero. Keeping the backdrop
+        # in art makes signals()/digest() include its exact source bytes.
+        "art": "art/oak-clearing-20261030.webp",
         "css": """
-  /* The page's own calm-daytime atmosphere (body::before) over --bg, plus the
-     sage glow the hero already puts behind this same painting (.hero-image::after).
-     Every value is copied out of the subsite's :root — nothing new is mixed. */
-  .og { background:
-        radial-gradient(ellipse 26% 44% at 78% 52%, rgba(157,191,168,0.20), transparent 65%),
-        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(157,191,168,0.22), transparent 60%),
-        radial-gradient(ellipse 70% 50% at 85% 15%, rgba(241,201,165,0.18), transparent 70%),
-        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(62,125,138,0.05), transparent 70%),
-        #F3F6F5; }
-  /* The kicker slot carries the BRAND LOCKUP, not a category line. Quietoak has
-     no store link — the hero eyebrow says "Coming to iOS" and the CTA is a
-     notify-me mailto — so the fleet's "<category> · iOS" kicker would read as an
-     availability claim this page does not make. Split exactly the way the nav
-     splits it: "Quiet" in --fg, "oak" in --sage-deep. display:block because the
-     shared .kicker is a flex row whose 10px gap opened it to "Quiet oak". */
-  .kicker { display: block; font-family: 'Nunito', ui-rounded, sans-serif;
-            font-size: 100px; font-weight: 800; letter-spacing: -0.01em;
-            text-transform: none; color: #21353B; }
+  .og { position: relative; isolation: isolate; background: #F7F5EC; }
+  .og-left { position: relative; z-index: 2; width: 750px; padding: 0 0 0 76px; }
+  .og-right { position: absolute; z-index: 0; inset: 0; }
+  .og-right::after { content: ''; position: absolute; inset: 0;
+       background: linear-gradient(90deg, rgba(247,245,236,.99),
+                   rgba(247,245,236,.95) 35%, rgba(247,245,236,.67) 59%,
+                   rgba(247,245,236,.06) 83%); }
+  .art { width: 1200px; height: 630px; object-fit: cover; object-position: center 48%; }
+  /* The original companion portrait keeps Willow's established identity. */
+  .og::after { content: ''; position: absolute; z-index: 1;
+       right: 26px; bottom: 55px; width: 445px; height: 445px;
+       background: url('motion/art/willow-dimensional.webp') center / contain no-repeat;
+       filter: drop-shadow(0 22px 28px rgba(36,62,53,.17)); }
+  .kicker { display: block; font-family: Georgia, 'Times New Roman', serif;
+       font-size: 36px; font-weight: 400; letter-spacing: -.025em;
+       text-transform: none; color: #243E35; margin-bottom: 32px; }
   .kicker .oak { color: #6F9C82; }
-  /* Flat ink, not a gradient: this site is a declared light, flat design whose
-     headline is one token (--fg) with one accent (--primary). The shell's
-     background-clip:text machinery is switched off rather than fed an invented ramp. */
-  h1 { font-family: 'Nunito', ui-rounded, sans-serif; font-weight: 800; font-size: 58px;
-       letter-spacing: -0.025em;
-       background-image: none; -webkit-background-clip: border-box; background-clip: border-box;
-       color: #21353B; }
-  h1 em { font-style: normal; color: #3E7D8A; }   /* the page's own <span class="soft"> */
-  .sub { font-family: 'Nunito', ui-rounded, sans-serif; color: #4A5E64;
-         /* 440px keeps the page's sentence break ("...DBT skills." / "A crisis
-            kit...") instead of orphaning "A crisis" onto the first line. */
-         max-width: 440px; }
-  /* Match the page's transparent companion portraits at their natural aspect ratio. */
-  .art { width: 506px; height: auto; }
+  h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400;
+       font-size: 70px; line-height: 1.12; letter-spacing: -.035em;
+       background: none; -webkit-background-clip: border-box; background-clip: border-box;
+       color: #243E35; margin-bottom: 24px; }
+  h1 em { font-style: italic; color: #3D6B57; }
+  .sub { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+       color: #52655B; font-size: 26px; line-height: 1.5; max-width: 510px; }
 """,
         "kicker": 'Quiet<span class="oak">oak</span>',
         "h1": 'Talk it through.<br><em>Find a next step.</em>',
-        "sub": "Conversation, guided practice, diary cards and written chain analysis, together.",
+        "sub": "Six AI companions, guided DBT practice, diary cards and plans to try.",
     },
     "rowan": {
         "art": "art/rowan_welcome.png",
