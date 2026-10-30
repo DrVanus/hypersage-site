@@ -34,7 +34,7 @@ FONTS = {
     'quietoak': 'family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600',
     'rowan': '',
     'alder': '',
-    'wingmate': 'family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700',
+    'wingmate': '',
     'waddleton': '',
     'mythkin': '',
     'hexhunter': 'family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800',
@@ -291,38 +291,25 @@ CARDS = {
         "sub": "It counts your sober time, sits with you through a craving, and never shames a lapse. No account.",
     },
     "wingmate": {
-        "art": "app-icon.png",
+        "art": "assets/screens/screen-ava-20261016.webp",
         "css": """
-  /* body::before's mesh, verbatim, over --bg — plus the hero-art's own amber
-     halo (rgba(232,168,56,0.14)) moved to where the icon sits on the card. */
-  .og { background:
-        radial-gradient(ellipse 44% 62% at 79% 50%, rgba(232,168,56,0.14), transparent 62%),
-        radial-gradient(ellipse 60% 50% at 10% -8%, rgba(232,168,56,0.10), transparent 55%),
-        radial-gradient(ellipse 50% 40% at 95% 5%, rgba(167,139,250,0.07), transparent 55%),
-        radial-gradient(ellipse 70% 45% at 50% 110%, rgba(52,211,153,0.05), transparent 65%),
-        #13151A; }
+  @font-face { font-family: 'Space Grotesk'; font-style: normal; font-weight: 300 700; src: url('../fonts/space-grotesk.woff2') format('woff2'); }
+  @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; src: url('../fonts/inter.woff2') format('woff2'); }
+  .og { background: url('assets/connection-atlas.svg') center / cover,
+       radial-gradient(ellipse 50% 75% at 76% 43%, rgba(232,168,56,.14), transparent 70%), #13151A; }
   .kicker { color: #E8A838; }
-  /* The page's h1 is flat --fg-strong, but the shell clips h1 to a gradient — so
-     white is spelled as a flat two-stop rather than invented as a ramp. */
-  h1 { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 700; font-size: 66px;
-       line-height: 1.18; letter-spacing: -0.02em;
-       background-image: linear-gradient(#FFFFFF, #FFFFFF); }
-  /* .grad-text — the page's own accent on "actually get it." (not italic there). */
-  h1 em { font-style: normal;
-       -webkit-background-clip: text; background-clip: text; color: transparent;
+  h1 { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 700; font-size: 65px;
+       line-height: 1.1; letter-spacing: -0.04em; background-image: linear-gradient(#FFFFFF, #FFFFFF); }
+  h1 em { font-style: normal; -webkit-background-clip: text; background-clip: text; color: transparent;
        background-image: linear-gradient(135deg, #F5CC6A 10%, #E8A838 90%); }
-  .sub { color: #9CA3B4; }
-  /* Radius is the site's own icon treatment (.brand img = 10px on 36px, scaled);
-     the halo is --amber-glow-strong so a near-black tile leaves a near-black card. */
-  .art { width: 424px; height: 424px; border-radius: 118px;
-         box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 90px rgba(232,168,56,0.24); }
+  .sub { color: #B5B4BE; }
+  .art { width: 250px; height: auto; border-radius: 34px; border: 8px solid #262B36;
+       box-shadow: 0 24px 70px rgba(0,0,0,.55), 0 0 90px rgba(232,168,56,.14); }
 """,
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-        # Live since 2026-08-20; page links the App Store and says nothing about
-        # "coming". Follows the fleet's "<category> · iOS" kicker convention.
-        "kicker": "Dating coach · iOS",
-        "h1": 'AI dating<br>coaches that<br><em>actually get&nbsp;it.</em>',
-        "sub": "Four coaches, four perspectives. Share a screenshot and get a reply that fits the app you&rsquo;re on.",
+        "kicker": "Wingmate · AI dating coaches · iOS",
+        "h1": 'Find your words.<br><em>Keep your spark.</em>',
+        "sub": "Four AI coaches to help you read the moment, find a reply, and make your next move.",
     },
     "waddleton": {
         "art": "waddleton-icon.png",

@@ -12,28 +12,25 @@
   <link rel="canonical" href="https://hypersage.ai/wingmate/">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Wingmate — AI Dating Coaches That Actually Get It">
+  <meta property="og:title" content="Wingmate — Find your words. Keep your spark.">
   <meta property="og:description" content="Four AI dating coaches, four perspectives. Share a screenshot and get a reply that fits the app you're on.">
   <meta property="og:url" content="https://hypersage.ai/wingmate/">
   <meta property="og:site_name" content="Wingmate">
-  <meta property="og:image" content="https://hypersage.ai/wingmate/og-image.png?v=20260919b">
+  <meta property="og:image" content="https://hypersage.ai/wingmate/og-image.png?v=20261030a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Wingmate — AI dating coaches that actually get it">
+  <meta property="og:image:alt" content="Wingmate — Find your words. Keep your spark.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Wingmate — AI Dating Coaches That Actually Get It">
+  <meta name="twitter:title" content="Wingmate — Find your words. Keep your spark.">
   <meta name="twitter:description" content="Four AI dating coaches, four perspectives. Share a screenshot and get a reply that fits the app you're on.">
-  <meta name="twitter:image" content="https://hypersage.ai/wingmate/og-image.png?v=20260919b">
-  <meta name="twitter:image:alt" content="Wingmate — AI dating coaches that actually get it">
+  <meta name="twitter:image" content="https://hypersage.ai/wingmate/og-image.png?v=20261030a">
+  <meta name="twitter:image:alt" content="Wingmate — Find your words. Keep your spark.">
 
   <link rel="icon" type="image/png" href="app-icon-180.png">
   <link rel="apple-touch-icon" href="app-icon-180.png">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+  <link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/fonts/fonts.css">
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -344,7 +341,7 @@
     .screens-grid + .screens-subhead { margin-top: 56px; }
 
     /* ===== ALTERNATING FEATURE ROWS ===== */
-    #keyboard .fr-note { margin-top: 18px; font-size: 0.86rem; opacity: 0.7; }
+    #keyboard .fr-note { margin-top: 18px; font-size: 0.86rem; color: var(--muted); }
     #keyboard .fr-art { display: flex; flex-direction: column; align-items: center; }
     #keyboard .fr-art-label { text-align: center; margin-top: 12px; font-size: 0.8rem; opacity: 0.6; }
     .feature-rows { display: flex; flex-direction: column; gap: 108px; margin-top: 12px; }
@@ -589,6 +586,20 @@
     footer .hs-more-grid a:hover { color: var(--amber); background: var(--card); border-color: rgba(232,168,56,0.4); }
 
     /* ===== ACCESSIBILITY ===== */
+    .skip-link { position: fixed; top: 12px; left: 16px; z-index: 100; padding: 12px 18px; background: var(--amber-light); color: #13151A; border-radius: 10px; font-weight: 700; transform: translateY(-180%); }
+    .skip-link:focus { transform: none; }
+    section[id], #top { scroll-margin-top: 90px; }
+    .theme-toggle { display: none; }
+    .js .theme-toggle { display: inline-flex; }
+    .carousel-dots button { width: 44px; height: 44px; }
+    .analyze-controls { text-align: center; margin-top: 14px; }
+    .analyze-controls[hidden] { display: none; }
+    .analyze-control { min-height: 44px; padding: 10px 20px; font: inherit; }
+    @media (prefers-reduced-motion: reduce) {
+      .js-reveal .section-head, .js-reveal .feature-card, .js-reveal .screen-card,
+      .js-reveal .coach-card, .js-reveal .step, .js-reveal .cta .container { opacity: 1 !important; transform: none !important; }
+    }
+
     a:focus-visible, summary:focus-visible, .btn:focus-visible, button:focus-visible {
       outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 8px;
     }
@@ -621,10 +632,93 @@
       .feature-card:hover, .coach-card:hover, .step:hover, .btn:hover, .screen-card:hover .device, .platform-card:hover { transform: none !important; }
       .carousel img { transition: none; }
     }
+    /* Connection atlas: a quiet, static constellation built from the coach palette. */
+    body::before {
+      background: radial-gradient(ellipse at 90% 12%, rgba(167,139,250,.09), transparent 46%),
+        radial-gradient(ellipse at 10% 60%, rgba(232,168,56,.055), transparent 48%);
+      animation: none; will-change: auto;
+    }
+    section.hero { padding: 66px 0 70px; isolation: isolate; }
+    section.hero::before {
+      content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+      background: url(assets/connection-atlas.svg) 50% 45% / cover no-repeat,
+        radial-gradient(ellipse 50% 75% at 76% 43%, rgba(232,168,56,.14), transparent 70%);
+    }
+    .hero-layout { grid-template-columns: 1.12fr .88fr; gap: 40px; }
+    .hero-text h1 { font-size: clamp(2.75rem, 5.3vw, 4.45rem); line-height: 1.08; letter-spacing: -.055em; margin-bottom: 24px; }
+    .hero-text h1 .grad-text { display: inline-block; padding-bottom: .13em; }
+    .hero-text .lede { max-width: 480px; font-size: 1.08rem; color: #B5B4BE; }
+    .hero-text .eyebrow { font-size: .65rem; letter-spacing: .15em; margin-bottom: 24px; }
+    .hero-trust { gap: 12px; font-size: .78rem; }
+    .hero-art { padding: 10px 28px 0; }
+    .hero-art .device { max-width: 288px; border-color: rgba(245,204,106,.3); box-shadow: 0 40px 85px rgba(0,0,0,.6), 0 0 80px rgba(232,168,56,.08); }
+    .hero-art::after { inset: 15% -18%; background: radial-gradient(ellipse, rgba(232,168,56,.17), transparent 67%); }
+    .coach-orbit { position: absolute; z-index: 2; width: 56px; height: 56px; padding: 4px; border-radius: 50%; background: #181B22; border: 1px solid var(--orbit); box-shadow: 0 8px 30px #0006, 0 0 26px color-mix(in srgb, var(--orbit) 15%, transparent); }
+    .coach-orbit img { width: 100%; height: 100%; border-radius: 50%; display: block; object-fit: cover; }
+    .coach-orbit::after { content: ''; position: absolute; width: 5px; height: 5px; background: var(--orbit); border-radius: 50%; top: 2px; right: 4px; box-shadow: 0 0 10px var(--orbit); }
+    .orbit-marcus { --orbit: var(--marcus); left: 2%; top: 10%; }
+    .orbit-jade { --orbit: var(--jade); right: 0; top: 32%; }
+    .orbit-eli { --orbit: var(--eli); left: -2%; top: 64%; }
+    .orbit-ava { --orbit: var(--ava); right: 5%; top: 83%; }
+    .carousel-caption { margin-top: 19px; font-size: .78rem; }
+    .carousel-dots { flex-wrap: wrap; max-width: 310px; }
+    section.block { padding: 78px 0; }
+    .section-head .eyebrow { display: inline-block; background: none; border: 0; padding: 0; letter-spacing: .2em; }
+    .section-head h2 { letter-spacing: -.04em; }
+    .panel { background: radial-gradient(ellipse at 100% 0, rgba(167,139,250,.045), transparent 55%), linear-gradient(180deg, #181B22, #13151A); }
+    #analyze-live { border-top: 1px solid rgba(245,204,106,.12); background: radial-gradient(ellipse at 15% 40%, rgba(232,168,56,.06), transparent 60%); }
+    #analyze-live .container { display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: 90px; }
+    #analyze-live .section-head { margin-bottom: 0; }
+    #analyze-live .analyze-player-fig { width: 100%; max-width: 270px; }
+    .moment-steps { list-style: none; display: grid; gap: 18px; margin-top: 32px; counter-reset: moment; }
+    .moment-steps li { display: flex; align-items: center; gap: 14px; font-size: .92rem; color: var(--fg); }
+    .moment-steps li::before { counter-increment: moment; content: '0' counter(moment); font-family: 'Space Grotesk', sans-serif; font-size: .75rem; color: var(--amber-light); width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid rgba(232,168,56,.25); border-radius: 50%; }
+    .feature-card, .step { background: linear-gradient(145deg, #262B36, #1E222B 65%); }
+    .feature-rows { gap: 82px; }
+    .coach-card { background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 8%, #1E222B), #181B22); }
+    .cta { position: relative; isolation: isolate; }
+    .cta::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: .6; background: url(assets/connection-atlas.svg) center / cover no-repeat; pointer-events: none; }
+    @media (max-width: 960px) {
+      section.hero { padding: 50px 0; }
+      .hero-layout { grid-template-columns: 1fr; gap: 40px; }
+      .hero-text h1 { font-size: clamp(2.75rem, 7.5vw, 4.5rem); }
+      .hero-text .lede { max-width: 520px; }
+      .hero-art { width: min(100%, 430px); margin-inline: auto; }
+      section.hero::before { background-position: 64% 100%; background-size: auto 100%; }
+      #analyze-live .container { gap: 40px; }
+    }
+    @media (max-width: 700px) {
+      #analyze-live .container { grid-template-columns: 1fr; }
+      section.block { padding: 58px 0; }
+      .hero-text h1 { font-size: clamp(2.6rem, 9vw, 3.5rem); }
+      .hero-text .lede { font-size: 1rem; margin-bottom: 25px; }
+      .hero-cta { gap: 12px; margin-bottom: 24px; }
+      .hero-trust { gap: 9px; font-size: .72rem; }
+      .hero-art { padding-inline: 26px; }
+      .hero-art .device { max-width: 265px; }
+      .coach-orbit { width: 46px; height: 46px; }
+      .orbit-marcus { left: 0; } .orbit-eli { left: 0; } .orbit-jade { right: 0; } .orbit-ava { right: 0; }
+      .feature-rows { gap: 60px; }
+      .section-head { margin-bottom: 36px; }
+    }
+    #keyboard, #connections { overflow-x: clip; }
+    .fresh-screens { display: grid; grid-template-columns: repeat(3, minmax(0, 270px)); justify-content: center; gap: 38px; }
+    .fresh-screens figcaption { margin-top: 24px; }
+    .fresh-screens h3 { font-size: 1.1rem; color: var(--fg-strong); margin-bottom: 8px; }
+    .fresh-screens p { font-size: .9rem; color: var(--muted); line-height: 1.6; }
+    #connections h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.2; margin-bottom: 22px; }
+    #connections .memory-note { margin-top: 18px; }
+    @media(max-width: 700px) { .fresh-screens { grid-template-columns: minmax(0, 270px); gap: 48px; } }
+    @media (prefers-reduced-motion: reduce) {
+      .js-reveal .section-head, .js-reveal .feature-card, .js-reveal .screen-card,
+      .js-reveal .coach-card, .js-reveal .step, .js-reveal .cta .container { opacity: 1 !important; transform: none !important; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
   </style>
   <script>
     (function () {
       try {
+        document.documentElement.classList.add('js');
         var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (!reduce && 'IntersectionObserver' in window) {
           document.documentElement.classList.add('js-reveal');
@@ -717,6 +811,7 @@
   <script src="/v.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
   <nav class="site">
     <div class="container">
@@ -749,15 +844,16 @@
     </div>
   </nav>
 
+  <main id="main-content" tabindex="-1">
   <span id="top"></span>
 
   <section class="hero">
     <div class="container">
       <div class="hero-layout">
         <div class="hero-text">
-          <span class="eyebrow">Available now</span>
-          <h1>AI dating coaches that <span class="grad-text">actually get it.</span></h1>
-          <p class="lede">Four coaches, four perspectives. Drop in a screenshot and get replies you can make your own, tuned to Tinder, Hinge, Bumble, Instagram, Snapchat, Messages, or any app.</p>
+          <span class="eyebrow">Your AI dating wingmate · iPhone</span>
+          <h1>Find your words.<br><span class="grad-text">Keep your spark.</span></h1>
+          <p class="lede">Four AI coaches to help you read the moment, find a reply, and make your next move. Start with a screenshot. Keep it sounding like you.</p>
           <div class="hero-cta">
             <a href="https://apps.apple.com/app/id6792772729" class="btn btn-primary" target="_blank" rel="noopener" aria-label="Download Wingmate on the App Store"><span>Download on the App Store</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
             <a href="#screens" class="btn btn-ghost"><span>See it in action</span></a>
@@ -771,20 +867,21 @@
           </div>
         </div>
         <div class="hero-art">
+          <span class="coach-orbit orbit-marcus" aria-hidden="true"><img src="assets/coaches/coach-marcus.webp" alt="" width="48" height="48"></span>
+          <span class="coach-orbit orbit-jade" aria-hidden="true"><img src="assets/coaches/coach-jade.webp" alt="" width="48" height="48"></span>
+          <span class="coach-orbit orbit-eli" aria-hidden="true"><img src="assets/coaches/coach-eli.webp" alt="" width="48" height="48"></span>
+          <span class="coach-orbit orbit-ava" aria-hidden="true"><img src="assets/coaches/coach-ava.webp" alt="" width="48" height="48"></span>
           <div class="carousel-column">
             <div class="device">
-              <div class="screen carousel" id="heroCarousel" aria-roledescription="carousel" aria-label="Wingmate app screenshots">
-                <img class="active" fetchpriority="high" width="828" height="1799" src="assets/screens/screen-chat-152.jpg?v=20261002a" alt="Marcus on Sophia’s Bumble thread, with the coach strip showing Auto, Marcus, Jade, Eli and Ava: date two should be a step up from coffee, so he suggests a reply to copy — a band at the little room on 7th on Saturday — with Copy reply, Save, Share and Use in keyboard." data-caption="Replies ready to copy">
-                <img width="828" height="1799" src="assets/screens/screen-openers.jpg?v=20261005a" alt="The opener vault — 10 saved openers filed by platform, each with its own Copy button." data-caption="Your opener vault, one tap away">
-                <img width="828" height="1799" src="assets/screens/screen-analyze.jpg?v=20261005a" alt="Drop in a screenshot of the conversation and Ava reads it — three of Olivia's last four messages hand you something, and 'coffee recs welcome' is the first date." data-caption="Reads your screenshots">
-                <img width="828" height="1799" src="assets/screens/screen-coaches.jpg?v=20261002a" alt="Meet your coaches: Marcus (direct), Jade (her view), Eli (playful) and Ava (analytical), with Eli selected — chill and funny, good at witty openers and playful banter, with Hear intro and Ask Eli buttons." data-caption="Meet your coaches">
-                <img width="828" height="1799" src="assets/screens/screen-connections.jpg?v=20261005a" alt="Connections — 4 active across 3 apps: Sophia, Emma, Olivia, and Chloe, each with the app you met on and a stage from Matching to Exclusive, with archived connections below." data-caption="Track every connection">
-                <img width="828" height="1799" src="assets/screens/screen-settings.jpg?v=20261005a" alt="Settings — switch active coach, adjust coaching tone between Gentle and Direct, and set dating experience level." data-caption="Gentle or direct, your call">
-                <img width="828" height="1799" src="assets/screens/screen-hero.jpg?v=20261002a" alt="Marcus on Emma’s Hinge thread with her chat screenshot attached: she said yes to coffee, so he suggests a reply to copy — Coffee date it is. Does this weekend work for you, or is next week better?" data-caption="The read, then the reply">
+              <div class="screen carousel" id="heroCarousel" role="group" aria-roledescription="carousel" aria-label="Wingmate app screenshots">
+                <img width="828" height="1799" src="assets/screens/screen-ava-20261016.webp" alt="Ava suggests a playful reply about a Sunday walk and finding a coffee spot." class="active" fetchpriority="high" data-caption="Ava · Find a reply that feels like you">
+                <img width="828" height="1799" src="assets/screens/screen-jade-20261016.webp" alt="Jade explains why a generic question falls flat and suggests asking about brunch spots." aria-hidden="true" loading="lazy" data-caption="Jade · See how your message lands">
+                <img width="828" height="1799" src="assets/screens/screen-coaches-20261016.webp" alt="Marcus suggests a live music date, with Auto, Marcus, Jade, Eli and Ava in the coach picker." aria-hidden="true" loading="lazy" data-caption="Four perspectives · One conversation">
+                <img width="828" height="1799" src="assets/screens/screen-openers-20261016.webp" alt="Six saved openers with Copy buttons, including a starred used-bookstore line." aria-hidden="true" loading="lazy" data-caption="Your favorite lines · Ready when you are">
               </div>
             </div>
-            <div class="carousel-caption" id="heroCaption" aria-live="polite"><span>Replies ready to copy</span></div>
-            <div class="carousel-dots" id="heroDots" role="tablist" aria-label="Choose a screenshot"></div>
+            <div class="carousel-caption" id="heroCaption" aria-live="polite"><span>Ava · Find a reply that feels like you</span></div>
+            <div class="carousel-dots" id="heroDots" role="group" aria-label="Choose a screenshot"></div>
           </div>
         </div>
       </div>
@@ -795,22 +892,23 @@
   <section class="block" id="analyze-live">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow">The core loop</span>
-        <h2>Drop a screenshot. <span class="grad-text">Watch the read.</span></h2>
-        <p>One session with Ava, start to finish. The thread goes in, you ask your question, and her read streams back with a reply you can copy.</p>
+        <span class="eyebrow">From unsure to ready</span>
+        <h2>A fresh perspective.<br><span class="grad-text">A next move.</span></h2>
+        <p>Ava finds the reply. Jade offers another perspective. Your connection profile keeps the context. Take a look through these real app screens from an example conversation.</p>
+        <ol class="moment-steps"><li>Find the words with Ava.</li><li>Get a second perspective from Jade.</li><li>Keep the details that matter.</li></ol>
       </div>
       <figure class="analyze-player-fig">
         <div class="device">
-          <div class="analyze-player" id="analyze-player" role="img" aria-label="Six real frames of one Wingmate session: Ava's empty coach screen for Olivia with a Read this screenshot for me starter, a conversation screenshot staged above the composer with the question Into me, or just killing time?, the message sent, Ava's read streaming in, the Writing replies you can send beat under EXECUTION, and the finished turn with a suggested reply to copy and Your next move chips">
-            <img width="828" height="1799" src="assets/screens/analyze-live-1.jpg?v=20260913b" alt="" decoding="async">
-            <img width="828" height="1799" src="assets/screens/analyze-live-2.jpg?v=20260913b" alt="" loading="lazy" decoding="async">
-            <img width="828" height="1799" src="assets/screens/analyze-live-3.jpg?v=20260913b" alt="" loading="lazy" decoding="async">
-            <img width="828" height="1799" src="assets/screens/analyze-live-4.jpg?v=20260913b" alt="" loading="lazy" decoding="async">
-            <img width="828" height="1799" src="assets/screens/analyze-live-5.jpg?v=20260913b" alt="" loading="lazy" decoding="async">
-            <img width="828" height="1799" src="assets/screens/analyze-live-6.jpg?v=20260913b" alt="" class="rest" decoding="async">
+          <div class="analyze-player" id="analyze-player" role="img" aria-label="Ava suggests a playful coffee reply in Wingmate.">
+            <img width="828" height="1799" src="assets/screens/screen-ava-20261016.webp" alt="" class="rest" decoding="async">
+            <img width="828" height="1799" src="assets/screens/screen-jade-20261016.webp" alt="" loading="lazy" decoding="async">
+            <img width="828" height="1799" src="assets/screens/screen-memory-20261016.webp" alt="" loading="lazy" decoding="async">
           </div>
         </div>
-        <figcaption class="analyze-caption" id="analyze-caption">The finished read, with a reply to copy</figcaption>
+        <figcaption class="analyze-caption" id="analyze-caption">Ava · A reply you can make your own</figcaption>
+        <div class="analyze-controls" id="analyze-controls" hidden>
+          <button class="btn btn-ghost analyze-control" id="analyze-control" type="button" aria-controls="analyze-player" aria-pressed="false">Play walkthrough</button>
+        </div>
       </figure>
     </div>
   </section>
@@ -818,7 +916,7 @@
   <section class="block" id="keyboard">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow">New in 1.5</span>
+        <span class="eyebrow">Right where you chat</span>
         <h2>Your coach, <span class="grad-text">in your keyboard.</span></h2>
         <p>Stay in the conversation. Switch to the Wingmate keyboard, tap Reply, and your coach reads what's on your screen and suggests a reply for you to edit and send.</p>
       </div>
@@ -836,7 +934,7 @@
             </ul>
             <p class="fr-note">Live replies need Allow Full Access and an internet connection, and each one uses a daily coaching message. Some apps and secure text fields don't allow custom keyboards or screen recording.</p>
           </div>
-          <div class="fr-art"><div class="device"><div class="screen"><img width="828" height="1799" src="assets/screens/screen-keyboard.jpg?v=20261002a" alt="An example chat with Emma, with the Wingmate keyboard open below it: Jade is the selected coach, Screen assist is on with 12 minutes left, and one Warm suggestion reads Coffee date it is, what day works for you? above a New reply button" loading="lazy"></div></div><p class="fr-art-label">Example conversation</p></div>
+          <div class="fr-art"><div class="device"><div class="screen"><img width="828" height="1799" src="assets/screens/screen-keyboard-20261016.webp" alt="Wingmate keyboard below an example chat with Sophia, with Eli selected and Flirty and Playful suggestions." loading="lazy" decoding="async"></div></div><p class="fr-art-label">Wingmate Keyboard · Example conversation</p></div>
         </div>
       </div>
     </div>
@@ -895,215 +993,35 @@
     <div class="container">
       <div class="section-head center">
         <span class="eyebrow">A look inside</span>
-        <h2>Real coaching, <span class="grad-text">real screens.</span></h2>
-        <p>Meet all four coaches at work, then Connections and the opener vault. Tap below to see them in Light or Dark.</p>
+        <h2>Less in your head.<br><span class="grad-text">More in the moment.</span></h2>
+        <p>Real screens from Wingmate 1.5.5, with example conversations. A little structure for everything that happens between hello and the next date.</p>
       </div>
-
-      <div style="text-align:center;">
-        <div class="theme-toggle is-dark" role="group" aria-label="Preview screens in light or dark mode">
-          <span class="thumb" aria-hidden="true"></span>
-          <button type="button" data-theme="light" aria-pressed="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-            Light
-          </button>
-          <button type="button" data-theme="dark" aria-pressed="true">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-            Dark
-          </button>
-        </div>
-      </div>
-
-      <div class="feature-rows">
-
-        <div class="feature-row" style="--accent: var(--marcus); --accent-glow: rgba(232,168,56,0.16);">
-          <div class="fr-text">
-            <span class="fr-eyebrow">Marcus · Confident &amp; Direct</span>
-            <h3>Here's what to send.</h3>
-            <p>Marcus reads the whole thread and hands you a reply, with the reasoning behind it. You learn the <em>why</em> while you send the <em>what</em>.</p>
-            <ul class="fr-points">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Replies you can copy in one tap</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Honest feedback on your draft, and a stronger version</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>A push when you're overthinking it</li>
-            </ul>
-          </div>
-          <div class="fr-art"><div class="device"><div class="screen"><img class="shot-img" width="828" height="1799" src="assets/screens/screen-midchat.jpg?v=20261005a" data-dark="assets/screens/screen-midchat.jpg?v=20261005a" data-light="assets/screens/screen-midchat-light.jpg?v=20261005a" alt="Marcus mid-conversation on Hinge, handing you a suggested reply to copy with the reasoning around it" loading="lazy"></div></div></div>
-        </div>
-
-        <div class="feature-row" style="--accent: var(--jade); --accent-glow: rgba(52,211,153,0.16);">
-          <div class="fr-text">
-            <span class="fr-eyebrow">Jade · The Female Perspective</span>
-            <h3>A second opinion on how it lands.</h3>
-            <p>Before you hit send, Jade reads your message from the other person's side.</p>
-            <ul class="fr-points">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Why a line might fall flat, and what reads better</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Rewrites that still sound like you</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>A natural way to show you're interested</li>
-            </ul>
-          </div>
-          <div class="fr-art"><div class="device"><div class="screen"><img class="shot-img" width="828" height="1799" src="assets/screens/screen-jade.jpg?v=20261005a" data-dark="assets/screens/screen-jade.jpg?v=20261005a" data-light="assets/screens/screen-jade-light.jpg?v=20261005a" alt="Jade explains why a looks-first compliment falls flat and rewrites it" loading="lazy"></div></div></div>
-        </div>
-
-        <div class="feature-row" style="--accent: var(--eli); --accent-glow: rgba(56,189,248,0.16);">
-          <div class="fr-text">
-            <span class="fr-eyebrow">Eli · Chill &amp; Funny</span>
-            <h3>Keep it light.</h3>
-            <p>Eli riffs witty openers off a profile and keeps the banter loose. And when a thread goes quiet, he'll talk you off the double-text ledge instead of feeding the spiral.</p>
-            <ul class="fr-points">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Playful openers that aren't try-hard</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>A thoughtful tone when things get serious</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>A calm voice before you double-text</li>
-            </ul>
-          </div>
-          <div class="fr-art"><div class="device"><div class="screen"><img class="shot-img" width="828" height="1799" src="assets/screens/screen-eli.jpg?v=20261005a" data-dark="assets/screens/screen-eli.jpg?v=20261005a" data-light="assets/screens/screen-eli-light.jpg?v=20261005a" alt="Eli talks you out of double-texting and suggests a light follow-up to copy if a day goes by" loading="lazy"></div></div></div>
-        </div>
-
-        <div class="feature-row" style="--accent: var(--ava); --accent-glow: rgba(167,139,250,0.16);">
-          <div class="fr-text">
-            <span class="fr-eyebrow">Ava · Strategic &amp; Analytical</span>
-            <h3>Screenshot in. Strategy out.</h3>
-            <p>Drop in a screenshot and Ava breaks the exchange down point by point, in plain language.</p>
-            <ul class="fr-points">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>What they said, and what it might mean</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>An honest call when there isn't enough to go on</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>A reply to copy, and your next move</li>
-            </ul>
-          </div>
-          <div class="fr-art"><div class="device"><div class="screen"><img class="shot-img" width="828" height="1799" src="assets/screens/screen-ava.jpg?v=20261005a" data-dark="assets/screens/screen-ava.jpg?v=20261005a" data-light="assets/screens/screen-ava-light.jpg?v=20261005a" alt="Ava's read of a shared screenshot — READ and EXECUTION notes, a suggested reply to copy, and next-move chips" loading="lazy"></div></div></div>
-        </div>
-
-        <div class="feature-row" style="--accent: var(--marcus); --accent-glow: rgba(232,168,56,0.14);">
-          <div class="fr-text">
-            <span class="fr-eyebrow">Connections</span>
-            <h3>Who's who, at a glance.</h3>
-            <p>Everyone you're talking to gets a profile. Your coaches remember the details, so the advice fits the person.</p>
-            <ul class="fr-points">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>A stage tracker from matching to exclusive</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Quick context and private notes on each person</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>One memory, shared by all four coaches</li>
-            </ul>
-          </div>
-          <div class="fr-art"><div class="device"><div class="screen"><img class="shot-img" width="828" height="1799" src="assets/screens/screen-detail-emma.jpg?v=20261005a" data-dark="assets/screens/screen-detail-emma.jpg?v=20261005a" data-light="assets/screens/screen-detail-emma-light.jpg?v=20261005a" alt="Emma's connection profile — met on Hinge, a Get coaching shortcut, her profile photos, the Texting stage, and quick context" loading="lazy"></div></div></div>
-        </div>
-
-        <div class="feature-row" style="--accent: var(--eli); --accent-glow: rgba(56,189,248,0.14);">
-          <div class="fr-text">
-            <span class="fr-eyebrow">Opener Vault</span>
-            <h3>Your best lines, saved for later.</h3>
-            <p>Save the openers you like and they're filed by app and by person, ready to reuse. Build a library of lines that sound like you.</p>
-            <ul class="fr-points">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Written for the app you're on</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Drawn from their profile</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>One-tap copy the moment you match</li>
-            </ul>
-          </div>
-          <div class="fr-art"><div class="device"><div class="screen"><img class="shot-img" width="828" height="1799" src="assets/screens/screen-openers-bumble.jpg?v=20261005a" data-dark="assets/screens/screen-openers-bumble.jpg?v=20261005a" data-light="assets/screens/screen-openers-light.jpg?v=20261005a" alt="Opener vault — saved lines filed under Bumble and Messages, tagged First Message, Re-engage, Reply, and Date Idea, each tied to a connection" loading="lazy"></div></div></div>
-        </div>
-
+      <div class="fresh-screens">
+        <figure class="screen-card">
+          <div class="device"><div class="screen"><img width="828" height="1799" src="assets/screens/screen-openers-20261016.webp" alt="Six saved openers with a starred used-bookstore line and individual Copy buttons." loading="lazy" decoding="async"></div></div>
+          <figcaption><h3>Keep the good lines.</h3><p>Save, star, and copy your favorite openers.</p></figcaption>
+        </figure>
+        <figure class="screen-card">
+          <div class="device"><div class="screen"><img width="828" height="1799" src="assets/screens/screen-connections-20261016.webp" alt="Wingmate in light mode showing Olivia, Sophia, Emma and Chloe in Connections." loading="lazy" decoding="async"></div></div>
+          <figcaption><h3>Remember the little things.</h3><p>Keep the people, the plans, and the context together.</p></figcaption>
+        </figure>
+        <figure class="screen-card">
+          <div class="device"><div class="screen"><img width="828" height="1799" src="assets/screens/screen-coaches-20261016.webp" alt="The coach picker shows Auto, Marcus, Jade, Eli and Ava above a suggested live music date reply." loading="lazy" decoding="async"></div></div>
+          <figcaption><h3>A coach for your moment.</h3><p>Choose your perspective, or let Auto find a fit.</p></figcaption>
+        </figure>
       </div>
     </div>
   </section>
-
   <section class="block" id="connections">
     <div class="container">
-      <div class="section-head center">
-        <span class="eyebrow">Connections</span>
-        <h2>Your dating life, <span class="grad-text">organized.</span></h2>
-        <p>Screenshots of their profile, your private notes, and what your coach has learned, all in one place. Tap "Get coaching" and your coach is already caught up.</p>
-      </div>
-
-      
-      <div style="text-align:center;">
-        <div class="theme-toggle is-dark" role="group" aria-label="Preview connection screens in light or dark mode">
-          <span class="thumb" aria-hidden="true"></span>
-          <button type="button" data-theme="light" aria-pressed="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-            Light
-          </button>
-          <button type="button" data-theme="dark" aria-pressed="true">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-            Dark
-          </button>
+      <div class="feature-row">
+        <div class="fr-text">
+          <span class="fr-eyebrow">Shared context</span>
+          <h2>Good advice remembers<br><span class="grad-text">the little things.</span></h2>
+          <p>Her favorite coffee spot. The half-marathon she is training for. The plans you already talked about. Keep those details with each connection so your next conversation starts with context.</p>
+          <p class="memory-note">Switch coaches for another perspective without retelling the whole story.</p>
         </div>
-      </div>
-
-      <div class="connections-showcase">
-
-        <div class="theme-card">
-          <div class="device">
-            <div class="screen"><img class="shot-img" width="828" height="1799" src="assets/screens/screen-connections.jpg?v=20261005a" data-dark="assets/screens/screen-connections.jpg?v=20261005a" data-light="assets/screens/screen-connections-light.jpg?v=20261005a" alt="The Connections list — Sophia, Emma, Olivia, and Chloe with their apps and stages from Matching to Exclusive, plus an Archived section below" loading="lazy"></div>
-          </div>
-          <div class="theme-badge">Every connection, one list</div>
-        </div>
-
-        <div class="theme-card">
-          <div class="device">
-            <div class="screen"><img class="shot-img" width="828" height="1799" src="assets/screens/screen-detail.jpg?v=20261005a" data-dark="assets/screens/screen-detail.jpg?v=20261005a" data-light="assets/screens/screen-profile.jpg?v=20261005a" alt="A connection profile — photo gallery of their dating-profile screenshots, a stage tracker from matching to exclusive, and quick context" loading="lazy"></div>
-          </div>
-          <div class="theme-badge">Profile &amp; photo gallery</div>
-        </div>
-
-        <div class="theme-card">
-          <div class="device">
-            <div class="screen"><img class="shot-img" width="828" height="1799" src="assets/screens/screen-detail-memory.jpg?v=20261005a" data-dark="assets/screens/screen-detail-memory.jpg?v=20261005a" data-light="assets/screens/screen-detail-memory-light.jpg?v=20261005a" alt="Coach memory and coaching sessions on a connection — private notes, what the coach remembers, and past sessions in one place" loading="lazy"></div>
-          </div>
-          <div class="theme-badge">Coach memory &amp; sessions</div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <section class="block" id="themes">
-    <div class="container">
-      <div class="section-head center">
-        <span class="eyebrow">Light or dark</span>
-        <h2>Looks right <span class="grad-text">either way.</span></h2>
-        <p>Light for the morning coffee, dark for the midnight text. Wingmate follows your phone, or you can choose in Settings.</p>
-      </div>
-      <div class="theme-showcase">
-
-        <div class="theme-card dark">
-          <div class="device">
-            <div class="screen"><img width="828" height="1799" src="assets/screens/screen-history.jpg?v=20261005a" alt="Conversation history across all four coaches in dark mode" loading="lazy"></div>
-          </div>
-          <div class="theme-badge">Dark · Conversations</div>
-        </div>
-
-        <div class="theme-card dark">
-          <div class="device">
-            <div class="screen"><img width="828" height="1799" src="assets/screens/screen-date.jpg?v=20261005a" alt="Coach home scoped to Sophia on Bumble in dark mode — a Wingmate Keyboard set-up card and starters like Help me reply to Sophia's last message, Is Sophia interested?, and Read this screenshot for me" loading="lazy"></div>
-          </div>
-          <div class="theme-badge">Dark · Coach home</div>
-        </div>
-
-        <div class="theme-card dark">
-          <div class="device">
-            <div class="screen"><img width="828" height="1799" src="assets/screens/screen-analyze.jpg?v=20261005a" alt="Ava reading a pasted conversation screenshot in dark mode — a READ on the openings Olivia left and what to do with them" loading="lazy"></div>
-          </div>
-          <div class="theme-badge">Dark · Screenshot read</div>
-        </div>
-
-        <div class="theme-card light">
-          <div class="device">
-            <div class="screen"><img width="828" height="1799" src="assets/screens/screen-chat-light.jpg?v=20261005a" alt="Coach chat with Marcus in light mode" loading="lazy"></div>
-          </div>
-          <div class="theme-badge">Light · Coach</div>
-        </div>
-
-        <div class="theme-card light">
-          <div class="device">
-            <div class="screen"><img width="828" height="1799" src="assets/screens/screen-settings-light.jpg?v=20261005a" alt="Settings in light mode" loading="lazy"></div>
-          </div>
-          <div class="theme-badge">Light · Settings</div>
-        </div>
-
-        <div class="theme-card light">
-          <div class="device">
-            <div class="screen"><img width="828" height="1799" src="assets/screens/screen-analyze-light.jpg?v=20261005a" alt="Ava reading the same pasted conversation screenshot in light mode — the same READ on the openings Olivia left and what to do with them" loading="lazy"></div>
-          </div>
-          <div class="theme-badge">Light · Screenshot read</div>
-        </div>
-
+        <figure class="fr-art"><div class="device"><div class="screen"><img width="828" height="1799" src="assets/screens/screen-memory-20261016.webp" alt="Olivia’s profile includes notes, coach memory about running and coffee, and two coaching sessions." loading="lazy" decoding="async"></div></div></figure>
       </div>
     </div>
   </section>
@@ -1273,6 +1191,8 @@
     </div>
   </section>
 
+  </main>
+
   <footer class="site">
     <div class="container">
       <div class="f-brand">
@@ -1335,127 +1255,123 @@
       var dotsWrap = document.getElementById('heroDots');
       var caption = document.getElementById('heroCaption');
       if (!carousel || !dotsWrap) return;
-
       var slides = Array.prototype.slice.call(carousel.querySelectorAll('img'));
       if (slides.length < 2) return;
 
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var DELAY = 3800;
-      var i = 0, timer = null;
-
+      // Manual selection keeps each real screen readable for as long as needed.
       var dots = slides.map(function (slide, idx) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.setAttribute('role', 'tab');
-        b.setAttribute('aria-label', (slide.getAttribute('data-caption') || ('Screenshot ' + (idx + 1))));
-        b.addEventListener('click', function () { show(idx); restart(); });
-        dotsWrap.appendChild(b);
-        return b;
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('aria-label', slide.getAttribute('data-caption') || ('Screenshot ' + (idx + 1)));
+        button.setAttribute('aria-controls', 'heroCarousel');
+        button.addEventListener('click', function () { show(idx); });
+        dotsWrap.appendChild(button);
+        return button;
       });
-
-      function show(n) {
-        slides[i].classList.remove('active');
-        dots[i].classList.remove('active');
-        dots[i].setAttribute('aria-selected', 'false');
-        i = (n + slides.length) % slides.length;
-        slides[i].classList.add('active');
-        dots[i].classList.add('active');
-        dots[i].setAttribute('aria-selected', 'true');
+      function show(index) {
+        slides.forEach(function (slide, i) {
+          var selected = i === index;
+          slide.classList.toggle('active', selected);
+          slide.setAttribute('aria-hidden', String(!selected));
+          dots[i].classList.toggle('active', selected);
+          dots[i].setAttribute('aria-pressed', String(selected));
+        });
         if (caption) {
-          var text = slides[i].getAttribute('data-caption') || '';
-          caption.style.opacity = '0';
-          setTimeout(function () {
-            caption.innerHTML = '<span>' + text + '</span>';
-            caption.style.opacity = '1';
-          }, 180);
+          var label = document.createElement('span');
+          label.textContent = slides[index].getAttribute('data-caption') || '';
+          caption.replaceChildren(label);
         }
       }
-
-      function next() { show(i + 1); }
-      function stop() { if (timer) { clearInterval(timer); timer = null; } }
-      function restart() { stop(); if (!reduce) timer = setInterval(next, DELAY); }
-
-      dots[0].classList.add('active');
-      dots[0].setAttribute('aria-selected', 'true');
-
-      if (!reduce) {
-        restart();
-        carousel.addEventListener('mouseenter', stop);
-        carousel.addEventListener('mouseleave', restart);
-        document.addEventListener('visibilitychange', function () {
-          if (document.hidden) stop(); else restart();
-        });
-      }
+      show(0);
     })();
   </script>
+
   <script>
-    (function () {
-      // Was hard-wired to getElementById('screens'). #connections grew a second,
-      // independent toggle once its three screens all had both appearances
-      // captured, so the wiring is per-toggle now: each one owns the .shot-img
-      // elements inside its own <section> and nothing else.
-      document.querySelectorAll('.theme-toggle').forEach(function (toggle) {
-        var section = toggle.closest('section');
-        if (!section) return;
-        var imgs = section.querySelectorAll('.shot-img');
-        // Preload the light variants so the first toggle is instant.
-        imgs.forEach(function (img) {
-          var l = img.getAttribute('data-light');
-          if (l) { var pre = new Image(); pre.src = l; }
-        });
-        function setTheme(mode) {
-          var light = mode === 'light';
-          section.classList.toggle('theme-light', light);
-          toggle.classList.toggle('is-dark', !light);
-          toggle.querySelectorAll('button').forEach(function (b) {
-            b.setAttribute('aria-pressed', b.getAttribute('data-theme') === mode ? 'true' : 'false');
-          });
-          imgs.forEach(function (img) {
-            var next = img.getAttribute(light ? 'data-light' : 'data-dark');
-            if (next && img.getAttribute('src') !== next) img.setAttribute('src', next);
-          });
-        }
-        toggle.addEventListener('click', function (e) {
-          var btn = e.target.closest('button');
-          if (btn) setTheme(btn.getAttribute('data-theme'));
-        });
-      });
-    })();
-  </script>
-  <script>
-    /* The analyze player paces six real frames of one session. Runs only when
-       motion is welcome and on screen; everyone else keeps the finished frame.
-       Captions quote the pixels. */
+    /* The finished screenshot is the default. The walkthrough starts only on
+       request and stops when hidden, offscreen, or reduced motion is enabled. */
     (function () {
       var player = document.getElementById('analyze-player');
-      if (!player || !('IntersectionObserver' in window) ||
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var controls = document.getElementById('analyze-controls');
+      var button = document.getElementById('analyze-control');
+      if (!player || !controls || !button || !('IntersectionObserver' in window)) return;
+      var preference = window.matchMedia('(prefers-reduced-motion: reduce)');
       var frames = player.querySelectorAll('img');
       var cap = document.getElementById('analyze-caption');
       var steps = [
-        { hold: 2200, say: '"Send me the conversation. We\'ll sort through the signals and find a reply that feels like you."' },
-        { hold: 2200, say: 'The thread staged from Photos, the question in the composer: "Into me, or just killing time?"' },
-        { hold: 1800, say: 'Sent — screenshot and all.' },
-        { hold: 2600, say: 'Ava\'s read streams in: three of her last four messages hand you something.' },
-        { hold: 2800, say: 'EXECUTION: "Make the rec a plan" — then "Writing replies you can send…"' },
-        { hold: 3400, say: 'The part you keep: a suggested reply to copy, and your next move.' }
+        { hold: 6000, say: 'Ava · A playful coffee reply, ready to make your own.' },
+        { hold: 6000, say: 'Jade · A second perspective on how your opener lands.' },
+        { hold: 6000, say: 'Connections · The details and coaching history, together.' }
       ];
-      var step = -1, timer = null;
+      var step = -1, timer = null, playing = false, visible = false;
+      var finishedLabel = 'Ava suggests a playful Sunday coffee reply, with Copy reply, Save and next-move options.';
+      player.setAttribute('aria-label', finishedLabel);
+      function setPlaying(active) {
+        playing = active;
+        button.setAttribute('aria-pressed', String(active));
+        button.textContent = active ? 'Pause walkthrough' : 'Play walkthrough';
+      }
+      function pause(finish) {
+        window.clearTimeout(timer);
+        timer = null;
+        setPlaying(false);
+        if (finish) {
+          step = -1;
+          player.classList.remove('playing');
+          frames.forEach(function (frame) { frame.classList.remove('on'); });
+          player.setAttribute('aria-label', finishedLabel);
+          if (cap) cap.textContent = 'Ava · A reply you can make your own';
+        }
+      }
       function advance() {
-        step = (step + 1) % steps.length;
-        for (var i = 0; i < frames.length; i++) frames[i].classList.toggle('on', i === step);
+        if (!playing || document.hidden || !visible || preference.matches) { pause(false); return; }
+        step += 1;
+        if (step >= steps.length) { pause(true); return; }
+        frames.forEach(function (frame, index) { frame.classList.toggle('on', index === step); });
+        player.setAttribute('aria-label', steps[step].say);
         if (cap) cap.textContent = steps[step].say;
         timer = window.setTimeout(advance, steps[step].hold);
       }
+      button.addEventListener('click', function () {
+        if (playing) { pause(false); return; }
+        if (preference.matches || document.hidden || !visible) return;
+        if (step >= steps.length - 1) step = -1;
+        player.classList.add('playing');
+        setPlaying(true);
+        advance();
+      });
       new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (en.isIntersecting) {
-            if (timer === null) { player.classList.add('playing'); advance(); }
-          } else if (timer !== null) { window.clearTimeout(timer); timer = null; }
+        entries.forEach(function (entry) {
+          visible = entry.isIntersecting;
+          if (!visible) pause(false);
         });
       }, { threshold: 0.3 }).observe(player);
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) pause(false);
+      });
+      function updatePreference() {
+        controls.hidden = preference.matches;
+        if (preference.matches) pause(true);
+      }
+      if (preference.addEventListener) preference.addEventListener('change', updatePreference);
+      else preference.addListener(updatePreference);
+      updatePreference();
     })();
   </script>
 
+  <script>
+    (function () {
+      var menu = document.querySelector('.mobile-menu');
+      if (!menu) return;
+      menu.addEventListener('click', function (event) {
+        if (event.target.closest('a')) menu.open = false;
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && menu.open) {
+          menu.open = false;
+          menu.querySelector('summary').focus();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
