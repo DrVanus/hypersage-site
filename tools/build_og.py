@@ -38,7 +38,7 @@ def site_parts() -> tuple[str, str, list[str], list[str], str]:
     style = re.search(r"<style>(.*?)</style>", html, re.S)
     if not style:
         sys.exit("no <style> block in index.html")
-    fig = re.search(r'(<figure class="product-universe".*?</figure>)', html, re.S)
+    fig = re.search(r'(<figure class="product-universe(?: [^"]*)?".*?</figure>)', html, re.S)
     if not fig:
         sys.exit("no .product-universe figure in index.html — the product showcase moved")
     ids = re.findall(r'id="product-([a-z]+)"', html)
@@ -104,9 +104,9 @@ body::before {{display:none}}
 .og .grad-text {{background-image:linear-gradient(105deg,#81E3D2,#9EB7F9 60%,#CFABF5)}}
 .og .product-universe {{grid-area:auto;width:94%;height:448px;margin:0}}
 .og .showcase-stage {{height:448px}}
-.og .showcase-controls,.og .showcase-note {{display:none}}
+.og .showcase-controls,.og .showcase-note,.og .showcase-summary {{display:none}}
 .og .phone-left,.og .phone-right {{top:50px}}
-.og .phone-night {{top:8px}}
+.og .phone-featured {{top:8px}}
 .og .phone-caption {{font-size:12px;margin-top:12px}}
 .og .phone-caption small {{display:none}}
 .og .phone-caption span[aria-hidden] {{display:none}}

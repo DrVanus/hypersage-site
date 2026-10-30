@@ -41,8 +41,8 @@ one product still on its own origin.
 - `index.html` — the landing page: inline CSS, small enhancement scripts, no build
   step. The hero comes first, then `#products`, `#ai`, `#about` and `#contact`; the
   desktop and mobile navigation must point at those sections in the same order.
-  The hero rotates real app screens around Nightshelf, with pause and manual
-  controls. The separate AI walkthrough remains under AI features.
+  The hero shows three real feature screens from each app, with an app selector,
+  pause and manual controls. The separate AI walkthrough remains under AI features.
 - `privacy.html` — studio-site privacy policy, scoped to the studio pages by name,
   because the subfolders share this origin and each product page has its own policy.
 - `terms.html` — website-only terms.

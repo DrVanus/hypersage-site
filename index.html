@@ -17,7 +17,7 @@
   <meta property="og:description" content="Thoughtful iPhone apps and original games from HyperSage AI Labs. Find a hand in the kitchen, a story before sleep, or a world to get lost in.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20261030b">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20261030c">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="Thoughtful iPhone apps and original games from HyperSage AI Labs. Find a hand in the kitchen, a story before sleep, or a world to get lost in.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20261030b">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20261030c">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20261030b",
+        "image": "https://hypersage.ai/og-image.png?v=20261030c",
         "description": "An independent studio making iPhone apps and original games.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -888,12 +888,12 @@
     .phone-glass { display: block; padding: 5px; border-radius: 25px; background: #151B29; border: 1px solid #A1B7CE55; box-shadow: 0 24px 60px #0009, inset 0 0 0 1px #ffffff0C; }
     .phone-glass img { display: block; width: 100%; height: auto; aspect-ratio: 420 / 913; object-fit: contain; background: #10131C; border-radius: 20px; }
     .phone-left { left: 0; transform: rotate(-8deg); z-index: 1; }
-    .phone-night { left: 32%; width: 37%; top: 8px; z-index: 3; }
+    .phone-featured { left: 32%; width: 37%; top: 8px; z-index: 3; }
     .phone-right { right: 0; transform: rotate(8deg); z-index: 2; }
     .phone-caption { display: block; text-align: center; margin-top: 15px; font-size: .82rem; font-weight: 600; color: var(--fg); white-space: nowrap; }
     .phone-caption small { display: block; color: var(--muted); font-size: .68rem; font-weight: 400; margin-top: 3px; }
     .universe-caption { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: .75rem; color: var(--muted); }
-    @media (hover:hover) { .showcase-phone:hover { transform: translateY(-8px) rotate(0); z-index: 4; } }
+    @media (hover:hover) { a.showcase-phone:hover { transform: translateY(-8px) rotate(0); z-index: 4; } }
     .showcase-phone:focus-visible { outline-offset: 10px; border-radius: 25px; z-index: 4; }
     .strip { background: #0D1421A8; padding: 18px 0; }
     .strip .word { font-size: .83rem; gap: 8px; min-height: 44px; }
@@ -939,7 +939,7 @@
       .hero .lede { font-size: 1rem; }
       .showcase-stage { height: 400px; }
       .showcase-phone { top: 60px; }
-      .phone-night { top: 15px; }
+      .phone-featured { top: 15px; }
       .phone-caption { font-size: .7rem; }
       .phone-caption small { display: none; }
     }
@@ -954,7 +954,7 @@
       .product-universe { margin-top: 40px; max-width: 490px; }
       .showcase-stage { height: auto; aspect-ratio: 1.05; }
       .showcase-phone { top: 32px; }
-      .phone-night { top: 0; }
+      .phone-featured { top: 0; }
       .phone-glass { padding: 3px; border-radius: 19px; }
       .phone-glass img { border-radius: 15px; }
       .phone-caption { font-size: .7rem; margin-top: 12px; }
@@ -971,7 +971,7 @@
       .cta { margin: 0 16px 40px; padding: 42px 0; border-radius: 24px; }
     }
     @media (max-width: 360px) { .phone-caption { font-size: .65rem; } .example-app > img { display: none; } }
-    @media (prefers-reduced-motion: reduce) { .showcase-phone:hover { transform: none; } }
+    @media (prefers-reduced-motion: reduce) { a.showcase-phone:hover { transform: none; } }
     @media (prefers-reduced-transparency: reduce) { .aurora-scene, .universe-orbit { display: none; } nav.site { background: var(--bg); backdrop-filter: none; } }
     @media (forced-colors: active) { .aurora-scene, .universe-orbit { display: none; } .filter-chip[aria-pressed="true"] { background: Highlight; color: HighlightText; } }
     @media print { .aurora-scene, .product-filters { display: none; } .product[hidden] { display: flex !important; } }
@@ -988,6 +988,33 @@
     @media (forced-colors: active) {
       .hero .grad-text { background: none; color: CanvasText; -webkit-text-fill-color: CanvasText; }
       .product, .product .foot, .ai-intro, .cta, .strip { background: Canvas; color: CanvasText; border-color: CanvasText; }
+    }
+
+
+    /* Shared, readable app journeys; one timer owns the whole composition. */
+    .showcase-select { min-width: 0; max-width: 140px; width: 140px; min-height: 44px; padding: 0 8px; border: 0; border-radius: 6px; color: var(--fg); background: #101625; font: 500 .8rem/1.3 'Inter',sans-serif; cursor: pointer; }
+    .showcase-select:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 1px; }
+    .showcase-summary { text-align: center; min-height: 68px; margin: 0 0 8px; }
+    .showcase-tagline { font-size: .85rem; line-height: 1.5; margin: 0; color: var(--muted); }
+    .showcase-explore { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: .85rem; color: var(--fg); }
+    .showcase-explore:hover { color: var(--brand-a); }
+    .showcase-explore:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 3px; }
+    .journey .phone-caption { white-space: normal; line-height: 1.4; min-height: 2.8em; padding: 0 3px; }
+    .journey .phone-caption small { display: none; }
+    .showcase-stage { height: 550px; }
+    @media (min-width: 761px) and (max-width: 1099px) { .showcase-stage { height: 430px; } }
+    @media (max-width: 760px) {
+      .showcase-stage { height: auto; aspect-ratio: .94; }
+      .journey .phone-name { display: inline-block; max-width: 76%; vertical-align: top; }
+      .showcase-summary { min-height: 68px; margin-bottom: 4px; }
+      .showcase-tagline { font-size: .8rem; }
+      .showcase-select { width: 126px; }
+      .showcase-note { font-size: .68rem; }
+    }
+    @media (max-width: 400px) {
+      .showcase-toggle span { display: none; }
+      .showcase-select { width: 105px; padding-inline: 3px; font-size: .73rem; }
+      .showcase-toggle { padding-inline: 14px; }
     }
 
   </style>
@@ -1059,33 +1086,21 @@
           </div>
         </div>
 
-        <figure class="product-universe" aria-label="Explore the HyperSage collection">
-          <div class="showcase-stage">
-            <div class="universe-orbit" aria-hidden="true"></div>
-            <a class="showcase-phone phone-left" href="https://cryptosageai.io/" aria-label="Explore CryptoSage AI">
-              <span class="phone-glass"><img src="assets/showcase/cryptosage-portfolio.webp" alt="CryptoSage AI: portfolio balance and allocation chart using demo data" width="420" height="913" fetchpriority="high"></span>
-              <span class="phone-caption"><span class="phone-name">CryptoSage AI</span> <span aria-hidden="true">↗</span><small>Portfolio · Demo data</small></span>
-            </a>
-            <a class="showcase-phone phone-night" href="nightshelf/" aria-label="Explore Nightshelf">
-              <span class="phone-glass"><img src="nightshelf/shots/20261030/home-small.webp" alt="Nightshelf with Pro enabled: illustrated classics, short listens, and bedtime stories" width="420" height="913" fetchpriority="high"></span>
-              <span class="phone-caption">Nightshelf <span aria-hidden="true">↗</span><small>Find a softer landing</small></span>
-            </a>
-            <a class="showcase-phone phone-right" href="wingmate/" aria-label="Explore Wingmate">
-              <span class="phone-glass"><img src="assets/showcase/wingmate-coach.webp" alt="Wingmate: a conversation with Ava, an AI dating coach" width="420" height="913"></span>
-              <span class="phone-caption"><span class="phone-name">Wingmate</span> <span aria-hidden="true">↗</span><small>Find your words</small></span>
-            </a>
-          </div>
-          <div class="showcase-controls" hidden role="group" aria-label="Product showcase controls">
-            <button class="showcase-control" type="button" id="showcase-prev" aria-label="Previous apps"><span aria-hidden="true">←</span></button>
-            <span class="showcase-count" aria-label="Scene 1 of 3">1 / 3</span>
-            <button class="showcase-control" type="button" id="showcase-next" aria-label="Next apps"><span aria-hidden="true">→</span></button>
-            <button class="showcase-control showcase-toggle" type="button" id="showcase-play" aria-label="Pause product rotation">
-              <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3v10H2zM7 1h3v10H7z"/></svg><span>Pause</span>
-            </button>
-          </div>
-          <figcaption class="showcase-note">Real apps. A little everyday magic.</figcaption>
-          <span class="showcase-announcement sr-only" role="status" aria-live="polite"></span>
-        </figure>
+        <figure class="product-universe journey" aria-label="Explore HyperSage apps">
+          <div class="showcase-stage"><div class="universe-orbit" aria-hidden="true"></div>
+          <div class="showcase-phone phone-left"><span class="phone-glass"><img src="assets/showcase/nightshelf-journey-1.webp" alt="Nightshelf: an illustrated Familiar Tales library of classic stories" width="420" height="912"></span><span class="phone-caption"><span class="phone-name">Find a story</span><small></small></span></div>
+          <div class="showcase-phone phone-featured"><span class="phone-glass"><img src="assets/showcase/nightshelf-journey-2.webp" alt="Nightshelf with Pro: a bedtime-story creator with an idea, mood, and story length" width="420" height="912" fetchpriority="high"></span><span class="phone-caption"><span class="phone-name">Create with Pro</span><small></small></span></div>
+          <div class="showcase-phone phone-right"><span class="phone-glass"><img src="assets/showcase/nightshelf-journey-3.webp" alt="Nightshelf: The Wind in the Willows reader with playback controls and a sleep timer" width="420" height="912"></span><span class="phone-caption"><span class="phone-name">Press play</span><small></small></span></div>
+          </div><div class="showcase-summary"><p class="showcase-tagline">A story for tonight</p><a class="showcase-explore" href="nightshelf/">Explore <span class="showcase-explore-name">Nightshelf</span> <span aria-hidden="true">↗</span></a></div>
+          <div class="showcase-controls" hidden role="group" aria-label="Product showcase controls"><button class="showcase-control" type="button" id="showcase-prev" aria-label="Previous app"><span aria-hidden="true">←</span></button><label class="sr-only" for="showcase-app">Choose an app to explore</label><select class="showcase-select" id="showcase-app">
+          <option value="0">Nightshelf</option>
+          <option value="1">Wingmate</option>
+          <option value="2">Quietoak</option>
+          <option value="3">Saffra</option>
+          <option value="4">Rowan</option>
+          <option value="5">Holohound</option>
+          <option value="6">CryptoSage AI</option>
+          </select><span class="showcase-count sr-only" aria-label="App 1 of 7">1 / 7</span><button class="showcase-control" type="button" id="showcase-next" aria-label="Next app"><span aria-hidden="true">→</span></button><button class="showcase-control showcase-toggle" type="button" id="showcase-play" aria-label="Pause product rotation"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3v10H2zM7 1h3v10H7z"/></svg><span>Pause</span></button></div><figcaption class="showcase-note">Real screens. More to discover.</figcaption><span class="showcase-announcement sr-only" role="status" aria-live="polite"></span></figure>
       </div>
     </div>
   </section>
@@ -2203,31 +2218,21 @@
   </script>
 <script>
 
-    /* Real app screens rotate around a stable Nightshelf anchor. The first
+    /* Real screens show what each app can do. A shared timer changes the whole
+       composition. The first
        scene is complete HTML; enhancement never makes it depend on loading. */
     (function () {
       var figure = document.querySelector('.product-universe');
       if (!figure || !('IntersectionObserver' in window)) return;
-      var sides = [figure.querySelector('.phone-left'), figure.querySelector('.phone-right')];
-      function readSide(link) {
-        var img = link.querySelector('img');
-        return { name: link.querySelector('.phone-name').textContent, href: link.getAttribute('href'),
-          src: img.getAttribute('src'), alt: img.alt, caption: link.querySelector('small').textContent };
-      }
-      var scenes = [
-        sides.map(readSide),
-        [
-          {name:'Quietoak',href:'quietoak/',src:'assets/showcase/quietoak-practice.webp',alt:'Quietoak: a guided practice with Willow, the AI companion',caption:'Make room for calm'},
-          {name:'Saffra',href:'saffra/',src:'assets/showcase/saffra-recipes.webp',alt:'Saffra: a recipe collection with food photography',caption:'Something good is cooking'}
-        ],
-        [
-          {name:'Rowan',href:'rowan/',src:'assets/showcase/rowan-today.webp',alt:'Rowan: daily symptom check-in, symptom history, and an upcoming appointment brief using sample data',caption:'Today, a little clearer'},
-          {name:'Holohound',href:'holohound/',src:'assets/showcase/holohound-collection.webp',alt:'Holohound: trading card collection, value chart, and Ask Hound',caption:'Know your collection'}
-        ]
-      ];
+      var apps = [{"name": "Nightshelf", "href": "nightshelf/", "tagline": "A story for tonight"}, {"name": "Wingmate", "href": "wingmate/", "tagline": "Find the words that feel like you"}, {"name": "Quietoak", "href": "quietoak/", "tagline": "A little room to breathe"}, {"name": "Saffra", "href": "saffra/", "tagline": "From what’s in the fridge to dinner"}, {"name": "Rowan", "href": "rowan/", "tagline": "Your day, ready for your next visit"}, {"name": "Holohound", "href": "holohound/", "tagline": "From a card to a collection"}, {"name": "CryptoSage AI", "href": "https://cryptosageai.io/", "tagline": "Your market, with more context"}];
+      var scenes = [[{"name": "Find a story", "href": "nightshelf/", "src": "assets/showcase/nightshelf-journey-1.webp", "alt": "Nightshelf: an illustrated Familiar Tales library of classic stories", "caption": "", "width": 420, "height": 912, "app": "Nightshelf"}, {"name": "Create with Pro", "href": "nightshelf/", "src": "assets/showcase/nightshelf-journey-2.webp", "alt": "Nightshelf with Pro: a bedtime-story creator with an idea, mood, and story length", "caption": "", "width": 420, "height": 912, "app": "Nightshelf"}, {"name": "Press play", "href": "nightshelf/", "src": "assets/showcase/nightshelf-journey-3.webp", "alt": "Nightshelf: The Wind in the Willows reader with playback controls and a sleep timer", "caption": "", "width": 420, "height": 912, "app": "Nightshelf"}], [{"name": "Keep the context", "href": "wingmate/", "src": "assets/showcase/wingmate-journey-1.webp", "alt": "Wingmate: Connections with example conversations for Olivia, Sophia, Emma, and Chloe", "caption": "", "width": 420, "height": 913, "app": "Wingmate"}, {"name": "Ask your coach", "href": "wingmate/", "src": "assets/showcase/wingmate-journey-2.webp", "alt": "Wingmate: Ava suggests a playful Sunday walk and coffee reply in an example conversation", "caption": "", "width": 420, "height": 913, "app": "Wingmate"}, {"name": "Save your favorites", "href": "wingmate/", "src": "assets/showcase/wingmate-journey-3.webp", "alt": "Wingmate: six saved openers with individual Copy controls", "caption": "", "width": 420, "height": 913, "app": "Wingmate"}], [{"name": "Talk it through", "href": "quietoak/", "src": "assets/showcase/quietoak-journey-1.webp", "alt": "Quietoak: a conversation with Willow and a STOP skill card", "caption": "", "width": 420, "height": 913, "app": "Quietoak"}, {"name": "Make a plan", "href": "quietoak/", "src": "assets/showcase/quietoak-journey-2.webp", "alt": "Quietoak: a saved practice plan with a cue, response, and rehearsal controls", "caption": "", "width": 420, "height": 913, "app": "Quietoak"}, {"name": "Try one small step", "href": "quietoak/", "src": "assets/showcase/quietoak-journey-3.webp", "alt": "Quietoak: guided STOP practice with Willow, with Next and Back controls", "caption": "", "width": 420, "height": 913, "app": "Quietoak"}], [{"name": "Find a recipe", "href": "saffra/", "src": "assets/showcase/saffra-journey-1.webp", "alt": "Saffra: Aglio e Olio and a row of quick dinner recipes", "caption": "", "width": 420, "height": 913, "app": "Saffra"}, {"name": "Ask your cook", "href": "saffra/", "src": "assets/showcase/saffra-journey-2.webp", "alt": "Saffra checks a sample pantry and suggests Chicken Thigh Puttanesca for a thirty-minute dinner", "caption": "", "width": 420, "height": 913, "app": "Saffra"}, {"name": "Cook step by step", "href": "saffra/", "src": "assets/showcase/saffra-journey-3.webp", "alt": "Saffra: Cooking Mode for Aglio e Olio, with voice controls and a suggested fifteen-minute timer", "caption": "", "width": 420, "height": 913, "app": "Saffra"}], [{"name": "Check in today", "href": "rowan/", "src": "assets/showcase/rowan-journey-1.webp", "alt": "Rowan: a sample mood check-in, symptom log, upcoming neurology appointment, and medication section", "caption": "", "width": 420, "height": 909, "app": "Rowan"}, {"name": "Log a symptom", "href": "rowan/", "src": "assets/showcase/rowan-journey-2.webp", "alt": "Rowan: Quick log with Fatigue selected and a sample severity rating of five out of ten", "caption": "", "width": 420, "height": 909, "app": "Rowan"}, {"name": "Prepare your visit", "href": "rowan/", "src": "assets/showcase/rowan-journey-3.webp", "alt": "Rowan: a sample neurology visit brief with a patient question, health background, conditions, and allergies", "caption": "", "width": 420, "height": 909, "app": "Rowan"}], [{"name": "Scan your cards", "href": "holohound/", "src": "assets/showcase/holohound-journey-1.webp", "alt": "Holohound: the scanner recognizes an Umbreon VMAX card, with capture and batch controls", "caption": "", "width": 420, "height": 913, "app": "Holohound"}, {"name": "Read the report", "href": "holohound/", "src": "assets/showcase/holohound-journey-2.webp", "alt": "Holohound: an Umbreon VMAX report with card details and separately attributed US and European prices", "caption": "", "width": 420, "height": 913, "app": "Holohound"}, {"name": "Track your binder", "href": "holohound/", "src": "assets/showcase/holohound-journey-3.webp", "alt": "Holohound: a binder dashboard with value history, card movers, and Scan and Ask Hound actions", "caption": "", "width": 420, "height": 913, "app": "Holohound"}], [{"name": "Follow the market", "href": "https://cryptosageai.io/", "src": "assets/showcase/cryptosage-journey-1.webp", "alt": "CryptoSage AI: demo Home with a portfolio chart, watchlist, and market movers", "caption": "", "width": 420, "height": 913, "app": "CryptoSage AI"}, {"name": "See your holdings", "href": "https://cryptosageai.io/", "src": "assets/showcase/cryptosage-journey-2.webp", "alt": "CryptoSage AI: portfolio allocation and holdings using demo data", "caption": "", "width": 420, "height": 913, "app": "CryptoSage AI"}, {"name": "Ask a question", "href": "https://cryptosageai.io/", "src": "assets/showcase/cryptosage-journey-3.webp", "alt": "CryptoSage AI: an educational AI answer about watchlists, charts, and technical signals", "caption": "", "width": 420, "height": 913, "app": "CryptoSage AI"}]];
+      var sides = ['.phone-left','.phone-featured','.phone-right'].map(function (selector) { return figure.querySelector(selector); });
       var controls = figure.querySelector('.showcase-controls');
       var count = figure.querySelector('.showcase-count');
       var play = figure.querySelector('#showcase-play');
+      var menu = figure.querySelector('#showcase-app');
+      var explore = figure.querySelector('.showcase-explore');
+      var tagline = figure.querySelector('.showcase-tagline');
       var announcement = figure.querySelector('.showcase-announcement');
       var note = figure.querySelector('.showcase-note');
       var restingNote = note.textContent;
@@ -2236,7 +2241,7 @@
       var paused = motion.matches || !!(connection && connection.saveData);
       var visible = false, hovered = false, focused = false;
       var current = 0, requested = 0, version = 0, timer = null, pendingManual = false;
-      var INTERVAL = 7000;
+      var INTERVAL = 10000;
       function restricted() { return motion.matches || !!(connection && connection.saveData); }
       function canRotate() { return !paused && !restricted() && visible && !hovered && !focused && !document.hidden; }
       function stopAutomatic() {
@@ -2282,22 +2287,29 @@
             image.alt = item.alt;
             image.width = image.naturalWidth; image.height = image.naturalHeight;
             link.querySelector('img').replaceWith(image);
-            link.href = item.href;
-            link.setAttribute('aria-label', 'Explore ' + item.name);
+            if (link.tagName === 'A') {
+              link.href = item.href;
+              link.setAttribute('aria-label', 'Explore ' + item.app);
+            }
             link.querySelector('.phone-name').textContent = item.name;
             link.querySelector('small').textContent = item.caption;
             if (!restricted() && image.animate) image.animate([{opacity:.65},{opacity:1}], {duration:220,easing:'ease-out'});
           });
           current = requested = index;
           pendingManual = false;
+          restingNote = (index + 1) + ' of ' + apps.length + ' apps · Real screens';
           note.textContent = restingNote;
+          menu.value = String(index);
+          tagline.textContent = apps[index].tagline;
+          explore.href = apps[index].href;
+          explore.querySelector('.showcase-explore-name').textContent = apps[index].name;
           count.textContent = (index + 1) + ' / ' + scenes.length;
-          count.setAttribute('aria-label', 'Scene ' + (index + 1) + ' of ' + scenes.length);
-          if (manual) announcement.textContent = scenes[index][0].name + ', Nightshelf, and ' + scenes[index][1].name + '. Scene ' + (index + 1) + ' of ' + scenes.length + '.';
+          count.setAttribute('aria-label', 'App ' + (index + 1) + ' of ' + scenes.length);
+          if (manual) announcement.textContent = apps[index].name + '. App ' + (index + 1) + ' of ' + scenes.length + '.';
           schedule();
         }).catch(function () {
           if (token !== version) return;
-          pendingManual = false; requested = current;
+          pendingManual = false; requested = current; menu.value = String(current);
           if (manual) {
             note.textContent = 'Couldn’t load that view. Please try again.';
             announcement.textContent = 'These screens could not load. The current apps are still available. Try Next or Previous again.';
@@ -2313,12 +2325,13 @@
       }
       figure.querySelector('#showcase-prev').addEventListener('click', function () { step(-1); });
       figure.querySelector('#showcase-next').addEventListener('click', function () { step(1); });
+      menu.addEventListener('change', function () { paused = true; stopAutomatic(); updatePlay(); show(Number(menu.value), true); });
       play.addEventListener('click', function () { paused = !paused; stopAutomatic(); updatePlay(); schedule(); });
       figure.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') { hovered = true; stopAutomatic(); } });
       figure.addEventListener('pointerleave', function () { hovered = false; schedule(); });
       figure.addEventListener('focusin', function (event) {
         focused = true; stopAutomatic();
-        if (event.target.closest('.showcase-phone')) { version++; pendingManual = false; requested = current; note.textContent = restingNote; }
+        if (event.target.closest('.showcase-phone, .showcase-explore')) { version++; pendingManual = false; requested = current; note.textContent = restingNote; menu.value = String(current); }
       });
       figure.addEventListener('focusout', function () {
         setTimeout(function () { focused = figure.contains(document.activeElement); schedule(); }, 0);
@@ -2340,6 +2353,8 @@
       if (connection && connection.addEventListener) connection.addEventListener('change', preferencesChanged);
       figure.setAttribute('aria-roledescription', 'carousel');
       controls.hidden = false;
+      restingNote = '1 of ' + apps.length + ' apps · Real screens';
+      note.textContent = restingNote;
       updatePlay();
     })();
   </script>
