@@ -14,6 +14,7 @@
         image.alt = link.querySelector('img').alt;
         title.textContent = link.dataset.title;
         dialog.showModal();
+        dialog.scrollTop = 0;
         document.body.style.overflow = 'hidden';
       });
     });
@@ -44,6 +45,23 @@
       const distance = card.getBoundingClientRect().width + parseFloat(getComputedStyle(rail).gap);
       rail.scrollBy({left: Number(button.dataset.direction) * distance, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
     }));
+    // Let native keyboard focus settle before aligning its card to the snap position.
+    // Pointer focus must not move a card out from under an in-progress click.
+    rail.addEventListener('focusin', event => {
+      const target = event.target;
+      const card = target.closest('.screen-card');
+      if (!card || !target.matches(':focus-visible')) return;
+      requestAnimationFrame(() => {
+        if (document.activeElement !== target) return;
+        const bounds = rail.getBoundingClientRect();
+        const focused = target.getBoundingClientRect();
+        if (focused.left >= bounds.left && focused.right <= bounds.right) return;
+        rail.scrollTo({
+          left: rail.scrollLeft + card.getBoundingClientRect().left - bounds.left,
+          behavior: 'instant'
+        });
+      });
+    });
     rail.addEventListener('scroll', update, {passive: true});
     addEventListener('resize', update);
     update();
