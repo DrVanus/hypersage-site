@@ -16,489 +16,218 @@
   <meta property="og:description" content="Dig through a tumbling gem jar, fill customer orders with seven satchel slots, and grow Flint’s hoard. Optional excavations add split-or-preserve routes.">
   <meta property="og:url" content="https://hypersage.ai/gemburrow/">
   <meta property="og:site_name" content="Gemburrow">
-  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20261029a">
+  <meta property="og:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20261030a">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Gemburrow: gem digging, customer orders and optional specimen excavations">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Gemburrow: Dig gems. Fill orders. Grow a hoard.">
   <meta name="twitter:description" content="Dig through a tumbling gem jar, fill customer orders with seven satchel slots, and grow Flint’s hoard. Optional excavations add split-or-preserve routes.">
-  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20261029a">
+  <meta name="twitter:image" content="https://hypersage.ai/gemburrow/og-image.png?v=20261030a">
   <meta name="twitter:image:alt" content="Gemburrow: gem digging, customer orders and optional specimen excavations">
 
   <link rel="icon" type="image/png" href="app-icon-512.png?v=20260821a">
   <link rel="apple-touch-icon" href="app-icon-512.png?v=20260821a">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <link rel="preload" href="fonts/baloo-2-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    :root {
-      /* Burrow palette — lifted from the game's own lantern-lit shop room. */
-      --bg: #17100A;          /* deep soil */
-      --bg-2: #1E1510;        /* raised panel */
-      --surface: #241A12;
-      --card: #261C13;
-      --card-soft: #2F2318;
-      --fg: #F6ECDC;          /* warm bone ink */
-      --muted-fg: #CBB79C;
-      /* Kept light enough that 0.78–0.92rem labels clear AA over the warm
-         gradient wash, not just against the flat page colour. */
-      --tertiary-fg: #A4917A;
-      --lantern: #FFD75E;     /* the coin/lantern gold the game draws in */
-      --lantern-bright: #FFE9A8;
-      --ember: #E08A3C;
-      --ruby: #E0475B;
-      --sapphire: #5B8CE8;
-      --emerald: #46B073;
-      --amber: #E3A24A;
-      --prism: #CFE8F5;
-      --dragon: #B98BDD;
-      --border: rgba(255, 215, 94, 0.14);
-      --border-strong: rgba(255, 215, 94, 0.30);
-      --gold-glow: rgba(255, 215, 94, 0.18);
-      --radius: 0.8rem;
-      --radius-lg: 1.25rem;
-    }
+@font-face{font-family:Baloo;src:url('fonts/baloo-2-latin.woff2') format('woff2');font-weight:500 800;font-style:normal;font-display:swap}
+@font-face{font-family:Inter;src:url('fonts/inter.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#17100a;--bg-2:#21160f;--fg:#fff2da;--muted-fg:#d2c1a9;--tertiary-fg:#bbab94;--lantern:#ffda80;--lantern-bright:#ffe9b4;--ember:#eab17a;--amber:#f0c476;--sapphire:#a6c5ff;--emerald:#91d5aa;--dragon:#d0b0f1;--border:rgba(238,190,112,.19);--border-strong:rgba(238,190,112,.38)}
+html{color-scheme:dark;background:var(--bg);scroll-behavior:smooth;scroll-padding-top:88px}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.7 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.brand,.foot-brand{font-family:Baloo,'Trebuchet MS',system-ui,sans-serif;line-height:1.1}
+h1{font-size:clamp(2.8rem,5.3vw,4.6rem);font-weight:800;letter-spacing:-.035em}
+h2{font-size:clamp(2rem,3.2vw,3rem);font-weight:700;letter-spacing:-.025em}
+h3{font-size:1.6rem;font-weight:700}
+a{color:var(--lantern);text-underline-offset:4px}
+a:hover{color:var(--lantern-bright)}
+button{font:inherit;cursor:pointer}
+a,button,summary{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--lantern);outline-offset:5px}
+img{max-width:100%;height:auto}
+.container{max-width:1180px;padding:0 32px;margin:auto;position:relative}
+.skip-link{position:fixed;top:8px;left:12px;transform:translateY(-160%);z-index:1000;background:var(--lantern);color:#20140a;padding:10px 18px;border-radius:8px}
+.skip-link:focus{transform:none;color:#20140a}
+nav.site{position:sticky;top:0;z-index:50;background:rgba(23,16,10,.96);border-bottom:1px solid var(--border)}
+nav.site .container{display:flex;justify-content:space-between;align-items:center;min-height:76px;gap:20px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--fg);font-weight:800;font-size:1.45rem;white-space:nowrap}
+.brand img{width:40px;height:40px;border-radius:12px}
+nav.site .links{display:flex;gap:25px;align-items:center}
+nav.site .links a{font-size:.85rem;font-weight:600;text-decoration:none;color:var(--muted-fg)}
+nav.site .links a:first-child{border:1px solid var(--border-strong);padding:8px 20px;border-radius:99px;color:var(--lantern)}
+nav.site .links a:hover{color:var(--lantern)}
+.mobile-menu{display:none;position:relative}
+.mobile-menu summary{cursor:pointer;list-style:none;border:1px solid var(--border-strong);border-radius:10px;padding:9px 16px;font-weight:600;min-height:44px}
+.mobile-menu summary::-webkit-details-marker{display:none}
+.mobile-links{position:absolute;top:calc(100% + 12px);right:0;min-width:210px;background:#24180f;border:1px solid var(--border-strong);border-radius:14px;padding:8px;box-shadow:0 18px 48px #0008}
+.mobile-links a{display:block;padding:10px 14px;min-height:44px;text-decoration:none;color:var(--fg);border-radius:8px}
+.mobile-links a:hover{background:#ffffff0a}
+.hero{position:relative;isolation:isolate;overflow:hidden;padding:66px 0 90px}
+.hero-backdrop{position:absolute;inset:0;z-index:-3}
+.hero-backdrop img{width:100%;height:100%;object-fit:cover;object-position:center}
+.hero::before{content:'';position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(23,16,10,.43),rgba(23,16,10,.07) 70%),linear-gradient(0deg,var(--bg),transparent 23%)}
+.hero .container{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center}
+.hero-copy{padding:22px 0 0}
+.eyebrow,.section-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--lantern)}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;margin-bottom:24px;padding:7px 13px;border:1px solid var(--border-strong);border-radius:99px;background:#21170fbf}
+.eyebrow::before{content:'✦';font-size:1rem}
+.hero .hl{color:var(--lantern);display:block}
+.lede{font-size:1.08rem;line-height:1.8;color:#ecdbc2;max-width:33rem;margin:24px 0 28px;text-wrap:pretty}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px}
+.btn-primary,.btn-ghost{display:inline-flex;justify-content:center;align-items:center;gap:12px;padding:14px 23px;min-height:52px;border-radius:12px;font-weight:700;font-size:.94rem;text-decoration:none;transition:transform .2s,background .2s}
+.btn-primary{color:#30200d;background:linear-gradient(180deg,#ffe8b0,#f4bf5d);border:1px solid #ffe5a6;box-shadow:0 6px 0 #7e4c1d,0 12px 40px #f5b64b25}
+.btn-primary:hover{color:#30200d;background:#ffe7ad;transform:translateY(-2px)}
+.btn-ghost{color:var(--fg);border:1px solid var(--border-strong);background:#20170dd9}
+.btn-ghost:hover{color:var(--lantern);background:#352419}
+.hero-note{font-size:.76rem;color:#d7c4a6;margin-top:24px}
+.hero-note span{color:var(--lantern);margin:0 7px}
+.hero-scene{position:relative;max-width:420px;width:100%;margin:auto;padding:10px 25px 30px}
+.phone{position:relative;width:280px;max-width:100%;margin:0 auto;border-radius:34px;padding:8px;background:linear-gradient(140deg,#7b5734,#302014 30%,#17100b 65%,#5a422a);border:1px solid #cba16180;box-shadow:0 32px 60px #0009,0 0 70px #daa75020}
+.phone img{display:block;width:100%;border-radius:26px}
+.scene-gem{position:absolute;width:60px;height:60px;z-index:2;pointer-events:none}
+.scene-gem.ruby{top:54px;right:8px;transform:rotate(15deg)}
+.scene-gem.emerald{bottom:120px;left:3px;transform:rotate(-16deg)}
+.scene-note{position:absolute;bottom:0;right:0;border:1px solid #d1a96680;border-radius:12px;background:#24190ff2;box-shadow:0 14px 35px #0005;padding:13px 20px;line-height:1.5}
+.scene-note strong{display:block;font-size:.73rem;color:var(--lantern);letter-spacing:.1em;text-transform:uppercase}
+.scene-note span{font-size:.77rem;color:var(--muted-fg)}
+.hero-caption{font-size:.7rem;text-align:center;color:var(--tertiary-fg);margin:16px auto 0}
+.glint{position:absolute;color:#ffe7ae;font-size:24px;pointer-events:none;animation:glimmer 1.4s ease-in-out 2 alternate}
+.glint.one{right:45px;top:26px}.glint.two{left:2px;bottom:190px;font-size:17px;animation-delay:.3s}
+@keyframes glimmer{from{opacity:.25;transform:scale(.7)}to{opacity:1;transform:scale(1.15)}}
+.section-block{position:relative;padding:90px 0;scroll-margin-top:80px}
+.section-block.panel{background:linear-gradient(135deg,#281d13,#1b130e);border-block:1px solid var(--border)}
+.section-eyebrow{margin-bottom:14px;color:var(--ember)}
+.section-lede{color:var(--muted-fg);max-width:46rem;margin-top:18px;line-height:1.85}
+.center{text-align:center}
+.center .section-lede{margin-inline:auto}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px;margin-top:46px}
+.card{position:relative;padding:28px 0 0;border-top:1px solid var(--border-strong)}
+.card-top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.card-top img{width:43px;height:43px;object-fit:contain}
+.step-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--lantern)}
+.card p{font-size:.94rem;color:var(--muted-fg);margin-top:12px}
+.dragon-row{display:grid;grid-template-columns:.85fr 1.15fr;gap:60px;align-items:center}
+#dragon{background:radial-gradient(ellipse at 22% 55%,#5030533b,transparent 55%)}
+.dragon-art{position:relative;min-height:345px;display:grid;place-items:center;border:1px solid #b78bdb33;border-radius:50% 50% 22px 22px;background:radial-gradient(ellipse at 50% 48%,#8357942b,transparent 67%),linear-gradient(#28202b30,#21151d70);overflow:hidden}
+.dragon-art::before{content:'';position:absolute;inset:22px;border:1px solid #cfa5f028;border-radius:inherit}
+.dragon-art img{position:relative;width:280px;height:280px;object-fit:contain}
+.dragon-art .dragon-label{position:absolute;bottom:25px;left:0;right:0;text-align:center;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dragon)}
+.jar-foot{font-size:.84rem;color:var(--tertiary-fg);margin-top:20px}
+.dragon-link{display:inline-flex;gap:12px;align-items:center;padding:10px 0;margin-top:12px;font-weight:600;font-size:.9rem}
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:38px}
+.mode{background:linear-gradient(150deg,#33261b,#231a13);border:1px solid var(--border);border-radius:18px;padding:28px;border-top:2px solid var(--accent)}
+.mode .kind{color:var(--accent);font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.mode h3{margin:14px 0}
+.mode p{font-size:.9rem;line-height:1.85;color:var(--muted-fg)}
+#screens{background:radial-gradient(ellipse at 75% 35%,#5a366429,transparent 60%)}
+.gallery-note{color:var(--tertiary-fg);font-size:.84rem;text-align:center;margin-top:16px}
+.gallery-note .swipe-hint{display:none}
+.screens{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin-top:40px}
+.screen-card{min-width:0}
+.screen-frame{position:relative;display:block;padding:6px;border:1px solid var(--border-strong);border-radius:25px;background:linear-gradient(150deg,#51402d,#20150f);box-shadow:0 16px 32px #0005;transition:transform .2s,border-color .2s}
+.screen-frame:hover{transform:translateY(-5px);border-color:var(--lantern)}
+.screen-frame img{display:block;width:100%;height:auto;aspect-ratio:430/932;object-fit:contain;border-radius:19px;background:#1c120c}
+.enlarge{position:absolute;bottom:13px;right:13px;padding:4px 9px;border:1px solid #f2d9a957;border-radius:8px;background:#21170fec;color:var(--fg);font-size:.65rem;font-weight:600}
+figcaption{text-align:center;padding:18px 0 0}
+.screen-kind{font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ember);font-weight:700}
+.screen-name{font-family:Baloo,system-ui,sans-serif;font-size:1.3rem;font-weight:700;margin-top:4px}
+.honest{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:36px}
+.honest>div{display:flex;gap:12px}
+.honest>div>div{min-width:0}
+.tick{color:var(--emerald);font-weight:700}
+.honest b{display:block;margin-bottom:10px;font-size:.95rem}
+.honest p{font-size:.88rem;color:var(--muted-fg);line-height:1.85}
+.faq-list{max-width:800px;margin:38px auto 0}
+details.faq{border-bottom:1px solid var(--border);padding:0 3px}
+details.faq summary{display:flex;gap:24px;align-items:center;justify-content:space-between;list-style:none;padding:22px 0;font-size:.95rem;font-weight:600;cursor:pointer}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::after{content:'+';font-size:1.4rem;color:var(--lantern);flex-shrink:0}
+details.faq[open] summary::after{content:'−'}
+details.faq p{color:var(--muted-fg);font-size:.9rem;line-height:1.9;padding:0 35px 25px 0}
+.cta-strip{text-align:center;padding:86px 24px 96px;border-top:1px solid var(--border);background:linear-gradient(#17100abf,#17100ad9),url('art/lantern-cavern-small.webp') center 65%/cover}
+.cta-strip p{color:var(--muted-fg);max-width:34rem;margin:18px auto 30px}
+footer.site{text-align:center;padding:36px 24px;border-top:1px solid var(--border)}
+.foot-brand{font-weight:800;font-size:1.6rem}
+footer.site .links{display:flex;gap:25px;justify-content:center;flex-wrap:wrap;margin:18px 0;font-size:.85rem}
+footer.site .links a{color:var(--muted-fg);padding:8px 0}
+.copyright{font-size:.72rem;color:var(--tertiary-fg)}
+.copyright a{color:inherit}
+.viewer{position:fixed;inset:0;width:min(680px,100% - 24px);max-height:calc(100dvh - 24px);margin:auto;background:#21170f;color:var(--fg);border:1px solid var(--border-strong);border-radius:18px;padding:18px;overscroll-behavior:contain}
+.viewer::backdrop{background:#0b0704e8}
+.viewer-heading{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:12px}
+.viewer-heading h2{font-family:Inter,system-ui,sans-serif;font-size:1rem;line-height:1.4;letter-spacing:0}
+.viewer button{min-width:44px;min-height:44px;padding:8px 14px;border:1px solid var(--border-strong);border-radius:9px;background:#352419;color:var(--fg);font-size:.84rem}
+.viewer-photo{display:flex;justify-content:center}
+.viewer-photo img{display:block;width:auto;max-width:100%;height:auto;max-height:calc(100dvh - 210px);object-fit:contain;border-radius:10px}
+.viewer-controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}
+.viewer-count{font-size:.8rem;color:var(--muted-fg)}
+@media(min-width:1700px){.hero-backdrop img{object-position:center 60%}}
+@media(max-width:1000px){nav.site .links{gap:16px}.hero{padding-top:42px}.hero .container{gap:20px}.hero-scene{padding-inline:12px}.phone{width:250px}.scene-note{right:0}.hero h1{font-size:3.5rem}.dragon-row{gap:35px}.modes{gap:14px}.mode{padding:22px}.screens{gap:15px}.honest{gap:24px}}
+@media(max-width:800px){nav.site .links{display:none}.mobile-menu{display:block}.hero .container{grid-template-columns:1fr;gap:38px}.hero-copy{text-align:center;padding:0;max-width:560px;margin:auto}.hero h1{font-size:clamp(2.6rem,8vw,3.6rem)}.lede{font-size:1rem;margin:19px auto 23px;max-width:440px}.hero-cta{justify-content:center}.hero-note{margin-top:22px}.hero-scene{max-width:360px;padding-inline:30px}.hero-backdrop img{object-position:65% center}.hero::before{background:linear-gradient(#17100a75,#17100a3b 40%,#17100a 100%)}.hero{padding:42px 0 52px}.grid-3{gap:24px}.dragon-row{grid-template-columns:1fr;gap:34px}.dragon-art{max-width:380px;width:100%;margin:auto;min-height:320px}.modes{grid-template-columns:1fr}.mode{padding:26px}.screens{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px}.honest{grid-template-columns:1fr;gap:28px}.section-block{padding:66px 0}.hero-caption{margin-top:12px}.phone{width:252px}}
+@media(max-width:560px){.container{padding-inline:24px}nav.site .container{min-height:70px}.brand{font-size:1.25rem;gap:9px}.brand img{width:34px;height:34px}.mobile-menu summary{font-size:.82rem;padding:8px 13px}.eyebrow{font-size:.62rem;letter-spacing:.1em;margin-bottom:20px;padding:6px 10px}.hero{padding-top:32px}.hero h1{font-size:clamp(2.35rem,9.4vw,3rem)}.lede{font-size:.91rem;line-height:1.8;max-width:360px}.hero-cta{gap:10px}.btn-primary,.btn-ghost{padding:12px 16px;font-size:.83rem;min-height:48px}.hero-note{font-size:.66rem}.hero-note span{margin:0 3px}.hero-scene{max-width:320px;padding-inline:25px}.phone{width:230px}.scene-gem{width:47px;height:47px}.scene-note{padding:11px 14px;right:-2px}.scene-note strong{font-size:.65rem}.scene-note span{font-size:.69rem}.hero-caption{font-size:.64rem}.grid-3{grid-template-columns:1fr;gap:26px;margin-top:30px}.card{padding-top:22px}.card-top{margin-bottom:12px}.card p{font-size:.9rem}.card-top img{width:35px;height:35px}.section-lede{font-size:.94rem}.screens{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:3px;padding:5px 3px 22px;margin-inline:-3px;scrollbar-width:thin;scrollbar-color:#896c45 #21170f}.screen-card{flex:0 0 76%;scroll-snap-align:start;max-width:290px}.gallery-note{font-size:.76rem}.gallery-note .swipe-hint{display:inline}.screen-name{font-size:1.35rem}.dragon-art{min-height:300px}.dragon-art img{width:250px;height:250px}.cta-strip{padding:66px 24px 76px}.cta-strip h2{max-width:320px;margin:auto}.cta-strip p{font-size:.9rem}.viewer{padding:12px}.viewer-heading h2{font-size:.9rem}.viewer-count{font-size:.72rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.screens{scroll-behavior:auto}}
 
-    html { scroll-behavior: smooth; color-scheme: dark; background: var(--bg); }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      line-height: 1.65;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow-x: hidden;
-    }
-
-    /* Lantern light: a warm glow from above and a low ember pool, plus a
-       vignette so the page edges fall away like the burrow walls do. */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background:
-        radial-gradient(ellipse 85% 55% at 50% -8%, rgba(255, 205, 110, 0.14), transparent 58%),
-        radial-gradient(ellipse 60% 40% at 12% 22%, rgba(224, 138, 60, 0.07), transparent 62%),
-        radial-gradient(ellipse 75% 55% at 50% 106%, rgba(120, 74, 30, 0.16), transparent 66%);
-      pointer-events: none; z-index: 0;
-    }
-    body::after {
-      content: '';
-      position: fixed; inset: 0;
-      box-shadow: inset 0 0 200px 36px rgba(0, 0, 0, 0.6);
-      pointer-events: none; z-index: 0;
-    }
-
-    h1, h2, h3, .brand, .stat b { font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif; line-height: 1.15; }
-    h1 { font-size: clamp(2.4rem, 6.4vw, 4rem); font-weight: 800; letter-spacing: -0.01em; }
-    h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; }
-    h3 { font-size: 1.22rem; font-weight: 700; }
-
-    a { color: var(--lantern); text-decoration: none; transition: color .2s; }
-    a:hover { color: var(--lantern-bright); }
-
-    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
-
-    /* ===== NAV ===== */
-    nav.site {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(23, 16, 10, 0.80);
-      backdrop-filter: saturate(150%) blur(16px);
-      -webkit-backdrop-filter: saturate(150%) blur(16px);
-      border-bottom: 1px solid var(--border);
-    }
-    nav.site .container {
-      display: flex; align-items: center; justify-content: space-between;
-      padding-top: 12px; padding-bottom: 12px;
-    }
-    nav.site .brand {
-      display: flex; align-items: center; gap: 12px;
-      font-weight: 800; color: var(--fg); font-size: 1.22rem;
-    }
-    nav.site .brand img { width: 38px; height: 38px; border-radius: 10px; box-shadow: 0 0 20px var(--gold-glow); }
-    nav.site .links { display: flex; gap: 22px; font-size: 0.92rem; flex-wrap: nowrap; white-space: nowrap; }
-    nav.site .links a { color: var(--muted-fg); font-weight: 600; letter-spacing: 0.01em; }
-    nav.site .links a:hover { color: var(--lantern); }
-
-    .mobile-menu { display: none; position: relative; }
-    .mobile-menu summary {
-      list-style: none; cursor: pointer; color: var(--muted-fg);
-      padding: 8px; border-radius: 10px; border: 1px solid var(--border);
-      display: flex; align-items: center;
-    }
-    .mobile-menu summary::-webkit-details-marker { display: none; }
-    .mobile-menu .mobile-links {
-      position: absolute; right: 0; top: calc(100% + 10px);
-      background: var(--bg-2); border: 1px solid var(--border-strong);
-      border-radius: var(--radius); padding: 10px; min-width: 190px;
-      display: flex; flex-direction: column; gap: 2px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
-    }
-    .mobile-menu .mobile-links a { color: var(--muted-fg); font-weight: 600; padding: 9px 12px; border-radius: 8px; }
-    .mobile-menu .mobile-links a:hover { color: var(--lantern); background: rgba(255, 215, 94, 0.07); }
-
-    /* ===== BUTTONS ===== */
-    .btn-primary, .btn-ghost {
-      display: inline-flex; align-items: center; gap: 10px;
-      padding: 14px 26px; border-radius: 999px;
-      font-weight: 700; font-size: 1rem; border: 1px solid transparent;
-      transition: transform .18s, box-shadow .18s, background .18s, border-color .18s;
-    }
-    .btn-primary {
-      background: linear-gradient(180deg, var(--lantern-bright), var(--lantern));
-      color: #2A1B08; box-shadow: 0 10px 30px rgba(255, 215, 94, 0.22);
-    }
-    .btn-primary:hover { transform: translateY(-2px); color: #2A1B08; box-shadow: 0 14px 36px rgba(255, 215, 94, 0.30); }
-    .btn-ghost { background: rgba(255, 215, 94, 0.05); color: var(--fg); border-color: var(--border-strong); }
-    .btn-ghost:hover { transform: translateY(-2px); color: var(--lantern-bright); border-color: var(--lantern); }
-
-    /* ===== HERO ===== */
-    .hero { padding: 76px 0 40px; }
-    .hero .container { display: grid; grid-template-columns: 1.06fr 0.94fr; gap: 54px; align-items: center; }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 9px;
-      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--lantern); background: rgba(255, 215, 94, 0.09);
-      border: 1px solid var(--border-strong); border-radius: 999px; padding: 6px 15px;
-      margin-bottom: 22px;
-    }
-    .hero h1 .hl {
-      background: linear-gradient(100deg, var(--lantern-bright), var(--amber) 55%, var(--ruby));
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-    }
-    .lede { font-size: 1.12rem; color: var(--muted-fg); margin: 20px 0 30px; max-width: 34rem; }
-    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
-    .hero-note { font-size: 0.84rem; color: var(--tertiary-fg); margin-top: 16px; }
-
-    /* the phone frame — a device frame reads as a product, floating UI does not */
-    .phone {
-      position: relative; margin: 0 auto; width: 100%; max-width: 320px;
-      border-radius: 42px; padding: 11px;
-      background: linear-gradient(160deg, #3B2C1E, #1A120C 60%);
-      border: 1px solid rgba(255, 215, 94, 0.22);
-      box-shadow: 0 34px 70px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 190, 90, 0.09);
-    }
-    .phone img { display: block; width: 100%; height: auto; border-radius: 32px; }
-    .phone::after {
-      content: ''; position: absolute; left: 50%; transform: translateX(-50%);
-      top: 17px; width: 76px; height: 20px; border-radius: 999px;
-      background: #0C0805; opacity: 0.9;
-    }
-
-    /* ===== SECTIONS ===== */
-    .section-block { padding: 72px 0; position: relative; scroll-margin-top: 68px; }
-    .section-block.panel { background: linear-gradient(180deg, rgba(38, 28, 19, 0.55), rgba(23, 16, 10, 0)); border-top: 1px solid var(--border); }
-    .section-eyebrow {
-      font-size: 0.76rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
-      color: var(--ember); margin-bottom: 12px;
-    }
-    .section-lede { color: var(--muted-fg); max-width: 46rem; margin-top: 14px; }
-    .center { text-align: center; }
-    .center .section-lede { margin-left: auto; margin-right: auto; }
-
-    /* ===== THE JAR (the interactive bit) ===== */
-    .jarband { padding: 20px 0 76px; }
-    .jarwrap {
-      display: grid; grid-template-columns: 360px 1fr; gap: 40px; align-items: start;
-      background: linear-gradient(180deg, rgba(47, 35, 24, 0.75), rgba(30, 21, 16, 0.5));
-      border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
-      padding: 30px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-    }
-    .jar-stage { position: relative; }
-    #jar {
-      display: block; width: 100%; height: 440px; touch-action: none; cursor: pointer;
-      border-radius: var(--radius);
-      background: radial-gradient(ellipse 80% 60% at 50% 8%, rgba(255, 200, 110, 0.10), transparent 60%), #1B130D;
-      border: 1px solid rgba(255, 215, 94, 0.16);
-    }
-    .jar-intro { max-width: 44rem; margin-bottom: 30px; }
-    .jar-intro h2 { margin-bottom: 6px; }
-    .jar-intro strong { color: var(--fg); }
-
-    /* ===== the demo HUD — the app's own furniture, in DOM so it stays crisp
-       and readable to a screen reader ===== */
-    .hud-row { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; }
-    .hud-card, .hud-stack {
-      background: rgba(20, 13, 8, 0.55); border: 1px solid var(--border-strong);
-      border-radius: var(--radius); padding: 12px 14px;
-    }
-    .hud-stack { display: flex; flex-direction: column; gap: 7px; }
-    .hud-label {
-      display: flex; justify-content: space-between; gap: 14px;
-      font-size: 0.72rem; letter-spacing: 0.13em; text-transform: uppercase;
-      font-weight: 700; color: var(--tertiary-fg); white-space: nowrap;
-    }
-    .hud-label span {
-      color: var(--lantern); letter-spacing: 0; font-variant-numeric: tabular-nums;
-      /* the label is uppercased, the value must not be: the game writes coins
-         as "90c", and text-transform was rendering it "90C" */
-      text-transform: none;
-    }
-    .swings-label { margin-top: 4px; }
-
-    .need { list-style: none; margin-top: 9px; display: flex; flex-direction: column; gap: 5px; }
-    .need li { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; }
-    .need img { width: 21px; height: 21px; }
-    .need .n { font-variant-numeric: tabular-nums; color: var(--muted-fg); }
-    .need li.done .n { color: var(--emerald); }
-    .need li.done::after { content: '✓'; color: var(--emerald); font-weight: 800; }
-
-    .bag { list-style: none; display: flex; gap: 4px; }
-    .bag li {
-      width: 30px; height: 30px; border-radius: 7px;
-      border: 1px dashed rgba(255, 215, 94, 0.28); background: rgba(10, 7, 4, 0.55);
-      display: grid; place-items: center;
-    }
-    .bag li.filled { border-style: solid; border-color: rgba(255, 215, 94, 0.55); cursor: pointer; }
-    .bag li.filled:hover { border-color: var(--lantern); background: rgba(255, 215, 94, 0.10); }
-    .bag li img { width: 22px; height: 22px; }
-    .bag li.jam { animation: jamflash .45s ease; }
-    @keyframes jamflash { 0%, 100% { background: rgba(10, 7, 4, 0.55); } 40% { background: rgba(224, 71, 91, 0.5); } }
-
-    .meter { height: 7px; border-radius: 99px; background: rgba(10, 7, 4, 0.7); overflow: hidden; border: 1px solid var(--border); }
-    .meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--lantern), var(--amber)); transition: width .25s; }
-    .meter.low i { background: linear-gradient(90deg, var(--ruby), var(--amber)); }
-
-    .jar-status {
-      margin: 16px 0 12px; min-height: 2.6em; font-size: 0.95rem; color: var(--muted-fg);
-      border-left: 3px solid var(--border-strong); padding-left: 12px;
-    }
-    .jar-status.good { color: var(--fg); border-left-color: var(--emerald); }
-    .jar-status.bad { color: var(--fg); border-left-color: var(--ruby); }
-
-    .rules { list-style: none; margin: 18px 0 0; display: flex; flex-direction: column; gap: 7px; }
-    .rules li { color: var(--tertiary-fg); font-size: 0.88rem; padding-left: 16px; position: relative; }
-    .rules li::before { content: '·'; position: absolute; left: 4px; color: var(--lantern); font-weight: 800; }
-    .rules b { color: var(--muted-fg); }
-
-    .jar-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-    .jar-actions button {
-      font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer;
-      background: rgba(255, 215, 94, 0.06); color: var(--fg);
-      border: 1px solid var(--border-strong); border-radius: 999px; padding: 9px 18px;
-      transition: border-color .2s, color .2s, background .2s;
-    }
-    .jar-actions button:hover { color: var(--lantern-bright); border-color: var(--lantern); background: rgba(255, 215, 94, 0.11); }
-    .jar-actions button:focus-visible { outline: 2px solid var(--lantern); outline-offset: 3px; }
-    .jar-foot { font-size: 0.86rem; color: var(--tertiary-fg); margin-top: 16px; }
-
-    /* ===== FEATURE CARDS ===== */
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 40px; }
-    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; margin-top: 40px; }
-    .card {
-      background: linear-gradient(180deg, var(--card), var(--bg-2));
-      border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 26px; transition: transform .2s, border-color .2s;
-    }
-    .card:hover { transform: translateY(-3px); border-color: var(--border-strong); }
-    .card .ico {
-      width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center;
-      background: rgba(255, 215, 94, 0.09); border: 1px solid var(--border-strong);
-      margin-bottom: 16px; color: var(--lantern);
-    }
-    .card .ico svg { display: block; }
-    .card p { color: var(--muted-fg); font-size: 0.97rem; margin-top: 9px; }
-
-    /* ===== MODES ===== */
-    .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 40px; }
-    .mode {
-      background: linear-gradient(180deg, var(--card-soft), var(--bg-2));
-      border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px;
-      border-top: 3px solid var(--accent, var(--lantern));
-    }
-    .mode .kind { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--accent, var(--lantern)); }
-    .mode h3 { margin: 8px 0 10px; }
-    .mode p { color: var(--muted-fg); font-size: 0.97rem; }
-    .mode ul { list-style: none; margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
-    .mode li { color: var(--tertiary-fg); font-size: 0.9rem; padding-left: 18px; position: relative; }
-    .mode li::before { content: '·'; position: absolute; left: 5px; color: var(--accent, var(--lantern)); font-weight: 800; }
-
-    /* ===== DRAGON ===== */
-    .dragon-row { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 46px; align-items: center; }
-    .dragon-art {
-      border-radius: var(--radius-lg); border: 1px solid var(--border-strong); overflow: hidden;
-      background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(185, 139, 221, 0.18), transparent 70%), var(--bg-2);
-      display: grid; place-items: center; padding: 26px;
-    }
-    /* The panel supplies the glow. Filtering this transparent sprite paints
-       a stray black surface above the hero in WebKit. */
-    .dragon-art img { width: 200px; height: 200px; }
-    .ladder { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
-    .rung {
-      display: flex; align-items: center; gap: 14px;
-      background: rgba(20, 13, 8, 0.55); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 12px 16px;
-    }
-    .rung .n {
-      min-width: 42px; height: 30px; border-radius: 8px; display: grid; place-items: center;
-      background: rgba(185, 139, 221, 0.14); border: 1px solid rgba(185, 139, 221, 0.35);
-      color: var(--dragon); font-weight: 800; font-size: 0.9rem;
-    }
-    .rung span { color: var(--muted-fg); font-size: 0.95rem; }
-
-    /* ===== SCREENS ===== */
-    .screens { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 42px; }
-    .screen-card { display: flex; flex-direction: column; gap: 12px; }
-    .screen-frame {
-      border-radius: 26px; padding: 8px; background: linear-gradient(160deg, #392A1C, #191108 62%);
-      border: 1px solid rgba(255, 215, 94, 0.18); box-shadow: 0 20px 42px rgba(0, 0, 0, 0.48);
-    }
-    .screen-frame img { display: block; width: 100%; height: auto; border-radius: 19px; }
-    .screen-kind { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ember); font-weight: 700; }
-    .screen-name { font-weight: 700; font-size: 0.98rem; }
-    figcaption { text-align: center; }
-
-    /* ===== HONEST ===== */
-    .honest { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 38px; }
-    .honest > div {
-      display: flex; gap: 14px; align-items: flex-start;
-      background: rgba(20, 13, 8, 0.5); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 18px 20px;
-    }
-    /* the text column must be allowed to shrink, or a long <b> pushes the
-       paragraph into a 3-word ribbon */
-    .honest > div > div { flex: 1 1 auto; min-width: 0; }
-    .honest .tick { color: var(--emerald); font-weight: 800; font-size: 1.1rem; line-height: 1.4; flex: 0 0 auto; }
-    .honest b { display: block; margin-bottom: 2px; }
-    .honest p { color: var(--muted-fg); font-size: 0.92rem; }
-
-    /* ===== FAQ ===== */
-    .faq-list { max-width: 50rem; margin: 34px auto 0; display: flex; flex-direction: column; gap: 12px; }
-    details.faq {
-      background: linear-gradient(180deg, var(--card), var(--bg-2));
-      border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 22px;
-    }
-    details.faq[open] { border-color: var(--border-strong); }
-    details.faq summary {
-      cursor: pointer; font-weight: 700; list-style: none; display: flex;
-      justify-content: space-between; align-items: center; gap: 16px;
-    }
-    details.faq summary::-webkit-details-marker { display: none; }
-    details.faq summary::after { content: '+'; color: var(--lantern); font-size: 1.4rem; font-weight: 700; line-height: 1; }
-    details.faq[open] summary::after { content: '–'; }
-    details.faq p { color: var(--muted-fg); margin-top: 12px; font-size: 0.97rem; }
-
-    /* ===== ABOUT / CTA ===== */
-    .about-card {
-      display: grid; grid-template-columns: 96px 1fr; gap: 24px; align-items: center;
-      background: linear-gradient(180deg, var(--card), var(--bg-2));
-      border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px;
-    }
-    .about-card img { width: 96px; height: 96px; border-radius: 22px; }
-    .about-card p { color: var(--muted-fg); margin-top: 8px; }
-
-    .cta-strip {
-      text-align: center; padding: 74px 24px;
-      background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(255, 200, 110, 0.12), transparent 70%);
-      border-top: 1px solid var(--border);
-    }
-    .cta-strip p { color: var(--muted-fg); max-width: 34rem; margin: 14px auto 26px; }
-
-    /* ===== FOOTER ===== */
-    footer.site { border-top: 1px solid var(--border); padding: 46px 24px 40px; text-align: center; }
-    .foot-brand { font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 800; font-size: 1.2rem; }
-    footer.site .links { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; margin: 14px 0 26px; font-size: 0.92rem; }
-    footer.site .links a { color: var(--muted-fg); font-weight: 600; }
-    footer.site .links a:hover { color: var(--lantern); }
-    .copyright { color: var(--tertiary-fg); font-size: 0.84rem; margin-top: 28px; }
-
-    /* ===== REVEAL — progressive enhancement only =====
-       Content is VISIBLE by default. The hidden state only exists once the
-       head script has proven motion is welcome and IntersectionObserver is
-       available, so a no-JS or reduced-motion reader never sees a blank page. */
-    .js-reveal .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
-    .js-reveal .reveal.in { opacity: 1; transform: none; }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
-
-    @media (max-width: 980px) {
-      .hero .container { grid-template-columns: 1fr; gap: 40px; }
-      /* minmax(0, 1fr), not 1fr: layout() sets the canvas's width ATTRIBUTE
-         from its measured box, which then gives the element an intrinsic
-         min-content width. A plain `1fr` track has an `auto` minimum, so it
-         could never shrink back below whatever width the canvas last had —
-         a one-way ratchet that pushed the jar 27px past a 320px viewport.
-         The zero minimum lets the track shrink; #jar is width:100% and
-         re-measures itself, and its hit-testing already reads
-         getBoundingClientRect(), so clicks stay aligned at any size. */
-      .jarwrap { grid-template-columns: minmax(0, 1fr); gap: 26px; }
-      .dragon-row { grid-template-columns: 1fr; gap: 30px; }
-      .grid-3, .modes, .screens { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 760px) {
-      nav.site .links { display: none; }
-      .mobile-menu { display: block; }
-      .hero { padding: 52px 0 26px; }
-      .grid-3, .grid-2, .modes, .screens, .honest { grid-template-columns: 1fr; }
-      .about-card { grid-template-columns: 1fr; text-align: center; justify-items: center; }
-      #jar { height: 380px; }
-      .hud-row { grid-template-columns: 1fr; }
-      /* Below ~400px the demo HUD could not fit: the satchel is a nowrap row of
-         seven 34px slots (262px of min-content) which pinned .hud-stack, which
-         pinned the .hud-row track, which pushed the page 27px sideways. Let the
-         slots wrap onto a second line and give the tracks a zero minimum so they
-         can actually shrink. Seven slots either way — only their arrangement
-         changes, and nothing here alters what the demo claims. */
-      @media (max-width: 400px) {
-        .hud-row { grid-template-columns: minmax(0, 1fr); }
-        .hud-card, .hud-stack { min-width: 0; }
-        .bag { flex-wrap: wrap; }
-        .jar-actions { flex-wrap: wrap; }
-      }
-      .bag li { width: 34px; height: 34px; }
-      .bag li img { width: 25px; height: 25px; }
-    }
-    /* The full eyebrow is ~440px of tracked capitals; on a phone it broke into
-       "…PLAY IN / YOUR BROWSER". The h1 and lede already say what the game is,
-       so a narrow screen keeps only the part that scopes every claim below it. */
-    @media (max-width: 520px) {
-      .eyebrow .eb-long { display: none; }
-    }
-  </style>
+</style>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Gemburrow", "applicationCategory": "Game", "operatingSystem": "Web", "description": "Dig through a tumbling gem jar, fill customer orders with seven satchel slots, and grow Flint’s hoard. Optional excavations add split-or-preserve routes.", "url": "https://hypersage.ai/gemburrow/", "author": {"@type": "Organization", "name": "HyperSage AI Labs LLC"}}</script>
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Where can I play?", "acceptedAnswer": {"@type": "Answer", "text": "Play free in your browser at hypersage.ai/gemburrow/play/. Progress is saved in that browser. An iPhone version is in development; its save is separate from the browser save."}}, {"@type": "Question", "name": "What happens when I split or preserve a great gem?", "acceptedAnswer": {"@type": "Answer", "text": "Splitting costs one swing and puts three loose gems into the seven-slot satchel. Lifting intact costs two swings and keeps a specimen for Flint, without supplying loose gems. The specimen is recorded only if you complete the commission."}}, {"@type": "Question", "name": "What is free?", "acceptedAnswer": {"@type": "Answer", "text": "All five excavations are free. The browser also opens all 40 Career levels, Free Dig and today’s Daily Dig. The iPhone version includes Career levels 1–10, Free Dig and today’s Daily; the optional one-time Full Burrow purchase opens Career levels 11–40 and the 14-day Daily archive. It does not add excavation sites. There are no ads, subscriptions or coin packs."}}, {"@type": "Question", "name": "How do I open the Daily Dig?", "acceptedAnswer": {"@type": "Answer", "text": "Start Career from the main menu and finish its introductory lesson. Today’s Daily uses the same jar and starting budget for everyone. A connection is needed for leaderboard results."}}, {"@type": "Question", "name": "Does the excavation have a timer?", "acceptedAnswer": {"@type": "Answer", "text": "No. Excavations use a fixed swing budget, and the great-gem choice has no countdown. Rush orders and rare-gem choices have their own visible timers."}}, {"@type": "Question", "name": "Where is my progress saved?", "acceptedAnswer": {"@type": "Answer", "text": "Excavation records and other progress stay in the browser or app where you played. Clearing site data or deleting the app removes that local save. Excavation results are not uploaded; Daily leaderboard activity is described in the Privacy Policy."}}, {"@type": "Question", "name": "How were the art and music made?", "acceptedAnswer": {"@type": "Answer", "text": "The gems, rocks, mole and dragon use AI-generated artwork curated for the game. The four soundtrack recordings were generated with AI and prepared for the game, with separate music and sound volume controls."}}, {"@type": "Question", "name": "Does the browser version vibrate?", "acceptedAnswer": {"@type": "Answer", "text": "Chrome on supported Android devices can provide optional vibration. Turn Haptics off in Settings if you prefer. Safari on iPhone does not support browser vibration, so that switch is hidden there. The iPhone app has its own haptics setting."}}]}</script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <div id="top"></div>
   <nav class="site"><div class="container">
     <a class="brand" href="#top" aria-label="Gemburrow: back to top"><img src="app-icon-512.png?v=20260821a" alt="" width="512" height="512"><span>Gemburrow</span></a>
     <div class="links"><a href="play/">Play</a><a href="#play">How it plays</a><a href="#dragon">Flint</a><a href="#modes">Ways to play</a><a href="#screens">Screens</a><a href="#faq">FAQ</a></div>
     <details class="mobile-menu"><summary aria-label="Open navigation">Menu</summary><div class="mobile-links"><a href="play/">Play</a><a href="#play">How it plays</a><a href="#dragon">Flint</a><a href="#modes">Ways to play</a><a href="#screens">Screens</a><a href="#faq">FAQ</a></div></details>
   </div></nav>
-  <header class="hero"><div class="container">
-    <div><span class="eyebrow">Gem digging · play free in your browser</span>
-      <h1>Read the orders.<br>Work the jar.<br><span class="hl">Grow Flint’s hoard.</span></h1>
-      <p class="lede">Pick exposed gems from a tumbling glass jar, make room in your seven-slot satchel, and deliver customer orders before your swings run out. Start in Career, return for a Daily Dig, or explore at your own pace in Free Dig.</p>
-      <div class="hero-cta"><a class="btn-primary" href="play/">Play Gemburrow free</a><a class="btn-ghost" href="#honest">What's included</a></div>
-      <p class="jar-foot">Best played in portrait on phones.</p>
-      <p class="hero-note">No ads · no energy meter · coming to iPhone</p>
+
+  <main id="main" tabindex="-1">
+  <header class="hero">
+    <picture class="hero-backdrop" aria-hidden="true">
+      <source media="(max-width: 800px)" srcset="art/lantern-cavern-small.webp">
+      <img src="art/lantern-cavern.webp" width="1536" height="1024" alt="" fetchpriority="high">
+    </picture>
+    <div class="container">
+      <div class="hero-copy">
+        <span class="eyebrow">A cozy gem-digging puzzle</span>
+        <h1>A little digging.<span class="hl">A lot of wonder.</span></h1>
+        <p class="lede">A jar full of jewels. Seven satchel slots. A little dragon waiting for treasure. Dig out the gems, fill your customers’ orders, and see what you can bring home.</p>
+        <div class="hero-cta">
+          <a class="btn-primary" href="play/">Play Gemburrow free <span aria-hidden="true">↗</span></a>
+          <a class="btn-ghost" href="#play">How it plays <span aria-hidden="true">↓</span></a>
+        </div>
+        <p class="hero-note">Play in your browser <span>·</span> No ads <span>·</span> Coming to iPhone</p>
+      </div>
+      <div>
+        <div class="hero-scene">
+          <div class="phone"><img src="shots/shot-20261030-career.webp" srcset="shots/shot-20261030-career-430.webp 430w, shots/shot-20261030-career.webp 860w" sizes="(max-width: 560px) 230px, 280px" width="860" height="1864" loading="eager" alt="A Career dig in GemBurrow: customer orders, a seven-slot satchel, and a glass jar of gems and rocks"></div>
+          <img class="scene-gem ruby" src="demo/ruby.png" alt="" width="120" height="120" aria-hidden="true">
+          <img class="scene-gem emerald" src="demo/emerald.png" alt="" width="120" height="120" aria-hidden="true">
+          <span class="glint one" aria-hidden="true">✦</span><span class="glint two" aria-hidden="true">✧</span>
+          <div class="scene-note"><strong>Seven little slots</strong><span>Make every gem count.</span></div>
+        </div>
+        <p class="hero-caption">An actual Career dig · best played in portrait</p>
+      </div>
     </div>
-    <div class="phone"><img src="shots/career-run.png" data-allow-duplicate="true" width="780" height="1688" loading="eager" alt="Gemburrow Career with hanging customer orders, a seven-slot satchel and a dense glass jar of gems and rocks"></div>
-  </div></header>
+  </header>
   <section class="section-block panel" id="play"><div class="container">
     <div class="section-eyebrow">How it plays</div><h2>Read the orders. Make room.</h2>
     <p class="section-lede">Five customer orders hang above the jar. Choose an order to keep its plan visible, then work through the pieces above the gems you need.</p>
     <div class="grid-3">
-      <article class="card"><h3>Plan a delivery</h3><p>Select a customer card to see the remaining gems. The plan stays selected while you dig, and matching gems are marked in the pile.</p></article>
-      <article class="card"><h3>Work the pile</h3><p>Clear exposed rocks and extract reachable gems. Pieces settle as the jar opens, so the next useful gem may need another route.</p></article>
-      <article class="card"><h3>Mind seven slots</h3><p>The satchel holds seven gems. Completed orders deliver automatically; tap a held gem to discard it when you need space.</p></article>
+      <article class="card"><div class="card-top"><img src="demo/sapphire.png" width="120" height="120" alt="" loading="lazy"><span class="step-label">01 · Read</span></div><h3>Plan a delivery</h3><p>Select a customer card to see the remaining gems. The plan stays selected while you dig, and matching gems are marked in the pile.</p></article>
+      <article class="card"><div class="card-top"><img src="demo/ruby.png" width="120" height="120" alt="" loading="lazy"><span class="step-label">02 · Dig</span></div><h3>Work the pile</h3><p>Clear exposed rocks and extract reachable gems. Pieces settle as the jar opens, so the next useful gem may need another route.</p></article>
+      <article class="card"><div class="card-top"><img src="demo/emerald.png" width="120" height="120" alt="" loading="lazy"><span class="step-label">03 · Deliver</span></div><h3>Mind seven slots</h3><p>The satchel holds seven gems. Completed orders deliver automatically; tap a held gem to discard it when you need space.</p></article>
     </div>
   </div></section>
   <section class="section-block" id="dragon"><div class="container dragon-row">
-    <div class="dragon-art"><img src="play/art/dragon.webp" width="200" height="200" loading="lazy" alt="Flint, the small purple dragon who keeps your preserved specimens"></div>
-    <div><div class="section-eyebrow">Optional excavations</div><h2>Some gems are worth keeping whole.</h2>
+    <div class="dragon-art"><img src="play/art/dragon.webp" width="320" height="320" loading="lazy" alt="Flint, the small purple dragon who keeps your preserved specimens"><span class="dragon-label" aria-hidden="true">Flint · keeper of little treasures</span></div>
+    <div><div class="section-eyebrow">Meet Flint · optional excavations</div><h2>Some treasures are<br>too good to break.</h2>
       <p class="section-lede">Choose EXCAVATIONS from the main menu for five free, finite sites. Split a great gem into three loose gems for a commission, or spend two swings to lift it intact for Flint. Complete the commission to record your route and specimens in the field journal.</p>
-      <p class="jar-foot">These optional digs have no timer. They do not award coins or change the Daily challenge; Career, Daily and Free Dig keep their own hoard, wardrobe and coin progress.</p>
+      <p class="jar-foot">These optional digs have no timer. They do not award coins or change the Daily challenge; Career, Daily and Free Dig keep their own hoard, wardrobe and coin progress.</p><a class="dragon-link" href="#screens">Take a peek inside <span aria-hidden="true">↗</span></a>
     </div>
   </div></section>
   <section class="section-block panel" id="modes"><div class="container">
@@ -512,11 +241,13 @@
   </div></section>
   <section class="section-block" id="screens"><div class="container">
     <div class="section-eyebrow center">From GemBurrow</div><h2 class="center">Plan, choose, bring it home.</h2>
-    <div class="screens">
-      <figure class="screen-card"><div class="screen-frame"><img src="shots/main-menu.png?v=127" width="1206" height="2622" loading="lazy" alt="The main menu keeps Career, Daily Dig and Free Dig prominent, with an optional Excavations entry"></div><figcaption><div class="screen-kind">The burrow</div><div class="screen-name">Choose your next dig</div></figcaption></figure>
-      <figure class="screen-card"><div class="screen-frame"><img src="shots/career-run.png" data-allow-duplicate="true" width="780" height="1688" loading="lazy" alt="Career customer orders above the dense gem jar and seven-slot satchel"></div><figcaption><div class="screen-kind">Career</div><div class="screen-name">Fill the orders</div></figcaption></figure>
-      <figure class="screen-card"><div class="screen-frame"><img src="shots/excavation-choice.png" width="640" height="1334" loading="lazy" alt="A great amber offers Lift intact for two swings, Split for one swing, or Leave it for now"></div><figcaption><div class="screen-kind">Optional excavation</div><div class="screen-name">Split or preserve</div></figcaption></figure>
-      <figure class="screen-card"><div class="screen-frame"><img src="shots/excavation-results-preserved.png" width="640" height="1334" loading="lazy" alt="An Amber Pocket commission completed in eleven swings with one intact amber specimen"></div><figcaption><div class="screen-kind">The field journal</div><div class="screen-name">A specimen for Flint</div></figcaption></figure>
+
+    <p class="gallery-note"><span class="swipe-hint">Swipe to explore. </span>Select any screen for a closer look.</p>
+    <div class="screens" aria-label="Screenshots from GemBurrow">
+      <figure class="screen-card"><a class="screen-frame" href="shots/shot-20261030-home.webp" aria-label="Enlarge: Welcome to the burrow"><img src="shots/shot-20261030-home.webp" srcset="shots/shot-20261030-home-430.webp 430w, shots/shot-20261030-home.webp 860w" sizes="(max-width: 560px) 76vw, (max-width: 800px) 45vw, 260px" width="860" height="1864" loading="lazy" alt="GemBurrow’s lantern-lit workshop and main menu"><span class="enlarge" aria-hidden="true">View screen ↗</span></a><figcaption><div class="screen-kind">The workshop</div><div class="screen-name">Make yourself at home</div></figcaption></figure>
+      <figure class="screen-card"><a class="screen-frame" href="shots/shot-20261030-excavation-choice.webp" aria-label="Enlarge: Split or preserve"><img src="shots/shot-20261030-excavation-choice.webp" srcset="shots/shot-20261030-excavation-choice-430.webp 430w, shots/shot-20261030-excavation-choice.webp 860w" sizes="(max-width: 560px) 76vw, (max-width: 800px) 45vw, 260px" width="860" height="1864" loading="lazy" alt="A great amber offers Lift intact for two swings, Split for one swing, or Leave it for now"><span class="enlarge" aria-hidden="true">View screen ↗</span></a><figcaption><div class="screen-kind">The choice</div><div class="screen-name">Split or preserve?</div></figcaption></figure>
+      <figure class="screen-card"><a class="screen-frame" href="shots/shot-20261030-excavation-results.webp" aria-label="Enlarge: A specimen for Flint"><img src="shots/shot-20261030-excavation-results.webp" srcset="shots/shot-20261030-excavation-results-430.webp 430w, shots/shot-20261030-excavation-results.webp 860w" sizes="(max-width: 560px) 76vw, (max-width: 800px) 45vw, 260px" width="860" height="1864" loading="lazy" alt="A completed excavation with an intact amber specimen kept for Flint"><span class="enlarge" aria-hidden="true">View screen ↗</span></a><figcaption><div class="screen-kind">The field journal</div><div class="screen-name">Bring back something rare</div></figcaption></figure>
+      <figure class="screen-card"><a class="screen-frame" href="shots/shot-20261030-dragon-shop.webp" aria-label="Enlarge: Make Flint your own"><img src="shots/shot-20261030-dragon-shop.webp" srcset="shots/shot-20261030-dragon-shop-430.webp 430w, shots/shot-20261030-dragon-shop.webp 860w" sizes="(max-width: 560px) 76vw, (max-width: 800px) 45vw, 260px" width="860" height="1864" loading="lazy" alt="The shop’s dragon wardrobe with Flint and eight color choices, showing which options are locked"><span class="enlarge" aria-hidden="true">View screen ↗</span></a><figcaption><div class="screen-kind">The dragon wardrobe</div><div class="screen-name">Make Flint your own</div></figcaption></figure>
     </div>
   </div></section>
   <section class="section-block panel" id="honest"><div class="container">
@@ -539,6 +270,65 @@
 <details class="faq"><summary>How were the art and music made?</summary><p>The gems, rocks, mole and dragon use AI-generated artwork curated for the game. The four soundtrack recordings were generated with AI and prepared for the game, with separate music and sound volume controls.</p></details>
 </div></div></section>
   <section class="cta-strip"><h2>What will you bring back for Flint?</h2><p>Start a Career dig, or choose an excavation. Questions? <a href="mailto:support@hypersage.ai?subject=Gemburrow">support@hypersage.ai</a>.</p><a href="play/" class="btn-primary">Play Gemburrow free</a></section>
+  </main>
   <footer class="site"><div class="foot-brand">Gemburrow</div><div class="links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="support.html">Support</a><a href="mailto:support@hypersage.ai">Contact</a></div><div class="copyright">© 2026 <a href="https://hypersage.ai/">HyperSage AI Labs LLC</a></div></footer>
+
+  <dialog class="viewer" aria-labelledby="viewer-title">
+    <div class="viewer-heading"><h2 id="viewer-title">Inside GemBurrow</h2><button type="button" class="viewer-close" aria-label="Close screenshot">Close ✕</button></div>
+    <div class="viewer-photo"></div>
+    <div class="viewer-controls"><button type="button" class="viewer-prev" aria-label="Previous screenshot">← Previous</button><span class="viewer-count" aria-live="polite"></span><button type="button" class="viewer-next" aria-label="Next screenshot">Next →</button></div>
+  </dialog>
+  <script>
+  (() => {
+    const menu = document.querySelector('.mobile-menu');
+    menu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { menu.open = false; }));
+    document.addEventListener('click', e => { if (!menu.contains(e.target)) menu.open = false; });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); }
+    });
+    const viewer = document.querySelector('.viewer');
+    const links = [...document.querySelectorAll('.screen-frame')];
+    if (typeof viewer.showModal !== 'function') return;
+    let active = 0, returnTo = null, previousOverflow = '';
+    let photo = null;
+    const show = index => {
+      if (!photo) {
+        photo = document.createElement('img');
+        photo.decoding = 'async';
+        viewer.querySelector('.viewer-photo').append(photo);
+      }
+      active = (index + links.length) % links.length;
+      const link = links[active], original = link.querySelector('img');
+      photo.src = link.href;
+      photo.alt = original.alt;
+      photo.width = original.width; photo.height = original.height;
+      viewer.querySelector('#viewer-title').textContent = link.closest('figure').querySelector('.screen-name').textContent;
+      viewer.querySelector('.viewer-count').textContent = (active + 1) + ' / ' + links.length;
+    };
+    links.forEach((link, index) => link.addEventListener('click', e => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      e.preventDefault(); returnTo = link; show(index);
+      previousOverflow = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+      viewer.showModal();
+      viewer.querySelector('.viewer-close').focus();
+    }));
+    viewer.querySelector('.viewer-close').addEventListener('click', () => viewer.close());
+    viewer.querySelector('.viewer-prev').addEventListener('click', () => show(active - 1));
+    viewer.querySelector('.viewer-next').addEventListener('click', () => show(active + 1));
+    viewer.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); show(active - 1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); show(active + 1); }
+    });
+    viewer.addEventListener('click', e => {
+      const rect = viewer.getBoundingClientRect();
+      if (e.target === viewer && (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom)) viewer.close();
+    });
+    viewer.addEventListener('close', () => {
+      document.documentElement.style.overflow = previousOverflow;
+      if (returnTo) returnTo.focus({preventScroll:true});
+    });
+  })();
+  </script>
 </body>
 </html>

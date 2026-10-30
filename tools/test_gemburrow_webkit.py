@@ -57,6 +57,12 @@ def main():
                             if phase=="after-scroll":
                                 for y in range(0,page.evaluate("document.documentElement.scrollHeight"),600):
                                     page.evaluate("y=>scrollTo(0,y)",y);page.wait_for_timeout(40)
+                                # The mobile gallery is a horizontal scroll region. Bring
+                                # every lazy image into view before asserting it loaded.
+                                for card in page.locator(".screen-card").all():
+                                    card.scroll_into_view_if_needed()
+                                    page.wait_for_timeout(100)
+                                page.eval_on_selector(".screens", "el => el.scrollLeft = 0")
                                 page.wait_for_function("Array.from(document.images).every(x=>x.complete&&x.naturalWidth>0)")
                                 page.evaluate("scrollTo(0,0)")
                             page.wait_for_timeout(450)

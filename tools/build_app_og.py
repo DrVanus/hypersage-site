@@ -38,7 +38,7 @@ FONTS = {
     'waddleton': '',
     'mythkin': '',
     'hexhunter': 'family=Cinzel:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800',
-    'gemburrow': 'family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800',
+    'gemburrow': '',
     'loam': '',
 }
 
@@ -367,42 +367,22 @@ CARDS = {
         "sub": "Cleopatra. Sherlock Holmes. Marcus Aurelius. Ada Lovelace. 470 figures from history, myth and literature, each written at length. They remember what you tell them.",
     },
     "gemburrow": {
-        "art": "shots/career-run.png",
+        "art": "shots/shot-20261030-career.webp",
         "css": """
-  /* The page's own lantern wash (body::before) over --bg-2 -> --bg, with one
-     extra warm pass at the top so the card carries the same light the shop room
-     does at message-bubble size. Every colour below is a :root token from
-     gemburrow/index.html — nothing new is mixed. */
-  .og { background:
-        radial-gradient(ellipse 74% 60% at 20% -6%, rgba(255,205,110,0.18), transparent 60%),
-        radial-gradient(ellipse 85% 55% at 50% -8%, rgba(255,205,110,0.14), transparent 58%),
-        radial-gradient(ellipse 60% 40% at 12% 22%, rgba(224,138,60,0.07), transparent 62%),
-        radial-gradient(ellipse 75% 55% at 50% 106%, rgba(120,74,30,0.16), transparent 66%),
-        linear-gradient(160deg, #1E1510 0%, #17100A 62%); }
-  /* One row or the headline gets shoved down (the saffra lesson): the full
-     "Cozy gem-digging puzzle · Coming to iPhone" wrapped at 21px, so it is
-     sized down and pinned. Measured: 519px of the 568px column. */
-  .kicker { color: #E08A3C; font-size: 19px; letter-spacing: 0.10em; white-space: nowrap; }
-  /* Baloo 2 at 800 is the page's own display face; 54px keeps "Feed the dragon."
-     on one line at this width. */
-  h1 { font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif; font-weight: 800;
-       font-size: 54px; letter-spacing: -0.01em;
-       background-image: linear-gradient(178deg, #F6ECDC 62%, #CBB79C 165%); }
-  h1 .grad { background-image: linear-gradient(100deg, #FFE9A8, #E3A24A 55%, #E0475B); }
-  .sub { color: #CBB79C; max-width: 540px; }
-  /* The Career frame, bled full height and feathered into the lantern glow —
-     780x1688 at h=630 is w=291, so nothing is cropped off the jar. */
-  .art { width: 291px; height: 630px; object-position: 50% 42%;
-         -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%);
-         mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%); }
+  @font-face { font-family: Baloo; src: url('fonts/baloo-2-latin.woff2') format('woff2'); font-weight: 500 800; font-display: block; }
+  @font-face { font-family: Inter; src: url('fonts/inter.woff2') format('woff2'); font-weight: 100 900; font-display: block; }
+  .og { background: linear-gradient(90deg,#17100a55,#17100a11),url('art/lantern-cavern.webp') center/cover; }
+  .og-left { width: 720px; padding-left: 76px; }
+  .kicker { font-family: Baloo, sans-serif; color:#ffda80; font-size:33px; letter-spacing:.02em; text-transform:none; margin-bottom:25px; }
+  h1 { font-family:Baloo,sans-serif; font-size:68px; font-weight:800; letter-spacing:-.025em; color:#fff2da; background:none; }
+  h1 .grad { color:#ffda80; background:none; }
+  .sub { color:#ecdbc2; font-size:24px; max-width:540px; }
+  .og-right { padding-right:50px; }
+  .art { width:245px; height:auto; max-height:550px; object-fit:contain; padding:7px; border-radius:29px; background:#302014; border:1px solid #cba16180; box-shadow:0 22px 50px #0009; }
 """,
-        # The page eyebrow, shortened. The iPhone app is not on sale (ASC 1.0
-        # PREPARE_FOR_SUBMISSION on 2026-09-13), so the card claims only the browser
-        # game, playable at /gemburrow/play/ (200) since before 2026-08-21. 41 chars,
-        # the length measured against the nowrap above.
-        "kicker": "Gem-digging puzzle \u00b7 play in your browser",
-        "h1": 'Read the orders.<br>Work the jar.<br><span class="grad">Grow a hoard.</span>',
-        "sub": "Career, Daily and Free Dig. Fill customer orders, or choose an optional excavation to preserve specimens for Flint.",
+        "kicker": "GemBurrow",
+        "h1": 'A little digging.<br><span class="grad">A lot of wonder.</span>',
+        "sub": "A cozy gem-digging puzzle.<br>Play free in your browser.",
     },
     # Replaces the hand-made 2026-08 plate whose baked subhead said "recover
     # every stolen coin", refuted by game.js:4486-4490 (a laden raider that
