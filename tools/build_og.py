@@ -103,11 +103,13 @@ body::before {{display:none}}
 .og .lede {{font-size:17px;line-height:1.65;color:var(--muted);max-width:490px}}
 .og .grad-text {{background-image:linear-gradient(105deg,#81E3D2,#9EB7F9 60%,#CFABF5)}}
 .og .product-universe {{grid-area:auto;width:94%;height:448px;margin:0}}
-.og .phone-story,.og .phone-gem {{top:50px}}
+.og .showcase-stage {{height:448px}}
+.og .showcase-controls,.og .showcase-note {{display:none}}
+.og .phone-left,.og .phone-right {{top:50px}}
 .og .phone-night {{top:8px}}
 .og .phone-caption {{font-size:12px;margin-top:12px}}
 .og .phone-caption small {{display:none}}
-.og .phone-caption span {{display:none}}
+.og .phone-caption span[aria-hidden] {{display:none}}
 .og .phone-glass {{padding:4px;border-radius:23px}}
 .og .phone-glass img {{border-radius:19px}}
 .og-apps {{border-top:1px solid #FFFFFF15;display:flex;align-items:center;gap:18px;margin-top:18px;padding-top:15px}}
