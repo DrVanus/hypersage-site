@@ -152,11 +152,11 @@ assert.match(html, /which choices are free and which are included with Pro/i);
 assert.match(html, /Some features require Nightshelf Pro/i);
 assert.match(html, /Availability follows your installed version/i);
 assert.match(html, /More options → About this book/);
-// 2026-10-27: the 1.9.19 (89) set — store-gallery raws plus Home, book details and
-// Music & sounds captured from the same build (hypersage-site shots/20261027/).
+// 2026-10-30: the 1.9.22 (94) set — authentic native captures with StoreKit Pro,
+// reviewed against the released build (hypersage-site shots/20261030/).
 for (const shot of ['home', 'familiar-tales', 'book-details', 'reader', 'narrators', 'sounds', 'story',
                     'up-next', 'find-place', 'history', 'romance']) {
-  const imagePath = 'shots/20261027/' + shot + '.jpg';
+  const imagePath = 'shots/20261030/' + shot + '.jpg';
   const imageURL = imagePath;
   assert.ok(html.includes('src="' + imageURL + '"'), shot + ' must use the current approved capture');
   assert.ok(fs.existsSync(path.join(root, imagePath)), shot + ' capture must exist');

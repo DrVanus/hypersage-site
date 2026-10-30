@@ -156,3 +156,59 @@
  .nav-inner{min-height:76px;flex-wrap:wrap;padding-block:12px;gap:12px}
  .sound-tiles,.sound-tiles[aria-labelledby="sound-music"]{grid-template-columns:repeat(auto-fit,minmax(min(100%,7rem),1fr))}
 }
+
+
+/* Moonlit reading room. Still, lightweight illustration; no motion required. */
+:root{--moon-glow:rgba(230,191,120,.15);--sky-violet:rgba(108,83,150,.25);--sky-blue:rgba(57,94,123,.18)}
+.site-nav{background:linear-gradient(110deg,#0c101b,#121322);border-bottom-color:rgba(230,191,120,.12)}
+.hero{isolation:isolate;background:radial-gradient(ellipse at 72% 26%,var(--sky-violet),transparent 55%),radial-gradient(ellipse at 95% 67%,var(--sky-blue),transparent 60%),linear-gradient(145deg,#101322,#0c101b 70%)}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 48% 5%,var(--moon-glow),transparent 34%),linear-gradient(100deg,rgba(12,16,27,.55),transparent 57%)}
+.night-sky{position:absolute;inset:0;background:url(art/night-sky.svg) center top/cover no-repeat;pointer-events:none;z-index:-1}
+.hero-moon{position:absolute;top:30px;left:calc(50% - 90px);width:62px;color:var(--gold);opacity:.88;filter:drop-shadow(0 0 26px #e6bf7866);pointer-events:none;transform:rotate(-12deg)}
+.hero-moon svg{width:100%;height:auto}
+.hero-grid,.hero-bottom{position:relative}
+.hero-stage:before{content:"";position:absolute;inset:4% -12% -3%;border-radius:50%;background:radial-gradient(ellipse,var(--sky-violet),transparent 67%);pointer-events:none;z-index:-1}
+.hero-copy{padding-top:58px}
+.hero h1{text-shadow:0 4px 40px #070a1266}
+.hero-note{max-width:360px;line-height:1.7}
+.hero-bottom{border-top-color:rgba(230,191,120,.17)}
+.primary{box-shadow:0 4px 30px #e6bf7812}
+.library{position:relative;background:radial-gradient(ellipse at 20% 50%,rgba(88,67,117,.15),transparent 50%)}
+.library-art{padding:66px 24px 42px;isolation:isolate;align-self:stretch;align-items:center}
+.library-art:before{content:"";position:absolute;inset:0 14px;border:1px solid rgba(230,191,120,.17);border-radius:230px 230px 14px 14px;z-index:-1;background:radial-gradient(ellipse at 50% 28%,rgba(230,191,120,.09),transparent 66%),linear-gradient(160deg,rgba(104,82,145,.12),transparent)}
+.library-art:after{content:"";position:absolute;inset:12px 26px;border:1px solid rgba(230,191,120,.065);border-radius:220px 220px 8px 8px;pointer-events:none;z-index:-1}
+.library-constellation{position:absolute;top:23px;left:0;width:100%;text-align:center;color:var(--gold);font-size:1rem;letter-spacing:.16em}
+.library-device{position:relative;width:min(280px,88%);box-shadow:0 22px 48px #06081288}
+.experience{background:radial-gradient(ellipse at 95% 0,rgba(97,72,131,.12),transparent 45%),#121623}
+.section-header h2{max-width:680px}
+.sound-section{background:radial-gradient(ellipse at 0 35%,rgba(105,73,137,.16),transparent 48%),radial-gradient(ellipse at 100% 80%,rgba(150,111,62,.09),transparent 50%)}
+.app-audio-panel{box-shadow:0 18px 50px #05071033}
+.ritual-section{background:linear-gradient(135deg,#151725,#101522)}
+.plan.pro{background:radial-gradient(ellipse at 95% 0,rgba(230,191,120,.10),transparent 65%),linear-gradient(135deg,#262133,#171b29)}
+.closing{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,rgba(108,83,150,.27),transparent 65%),var(--bg)}
+.closing:before{content:"";position:absolute;inset:0;background:url(art/night-sky.svg) center/cover;opacity:.65;pointer-events:none;z-index:-1}
+.closing-moon{filter:drop-shadow(0 0 24px #e6bf7844)}
+.mobile-nav{display:none}
+.screen-dialog{width:min(94vw,650px);height:min(94dvh,1050px);max-height:94dvh;padding:0;border:1px solid #e6bf7844;border-radius:18px;color:var(--ink);background:#111522;box-shadow:0 30px 100px #000b;overflow:hidden}
+.screen-dialog[open]{display:flex;flex-direction:column}
+.screen-dialog::backdrop{background:rgba(3,5,12,.9);backdrop-filter:blur(8px)}
+.screen-dialog-bar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.screen-dialog-bar p{font-family:var(--serif);font-size:1.1rem;line-height:1.35}
+.screen-dialog button{border:1px solid var(--line);border-radius:8px;color:var(--ink);background:transparent;min-height:44px;padding:8px 14px;font-size:.8rem}
+.screen-dialog button:hover{border-color:var(--gold);color:var(--gold)}
+.screen-dialog-close{flex-shrink:0}.screen-dialog-close span{font-size:1.15rem;margin-left:8px}
+.screen-dialog-image{min-height:0;flex:1;display:flex;justify-content:center;padding:16px;overflow:auto}
+.screen-dialog-image img{height:100%;width:auto;max-width:100%;object-fit:contain;border-radius:18px}
+.screen-dialog-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;border-top:1px solid var(--line)}
+.screen-dialog-count{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+body.screenshot-open{overflow:hidden}
+@media(max-width:850px){.mobile-nav{display:block;position:relative;margin-left:auto}.mobile-nav summary{list-style:none;cursor:pointer;font-size:.76rem;padding:12px 8px;min-height:44px;color:var(--muted)}.mobile-nav summary::-webkit-details-marker{display:none}.mobile-nav summary span{margin-left:6px;color:var(--gold)}.mobile-nav>div{position:absolute;top:calc(100% + 14px);right:0;width:205px;padding:12px;background:#191c2c;border:1px solid #e6bf7833;border-radius:12px;box-shadow:0 15px 40px #0008}.mobile-nav a{display:block;padding:11px 12px;min-height:44px;text-decoration:none;font-size:.85rem;border-radius:5px}.mobile-nav a:hover{background:#e6bf7812}.hero-moon{left:44%;width:56px;top:25px}.library-art{padding:62px 10px 34px}.library-art:before{inset:0}.library-art:after{inset:10px}.library-device{width:90%}}
+@media(max-width:600px){.nav-inner{gap:8px}.brand{font-size:1.3rem;gap:8px}.brand img{width:30px;height:30px}.nav-download{font-size:.66rem;padding:10px 11px;min-height:44px;display:flex;align-items:center}.nav-download span{margin-left:5px}.mobile-nav summary{font-size:.7rem;padding-inline:4px}.hero{background:radial-gradient(ellipse at 65% 62%,rgba(108,83,150,.28),transparent 60%),#0c101b}.night-sky{background-size:auto 100%;opacity:.75}.hero-moon{left:auto;right:14px;top:18px;width:40px;opacity:.62}.hero-copy{padding-top:56px}.hero-note{margin-inline:auto;max-width:310px}.hero-stage{margin-top:40px}.library-art{align-self:center;width:min(100%,380px);padding:65px 25px 35px;min-height:0}.library-art:before{inset:0 5px}.library-art:after{inset:12px 17px}.library-device{width:min(280px,95%)}.screen-dialog-bar{padding:12px 14px;gap:12px}.screen-dialog-bar p{font-size:.95rem}.screen-dialog-controls{padding:10px 14px;gap:8px}.screen-dialog-image{padding:10px}.screen-dialog button{padding:8px 10px;font-size:.75rem}}
+@media(max-width:370px){.brand{font-size:1.2rem}.nav-inner{gap:5px}.nav-download{font-size:.63rem;padding-inline:8px}.mobile-nav summary{font-size:.65rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.primary:hover{transform:none}}
+
+/* The hero CTA remains visible on the narrowest phones. */
+@media(max-width:370px){.nav-download{display:none}.nav-inner{flex-wrap:nowrap}.night-sky{mask-image:linear-gradient(to bottom,#000,transparent 22%,transparent 48%,#000 68%);-webkit-mask-image:linear-gradient(to bottom,#000,transparent 22%,transparent 48%,#000 68%)}}
+
+/* Supporting information remains readable and easy to tap. */
+.credits{font-size:.72rem;max-width:1000px}.copyright{font-size:.7rem}.footer-top nav a{font-size:.8rem;min-height:44px;display:inline-flex;align-items:center}

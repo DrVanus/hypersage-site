@@ -19,8 +19,8 @@ const stop = document.getElementById('stop-preview');
 const toggle = document.getElementById('room-toggle');
 const volume = document.getElementById('room-volume');
 const roomNow = document.getElementById('room-now');
-let activeVoice = null, activeSound = null, voiceRequest = 0, soundRequest = 0;
-let audioContext, roomFade, roomGain, roomSource;
+let activeVoice = null, activeSound = null, voiceRequest = 0, soundRequest = 0, explicitlyStopped = false;
+let audioContext, roomFade, roomGain, roomSource, narratorGain;
 narr.defaultPlaybackRate = .85; narr.playbackRate = .85;
 narr.preservesPitch = true; narr.webkitPreservesPitch = true;
 const playing = audio => !audio.paused && !audio.ended;
@@ -33,6 +33,9 @@ function setupMix() {
  try {
   audioContext = new AudioContextClass();
   roomSource = audioContext.createMediaElementSource(room);
+  narratorGain = audioContext.createGain();
+  audioContext.createMediaElementSource(narr).connect(narratorGain).connect(audioContext.destination);
+  narratorGain.gain.value=Number(activeVoice?.dataset.gain || 1);
   roomFade = audioContext.createGain(); roomGain = audioContext.createGain();
   roomSource.connect(roomFade).connect(roomGain).connect(audioContext.destination);
   room.volume=1; // The graph owns volume once connected; avoid applying it twice.
@@ -84,9 +87,15 @@ function describe() {
  else announce('Previews paused.');
 }
 function begin(audio) {
+ explicitlyStopped=false;
  setupMix();
  const token=audio===narr?++voiceRequest:++soundRequest;
- if(audio===narr){audio.playbackRate=.85;audio.preservesPitch=true;}
+ if(audio===narr){
+  audio.playbackRate=.85;audio.preservesPitch=true;
+  const gain=Number(activeVoice?.dataset.gain || 1);
+  if(narratorGain) narratorGain.gain.value=gain;
+  else audio.volume=gain;
+ }
  announce('Loading '+(audio===narr?activeVoice.dataset.name:activeSound.dataset.name)+'…');
  audio.play().catch(error=>{
   if(error.name==='AbortError')return;
@@ -112,11 +121,11 @@ volume.addEventListener('input',()=>{
 for(const audio of [narr,room]){
  audio.addEventListener('play',update);
  audio.addEventListener('playing',()=>{if(audio===room)openingFade();update();describe();});
- audio.addEventListener('waiting',()=>announce('Loading preview…'));
+ audio.addEventListener('waiting',()=>{if(!explicitlyStopped)announce('Loading preview…');});
  audio.addEventListener('pause',()=>{
   update();
   // A failed load can queue pause after error. Keep its recovery message visible.
-  if(!audio.error && status.dataset.error!=='true')describe();
+  if(!explicitlyStopped && !audio.error && status.dataset.error!=='true')describe();
  });
  audio.addEventListener('ended',()=>{
   update();
@@ -133,8 +142,46 @@ narr.addEventListener('timeupdate',()=>{
  }
 });
 room.addEventListener('timeupdate',()=>{if(Number.isFinite(room.duration))document.getElementById('ambient-fill').style.width=100*room.currentTime/room.duration+'%';});
-function stopAll(){voiceRequest++;soundRequest++;narr.pause();room.pause();narr.currentTime=0;room.currentTime=0;update();announce('All previews stopped.');}
+function stopAll(){explicitlyStopped=true;voiceRequest++;soundRequest++;narr.pause();room.pause();narr.currentTime=0;room.currentTime=0;update();announce('All previews stopped.');}
 stop.addEventListener('click',stopAll);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAll();});
 update();
+})();
+
+// Progressive screenshot viewer. Original image links remain useful without JS.
+(() => {
+ const dialog = document.querySelector('.screen-dialog');
+ if (!dialog || typeof dialog.showModal !== 'function') return;
+ const links = [...document.querySelectorAll('.screen-open')];
+ const picture = dialog.querySelector('img');
+ const title = dialog.querySelector('#screen-dialog-title');
+ const count = dialog.querySelector('.screen-dialog-count');
+ let current = 0, opener = null;
+ function show(index) {
+  current = (index + links.length) % links.length;
+  const link = links[current], source = link.querySelector('img');
+  picture.src = link.href; picture.alt = source.alt;
+  title.textContent = link.closest('figure').querySelector('h3').textContent;
+  count.textContent = (current + 1) + ' / ' + links.length;
+ }
+ links.forEach((link,index) => link.addEventListener('click',event => {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault(); opener=link;show(index);dialog.showModal();
+  document.body.classList.add('screenshot-open');
+ }));
+ dialog.querySelector('.screen-dialog-close').addEventListener('click',()=>dialog.close());
+ dialog.querySelector('.screen-dialog-prev').addEventListener('click',()=>show(current-1));
+ dialog.querySelector('.screen-dialog-next').addEventListener('click',()=>show(current+1));
+ dialog.addEventListener('keydown',event=>{
+  if(event.key==='ArrowRight'){event.preventDefault();show(current+1);}
+  if(event.key==='ArrowLeft'){event.preventDefault();show(current-1);}
+ });
+ dialog.addEventListener('click',event=>{
+  if(event.target!==dialog)return;
+  const r=dialog.getBoundingClientRect();
+  if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();
+ });
+ dialog.addEventListener('close',()=>{document.body.classList.remove('screenshot-open');opener?.focus({preventScroll:true});});
+ const menu=document.querySelector('.mobile-nav');
+ menu?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{menu.open=false;}));
 })();
