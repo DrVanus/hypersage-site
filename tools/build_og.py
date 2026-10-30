@@ -1,27 +1,11 @@
-"""Render hypersage.ai's og-image FROM THE SITE'S OWN MARKUP.
+"""Render the 1200x630 social preview from the studio homepage.
 
-    python3 tools/build_og.py            # writes og-image.png (1200x630)
-    python3 tools/build_og.py --check    # fail if the preview no longer matches the page
+    python3 tools/build_og.py
+    python3 tools/build_og.py --check
 
-WHY THIS IS A RENDERER AND NOT A DESIGN FILE
---------------------------------------------
-The previous og-image was drawn separately from the site and drifted, exactly the
-way a second copy of anything drifts:
-
-  * It showed an ORBITAL diagram, four labels ringed around a hub. The site shows
-    a left-to-right walkthrough: three input cards -> the product -> Result. Two
-    different diagrams making two different claims about how the product works.
-    Someone shares the link,
-    sees one thing, clicks, and sees another.
-  * It listed THIRTEEN products including "The One". The site has twelve, and
-    "The One" is not among them.
-
-So this does not draw anything. It lifts the site's own <style> block and its
-own hero markup, drops them on a 1200x630 canvas, and screenshots it. The
-diagram in the preview is the diagram on the page because it is literally the
-same DOM. The product list is read out of the page's `id="product-*"` anchors,
-so adding or removing a product updates the preview on the next build and
-`--check` fails loudly if someone forgets.
+The heading, introduction, aurora, product screenshots and icon roster come
+from index.html. The digest covers their source and image bytes, local fonts
+and this renderer so the card cannot silently drift behind the page.
 """
 from __future__ import annotations
 
@@ -54,9 +38,9 @@ def site_parts() -> tuple[str, str, list[str], list[str], str]:
     style = re.search(r"<style>(.*?)</style>", html, re.S)
     if not style:
         sys.exit("no <style> block in index.html")
-    fig = re.search(r'(<figure class="context-engine".*?</figure>)', html, re.S)
+    fig = re.search(r'(<figure class="product-universe".*?</figure>)', html, re.S)
     if not fig:
-        sys.exit("no .context-engine figure in index.html — the hero diagram moved")
+        sys.exit("no .product-universe figure in index.html — the product showcase moved")
     ids = re.findall(r'id="product-([a-z]+)"', html)
     seen: list[str] = []
     for i in ids:
@@ -96,139 +80,74 @@ def site_parts() -> tuple[str, str, list[str], list[str], str]:
 
 
 def build_html() -> str:
+    """Compose the social card from the live heading, copy, showcase and icons."""
     style, figure, products, icons, cap = site_parts()
-    tiles = "".join(f'<img src="{s}" alt="">' for s in icons)
+    source = INDEX.read_text()
+    headline = re.search(r"<h1[^>]*>(.*?)</h1>", source, re.S).group(1)
+    lede = re.search(r'<p class="lede">(.*?)</p>', source, re.S).group(1)
+    aurora = re.search(r'(<div class="aurora-scene".*?</div>)', source, re.S).group(1)
+    tiles = "".join(f'<img src="{src}" alt="">' for src in icons)
     return f"""<!doctype html><html><head><meta charset="utf-8">
-<!-- The site's @font-face rules live HERE, not in index.html's <style> block, so
-     lifting that block alone rendered the whole card — including the lifted
-     figure, whose CSS asks for these families BY NAME — in system fallback.
-     A preview set in a different typeface than the page it previews is the same
-     drift this renderer exists to prevent, wearing a font instead of a claim. -->
-<link rel="stylesheet" href="fonts/fonts.css">
-<style>{style}</style>
+<link rel="stylesheet" href="fonts/fonts.css"><style>{style}</style>
 <style>
-  html,body {{ margin:0; padding:0; width:{W}px; height:{H}px; overflow:hidden; }}
-  body {{ background:#080B0F; }}
-  .og {{ position:relative; width:{W}px; height:{H}px;
-         background:
-           radial-gradient(900px 460px at 12% -10%, rgba(45,212,191,.13), transparent 60%),
-           radial-gradient(760px 420px at 96% 8%, rgba(167,139,250,.14), transparent 62%),
-           #080B0F;
-         padding:48px 56px; box-sizing:border-box; display:flex; gap:20px; }}
-  /* 500 + a 20px gutter, tuned WITH the figure's scale below so the card has
-     even air on both sides — see that rule for the arithmetic. The floor on this
-     width is the tile strip: 8 tiles per row needs 477px of content box, and at
-     7 per row sixteen products spill into a third row that collides upward. */
-  .og-left {{ width:500px; flex:0 0 500px; display:flex; flex-direction:column; }}
-  .og-right {{ flex:1; display:flex; align-items:center; justify-content:center; }}
-  .og-brand {{ display:flex; align-items:center; gap:12px; margin-bottom:30px; }}
-  /* object-fit, and a box that matches the ASSET's aspect rather than restating
-     it. This pair was 38x42 — the exact aspect of the old logo.png, which was a
-     portrait canvas with the mark floating inside it. When logo.png was
-     re-cropped to the mark's own 3:2, the pin silently stretched it 61% too
-     tall. A box that hardcodes one asset's proportions is a second definition
-     of that asset, and it does not travel when the asset is fixed. */
-  .og-brand img {{ width:38px; height:26px; object-fit:contain; }}
-  .og-brand .t1 {{ font: 600 11px/1.1 'JetBrains Mono',ui-monospace,monospace;
-                   letter-spacing:.22em; text-transform:uppercase; color:#5EEAD4; }}
-  .og-brand .t2 {{ font: 700 17px/1.45 'Inter',sans-serif; color:#F2F6F8;
-                   margin-top:3px; letter-spacing:-.01em; }}
-  /* 58px, not 54: the two lines are hard-broken, and at 58 the longer of them
-     ("a point of view.") still measures ~410px inside a 520px column. Sized up
-     with the portfolio strip below so the column reads as one filled composition
-     rather than two islands with a hole between them. */
-  .og h1 {{ font: 700 58px/1.14 'Inter',sans-serif;
-            color:#F2F6F8; margin:0 0 24px; letter-spacing:-.02em; padding-bottom:.1em; }}
-  /* The SAME gradient the live headline uses — teal -> blue -> violet. The old
-     preview flattened this to one teal, which is half the brand. */
-  .og h1 .grad {{ background:linear-gradient(96deg,#2DD4BF 0%,#5AA9E6 52%,#A78BFA 100%);
-                  -webkit-background-clip:text; background-clip:text; color:transparent; }}
-  .og .rule {{ width:330px; height:2px; margin:0 0 22px;
-               background:linear-gradient(90deg,#2DD4BF,#A78BFA); border-radius:2px; }}
-  .og-left > p {{ font: 400 19px/1.55 'Inter',ui-sans-serif,-apple-system,sans-serif;
-           color:#B9C6CE; margin:0; max-width:477px; }}
-  /* THE PORTFOLIO, AS PICTURES. This column used to end with the fifteen product
-     NAMES set in two 13px rows, absolutely positioned at the bottom — and above
-     them sat a 204px hole, a third of the card's height, which is what Vanus saw
-     as "a lot of empty space". Both halves of that were the same mistake: a link
-     preview is drawn ~460px wide in a message bubble, where 13px becomes ~5px and
-     no name is ever read, so the card spent its whole lower third on type nobody
-     can see. Icons survive the downscale — each tile is still ~18px in that
-     bubble and reads as a portfolio at a glance. The label is the live page's own
-     section eyebrow and the tiles are the live page's own icons, so this section
-     mirrors the site exactly like the figure does.
-     50px + 11px gap = 8 tiles per row inside 492px, so sixteen products land as
-     8 + 8. Check the arithmetic if the count changes; a third row would collide
-     with the paragraph above. */
-  .og-apps {{ margin-top:auto; }}
-  .og-apps .cap {{ font: 600 11px/1 'JetBrains Mono',ui-monospace,monospace;
-                   letter-spacing:.18em; text-transform:uppercase; color:#7C8B95;
-                   margin:0 0 16px; }}
-  .og-apps .tiles {{ display:flex; flex-wrap:wrap; gap:11px; max-width:477px; }}
-  .og-apps img {{ width:50px; height:50px; border-radius:13px; object-fit:cover;
-                  border:1px solid rgba(255,255,255,.14);
-                  background:rgba(255,255,255,.05);
-                  box-shadow:0 3px 10px rgba(0,0,0,.45); }}
-  /* The compact flow keeps the page’s own typography and geometry.
-     Scale it as one unit inside the social card’s right column. */
-  .og-right .context-engine {{ transform:scale(1.08); transform-origin:center; margin:0; }}
-  /* NO CONTROLS IN A PICTURE. The lifted figure is the page's live carousel, and
-     on the page "01 / 12", "Explore app ↗" and the product menu's chevron all
-     work. Frozen into a PNG they are a counter for slides nobody can advance, a
-     button nobody can press and a menu nobody can open — a fake CTA in the one
-     image that represents the studio on X. "Illustrative example" stays: it is
-     the caption that keeps the diagram honest. */
-  .og-right .engine-counter, .og-right .example-link {{ display:none !important; }}
-  .og-right .example-choice select {{ background-image:none; }}
-</style></head><body>
-<div class="og">
-  <div class="og-left">
-    <div class="og-brand">
-      <img src="logo.png" alt="">
-      <div><div class="t1">Independent Product Studio</div><div class="t2">HyperSage AI Labs</div></div>
-    </div>
-    <h1>Software with<br><span class="grad">a point of view.</span></h1>
-    <div class="rule"></div>
-    <p>iPhone apps and original games.<br>Dinner from your pantry, a classic at bedtime.</p>
-    <div class="og-apps">
-      <div class="cap">{cap}</div>
-      <div class="tiles">{tiles}</div>
-    </div>
-  </div>
-  <div class="og-right">{figure}</div>
-</div>
-</body></html>"""
+html,body {{margin:0;width:1200px;height:630px;overflow:hidden}}
+body::before {{display:none}}
+.og {{position:relative;isolation:isolate;width:1200px;height:630px;padding:36px 48px;background:#080B14}}
+.og .aurora-scene {{inset:-50px;opacity:.85}}
+.og-brand {{display:flex;align-items:center;gap:12px;font-size:21px;font-weight:650;margin-bottom:14px}}
+.og-brand img {{width:40px;height:27px;object-fit:contain}}
+.og-brand span {{color:#9AA8BE;font-weight:400}}
+.og-hero {{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:30px;height:448px}}
+.og h1 {{font-size:54px;line-height:1.06;font-weight:650;letter-spacing:-.055em;margin:0 0 22px}}
+.og h1 .hero-line {{display:block}}
+.og .lede {{font-size:17px;line-height:1.65;color:var(--muted);max-width:490px}}
+.og .grad-text {{background-image:linear-gradient(105deg,#81E3D2,#9EB7F9 60%,#CFABF5)}}
+.og .product-universe {{grid-area:auto;width:94%;height:448px;margin:0}}
+.og .phone-story,.og .phone-gem {{top:50px}}
+.og .phone-night {{top:8px}}
+.og .phone-caption {{font-size:12px;margin-top:12px}}
+.og .phone-caption small {{display:none}}
+.og .phone-caption span {{display:none}}
+.og .phone-glass {{padding:4px;border-radius:23px}}
+.og .phone-glass img {{border-radius:19px}}
+.og-apps {{border-top:1px solid #FFFFFF15;display:flex;align-items:center;gap:18px;margin-top:18px;padding-top:15px}}
+.og-apps .cap {{font:10px 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.15em;color:#A9B5C9;white-space:nowrap}}
+.og-apps .tiles {{display:flex;gap:12px}}
+.og-apps img {{width:34px;height:34px;border-radius:9px;border:1px solid #FFFFFF25}}
+</style></head><body><div class="og">
+{aurora}
+<div class="og-brand"><img src="logo.png" alt="">HyperSage <span>AI Labs</span></div>
+<div class="og-hero"><div><h1>{headline}</h1><p class="lede">{lede}</p></div>{figure}</div>
+<div class="og-apps"><div class="cap">{cap}</div><div class="tiles">{tiles}</div></div>
+</div></body></html>"""
 
 
 STAMP = ROOT / "og-image.inputs.sha256"
 
 
 def inputs_digest() -> str:
-    """Hash exactly what the render is made of: the page's style block, its hero
-    figure, and the product list. Nothing else about index.html matters — an FAQ
-    edit must not report the preview as stale, and a change to the diagram must.
-
-    The headline and og:title are in here too even though this file HARDCODES
-    the left column: that is precisely why they belong. If the page's hero
-    headline is rewritten, nothing about the lifted figure changes, and the
-    preview would keep promising the old line in silence."""
+    """Hash the rendered source, image bytes, fonts and renderer configuration."""
     style, figure, products, icons, cap = site_parts()
     html = INDEX.read_text()
     h1 = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S)
-    h1 = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", h1.group(1))).strip() if h1 else ""
+    h1 = h1.group(1) if h1 else ""
     ogt = re.search(r'<meta property="og:title" content="([^"]*)"', html)
     h = hashlib.sha256()
     # Lifecycle chips are deliberately NOT in here any more: the card stopped
     # counting them, so an app going live changes no pixel, and a stale verdict
     # would only force a ?v= bump on identical bytes.
     for part in (style, figure, "\n".join(products), "\n".join(icons), cap,
-                 h1, ogt.group(1) if ogt else ""):
+                 h1, ogt.group(1) if ogt else "",
+                 re.search(r'<p class="lede">(.*?)</p>', html, re.S).group(1),
+                 re.search(r'(<div class="aurora-scene".*?</div>)', html, re.S).group(1)):
         h.update(part.encode())
         h.update(b"\0")
     # The brand mark is pixels in the card; a swapped logo.png must read as stale.
     # The app icons are pixels in it too, for exactly the same reason — a redrawn
     # icon changes what the card shows while every string stays put.
-    for rel in ["logo.png"] + [s.split("?", 1)[0] for s in icons]:
+    # Screenshot bytes participate, so replacing a frame invalidates the card.
+    shots = re.findall(r'<img[^>]+src="([^"]+)"', figure)
+    for rel in ["logo.png"] + [s.split("?", 1)[0] for s in icons + shots]:
         h.update((ROOT / rel).read_bytes())
         h.update(b"\0")
     # The renderer supplies its own layout overrides, and the linked font CSS

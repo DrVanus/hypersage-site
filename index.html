@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#080B11">
   <title>HyperSage AI Labs — Independent iOS App &amp; Game Studio</title>
-  <meta name="description" content="HyperSage AI Labs is an independent studio making iPhone apps and original games. Cook from your pantry, hear a classic read aloud at bedtime, or survive a gothic horde.">
+  <meta name="description" content="Thoughtful iPhone apps and original games from HyperSage AI Labs. Find a hand in the kitchen, a story before sleep, or a world to get lost in.">
   <meta name="robots" content="index, follow">
   
   <link rel="canonical" href="https://hypersage.ai/">
@@ -14,18 +14,18 @@
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="HyperSage AI Labs — Independent Product Studio">
-  <meta property="og:description" content="HyperSage AI Labs is an independent studio making iPhone apps and original games. Cook from your pantry, hear a classic read aloud at bedtime, or survive a gothic horde.">
+  <meta property="og:description" content="Thoughtful iPhone apps and original games from HyperSage AI Labs. Find a hand in the kitchen, a story before sleep, or a world to get lost in.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20260919a">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20261030a">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="HyperSage AI Labs — an independent product studio">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
-  <meta name="twitter:description" content="HyperSage AI Labs is an independent studio making iPhone apps and original games. Cook from your pantry, hear a classic read aloud at bedtime, or survive a gothic horde.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20260919a">
+  <meta name="twitter:description" content="Thoughtful iPhone apps and original games from HyperSage AI Labs. Find a hand in the kitchen, a story before sleep, or a world to get lost in.">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20261030a">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20260919a",
+        "image": "https://hypersage.ai/og-image.png?v=20261030a",
         "description": "An independent studio making iPhone apps and original games.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -855,6 +855,129 @@
       .btn-primary { color: ButtonText; background: ButtonFace; border: 1px solid ButtonText; box-shadow: none; }
       a:focus-visible, summary:focus-visible, .btn:focus-visible, .rail-btn:focus-visible { outline-color: Highlight; }
     }
+
+    /* The studio's aurora: a lightweight vector light trail around real products. */
+    :root { --bg: #080B14; --panel: #101724; --panel-2: #172130; --muted: #A9B5C9; --faint: #9AA8BE; --radius: 22px; --c-loam-text: #A2B77D; --c-rowan-text: #B6A1F2; }
+    body::before { background: radial-gradient(ellipse 75% 50% at 10% 0%, #14353255, transparent 70%), radial-gradient(ellipse 70% 70% at 95% 30%, #29204444, transparent 72%); }
+    section.hero { padding: 84px 0 68px; isolation: isolate; overflow: clip; }
+    .aurora-scene { position: absolute; inset: -80px -10% -80px; z-index: -1; pointer-events: none; opacity: .82; }
+    .aurora-ribbon { width: 100%; height: 100%; }
+    .ribbon-halo { opacity: .24; }
+    .hero-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1.06fr); column-gap: 36px; align-items: center; }
+    .hero .eyebrow { border: 0; background: none; padding: 0; font-size: .7rem; letter-spacing: .2em; margin: 18px 0 24px; }
+    .hero h1 { font-size: clamp(3rem, 4.65vw, 4.6rem); line-height: 1.075; letter-spacing: -.055em; font-weight: 650; margin-bottom: 24px; }
+    .hero .grad-text { background-image: linear-gradient(105deg, #81E3D2 4%, #9EB7F9 60%, #CFABF5); }
+    .hero .lede { max-width: 35em; font-size: 1.08rem; line-height: 1.75; margin-bottom: 28px; }
+    .hero-cta { gap: 14px 22px; }
+    .hero-try { font-size: .85rem; }
+    .product-universe { grid-area: engine; position: relative; width: 94%; max-width: 620px; height: 540px; justify-self: center; isolation: isolate; }
+    .universe-orbit { position: absolute; width: 100%; height: 63%; top: 16%; border: 1px solid #A68DEC30; border-radius: 50%; transform: rotate(-24deg); box-shadow: 0 0 70px #759BE80B, inset 0 0 50px #76DCC709; z-index: -1; }
+    .universe-orbit::after { content: ''; position: absolute; inset: 24px -24px; border: 1px solid #72DFC320; border-radius: 50%; }
+    .showcase-phone { position: absolute; display: block; width: 34%; top: 58px; transition: transform .24s ease; }
+    .phone-glass { display: block; padding: 5px; border-radius: 25px; background: #151B29; border: 1px solid #A1B7CE55; box-shadow: 0 24px 60px #0009, inset 0 0 0 1px #ffffff0C; }
+    .phone-glass img { display: block; width: 100%; height: auto; border-radius: 20px; }
+    .phone-story { left: 0; transform: rotate(-8deg); z-index: 1; }
+    .phone-night { left: 32%; width: 37%; top: 8px; z-index: 3; }
+    .phone-gem { right: 0; transform: rotate(8deg); z-index: 2; }
+    .phone-caption { display: block; text-align: center; margin-top: 15px; font-size: .82rem; font-weight: 600; color: var(--fg); white-space: nowrap; }
+    .phone-caption small { display: block; color: var(--muted); font-size: .68rem; font-weight: 400; margin-top: 3px; }
+    .universe-caption { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: .75rem; color: var(--muted); }
+    @media (hover:hover) { .showcase-phone:hover { transform: translateY(-8px) rotate(0); z-index: 4; } }
+    .showcase-phone:focus-visible { outline-offset: 10px; border-radius: 25px; z-index: 4; }
+    .strip { background: #0D1421A8; padding: 18px 0; }
+    .strip .word { font-size: .83rem; gap: 8px; min-height: 44px; }
+    .strip .word img { width: 22px; height: 22px; border-radius: 6px; }
+    section.block { padding: 86px 0; }
+    .section-head { margin-bottom: 36px; }
+    .section-head h2 { font-weight: 600; letter-spacing: -.04em; }
+    .product-filters { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 0 0 32px; }
+    .product-filters[hidden], .product[hidden] { display: none !important; }
+    .filter-chip { min-height: 44px; padding: 10px 20px; font: 500 .88rem/1.4 'Inter', sans-serif; color: var(--muted); background: transparent; border: 1px solid var(--line-strong); border-radius: 999px; cursor: pointer; }
+    .filter-chip[aria-pressed="true"] { background: #A8E8DE; color: #0A2423; border-color: #A8E8DE; }
+    .filter-chip:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 3px; }
+    .product { background: linear-gradient(145deg,#15202A,#101522 65%); border-color: #93AFC120; }
+    .product::before { height: 2px; opacity: .65; }
+    .product .top { margin-bottom: 20px; }
+    .product .foot { background: #0C121ECC; }
+    .product > p.desc { font-size: 1rem; }
+    .product ul li { font-size: .92rem; }
+    .product:hover { transform: translateY(-3px); box-shadow: 0 16px 48px #0004; }
+    .aside-card { background: radial-gradient(ellipse at 20% 50%, #24433B55, transparent 70%), linear-gradient(125deg,#111C2A,#211B34); }
+    .aside-card .inner { max-width: 70ch; }
+    .ai-intro { display: grid; grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); gap: 60px; align-items: center; margin: 8px 0 50px; padding: 40px; border: 1px solid #9BA9D324; border-radius: 28px; background: radial-gradient(ellipse at 8% 20%,#234A4738,transparent 70%), #10162499; }
+    .ai-intro .context-engine { grid-area: auto; margin: 0; max-width: 560px; }
+    .section-number { font: .8rem/1 'JetBrains Mono',monospace; color: var(--brand-a); }
+    .ai-intro-copy h3 { font-size: clamp(1.6rem,2.7vw,2.5rem); line-height: 1.2; letter-spacing: -.035em; margin: 22px 0 18px; font-weight: 550; }
+    .ai-intro-copy p { font-size: 1rem; color: var(--muted); max-width: 34em; }
+    .ai-intro-copy .ai-demo-hint { font-size: .8rem; margin-top: 26px; }
+    #ai { background: linear-gradient(180deg,transparent,#14152D55 45%,transparent); }
+    #about .container { display: grid; grid-template-columns: .9fr 1.1fr; gap: 70px; }
+    #about .section-head { text-align: left; margin: 0; }
+    #about .section-head h2 { font-size: clamp(2rem,3.3vw,3.2rem); }
+    #about .section-head p { margin: 0; }
+    .approach-row { grid-template-columns: 1fr; gap: 8px; padding: 25px 0; }
+    .approach-row .k { color: var(--brand-a); font-size: .65rem; }
+    .approach-row h3 { font-size: 1.17rem; }
+    .cta { margin: 0 24px 60px; padding: 64px 0; border: 1px solid #A7B7F333; border-radius: 30px; background: radial-gradient(ellipse at 15% 100%,#25736B55,transparent 65%),radial-gradient(ellipse at 90% 0%,#6753A54D,transparent 65%),#101725; }
+    footer.site { background: #080B14; }
+    @media (min-width: 1180px) { .products-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } .products-grid > aside { grid-column: 2 / -1 !important; } .product { --card-padding: 25px; } }
+    @media (min-width: 1700px) { .hero h1 { font-size: 4.6rem; } }
+    @media (max-width: 1099px) and (min-width: 761px) {
+      .hero-stage { grid-template-areas: 'eyebrow engine' 'title engine' 'copy engine'; gap: 0 28px; grid-template-columns: 1fr 1fr; }
+      .hero h1 { font-size: clamp(2.8rem,4.8vw,3.6rem); }
+      .hero .lede { font-size: 1rem; }
+      .product-universe { height: 440px; }
+      .showcase-phone { top: 60px; }
+      .phone-night { top: 15px; }
+      .phone-caption { font-size: .7rem; }
+      .phone-caption small { display: none; }
+    }
+    @media (max-width: 960px) { .ai-intro { grid-template-columns: minmax(0,1fr); padding: 28px; gap: 30px; } .ai-intro .context-engine { justify-self: center; } #about .container { gap: 36px; } }
+    @media (max-width: 760px) {
+      section.hero { padding: 44px 0 36px; }
+      .hero-stage { grid-template-columns: minmax(0,1fr); grid-template-areas: 'eyebrow' 'title' 'copy' 'engine'; gap: 0; }
+      .hero h1 { font-size: clamp(2.7rem,8.5vw,4.8rem); margin-bottom: 20px; }
+      .desktop-break { display: none; }
+      .hero .lede { font-size: 1rem; max-width: 39em; }
+      .hero .eyebrow { margin: 0 0 22px; font-size: .64rem; }
+      .product-universe { margin-top: 40px; max-width: 490px; height: auto; aspect-ratio: 1.05; }
+      .showcase-phone { top: 32px; }
+      .phone-night { top: 0; }
+      .phone-glass { padding: 3px; border-radius: 19px; }
+      .phone-glass img { border-radius: 15px; }
+      .phone-caption { font-size: .7rem; margin-top: 12px; }
+      .phone-caption small { display: none; }
+      .universe-caption { font-size: .7rem; bottom: -5px; }
+      section.block { padding: 56px 0; }
+      .product-filters { justify-content: flex-start; }
+      .filter-chip { padding: 10px 14px; font-size: .8rem; }
+      .ai-intro { grid-template-columns: minmax(0,1fr); padding: 24px 16px; gap: 24px; margin-bottom: 32px; }
+      .ai-intro-copy { padding: 0 6px; }
+      .ai-intro .context-engine { justify-self: stretch; }
+      .ai-intro-copy .ai-demo-hint { margin-top: 14px; }
+      #about .container { grid-template-columns: minmax(0,1fr); gap: 30px; }
+      .cta { margin: 0 16px 40px; padding: 42px 0; border-radius: 24px; }
+    }
+    @media (max-width: 360px) { .phone-caption { font-size: .65rem; } .example-app > img { display: none; } }
+    @media (prefers-reduced-motion: reduce) { .showcase-phone:hover { transform: none; } }
+    @media (prefers-reduced-transparency: reduce) { .aurora-scene, .universe-orbit { display: none; } nav.site { background: var(--bg); backdrop-filter: none; } }
+    @media (forced-colors: active) { .aurora-scene, .universe-orbit { display: none; } .filter-chip[aria-pressed="true"] { background: Highlight; color: HighlightText; } }
+    @media print { .aurora-scene, .product-filters { display: none; } .product[hidden] { display: flex !important; } }
+
+
+    @media (min-width: 701px) {
+      .products-grid[data-filter="apps"] > aside,
+      .products-grid[data-filter="games"] > aside { grid-column: auto !important; }
+    }
+    @media (prefers-contrast: more) {
+      :root { --muted: #C5CEDB; --faint: #B5C0D0; --line: #FFFFFF44; --line-strong: #FFFFFF66; }
+      .product { border-color: var(--line-strong); }
+    }
+    @media (forced-colors: active) {
+      .hero .grad-text { background: none; color: CanvasText; -webkit-text-fill-color: CanvasText; }
+      .product, .product .foot, .ai-intro, .cta, .strip { background: Canvas; color: CanvasText; border-color: CanvasText; }
+    }
+
   </style>
   <script>
     /* Enable reveal only when motion is welcome and the API exists — otherwise
@@ -903,19 +1026,436 @@
   <main id="top" tabindex="-1">
 
   <section class="hero">
+    <div class="aurora-scene" aria-hidden="true">
+      <svg class="aurora-ribbon" viewBox="0 0 1400 900" fill="none" preserveAspectRatio="xMidYMid slice">
+        <defs><linearGradient id="ribbon-light" x1="50" y1="650" x2="1350" y2="150" gradientUnits="userSpaceOnUse"><stop stop-color="#2DD4BF"/><stop offset=".5" stop-color="#77A4F9"/><stop offset="1" stop-color="#B690F8"/></linearGradient><filter id="ribbon-blur"><feGaussianBlur stdDeviation="30"/></filter></defs>
+        <path class="ribbon-halo" d="M-120 680C210 120 440 250 680 535S1120 850 1470 140" stroke="url(#ribbon-light)" stroke-width="95" filter="url(#ribbon-blur)"/>
+        <path d="M-120 680C210 120 440 250 680 535S1120 850 1470 140" stroke="url(#ribbon-light)" stroke-width="1.3" opacity=".5"/>
+        <path d="M-100 711C235 150 450 275 690 555S1140 870 1480 170" stroke="url(#ribbon-light)" stroke-width=".6" opacity=".35"/>
+        <g fill="#C7F8F1"><circle cx="115" cy="185" r="1.5"/><circle cx="380" cy="98" r="1"/><circle cx="669" cy="177" r="1.5"/><circle cx="1220" cy="204" r="2"/><circle cx="1290" cy="659" r="1.5"/><circle cx="483" cy="734" r="1"/><circle cx="915" cy="90" r="1"/><circle cx="75" cy="510" r="1"/></g>
+      </svg>
+    </div>
     <div class="container">
       <div class="hero-stage">
         <span class="eyebrow">Independent Product Studio</span>
-        <h1><span class="hero-line">Software with</span> <span class="grad-text hero-line">a point of view.</span></h1>
+        <h1><span class="hero-line">Everyday tools.</span> <span class="grad-text hero-line">Extraordinary<br class="desktop-break"> worlds.</span></h1>
         <div class="hero-copy">
-          <p class="lede">HyperSage makes iPhone apps and original games. One app turns what’s in your pantry into dinner. Another reads you a classic at bedtime.</p>
+          <p class="lede">Thoughtful iPhone apps and original games. A hand in the kitchen, a story before sleep, a world to get lost in. Made with care, down to the little things.</p>
           <div class="hero-cta">
             <a href="#products" class="btn btn-primary"><span>Explore the products</span><span aria-hidden="true">→</span></a>
             <a class="hero-try" href="https://waddleton.pages.dev/" target="_blank" rel="noopener" aria-label="Play Waddleton free in your browser"><span class="u">Or play Waddleton free</span> <span aria-hidden="true">↗</span></a>
           </div>
         </div>
 
-        <figure class="context-engine" aria-label="Product walkthroughs">
+        <figure class="product-universe" aria-label="Explore three HyperSage products">
+          <div class="universe-orbit" aria-hidden="true"></div>
+          <a class="showcase-phone phone-story" href="storyvault/" aria-label="Explore StoryVault AI">
+            <span class="phone-glass"><img src="storyvault/screenshots/release135-adventure.webp" alt="StoryVault AI: a Dracula adventure with illustrated scenes and choices" width="900" height="1955" fetchpriority="high"></span>
+            <span class="phone-caption">StoryVault AI <span aria-hidden="true">↗</span><small>Step into a story</small></span>
+          </a>
+          <a class="showcase-phone phone-night" href="nightshelf/" aria-label="Explore Nightshelf">
+            <span class="phone-glass"><img src="nightshelf/shots/20261030/home-small.webp" alt="Nightshelf with Pro enabled: illustrated classics, short listens, and bedtime stories" width="420" height="913" fetchpriority="high"></span>
+            <span class="phone-caption">Nightshelf <span aria-hidden="true">↗</span><small>Find a softer landing</small></span>
+          </a>
+          <a class="showcase-phone phone-gem" href="gemburrow/" aria-label="Explore Gemburrow">
+            <span class="phone-glass"><img src="gemburrow/shots/shot-20261030-career-430.webp" alt="Gemburrow: a jar of colorful gems and active digging orders" width="430" height="932"></span>
+            <span class="phone-caption">Gemburrow <span aria-hidden="true">↗</span><small>Unearth a little joy</small></span>
+          </a>
+          <figcaption class="sr-only">Real screens from StoryVault AI, Nightshelf, and Gemburrow.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <div class="strip">
+    <div class="container">
+      <span class="label">Jump to</span>
+      <a class="word" href="#product-holohound"><img src="icons/holohound.webp" alt="" width="26" height="26" loading="lazy">Holohound</a>
+      <a class="word" href="#product-wingmate"><img src="icons/wingmate.webp" alt="" width="26" height="26" loading="lazy">Wingmate</a>
+      <a class="word" href="#product-loam"><img src="icons/loam.webp" alt="" width="26" height="26" loading="lazy">Loam</a>
+      <a class="word" href="#product-quietoak"><img src="icons/quietoak.webp?v=20260908a" alt="" width="26" height="26" loading="lazy">Quietoak</a>
+      <a class="word" href="#product-cryptosage"><img src="icons/cryptosage.webp" alt="" width="26" height="26" loading="lazy">CryptoSage&nbsp;AI</a>
+      <a class="word" href="#product-saffra"><img src="icons/saffra.webp" alt="" width="26" height="26" loading="lazy">Saffra</a>
+      <a class="word" href="#product-storyvault"><img src="icons/storyvault.webp" alt="" width="26" height="26" loading="lazy">StoryVault&nbsp;AI</a>
+      <a class="word" href="#product-nightshelf"><img src="icons/nightshelf.webp" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
+      <a class="word" href="#product-rowan"><img src="icons/rowan.webp" alt="" width="26" height="26" loading="lazy">Rowan</a>
+      <a class="word" href="#product-alder"><img src="icons/alder.webp" alt="" width="26" height="26" loading="lazy">Alder</a>
+      <a class="word" href="#product-mythkin"><img src="icons/mythkin.webp" alt="" width="26" height="26" loading="lazy">Mythkin</a>
+      <a class="word" href="#product-hexhunter"><img src="icons/hexhunter.webp" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
+      <a class="word" href="#product-mythwright"><img src="icons/mythwright.webp" alt="" width="26" height="26" loading="lazy">Mythwright</a>
+      <a class="word" href="#product-waddleton"><img src="icons/waddleton.webp" alt="" width="26" height="26" loading="lazy">Waddleton</a>
+      <a class="word" href="#product-hoardling"><img src="icons/hoardling.webp" alt="" width="26" height="26" loading="lazy">Hoardling</a>
+      <a class="word" href="#product-gemburrow"><img src="icons/gemburrow.webp" alt="" width="26" height="26" loading="lazy">Gemburrow</a>
+    </div>
+  </div>
+
+  <section class="block" id="products">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Our apps</span>
+        <h2>Find your kind of wonderful.</h2>
+        
+        <p>Some are on the App Store now, some are coming soon, and a few play free in your browser.</p>
+      </div>
+
+      <div class="product-filters" hidden role="group" aria-label="Filter products">
+        <button type="button" class="filter-chip" data-filter="all" aria-pressed="true">Everything</button>
+        <button type="button" class="filter-chip" data-filter="apps" aria-pressed="false">Apps for life</button>
+        <button type="button" class="filter-chip" data-filter="games" aria-pressed="false">Games &amp; worlds</button>
+        <span class="filter-status sr-only" role="status" aria-live="polite"></span>
+      </div>
+      <div class="products-grid" data-filter="all">
+
+        <article class="product" id="product-holohound" data-category="apps" style="--accent: var(--c-holohound);">
+          <div class="top">
+            <img class="app-icon" src="icons/holohound.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Holohound</h3>
+              <div class="cat">Trading Card Scanner</div>
+            </div>
+            <span class="status">iOS · Coming soon</span>
+          </div>
+          <p class="desc">Explore 131,507 cards across Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam. Scan Pokémon and Magic; add the other games by search, with prices that name their source.</p>
+          <ul role="list">
+            <li>Hound, an AI that knows your binder and the market</li>
+            <li>Set completion, pre-grade triage, and flip P&amp;L</li>
+          </ul>
+          <div class="foot">
+            <a class="link" aria-label="Website: Holohound" href="holohound/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-wingmate" data-category="apps" style="--accent: var(--c-wingmate);">
+          <div class="top">
+            <img class="app-icon" src="icons/wingmate.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Wingmate</h3>
+              <div class="cat">AI Dating Coach</div>
+            </div>
+            <span class="status live">iOS · Available</span>
+          </div>
+          <p class="desc">Screenshot a conversation and get replies you can actually send. Four coaches, four points of view, and one shared memory of everyone you&rsquo;re talking to.</p>
+          <ul role="list">
+            <li>Openers written for the person, from their profile</li>
+            <li>Coaching that adapts to Tinder, Hinge, Bumble, Instagram, Snapchat, Messages, or any app</li>
+          </ul>
+          <div class="foot">
+            <a class="app-store" aria-label="Download on the App Store: Wingmate" href="https://apps.apple.com/app/id6792772729" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Wingmate" href="wingmate/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        
+        <article class="product" id="product-loam" data-category="apps" style="--accent: var(--c-loam); --accent-text: var(--c-loam-text);">
+          <div class="top">
+            <img class="app-icon" src="icons/loam.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Loam</h3>
+              <div class="cat">AI Notes Companion</div>
+            </div>
+            <span class="status">iOS · Coming soon</span>
+          </div>
+          <p class="desc">Notes, tended. Loam fixes your slips, shapes rambly jots into clean lines, and files and flags what matters, without ever rephrasing you.</p>
+          <ul role="list">
+            <li>Six powers, each dialed Off, Ask first, or Auto</li>
+            <li>A Ledger of changes, with undo and redo where supported</li>
+          </ul>
+          <div class="foot">
+            <a class="link" aria-label="Website: Loam" href="loam/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-quietoak" data-category="apps" style="--accent: var(--c-quietoak);">
+          <div class="top">
+            <img class="app-icon" src="icons/quietoak.webp?v=20260908a" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Quietoak</h3>
+              <div class="cat">DBT Companion &amp; Diary</div>
+            </div>
+            <span class="status">iOS · Coming soon</span>
+          </div>
+          <p class="desc">Talk through a hard moment with an AI companion. Practice DBT skills, keep a daily diary, and make a written plan for what to try next.</p>
+          <ul role="list">
+            <li>Six companions, each with its own temperament</li>
+            <li>Rehearse a response, record what you tried, and return to your plan</li>
+          </ul>
+          <div class="foot">
+            <a class="link" aria-label="Website: Quietoak" href="quietoak/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-cryptosage" data-category="apps" style="--accent: var(--c-crypto);">
+          <div class="top">
+            <img class="app-icon" src="icons/cryptosage.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>CryptoSage AI</h3>
+              <div class="cat">Crypto Portfolio Tracker</div>
+            </div>
+            <span class="status live">iOS · Available</span>
+          </div>
+          
+          <p class="desc">Your crypto portfolio, explained. Ask about your coins and get answers built on what you hold and what you paid.</p>
+          <ul role="list">
+            <li>Price alerts you set just by asking</li>
+            <li>Live prices, watchlists, sentiment and market heat maps</li>
+          </ul>
+          <div class="foot">
+            <a class="app-store" aria-label="Download on the App Store: CryptoSage AI" href="https://apps.apple.com/app/id6792761331" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: CryptoSage AI" href="https://cryptosageai.io/" target="_blank" rel="noopener">Website <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-saffra" data-category="apps" style="--accent: var(--c-saffra);">
+          <div class="top">
+            <img class="app-icon" src="icons/saffra.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Saffra</h3>
+              <div class="cat">AI Cooking Assistant</div>
+            </div>
+            <span class="status live">iOS · Available</span>
+          </div>
+          
+          <p class="desc">Tell Saffra what&rsquo;s in your kitchen and she adapts a complete recipe to it, with measured amounts, prep notes and the equipment you&rsquo;ll need. Your allergies come first.</p>
+          <ul role="list">
+            <li>Recipes rewritten for your equipment, time and skill level</li>
+            <li>Hands-free Cooking Mode, with timers you set by voice</li>
+          </ul>
+          <div class="foot">
+            <a class="app-store" aria-label="Download on the App Store: Saffra" href="https://apps.apple.com/app/id6792760857" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Saffra" href="saffra/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-storyvault" data-category="apps" style="--accent: var(--c-story);">
+          <div class="top">
+            <img class="app-icon" src="icons/storyvault.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              
+              <h3>StoryVault AI</h3>
+              <div class="cat">Interactive Fiction</div>
+            </div>
+            <span class="status live">iOS · Available</span>
+          </div>
+          <p class="desc">Step inside a classic and take it somewhere the author never did, or start a world from a single line. Pick a branch or type your own move, and the story follows.</p>
+          <ul role="list">
+            <li>84 complete classics you can read offline</li>
+            
+            <li>A hand-curated AI scenario for every classic</li>
+          </ul>
+          <div class="foot">
+            <a class="app-store" aria-label="Download on the App Store: StoryVault AI" href="https://apps.apple.com/app/id6792759454" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: StoryVault AI" href="storyvault/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-nightshelf" data-category="apps" style="--accent: var(--c-night);">
+          <div class="top">
+            <img class="app-icon" src="icons/nightshelf.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Nightshelf</h3>
+              <div class="cat">Sleep Stories</div>
+            </div>
+            <span class="status live">iOS · Available</span>
+          </div>
+          <p class="desc">Unabridged classics read aloud in a soft, sleepy voice, with ambient sound underneath and a timer that fades you out. Pro adds AI-written bedtime stories and ten narrators with a range of accents.</p>
+          <ul role="list">
+            <li>A shelf built for airplane mode</li>
+            <li>Your place in every story, synced through your own iCloud</li>
+          </ul>
+          <div class="foot">
+            <a class="app-store" aria-label="Download on the App Store: Nightshelf" href="https://apps.apple.com/app/id6792761643" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Nightshelf" href="nightshelf/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-rowan" data-category="apps" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
+          <div class="top">
+            <img class="app-icon" src="icons/rowan.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Rowan</h3>
+              <div class="cat">Chronic Illness Diary</div>
+            </div>
+            <span class="status live">iOS · Available</span>
+          </div>
+          <p class="desc">Say how the day went in ordinary words and Rowan keeps the record. Before an appointment, it hands you a brief with your last thirty days, your medications and the questions worth asking.</p>
+          <ul role="list">
+            <li>Medication reminders on the schedule you set</li>
+            <li>No account, no ads, no trackers</li>
+          </ul>
+          <div class="foot">
+            <a class="app-store" aria-label="Download on the App Store: Rowan" href="https://apps.apple.com/app/id6797693737" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Rowan" href="rowan/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-alder" data-category="apps" style="--accent: var(--c-alder);">
+          <div class="top">
+            <img class="app-icon" src="icons/alder.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Alder</h3>
+              <div class="cat">Sobriety &amp; Recovery</div>
+            </div>
+            <span class="status">iOS · Coming soon</span>
+          </div>
+          <p class="desc">For 11pm on day nine. Alder counts your sober time, walks you through a slip without wiping out what you&rsquo;ve built, and keeps your reasons in view.</p>
+          <ul role="list">
+            <li>A clock for each thing you&rsquo;re stepping away from</li>
+            <li>The SOS screen and crisis lines are never metered or paywalled</li>
+          </ul>
+          <div class="foot">
+            <a class="link" aria-label="Website: Alder" href="alder/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-mythkin" data-category="apps" style="--accent: var(--c-mythkin);">
+          <div class="top">
+            <img class="app-icon" src="icons/mythkin.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Mythkin</h3>
+              <div class="cat">AI Characters &amp; Legends</div>
+            </div>
+            <span class="status">iOS · Coming soon</span>
+          </div>
+          <p class="desc">Talk with 470 painted characters from history, myth, literature and scripture, or write one of your own.</p>
+          <ul role="list">
+            <li>Start a Hearth, where two or three characters answer you and each other</li>
+            <li>44 stories to step into, each cast from the roster</li>
+          </ul>
+          <div class="foot">
+            <a class="link" aria-label="Website: Mythkin" href="mythkin/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        
+        <article class="product" id="product-hexhunter" data-category="games" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
+          <div class="top">
+            <img class="app-icon" src="icons/hexhunter.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Hexhunter</h3>
+              <div class="cat">Gothic Horde-Survivor</div>
+            </div>
+            <span class="status live">iOS · Available</span>
+          </div>
+          <p class="desc">Survive the horde. Draft your doom. Pick a hero, grab an upgrade every level, and evolve your weapons into ascended forms.</p>
+          <ul role="list">
+            
+            <li>9 heroes, 18 weapons and 3 dark biomes</li>
+            <li>A Daily Challenge where everyone gets the same hero and arena</li>
+            
+          </ul>
+          <div class="foot">
+            <a class="app-store" aria-label="Download on the App Store: Hexhunter" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
+            <a class="link" aria-label="Website: Hexhunter" href="hexhunter/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-mythwright" data-category="games" style="--accent: var(--c-myth);">
+          <div class="top">
+            <img class="app-icon" src="icons/mythwright.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Mythwright</h3>
+              <div class="cat">Strategy Card Game</div>
+            </div>
+            <span class="status">iOS · Coming soon</span>
+          </div>
+          <p class="desc">The heroes and monsters of classic literature, at war across three lanes. Dracula trades blows with Athena, and every match is six turns of nerve and timing.</p>
+          <ul role="list">
+            <li>256 cards across six factions</li>
+            <li>Campaign, practice and a seasonal ladder from Recruit to Infinite</li>
+          </ul>
+          <div class="foot">
+            <a class="link" aria-label="Website: Mythwright" href="mythwright/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-waddleton" data-category="games" style="--accent: var(--c-waddle);">
+          <div class="top">
+            <img class="app-icon" src="icons/waddleton.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Waddleton</h3>
+              <div class="cat">Social World · Arcade</div>
+            </div>
+            <span class="status live">Web · Available</span>
+          </div>
+          
+          <p class="desc">A snowy island to waddle around, right in your browser. Make a penguin, start a snowball fight, and duck into seventeen arcade games.</p>
+          <ul role="list">
+            <li>Friends, parties and chat, with ready-made phrases for players under 13</li>
+            <li>Free to play, with no ads and nothing you have to buy</li>
+          </ul>
+          <div class="foot">
+            <a class="btn-store" aria-label="Play free: Waddleton" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Website: Waddleton" href="waddleton/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-hoardling" data-category="games" style="--accent: var(--c-hoard);">
+          <div class="top">
+            <img class="app-icon" src="icons/hoardling.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Hoardling</h3>
+              <div class="cat">Hoard Defense</div>
+            </div>
+            <span class="status live">Web · Available</span>
+          </div>
+          
+          <p class="desc">Wick is too young for dragonfire, so he built his own. Raiders grab the hoard and run. Kill a carrier before it escapes, and its coins fly home.</p>
+          <ul role="list">
+            <li>Four keeps to hold, plus a Daily Siege with no last wave</li>
+            <li>Duels against four computer rivals, with the same raiders down both roads</li>
+          </ul>
+          <div class="foot">
+            <a class="btn-store" aria-label="Play free: Hoardling" href="hoardling/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Website: Hoardling" href="hoardling/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="product" id="product-gemburrow" data-category="games" style="--accent: var(--c-gem);">
+          <div class="top">
+            <img class="app-icon" src="icons/gemburrow.webp" alt="" width="58" height="58" loading="lazy">
+            <div class="titleblock">
+              <h3>Gemburrow</h3>
+              <div class="cat">Cozy Gem-Digging Puzzle</div>
+            </div>
+            <span class="status live">Web · Available</span>
+          </div>
+          <p class="desc">Dig through a jar of gems and rocks, fill customer orders, and make room in your seven-slot satchel.</p>
+          <ul role="list">
+            <li>40 Career levels, a shared Daily Dig, and Free Dig</li>
+            
+            <li>Optional Excavations: split a find or preserve it for Flint</li>
+            
+          </ul>
+          <div class="foot">
+            <a class="btn-store" aria-label="Play free: Gemburrow" href="gemburrow/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Website: Gemburrow" href="gemburrow/">Website <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        
+        
+        <aside class="product aside-card" aria-label="Studio contact" style="--accent: var(--brand-b);">
+          <div class="inner">
+            <div class="cat">The studio</div>
+            <h3>Want to talk?</h3>
+            <p class="desc">We&rsquo;d like to hear from investors, partners, press and early users.</p>
+            <a class="btn btn-primary" href="#contact">Contact the studio</a>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="block systems" id="ai">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Inside the products</span>
+        
+        <h2>AI with a job to do.</h2>
+        <p>A good feature starts with something you want to do. See how our apps turn context into a useful next step.</p>
+      </div>
+      <div class="ai-intro"><div class="ai-intro-copy"><span class="section-number" aria-hidden="true">01 →</span><h3>Small moments.<br>Thoughtfully connected.</h3><p>The right recipe for what’s in the fridge. A story that follows your choices. Help that starts with you.</p><p class="ai-demo-hint">Choose an app to explore an illustrative example.</p></div><figure class="context-engine" aria-label="Product walkthroughs">
           <div class="example-app">
             <img id="example-icon" src="icons/cryptosage.webp" alt="" width="36" height="36">
             <div class="example-choice">
@@ -973,393 +1513,7 @@
           </figcaption>
           <div class="engine-progress" aria-hidden="true"></div>
           <span class="sr-only" id="example-announcement" aria-live="polite" aria-atomic="true"></span>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <div class="strip">
-    <div class="container">
-      <span class="label">Jump to</span>
-      <a class="word" href="#product-holohound"><img src="icons/holohound.webp" alt="" width="26" height="26" loading="lazy">Holohound</a>
-      <a class="word" href="#product-wingmate"><img src="icons/wingmate.webp" alt="" width="26" height="26" loading="lazy">Wingmate</a>
-      <a class="word" href="#product-loam"><img src="icons/loam.webp" alt="" width="26" height="26" loading="lazy">Loam</a>
-      <a class="word" href="#product-quietoak"><img src="icons/quietoak.webp?v=20260908a" alt="" width="26" height="26" loading="lazy">Quietoak</a>
-      <a class="word" href="#product-cryptosage"><img src="icons/cryptosage.webp" alt="" width="26" height="26" loading="lazy">CryptoSage&nbsp;AI</a>
-      <a class="word" href="#product-saffra"><img src="icons/saffra.webp" alt="" width="26" height="26" loading="lazy">Saffra</a>
-      <a class="word" href="#product-storyvault"><img src="icons/storyvault.webp" alt="" width="26" height="26" loading="lazy">StoryVault&nbsp;AI</a>
-      <a class="word" href="#product-nightshelf"><img src="icons/nightshelf.webp" alt="" width="26" height="26" loading="lazy">Nightshelf</a>
-      <a class="word" href="#product-rowan"><img src="icons/rowan.webp" alt="" width="26" height="26" loading="lazy">Rowan</a>
-      <a class="word" href="#product-alder"><img src="icons/alder.webp" alt="" width="26" height="26" loading="lazy">Alder</a>
-      <a class="word" href="#product-mythkin"><img src="icons/mythkin.webp" alt="" width="26" height="26" loading="lazy">Mythkin</a>
-      <a class="word" href="#product-hexhunter"><img src="icons/hexhunter.webp" alt="" width="26" height="26" loading="lazy">Hexhunter</a>
-      <a class="word" href="#product-mythwright"><img src="icons/mythwright.webp" alt="" width="26" height="26" loading="lazy">Mythwright</a>
-      <a class="word" href="#product-waddleton"><img src="icons/waddleton.webp" alt="" width="26" height="26" loading="lazy">Waddleton</a>
-      <a class="word" href="#product-hoardling"><img src="icons/hoardling.webp" alt="" width="26" height="26" loading="lazy">Hoardling</a>
-      <a class="word" href="#product-gemburrow"><img src="icons/gemburrow.webp" alt="" width="26" height="26" loading="lazy">Gemburrow</a>
-    </div>
-  </div>
-
-  <section class="block" id="products">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">Our apps</span>
-        <h2>Focused products for different parts of life.</h2>
-        
-        <p>Some are on the App Store now, some are coming soon, and a few play free in your browser.</p>
-      </div>
-
-      <div class="products-grid">
-
-        <article class="product" id="product-holohound" style="--accent: var(--c-holohound);">
-          <div class="top">
-            <img class="app-icon" src="icons/holohound.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Holohound</h3>
-              <div class="cat">Trading Card Scanner</div>
-            </div>
-            <span class="status">iOS · Coming soon</span>
-          </div>
-          <p class="desc">One binder for Pokémon, Magic: The Gathering, Yu-Gi-Oh!, Lorcana and Gundam. The scanner recognizes 131,507 cards right on your phone, and the prices it shows name their source.</p>
-          <ul role="list">
-            <li>Hound, an AI that knows your binder and the market</li>
-            <li>Set completion, pre-grade triage, and flip P&amp;L</li>
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Website: Holohound" href="holohound/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-wingmate" style="--accent: var(--c-wingmate);">
-          <div class="top">
-            <img class="app-icon" src="icons/wingmate.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Wingmate</h3>
-              <div class="cat">AI Dating Coach</div>
-            </div>
-            <span class="status live">iOS · Available</span>
-          </div>
-          <p class="desc">Screenshot a conversation and get replies you can actually send. Four coaches, four points of view, and one shared memory of everyone you&rsquo;re talking to.</p>
-          <ul role="list">
-            <li>Openers written for the person, from their profile</li>
-            <li>Coaching that adapts to Tinder, Hinge, Bumble, Instagram, Snapchat, Messages, or any app</li>
-          </ul>
-          <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Wingmate" href="https://apps.apple.com/app/id6792772729" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Wingmate" href="wingmate/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        
-        <article class="product" id="product-loam" style="--accent: var(--c-loam); --accent-text: var(--c-loam-text);">
-          <div class="top">
-            <img class="app-icon" src="icons/loam.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Loam</h3>
-              <div class="cat">AI Notes Companion</div>
-            </div>
-            <span class="status">iOS · Coming soon</span>
-          </div>
-          <p class="desc">Notes, tended. Loam fixes your slips, shapes rambly jots into clean lines, and files and flags what matters, without ever rephrasing you.</p>
-          <ul role="list">
-            <li>Six powers, each dialed Off, Ask first, or Auto</li>
-            <li>A Ledger of every change, each with its own undo and redo</li>
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Website: Loam" href="loam/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-quietoak" style="--accent: var(--c-quietoak);">
-          <div class="top">
-            <img class="app-icon" src="icons/quietoak.webp?v=20260908a" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Quietoak</h3>
-              <div class="cat">DBT Companion &amp; Diary</div>
-            </div>
-            <span class="status">iOS · Coming soon</span>
-          </div>
-          <p class="desc">Talk through hard moments, out loud or in text, with an AI companion that remembers you. Keep a daily diary card and see your progress over time.</p>
-          <ul role="list">
-            <li>Six companions, each with its own temperament</li>
-            <li>Practice DBT skills, with a crisis kit that works offline</li>
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Website: Quietoak" href="quietoak/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-cryptosage" style="--accent: var(--c-crypto);">
-          <div class="top">
-            <img class="app-icon" src="icons/cryptosage.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>CryptoSage AI</h3>
-              <div class="cat">Crypto Portfolio Tracker</div>
-            </div>
-            <span class="status live">iOS · Available</span>
-          </div>
-          
-          <p class="desc">Your crypto portfolio, explained. Ask about your coins and get answers built on what you hold and what you paid.</p>
-          <ul role="list">
-            <li>Price alerts you set just by asking</li>
-            <li>Live prices, watchlists, sentiment and market heat maps</li>
-          </ul>
-          <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: CryptoSage AI" href="https://apps.apple.com/app/id6792761331" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: CryptoSage AI" href="https://cryptosageai.io/" target="_blank" rel="noopener">Website <span aria-hidden="true">↗</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-saffra" style="--accent: var(--c-saffra);">
-          <div class="top">
-            <img class="app-icon" src="icons/saffra.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Saffra</h3>
-              <div class="cat">AI Cooking Assistant</div>
-            </div>
-            <span class="status live">iOS · Available</span>
-          </div>
-          
-          <p class="desc">Tell Saffra what&rsquo;s in your kitchen and she adapts a complete recipe to it, with measured amounts, prep notes and the equipment you&rsquo;ll need. Your allergies come first.</p>
-          <ul role="list">
-            <li>Recipes rewritten for your equipment, time and skill level</li>
-            <li>Hands-free Cooking Mode, with timers you set by voice</li>
-          </ul>
-          <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Saffra" href="https://apps.apple.com/app/id6792760857" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Saffra" href="saffra/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-storyvault" style="--accent: var(--c-story);">
-          <div class="top">
-            <img class="app-icon" src="icons/storyvault.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              
-              <h3>StoryVault AI</h3>
-              <div class="cat">Interactive Fiction</div>
-            </div>
-            <span class="status live">iOS · Available</span>
-          </div>
-          <p class="desc">Step inside a classic and take it somewhere the author never did, or start a world from a single line. Pick a branch or type your own move, and the story follows.</p>
-          <ul role="list">
-            <li>84 complete classics you can read offline</li>
-            
-            <li>A hand-curated AI scenario for every classic</li>
-          </ul>
-          <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: StoryVault AI" href="https://apps.apple.com/app/id6792759454" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: StoryVault AI" href="storyvault/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-nightshelf" style="--accent: var(--c-night);">
-          <div class="top">
-            <img class="app-icon" src="icons/nightshelf.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Nightshelf</h3>
-              <div class="cat">Sleep Stories</div>
-            </div>
-            <span class="status live">iOS · Available</span>
-          </div>
-          <p class="desc">Unabridged classics read aloud in a soft, sleepy voice, with ambient sound underneath and a timer that fades you out. Pro adds AI-written bedtime stories and ten narrators with a range of accents.</p>
-          <ul role="list">
-            <li>A shelf built for airplane mode</li>
-            <li>Your place in every story, synced through your own iCloud</li>
-          </ul>
-          <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Nightshelf" href="https://apps.apple.com/app/id6792761643" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Nightshelf" href="nightshelf/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-rowan" style="--accent: var(--c-rowan); --accent-text: var(--c-rowan-text);">
-          <div class="top">
-            <img class="app-icon" src="icons/rowan.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Rowan</h3>
-              <div class="cat">Chronic Illness Diary</div>
-            </div>
-            <span class="status live">iOS · Available</span>
-          </div>
-          <p class="desc">Say how the day went in ordinary words and Rowan keeps the record. Before an appointment, it hands you a brief with your last thirty days, your medications and the questions worth asking.</p>
-          <ul role="list">
-            <li>Medication reminders on the schedule you set</li>
-            <li>No account, no ads, no trackers</li>
-          </ul>
-          <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Rowan" href="https://apps.apple.com/app/id6797693737" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Rowan" href="rowan/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-alder" style="--accent: var(--c-alder);">
-          <div class="top">
-            <img class="app-icon" src="icons/alder.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Alder</h3>
-              <div class="cat">Sobriety &amp; Recovery</div>
-            </div>
-            <span class="status">iOS · Coming soon</span>
-          </div>
-          <p class="desc">For 11pm on day nine. Alder counts your sober time, walks you through a slip without wiping out what you&rsquo;ve built, and keeps your reasons in view.</p>
-          <ul role="list">
-            <li>A clock for each thing you&rsquo;re stepping away from</li>
-            <li>The SOS screen and crisis lines are never metered or paywalled</li>
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Website: Alder" href="alder/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-mythkin" style="--accent: var(--c-mythkin);">
-          <div class="top">
-            <img class="app-icon" src="icons/mythkin.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Mythkin</h3>
-              <div class="cat">AI Characters &amp; Legends</div>
-            </div>
-            <span class="status">iOS · Coming soon</span>
-          </div>
-          <p class="desc">Talk with 470 painted characters from history, myth, literature and scripture, or write one of your own.</p>
-          <ul role="list">
-            <li>Start a Hearth, where two or three characters answer you and each other</li>
-            <li>44 stories to step into, each cast from the roster</li>
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Website: Mythkin" href="mythkin/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        
-        <article class="product" id="product-hexhunter" style="--accent: var(--c-hex); --accent-text: var(--c-hex-text);">
-          <div class="top">
-            <img class="app-icon" src="icons/hexhunter.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Hexhunter</h3>
-              <div class="cat">Gothic Horde-Survivor</div>
-            </div>
-            <span class="status live">iOS · Available</span>
-          </div>
-          <p class="desc">Survive the horde. Draft your doom. Pick a hero, grab an upgrade every level, and evolve your weapons into ascended forms.</p>
-          <ul role="list">
-            
-            <li>9 heroes, 18 weapons and 3 dark biomes</li>
-            <li>A Daily Challenge where everyone gets the same hero and arena</li>
-            
-          </ul>
-          <div class="foot">
-            <a class="app-store" aria-label="Download on the App Store: Hexhunter" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Hexhunter" href="hexhunter/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-mythwright" style="--accent: var(--c-myth);">
-          <div class="top">
-            <img class="app-icon" src="icons/mythwright.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Mythwright</h3>
-              <div class="cat">Strategy Card Game</div>
-            </div>
-            <span class="status">iOS · Coming soon</span>
-          </div>
-          <p class="desc">The heroes and monsters of classic literature, at war across three lanes. Dracula trades blows with Athena, and every match is six turns of nerve and timing.</p>
-          <ul role="list">
-            <li>256 cards across six factions</li>
-            <li>Campaign, practice and a seasonal ladder from Recruit to Infinite</li>
-          </ul>
-          <div class="foot">
-            <a class="link" aria-label="Website: Mythwright" href="mythwright/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-waddleton" style="--accent: var(--c-waddle);">
-          <div class="top">
-            <img class="app-icon" src="icons/waddleton.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Waddleton</h3>
-              <div class="cat">Social World · Arcade</div>
-            </div>
-            <span class="status live">Web · Available</span>
-          </div>
-          
-          <p class="desc">A snowy island to waddle around, right in your browser. Make a penguin, start a snowball fight, and duck into seventeen arcade games.</p>
-          <ul role="list">
-            <li>Friends, parties and chat, with ready-made phrases for players under 13</li>
-            <li>Free to play, with no ads and nothing you have to buy</li>
-          </ul>
-          <div class="foot">
-            <a class="btn-store" aria-label="Play free: Waddleton" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Website: Waddleton" href="waddleton/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-hoardling" style="--accent: var(--c-hoard);">
-          <div class="top">
-            <img class="app-icon" src="icons/hoardling.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Hoardling</h3>
-              <div class="cat">Hoard Defense</div>
-            </div>
-            <span class="status live">Web · Available</span>
-          </div>
-          
-          <p class="desc">Wick is too young for dragonfire, so he built his own. Raiders grab the hoard and run. Kill a carrier before it escapes, and its coins fly home.</p>
-          <ul role="list">
-            <li>Four keeps to hold, plus a Daily Siege with no last wave</li>
-            <li>Duels against four computer rivals, with the same raiders down both roads</li>
-          </ul>
-          <div class="foot">
-            <a class="btn-store" aria-label="Play free: Hoardling" href="hoardling/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Website: Hoardling" href="hoardling/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        <article class="product" id="product-gemburrow" style="--accent: var(--c-gem);">
-          <div class="top">
-            <img class="app-icon" src="icons/gemburrow.webp" alt="" width="58" height="58" loading="lazy">
-            <div class="titleblock">
-              <h3>Gemburrow</h3>
-              <div class="cat">Cozy Gem-Digging Puzzle</div>
-            </div>
-            <span class="status live">Web · Available</span>
-          </div>
-          <p class="desc">Dig gems out of a jar where every gem and rock is real physics. Fill the orders, and decide which rare finds the shop dragon keeps forever.</p>
-          <ul role="list">
-            <li>A 40-level career, plus one shared Daily Dig for everyone</li>
-            
-            <li>Free in your browser, with no ads and no sign-in</li>
-            
-          </ul>
-          <div class="foot">
-            <a class="btn-store" aria-label="Play free: Gemburrow" href="gemburrow/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Website: Gemburrow" href="gemburrow/">Website <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-
-        
-        
-        <aside class="product aside-card" aria-label="Studio contact" style="--accent: var(--brand-b);">
-          <div class="inner">
-            <div class="cat">The studio</div>
-            <h3>Want to talk?</h3>
-            <p class="desc">We&rsquo;d like to hear from investors, partners, press and early users.</p>
-            <a class="btn btn-primary" href="#contact">Contact the studio</a>
-          </div>
-        </aside>
-
-      </div>
-    </div>
-  </section>
-
-  <section class="block systems" id="ai">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">Inside the products</span>
-        
-        <h2>AI with a job to do.</h2>
-        <p>Here are a few of those jobs, app by app.</p>
-      </div>
+        </figure></div>
 
       <div class="proof-rail">
         <ul class="layer-proof" id="layer-proof" tabindex="0" role="list" aria-label="Examples of what AI does in the products">
@@ -1993,6 +2147,35 @@
       document.addEventListener('click', function (e) {
         if (menu.hasAttribute('open') && !menu.contains(e.target)) menu.removeAttribute('open');
       });
+    })();
+  </script>
+<script>
+    (function () {
+      var bar = document.querySelector('.product-filters');
+      if (!bar) return;
+      var cards = Array.from(document.querySelectorAll('article.product[data-category]'));
+      var buttons = Array.from(bar.querySelectorAll('button'));
+      function show(kind, announce) {
+        var count = 0;
+        cards.forEach(function (card) { card.hidden = kind !== 'all' && card.dataset.category !== kind; if (!card.hidden) count++; });
+        buttons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.filter === kind)); });
+        document.querySelector('.products-grid').dataset.filter = kind;
+        bar.querySelector('.filter-status').textContent = announce ? count + ' products shown' : '';
+      }
+      bar.hidden = false;
+      buttons.forEach(function (button) { button.addEventListener('click', function () { show(button.dataset.filter, true); }); });
+      document.addEventListener('click', function (event) {
+        var link = event.target.closest('a[href^="#product-"]');
+        if (link) show('all', false);
+      });
+      window.addEventListener('hashchange', function () {
+        if (location.hash.indexOf('#product-') === 0) {
+          show('all', false);
+          var target = document.getElementById(location.hash.slice(1));
+          if (target) target.scrollIntoView();
+        }
+      });
+      window.addEventListener('beforeprint', function () { show('all', false); });
     })();
   </script>
 </body>
