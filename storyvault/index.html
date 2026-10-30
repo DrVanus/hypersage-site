@@ -468,7 +468,7 @@
     .device .turn-player.playing img.rest:not(.on) { opacity: 0; }
     .device .turn-player.playing img.on { opacity: 1; }
     .turn-player-caption {
-      margin-top: 14px; text-align: center; color: var(--muted, #9b8ec4);
+      margin-top: 14px; text-align: center; color: var(--muted-fg);
       font-size: 0.9rem; min-height: 2.6em; max-width: 320px;
       margin-left: auto; margin-right: auto;
     }
@@ -652,197 +652,34 @@
       line-height: 1.7;
     }
 
-    /* ===== HOW IT WORKS ===== */
-    .how-grid {
+    /* ===== A SINGLE, CONCRETE INTRODUCTION TO AI ADVENTURE ===== */
+    .adventure-intro { text-align: center; max-width: 760px; margin: 0 auto 40px; }
+    .adventure-intro h2 { margin-bottom: 20px; }
+    .journey-steps {
+      list-style: none;
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 64px; align-items: center;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      max-width: 920px;
+      margin: 0 auto 48px;
+      padding: 22px 0;
+      border-top: 1px solid var(--border-strong);
+      border-bottom: 1px solid var(--border);
+      gap: 24px;
     }
-    @media (max-width: 880px) { .how-grid { grid-template-columns: 1fr; gap: 44px; } }
-    .how-image {
-      border-radius: var(--radius-lg);
-      width: 100%; max-width: 460px;
-      display: block; margin: 0 auto;
-      box-shadow:
-        0 20px 60px rgba(107,63,160,0.35),
-        0 0 0 1px var(--border);
-    }
-    .how-steps { list-style: none; counter-reset: step; }
-    .how-steps li {
-      counter-increment: step;
-      padding: 20px 0 20px 68px;
-      position: relative;
-    }
-    .how-steps li + li {
-      border-top: 1px solid var(--border);
-    }
-    .how-steps li::before {
-      content: counter(step);
-      position: absolute; left: 0; top: 22px;
-      width: 46px; height: 46px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Playfair Display', Georgia, serif;
-      font-weight: 700; font-size: 1.25rem;
-      color: var(--accent);
-      background:
-        linear-gradient(180deg, rgba(217,181,127,0.14), rgba(217,181,127,0.04));
-      border: 1px solid var(--border-strong);
-      border-radius: 50%;
-      box-shadow: 0 0 18px rgba(217,181,127,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
-    }
-    .how-steps h3 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-weight: 600; font-size: 1.18rem;
-      line-height: 1.3;
-      margin-bottom: 5px;
-      padding-bottom: 0.08em;
-    }
-    .how-steps p { color: var(--muted-fg); font-size: 0.96rem; line-height: 1.7; }
-
-    /* ===== BRANCH MAP — one page forking into choices =====
-       A diagram of the loop the copy above describes: a page offers
-       three numbered branches plus a typed move; the one you pick
-       becomes the next page. Pure CSS + two inline SVG connector
-       fans (stretched with preserveAspectRatio="none"). */
-    .branch-map {
-      display: grid;
-      grid-template-columns: 1fr 84px 1.25fr 84px 1fr;
-      align-items: center;
-      max-width: 880px;
-      margin: 76px auto 0;
-    }
-    .bm-page {
-      position: relative;
-      padding: 18px 20px 22px;
-      background: linear-gradient(180deg, var(--card-2), var(--card));
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: 0 14px 40px rgba(6,3,18,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
-    }
-    .bm-page.bm-next {
-      border-color: var(--border-strong);
-      box-shadow: 0 14px 40px rgba(107,63,160,0.28), inset 0 1px 0 rgba(255,255,255,0.05);
-    }
-    .bm-kicker {
-      display: block;
-      font-family: 'Playfair Display', Georgia, serif;
-      font-style: italic; font-weight: 600;
-      font-size: 1.02rem;
-      color: var(--accent-light);
-      padding-bottom: 0.12em;
-      margin-bottom: 8px;
-    }
-    .bm-lines i {
-      display: block;
-      height: 2px; border-radius: 2px;
-      background: rgba(184,174,198,0.26);
-      margin-top: 8px;
-    }
-    .bm-lines i:nth-child(1) { width: 94%; }
-    .bm-lines i:nth-child(2) { width: 86%; }
-    .bm-lines i:nth-child(3) { width: 90%; }
-    .bm-lines i:nth-child(4) { width: 58%; }
-    .bm-lines i.gold { background: linear-gradient(90deg, rgba(235,211,164,0.7), rgba(217,181,127,0.2)); }
-    .bm-spark {
-      position: absolute; top: -10px; right: 14px;
-      color: var(--accent); font-size: 0.85rem;
-      text-shadow: 0 0 12px rgba(217,181,127,0.6);
-      animation: spark-float 7s ease-in-out infinite;
-    }
-    .bm-fan { width: 100%; height: 100%; min-height: 220px; align-self: stretch; display: block; }
-    .bm-fan path {
-      fill: none;
-      stroke: var(--border-strong);
-      stroke-width: 1.4;
-      vector-effect: non-scaling-stroke;
-    }
-    .bm-fan path.bm-typed { stroke-dasharray: 4 5; }
-    .bm-fan path.bm-fade { opacity: 0.3; stroke-dasharray: 2 6; }
-    .bm-fan path.bm-live {
-      stroke: var(--accent);
-      stroke-width: 2;
-      filter: drop-shadow(0 0 5px rgba(217,181,127,0.4));
-      animation: bm-pulse 3.2s ease-in-out infinite;
-    }
-    @keyframes bm-pulse {
-      0%, 100% { opacity: 0.7; }
-      50%      { opacity: 1; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .bm-fan path.bm-live { animation: none; }
-      .bm-spark { animation: none; }
-    }
-    .bm-choices {
-      position: relative;
-      display: flex; flex-direction: column;
-      justify-content: center;
-      gap: 12px;
-    }
-    .bm-choice {
-      display: flex; align-items: center; gap: 12px;
-      min-height: 46px;
-      padding: 12px 16px;
-      background: rgba(217,181,127,0.05);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-    }
-    .bm-choice i {
-      flex: 1;
-      height: 2px; border-radius: 2px;
-      background: rgba(184,174,198,0.26);
-      margin-right: 8%;
-    }
-    .bm-choice:nth-child(3) i { margin-right: 22%; }
-    .bm-choice .n {
-      flex: 0 0 26px; height: 26px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Playfair Display', Georgia, serif;
-      font-weight: 700; font-size: 0.85rem;
-      color: var(--accent);
-      border: 1px solid var(--border-strong);
-      border-radius: 50%;
-      background: var(--accent-glow);
-    }
-    .bm-choice.bm-picked {
-      border-color: var(--accent);
-      background: rgba(217,181,127,0.12);
-      box-shadow: 0 0 22px rgba(217,181,127,0.14), inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-    .bm-choice.bm-picked i { background: linear-gradient(90deg, rgba(235,211,164,0.7), rgba(217,181,127,0.25)); }
-    .bm-choice.bm-picked .n {
-      color: var(--primary-dark);
-      background: var(--gold-grad);
-      border-color: transparent;
-    }
-    .bm-choice.bm-custom {
-      border: 1px dashed var(--border-strong);
-      background: transparent;
-      color: var(--tertiary-fg);
-      font-size: 0.92rem; font-style: italic;
-    }
-    .bm-choice.bm-custom::before { content: '✎'; color: var(--accent); font-style: normal; }
-    .bm-caption {
-      text-align: center;
-      margin: 26px auto 0;
-      max-width: 560px;
-      color: var(--tertiary-fg);
-      font-size: 0.88rem;
-      line-height: 1.7;
-    }
-    @media (max-width: 760px) {
-      .branch-map { grid-template-columns: 1fr; max-width: 420px; }
-      .bm-fan { display: none; }
-      .bm-choices { margin-top: 34px; }
-      .bm-page.bm-next { margin-top: 42px; }
-      .bm-choices::before,
-      .bm-page.bm-next::after {
-        content: '';
-        position: absolute;
-        left: 50%; top: -34px;
-        width: 1px; height: 26px;
-        background: linear-gradient(180deg, transparent, var(--border-strong));
-      }
-      .bm-page.bm-next::after { background: linear-gradient(180deg, transparent, var(--accent)); }
+    .journey-steps li { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+    .journey-number { color: var(--accent); font-family: 'Playfair Display', Georgia, serif; font-size: 1.1rem; line-height: 1.55; }
+    .journey-steps h3 { font-size: .94rem; font-weight: 600; margin-bottom: 5px; }
+    .journey-steps p { color: var(--muted-fg); font-size: .86rem; line-height: 1.6; }
+    .adventure-section { position: relative; background: radial-gradient(ellipse at 22% 65%, rgba(107,63,160,.12), transparent 65%); }
+    .section-anchor { display: block; scroll-margin-top: var(--nav-height, 5rem); }
+    .adventure-section .adv-hero-grid { margin-bottom: 0; }
+    .turn-example-label { margin-bottom: 10px; color: var(--muted-fg); font-size: .75rem; letter-spacing: .04em; }
+    .worlds-section { border-top: 1px solid var(--border); }
+    @media (max-width: 600px) {
+      .adventure-intro { margin-bottom: 28px; }
+      .journey-steps { grid-template-columns: 1fr; gap: 17px; margin-bottom: 36px; padding: 22px 0; }
+      .journey-number { flex: 0 0 26px; }
+      .journey-steps h3 { margin-bottom: 2px; }
     }
 
     /* ===== SCREENS STRIP ===== */
@@ -1051,7 +888,7 @@
       margin-bottom: 22px;
     }
     .turn-panel .prose em { color: var(--accent-light); }
-    .turn-choices { display: flex; flex-direction: column; gap: 10px; }
+    .turn-choices { list-style: none; display: flex; flex-direction: column; gap: 10px; }
     .turn-choice {
       display: flex; align-items: center; gap: 12px;
       text-align: left;
@@ -1062,13 +899,6 @@
       color: var(--fg);
       font-size: 0.95rem;
       line-height: 1.5;
-      transition: border-color .2s, background .2s, transform .15s;
-    }
-    .turn-choice:hover {
-      border-color: var(--accent);
-      background: rgba(217,181,127,0.11);
-      color: var(--fg);
-      transform: translateX(4px);
     }
     .turn-choice .n {
       flex: 0 0 26px; height: 26px;
@@ -1091,12 +921,6 @@
       font-style: italic;
     }
     .turn-custom::before { content: '✎'; color: var(--accent); font-style: normal; }
-    .turn-note {
-      margin-top: 16px;
-      font-size: 0.8rem;
-      color: var(--tertiary-fg);
-    }
-
     /* Genre scenario cards — real painted covers + catalog copy. */
     .adv-worlds-grid {
       display: grid;
@@ -1266,20 +1090,11 @@
       stroke-width: 1.4;
       vector-effect: non-scaling-stroke;
     }
-    /* The fan is two destinations, NOT two simultaneous sends: only the Claude
-       edge is accented + live, the OpenAI edge stays the muted base stroke. It
-       is deliberately NOT dashed — this page already spends dashes on "the
-       user-typed branch" (.bm-typed, .bm-choice.bm-custom in the branch map
-       this figure imitates), and one idiom cannot carry two meanings with no
-       legend. The Pro/metered qualifier travels in the chip's words instead. */
+    /* Two provider destinations; the gold edge identifies the text provider. */
     .dp-fan path.dp-live {
       stroke: var(--accent);
       stroke-width: 2;
       filter: drop-shadow(0 0 5px rgba(217,181,127,0.35));
-      animation: bm-pulse 3.2s ease-in-out infinite;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .dp-fan path.dp-live { animation: none; }
     }
     .dp-seal { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 16px; }
     .dp-seal span {
@@ -1460,7 +1275,6 @@
     .world-card { border-color: rgba(217,181,127,.26); }
     .screen-card .screen-label strong { color: var(--accent-light); }
     .cta-strip { background: radial-gradient(ellipse at center top, rgba(169,117,58,.14), transparent 70%), var(--bg-deeper); }
-    .bm-live, .bm-spark, .dp-fan path.dp-live { animation: none !important; }
     @media (max-width: 1090px) {
       nav.site .links { display: none; }
       .mobile-menu { display: block; }
@@ -1502,7 +1316,7 @@
     /* Keep native text enlargement within the page, including navigation. */
     main { overflow-wrap: anywhere; }
     nav.site .container { flex-wrap: wrap; }
-    .hero-layout > *, .how-grid > *, .adv-hero-grid > *, .features-grid > *, .plans > * { min-width: 0; }
+    .hero-layout > *, .adv-hero-grid > *, .features-grid > *, .plans > * { min-width: 0; }
     .hero-image .device-stage { max-width: 100%; }
     .mobile-links { max-width: calc(100vw - 24px); max-height: calc(100dvh - var(--nav-height, 5rem) - 20px); overflow-y: auto; }
     .library-chip { max-width: 100%; white-space: normal; }
@@ -1619,7 +1433,7 @@
       </a>
       <div class="links">
         <a href="#how">How it works</a>
-        <a href="#adventure">AI Adventure</a>
+        <a href="#worlds">Explore worlds</a>
         <a href="#features">Features</a>
         <a href="#screens">Screens</a>
         <a href="#plans">Pro</a>
@@ -1631,7 +1445,7 @@
         <summary aria-label="Navigation menu">☰</summary>
         <div class="mobile-links">
           <a href="#how">How it works</a>
-          <a href="#adventure">AI Adventure</a>
+          <a href="#worlds">Explore worlds</a>
           <a href="#features">Features</a>
           <a href="#screens">Screens</a>
           <a href="#plans">Pro</a>
@@ -1712,75 +1526,18 @@
     </div>
   </div>
 
-  <section class="section-block" id="how">
+  <section class="section-block adventure-section" id="how" aria-labelledby="adventure-heading">
     <div class="container">
-      <div class="how-grid">
-        <div class="reveal">
-          <div class="section-eyebrow">How it works</div>
-          <h2>A page. A choice.<br><em class="grad">A new page.</em></h2>
-          <p class="lede">A tale that bends to every move you make, told in the voice of the world you stepped into.</p>
-          <ol class="how-steps">
-            <li>
-              <h3>Pick a tale</h3>
-              <p>Start with one of 84 classics, from Dracula to the Odyssey. Wander into myth, folklore, history, the stage, or epic poetry. Or invent a world of your own.</p>
-            </li>
-            <li>
-              <h3>Read what the AI writes</h3>
-              <p>The next page streams in a sentence at a time, beneath a painted cover made for your story.</p>
-            </li>
-            <li>
-              <h3>Choose what happens next</h3>
-              <p>Take one of three branches, or type any move you like. The story follows.</p>
-            </li>
-          </ol>
-        </div>
-        <div class="reveal">
-          <div class="device-stage">
-            <div class="device" style="max-width: 320px;">
-              <img src="screenshots/book-detail-dark.jpg?v=20261027a" width="720" height="1564" alt="Alice in Wonderland book detail in dark mode — painted cover, Fantasy tag, chapters, and first-pages preview" loading="lazy">
-            </div>
-          </div>
-        </div>
+      <span class="section-anchor" id="adventure" aria-hidden="true"></span>
+      <div class="adventure-intro reveal">
+        <div class="section-eyebrow center">How the adventure unfolds</div>
+        <h2 id="adventure-heading">Your choice writes<br><em class="grad">the next page.</em></h2>
       </div>
-
-      <div class="branch-map reveal" aria-hidden="true">
-        <div class="bm-page">
-          <span class="bm-kicker">A page</span>
-          <span class="bm-lines"><i></i><i></i><i></i><i></i></span>
-        </div>
-        <svg class="bm-fan" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
-          <path d="M0,50 C45,50 55,10 100,10"/>
-          <path class="bm-live" d="M0,50 C45,50 55,37 100,37"/>
-          <path d="M0,50 C45,50 55,63 100,63"/>
-          <path class="bm-typed" d="M0,50 C45,50 55,90 100,90"/>
-        </svg>
-        <div class="bm-choices">
-          <span class="bm-choice"><span class="n">1</span><i></i></span>
-          <span class="bm-choice bm-picked"><span class="n">2</span><i></i></span>
-          <span class="bm-choice"><span class="n">3</span><i></i></span>
-          <span class="bm-choice bm-custom">Or type your own…</span>
-        </div>
-        <svg class="bm-fan" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
-          <path class="bm-fade" d="M0,10 C30,10 42,17 52,25"/>
-          <path class="bm-live" d="M0,37 C45,37 55,50 100,50"/>
-          <path class="bm-fade" d="M0,63 C30,63 42,58 52,53"/>
-          <path class="bm-fade" d="M0,90 C30,90 42,78 52,66"/>
-        </svg>
-        <div class="bm-page bm-next">
-          <span class="bm-spark" aria-hidden="true">✦</span>
-          <span class="bm-kicker">A new page</span>
-          <span class="bm-lines"><i class="gold"></i><i></i><i></i><i></i></span>
-        </div>
-      </div>
-      <p class="bm-caption reveal">Whichever you pick becomes the next page, and your choices carry forward from there.</p>
-    </div>
-  </section>
-
-  <section class="section-block" id="adventure" style="background: linear-gradient(180deg, rgba(23,16,48,0.0), rgba(23,16,48,0.5) 18%, rgba(23,16,48,0.5) 82%, rgba(23,16,48,0.0));">
-    <div class="container">
-      <div class="section-eyebrow center">The headline act</div>
-      <h2 style="text-align:center;" class="reveal">AI Adventure. <em class="grad">Your move.</em></h2>
-      <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Step into a familiar world and take it somewhere unexpected. The AI writes the scene; you decide what happens next.</p>
+      <ol class="journey-steps reveal" aria-label="How AI Adventure works">
+        <li><span class="journey-number" aria-hidden="true">01</span><div><h3>Pick a world</h3><p>A classic, a scenario, or your own idea.</p></div></li>
+        <li><span class="journey-number" aria-hidden="true">02</span><div><h3>Read the scene</h3><p>The AI sets the next moment in motion.</p></div></li>
+        <li><span class="journey-number" aria-hidden="true">03</span><div><h3>Make your move</h3><p>Choose a branch or write your own.</p></div></li>
+      </ol>
 
       <div class="adv-hero-grid">
         <div class="reveal">
@@ -1794,19 +1551,24 @@
         <div class="turn-panel reveal">
           <div class="turn-kicker">Dracula · at the castle threshold</div>
           <h3 class="adventure-title">The door opens.<br><em>What do you do?</em></h3>
-          <p class="prose">A pale figure waits with a silver lamp. Read the scene, choose a response, or write a move of your own. The next page begins with your decision.</p>
-          <div class="turn-choices" aria-label="Example choices shown in the app">
-            <div class="turn-choice"><span class="n">1</span> Search the courtyard for a way out.</div>
-            <div class="turn-choice"><span class="n">2</span> Step inside and take the Count’s hand.</div>
-            <div class="turn-choice"><span class="n">3</span> Raise your crucifix and refuse to enter.</div>
-          </div>
+          <p class="prose">At Dracula’s castle, a pale figure waits with a silver lamp. Do you enter, escape, or stand your ground?</p>
+          <p class="turn-example-label">Example choices in the app</p>
+          <ol class="turn-choices" aria-label="Example choices shown in the app">
+            <li class="turn-choice"><span class="n" aria-hidden="true">1</span> Search the courtyard for a way out.</li>
+            <li class="turn-choice"><span class="n" aria-hidden="true">2</span> Step inside and take the Count’s hand.</li>
+            <li class="turn-choice"><span class="n" aria-hidden="true">3</span> Raise your crucifix and refuse to enter.</li>
+          </ol>
           <div class="turn-custom">Or write your own response in the app.</div>
-          <p class="turn-note">One scene from a real Dracula adventure. Your choices take the story somewhere new.</p>
         </div>
       </div>
 
+    </div>
+  </section>
+
+  <section class="section-block worlds-section" id="worlds" aria-labelledby="worlds-heading">
+    <div class="container">
       <div class="section-eyebrow center">250+ doors, one vault</div>
-      <h2 style="text-align:center;" class="reveal">Pick a world. <em class="grad">Any world.</em></h2>
+      <h2 id="worlds-heading" style="text-align:center;" class="reveal">Pick a world. <em class="grad">Any world.</em></h2>
       <p class="lede reveal" style="text-align:center; margin-left:auto; margin-right:auto;">Six of the worlds waiting inside. Each opens under its own painted cover and branches, turn by turn, from the premise on its card.</p>
 
       <div class="adv-worlds-grid reveal-stagger">
