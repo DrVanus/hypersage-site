@@ -6383,6 +6383,7 @@ function makeExcavationJar(site) {
         var kept = rec.specimens.indexOf('gem-' + id) >= 0;
         c.globalAlpha = kept ? 1 : 0.28;
         if (art) c.drawImage(art, px - 12, r.y + 8, 24, 24);
+        if (specimen && Meta.data.marks === 1) gemMark(c, specimen.key, px, r.y + 20, 5.5);
         c.globalAlpha = 1;
         if (kept) { c.strokeStyle = '#c5e69a'; c.lineWidth = 1; c.beginPath(); c.arc(px, r.y + 20, 14, 0, 6.283); c.stroke(); }
       });
@@ -6427,6 +6428,7 @@ function makeExcavationJar(site) {
       var key = keys[0], need = site.recipe[key],
           have = e.delivered ? need : Math.min(need, this._bagCount(key)), art = SPR[BODY_SPR[key]];
       if (art) c.drawImage(art, 40, 70, 38, 38);
+      if (Meta.data.marks === 1) gemMark(c, key, 59, 89, 9);
       text(e.delivered ? 'FILLED' : have + ' / ' + need, 125, 75, e.delivered ? 20 : 26, e.delivered ? '#3f8f4f' : '#5b4930', fD);
       text(need + ' loose ' + key, 102, 119, 11, '#7b684d');
     } else {
@@ -6446,7 +6448,10 @@ function makeExcavationJar(site) {
     }).filter(Boolean);
     if (targets.length === 1) {
       var specimenArt = SPR[bodySpr(targets[0])];
-      if (specimenArt) { c.globalAlpha = e.specimens.length ? 1 : intactLeft ? 0.60 : 0.20; c.drawImage(specimenArt, 211, 70, 38, 38); c.globalAlpha = 1; }
+      c.globalAlpha = e.specimens.length ? 1 : intactLeft ? 0.60 : 0.20;
+      if (specimenArt) c.drawImage(specimenArt, 211, 70, 38, 38);
+      if (Meta.data.marks === 1) gemMark(c, targets[0].key, 230, 89, 9);
+      c.globalAlpha = 1;
       text(e.specimens.length + ' / ' + targets.length, 287, 77, 23, '#755842', fD);
       text(e.specimens.length ? 'Safe with Flint' : intactLeft ? 'Lift intact · 2 swings' : 'Split this attempt', 270, 119, 10, '#7b684d');
     } else {
@@ -6456,6 +6461,7 @@ function makeExcavationJar(site) {
         var art = SPR[bodySpr(body)], x = 270 + (i - (targets.length - 1) / 2) * 38;
         c.globalAlpha = kept ? 1 : left ? 0.60 : 0.20;
         if (art) c.drawImage(art, x - 17, 72, 34, 34);
+        if (Meta.data.marks === 1) gemMark(c, body.key, x, 89, 8);
         c.globalAlpha = 1;
         if (!kept && !left) {
           c.strokeStyle = '#9d7260'; c.lineWidth = 1.5;
@@ -6528,12 +6534,14 @@ function makeExcavationJar(site) {
         e.specimens.forEach(function(id,j){
           var b=site.bodies.filter(function(body){return specimenId(body)===id;})[0],im=b&&SPR[bodySpr(b)];
           if(im)c.drawImage(im,resultLeft+80+j*46,404,40,40);
+          if(b && Meta.data.marks === 1) gemMark(c,b.key,resultLeft+100+j*46,424,9.5);
         });
         choicePlate(c,{x:60,y:488,w:300,h:58},'REPLAY THIS SITE','Try a different route','career',false);
         choicePlate(c,{x:60,y:558,w:300,h:58},'FIELD JOURNAL','Choose another excavation','wood',false);
       } else if(e.cut) {
         text('A great '+e.cut.key,210,248,25,'#5b4930',fD);
         var gem=SPR[bodySpr(e.cut)];if(gem)c.drawImage(gem,175,281,70,70);
+        if(Meta.data.marks === 1) gemMark(c,e.cut.key,210,316,15);
         choicePlate(c,{x:54,y:370,w:312,h:58},'LIFT INTACT · 2 SWINGS','Keep for Flint; no loose gems','free',this.swings<2);
         choicePlate(c,{x:54,y:440,w:312,h:58},'SPLIT · 1 SWING',this.bag.length+3>7?'Needs 3 empty satchel spaces':'3 loose '+e.cut.key+' gems; specimen is lost','career',this.bag.length+3>7);
         choicePlate(c,{x:54,y:510,w:312,h:52},'LEAVE IT FOR NOW','Choose another route','wood',false);
