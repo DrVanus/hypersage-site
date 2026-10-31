@@ -17,7 +17,7 @@
   <meta property="og:description" content="Thoughtful iPhone apps from HyperSage AI Labs. Help with cooking, conversations, notes, health records, bedtime stories and more.">
   <meta property="og:url" content="https://hypersage.ai/">
   <meta property="og:site_name" content="HyperSage AI Labs">
-  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20261030e">
+  <meta property="og:image" content="https://hypersage.ai/og-image.png?v=20261031a">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HyperSage AI Labs — Independent Product Studio">
   <meta name="twitter:description" content="Thoughtful iPhone apps from HyperSage AI Labs. Help with cooking, conversations, notes, health records, bedtime stories and more.">
-  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20261030e">
+  <meta name="twitter:image" content="https://hypersage.ai/og-image.png?v=20261031a">
   <meta name="twitter:image:alt" content="HyperSage AI Labs — an independent product studio">
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -42,7 +42,7 @@
         "legalName": "HyperSage AI Labs LLC",
         "url": "https://hypersage.ai/",
         "logo": "https://hypersage.ai/apple-touch-icon.png",
-        "image": "https://hypersage.ai/og-image.png?v=20261030e",
+        "image": "https://hypersage.ai/og-image.png?v=20261031a",
         "description": "An independent studio making iPhone apps and original games.",
         "email": "support@hypersage.ai",
         "address": { "@type": "PostalAddress", "addressRegion": "DE", "addressCountry": "US" }
@@ -869,6 +869,9 @@
     .hero .grad-text { background-image: linear-gradient(105deg, #81E3D2 4%, #9EB7F9 60%, #CFABF5); }
     .hero .lede { max-width: 35em; font-size: 1.08rem; line-height: 1.75; margin-bottom: 28px; }
     .hero-cta { gap: 14px 22px; }
+    .hero-cta .btn { max-width: 100%; white-space: normal; }
+    .hero-cta .btn span:first-child { min-width: 0; overflow-wrap: anywhere; }
+    .hero-cta .btn span[aria-hidden] { flex-shrink: 0; }
     .hero-try { font-size: .85rem; }
     .product-universe { grid-area: engine; position: relative; width: 94%; max-width: 620px; justify-self: center; isolation: isolate; }
     .showcase-stage { position: relative; height: 540px; }
@@ -992,7 +995,7 @@
 
 
     /* Shared, readable app journeys; one timer owns the whole composition. */
-    .showcase-select { min-width: 0; max-width: 140px; width: 140px; min-height: 44px; padding: 0 8px; border: 0; border-radius: 6px; color: var(--fg); background: #101625; font: 500 .8rem/1.3 'Inter',sans-serif; cursor: pointer; }
+    .showcase-select { min-width: 0; max-width: 140px; width: 140px; min-height: 44px; height: 44px; padding: 0 8px; border: 0; border-radius: 6px; color: var(--fg); background: #101625; font: 500 .8rem/1.3 'Inter',sans-serif; cursor: pointer; }
     .showcase-select:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 1px; }
     .showcase-summary { text-align: center; min-height: 68px; margin: 0 0 8px; }
     .showcase-tagline { font-size: .85rem; line-height: 1.5; margin: 0; color: var(--muted); }
@@ -1017,6 +1020,73 @@
       .showcase-toggle { padding-inline: 14px; }
     }
 
+
+    /* Keep app journeys readable when visitors enlarge text. */
+    .journey .showcase-stage {
+      display: grid;
+      grid-template-columns: repeat(100, minmax(0, 1fr));
+      height: auto;
+      min-height: 550px;
+      aspect-ratio: auto;
+      padding-bottom: 3%;
+    }
+    .journey .showcase-phone {
+      position: relative;
+      inset: auto;
+      width: auto;
+      min-width: 0;
+      grid-row: 1;
+      align-self: start;
+      margin-top: 58px;
+    }
+    .journey .phone-left { grid-column: 1 / span 34; transform: none; }
+    .journey .phone-featured { grid-column: 33 / span 37; margin-top: 8px; }
+    .journey .phone-right { grid-column: 67 / span 34; transform: none; }
+    .journey .phone-left .phone-glass { transform: rotate(-8deg); }
+    .journey .phone-right .phone-glass { transform: rotate(8deg); }
+    .journey .phone-caption { position: relative; margin-top: max(15px, 1em); }
+    .journey .phone-name { max-width: 100%; overflow-wrap: anywhere; }
+    .showcase-explore { flex-wrap: wrap; justify-content: center; max-width: 100%; }
+    .showcase-explore-name { white-space: nowrap; }
+    .product-universe { container-name: showcase; container-type: inline-size; }
+    .showcase-controls { flex-wrap: wrap; justify-content: center; }
+    .showcase-select { flex: 0 0 auto; width: 10em; max-width: 100%; }
+    @media (min-width: 761px) and (max-width: 1099px) {
+      .journey .showcase-stage { min-height: 430px; }
+      .journey .showcase-phone { margin-top: 60px; }
+      .journey .phone-featured { margin-top: 15px; }
+    }
+    @media (max-width: 760px) {
+      .journey .showcase-stage { min-height: 0; }
+      .journey .showcase-stage::before {
+        content: "";
+        grid-area: 1 / 1 / 2 / -1;
+        width: 100%;
+        aspect-ratio: .94;
+        align-self: start;
+        pointer-events: none;
+      }
+      .journey .showcase-phone { margin-top: 32px; }
+      .journey .phone-featured { margin-top: 0; }
+    }
+    @media (max-width: 400px) {
+      .showcase-controls { gap: 0; padding: 4px; }
+      .showcase-select { width: 9.2em; }
+    }
+    @container showcase (max-width: 15em) {
+      .showcase-controls {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(44px, 1fr));
+        width: 100%;
+        border-radius: 24px;
+        gap: 4px;
+        padding: 6px;
+      }
+      .showcase-controls:has(.showcase-toggle[hidden]) { grid-template-columns: repeat(2, minmax(44px, 1fr)); }
+      .showcase-select { grid-column: 1 / -1; grid-row: 1; width: 100%; }
+      .showcase-control { grid-row: 2; }
+      .showcase-toggle { border-left: 0; border-radius: 50%; padding: 0; }
+    }
   </style>
   <script>
     /* Enable reveal only when motion is welcome and the API exists — otherwise
@@ -1089,8 +1159,8 @@
         <figure class="product-universe journey" aria-label="Explore HyperSage apps">
           <div class="showcase-stage"><div class="universe-orbit" aria-hidden="true"></div>
           <div class="showcase-phone phone-left"><span class="phone-glass"><img src="assets/showcase/nightshelf-journey-1.webp" alt="Nightshelf: an illustrated Familiar Tales library of classic stories" width="420" height="912"></span><span class="phone-caption"><span class="phone-name">Find a story</span><small></small></span></div>
-          <div class="showcase-phone phone-featured"><span class="phone-glass"><img src="assets/showcase/nightshelf-journey-2.webp" alt="Nightshelf with Pro: a bedtime-story creator with an idea, mood, and story length" width="420" height="912" fetchpriority="high"></span><span class="phone-caption"><span class="phone-name">Create with Pro</span><small></small></span></div>
-          <div class="showcase-phone phone-right"><span class="phone-glass"><img src="assets/showcase/nightshelf-journey-3.webp" alt="Nightshelf: The Wind in the Willows reader with playback controls and a sleep timer" width="420" height="912"></span><span class="phone-caption"><span class="phone-name">Press play</span><small></small></span></div>
+          <div class="showcase-phone phone-featured"><span class="phone-glass"><img src="assets/showcase/nightshelf-listening-20261031.webp" alt="Nightshelf: The Wind in the Willows playing with Clara during the free AI-narration welcome, with playback controls and a thirty-minute sleep timer" width="420" height="913" fetchpriority="high"></span><span class="phone-caption"><span class="phone-name">Start listening</span><small></small></span></div>
+          <div class="showcase-phone phone-right"><span class="phone-glass"><img src="assets/showcase/nightshelf-journey-2.webp" alt="Nightshelf with Pro: a bedtime-story creator with an idea, mood, and story length" width="420" height="912"></span><span class="phone-caption"><span class="phone-name">Create with Pro</span><small></small></span></div>
           </div><div class="showcase-summary"><p class="showcase-tagline">A story for tonight</p><a class="showcase-explore" href="nightshelf/">Explore <span class="showcase-explore-name">Nightshelf</span> <span aria-hidden="true">↗</span></a></div>
           <div class="showcase-controls" hidden role="group" aria-label="Product showcase controls"><button class="showcase-control" type="button" id="showcase-prev" aria-label="Previous app"><span aria-hidden="true">←</span></button><label class="sr-only" for="showcase-app">Choose an app to explore</label><select class="showcase-select" id="showcase-app">
             <option value="0">Nightshelf</option>
@@ -1238,7 +1308,7 @@
           
           <p class="desc">Your crypto portfolio, explained. Ask about your coins and get answers built on what you hold and what you paid.</p>
           <ul role="list">
-            <li>Price alerts you set just by asking</li>
+            <li>Price alerts prepared in plain language, ready to review</li>
             <li>Live prices, watchlists, sentiment and market heat maps</li>
           </ul>
           <div class="foot">
@@ -2229,7 +2299,7 @@
       var figure = document.querySelector('.product-universe');
       if (!figure || !('IntersectionObserver' in window)) return;
       var apps = [{"name": "Nightshelf", "href": "nightshelf/", "tagline": "A story for tonight"}, {"name": "Wingmate", "href": "wingmate/", "tagline": "Find the words that feel like you"}, {"name": "Loam", "href": "loam/", "tagline": "Your notes, with a little care"}, {"name": "Quietoak", "href": "quietoak/", "tagline": "A little room to breathe"}, {"name": "Saffra", "href": "saffra/", "tagline": "From what’s in the fridge to dinner"}, {"name": "Rowan", "href": "rowan/", "tagline": "Your day, ready for your next visit"}, {"name": "Holohound", "href": "holohound/", "tagline": "From a card to a collection"}, {"name": "CryptoSage AI", "href": "https://cryptosageai.io/", "tagline": "Your market, with more context"}, {"name": "Alder", "href": "alder/", "tagline": "A little support for recovery"}, {"name": "Mythkin", "href": "mythkin/", "tagline": "Conversations across history and imagination"}, {"name": "StoryVault AI", "href": "storyvault/", "tagline": "Stories shaped by your choices"}];
-      var scenes = [[{"name": "Find a story", "href": "nightshelf/", "src": "assets/showcase/nightshelf-journey-1.webp", "alt": "Nightshelf: an illustrated Familiar Tales library of classic stories", "caption": "", "width": 420, "height": 912, "app": "Nightshelf"}, {"name": "Create with Pro", "href": "nightshelf/", "src": "assets/showcase/nightshelf-journey-2.webp", "alt": "Nightshelf with Pro: a bedtime-story creator with an idea, mood, and story length", "caption": "", "width": 420, "height": 912, "app": "Nightshelf"}, {"name": "Press play", "href": "nightshelf/", "src": "assets/showcase/nightshelf-journey-3.webp", "alt": "Nightshelf: The Wind in the Willows reader with playback controls and a sleep timer", "caption": "", "width": 420, "height": 912, "app": "Nightshelf"}], [{"name": "Keep the context", "href": "wingmate/", "src": "assets/showcase/wingmate-journey-1.webp", "alt": "Wingmate: Connections with example conversations for Olivia, Sophia, Emma, and Chloe", "caption": "", "width": 420, "height": 913, "app": "Wingmate"}, {"name": "Ask your coach", "href": "wingmate/", "src": "assets/showcase/wingmate-journey-2.webp", "alt": "Wingmate: Ava suggests a playful Sunday walk and coffee reply in an example conversation", "caption": "", "width": 420, "height": 913, "app": "Wingmate"}, {"name": "Save your favorites", "href": "wingmate/", "src": "assets/showcase/wingmate-journey-3.webp", "alt": "Wingmate: six saved openers with individual Copy controls", "caption": "", "width": 420, "height": 913, "app": "Wingmate"}], [{"name": "Keep your notes", "href": "loam/", "src": "assets/showcase/loam-journey-1.webp", "alt": "Loam Notes with pinned notes, collection filters, a digest of tended notes and a New note button.", "caption": "", "width": 420, "height": 913, "app": "Loam"}, {"name": "Review a tidy", "href": "loam/", "src": "assets/showcase/loam-journey-2.webp", "alt": "A Kitchen reno note with a Tidied by Loam banner, View original and Undo tidy controls, and commitment marks offering Remind me or Dismiss.", "caption": "", "width": 420, "height": 913, "app": "Loam"}, {"name": "Ask your notes", "href": "loam/", "src": "assets/showcase/loam-journey-3.webp", "alt": "Loam answering What did I promise Tom from the sample Kitchen reno note, with a source-note link, Copy and Ask again controls.", "caption": "", "width": 420, "height": 913, "app": "Loam"}], [{"name": "Talk it through", "href": "quietoak/", "src": "assets/showcase/quietoak-journey-1.webp", "alt": "Quietoak: a conversation with Willow and a STOP skill card", "caption": "", "width": 420, "height": 913, "app": "Quietoak"}, {"name": "Make a plan", "href": "quietoak/", "src": "assets/showcase/quietoak-journey-2.webp", "alt": "Quietoak: a saved practice plan with a cue, response, and rehearsal controls", "caption": "", "width": 420, "height": 913, "app": "Quietoak"}, {"name": "Try one small step", "href": "quietoak/", "src": "assets/showcase/quietoak-journey-3.webp", "alt": "Quietoak: guided STOP practice with Willow, with Next and Back controls", "caption": "", "width": 420, "height": 913, "app": "Quietoak"}], [{"name": "Find a recipe", "href": "saffra/", "src": "assets/showcase/saffra-journey-1.webp", "alt": "Saffra: Aglio e Olio and a row of quick dinner recipes", "caption": "", "width": 420, "height": 913, "app": "Saffra"}, {"name": "Ask your cook", "href": "saffra/", "src": "assets/showcase/saffra-journey-2.webp", "alt": "Saffra checks a sample pantry and suggests Chicken Thigh Puttanesca for a thirty-minute dinner", "caption": "", "width": 420, "height": 913, "app": "Saffra"}, {"name": "Cook step by step", "href": "saffra/", "src": "assets/showcase/saffra-journey-3.webp", "alt": "Saffra: Cooking Mode for Aglio e Olio, with voice controls and a suggested fifteen-minute timer", "caption": "", "width": 420, "height": 913, "app": "Saffra"}], [{"name": "Check in today", "href": "rowan/", "src": "assets/showcase/rowan-journey-1.webp", "alt": "Rowan: a sample mood check-in, symptom log, upcoming neurology appointment, and medication section", "caption": "", "width": 420, "height": 909, "app": "Rowan"}, {"name": "Log a symptom", "href": "rowan/", "src": "assets/showcase/rowan-journey-2.webp", "alt": "Rowan: Quick log with Fatigue selected and a sample severity rating of five out of ten", "caption": "", "width": 420, "height": 909, "app": "Rowan"}, {"name": "Prepare your visit", "href": "rowan/", "src": "assets/showcase/rowan-journey-3.webp", "alt": "Rowan: a sample neurology visit brief with a patient question, health background, conditions, and allergies", "caption": "", "width": 420, "height": 909, "app": "Rowan"}], [{"name": "Scan your cards", "href": "holohound/", "src": "assets/showcase/holohound-journey-20261030-1.webp", "alt": "HoloHound demo viewfinder recognizing an Umbreon VMAX card, with search, capture and batch controls.", "caption": "", "width": 420, "height": 913, "app": "Holohound"}, {"name": "Read the report", "href": "holohound/", "src": "assets/showcase/holohound-journey-20261030-2.webp", "alt": "HoloHound Umbreon VMAX report with card details, a cached quote with source date, and separately attributed US and European prices.", "caption": "", "width": 420, "height": 913, "app": "Holohound"}, {"name": "Track your binder", "href": "holohound/", "src": "assets/showcase/holohound-journey-20261030-3.webp", "alt": "HoloHound Home with a sample collection value and history, card movers, and Scan a card and Ask Hound actions.", "caption": "", "width": 420, "height": 913, "app": "Holohound"}], [{"name": "Follow the market", "href": "https://cryptosageai.io/", "src": "assets/showcase/cryptosage-journey-1.webp", "alt": "CryptoSage AI: demo Home with a portfolio chart, watchlist, and market movers", "caption": "", "width": 420, "height": 913, "app": "CryptoSage AI"}, {"name": "See your holdings", "href": "https://cryptosageai.io/", "src": "assets/showcase/cryptosage-journey-2.webp", "alt": "CryptoSage AI: portfolio allocation and holdings using demo data", "caption": "", "width": 420, "height": 913, "app": "CryptoSage AI"}, {"name": "Ask a question", "href": "https://cryptosageai.io/", "src": "assets/showcase/cryptosage-journey-3.webp", "alt": "CryptoSage AI: an educational AI answer about watchlists, charts, and technical signals", "caption": "", "width": 420, "height": 913, "app": "CryptoSage AI"}], [{"name": "Track recovery", "href": "alder/", "src": "assets/showcase/alder-journey-1.webp", "alt": "Alder Today with a painted night tree, example recovery counters for Alcohol and Vaping, and Talk to Alder and Check in buttons.", "caption": "", "width": 420, "height": 909, "app": "Alder"}, {"name": "Daily check-in", "href": "alder/", "src": "assets/showcase/alder-journey-2.webp", "alt": "Alder Check in with a selected daily mood, separate Alcohol and Vaping craving ratings, a Tired factor, a sample note and Save check-in.", "caption": "", "width": 420, "height": 909, "app": "Alder"}, {"name": "Try a tool", "href": "alder/", "src": "assets/showcase/alder-journey-3.webp", "alt": "Alder Toolbox listing Urge surfing, Play the tape forward, DEADS and SOBER breathing, with duration labels and explanations.", "caption": "", "width": 420, "height": 909, "app": "Alder"}], [{"name": "Meet the cast", "href": "mythkin/", "src": "assets/showcase/mythkin-journey-1.webp", "alt": "Mythkin Discover with Find a kin, Read a story and Create a kin actions, a Start a Hearth control, featured Oedipus and painted character collections.", "caption": "", "width": 420, "height": 911, "app": "Mythkin"}, {"name": "Talk with a kin", "href": "mythkin/", "src": "assets/showcase/mythkin-journey-2.webp", "alt": "A Mythkin conversation with Sherlock Holmes about a torn ticket found in a coat pocket; the header identifies an AI character, not a person.", "caption": "", "width": 420, "height": 911, "app": "Mythkin"}, {"name": "Create your kin", "href": "mythkin/", "src": "assets/showcase/mythkin-journey-3.webp", "alt": "Mythkin New kin form partially filled for Maeve, a cottage witch, with a silhouette preview, personality, name, description and story fields.", "caption": "", "width": 420, "height": 911, "app": "Mythkin"}], [{"name": "Find a world", "href": "storyvault/", "src": "assets/showcase/storyvault-journey-1.webp", "alt": "StoryVault Original Worlds with painted covers for Beowulf at Heorot, The Scribes of the Veiled Mere, The Same Day at Vialdi and Veilkeep Manor.", "caption": "", "width": 420, "height": 912, "app": "StoryVault AI"}, {"name": "Choose your path", "href": "storyvault/", "src": "assets/showcase/storyvault-journey-2.webp", "alt": "An illustrated Dracula adventure with a castle scene, story passage, Listen control, three choices and a field for a custom response.", "caption": "", "width": 420, "height": 912, "app": "StoryVault AI"}, {"name": "Write your story", "href": "storyvault/", "src": "assets/showcase/storyvault-journey-3.webp", "alt": "StoryVault Write Your Own Story with an idea field, quick-start inspirations including Heist Caper and Haunted Mystery, Help build my brief and Begin Story controls.", "caption": "", "width": 420, "height": 912, "app": "StoryVault AI"}]];
+      var scenes = [[{"name": "Find a story", "href": "nightshelf/", "src": "assets/showcase/nightshelf-journey-1.webp", "alt": "Nightshelf: an illustrated Familiar Tales library of classic stories", "caption": "", "width": 420, "height": 912, "app": "Nightshelf"}, {"name": "Start listening", "href": "nightshelf/", "src": "assets/showcase/nightshelf-listening-20261031.webp", "alt": "Nightshelf: The Wind in the Willows playing with Clara during the free AI-narration welcome, with playback controls and a thirty-minute sleep timer", "caption": "", "width": 420, "height": 913, "app": "Nightshelf"}, {"name": "Create with Pro", "href": "nightshelf/", "src": "assets/showcase/nightshelf-journey-2.webp", "alt": "Nightshelf with Pro: a bedtime-story creator with an idea, mood, and story length", "caption": "", "width": 420, "height": 912, "app": "Nightshelf"}], [{"name": "Keep the context", "href": "wingmate/", "src": "assets/showcase/wingmate-journey-1.webp", "alt": "Wingmate: Connections with example conversations for Olivia, Sophia, Emma, and Chloe", "caption": "", "width": 420, "height": 913, "app": "Wingmate"}, {"name": "Ask your coach", "href": "wingmate/", "src": "assets/showcase/wingmate-journey-2.webp", "alt": "Wingmate: Ava suggests a playful Sunday walk and coffee reply in an example conversation", "caption": "", "width": 420, "height": 913, "app": "Wingmate"}, {"name": "Save your favorites", "href": "wingmate/", "src": "assets/showcase/wingmate-journey-3.webp", "alt": "Wingmate: six saved openers with individual Copy controls", "caption": "", "width": 420, "height": 913, "app": "Wingmate"}], [{"name": "Keep your notes", "href": "loam/", "src": "assets/showcase/loam-journey-1.webp", "alt": "Loam Notes with pinned notes, collection filters, a digest of tended notes and a New note button.", "caption": "", "width": 420, "height": 913, "app": "Loam"}, {"name": "Review a tidy", "href": "loam/", "src": "assets/showcase/loam-journey-2.webp", "alt": "A Kitchen reno note with a Tidied by Loam banner, View original and Undo tidy controls, and commitment marks offering Remind me or Dismiss.", "caption": "", "width": 420, "height": 913, "app": "Loam"}, {"name": "Ask your notes", "href": "loam/", "src": "assets/showcase/loam-journey-3.webp", "alt": "Loam answering What did I promise Tom from the sample Kitchen reno note, with a source-note link, Copy and Ask again controls.", "caption": "", "width": 420, "height": 913, "app": "Loam"}], [{"name": "Talk it through", "href": "quietoak/", "src": "assets/showcase/quietoak-journey-1.webp", "alt": "Quietoak: a conversation with Willow and a STOP skill card", "caption": "", "width": 420, "height": 913, "app": "Quietoak"}, {"name": "Make a plan", "href": "quietoak/", "src": "assets/showcase/quietoak-journey-2.webp", "alt": "Quietoak: a saved practice plan with a cue, response, and rehearsal controls", "caption": "", "width": 420, "height": 913, "app": "Quietoak"}, {"name": "Try one small step", "href": "quietoak/", "src": "assets/showcase/quietoak-journey-3.webp", "alt": "Quietoak: guided STOP practice with Willow, with Next and Back controls", "caption": "", "width": 420, "height": 913, "app": "Quietoak"}], [{"name": "Find a recipe", "href": "saffra/", "src": "assets/showcase/saffra-journey-1.webp", "alt": "Saffra: Aglio e Olio and a row of quick dinner recipes", "caption": "", "width": 420, "height": 913, "app": "Saffra"}, {"name": "Ask your cook", "href": "saffra/", "src": "assets/showcase/saffra-journey-2.webp", "alt": "Saffra checks a sample pantry and suggests Chicken Thigh Puttanesca for a thirty-minute dinner", "caption": "", "width": 420, "height": 913, "app": "Saffra"}, {"name": "Cook step by step", "href": "saffra/", "src": "assets/showcase/saffra-journey-3.webp", "alt": "Saffra: Cooking Mode for Aglio e Olio, with voice controls and a suggested fifteen-minute timer", "caption": "", "width": 420, "height": 913, "app": "Saffra"}], [{"name": "Check in today", "href": "rowan/", "src": "assets/showcase/rowan-journey-1.webp", "alt": "Rowan: a sample mood check-in, symptom log, upcoming neurology appointment, and medication section", "caption": "", "width": 420, "height": 909, "app": "Rowan"}, {"name": "Log a symptom", "href": "rowan/", "src": "assets/showcase/rowan-journey-2.webp", "alt": "Rowan: Quick log with Fatigue selected and a sample severity rating of five out of ten", "caption": "", "width": 420, "height": 909, "app": "Rowan"}, {"name": "Prepare your visit", "href": "rowan/", "src": "assets/showcase/rowan-journey-3.webp", "alt": "Rowan: a sample neurology visit brief with a patient question, health background, conditions, and allergies", "caption": "", "width": 420, "height": 909, "app": "Rowan"}], [{"name": "Scan your cards", "href": "holohound/", "src": "assets/showcase/holohound-journey-20261030-1.webp", "alt": "HoloHound demo viewfinder recognizing an Umbreon VMAX card, with search, capture and batch controls.", "caption": "", "width": 420, "height": 913, "app": "Holohound"}, {"name": "Read the report", "href": "holohound/", "src": "assets/showcase/holohound-journey-20261030-2.webp", "alt": "HoloHound Umbreon VMAX report with card details, a cached quote with source date, and separately attributed US and European prices.", "caption": "", "width": 420, "height": 913, "app": "Holohound"}, {"name": "Track your binder", "href": "holohound/", "src": "assets/showcase/holohound-journey-20261030-3.webp", "alt": "HoloHound Home with a sample collection value and history, card movers, and Scan a card and Ask Hound actions.", "caption": "", "width": 420, "height": 913, "app": "Holohound"}], [{"name": "Follow the market", "href": "https://cryptosageai.io/", "src": "assets/showcase/cryptosage-journey-1.webp", "alt": "CryptoSage AI: demo Home with a portfolio chart, watchlist, and market movers", "caption": "", "width": 420, "height": 913, "app": "CryptoSage AI"}, {"name": "See your holdings", "href": "https://cryptosageai.io/", "src": "assets/showcase/cryptosage-journey-2.webp", "alt": "CryptoSage AI: portfolio allocation and holdings using demo data", "caption": "", "width": 420, "height": 913, "app": "CryptoSage AI"}, {"name": "Ask a question", "href": "https://cryptosageai.io/", "src": "assets/showcase/cryptosage-journey-3.webp", "alt": "CryptoSage AI: an educational AI answer about watchlists, charts, and technical signals", "caption": "", "width": 420, "height": 913, "app": "CryptoSage AI"}], [{"name": "Track recovery", "href": "alder/", "src": "assets/showcase/alder-journey-1.webp", "alt": "Alder Today with a painted night tree, example recovery counters for Alcohol and Vaping, and Talk to Alder and Check in buttons.", "caption": "", "width": 420, "height": 909, "app": "Alder"}, {"name": "Daily check-in", "href": "alder/", "src": "assets/showcase/alder-journey-2.webp", "alt": "Alder Check in with a selected daily mood, separate Alcohol and Vaping craving ratings, a Tired factor, a sample note and Save check-in.", "caption": "", "width": 420, "height": 909, "app": "Alder"}, {"name": "Try a tool", "href": "alder/", "src": "assets/showcase/alder-journey-3.webp", "alt": "Alder Toolbox listing Urge surfing, Play the tape forward, DEADS and SOBER breathing, with duration labels and explanations.", "caption": "", "width": 420, "height": 909, "app": "Alder"}], [{"name": "Meet the cast", "href": "mythkin/", "src": "assets/showcase/mythkin-journey-1.webp", "alt": "Mythkin Discover with Find a kin, Read a story and Create a kin actions, a Start a Hearth control, featured Oedipus and painted character collections.", "caption": "", "width": 420, "height": 911, "app": "Mythkin"}, {"name": "Talk with a kin", "href": "mythkin/", "src": "assets/showcase/mythkin-journey-2.webp", "alt": "A Mythkin conversation with Sherlock Holmes about a torn ticket found in a coat pocket; the header identifies an AI character, not a person.", "caption": "", "width": 420, "height": 911, "app": "Mythkin"}, {"name": "Create your kin", "href": "mythkin/", "src": "assets/showcase/mythkin-journey-3.webp", "alt": "Mythkin New kin form partially filled for Maeve, a cottage witch, with a silhouette preview, personality, name, description and story fields.", "caption": "", "width": 420, "height": 911, "app": "Mythkin"}], [{"name": "Find a world", "href": "storyvault/", "src": "assets/showcase/storyvault-journey-1.webp", "alt": "StoryVault Original Worlds with painted covers for Beowulf at Heorot, The Scribes of the Veiled Mere, The Same Day at Vialdi and Veilkeep Manor.", "caption": "", "width": 420, "height": 912, "app": "StoryVault AI"}, {"name": "Choose your path", "href": "storyvault/", "src": "assets/showcase/storyvault-journey-2.webp", "alt": "An illustrated Dracula adventure with a castle scene, story passage, Listen control, three choices and a field for a custom response.", "caption": "", "width": 420, "height": 912, "app": "StoryVault AI"}, {"name": "Write your story", "href": "storyvault/", "src": "assets/showcase/storyvault-journey-3.webp", "alt": "StoryVault Write Your Own Story with an idea field, quick-start inspirations including Heist Caper and Haunted Mystery, Help build my brief and Begin Story controls.", "caption": "", "width": 420, "height": 912, "app": "StoryVault AI"}]];
       var sides = ['.phone-left','.phone-featured','.phone-right'].map(function (selector) { return figure.querySelector(selector); });
       var controls = figure.querySelector('.showcase-controls');
       var count = figure.querySelector('.showcase-count');
