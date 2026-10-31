@@ -1087,6 +1087,87 @@
       .showcase-control { grid-row: 2; }
       .showcase-toggle { border-left: 0; border-radius: 50%; padding: 0; }
     }
+
+    /* A browsable collection with a shared action hierarchy. */
+    #products .catalog-heading {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      flex-wrap: wrap; gap: 24px 40px; margin-bottom: 32px;
+    }
+    #products .section-head { text-align: start; margin: 0; flex: 1 1 30rem; }
+    #products .section-head p { margin: 14px 0 0; max-width: 44em; }
+    #products .product-filters {
+      justify-content: flex-start; gap: 4px; margin: 0; padding: 5px;
+      border: 1px solid var(--line-strong); border-radius: 999px;
+      background: var(--bg-2);
+    }
+    #products .filter-chip {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 9px 14px; border-color: transparent; font-size: .83rem;
+    }
+    #products .filter-total { font: .72rem/1 'JetBrains Mono', monospace; opacity: .75; }
+    #products .filter-chip[aria-pressed="true"] { box-shadow: 0 2px 10px #0002; }
+    #products article.product {
+      background: radial-gradient(ellipse at 0 0, color-mix(in srgb, var(--accent) 9%, transparent), transparent 60%),
+                  linear-gradient(145deg, #141D29, #101521 70%);
+    }
+    #products .product .top { grid-template-columns: 64px minmax(0, 1fr); gap: 9px 16px; margin-bottom: 22px; }
+    #products .product .app-icon { width: 64px; height: 64px; border-radius: 16px; }
+    #products .product .titleblock h3 { font-size: 1.35rem; line-height: 1.25; }
+    #products .product-title { border-radius: 4px; }
+    #products .product-title:hover { color: var(--accent-text); }
+    #products .product-title:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 4px; }
+    #products .product .cat {
+      font: 400 .8rem/1.45 'Inter', sans-serif;
+      text-transform: none; letter-spacing: .01em; color: var(--muted); margin-top: 5px;
+    }
+    #products article.product:focus-within { border-color: var(--accent-text); }
+    #products .product .foot {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px 16px; padding-block: 18px; align-items: center;
+      background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 5%, #0C121D), #0C121D);
+    }
+    #products .product .app-store { justify-self: start; min-height: 48px; }
+    #products .product .link { min-height: 48px; font-size: .88rem; }
+    #products .product .link:only-child { grid-column: 1 / -1; }
+    #products .product .btn-store {
+      display: inline-flex; align-items: center; justify-content: flex-start;
+      min-width: 0; min-height: 48px; gap: 9px; padding: 7px 12px 7px 8px;
+      border-radius: 14px; border: 1px solid color-mix(in srgb, var(--accent-text) 65%, white);
+      background: linear-gradient(125deg, color-mix(in srgb, var(--accent-text) 75%, white), var(--accent-text));
+      color: #10121A; font-size: .9rem; font-weight: 650; line-height: 1.35;
+      box-shadow: inset 0 1px 0 #FFFFFF60, 0 4px 14px #0003;
+      transition: box-shadow .18s ease, filter .18s ease;
+    }
+    #products .play-symbol {
+      display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px;
+      border: 1px solid #10121A20; border-radius: 50%; background: #FFFFFF38;
+    }
+    #products .play-symbol svg { width: 18px; height: 18px; fill: currentColor; }
+    #products .play-arrow { margin-inline-start: auto; flex-shrink: 0; }
+    #products .product .btn-store:hover { filter: brightness(1.08); box-shadow: inset 0 1px 0 #FFFFFF80, 0 6px 18px #0004; }
+    @container portfolio-card (max-width: 17rem) {
+      #products .product .foot { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+      #products .product .foot .link { justify-content: space-between; }
+      #products .product .btn-store { width: 100%; }
+    }
+    @container portfolio-card (min-width: 26.875rem) {
+      #products .product .top { grid-template-columns: 64px minmax(0, 1fr) auto; }
+    }
+    @media (max-width: 560px) {
+      #products .catalog-heading { gap: 24px; }
+      #products .product-filters { width: 100%; border-radius: 22px; }
+      #products .filter-chip { flex: 1 1 auto; justify-content: center; padding-inline: 10px; }
+      #products .product .top { gap: 9px 13px; }
+    }
+    #products .aside-card .inner { width: 100%; min-width: 0; }
+    #products .aside-card .btn { max-width: 100%; white-space: normal; }
+    @media (prefers-reduced-motion: reduce) { #products .product .btn-store { transition: none; } }
+    @media (forced-colors: active) {
+      #products article.product, #products .product .foot, #products .product-filters { background: Canvas; }
+      #products .product .btn-store { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; }
+      #products .play-symbol { border-color: ButtonText; background: ButtonFace; }
+      #products .filter-chip[aria-pressed="true"] { background: Highlight; color: HighlightText; }
+    }
   </style>
   <script>
     /* Enable reveal only when motion is welcome and the API exists — otherwise
@@ -1203,18 +1284,20 @@
 
   <section class="block" id="products">
     <div class="container">
+      <div class="catalog-heading">
       <div class="section-head">
         <span class="eyebrow">Our apps</span>
         <h2>Find your kind of wonderful.</h2>
         
-        <p>Some are on the App Store now, some are coming soon, and a few play free in your browser.</p>
+        <p>Thoughtful iPhone apps and original games. Explore what’s available now and what we’re making next.</p>
       </div>
 
       <div class="product-filters" hidden role="group" aria-label="Filter products">
-        <button type="button" class="filter-chip" data-filter="all" aria-pressed="true">Everything</button>
-        <button type="button" class="filter-chip" data-filter="apps" aria-pressed="false">Apps for life</button>
-        <button type="button" class="filter-chip" data-filter="games" aria-pressed="false">Games</button>
+        <button type="button" class="filter-chip" data-filter="all" aria-pressed="true" aria-label="Everything, 16 products">Everything <span class="filter-total" aria-hidden="true">16</span></button>
+        <button type="button" class="filter-chip" data-filter="apps" aria-pressed="false" aria-label="Apps for life, 11 apps">Apps for life <span class="filter-total" aria-hidden="true">11</span></button>
+        <button type="button" class="filter-chip" data-filter="games" aria-pressed="false" aria-label="Games, 5 games">Games <span class="filter-total" aria-hidden="true">5</span></button>
         <span class="filter-status sr-only" role="status" aria-live="polite"></span>
+      </div>
       </div>
       <div class="products-grid" data-filter="all">
 
@@ -1222,7 +1305,7 @@
           <div class="top">
             <img class="app-icon" src="icons/holohound.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Holohound</h3>
+              <h3><a class="product-title" href="holohound/">Holohound</a></h3>
               <div class="cat">Trading Card Scanner</div>
             </div>
             <span class="status">iOS · Coming soon</span>
@@ -1233,7 +1316,7 @@
             <li>Set completion, pre-grade triage, and flip P&amp;L</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Website: Holohound" href="holohound/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Holohound" href="holohound/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1241,7 +1324,7 @@
           <div class="top">
             <img class="app-icon" src="icons/wingmate.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Wingmate</h3>
+              <h3><a class="product-title" href="wingmate/">Wingmate</a></h3>
               <div class="cat">AI Dating Coach</div>
             </div>
             <span class="status live">iOS · Available</span>
@@ -1253,7 +1336,7 @@
           </ul>
           <div class="foot">
             <a class="app-store" aria-label="Download on the App Store: Wingmate" href="https://apps.apple.com/app/id6792772729" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Wingmate" href="wingmate/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Wingmate" href="wingmate/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1262,7 +1345,7 @@
           <div class="top">
             <img class="app-icon" src="icons/loam.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Loam</h3>
+              <h3><a class="product-title" href="loam/">Loam</a></h3>
               <div class="cat">AI Notes Companion</div>
             </div>
             <span class="status">iOS · Coming soon</span>
@@ -1273,7 +1356,7 @@
             <li>A Ledger of changes, with undo and redo where supported</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Website: Loam" href="loam/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Loam" href="loam/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1281,7 +1364,7 @@
           <div class="top">
             <img class="app-icon" src="icons/quietoak.webp?v=20260908a" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Quietoak</h3>
+              <h3><a class="product-title" href="quietoak/">Quietoak</a></h3>
               <div class="cat">DBT Companion &amp; Diary</div>
             </div>
             <span class="status">iOS · Coming soon</span>
@@ -1292,7 +1375,7 @@
             <li>Rehearse a response, record what you tried, and return to your plan</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Website: Quietoak" href="quietoak/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Quietoak" href="quietoak/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1300,7 +1383,7 @@
           <div class="top">
             <img class="app-icon" src="icons/cryptosage.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>CryptoSage AI</h3>
+              <h3><a class="product-title" href="https://cryptosageai.io/" target="_blank" rel="noopener">CryptoSage AI</a></h3>
               <div class="cat">Crypto Portfolio Tracker</div>
             </div>
             <span class="status live">iOS · Available</span>
@@ -1313,7 +1396,7 @@
           </ul>
           <div class="foot">
             <a class="app-store" aria-label="Download on the App Store: CryptoSage AI" href="https://apps.apple.com/app/id6792761331" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: CryptoSage AI" href="https://cryptosageai.io/" target="_blank" rel="noopener">Website <span aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Explore CryptoSage AI" href="https://cryptosageai.io/" target="_blank" rel="noopener">Explore <span aria-hidden="true">↗</span></a>
           </div>
         </article>
 
@@ -1321,7 +1404,7 @@
           <div class="top">
             <img class="app-icon" src="icons/saffra.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Saffra</h3>
+              <h3><a class="product-title" href="saffra/">Saffra</a></h3>
               <div class="cat">AI Cooking Assistant</div>
             </div>
             <span class="status live">iOS · Available</span>
@@ -1334,7 +1417,7 @@
           </ul>
           <div class="foot">
             <a class="app-store" aria-label="Download on the App Store: Saffra" href="https://apps.apple.com/app/id6792760857" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Saffra" href="saffra/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Saffra" href="saffra/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1343,7 +1426,7 @@
             <img class="app-icon" src="icons/storyvault.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
               
-              <h3>StoryVault AI</h3>
+              <h3><a class="product-title" href="storyvault/">StoryVault AI</a></h3>
               <div class="cat">Interactive Fiction</div>
             </div>
             <span class="status live">iOS · Available</span>
@@ -1356,7 +1439,7 @@
           </ul>
           <div class="foot">
             <a class="app-store" aria-label="Download on the App Store: StoryVault AI" href="https://apps.apple.com/app/id6792759454" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: StoryVault AI" href="storyvault/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore StoryVault AI" href="storyvault/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1364,7 +1447,7 @@
           <div class="top">
             <img class="app-icon" src="icons/nightshelf.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Nightshelf</h3>
+              <h3><a class="product-title" href="nightshelf/">Nightshelf</a></h3>
               <div class="cat">Sleep Stories</div>
             </div>
             <span class="status live">iOS · Available</span>
@@ -1376,7 +1459,7 @@
           </ul>
           <div class="foot">
             <a class="app-store" aria-label="Download on the App Store: Nightshelf" href="https://apps.apple.com/app/id6792761643" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Nightshelf" href="nightshelf/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Nightshelf" href="nightshelf/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1384,7 +1467,7 @@
           <div class="top">
             <img class="app-icon" src="icons/rowan.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Rowan</h3>
+              <h3><a class="product-title" href="rowan/">Rowan</a></h3>
               <div class="cat">Chronic Illness Diary</div>
             </div>
             <span class="status live">iOS · Available</span>
@@ -1396,7 +1479,7 @@
           </ul>
           <div class="foot">
             <a class="app-store" aria-label="Download on the App Store: Rowan" href="https://apps.apple.com/app/id6797693737" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Rowan" href="rowan/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Rowan" href="rowan/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1404,7 +1487,7 @@
           <div class="top">
             <img class="app-icon" src="icons/alder.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Alder</h3>
+              <h3><a class="product-title" href="alder/">Alder</a></h3>
               <div class="cat">Sobriety &amp; Recovery</div>
             </div>
             <span class="status">iOS · Coming soon</span>
@@ -1415,7 +1498,7 @@
             <li>The SOS screen and crisis lines are never metered or paywalled</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Website: Alder" href="alder/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Alder" href="alder/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1423,7 +1506,7 @@
           <div class="top">
             <img class="app-icon" src="icons/mythkin.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Mythkin</h3>
+              <h3><a class="product-title" href="mythkin/">Mythkin</a></h3>
               <div class="cat">AI Characters &amp; Legends</div>
             </div>
             <span class="status">iOS · Coming soon</span>
@@ -1434,7 +1517,7 @@
             <li>44 stories to step into, each cast from the roster</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Website: Mythkin" href="mythkin/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Mythkin" href="mythkin/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1443,7 +1526,7 @@
           <div class="top">
             <img class="app-icon" src="icons/hexhunter.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Hexhunter</h3>
+              <h3><a class="product-title" href="hexhunter/">Hexhunter</a></h3>
               <div class="cat">Gothic Horde-Survivor</div>
             </div>
             <span class="status live">iOS · Available</span>
@@ -1457,7 +1540,7 @@
           </ul>
           <div class="foot">
             <a class="app-store" aria-label="Download on the App Store: Hexhunter" href="https://apps.apple.com/app/id6792798732" target="_blank" rel="noopener"><img src="badges/download-on-the-app-store.svg" alt="Download on the App Store" width="132" height="44" loading="lazy"></a>
-            <a class="link" aria-label="Website: Hexhunter" href="hexhunter/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Hexhunter" href="hexhunter/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1465,7 +1548,7 @@
           <div class="top">
             <img class="app-icon" src="icons/mythwright.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Mythwright</h3>
+              <h3><a class="product-title" href="mythwright/">Mythwright</a></h3>
               <div class="cat">Strategy Card Game</div>
             </div>
             <span class="status">iOS · Coming soon</span>
@@ -1476,7 +1559,7 @@
             <li>Campaign, practice and a seasonal ladder from Recruit to Infinite</li>
           </ul>
           <div class="foot">
-            <a class="link" aria-label="Website: Mythwright" href="mythwright/">Website <span aria-hidden="true">→</span></a>
+            <a class="link" aria-label="Explore Mythwright" href="mythwright/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1484,7 +1567,7 @@
           <div class="top">
             <img class="app-icon" src="icons/waddleton.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Waddleton</h3>
+              <h3><a class="product-title" href="waddleton/">Waddleton</a></h3>
               <div class="cat">Social World · Arcade</div>
             </div>
             <span class="status live">Web · Available</span>
@@ -1496,8 +1579,8 @@
             <li>Free to play, with no ads and nothing you have to buy</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Play free: Waddleton" href="https://waddleton.pages.dev/" target="_blank" rel="noopener">Play Waddleton free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Website: Waddleton" href="waddleton/">Website <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Play free: Waddleton (opens in a new tab)" href="https://waddleton.pages.dev/" target="_blank" rel="noopener"><span class="play-symbol" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M7 4.5 15 10l-8 5.5z"/></svg></span><span>Play free<span class="sr-only"> Waddleton</span></span><span class="play-arrow" aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Explore Waddleton" href="waddleton/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1505,7 +1588,7 @@
           <div class="top">
             <img class="app-icon" src="icons/hoardling.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Hoardling</h3>
+              <h3><a class="product-title" href="hoardling/">Hoardling</a></h3>
               <div class="cat">Hoard Defense</div>
             </div>
             <span class="status live">Web · Available</span>
@@ -1517,8 +1600,8 @@
             <li>Duels against four computer rivals, with the same raiders down both roads</li>
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Play free: Hoardling" href="hoardling/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Website: Hoardling" href="hoardling/">Website <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Play free: Hoardling (opens in a new tab)" href="hoardling/play/" target="_blank" rel="noopener"><span class="play-symbol" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M7 4.5 15 10l-8 5.5z"/></svg></span><span>Play free<span class="sr-only"> Hoardling</span></span><span class="play-arrow" aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Explore Hoardling" href="hoardling/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
@@ -1526,7 +1609,7 @@
           <div class="top">
             <img class="app-icon" src="icons/gemburrow.webp" alt="" width="58" height="58" loading="lazy">
             <div class="titleblock">
-              <h3>Gemburrow</h3>
+              <h3><a class="product-title" href="gemburrow/">Gemburrow</a></h3>
               <div class="cat">Cozy Gem-Digging Puzzle</div>
             </div>
             <span class="status live">Web · Available</span>
@@ -1539,8 +1622,8 @@
             
           </ul>
           <div class="foot">
-            <a class="btn-store" aria-label="Play free: Gemburrow" href="gemburrow/play/" target="_blank" rel="noopener">Play free <span aria-hidden="true">↗</span></a>
-            <a class="link" aria-label="Website: Gemburrow" href="gemburrow/">Website <span aria-hidden="true">→</span></a>
+            <a class="btn-store" aria-label="Play free: Gemburrow (opens in a new tab)" href="gemburrow/play/" target="_blank" rel="noopener"><span class="play-symbol" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M7 4.5 15 10l-8 5.5z"/></svg></span><span>Play free<span class="sr-only"> Gemburrow</span></span><span class="play-arrow" aria-hidden="true">↗</span></a>
+            <a class="link" aria-label="Explore Gemburrow" href="gemburrow/">Explore <span aria-hidden="true">→</span></a>
           </div>
         </article>
 
