@@ -920,8 +920,7 @@
     .aside-card .inner { max-width: 70ch; }
     .ai-intro { display: grid; grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); gap: 60px; align-items: center; margin: 8px 0 50px; padding: 40px; border: 1px solid #9BA9D324; border-radius: 28px; background: radial-gradient(ellipse at 8% 20%,#234A4738,transparent 70%), #10162499; }
     .ai-intro .context-engine { grid-area: auto; margin: 0; max-width: 560px; }
-    .section-number { font: .8rem/1 'JetBrains Mono',monospace; color: var(--brand-a); }
-    .ai-intro-copy h3 { font-size: clamp(1.6rem,2.7vw,2.5rem); line-height: 1.2; letter-spacing: -.035em; margin: 22px 0 18px; font-weight: 550; }
+    .ai-intro-copy h3 { font-size: clamp(1.6rem,2.7vw,2.5rem); line-height: 1.2; letter-spacing: -.035em; margin: 0 0 18px; font-weight: 550; }
     .ai-intro-copy p { font-size: 1rem; color: var(--muted); max-width: 34em; }
     .ai-intro-copy .ai-demo-hint { font-size: .8rem; margin-top: 26px; }
     #ai { background: linear-gradient(180deg,transparent,#14152D55 45%,transparent); }
@@ -1242,7 +1241,7 @@
           <div class="showcase-phone phone-left"><span class="phone-glass"><img src="assets/showcase/nightshelf-journey-1.webp" alt="Nightshelf: an illustrated Familiar Tales library of classic stories" width="420" height="912"></span><span class="phone-caption"><span class="phone-name">Find a story</span><small></small></span></div>
           <div class="showcase-phone phone-featured"><span class="phone-glass"><img src="assets/showcase/nightshelf-listening-20261031.webp" alt="Nightshelf: The Wind in the Willows playing with Clara during the free AI-narration welcome, with playback controls and a thirty-minute sleep timer" width="420" height="913" fetchpriority="high"></span><span class="phone-caption"><span class="phone-name">Start listening</span><small></small></span></div>
           <div class="showcase-phone phone-right"><span class="phone-glass"><img src="assets/showcase/nightshelf-journey-2.webp" alt="Nightshelf with Pro: a bedtime-story creator with an idea, mood, and story length" width="420" height="912"></span><span class="phone-caption"><span class="phone-name">Create with Pro</span><small></small></span></div>
-          </div><div class="showcase-summary"><p class="showcase-tagline">A story for tonight</p><a class="showcase-explore" href="nightshelf/">Explore <span class="showcase-explore-name">Nightshelf</span> <span aria-hidden="true">↗</span></a></div>
+          </div><div class="showcase-summary"><p class="showcase-tagline">A story for tonight</p><a class="showcase-explore" href="nightshelf/">Explore <span class="showcase-explore-name">Nightshelf</span> <span class="showcase-explore-arrow" aria-hidden="true">→</span></a></div>
           <div class="showcase-controls" hidden role="group" aria-label="Product showcase controls"><button class="showcase-control" type="button" id="showcase-prev" aria-label="Previous app"><span aria-hidden="true">←</span></button><label class="sr-only" for="showcase-app">Choose an app to explore</label><select class="showcase-select" id="showcase-app">
             <option value="0">Nightshelf</option>
             <option value="1">Wingmate</option>
@@ -1650,7 +1649,7 @@
         <h2>AI with a job to do.</h2>
         <p>A good feature starts with something you want to do. See how our apps turn context into a useful next step.</p>
       </div>
-      <div class="ai-intro"><div class="ai-intro-copy"><span class="section-number" aria-hidden="true">01 →</span><h3>Small moments.<br>Thoughtfully connected.</h3><p>The right recipe for what’s in the fridge. A story that follows your choices. Help that starts with you.</p><p class="ai-demo-hint">Choose an app to explore an illustrative example.</p></div><figure class="context-engine" aria-label="Product walkthroughs">
+      <div class="ai-intro"><div class="ai-intro-copy"><h3>You ask.<br>It knows the context.<br>You get an answer.</h3><p>Each app starts from something you’d actually say, reads it against what it already knows, and hands back one thing you can use: a recipe, a visit brief, a reply, tonight’s story.</p><p class="ai-demo-hint">Pick an app to see its walkthrough.</p></div><figure class="context-engine" aria-label="Product walkthroughs">
           <div class="example-app">
             <img id="example-icon" src="icons/cryptosage.webp" alt="" width="36" height="36">
             <div class="example-choice">
@@ -1704,7 +1703,7 @@
             </div>
           </div>
           <figcaption>
-            <div class="engine-foot"><small>Illustrative example <span class="engine-counter" aria-hidden="true">01 / 12</span></small><a class="example-link" href="https://cryptosageai.io/" aria-label="Explore app: CryptoSage AI">Explore app <span aria-hidden="true">&nbsp;↗</span></a></div>
+            <div class="engine-foot"><small>Illustrative example <span class="engine-counter" aria-hidden="true">01 / 12</span></small><a class="example-link" href="https://cryptosageai.io/" target="_blank" rel="noopener" aria-label="Explore app: CryptoSage AI">Explore app <span aria-hidden="true">&nbsp;↗</span></a></div>
           </figcaption>
           <div class="engine-progress" aria-hidden="true"></div>
           <span class="sr-only" id="example-announcement" aria-live="polite" aria-atomic="true"></span>
@@ -2137,6 +2136,9 @@
         var link = engine.querySelector('.example-link');
         link.href = item.url;
         link.firstChild.textContent = 'Explore app ';
+        var leaves = /^https?:/.test(item.url);
+        link.querySelector('span').textContent = '\u00a0' + (leaves ? '↗' : '→');
+        if (leaves) { link.target = '_blank'; link.rel = 'noopener'; } else { link.removeAttribute('target'); link.removeAttribute('rel'); }
         link.setAttribute('aria-label', 'Explore app: ' + item.name);
         if (manual) engine.querySelector('#example-announcement').textContent = item.name + '. ' + item.availability + '. ' + item.result + '. ' + item.detail;
         animate();
@@ -2467,6 +2469,9 @@
           tagline.textContent = apps[index].tagline;
           explore.href = apps[index].href;
           explore.querySelector('.showcase-explore-name').textContent = apps[index].name;
+          var leaves = /^https?:/.test(apps[index].href);
+          explore.querySelector('.showcase-explore-arrow').textContent = leaves ? '↗' : '→';
+          if (leaves) { explore.target = '_blank'; explore.rel = 'noopener'; } else { explore.removeAttribute('target'); explore.removeAttribute('rel'); }
           count.textContent = (index + 1) + ' / ' + scenes.length;
           count.setAttribute('aria-label', 'App ' + (index + 1) + ' of ' + scenes.length);
           if (manual) announcement.textContent = apps[index].name + '. App ' + (index + 1) + ' of ' + scenes.length + '.';
