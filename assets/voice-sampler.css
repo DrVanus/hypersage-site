@@ -206,3 +206,35 @@
 
 /* Direct audio links remain available if script loading fails. */
 #voices.voice-ready .voice-fallback{display:none}
+
+/* Complete app catalog: official icons, current casts, and a truthful upcoming state. */
+#voices .app-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+#voices .app-tab{padding:13px 14px;gap:10px;border-radius:18px;min-width:0}
+#voices .app-tab-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0}
+#voices .app-tab small{display:block;line-height:1.45;margin-top:3px}
+#voices [data-group=nightshelf],#voices [data-app=nightshelf]{--accent:#d9be83}
+#voices [data-group=quietoak],#voices [data-app=quietoak]{--accent:#a8d9bf}
+#voices [data-group=saffra],#voices [data-app=saffra]{--accent:#efb186}
+#voices [data-group=storyvault],#voices [data-app=storyvault]{--accent:#c6b4f0}
+#voices [data-group=wingmate],#voices [data-app=wingmate]{--accent:#e7aec8}
+#voices .app-tab[aria-pressed=true]{border-color:color-mix(in srgb,var(--accent) 48%,transparent);background:color-mix(in srgb,var(--accent) 9%,#0f141d)}
+#voices .listening-room{border-color:color-mix(in srgb,var(--accent) 20%,transparent);background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 6%,#10141d),#10141d 60%)}
+#voices .art-stage{background:radial-gradient(ellipse at 50% 54%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 67%)}
+#voices .art-stage:before,#voices .art-stage:after{border-color:color-mix(in srgb,var(--accent) 8%,transparent)}
+#voices .availability,#voices .availability.coming{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 24%,transparent);background:color-mix(in srgb,var(--accent) 5%,transparent)}
+#voices .voice-option[aria-pressed=true]{border-color:color-mix(in srgb,var(--accent) 50%,transparent);background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--accent)}
+#voices .play-toggle{background:var(--accent);box-shadow:0 6px 26px color-mix(in srgb,var(--accent) 9%,transparent)}
+#voices .voice-detail{font-size:11px;color:var(--muted);line-height:1.6;margin:15px 0 0}
+#voices .voice-upcoming{margin:4px 0 12px;color:#d6dce5;line-height:1.75;font-size:15px}
+#voices .voice-upcoming p{margin:0}
+#voices .coach-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;width:min(100%,320px)}
+#voices .coach-preview figure{margin:0;min-width:0;text-align:center}
+#voices .coach-preview img{width:100%;height:auto;border-radius:18px;object-fit:contain}
+#voices .coach-preview figcaption{font-size:12px;color:#d5c4cf;margin-top:7px}
+#voices .voice-fallback h3{font-size:20px;margin:28px 0 12px}
+#voices .voice-fallback li{overflow-wrap:anywhere}
+@media(max-width:1050px){#voices .app-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){#voices .app-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}#voices .app-tab{padding:12px 10px;gap:9px}#voices .app-tab-icon{width:31px;height:31px;border-radius:9px}#voices .coach-preview{max-width:250px;gap:14px}#voices .voice-upcoming{font-size:14px}}
+@media(forced-colors:active){#voices .app-tab[aria-pressed=true],#voices .voice-option[aria-pressed=true]{outline:2px solid Highlight;outline-offset:1px}#voices .play-toggle{background:ButtonFace;color:ButtonText;border:1px solid ButtonText}}
+
+#voices .voice-heading :is(h2,h3){min-width:0;max-width:100%;overflow-wrap:anywhere}
