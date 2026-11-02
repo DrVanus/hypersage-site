@@ -6,11 +6,11 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0b1026">
   <title>Privacy Policy — Waddleton</title>
-  <meta name="description" content="What Waddleton stores about your penguin, what it doesn't, and why there are no ads and no analytics.">
+  <meta name="description" content="How Waddleton handles guest profiles, age bands, purchases, online play, and deletion.">
   <link rel="canonical" href="https://hypersage.ai/waddleton/privacy.html">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Privacy Policy — Waddleton">
-  <meta property="og:description" content="What Waddleton stores about your penguin, what it doesn't, and why there are no ads or analytics.">
+  <meta property="og:description" content="How Waddleton handles guest profiles, age bands, purchases, online play, and deletion.">
   <meta property="og:url" content="https://hypersage.ai/waddleton/privacy.html">
   <meta property="og:site_name" content="Waddleton">
   <meta property="og:image" content="https://hypersage.ai/waddleton/og-image.png?v=20260913a">
@@ -43,83 +43,70 @@
 
   <main class="legal" id="main">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 2026-09-13</p>
+    <p class="updated">Last updated: 2026-11-02</p>
 
-    <p>Waddleton is a free game with <strong>no ads and no analytics</strong>. You can play the whole thing without signing in and without spending anything. Signing in is optional, and the mobile app — once it ships — will have optional purchases for cosmetic extras. That keeps the amount we collect small, which is why this page is short. Everything below is what actually happens.</p>
+    <p>This policy covers Waddleton in the browser and the iPhone app being prepared for release. Waddleton has <strong>no ads and no third-party analytics in the game</strong>. The games and shared island are free to play. The iPhone app offers optional Goldfish and Waddleton Club purchases through Apple.</p>
 
     <h2>Who we are</h2>
-    <p>Waddleton is made by HyperSage AI Labs, an independent studio. Contact: <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>.</p>
+    <p>Waddleton is made by HyperSage AI Labs LLC. Contact us at <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>.</p>
 
     <h2>The short version</h2>
     <ul>
-      <li><strong>No sign-up required.</strong> You get a guest penguin automatically — no email, no password, no real name. You <em>may</em> choose to sign in with Google so your penguin follows you between devices; that is the only way we ever receive an email address.</li>
-      <li><strong>No ads, and no advertising networks</strong> of any kind.</li>
-      <li><strong>No analytics.</strong> There is no Google Analytics, no Firebase, no tracking pixel, no third-party telemetry in the game at all.</li>
-      <li><strong>We do not sell or share anything.</strong></li>
-      <li>What we keep is your penguin — its name, look, and progress — the <a href="#age-band">age band</a> the age screen puts you in, and, when you post one, your score and the name published against it on a leaderboard.</li>
-      <li><strong>In the mobile app, purchases happen in the app store, never here.</strong> We never see or store your card, and the browser version has no purchases at all.</li>
+      <li><strong>No sign-up required.</strong> A guest penguin uses a random account identifier; you do not need an email address, password, or real name.</li>
+      <li><strong>The iPhone app does not offer sign-in or cross-device save recovery.</strong> A phone and a browser are separate penguins. Clearing app data or reinstalling can lose your save.</li>
+      <li>We store the profile and progress needed to run your penguin, your age band, shared scores, and reports you submit. Purchase records are part of the mobile profile; payment-card details are not.</li>
+      <li>Cloudflare and Supabase run the online features. Apple processes iPhone purchases. We do not sell personal information or use it for advertising.</li>
     </ul>
 
     <h2>What we store</h2>
 
     <h3>Your penguin</h3>
-    <p>When you first play, a <strong>guest identity is created for you automatically</strong> — a random identifier, with no email address or password attached. Against that identifier we store the <strong>display name your penguin is carrying</strong>, your penguin's state — colors, clothing, items, coins, level, badges, pets, and igloo — and the <strong>age band</strong> described below. That's what makes your penguin still be there tomorrow.</p>
+    <p>The game saves your penguin on your device. When online features are available, it also creates a guest account and stores a cloud profile tied to that account. The profile includes your display name, appearance, items, currencies, progress, badges, pets, igloo, friends, mute and block lists, and age band. A cloud copy of a guest profile is <strong>not a recoverable sign-in</strong>: without the original device credentials, we cannot promise to reconnect you to it.</p>
 
     <h3 id="age-band">Your age band</h3>
-    <p>Before the island loads, Waddleton asks the <strong>month and year you were born</strong>. Those two numbers stay inside the screen that asked for them: they are not written to storage, not attached to your penguin, and not sent to us. What we do keep is the single band they put you in — <strong>child, teen, or adult</strong>. It is saved on your device, and it travels with your penguin's profile record to our database. We keep the band and not the date on purpose: a band is not a date of birth, and the band is what decides whether you can type in chat, whether you can read what other players type, and whether a name you picked may go on a public board.</p>
+    <p>Before you play, Waddleton asks for your <strong>birth month and year</strong>. These values are used on the device to select <strong>child, teen, or adult</strong>; the values themselves are not saved or sent to us. The age band is saved locally and included in the cloud profile. It controls chat, display names, and grown-up checks. This is an age declaration, not identity verification.</p>
 
-    <h3>If you sign in</h3>
-    <p>Signing in is <strong>optional</strong> and exists for one reason: so your penguin can follow you to another device. If you sign in with Google, we receive and store the <strong>account identifier and the email address</strong> Google gives us, and we attach your existing penguin to it. We do not use that address to email you marketing, and we do not pass it on.</p>
+    <h3>Optional browser sign-in</h3>
+    <p>If a browser version offers a configured Google sign-in, choosing it links that provider's account identifier and email address to your penguin. The game does not use that email for marketing. Availability is shown in the account screen. <strong>This option is not offered in the current iPhone app</strong>; an Apple account used for purchases does not sign you into a Waddleton save.</p>
 
     <h3>Your scores</h3>
-    <p>When you set a personal best in a mini-game, we store the <strong>board, the score, the name published against it, and the time</strong> so it can appear on the shared leaderboard for that game, along with a short-lived run token used to check the score came from a real play session. For a teen or adult, that name is the one you chose, and <strong>it is visible to every other player on that board</strong> — so please don't make it your real full name.</p>
-    
-    <p><strong>For a player in the under-13 band, nothing they picked is published.</strong> The game does not give those players a name field at all, and the board is handed a penguin name the game generates instead — which is why a child's row will not match the name over their penguin's head. The substitution happens both when the score is queued and again when it is sent, so a score that waited offline cannot carry an older name onto a board. Either way the score itself still counts. Your best score is also kept in your own browser.</p>
+    <p>When you set a personal best and online services are available, the game sends the board, score, public name, and time to the shared leaderboard, with a short-lived run token used to check the play session. Teen and adult scores use their chosen display name, visible to other players. Please do not use your real full name. Under-13 players have generated names; their leaderboard name is generated too. Personal bests and scores waiting to upload are also stored on the device.</p>
 
-    <h3>If you buy something (mobile app only)</h3>
-    <p>Purchases are handled entirely by the <strong>App Store or Google Play</strong>. We never see, receive, or store your payment details — the store tells the app only that a purchase succeeded, and the app adds the item to your penguin. We keep a record of which purchases have been added, so you are never charged twice or credited twice. The browser version has no purchases.</p>
+    <h3>Purchases in the iPhone app</h3>
+    <p>Apple handles payment. Waddleton receives purchase identifiers and verification results, including product and transaction identifiers and subscription status or expiry. The app records delivered purchases and membership in your profile, which may be synced to Supabase, and keeps local receipt records to prevent duplicate delivery. We do not receive your payment-card number or billing details. The browser version has no purchases.</p>
 
-    <h3>Reports</h3>
-    <p>If you report another player, we store <strong>who reported, who was reported, the category, and the note you wrote</strong> (up to 500 characters). Please be honest and please don't include personal information about yourself or anyone else in that note.</p>
+    <h3>Reports and support</h3>
+    <p>A report records the reporter's account identifier, the reported player's identifier, category, and the note entered, up to 500 characters. Please do not put personal information in a report. If you email support, we receive your email address and the information you send so we can respond.</p>
 
-    <h3>On your own device</h3>
-    <p>Your browser's local storage holds your penguin's profile, your personal best in each game, and small preferences like zoom level. In the mobile app the same profile is also copied into the app's own storage, so it survives the phone clearing space. If you have <strong>not</strong> signed in, clearing your browser data still means <strong>a lost penguin</strong> and there is no way for us to recover it — signing in is what protects against that.</p>
+    <h3>On your device</h3>
+    <p>Local storage holds your profile, scores, queued uploads, and preferences. The iPhone app also keeps a native backup of the save. This helps preserve progress but is not a guarantee against loss after uninstalling, clearing data, or changing devices.</p>
 
-    <h2>What we don't store</h2>
+    <h2>Chat and the people you meet</h2>
+    <p>The island includes <strong>scripted residents and real players</strong>; the player card identifies residents. Other players can see your display name, appearance, location within the game, and messages you send. Chat is relayed live and is not written to our game database, unless someone includes it in a report. For under-13 players, the app offers only preset phrases and filters incoming free text from their view. Mute and block act immediately. Reports let us investigate problems, but there is no full-time team watching chat in real time.</p>
+
+    <h2>Technical services</h2>
+    <p>Cloudflare hosts the browser game and the multiplayer relay. Supabase supplies accounts and the database. These services process network requests needed to provide the game, including IP addresses and technical request information under their own policies. The relay briefly counts recent guest registrations by network address to limit abuse. A Cloudflare Turnstile check may be used to distinguish people from bots.</p>
     <ul>
-      <li><strong>Chat is not saved.</strong> What you type is relayed live to the players near you and is not written to our database. The one exception is if someone includes it in a report.</li>
-      <li><strong>No payment details, ever.</strong> Card and billing information stays with the App Store or Google Play and is never sent to us.</li>
-      <li>No password, and no real name. <strong>No date of birth:</strong> the age screen asks for a month and a year, and neither one is written down anywhere — only the band is kept, as set out above. No email address either, unless you chose to sign in.</li>
-      <li>No location, no contacts, no photos, no microphone or camera access.</li>
-      <li>No advertising identifiers, and no profile of you for advertising — there are no ads.</li>
+      <li><a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare privacy policy</a></li>
+      <li><a href="https://supabase.com/privacy" rel="noopener">Supabase privacy policy</a></li>
+      <li><a href="https://www.apple.com/legal/privacy/" rel="noopener">Apple privacy policy</a> — iPhone purchases and subscriptions</li>
+      <li><a href="https://policies.google.com/privacy" rel="noopener">Google privacy policy</a> — only if you choose an available browser sign-in</li>
     </ul>
+    <p>The game does not request contacts, precise location, photos, microphone, or camera access. It does not use advertising identifiers, advertising networks, or third-party analytics. Data is shared with the providers needed to run the features described above, not sold or shared for advertising.</p>
 
-    <h2>Anti-abuse</h2>
-    <p>To stop one person creating thousands of penguins, our multiplayer server briefly keeps a count of recent guest sign-ups against the network address they came from. That's a short list of timestamps, it ages out on its own, and it isn't connected to your penguin or used for anything else. New sign-ins may also show a Cloudflare Turnstile check, which is there to tell people from bots.</p>
+    <h2>Children and parents</h2>
+    <p>Under-13 players do not get a custom-name field or free-text chat. Their profile still uses a guest identifier, generated name, and age band as described above. The iPhone app places grown-up checks before purchases and selected external actions; these complement Apple's purchase controls, such as Ask to Buy, and are not proof of a person's age. Parents can contact <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> about their child's data or an unsafe interaction. Please use mute or block immediately when needed.</p>
 
-    <h2>Who else is involved</h2>
-    <ul>
-      <li><strong>Cloudflare</strong> — hosts the game and runs the multiplayer server and the bot check. <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">cloudflare.com/privacypolicy</a></li>
-      <li><strong>Supabase</strong> — the database holding penguins, scores, and reports. <a href="https://supabase.com/privacy" rel="noopener">supabase.com/privacy</a></li>
-      <li><strong>Google</strong> — only if you choose to sign in with Google, and only for that sign-in. <a href="https://policies.google.com/privacy" rel="noopener">policies.google.com/privacy</a></li>
-      <li><strong>Apple App Store / Google Play</strong> — only in the mobile app, and only to take a purchase. They handle the payment; we are told the purchase succeeded, and nothing else. <a href="https://www.apple.com/legal/privacy/" rel="noopener">apple.com/legal/privacy</a> · <a href="https://policies.google.com/privacy" rel="noopener">policies.google.com/privacy</a></li>
-    </ul>
-    <p>These act as service providers for us. None of them is given your data for their own purposes.</p>
+    <h2 id="deletion">Deleting your penguin</h2>
+    <p>In the iPhone app, open your <strong>profile → Your Account → Delete account</strong>. Review the confirmation and keep the app open until deletion is confirmed. This deletes the current guest account and associated cloud profile, scores, authored reports, known reports about that identity, and online social records, then clears that penguin from the device. If the connection fails, use the retry action; clearing app data alone does not delete the server account. In a browser version without this control, contact <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> for help. We may need to verify that the account is yours; a display name alone is not proof.</p>
+    <p><strong>Deleting a penguin does not cancel Waddleton Club.</strong> Manage the subscription in your Apple account's subscription settings. A deleted save, spent Goldfish, and finished consumable purchases cannot be recovered by Restore Purchases.</p>
 
-    <h2>Children</h2>
-    <p>Waddleton is a gentle game with a friendly art style, and plenty of younger players will find it. It asks one thing of everybody before they play — <strong>the month and year you were born</strong>, so it knows which band to use — and it does not keep those numbers; see <a href="#age-band">Your age band</a> above for exactly what is kept and where it goes. Beyond that it <strong>never asks a child for personal information</strong>: no real name, no address, and no email unless an adult chooses to sign in. A guest penguin needs nothing at all.</p>
-    <p>For a player in the <strong>under-13 band</strong> the game offers no name field at all — the penguin's name is picked from a list the game generates — and a score posted to a shared board is published under a generated name rather than anything the player picked. For a teen or an adult the display name is chosen freely, is <strong>shown to other players and on leaderboards</strong>, and we ask that you not use a real full name.</p>
-    <p>Purchases in the mobile app go through the App Store or Google Play, which is where a parent's existing purchase controls — Ask to Buy, Family Sharing, and password prompts — apply. We'd encourage any parent to turn those on.</p>
-    <p>We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has entered personal information into Waddleton — in a display name or a report, for example — email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> and we will delete it.</p>
-
-    <h2>Chatting with strangers</h2>
-    <p>Waddleton is a live multiplayer world, so the penguins around you are real people. You can <strong>mute or block</strong> any player, and those take effect immediately. There is a quick-chat list of safe pre-written phrases for anyone who'd rather not type freely, and for players in the <strong>under-13 band it is the only way to talk</strong>: the typing box is not rendered for them at all, and free text other players type never reaches their screen. Reports are recorded, but to be straightforward with you: <strong>there is not a full-time moderation team reviewing them in real time</strong>, so mute and block are the tools that work instantly. Parents may want to sit with younger players the first time.</p>
+    <h2>Retention and deletion limits</h2>
+    <p>Profile data is kept while the account exists. Limited deletion records are retained to finish interrupted requests and prevent stale devices from putting deleted identities back: relay retry records for up to 30 days and hashed identity records in the database for up to one year. A hash is a technical identifier, not a promise of anonymity. Completed purchase-delivery records may remain on the device to prevent the same purchase being credited again.</p>
+    <p>Deletion does not erase Apple's transaction records, other devices' offline copies, or personal information someone may have included in unrelated report text. Service backups may retain data until they expire; deleted records must not be restored into active use. Contact support if information remains in a report or you need help with a deletion request.</p>
 
     <h2>Your choices</h2>
-    <ul>
-      <li><strong>Delete your penguin:</strong> clearing your browser's site data for waddleton.pages.dev removes it locally. To have the stored copy deleted too, email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> with your penguin's display name and we'll remove it.</li>
-      <li><strong>EU/UK (GDPR) &amp; California (CCPA/CPRA):</strong> you may request access to, or deletion of, the data tied to your penguin. <strong>We do not sell or share personal information, and we will not discriminate against you for exercising these rights.</strong></li>
-    </ul>
+    <p>You may ask us for access to or deletion of data tied to your penguin, and exercise applicable privacy rights, by emailing <a href="mailto:support@hypersage.ai">support@hypersage.ai</a>. We do not sell personal information or share it for targeted advertising, and will not discriminate against you for exercising your rights.</p>
 
     <h2>Changes</h2>
     <p>If we change this policy we'll update the date above and post the new version here.</p>

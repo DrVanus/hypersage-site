@@ -30,7 +30,7 @@
     .help-row .glyph { flex: 0 0 30px; color: var(--ice); }
     .help-row .glyph svg { width: 24px; height: 24px; }
     .help-row .body { flex: 1; }
-    .help-row .body strong { display: block; margin-bottom: 4px; color: var(--fg); }
+    .help-row .body > strong { display: block; margin-bottom: 4px; color: var(--fg); }
     .help-row .body p { color: var(--muted-fg); font-size: 0.95rem; margin-bottom: 0; }
   </style>
 </head>
@@ -68,14 +68,14 @@
         <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
         <div class="body">
           <strong>My penguin is gone</strong>
-          <p>Your penguin is saved in the browser you played in. If you signed in with Google, it's also attached to that sign-in — sign in again on any device and your penguin comes back. If you never signed in and cleared your browsing data, used a private window, or switched to a different device or browser, you'll get a new penguin. A penguin that was never signed in can't be recovered, because nothing is attached to it. Signing in is optional, but it's the way to protect a penguin you care about.</p>
+          <p>The current iPhone app does not offer sign-in or cross-device save recovery. Your save depends on the app or browser where it began; a phone and a browser are separate penguins. Clearing data, reinstalling, or changing devices can lose that save. Restore Purchases can check active Club membership and unfinished transactions, but cannot recover a lost penguin or completed Goldfish purchases. Please contact support before clearing data if something looks wrong.</p>
         </div>
       </div>
       <div class="help-row">
         <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/><circle cx="12" cy="12" r="3.4"/></svg></div>
         <div class="body">
           <strong>The island is empty</strong>
-          <p>You'll only see the players who are in the same area as you at that moment. Try the Town Square, which is where most penguins end up. If you can see your own penguin but nobody else ever appears, refresh the page — the connection may have dropped.</p>
+          <p>The island has scripted residents as well as real players. A resident's player card identifies them. You see real players who are in the same area while online services are connected; Town Square is a good place to meet. If the connection drops, reopen the app or refresh the browser. An empty area does not mean your save is lost.</p>
         </div>
       </div>
       <div class="help-row">
@@ -89,7 +89,7 @@
         <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-7 5 5"/><path d="M3 21h18"/></svg></div>
         <div class="body">
           <strong>My score isn't on the leaderboard</strong>
-          <p>Shared leaderboards are live for sixteen of the seventeen games; the exception is Lazy Floe, which has no score to beat. A score is only posted when you beat your own personal best, so an ordinary run won't appear, and if a board looks empty it usually is — most are new. Teens and adults appear under the display name they chose, which everyone on that board can see. Players in the under-13 band appear under a penguin name the game generates instead, so a child's row will not match the name over their penguin — that is deliberate, and the score still counts. If a score you're sure about never appears, email us and say which game.</p>
+          <p>Shared leaderboards are available for sixteen of the seventeen games while online services are connected; the exception is Lazy Floe, which has no score to beat. A score is only posted when you beat your own personal best, so an ordinary run won't appear, and an empty board may mean no scores are available or the online service is disconnected. Teens and adults appear under the display name they chose, which everyone on that board can see. Players in the under-13 band appear under a penguin name the game generates instead, so a child's row will not match the name over their penguin — that is deliberate, and the score still counts. If a score you're sure about never appears, email us and say which game.</p>
         </div>
       </div>
       <div class="help-row">
@@ -108,14 +108,19 @@
       </div>
     </div>
 
+    <h2>Delete your penguin</h2>
+    <p>In the iPhone app, open <strong>profile → Your Account → Delete account</strong> and follow the confirmation. Keep the app open until it confirms deletion; if interrupted, use the retry action. Clearing app data alone does not remove the server account. For browser versions without this control, or if you cannot access the penguin, email support. We may need to verify ownership.</p>
+    <p>Deletion removes the current penguin's account and progress. It <strong>does not cancel Club</strong> or erase Apple's purchase records. Read the <a href="privacy.html#deletion">privacy policy</a> for deletion scope and limited retention.</p>
+
     <h2>Refunds and purchases</h2>
-    <p>Waddleton is free to play and has no ads, and the browser version has <strong>no purchases at all</strong>. When the <strong>mobile app</strong> ships, it will have optional, purely decorative purchases — Goldfish, a premium currency, and the Waddleton Club subscription. Nothing you'll be able to buy makes a penguin better at a mini-game or moves you up a leaderboard.</p>
-    <p><strong>Payments and refunds will be handled by the store you buy from</strong> — Apple's <em>Report a Problem</em> page or Google Play's order history — not by us; we'll never take the payment ourselves. Purchases will restore from the store automatically, and a subscription will cancel in your App Store or Google Play account settings, which stops the next payment rather than refunding the period you're in.</p>
+    <p>Waddleton's games and shared island are free, with no ads. The browser version has no purchases. The iPhone app being prepared for release offers optional Goldfish packs and Waddleton Club for cosmetics and membership bonuses; purchases do not improve mini-game performance or leaderboard scores.</p>
+    <p>For a missing purchase, reopen the app or use <strong>Restore Purchases</strong> in the Goldfish screen with the Apple account that made the purchase. This checks active subscriptions and unfinished transactions. It does not restore completed consumable purchases, spent Goldfish, or a lost or deleted save. If delivery still fails, email support before clearing data.</p>
+    <p>Apple processes payments. You can <a href="https://reportaproblem.apple.com/" rel="noopener">request a refund from Apple</a>; eligibility depends on Apple's policies and applicable law. To stop Club renewing, open <strong>iPhone Settings → your name → Subscriptions → Waddleton Club</strong> and cancel. See <a href="https://support.apple.com/en-us/118428" rel="noopener">Apple's cancellation instructions</a>. Deleting the app or penguin does not cancel it.</p>
 
     <h2>For parents</h2>
-    
-    <p>Waddleton asks one thing of everybody before they play: the <strong>month and year you were born</strong>, so it knows which age band to use. Those two numbers aren't stored; the band is, and the <a href="privacy.html#age-band">privacy policy</a> sets out exactly where it goes. Beyond that it never asks a child for a name, email, or address — a guest penguin needs nothing at all, and signing in is optional. <strong>When the mobile app ships it will have optional purchases</strong> for decorative items; they'll go through the App Store or Google Play, so your existing controls — Ask to Buy, Family Sharing, and password prompts — will apply, and we'd encourage turning them on.</p>
-    <p>It is a live multiplayer game, so your child can see and be seen by other players. In the <strong>under-13 band</strong> the game gives no name field at all — the penguin's name comes from a list the game generates — and a score posted to a shared board goes up under a generated name, not one your child picked. Those players cannot type in chat either: they use the list of safe pre-written phrases, and free text other players type never reaches their screen. Mute and block work instantly, for everyone. Reports are recorded, but there's no full-time moderation team reading them in real time — so mute and block are the tools to rely on. Full detail is in the <a href="privacy.html">privacy policy</a>, and we're happy to answer questions directly.</p>
+    <p>Waddleton asks for birth month and year to choose an age band. The month and year are not saved; the band is saved locally and included in the online profile. Under-13 players get generated names and preset chat phrases; incoming free text is filtered from their view. Their guest identifier, progress, and other profile data are still processed as described in the <a href="privacy.html#age-band">privacy policy</a>.</p>
+    <p>The iPhone app uses grown-up checks before purchases and selected external actions. These complement Apple's purchase controls, such as Ask to Buy, but are not identity verification. Parents can enable Apple's controls in their family settings.</p>
+    <p>The island includes scripted residents and other people. Tap a player to mute or block them immediately, and report inappropriate behavior. Reports are recorded, but there is no full-time team watching live chat. Do not share personal information; contact <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> with concerns.</p>
 
     <h2>For press &amp; creators</h2>
     <p>Videos, streams, and screenshots of your own play are welcome and don't need permission. If you'd like art assets or want to talk about the game, email <a href="mailto:support@hypersage.ai?subject=Waddleton%20press">support@hypersage.ai</a>.</p>
