@@ -61,10 +61,10 @@
     <h2>What we store</h2>
 
     <h3>Your penguin</h3>
-    <p>The game saves your penguin on your device. When online features are available, it also creates a guest account and stores a cloud profile tied to that account. The profile includes your display name, appearance, items, currencies, progress, badges, pets, igloo, friends, mute and block lists, and age band. A cloud copy of a guest profile is <strong>not a recoverable sign-in</strong>: without the original device credentials, we cannot promise to reconnect you to it.</p>
+    <p>The game saves your penguin on your device. When online features are available, it also creates a guest account and stores a cloud profile tied to that account. The profile includes your display name, appearance, items, currencies, progress, badges, pets, igloo, friends, mute and block lists, and age band. Your in-game social connections include other penguins' identifiers and names, and when you added a friend. These relationships are stored with your guest account; they do not come from your phone's address book. A cloud copy of a guest profile is <strong>not a recoverable sign-in</strong>: without the original device credentials, we cannot promise to reconnect you to it.</p>
 
     <h3 id="age-band">Your age band</h3>
-    <p>Before you play, Waddleton asks for your <strong>birth month and year</strong>. These values are used on the device to select <strong>child, teen, or adult</strong>; the values themselves are not saved or sent to us. The age band is saved locally and included in the cloud profile. It controls chat, display names, and grown-up checks. This is an age declaration, not identity verification.</p>
+    <p>Before you play, Waddleton asks for your <strong>birth month and year</strong>. These values are used on the device to select <strong>child, teen, or adult</strong>; the values themselves are not saved or sent to us. The age band is saved locally and included in the cloud profile under your guest account identifier. It controls chat, display names, and grown-up checks. This is an age declaration, not identity verification.</p>
 
     <h3>Optional browser sign-in</h3>
     <p>If a browser version offers a configured Google sign-in, choosing it links that provider's account identifier and email address to your penguin. The game does not use that email for marketing. Availability is shown in the account screen. <strong>This option is not offered in the current iPhone app</strong>; an Apple account used for purchases does not sign you into a Waddleton save.</p>
@@ -76,7 +76,7 @@
     <p>Apple handles payment. Waddleton receives purchase identifiers and verification results, including product and transaction identifiers and subscription status or expiry. The app records delivered purchases and membership in your profile, which may be synced to Supabase, and keeps local receipt records to prevent duplicate delivery. We do not receive your payment-card number or billing details. The browser version has no purchases.</p>
 
     <h3>Reports and support</h3>
-    <p>A report records the reporter's account identifier, the reported player's identifier, category, and the note entered, up to 500 characters. Please do not put personal information in a report. If you email support, we receive your email address and the information you send so we can respond.</p>
+    <p>A report records the reporter's account identifier, the reported player's identifier, and the selected reason. It can automatically include recent chat excerpts, the room, and related context in a details field limited to 500 characters. These excerpts may include messages from you and the player being reported. Please do not put personal information in chat or reports. If you email support, we receive your email address and the information you send so we can respond.</p>
 
     <h3>On your device</h3>
     <p>Local storage holds your profile, scores, queued uploads, and preferences. The iPhone app also keeps a native backup of the save. This helps preserve progress but is not a guarantee against loss after uninstalling, clearing data, or changing devices.</p>
@@ -85,14 +85,15 @@
     <p>The island includes <strong>scripted residents and real players</strong>; the player card identifies residents. Other players can see your display name, appearance, location within the game, and messages you send. Chat is relayed live and is not written to our game database, unless someone includes it in a report. For under-13 players, the app offers only preset phrases and filters incoming free text from their view. Mute and block act immediately. Reports let us investigate problems, but there is no full-time team watching chat in real time.</p>
 
     <h2>Technical services</h2>
-    <p>Cloudflare hosts the browser game and the multiplayer relay. Supabase supplies accounts and the database. These services process network requests needed to provide the game, including IP addresses and technical request information under their own policies. The relay briefly counts recent guest registrations by network address to limit abuse. A Cloudflare Turnstile check may be used to distinguish people from bots.</p>
+    <p>Cloudflare hosts the browser game and the multiplayer relay. Supabase supplies accounts and the database. These services process network requests needed to provide the game, including IP addresses and technical request information under their own policies. A Cloudflare Turnstile check may be used to distinguish people from bots.</p>
+    <p>To prevent signup abuse, our relay stores the request's IP address with recent guest-registration times and counts registrations within a rolling one-hour window. Scheduled cleanup removes expired timestamps and deletes the address entry once none remain. Service or scheduling delays can postpone removal beyond the exact hour. This expiry applies to our signup counters; providers' separate network and security logs follow their own retention practices. We use these counters to limit abuse, not to determine your location or advertise to you.</p>
     <ul>
       <li><a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare privacy policy</a></li>
       <li><a href="https://supabase.com/privacy" rel="noopener">Supabase privacy policy</a></li>
       <li><a href="https://www.apple.com/legal/privacy/" rel="noopener">Apple privacy policy</a> — iPhone purchases and subscriptions</li>
       <li><a href="https://policies.google.com/privacy" rel="noopener">Google privacy policy</a> — only if you choose an available browser sign-in</li>
     </ul>
-    <p>The game does not request contacts, precise location, photos, microphone, or camera access. It does not use advertising identifiers, advertising networks, or third-party analytics. Data is shared with the providers needed to run the features described above, not sold or shared for advertising.</p>
+    <p>The game does not request access to your device's address book, precise location, photos, microphone, or camera. In-game friend relationships are stored as described above. It does not use advertising identifiers, advertising networks, or third-party analytics. Data is shared with the providers needed to run the features described above, not sold or shared for advertising.</p>
 
     <h2>Children and parents</h2>
     <p>Under-13 players do not get a custom-name field or free-text chat. Their profile still uses a guest identifier, generated name, and age band as described above. The iPhone app places grown-up checks before purchases and selected external actions; these complement Apple's purchase controls, such as Ask to Buy, and are not proof of a person's age. Parents can contact <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> about their child's data or an unsafe interaction. Please use mute or block immediately when needed.</p>
@@ -102,7 +103,7 @@
     <p><strong>Deleting a penguin does not cancel Waddleton Club.</strong> Manage the subscription in your Apple account's subscription settings. A deleted save, spent Goldfish, and finished consumable purchases cannot be recovered by Restore Purchases.</p>
 
     <h2>Retention and deletion limits</h2>
-    <p>Profile data is kept while the account exists. Limited deletion records are retained to finish interrupted requests and prevent stale devices from putting deleted identities back: relay retry records for up to 30 days and hashed identity records in the database for up to one year. A hash is a technical identifier, not a promise of anonymity. Completed purchase-delivery records may remain on the device to prevent the same purchase being credited again.</p>
+    <p>Profile data is kept while the account exists. Limited deletion records are retained to finish interrupted requests and prevent stale devices from putting deleted identities back: relay retry records for up to 30 days and hashed identity records in the database for up to one year. These are expiry periods; scheduled cleanup can run later if a service is delayed. A hash is a technical identifier, not a promise of anonymity. Completed purchase-delivery records may remain on the device to prevent the same purchase being credited again.</p>
     <p>Deletion does not erase Apple's transaction records, other devices' offline copies, or personal information someone may have included in unrelated report text. Service backups may retain data until they expire; deleted records must not be restored into active use. Contact support if information remains in a report or you need help with a deletion request.</p>
 
     <h2>Your choices</h2>
