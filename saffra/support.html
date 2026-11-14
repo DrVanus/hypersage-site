@@ -12,11 +12,11 @@
   <meta property="og:description" content="Help with Saffra: fixes for common problems, restoring a purchase, billing and refunds, reporting a bug, and where your data goes.">
   <meta property="og:url" content="https://hypersage.ai/saffra/support.html">
   <meta property="og:site_name" content="Saffra">
-  <meta property="og:image" content="https://hypersage.ai/saffra/og-image.png?v=20260919a">
+  <meta property="og:image" content="https://hypersage.ai/saffra/og-image.png?v=20260919b">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://hypersage.ai/saffra/og-image.png?v=20260919a">
+  <meta name="twitter:image" content="https://hypersage.ai/saffra/og-image.png?v=20260919b">
   <link rel="icon" type="image/png" href="saffra-hat.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,7 +39,7 @@
 <main>
   <div class="container">
     <h1>Support</h1>
-    <p class="last-updated">Last updated: August 24, 2026</p>
+    <p class="last-updated">Last updated: November 14, 2026</p>
 
     <div class="draft-note">
       Support for Saffra is handled over email by the person who builds it. There is no phone line and no live chat. Write to <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> and you will get a reply from a human.
@@ -136,7 +136,7 @@
     <p>The short version, with the full detail in our <a href="privacy.html">Privacy Policy</a>:</p>
     <ul>
       <li><strong>OpenAI (chat)</strong> — your chat messages, plus a summary of your profile and pantry, are sent to OpenAI to generate and adapt the chef's replies. Your recipe searches and imported recipe text also go to OpenAI to create the embeddings that power recipe search — there is no external web-search provider.</li>
-      <li><strong>OpenAI (text-to-speech)</strong> — the text you want spoken aloud, for the premium voice. You can turn premium voice off in Settings and use on-device iOS voices only, in which case no text leaves your device to be spoken.</li>
+      <li><strong>ElevenLabs or OpenAI (premium voice)</strong> — the text Saffra reads aloud with the premium voice. If you've accepted the updated voice disclosure in the app, that provider is ElevenLabs; otherwise, including on earlier versions of the app, it is OpenAI. Turn off Premium voice in Settings → Voice to use on-device iOS voices only, in which case no text leaves your device to be spoken.</li>
       
       <li><strong>Apple (speech recognition)</strong> — the audio you speak in voice mode. The app does not request on-device recognition, so Apple's Speech framework runs server-backed and the audio reaches Apple; it does not reach us.</li>
       <li><strong>OpenAI (Whisper)</strong> — the audio you speak in Cooking Mode, sent for a second, more accurate transcription. It runs for <em>every</em> spoken question, not only when Apple's transcript is poor, and also whenever Apple returns nothing or something Saffra can't parse; a cleanly recognized &ldquo;next&rdquo; or &ldquo;back&rdquo; is not sent, and composer dictation is never sent. The audio is not retained.</li>

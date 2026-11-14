@@ -65,7 +65,7 @@ CARDS = {
         "kicker_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13C12 9.5 9.5 7 6 7c0 3.5 2.5 6 6 6z"/><path d="M12 13c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6z"/></svg>',
         "kicker": "Notes, tended \u00b7 Coming to iOS",
         "h1": "The notes companion<br>that <em>asks first.</em>",
-        "sub": "Tidies your slips in place, never rephrases you \u2014 and writes every action into a Ledger you can undo.",
+        "sub": "Tidies your slips in place, never rephrases you \u2014 and records changes in a Ledger, with undo and redo where supported.",
     },
     "nightshelf": {
         "art": "app-icon.png",
@@ -462,7 +462,7 @@ CARDS = {
         # previews; the page's own hero eyebrow is the source of this string.
         "kicker": "Hexhunter · iOS",
         "h1": 'Survive the Horde.<br>Draft Your <span class="grad">Doom.</span>',
-        "sub": "Pick a hero, draft upgrades every level, evolve your weapons into ascended forms, and fight to survive the endless dark.",
+        "sub": "Pick a hunter, draft upgrades every level, evolve your weapons into ascended forms, and fight to survive the endless dark.",
     },
 }
 
