@@ -921,6 +921,8 @@
     .ai-intro { display: grid; grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); gap: 60px; align-items: center; margin: 8px 0 50px; padding: 40px; border: 1px solid #9BA9D324; border-radius: 28px; background: radial-gradient(ellipse at 8% 20%,#234A4738,transparent 70%), #10162499; }
     .ai-intro .context-engine { grid-area: auto; margin: 0; max-width: 560px; }
     .ai-intro-copy h3 { font-size: clamp(1.6rem,2.7vw,2.5rem); line-height: 1.2; letter-spacing: -.035em; margin: 0 0 18px; font-weight: 550; }
+    /* Keep "You get the best answer." on one line on phones: 1.6rem leaves "answer." orphaned at 375px. */
+    @media (max-width: 440px) { .ai-intro-copy h3 { font-size: clamp(1.2rem,6.2vw,1.6rem); } }
     .ai-intro-copy p { font-size: 1rem; color: var(--muted); max-width: 34em; }
     .ai-intro-copy .ai-demo-hint { font-size: .8rem; margin-top: 26px; }
     #ai { background: linear-gradient(180deg,transparent,#14152D55 45%,transparent); }
@@ -1652,7 +1654,7 @@
         <h2>AI with a job to do.</h2>
         <p>A good feature starts with something you want to do. See how our apps turn context into a useful next step.</p>
       </div>
-      <div class="ai-intro"><div class="ai-intro-copy"><h3>You ask.<br>It knows the context.<br>You get an answer.</h3><p>Each app starts from something you’d actually say, reads it against what it already knows, and hands back one thing you can use: a recipe, a visit brief, a reply, tonight’s story.</p><p class="ai-demo-hint">Pick an app to see its walkthrough.</p></div><figure class="context-engine" aria-label="Product walkthroughs">
+      <div class="ai-intro"><div class="ai-intro-copy"><h3>You ask.<br>It knows the context.<br>You get the best answer.</h3><p>Each app starts from something you’d actually say, reads it against what it already knows, and hands back one thing you can use: a recipe, a visit brief, a reply, tonight’s story.</p><p class="ai-demo-hint">Pick an app to see its walkthrough.</p></div><figure class="context-engine" aria-label="Product walkthroughs">
           <div class="example-app">
             <img id="example-icon" src="icons/cryptosage.webp" alt="" width="36" height="36">
             <div class="example-choice">

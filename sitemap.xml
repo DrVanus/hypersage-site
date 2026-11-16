@@ -5,7 +5,7 @@
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>https://hypersage.ai/sitemap-main.xml</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://hypersage.ai/loam/sitemap.xml</loc>
@@ -45,7 +45,7 @@
   </sitemap>
   <sitemap>
     <loc>https://hypersage.ai/nightshelf/sitemap.xml</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://hypersage.ai/quietoak/sitemap.xml</loc>
@@ -69,6 +69,6 @@
   </sitemap>
   <sitemap>
     <loc>https://hypersage.ai/wingmate/sitemap.xml</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-16</lastmod>
   </sitemap>
 </sitemapindex>
