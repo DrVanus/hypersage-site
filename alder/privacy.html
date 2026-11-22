@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#171310">
   <title>Privacy Policy — Alder</title>
-  <meta name="description" content="How Alder handles your recovery record — what is kept on your device, exactly which fields are sent with every message to generate a reply, and what we will never claim about confidentiality.">
+  <meta name="description" content="How Alder handles your journal, what is shared for optional cloud AI replies and subscriptions, and how to export or delete your data.">
   <link rel="canonical" href="https://hypersage.ai/alder/privacy.html">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Privacy Policy — Alder">
@@ -42,7 +42,7 @@
 
   <main class="legal" id="main">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 2026-09-23</p>
+    <p class="updated">Last updated: 2026-11-22</p>
 
     <p>A recovery record is among the most sensitive things a person can keep on a phone — the kind of information that, in the wrong hands, costs people jobs, custody, and relationships. So this policy is written to be checked rather than trusted, and it deliberately avoids claiming protections Alder does not have.</p>
 
@@ -54,7 +54,7 @@
     <ul>
       <li>Alder is <strong>not HIPAA-covered</strong>, and we make no HIPAA claim. HIPAA governs healthcare providers, health plans, and their business associates — a consumer app is none of those.</li>
       <li>Alder is <strong>not covered by 42 CFR Part 2</strong>, the federal rule that protects records held by substance-use treatment programs. Alder is not such a program.</li>
-      <li>We won't tell you your recovery record never leaves the phone. Part of it goes out with every message you send Alder, and the next two sections say exactly which part and where it goes.</li>
+      <li>An on-device chat reply stays on your phone. If you choose a cloud AI reply, your message and the details listed below go to Alder’s service and Anthropic.</li>
       <li>What we can say is what's actually true: no account, no separate recovery-record database on our side, one named AI provider, and controls to export or delete the records we hold. Our conversation storage and Anthropic’s separate retention are described below.</li>
     </ul>
 
@@ -63,22 +63,25 @@
     <p><strong>But "kept on your device" is not the same as "never sent."</strong> Some apps blur those two, and that blur is how people end up surprised. So here is the part that actually leaves.</p>
 
     <h2>What leaves your device — and why</h2>
-    <p>Alder's replies are written by an AI model that runs on someone else's computers, and for the reply to fit <em>you</em> rather than a generic person, it has to be told about you. You are shown this list and asked to agree <strong>before a single message is sent</strong>, and you can withdraw at any time.</p>
+    <p>Cloud AI replies are optional. Alder shows you which information goes to our service and Anthropic and asks for your permission before requesting a cloud reply. You can withdraw that permission in You &rsaquo; Privacy.</p>
     <ul>
-      <li><strong>Your message — and, with every message, a slice of your recovery record.</strong> Not once at setup: <em>every turn</em>. Specifically, it carries your first name and the tone you chose; what you are stepping away from, each quit date and day count; your goal; <strong>your reasons, in the words you wrote them in</strong>; your people's first names and how you know them; <strong>your last seven check-ins</strong> — the date, your 0&ndash;5 craving rating, whether the day involved using, and any hungry / angry / lonely / tired flags; whatever you have told Alder about heavy use or a prescriber-managed taper; and the notes Alder keeps about you.</li>
+      <li><strong>With each cloud AI request</strong>, Alder sends your message and selected information from your recovery record. This includes your first name and the tone you chose; what you are stepping away from, each quit date and day count; your goal; <strong>your reasons, in the words you wrote them in</strong>; your people's first names and how you know them; <strong>your last seven check-ins</strong> — the date, your 0&ndash;5 craving rating, whether the day involved using, and any hungry / angry / lonely / tired flags; whatever you have told Alder about heavy use or a prescriber-managed taper; and the notes Alder keeps about you.</li>
       <li><strong>A little context about the session.</strong> How long the current session has run and how many days since your last one (Alder is required to re-introduce itself as an AI on a long session or after a gap), whether you opened this conversation from SOS or flagged an active urge, your language setting, and your random device identifier.</li>
-      <li><strong>It goes to our backend, and on to Anthropic (Claude)</strong>, which writes the reply. <strong>Anthropic is the only AI provider Alder uses.</strong> This deployment holds no key for any other provider, so no other one can receive your messages — if that ever changes, this page and the in-app consent screen change first.</li>
+      <li><strong>Your message and recovery context go to our server and to Anthropic (Claude)</strong>, which writes the cloud reply. <strong>Anthropic is the only AI provider Alder uses.</strong> This deployment holds no key for any other provider, so no other one can receive your messages — if that ever changes, this page and the in-app consent screen change first.</li>
       <li>Anthropic's commercial API terms restrict processing purposes and require confidentiality and security. API inputs and outputs are not used for model training by default, subject to explicit opt-in and feedback exceptions. Its standard retention is up to 30 days, with safety, legal, model/feature and separate-agreement exceptions. Read its <a href="https://www.anthropic.com/legal/commercial-terms">commercial terms</a>, <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data">retention policy</a> and <a href="https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training">training policy</a>.</li>
       <li><strong>What we then store, and for how long.</strong> The conversation itself — your messages and Alder's replies — is scheduled for removal <strong>30 days after that conversation’s last message</strong>, so an ongoing conversation can pick up where the last one left off. Continuing a conversation extends that conversation’s retention; this is not a 30-day limit measured from each individual message. Saved companion memories have a separate <strong>365-day retention period</strong> and can be removed earlier when their associated conversation is removed. Expired rows are removed by a cleanup scheduled every six hours; downtime or a failed cleanup can delay removal. Our database has encrypted automatic snapshots with five-day retention, so a previously created backup can retain a deleted row until that snapshot expires. <strong>The recovery-record slice above is used to write the reply and is not stored as a record of its own</strong> — it is not turned into a check-in table or a sobriety log on our side. Anything Alder quotes back to you is part of the reply and follows conversation retention. Separate saved memories follow the memory period above.</li>
-      <li><strong>A safety log with no words in it.</strong> When a crisis, overdose, or withdrawal path fires, we record that it fired — a one-way hash of your device identifier, which kind of escalation it was, and when. <strong>Never your message, never a substance, never a quoted fragment.</strong> Safety-log rows have a 30-day retention period and the same scheduled-cleanup and backup qualifications described above. We also count requests per day against a hashed IP address so the free tier can't be abused.</li>
+      <li><strong>A safety log with no words in it.</strong> When our server handles a crisis, overdose, or withdrawal path, we record that it fired — a one-way hash of your device identifier, which kind of escalation it was, and when. <strong>Never your message, never a substance, never a quoted fragment.</strong> Safety-log rows have a 30-day retention period and the same scheduled-cleanup and backup qualifications described above. We also count requests per day against a hashed IP address so the free tier can't be abused.</li>
       <li>Server records are indexed by a random device identifier. This does not make conversation content anonymous: a name or other identifying detail you enter, or Alder includes in a reply, can remain in that conversation.</li>
       <li><strong>You can stop it.</strong> "Withdraw consent" in You &rsaquo; Privacy stops new AI requests and cancels pending app requests. It does not recall data already received by our service or Anthropic, or prevent a non-AI export or deletion request you choose. It does not delete what you have written — Alder keeps working with its simpler on-device companion.</li>
     </ul>
 
+    <h2>How Alder Plus is verified</h2>
+    <p>Apple handles billing. On iPhone, Alder can send a random app-account token to its server with a cloud AI request, including on the free tier. When an Apple-signed transaction for an active Plus subscription is available, Alder sends that proof so our server can check the subscription and apply the correct chat allowance. The token is stored in Keychain and can sync through iCloud Keychain so Alder can recognize a subscription on another device. Alder also sends the token to Apple when you buy Plus. Your payment card details are handled by Apple.</p>
+
     <h2>What we do not collect — now or later</h2>
     <ul>
       <li>An account profile, email address or login credentials required for sign-in. The app has no login; optional names and identifying text you enter are handled as described above.</li>
-      <li>Your location, contacts, photos, or calendar.</li>
+      <li>Your location, device address book, photos, or calendar. If you enter a support person yourself, their phone number stays on the device. Their name and relationship can be included in cloud AI requests as described above.</li>
       <li>Any advertising identifier. <strong>There are no ad SDKs and no third-party marketing or analytics SDKs in Alder, and there never will be.</strong></li>
       <li>Data about you from anywhere outside Alder.</li>
     </ul>
@@ -97,18 +100,19 @@
     <ul>
       <li><strong>Anthropic</strong> — the AI provider that writes Alder's replies, and the only one. <a href="https://www.anthropic.com/legal/privacy" rel="noopener">anthropic.com/legal/privacy</a></li>
       <li><strong>Fly.io</strong> — hosts Alder's backend, database and the backups described above. <a href="https://fly.io/legal/privacy-policy/" rel="noopener">fly.io/legal/privacy-policy</a></li>
-      <li><strong>Apple App Store</strong> — app distribution. <a href="https://www.apple.com/legal/privacy/en-ww/" rel="noopener">apple.com/legal/privacy</a></li>
+      <li><strong>Apple App Store</strong> — app distribution, subscription purchases, renewals and restoration. <a href="https://www.apple.com/legal/privacy/en-ww/" rel="noopener">apple.com/legal/privacy</a></li>
     </ul>
     <p>There is no analytics provider, no crash-reporting provider, no advertising network, and no data broker on this list, because there are none in Alder.</p>
 
     <p><strong>Same or equal protection.</strong> Anthropic receives only the data it needs to answer your requests, under commercial API terms that limit its use of it to providing that service to us (and to abuse monitoring and legal compliance) and that require confidentiality and security. We confirm that it protects your data to the same or an equal standard as this policy describes and as Apple&rsquo;s App Store Review Guidelines require. It may not sell your data or use it for advertising. Fly.io hosts our servers under terms that let it use hosted data only to provide and improve its hosting service; it has no right to sell that data or use it for advertising.</p>
 
     <h2>Your choices &amp; rights</h2>
+    <p>When you choose Export or Delete in You &rsaquo; Privacy, Alder sends a request to its own server with this installation’s random identifier so it can find your records. The app sends no journal entries, chat text, or subscription proof in either request. These controls work independently of your AI-sharing choice.</p>
     <ul>
-      <li><strong>Export:</strong> you can export your full record from inside the app and keep it wherever you like. The export asks our server for its side too, so what you get is everything, not just the on-device half.</li>
-      <li><strong>Delete:</strong> "Delete everything" in the app erases your on-device record <em>and</em> tells our server to purge every row held for your device identifier — your conversations, anything remembered, and your safety-log rows. The app reports back what the server actually erased rather than just claiming success, and if the server could not be reached it says so and tells you to try again. Deleting the app itself removes its on-device data. Deletion does not recall requests Anthropic already received; those follow its separate retention terms. Exported files, device backups and copies you shared remain separate.</li>
+      <li><strong>Export:</strong> You &rsaquo; Privacy lets you save a copy of your local record and requests the server-side data associated with this installation. If the server cannot be reached, the export identifies the missing server portion.</li>
+      <li><strong>Delete:</strong> "Delete everything" in the app erases your on-device record <em>and</em> asks our server to erase the recovery data held for your device identifier, including your conversations, saved memories and safety-log rows. Apple manages its own purchase records. Deleting Alder data does not cancel an Apple subscription. The app reports back what the server actually erased rather than just claiming success, and if the server could not be reached it says so and tells you to try again. Deleting the app itself removes its on-device data. Deletion does not recall requests Anthropic already received; those follow its separate retention terms. Exported files, device backups and copies you shared remain separate.</li>
       <li><strong>EU/UK (GDPR) &amp; California (CCPA/CPRA):</strong> you may request access to, or deletion of, data tied to your device identifier, and you can withdraw consent at any time. <strong>We do not sell your personal information or share it for advertising, and we will not discriminate against you for exercising these rights.</strong> Our legal bases (GDPR) are your consent for AI processing and our legitimate interest in operating and securing the service.</li>
-      <li><strong>Consumer health data laws</strong> — including Washington's My Health My Data Act — treat information about substance use as a protected category with its own consent requirements. Alder is built to that standard: nothing is collected until you have affirmatively agreed, having first been shown which providers are involved.</li>
+      <li><strong>Consumer health data laws</strong> — including Washington's My Health My Data Act — treat information about substance use as a protected category with its own consent requirements. Alder is built to that standard: Alder requests affirmative consent before sharing your recovery context with its cloud AI provider.</li>
       <li>Email <a href="mailto:support@hypersage.ai">support@hypersage.ai</a> with any request.</li>
     </ul>
 
