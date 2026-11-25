@@ -7,13 +7,13 @@
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#F5EFE3">
   <title>Privacy Policy — Loam</title>
-  <meta name="description" content="What Loam stores, what leaves your device and when, and what we never do. No accounts, no ads, no analytics.">
+  <meta name="description" content="How the upcoming Loam app handles local notes, optional AI, subscriptions, backups and support messages.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://hypersage.ai/loam/privacy.html">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Privacy Policy — Loam">
-  <meta property="og:description" content="What Loam stores, what leaves your device and when, and what we never do. No accounts, no ads, no analytics.">
+  <meta property="og:description" content="How the upcoming Loam app handles local notes, optional AI, subscriptions, backups and support messages.">
   <meta property="og:url" content="https://hypersage.ai/loam/privacy.html">
   <meta property="og:site_name" content="Loam">
   <meta property="og:image" content="https://hypersage.ai/loam/og-image.png?v=20261114a">
@@ -22,7 +22,7 @@
   <meta property="og:image:alt" content="Loam — notes, tended">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Privacy Policy — Loam">
-  <meta name="twitter:description" content="What Loam stores, what leaves your device and when, and what we never do. No accounts, no ads, no analytics.">
+  <meta name="twitter:description" content="How the upcoming Loam app handles local notes, optional AI, subscriptions, backups and support messages.">
   <meta name="twitter:image" content="https://hypersage.ai/loam/og-image.png?v=20261114a">
   <meta name="twitter:image:alt" content="Loam — notes, tended">
   <link rel="icon" type="image/png" href="loam-icon.png?v=20260831a">
@@ -34,63 +34,51 @@
     <nav class="crumb"><a href="./">← Loam</a></nav>
 
     <h1>Privacy Policy</h1>
-    <p class="updated">Loam, by HyperSage AI Labs LLC · Last updated September 23, 2026</p>
-
+    <p class="updated">Loam, by HyperSage AI Labs LLC · Updated November 24, 2026</p>
     <div class="callout">
-      <p><strong>The short version.</strong> Your notes live on your device. There is no account, no advertising, and no analytics. Companion requests to Anthropic require your permission. Optional dictation separately uses Apple Speech, and an export or share goes where you choose, as described below. Deleting a note really deletes it.</p>
+      <p><strong>Preparing for launch.</strong> Loam is not yet available on the App Store. This policy describes the upcoming release, including optional Loam Plus. Your notebook is stored on your device; AI sharing needs a separate choice. Purchases, dictation, backups and support messages have their own data paths below.</p>
     </div>
 
-    <h2>What Loam stores, and where</h2>
-    <p>Everything you make in Loam — notes, checklists, sketches, voice-note transcripts, chat history, the Ledger of companion actions, reminders, and your settings — is stored locally in the app's storage on your device. Loam has no accounts or sign-in and does not maintain a cloud notebook. Our server processes the content you send for companion features, as described below, without storing a note library.</p>
+    <h2>Your notebook on your device</h2>
+    <p>Notes, checklists, sketches, transcripts, chat history, Ledger entries, reminders and settings are stored locally. The iPhone app keeps a private file snapshot and a WebView recovery cache. Local files may be included in system device backups. If a file cannot be read, Loam may preserve the damaged bytes privately before replacing them; this is a recovery precaution, not a trash folder or guaranteed recovery. Loam does not provide cloud notebook sync.</p>
 
-    <h2>What leaves your device, and when</h2>
-    <p>Loam's companion sends content to Anthropic only after you consent to waking it — it asks before its first send and names its AI provider. Manual notes remain available if you decline. Optional dictation separately uses Apple Speech as described below. After companion consent, content is sent to Anthropic only while the companion is doing something you asked for or dialed in:</p>
+    <h2>Optional AI sharing</h2>
+    <p>Before the first AI request, Loam names Anthropic and explains what each feature sends through Loam's service to Claude. Declining keeps local writing, editing, search and export available. After permission:</p>
     <ul>
-      <li><strong>Asking your pile a question (chat).</strong> Your message, your note titles with each note's collection name, the handful of notes most relevant to your question, and the recent messages of that conversation (so Loam doesn't ask you to repeat yourself) are sent to Loam's server, which forwards them to Anthropic's Claude API and returns the answer. If you attach a photo in chat, it is sent for reading; a small thumbnail stays in your chat on the device, and we don't store the image.</li>
-      <li><strong>A deeper tending.</strong> When you ask Loam to look deeper, the chosen notes (or up to three recent notes) are trimmed and sent with up to 12 collection names from your whole pile, including collections unrelated to those notes. Recent Ledger and reminder labels are limited to the notes being sent. Your power-dial settings also travel so proposals fit the permissions you chose.</li>
-      <li><strong>Basic tidying stays on the device.</strong> The Tidy pass that fixes typos and shapes rambly jots is deterministic code running locally — no AI service ever touches your words for it.</li>
+      <li><strong>Chat:</strong> your question, note titles and collection names, relevant note text, and up to 12 recent conversation turns are sent. Each previous turn is capped at 1,500 Unicode code points. If you attach a photo, it is sent for the requested analysis; a thumbnail may remain in local chat.</li>
+      <li><strong>Look deeper:</strong> the selected notes, or up to three recent notes, are sent with up to 12 collection names, including names from unrelated collections. Related Ledger/reminder labels and power settings provide context.</li>
+      <li><strong>Basic Tidy:</strong> supported spelling, shorthand and spacing corrections use local rules rather than a remote AI request.</li>
     </ul>
-    <p>Requests carry a pseudonymous device identifier (a random ID minted on your device) used only to meter daily usage and prevent abuse. It is not tied to your name, email, or any account, because none exist.</p>
-    <h2>Changing your mind</h2>
-    <p>You can withdraw consent at any time. In Loam, open <strong>Powers</strong> and tap <strong>Withdraw</strong> on the Companion consent row, then choose <strong>Not now — just notes</strong> on the permission screen. New AI requests stop and pending app requests are cancelled. Re-enabling sharing does not restart an old request. Requests a provider already received remain subject to its retention terms. <strong>Pause Loam</strong>, on the row below, suspends the companion without withdrawing consent. Either way, your notes, capture, history, undo and redo keep working exactly as before.</p>
+    <p>In <strong>Powers → Companion consent</strong>, tap <strong>Withdraw</strong>, then <strong>Not now — just notes</strong>. Pending app requests are cancelled and new AI work stops. Withdrawal cannot recall a request a provider already received. <strong>Pause Loam</strong> suspends assistance without withdrawing the saved permission. Buying Plus does not grant AI permission.</p>
 
-    <h2>Our server keeps no content</h2>
-    <p>Loam's server is a thin relay. It forwards your request to Anthropic and returns the reply. It has no database of notes, messages, or photos, and it does not log their contents. The one thing it does keep is a count of requests per device identifier, per day — a number, not your content — stored on its own disk and deleted after a few days, so that the daily allowance holds across server restarts.</p>
+    <h2>Usage and subscription verification</h2>
+    <p>AI requests carry a random per-install device identifier for free usage limits and abuse prevention. Optional Plus requests also carry Apple-signed transaction proof and a pseudonymous purchase-account token. These verify the product and current entitlement. Apple handles payment details; Loam does not receive your card information. The purchase token is kept in synchronizable Keychain and may sync through Apple's Keychain service, separately from your notes.</p>
+    <p>Loam's service keeps monthly or trial allowance records under hashed device or subscription identifiers. Each record contains used or reserved request counts, a provider-cost reservation estimate and the period expiry. To prevent duplicate charges when a request is retried, it also keeps a hashed request identifier, a one-way request-body fingerprint, the allowance identifier, request status and timestamps. These records contain no note, photo or reply text. Allowance and duplicate-request records are pruned when a later request is processed after their period has expired for more than 35 days. Aggregate monthly cost records contain no per-user content.</p>
+    <p>Apple-signed subscription notifications update a separate record containing a hashed transaction identifier, event date, expiry and revoked status. Expired status records are pruned on notification delivery after expiry plus three days; active or refunded-period records may remain until that expiry. All pruning is opportunistic rather than an exact deletion deadline.</p>
+    <p>The service does not deliberately store raw purchase proofs, account tokens or raw transaction identifiers in these records. It does not maintain a database of note or photo content, and its application logs exclude those request bodies. Content needed for an AI response goes to Anthropic; the device identifier and purchase proof do not. Device and purchase identifiers are pseudonymous, not anonymous. Notes and photos may also identify you, and Loam does not anonymize their contents before the processing you request.</p>
 
-    <h2>Anthropic (the AI provider)</h2>
-    <p>The companion runs on Claude, by Anthropic. Anthropic's published API policy describes a standard retention period of up to 30 days, with exceptions for safety enforcement, legal requirements, model-specific terms and separate agreements. Its commercial API training policy excludes inputs and outputs by default, with opt-in and feedback exceptions. Loam does not train models on your notes. Read <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data">Anthropic's retention policy</a> and <a href="https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training">training policy</a>; we do not promise an unconditional provider deletion deadline.</p>
+    <h2>Anthropic and hosting</h2>
+    <p>Anthropic's commercial API policy describes standard input/output retention of up to 30 days, with exceptions including safety enforcement, legal requirements, particular services/models and separate agreements. Commercial inputs and outputs are excluded from model training by default, with opt-in and feedback exceptions. Loam does not train its own models on your notes. See Anthropic's <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data">retention policy</a> and <a href="https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training">training policy</a>. These terms do not provide an unconditional deletion deadline.</p>
+    <p>Loam's relay is hosted by Fly.io. Hosting and AI processing use service providers to operate the requested features. Loam does not sell your data or share it for advertising. There is no advertising, analytics or third-party tracking SDK in the app.</p>
 
-    <p><strong>Same or equal protection.</strong> Anthropic receives only the data it needs to answer your requests, under commercial API terms that limit its use of it to providing that service to us (and to abuse monitoring and legal compliance) and that require confidentiality and security. We confirm that it protects your data to the same or an equal standard as this policy describes and as Apple&rsquo;s App Store Review Guidelines require. It may not sell your data or use it for advertising. Loam&rsquo;s relay server runs on Fly.io, under terms that let Fly.io use hosted data only to provide and improve its hosting service; it has no right to sell that data or use it for advertising.</p>
+    <h2>Apple services and sharing</h2>
+    <p>Dictation separately asks for microphone and Apple Speech permission. Apple may process audio on-device or on its servers. Loam's service receives no dictation audio; transcribed text may later be included in an AI request you permit.</p>
+    <p>Accepted reminders use local notifications with system permission. A photo you select is shared with AI only if you attach it to a permitted request. Exports and the share sheet send copies to the destination you choose. The system rating prompt keeps its timing record locally; it does not send your rating history to Loam.</p>
 
-    <h2>Dictation</h2>
-    <p>Voice capture uses Apple's speech recognition. Your audio is processed by Apple on your device or Apple's servers according to your iOS settings; it is never sent to Loam's server. Only the transcribed text lands in your note, on your device.</p>
+    <h2>Support and response reports</h2>
+    <p><strong>Report reply</strong> lets you enter a reason and choose whether to include the reply text. The text is excluded by default. Loam prepares an email or copies a report; you send it through your own mail app. No report is sent automatically and no notes, photos or purchase proof are attached. Your email provider supplies the sender address and any content you choose to add.</p>
+    <p>If you email support or request a launch notice, we receive that correspondence and your email address. We use it to respond, investigate the issue or send the notice you requested. We keep correspondence while needed to handle the request, maintain necessary support records or meet legal obligations. Ask us to stop launch notices or delete support correspondence at <a href="mailto:support@hypersage.ai?subject=Loam%20privacy">support@hypersage.ai</a>; legal or security recordkeeping may limit deletion.</p>
 
-    <h2>Reminders and notifications</h2>
-    <p>Reminders you accept are scheduled as local notifications on your device, and iOS asks your permission before the first one is scheduled. A reminder's label travels only when you ask Loam to look deeper at the note it belongs to, as described above; the notification itself never leaves your device.</p>
+    <h2>Deletion and separate copies</h2>
+    <p>Deleting a note removes it from Loam's active notebook and current saved state, and redacts related Ledger and chat traces. Loam has no built-in trash or undelete command. Earlier exports, shared copies, clipboard content, system backups, private unreadable-file recovery copies and requests already received by providers are separate. Local deletion does not erase them. Deleting the app does not cancel an Apple subscription; use your Apple subscription settings.</p>
+    <p>In Powers, <strong>Back up all notes</strong> exports notes, sketches and collections; chats and reminders are not included. <strong>Copy all notes as Markdown</strong> copies your notebook to the clipboard. Keep exported backups somewhere you control.</p>
 
-    <h2>What we never do</h2>
-    <ul>
-      <li>No account profile or access to your contacts. Notes and questions you choose to send can contain identifying information.</li>
-      <li>No advertising, and no advertising SDKs.</li>
-      <li>No analytics or tracking SDKs. The only record of use we keep is the per-device request count described above, and only to enforce the daily allowance.</li>
-      <li>No sale of your data or sharing for advertising. Requested AI processing shares the content described above with Anthropic.</li>
-      <li>Loam does not train its own AI models on your notes. Anthropic and Apple handle the information sent to them under their respective terms described above.</li>
-    </ul>
-
-    <h2>Deletion — and why there's no trash can</h2>
-    <p>Deleted means deleted. When you delete a note, it is removed from your device, its Ledger entries are redacted, and its traces are scrubbed from chat history — there is no trash folder and no thirty-day holding period, which is why Loam asks you to confirm. Our server holds none of your content, so there is nothing of yours to delete there; its per-device request counts expire on their own within a few days. Deleting local data does not recall requests Anthropic has already received; those are subject to its retention policy. If you want the on-device record gone, delete your notes in the app or delete the app itself. Backups, clipboard content, files you exported or shared, and copies saved in another app remain under your control; deleting the note does not remove those separate copies.</p>
-
-    <h2>Export</h2>
-    <p>Your pile is yours, anytime: in Powers, <strong>Back up all notes</strong> saves one file with your notes, sketches and collections (chats and reminders stay on your device), and <strong>Copy all notes as Markdown</strong> puts your whole pile on the clipboard to paste wherever you like.</p>
-
-    <h2>Children</h2>
-    <p>Loam is not directed at children under 13. It has no accounts and no sign-up, and we do not knowingly collect information from children.</p>
-
-    <h2>Changes</h2>
-    <p>If Loam's data practices change, this policy will change in the same release, with the date above updated. Material changes will be called out in the app.</p>
+    <h2>Adult audience and changes</h2>
+    <p>Loam is intended for adults aged 18 or older, not for children or teenagers under 18. The AI permission step asks you to affirm that you are at least 18; it does not verify your identity or collect your date of birth. There is no Loam sign-in profile, but optional AI requests may contain personal information. Contact us if you believe a minor has supplied information that needs attention.</p>
+    <p>This policy will be updated when data practices change. Material changes to AI sharing will be explained before renewed permission is requested.</p>
 
     <h2>Contact</h2>
-    <p>Questions about privacy? Email <a href="mailto:support@hypersage.ai?subject=Loam%20privacy" class="email-link">support@hypersage.ai</a>.</p>
+    <p>Privacy questions: <a href="mailto:support@hypersage.ai?subject=Loam%20privacy" class="email-link">support@hypersage.ai</a>.</p>
 
     <footer class="legal">
       <div>© 2026 HyperSage AI Labs LLC</div>
